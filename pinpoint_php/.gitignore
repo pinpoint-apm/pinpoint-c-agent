@@ -1,0 +1,13 @@
+*
+!*.c
+!*.cpp
+!*.h
+!plugins
+!compile_checking
+!config.m4
+!README.md
+!.gitignore
+!Build.sh
+/config.h
+!*.php
+run-tests.php
