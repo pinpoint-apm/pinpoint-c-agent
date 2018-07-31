@@ -1,8 +1,6 @@
 # pinpoint_c_agent
 Pinpoint agent using C language.
 
-[![Build Status](http://ci-gdc2.navercorp.com/jenkins/buildStatus/icon?job=pinpoint_c_agent_dailybuilding)](http://ci-gdc2.navercorp.com/jenkins/view/pinpoint/job/pinpoint_c_agent_dailybuilding/)
-
 ## License
 This project is licensed under the Apache License, Version 2.0.
 See [LICENSE](LICENSE) for full license text.
