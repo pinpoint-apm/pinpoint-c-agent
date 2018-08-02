@@ -73,7 +73,7 @@ gcc: 4.4.7+
 
 Pinpoint Version | PHP|GCC|Boost| Thrift|
 ---------------- | ----- | --------- |----|----|
-1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.63+|0.10.0+|
+1.7.3+ | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.63+|0.10.0+|
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
