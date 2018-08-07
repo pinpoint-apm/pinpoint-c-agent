@@ -28,18 +28,18 @@ BOOST_PATH=$(WITH_BOOST_PATH)
 THRIFT_PATH=$(WITH_THRIFT_PATH)
 
 
-ifneq ($(strip $(BOOST_PATH)),)
-	LIBS+=-L$(BOOST_PATH)/lib
-	INC+=-isystem $(BOOST_PATH)/include
+ifneq "$(wildcard $(BOOST_PATH) )" ""
+	LIBS+=-L$(BOOST_PATH)/lib 
+	INC+=-isystem $(BOOST_PATH)/include 
 endif
 
-ifneq ($(strip $(THRIFT_PATH)),)
-	LIBS+=-L$(THRIFT_PATH)/lib
-	INC+=-isystem $(THRIFT_PATH)/include
+ifneq "$(wildcard $(THRIFT_PATH) )" ""
+	LIBS+=-L$(THRIFT_PATH)/lib 
+	INC+=-isystem $(THRIFT_PATH)/include 
 else	
-	THRIFT_INC=$(shell pkg-config --cflags thrift)
-    THRIFT_LIB=$(shell pkg-config --libs thrift)
-    INC+=$(subst -I,-isystem ,$(THRIFT_INC))
+	THRIFT_INC=$(shell pkg-config --cflags thrift) 
+    THRIFT_LIB=$(shell pkg-config --libs thrift) 
+    INC+=$(subst -I,-isystem ,$(THRIFT_INC)) 
     LIBS+=$(THRIFT_LIB)
 endif
 

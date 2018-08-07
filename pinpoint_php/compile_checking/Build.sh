@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 ## sample
 ## Build.sh  --with-boost=... --with-thrift= --enable-debug --disable-64bit
 

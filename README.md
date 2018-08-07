@@ -18,7 +18,7 @@ Dependency|Version
 APACHE| 2.2.x 2.4.x
 PHP| php 5.4.x 5.5.x 5.6.x 7x
 OS| 64bit only
-Boost | 1.6.3+
+Boost | 1.5.8+
 Thirft|0.10.0+
 gcc| 4.4.7+
 
@@ -35,7 +35,7 @@ gcc| 4.4.7+
     - ./bootstrap.sh
     - ./b2 install --prefix=PREFIX
   
-- [Install Thrift 0.10.0+](https://thrift.apache.org/docs/install/centos)
+- [Install Thrift 0.10.0+](http://thrift.apache.org/docs/install/)
     - wget http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz
     - tar zxvf thrift-0.10.0.tar.gz  
     - cd thrift-0.10.0  
@@ -91,7 +91,7 @@ gcc| 4.4.7+
 
 Pinpoint Version | PHP|GCC|Boost| Thrift|
 ---------------- | ----- | --------- |----|----|
-1.7.3+ | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.63+|0.10.0+|
+1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.10.0+|
 
 ## License
 This project is licensed under the Apache License, Version 2.0.

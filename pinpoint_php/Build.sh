@@ -1,5 +1,17 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
+# Copyright 2018 NAVER Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 WORKDIR=$PWD
 SHOW_HELP=NO
@@ -20,9 +32,6 @@ do
 
     esac
     case "$option" in
-
-        --with-boost-path=*)                 WITH_BOOST_PATH="$value"           ;;
-        --with-thrift-path=*)                WITH_THRIFT_PATH="$value" ;;
         --enable-debug)                      WITH_DEBUG=YES ;;
         --enable-ci)                         WITH_CI=YES ;;
         --enable-gcov)                       WITH_GCOV=YES ;;
@@ -47,8 +56,40 @@ function init_env(){
     export DEBUG_FLAG=$WITH_DEBUG
 
     ## test boost and thrift
+    if [[ -d $WITH_BOOST_PATH && -d $WITH_THRIFT_PATH ]]
+    then  
+        echo "WITH_BOOST_PATH="$WITH_BOOST_PATH
+        echo "WITH_THRIFT_PATH="$WITH_THRIFT_PATH
+    elif [ -f $PWD/agent_library_conf ]
+    then
+        cat $PWD/agent_library_conf
+        source $PWD/agent_library_conf
+    else
+        read -p "Install all third-party lib: y/n ?" -n 1 Flag
+        echo ""
+        if [ $Flag = "y" ]
+        then
+            echo "Got it, third-party will install current library $PWD/third-party"
+            # rm $PWD/third-party -rf
+            mkdir -p $PWD/third-party 
+            source deploy_third_party.sh $PWD/third-party
+            export WITH_BOOST_PATH=$PWD/third-party
+            export WITH_THRIFT_PATH=$PWD/third-party 
+            echo "export WITH_BOOST_PATH=$PWD/third-party">$PWD/agent_library_conf
+            echo "export WITH_THRIFT_PATH=$PWD/third-party">>$PWD/agent_library_conf
+            echo "export LD_LIBRARY_PATH=$PWD/third-party/lib:$LD_LIBRARY_PATH"
+        else
+            echo "please  install boost and thrift, and"
+            echo "export WITH_BOOST_PATH=/boost root path/"
+            echo "export WITH_THRIFT_PATH=/thrift root path/"        
+            exit 1
+        fi
+        
+    fi
+
     export BOOST_PATH=$WITH_BOOST_PATH
     export THRIFT_PATH=$WITH_THRIFT_PATH
+
     echo "built common library ..."
 
     if [ -z "$JENKINS_DEFINE_CONFIG" ];then
@@ -57,6 +98,9 @@ function init_env(){
         export CPUNUM=$DISTCC_NODE_COUNT
     fi
 
+    ## check the phpize
+    phpize -v || (echo "phpize not find" && exit 1)
+
 }
 
 
@@ -64,9 +108,7 @@ function read_cmd(){
 
     if [ $SHOW_HELP = YES ] ; then
         echo "--help  "
-        echo "--with-boost-path= "
-        echo "--with-thrift-path= "
-        echo "--enable-debug "
+        echo "--enable-debug"
         echo "--always-make"
         echo "--enable-ci"
         echo "--enable-release"
