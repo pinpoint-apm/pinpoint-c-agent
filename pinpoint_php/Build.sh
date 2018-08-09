@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 WORKDIR=$PWD
@@ -112,11 +112,11 @@ function build_agent(){
     make clean >/dev/zero || echo "clean last building"
 
     if [ $WITH_GCOV = YES ] ; then
-        ./configure  ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall  -g3 $PINPOINT_CXXFLAG" --with-thrift-dir=$BOOST_PATH/include --with-boost-dir=$THRIFT_PATH/include   --enable-gcov 
+        ./configure  ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall  -g3 $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include --with-boost-dir=$BOOST_PATH/include   --enable-gcov 
     elif [ $RELEASE = YES ]; then
-        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$BOOST_PATH/include  --with-boost-dir=$THRIFT_PATH/include --enable-release
+        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include  --with-boost-dir=$BOOST_PATH/include --enable-release
     else
-        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$BOOST_PATH/include --with-boost-dir=$THRIFT_PATH/include  
+        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include --with-boost-dir=$BOOST_PATH/include  
     fi
 
     make  $MAKE_PARAS -j$CPUNUM

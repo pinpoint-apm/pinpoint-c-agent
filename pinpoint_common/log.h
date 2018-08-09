@@ -21,7 +21,7 @@ void free_log();
  * @param msgStr (c_like )
  * @param msgLen (exclude '\0')
  */
-void log_message(const char *msgStr, uint32_t msgLen);
+int64_t log_message(const char *msgStr, uint32_t msgLen);
 
 #if defined(__cplusplus)||defined(c_plusplus)
 }
