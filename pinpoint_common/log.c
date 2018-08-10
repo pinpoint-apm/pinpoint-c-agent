@@ -105,13 +105,13 @@ void free_log()
     _logInfo = t_logInfo;
 }
 
-void log_message(const char *msgStr,uint32_t msgLen)
+int64_t log_message(const char *msgStr,uint32_t msgLen)
 {
     if( msgStr == NULL ||msgLen == 0 )
     {
-        return ;
+        return 0;
     }
 
-    write(_logInfo.fileFd > -1 ? _logInfo.fileFd : STDERR_FILENO, msgStr,msgLen);
+    return write(_logInfo.fileFd > -1 ? _logInfo.fileFd : STDERR_FILENO, msgStr,msgLen);
 }
 #endif 

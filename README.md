@@ -13,21 +13,38 @@ It is an agent written by C/C++ language. And we hope to support other languages
 
 ### Requirement
 
-```
-Pinpoint: 
-APACHE: 2.2.x 2.4.x
-PHP: php 5.4.x 5.5.x 5.6.x 7x
-OS: 64bit only
-Boost library： 1.6.3+
-Thirft：0.10.0+
-gcc: 4.4.7+
-```
+Dependency|Version
+---|----
+APACHE| 2.2.x 2.4.x
+PHP| php 5.4.x 5.5.x 5.6.x 7x
+OS| 64bit only
+Boost | 1.6.3+
+Thirft|0.10.0+
+gcc| 4.4.7+
+
 
 
 ### Installation
-#### Pre-install
-- Download(or git clone ) pinpoint_c_agent
 
+#### Pre-install
+- Download pinpoint-c-agent:  git clone https://github.com/naver/pinpoint-c-agent.git
+ 
+- [Install Boost 1.6.3+](https://www.boost.org/doc/libs/1_63_0/doc/html/bbv2.html#bbv2.installation)
+    - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
+    - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
+    - ./bootstrap.sh
+    - ./b2 install --prefix=PREFIX
+  
+- [Install Thrift 0.10.0+](https://thrift.apache.org/docs/install/centos)
+    - wget http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz
+    - tar zxvf thrift-0.10.0.tar.gz  
+    - cd thrift-0.10.0  
+    - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
+    - make 
+    - make install 
+     
+-  [phpize](http://php.net/manual/en/install.pecl.phpize.php) (In your php installation path)
+  
 #### Build php-agent
 
 1. Checking phpize is in your PATH.
@@ -35,29 +52,30 @@ gcc: 4.4.7+
 2. Specifying BOOST and THRIFT path  
     
     ```
+    # eg: header file in /usr/local/include/boost and /usr/local/include/thrift
     export WITH_BOOST_PATH='/usr/local/include'
     export WITH_THRIFT_PATH='/usr/local/include' 
     ```
 
-3. Run cd pinpoint_php && ./Build.sh --enable-debug --always-make && make install
+3. Run cd pinpoint_php && ./Build.sh  && make install
 4. If **_3_** running successfully, agent had installed into php module.
 
 #### Startup 
-1. Modifying below options in the "pinpoint_agent.conf" (eg:pinpoint_c_agent/quickstart/conf/pinpoint_agent.conf.example)
+1. Modifying below options in the "pinpoint_agent.conf" (eg:pinpoint_c_agent/quickstart/config/pinpoint_agent.conf.example)
 ```
-      AgentID= the same as pinpoint-java
-      ApplicationName= the same as pinpoint-java​
+      AgentID=uniquely identifies the application instance in which the agent is running on
+      ApplicationName= groups a number of identical application instances as a single service
       Collector*= pinpoint collector information  
       LogFileRootPath=/absolute ​path where logging to/
       PluginRootDir​=/absolute path to /web/plugins/​
 ```
-2. Enable pinpoint-agent-php into php.ini, and configuring extension and pinpoint_agent.config_full_name (eg:pinpoint_c_agent/quickstart/conf/php.ini.example)
+2. Enable pinpoint-agent-php into php.ini, and configuring extension and pinpoint_agent.config_full_name (eg:pinpoint_c_agent/quickstart/config/php.ini.example)
 3. Restart php-fpm/Apache
 4. After restart php-fpm/Apache, if you meet "xxx pinpoint_api.cpp:158 [INFO] common.AgentID=php_pinpoint ...." in your LogFileRootPath/pinpoint_log.txt, pinpoint-agent-php installed successfully. If not, contract us without hesitation. 
 
 #### Collect result from the Pinpoint 
 1. Configure pinpoint_c_agent/quickstart/php/web/ as your web side.
-2. Access Http://localhost/index.php 
+2. Access http://\$serverip:\$port/index.php 
 3. Log into pinpoint-web and choose the right ApplicationList 
 
 ## Overview
@@ -94,6 +112,3 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-
-

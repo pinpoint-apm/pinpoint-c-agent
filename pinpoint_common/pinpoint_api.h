@@ -323,7 +323,7 @@ namespace Pinpoint
             PHP_AGENT_TYPE
         } AgentType;
 
-        typedef boost::function<void(const char*, uint32_t)> LogOutputFunc;
+        typedef boost::function<int64_t(const char*, uint32_t)> LogOutputFunc;
 //        typedef boost::function<int32_t()> TurnOnAOPFunc;
 //        typedef boost::function<int32_t()> TurnOffAOPFunc;
         typedef boost::function<int32_t(const Plugin::InterceptorPtr& interceptorPtr)> AddInterceptorFunc;
