@@ -60,31 +60,11 @@ function init_env(){
     then  
         echo "WITH_BOOST_PATH="$WITH_BOOST_PATH
         echo "WITH_THRIFT_PATH="$WITH_THRIFT_PATH
-    elif [ -f $PWD/agent_library_conf ]
-    then
-        cat $PWD/agent_library_conf
-        source $PWD/agent_library_conf
     else
-        read -p "Install all third-party lib: y/n ?" -n 1 Flag
-        echo ""
-        if [ $Flag = "y" ]
-        then
-            echo "Got it, third-party will install current library $PWD/third-party"
-            # rm $PWD/third-party -rf
-            mkdir -p $PWD/third-party 
-            source deploy_third_party.sh $PWD/third-party
-            export WITH_BOOST_PATH=$PWD/third-party
-            export WITH_THRIFT_PATH=$PWD/third-party 
-            echo "export WITH_BOOST_PATH=$PWD/third-party">$PWD/agent_library_conf
-            echo "export WITH_THRIFT_PATH=$PWD/third-party">>$PWD/agent_library_conf
-            echo "export LD_LIBRARY_PATH=$PWD/third-party/lib:$LD_LIBRARY_PATH"
-        else
-            echo "please  install boost and thrift, and"
-            echo "export WITH_BOOST_PATH=/boost root path/"
-            echo "export WITH_THRIFT_PATH=/thrift root path/"        
-            exit 1
-        fi
-        
+        echo "error: please  install boost and thrift, and"
+        echo "       export WITH_BOOST_PATH=/boost root path/"
+        echo "       export WITH_THRIFT_PATH=/thrift root path/"        
+        exit 1
     fi
 
     export BOOST_PATH=$WITH_BOOST_PATH
@@ -99,7 +79,7 @@ function init_env(){
     fi
 
     ## check the phpize
-    phpize -v || (echo "phpize not find" && exit 1)
+    phpize -v || (echo "error: phpize not find exit 1" && exit 1)
 
 }
 
@@ -107,7 +87,7 @@ function init_env(){
 function read_cmd(){
 
     if [ $SHOW_HELP = YES ] ; then
-        echo "--help  "
+        echo "--help"
         echo "--enable-debug"
         echo "--always-make"
         echo "--enable-ci"
@@ -132,7 +112,6 @@ function read_cmd(){
         export PINPOINT_CFLAG='-DTEST_SIMULATE'
     else
         echo "none gcov "
-        echo "none with ci"
     fi
 }
 

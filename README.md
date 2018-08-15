@@ -29,20 +29,46 @@ gcc| 4.4.7+
 #### Pre-install
 - Download pinpoint-c-agent:  git clone https://github.com/naver/pinpoint-c-agent.git
  
-- [Install Boost 1.6.3+](https://www.boost.org/doc/libs/1_63_0/doc/html/bbv2.html#bbv2.installation)
-    - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
-    - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
-    - ./bootstrap.sh
-    - ./b2 install --prefix=PREFIX
-  
-- [Install Thrift 0.10.0+](http://thrift.apache.org/docs/install/)
-    - wget http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz
-    - tar zxvf thrift-0.10.0.tar.gz  
-    - cd thrift-0.10.0  
-    - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
-    - make 
-    - make install 
+- Install third-library  
+ 
+    Option 1. Install from source code
+    - [Install Boost 1.6.3+](https://www.boost.org/doc/libs/1_63_0/doc/html/bbv2.html#bbv2.installation)
+        - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
+        - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
+        - ./bootstrap.sh
+        - ./b2 install --prefix=PREFIX
+    
+    - [Install Thrift 0.10.0+](http://thrift.apache.org/docs/install/)
+        - wget http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz
+        - tar zxvf thrift-0.10.0.tar.gz  
+        - cd thrift-0.10.0  
+        - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
+        - make 
+        - make install 
      
+    Option 2. Use deploy_third_party.sh
+     
+    >    If `WITH_BOOST_PATH` and `WITH_THRIFT_PATH` are not in your system env, `deploy_third_party.sh` will automatic install these into your directory.
+
+    1. The boost will be installed at /usr/local. Please ensure you have the authority. (Use su or sudo)
+    2. When it run, agent will use the dynamic libraris. So please add your installed path in LD_LIBRARY_PATH. (export LD_LIBRARY_PATH=/home/test/var/lib:\$LD_LIBRARY_PATH)
+
+        ```
+        $ ./deploy_third_party.sh /home/test/var
+        ...
+        ...
+        --------------------------------------------------------------------
+        Adding below into your system
+        export WITH_BOOST_PATH=/usr/local/
+        export WITH_THRIFT_PATH=/home/test/var
+        export LD_LIBRARY_PATH=/home/test/var/lib:\$LD_LIBRARY_PATH
+        --------------------------------------------------------------------
+        NOTE: Keeping /home/test/var/lib in your LD_LIBRARY_PATH when you run pinpoint_php_agent
+        --------------------------------------------------------------------
+
+        ```
+
+
 -  [phpize](http://php.net/manual/en/install.pecl.phpize.php) (In your php installation path)
   
 #### Build php-agent

@@ -13,41 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BOOST_LINK="https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz"
+
 THRIFT_LINK="http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz"
 
 ROOT=$PWD
 
-abort(){
-    echo "error " $? $BASH_COMMAND  ${BASH_LINENO[0]}
+func_fast_deploy_library(){
+    echo "install automake bison flex g++  libboost-all-dev  libtool make pkg-config [Superuser privilege]"
+    if type "apt-get" >/dev/null; then
+        sudo apt-get install automake bison flex g++ git libboost-all-dev  libtool make pkg-config
+    elif type  "yum" >/dev/null; then
+        sudo yum install automake libtool flex bison pkgconfig gcc-c++ boost-devel
+    else
+        echo "not supported"
+        exit 1
+    fi 
+
 }
 
 func_download_third_packets(){
-    if [ ! -f boost_1_64_0.tar.gz ];then
-        wget $BOOST_LINK 
-    fi
-
+    cd $1
     if [ ! -f thrift-0.10.0.tar.gz ];then
         wget $THRIFT_LINK 
     fi
-}
-
-trap 'abort' ERR
-
-func_deploy_boost(){
-    tar zxvf boost_1_64_0.tar.gz
-    cd boost_1_64_0
-    ./bootstrap.sh --prefix=$1
-    ./b2 -j4 install 
-    test 0 -ne $? && exit 0
 }
 
 func_deploy_thrift(){
     tar zxvf thrift-0.10.0.tar.gz
     cd thrift-0.10.0
     ./configure --prefix=$1 \
-                --with-boost=$1 \
-                --with-boost-libdir=$1 \
                 --with-cpp \
                 --with-php=no \
                 --with-python=no \
@@ -61,14 +55,23 @@ func_deploy_thrift(){
     test 0 -ne $? && exit 0
 }
 
-deploy_main(){
-    cd $1
-    func_download_third_packets 
-    cd $1
-    func_deploy_boost $1
-    cd $1
-    func_deploy_thrift $1
-    cd $ROOT
+func_output_env(){
+
+    echo "--------------------------------------------------------------------"
+    echo "Adding below into your system"
+    echo "export WITH_BOOST_PATH=/usr/local/"
+    echo "export WITH_THRIFT_PATH=$1"
+    echo "export LD_LIBRARY_PATH=$1/lib:\$LD_LIBRARY_PATH"
+    echo "--------------------------------------------------------------------"
+    echo "NOTE: Keeping $1/lib in your LD_LIBRARY_PATH when you run pinpoint_php_agent"
+    echo "--------------------------------------------------------------------"
 }
 
-deploy_main $1
+deploy_third_library(){
+    cd $1 && func_download_third_packets $1 
+    func_fast_deploy_library
+    cd $1 && func_deploy_thrift $1
+    cd $1 && func_output_env $1
+}
+
+deploy_third_library $1
