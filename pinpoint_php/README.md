@@ -15,4 +15,4 @@
 
 1.  What's the difference between NGINX+PHP-FPM and APACHE+mod_php5(7).so when install pinpoint php agent.
   
-    A: pinpoint php agent is a extension of php.
+    A: pinpoint php agent is an extension of php.

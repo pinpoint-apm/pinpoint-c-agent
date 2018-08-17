@@ -1,5 +1,17 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
+# Copyright 2018 NAVER Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 WORKDIR=$PWD
 SHOW_HELP=NO
@@ -20,9 +32,6 @@ do
 
     esac
     case "$option" in
-
-        --with-boost-path=*)                 WITH_BOOST_PATH="$value"           ;;
-        --with-thrift-path=*)                WITH_THRIFT_PATH="$value" ;;
         --enable-debug)                      WITH_DEBUG=YES ;;
         --enable-ci)                         WITH_CI=YES ;;
         --enable-gcov)                       WITH_GCOV=YES ;;
@@ -47,8 +56,20 @@ function init_env(){
     export DEBUG_FLAG=$WITH_DEBUG
 
     ## test boost and thrift
+    if [[ -d $WITH_BOOST_PATH && -d $WITH_THRIFT_PATH ]]
+    then  
+        echo "WITH_BOOST_PATH="$WITH_BOOST_PATH
+        echo "WITH_THRIFT_PATH="$WITH_THRIFT_PATH
+    else
+        echo "error: please  install boost and thrift, and"
+        echo "       export WITH_BOOST_PATH=/boost root path/"
+        echo "       export WITH_THRIFT_PATH=/thrift root path/"        
+        exit 1
+    fi
+
     export BOOST_PATH=$WITH_BOOST_PATH
     export THRIFT_PATH=$WITH_THRIFT_PATH
+
     echo "built common library ..."
 
     if [ -z "$JENKINS_DEFINE_CONFIG" ];then
@@ -57,16 +78,17 @@ function init_env(){
         export CPUNUM=$DISTCC_NODE_COUNT
     fi
 
+    ## check the phpize
+    phpize -v || (echo "error: phpize not find exit 1" && exit 1)
+
 }
 
 
 function read_cmd(){
 
     if [ $SHOW_HELP = YES ] ; then
-        echo "--help  "
-        echo "--with-boost-path= "
-        echo "--with-thrift-path= "
-        echo "--enable-debug "
+        echo "--help"
+        echo "--enable-debug"
         echo "--always-make"
         echo "--enable-ci"
         echo "--enable-release"
@@ -90,7 +112,6 @@ function read_cmd(){
         export PINPOINT_CFLAG='-DTEST_SIMULATE'
     else
         echo "none gcov "
-        echo "none with ci"
     fi
 }
 
