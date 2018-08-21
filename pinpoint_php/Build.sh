@@ -13,7 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-WORKDIR=$PWD
+#for debug
+#set -x
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+
+source $DIR/../bin/env.sh
+
+WITH_THRIFT_PATH=$TP_PREFIX
+WITH_BOOST_PATH=$TP_PREFIX
+
 SHOW_HELP=NO
 JUST_CLEAN=NO
 WITH_DEBUG=NO
@@ -51,24 +67,24 @@ done
 
 function init_env(){
 
-    export EXT_LIBRRAYPATH="/user/local/lib"
+    export EXT_LIBRRAYPATH="/user/local/lib":${TP_PREFIX}/installed/lib
     export DISABLE_64BIT=NO
-    export DEBUG_FLAG=$WITH_DEBUG
+    export DEBUG_FLAG=${WITH_DEBUG}
 
     ## test boost and thrift
-    if [[ -d $WITH_BOOST_PATH && -d $WITH_THRIFT_PATH ]]
+     if [[ -d $WITH_BOOST_PATH && -d $WITH_THRIFT_PATH ]]
     then  
         echo "WITH_BOOST_PATH="$WITH_BOOST_PATH
         echo "WITH_THRIFT_PATH="$WITH_THRIFT_PATH
     else
         echo "error: please  install boost and thrift, and"
         echo "       export WITH_BOOST_PATH=/boost root path/"
-        echo "       export WITH_THRIFT_PATH=/thrift root path/"        
+        echo "       export WITH_THRIFT_PATH=/thrift root path/"
         exit 1
     fi
 
-    export BOOST_PATH=$WITH_BOOST_PATH
-    export THRIFT_PATH=$WITH_THRIFT_PATH
+    export BOOST_PATH=${WITH_BOOST_PATH}
+    export THRIFT_PATH=${WITH_THRIFT_PATH}
 
     echo "built common library ..."
 
@@ -97,8 +113,8 @@ function read_cmd(){
 
     ## clean
     if [ $JUST_CLEAN = YES ] ; then
-        cd ../pinpoint_common/ && make clean
-        cd ../pinpoint_php/ && phpize --clean
+        cd ${PINPOINT_COMMON_DIR} && make clean
+        cd ${PINPOINT_PHP_DIR} && phpize --clean
         exit 0
     fi
 
@@ -117,11 +133,11 @@ function read_cmd(){
 
 function build_common(){
 
-    cd ../pinpoint_common/ && make all -j$CPUNUM $JENKINS_DEFINE_CONFIG  $MAKE_PARAS 
+    cd ${PINPOINT_COMMON_DIR} && make all -j$CPUNUM $JENKINS_DEFINE_CONFIG  $MAKE_PARAS
 
     if [ $? != 0 ]; then
         echo "built common library failed ..."
-        cd $WORKDIR
+        cd ${PINPOINT_PHP_DIR}
         exit -1
     fi
 
@@ -129,7 +145,7 @@ function build_common(){
 
 function build_agent(){
     echo "build pinpoint_php"
-    cd $WORKDIR && phpize
+    cd ${PINPOINT_PHP_DIR} && phpize
     make clean >/dev/zero || echo "clean last building"
 
     if [ $WITH_GCOV = YES ] ; then
