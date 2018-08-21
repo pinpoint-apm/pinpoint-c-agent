@@ -1,8 +1,8 @@
 CPPFLAGS=-fPIC -Wall $(PINPOINT_CXXFLAG)
 CFLAGS=-fPIC -Wall $(PINPOINT_CFLAG)
 # -I changto -isystem
-INC=-isystem /usr/local/include
-LIBS=-L/usr/local/lib
+INC=#/usr/local/include
+LIBS=#-L/usr/local/lib
 
 COMMON_LIB_NAME=pinpoint_common
 COMMON_LIB_FILE_NAME=lib$(COMMON_LIB_NAME).a
@@ -24,18 +24,13 @@ else
 	CPPFLAGS+=-O3 -DNDEBUG -Werror
 endif
 
-#BOOST_PATH=$(WITH_BOOST_PATH)
-#THRIFT_PATH=$(WITH_THRIFT_PATH)
-BOOST_PATH=./../thirdparty/installed
-THRIFT_PATH=./../thirdparty/installed
-
-ifneq "$(wildcard $(BOOST_PATH) )" ""
+ifeq ($(BOOST_PATH), $(wildcard $(BOOST_PATH)))
 	LIBS+=-L$(BOOST_PATH)/lib 
 	INC+=-isystem $(BOOST_PATH)/include 
 endif
 
-ifneq "$(wildcard $(THRIFT_PATH) )" ""
-	LIBS+=-L$(THRIFT_PATH)/lib 
+ifeq ($(THRIFT_PATH), $(wildcard $(THRIFT_PATH)))
+	LIBS+=-L$(THRIFT_PATH)/lib
 	INC+=-isystem $(THRIFT_PATH)/include 
 else	
 	THRIFT_INC=$(shell pkg-config --cflags thrift) 

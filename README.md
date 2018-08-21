@@ -29,6 +29,17 @@ gcc| 4.4.7+
 #### Pre-install
 - Download pinpoint-c-agent:  git clone https://github.com/naver/pinpoint-c-agent.git
  
+
+- Install Build-essential
+
+    > Ubuntu 
+
+        sudo apt-get install automake bison flex g++ git libtool make pkg-config
+
+    > Centos
+    
+        sudo yum install automake libtool flex bison pkgconfig gcc-c++
+
 - Install third-library  
  
     Option 1. Install from source code
@@ -46,45 +57,29 @@ gcc| 4.4.7+
         - make 
         - make install 
      
-    Option 2. Use deploy_third_party.sh
+
+    - export environment variable
+
+        ```
+            export WITH_BOOST_PATH=/boost root path/
+            export WITH_THRIFT_PATH=/thrift root path/
+            export LD_LIBRARY_PATH=/boost lib/:/thrift/:\$LD_LIBRARY_PATH
+        ```
+
+    Option 2. Use git submodule
+
+        $ cd pinpoint-c-agent
+        $ git submodule init
+        $ git submodule update --init --recursive
      
-    >    If `WITH_BOOST_PATH` and `WITH_THRIFT_PATH` are not in your system env, `deploy_third_party.sh` will automatic install these into your directory.
-
-    1. The boost will be installed at /usr/local. Please ensure you have the authority. (Use su or sudo)
-    2. When it run, agent will use the dynamic libraris. So please add your installed path in LD_LIBRARY_PATH. (export LD_LIBRARY_PATH=/home/test/var/lib:\$LD_LIBRARY_PATH)
-
-        ```
-        $ ./deploy_third_party.sh /home/test/var
-        ...
-        ...
-        --------------------------------------------------------------------
-        Adding below into your system
-        export WITH_BOOST_PATH=/usr/local/
-        export WITH_THRIFT_PATH=/home/test/var
-        export LD_LIBRARY_PATH=/home/test/var/lib:\$LD_LIBRARY_PATH
-        --------------------------------------------------------------------
-        NOTE: Keeping /home/test/var/lib in your LD_LIBRARY_PATH when you run pinpoint_php_agent
-        --------------------------------------------------------------------
-
-        ```
-
-
 -  [phpize](http://php.net/manual/en/install.pecl.phpize.php) (In your php installation path)
   
 #### Build php-agent
 
 1. Checking phpize is in your PATH.
     If not, install phpize and export in your system PATH.(eg:export PATH=/path to phpize/:$PATH)
-2. Specifying BOOST and THRIFT path  
-    
-    ```
-    # eg: header file in /usr/local/include/boost and /usr/local/include/thrift
-    export WITH_BOOST_PATH='/usr/local/include'
-    export WITH_THRIFT_PATH='/usr/local/include' 
-    ```
-
-3. Run cd pinpoint_php && ./Build.sh  && make install
-4. If **_3_** running successfully, agent had installed into php module.
+2. Run cd pinpoint_php && ./Build.sh  && make install
+3. If **_2_** running successfully, agent had installed into php module.
 
 #### Startup 
 1. Modifying below options in the "pinpoint_agent.conf" (eg:pinpoint_c_agent/quickstart/config/pinpoint_agent.conf.example)

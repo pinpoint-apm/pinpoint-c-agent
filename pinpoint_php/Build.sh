@@ -14,7 +14,8 @@
 # limitations under the License.
 
 #for debug
-#set -x
+set -e
+set -x
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -22,6 +23,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   SOURCE="$(readlink "$SOURCE")"
   [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
+
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
@@ -51,8 +53,11 @@ do
         --enable-debug)                      WITH_DEBUG=YES ;;
         --enable-ci)                         WITH_CI=YES ;;
         --enable-gcov)                       WITH_GCOV=YES ;;
+        --with-boost=*)                      USER_BOOST_PATH="$value" ;;
+        --with-thrift=*)                     USER_THRIFT_PATH="$value" ;;
         clean)                               JUST_CLEAN=YES ;;
         --help)                              SHOW_HELP=YES ;;
+        --always-make)                       MAKE_PARAS="-B" ;;
         --always-make)                       MAKE_PARAS="-B" ;;
         -h)                                  SHOW_HELP=YES ;;
         --enable-release)                    RELEASE=YES ;;
@@ -67,25 +72,27 @@ done
 
 function init_env(){
 
-    export EXT_LIBRRAYPATH="/user/local/lib":${TP_PREFIX}/installed/lib
     export DISABLE_64BIT=NO
     export DEBUG_FLAG=${WITH_DEBUG}
 
-    ## test boost and thrift
-     if [[ -d $WITH_BOOST_PATH && -d $WITH_THRIFT_PATH ]]
+    if [[ -d $USER_BOOST_PATH/include/boost && -d $USER_THRIFT_PATH/include/thrfit ]]
+    then
+        export BOOST_PATH=${USER_BOOST_PATH}
+        export THRIFT_PATH=${USER_THRIFT_PATH}
+    elif [[ -d $WITH_BOOST_PATH/include/boost  && -d $WITH_THRIFT_PATH/include/thrfit ]]
     then  
         echo "WITH_BOOST_PATH="$WITH_BOOST_PATH
         echo "WITH_THRIFT_PATH="$WITH_THRIFT_PATH
+        export BOOST_PATH=${WITH_BOOST_PATH}
+        export THRIFT_PATH=${WITH_THRIFT_PATH}
     else
-        echo "error: please  install boost and thrift, and"
-        echo "       export WITH_BOOST_PATH=/boost root path/"
-        echo "       export WITH_THRIFT_PATH=/thrift root path/"
-        exit 1
+        echo "Install boost and thrift into " ${TP_PREFIX}
+        source deploy_third_party.sh ${TP_PREFIX}
+        export BOOST_PATH=${TP_PREFIX}
+        export THRIFT_PATH=${TP_PREFIX}
     fi
 
-    export BOOST_PATH=${WITH_BOOST_PATH}
-    export THRIFT_PATH=${WITH_THRIFT_PATH}
-
+    
     echo "built common library ..."
 
     if [ -z "$JENKINS_DEFINE_CONFIG" ];then
@@ -151,7 +158,7 @@ function build_agent(){
     if [ $WITH_GCOV = YES ] ; then
         ./configure  ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall  -g3 $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include --with-boost-dir=$BOOST_PATH/include   --enable-gcov 
     elif [ $RELEASE = YES ]; then
-        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include  --with-boost-dir=$BOOST_PATH/include --enable-release
+        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="pinpoint_php-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include  --with-boost-dir=$BOOST_PATH/include --enable-release
     else
         ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include --with-boost-dir=$BOOST_PATH/include  
     fi
