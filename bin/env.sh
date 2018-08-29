@@ -18,15 +18,9 @@ PINPOINT_COMMON_DIR=${PROJECT_DIR}/pinpoint_common
 
 # third party
 TP_DIR=${PROJECT_DIR}/thirdparty
-TP_PREFIX=${TP_DIR}/installed
+TP_PREFIX=${TP_DIR}/var
 
-# https://issues.apache.org/jira/browse/THRIFT-3991
-#THRIFT_VERSION=0.10.0
-THRIFT_VERSION=0.11.0
-THRIFT_DIR=${TP_DIR}/thrift-$THRIFT_VERSION
-THRIFT_LINK="http://apache.fayea.com/thrift/${THRIFT_VERSION}/thrift-${THRIFT_VERSION}.tar.gz"
+THRIFT_DIR=${TP_DIR}/thrift
 
-BOOST_VERSION=1.63.0
-BOOST_VERSION_TAR=1_63_0
-BOOST_DIR=${TP_DIR}/boost-boost-$1.63.0
-BOOST_LINK="https://jaist.dl.sourceforge.net/project/boost/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_TAR}.tar.gz"
+BOOST_DIR=${TP_DIR}/boost
+

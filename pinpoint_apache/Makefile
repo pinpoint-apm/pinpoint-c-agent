@@ -3,8 +3,8 @@ CPPFLAGS=-fPIC -Wall $(PINPOINT_CXXFLAG)
 CFLAGS=-fPIC -Wall $(PINPOINT_CFLAG)
 
 DEBUG_FLAG=YES
-BOOST_PATH=$(HOME)/bin
-THRIFT_PATH=$(HOME)/bin
+WITH_BOOST_PATH=$(HOME)/bin
+WITH_THRIFT_PATH=$(HOME)/bin
 HTTPD_DIR = $(HTTPDDIR)
 APR_HEADER=$(HOME)/bin/include/apr-1
 
@@ -32,14 +32,14 @@ else
 	CPPFLAGS+=-O3 -DNDEBUG -Werror
 endif
 
-ifneq ($(strip $(BOOST_PATH)),)
-	LIBS+=-L$(BOOST_PATH)/lib
-	INC+=-isystem $(BOOST_PATH)
+ifneq ($(strip $(WITH_BOOST_PATH)),)
+	LIBS+=-L$(WITH_BOOST_PATH)/lib
+	INC+=-isystem $(WITH_BOOST_PATH)
 endif
 
-ifneq ($(strip $(THRIFT_PATH)),)
-	LIBS+=-L$(THRIFT_PATH)/lib
-	INC+=-isystem $(THRIFT_PATH)/include
+ifneq ($(strip $(WITH_THRIFT_PATH)),)
+	LIBS+=-L$(WITH_THRIFT_PATH)/lib
+	INC+=-isystem $(WITH_THRIFT_PATH)/include
 else
 	THRIFT_INC=$(shell pkg-config --cflags thrift)
     THRIFT_LIB=$(shell pkg-config --libs thrift)
@@ -78,7 +78,7 @@ $(AP_MODULE): common $(OBJS) $(HEADERS)
 
 
 common:
-	$(MAKE) -j4 -C $(PINPOINT_COMMON_PATH) BOOST_PATH=$(BOOST_PATH) THRIFT_PATH=$(THRIFT_PATH) DEBUG_FLAG=$(DEBUG_FLAG)
+	$(MAKE) -j4 -C $(PINPOINT_COMMON_PATH)
 
 .PHONY: all clean install uninstall common
 

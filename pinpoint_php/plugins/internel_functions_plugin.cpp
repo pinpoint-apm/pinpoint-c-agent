@@ -16,11 +16,12 @@
 #include "zend_types.h"
 
 #include <stdint.h>
-#include "internel_functions_plugin.h"
 
 #if PHP_VERSION_ID < 50500
 #include "zend.h"
 #endif
+
+#include "internel_functions_plugin.h"
 
 using namespace Pinpoint::Trace;
 using namespace Pinpoint::log;

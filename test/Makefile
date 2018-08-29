@@ -7,14 +7,14 @@ WORKDIR=$(shell pwd)
 INC+=-I$(WORKDIR)/../pinpoint_common
 LIBS+=-lboost_system -lboost_thread -lboost_date_time 
 
-ifneq ($(strip $(with-boost-path)),)
-	LIBS+=-L$(with-boost-path)/lib
-	INC+=-I$(with-boost-path)
+ifneq ($(strip $(WITH_BOOST_PATH)),)
+	LIBS+=-L$(WITH_BOOST_PATH)/lib
+	INC+=-I$(WITH_BOOST_PATH)
 endif
 
-ifneq ($(strip $(with-thrift-path)),)
-	LIBS+=-L$(with-thrift-path)/lib -lthrift
-	INC+=-I$(with-thrift-path)/include
+ifneq ($(strip $(WITH_THRIFT_PATH)),)
+	LIBS+=-L$(WITH_THRIFT_PATH)/lib -lthrift
+	INC+=-I$(WITH_THRIFT_PATH)/include
 else	
 	THRIFT_INC=$(shell pkg-config --cflags thrift)
     THRIFT_LIB=$(shell pkg-config --libs thrift)
@@ -22,9 +22,6 @@ else
     LIBS+=$(THRIFT_LIB)
 endif
 
-## export global para , maybe needs by other module
-export THRIFT_PATH=$(with-thrift-path)
-export BOOST_PATH=$(with-boost-path)
 ## open unit test flag
 export RUN_TEST=1
 export RUN_TEST_FLAGS=-DUNITTEST 

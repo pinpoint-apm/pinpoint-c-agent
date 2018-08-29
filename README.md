@@ -19,7 +19,7 @@ APACHE| 2.2.x 2.4.x
 PHP| php 5.4.x 5.5.x 5.6.x 7x
 OS| 64bit only
 Boost | 1.5.8+
-Thirft|0.10.0+
+Thirft|0.11.0+
 gcc| 4.4.7+
 
 
@@ -29,62 +29,58 @@ gcc| 4.4.7+
 #### Pre-install
 - Download pinpoint-c-agent:  git clone https://github.com/naver/pinpoint-c-agent.git
  
+
+- Install Build-essential
+
+    > Ubuntu 
+
+        sudo apt-get install automake bison flex g++ git libtool make pkg-config
+
+    > Centos
+    
+        sudo yum install automake libtool flex bison pkgconfig gcc-c++
+
 - Install third-library  
- 
-    Option 1. Install from source code
+
+    Option 1. Use agent build tools (install boost and Thirft in $PWD/../thirdlibray/var)
+
+        $ cd pinpoint-c-agent
+        $ ./Build.sh
+        $ export LD_LIBRARY_PATH=$PWD/../thirdlibray/var/:$LD_LIBRARY_PATH
+
+    Option 2. Install from source code
     - [Install Boost 1.6.3+](https://www.boost.org/doc/libs/1_63_0/doc/html/bbv2.html#bbv2.installation)
         - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
         - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
         - ./bootstrap.sh
         - ./b2 install --prefix=PREFIX
     
-    - [Install Thrift 0.10.0+](http://thrift.apache.org/docs/install/)
-        - wget http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz
-        - tar zxvf thrift-0.10.0.tar.gz  
-        - cd thrift-0.10.0  
+    - [Install Thrift 0.11.0+](http://thrift.apache.org/docs/install/)
+        - wget http://apache.fayea.com/thrift/0.11.0/thrift-0.11.0.tar.gz
+        - tar zxvf thrift-0.11.0.tar.gz  
+        - cd thrift-0.11.0  
         - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
         - make 
         - make install 
      
-    Option 2. Use deploy_third_party.sh
+        - export environment variable
+
+        ```
+            export WITH_BOOST_PATH=/boost root path/
+            export WITH_THRIFT_PATH=/thrift root path/
+            export LD_LIBRARY_PATH=/boost lib/:/thrift/:$LD_LIBRARY_PATH
+        ```
+
+
      
-    >    If `WITH_BOOST_PATH` and `WITH_THRIFT_PATH` are not in your system env, `deploy_third_party.sh` will automatic install these into your directory.
-
-    1. The boost will be installed at /usr/local. Please ensure you have the authority. (Use su or sudo)
-    2. When it run, agent will use the dynamic libraris. So please add your installed path in LD_LIBRARY_PATH. (export LD_LIBRARY_PATH=/home/test/var/lib:\$LD_LIBRARY_PATH)
-
-        ```
-        $ ./deploy_third_party.sh /home/test/var
-        ...
-        ...
-        --------------------------------------------------------------------
-        Adding below into your system
-        export WITH_BOOST_PATH=/usr/local/
-        export WITH_THRIFT_PATH=/home/test/var
-        export LD_LIBRARY_PATH=/home/test/var/lib:\$LD_LIBRARY_PATH
-        --------------------------------------------------------------------
-        NOTE: Keeping /home/test/var/lib in your LD_LIBRARY_PATH when you run pinpoint_php_agent
-        --------------------------------------------------------------------
-
-        ```
-
-
 -  [phpize](http://php.net/manual/en/install.pecl.phpize.php) (In your php installation path)
   
 #### Build php-agent
 
 1. Checking phpize is in your PATH.
     If not, install phpize and export in your system PATH.(eg:export PATH=/path to phpize/:$PATH)
-2. Specifying BOOST and THRIFT path  
-    
-    ```
-    # eg: header file in /usr/local/include/boost and /usr/local/include/thrift
-    export WITH_BOOST_PATH='/usr/local/include'
-    export WITH_THRIFT_PATH='/usr/local/include' 
-    ```
-
-3. Run cd pinpoint_php && ./Build.sh  && make install
-4. If **_3_** running successfully, agent had installed into php module.
+2. Run cd pinpoint_php && ./Build.sh  && make install
+3. If **_2_** running successfully, agent had installed into php module.
 
 #### Startup 
 1. Modifying below options in the "pinpoint_agent.conf" (eg:pinpoint_c_agent/quickstart/config/pinpoint_agent.conf.example)
@@ -117,7 +113,7 @@ gcc| 4.4.7+
 
 Pinpoint Version | PHP|GCC|Boost| Thrift|
 ---------------- | ----- | --------- |----|----|
-1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.10.0+|
+1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.11.0+|
 
 ## License
 This project is licensed under the Apache License, Version 2.0.

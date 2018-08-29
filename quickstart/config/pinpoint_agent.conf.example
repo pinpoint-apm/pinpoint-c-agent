@@ -21,7 +21,7 @@ AgentType="NGINX"
 # plugin
 # PhpInternalFunctionsPlugin
 PluginExclude = ExcludePlugin
-PluginInclude = PhpRequestPlugin;QuickStartPlugin  ; PhpInternalFunctionsPlugin ;ExcludePlugin ;PDOPlugin;NextSpanPlugin;
+PluginInclude = PhpRequestPlugin;QuickStartPlugin  ; PhpInternalFunctionsPlugin ;ExcludePlugin ;PDOPlugin;CurlPlugin;
 
 
 [PHP]
