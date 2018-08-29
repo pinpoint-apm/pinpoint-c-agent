@@ -29,7 +29,7 @@
   "php_fpm_log_name": "php-fpm.log",
   "pinpoint_agent_code_path": "../../pinpoint_php",
   "pinpoint_agent_conf_path": "../conf/pinpoint_agent.conf",
-  "pinpoint_agent_build_commands": "./Build.sh --enable-ci --always-make --enable-release && make install",
+  "pinpoint_agent_build_commands": "./Build.sh --enable-ci --always-make && make install",
   "nginx_listen_port": 8989,
   "nginx_conf_path": "../conf/nginx.conf",
   "nginx_start_commands": "nginx -c %s",

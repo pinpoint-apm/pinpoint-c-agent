@@ -5,22 +5,17 @@ CURDIR = $(shell pwd)
 COMMON_DIR=$(CURDIR)/../../pinpoint_common/
 COMMON_LIB_NAME=pinpoint_common
 
-
-BOOST_PATH=$(WITH_BOOST_PATH)
-THRIFT_PATH=$(WITH_THRIFT_PATH)
-
-
 TEST_COLLECTOR=test_collector
 TEST_CHECKER=test_checker
 
-ifneq ($(strip $(BOOST_PATH)),)
-	LIBS+=-L$(BOOST_PATH)/lib
-	INC+=-isystem $(BOOST_PATH)/include
+ifneq ($(strip $(WITH_BOOST_PATH)),)
+	LIBS+=-L$(WITH_BOOST_PATH)/lib
+	INC+=-isystem $(WITH_BOOST_PATH)/include
 endif
 
-ifneq ($(strip $(THRIFT_PATH)),)
-	LIBS+=-L$(THRIFT_PATH)/lib
-	INC+=-isystem $(THRIFT_PATH)/include
+ifneq ($(strip $(WITH_THRIFT_PATH)),)
+	LIBS+=-L$(WITH_THRIFT_PATH)/lib
+	INC+=-isystem $(WITH_THRIFT_PATH)/include
 else
 	THRIFT_INC=$(shell pkg-config --cflags thrift)
     THRIFT_LIB=$(shell pkg-config --libs thrift)
@@ -56,10 +51,10 @@ export DEBUG_FLAG=YES
 all: collector checker
 
 common:
-	make -C $(COMMON_DIR) $(JENKINS_DEFINE_CONFIG) with-boost-path=$(BOOST_PATH) with-thrift-path=$(THRIFT_PATH) -j$(CPUNUM)
+	make -C $(COMMON_DIR) $(JENKINS_DEFINE_CONFIG)  -j$(CPUNUM)
 
 collector: collector.cpp $(cpp_src_obj) $(cpp_src) $(headers) common
-	# make -C $(COMMON_DIR)  with-boost-path=$(BOOST_PATH) with-thrift-path=$(THRIFT_PATH) -j4
+	# make -C $(COMMON_DIR)  with-boost-path=$(WITH_BOOST_PATH) with-thrift-path=$(WITH_THRIFT_PATH) -j4
 	$(CXX) $(CPPFLAGS) collector.cpp $(cpp_src_obj) $(INC)  -l$(COMMON_LIB_NAME)   $(LIBS) -L$(COMMON_DIR) -o $(TEST_COLLECTOR)
 
 checker: checker.cpp common

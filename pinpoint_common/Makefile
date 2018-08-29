@@ -24,14 +24,14 @@ else
 	CPPFLAGS+=-O3 -DNDEBUG -Werror
 endif
 
-ifeq ($(BOOST_PATH), $(wildcard $(BOOST_PATH)))
-	LIBS+=-L$(BOOST_PATH)/lib 
-	INC+=-isystem $(BOOST_PATH)/include 
+ifeq ($(WITH_BOOST_PATH), $(wildcard $(WITH_BOOST_PATH)))
+	LIBS+=-L$(WITH_BOOST_PATH)/lib 
+	INC+=-isystem $(WITH_BOOST_PATH)/include 
 endif
 
-ifeq ($(THRIFT_PATH), $(wildcard $(THRIFT_PATH)))
-	LIBS+=-L$(THRIFT_PATH)/lib
-	INC+=-isystem $(THRIFT_PATH)/include 
+ifeq ($(WITH_THRIFT_PATH), $(wildcard $(WITH_THRIFT_PATH)))
+	LIBS+=-L$(WITH_THRIFT_PATH)/lib
+	INC+=-isystem $(WITH_THRIFT_PATH)/include 
 else	
 	THRIFT_INC=$(shell pkg-config --cflags thrift) 
     THRIFT_LIB=$(shell pkg-config --libs thrift) 
@@ -119,7 +119,7 @@ all:$(THRIFT_OBJS) $(headers) $(cpp_src_obj) $(c_src_obj)
 
 thrift:$(THRIFT_FILES_DIST)
 	@for i in $(THRIFT_FILES_DIST); \
-	    do thrift -o $(THRIFT_FILE_DIR) -r -gen cpp $$i; \
+	    do $(WITH_THRIFT_PATH)/bin/thrift -o $(THRIFT_FILE_DIR) -r -gen cpp $$i; \
 	done
 
 $(THRIFT_OBJS): %.o: %.cpp

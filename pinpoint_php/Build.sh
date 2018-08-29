@@ -29,9 +29,6 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source $DIR/../bin/env.sh
 
-WITH_THRIFT_PATH=$TP_PREFIX
-WITH_BOOST_PATH=$TP_PREFIX
-
 SHOW_HELP=NO
 JUST_CLEAN=NO
 WITH_DEBUG=NO
@@ -75,21 +72,21 @@ function init_env(){
     export DISABLE_64BIT=NO
     export DEBUG_FLAG=${WITH_DEBUG}
 
-    if [[ -d $USER_BOOST_PATH/include/boost && -d $USER_THRIFT_PATH/include/thrfit ]]
+    if [[ -d $USER_BOOST_PATH/include/boost && -d $USER_THRIFT_PATH/include/thrift ]]
     then
-        export BOOST_PATH=${USER_BOOST_PATH}
-        export THRIFT_PATH=${USER_THRIFT_PATH}
-    elif [[ -d $WITH_BOOST_PATH/include/boost  && -d $WITH_THRIFT_PATH/include/thrfit ]]
+        export WITH_BOOST_PATH=${USER_BOOST_PATH}
+        export WITH_THRIFT_PATH=${USER_THRIFT_PATH}
+    elif [[ -d $WITH_BOOST_PATH/include/boost  && -d $WITH_THRIFT_PATH/include/thrift ]]
     then  
         echo "WITH_BOOST_PATH="$WITH_BOOST_PATH
         echo "WITH_THRIFT_PATH="$WITH_THRIFT_PATH
-        export BOOST_PATH=${WITH_BOOST_PATH}
-        export THRIFT_PATH=${WITH_THRIFT_PATH}
     else
         echo "Install boost and thrift into " ${TP_PREFIX}
+        cd ../ && git submodule update --init --recursive
+        cd pinpoint_php
         source deploy_third_party.sh ${TP_PREFIX}
-        export BOOST_PATH=${TP_PREFIX}
-        export THRIFT_PATH=${TP_PREFIX}
+        export WITH_BOOST_PATH=${TP_PREFIX}
+        export WITH_THRIFT_PATH=${TP_PREFIX}
     fi
 
     
@@ -156,11 +153,11 @@ function build_agent(){
     make clean >/dev/zero || echo "clean last building"
 
     if [ $WITH_GCOV = YES ] ; then
-        ./configure  ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall  -g3 $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include --with-boost-dir=$BOOST_PATH/include   --enable-gcov 
+        ./configure  ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall  -g3 $PINPOINT_CXXFLAG" --with-thrift-dir=$WITH_THRIFT_PATH/include --with-boost-dir=$WITH_BOOST_PATH/include   --enable-gcov 
     elif [ $RELEASE = YES ]; then
-        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="pinpoint_php-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include  --with-boost-dir=$BOOST_PATH/include --enable-release
+        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$WITH_THRIFT_PATH/include  --with-boost-dir=$WITH_BOOST_PATH/include --enable-release
     else
-        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$THRIFT_PATH/include --with-boost-dir=$BOOST_PATH/include  
+        ./configure ${JENKINS_DEFINE_CONFIG} CFLAGS="-Wall $PINPOINT_CFLAG" CXXFLAGS="-Wall $PINPOINT_CXXFLAG" --with-thrift-dir=$WITH_THRIFT_PATH/include --with-boost-dir=$WITH_BOOST_PATH/include  
     fi
 
     make  $MAKE_PARAS -j$CPUNUM

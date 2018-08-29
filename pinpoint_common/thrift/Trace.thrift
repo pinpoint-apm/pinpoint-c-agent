@@ -21,7 +21,7 @@ union TAnnotationValue {
   5: i16 shortValue
   6: double doubleValue;
   7: binary binaryValue;
-  8: byte byteValue;
+  8: i8 byteValue;
   9: TIntStringValue intStringValue;
   10: TIntStringStringValue intStringStringValue;
 }
@@ -101,7 +101,7 @@ struct TSpan {
   26: optional TIntStringValue exceptionInfo;
   
   30: optional i16 applicationServiceType;
-  31: optional byte loggingTransactionInfo;
+  31: optional i8 loggingTransactionInfo;
 }
 
 struct TSpanChunk {

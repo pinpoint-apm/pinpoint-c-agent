@@ -19,7 +19,7 @@ APACHE| 2.2.x 2.4.x
 PHP| php 5.4.x 5.5.x 5.6.x 7x
 OS| 64bit only
 Boost | 1.5.8+
-Thirft|0.10.0+
+Thirft|0.11.0+
 gcc| 4.4.7+
 
 
@@ -41,36 +41,37 @@ gcc| 4.4.7+
         sudo yum install automake libtool flex bison pkgconfig gcc-c++
 
 - Install third-library  
- 
-    Option 1. Install from source code
+
+    Option 1. Use agent build tools (install boost and Thirft in $PWD/../thirdlibray/var)
+
+        $ cd pinpoint-c-agent
+        $ ./Build.sh
+        $ export LD_LIBRARY_PATH=$PWD/../thirdlibray/var/:$LD_LIBRARY_PATH
+
+    Option 2. Install from source code
     - [Install Boost 1.6.3+](https://www.boost.org/doc/libs/1_63_0/doc/html/bbv2.html#bbv2.installation)
         - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
         - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
         - ./bootstrap.sh
         - ./b2 install --prefix=PREFIX
     
-    - [Install Thrift 0.10.0+](http://thrift.apache.org/docs/install/)
-        - wget http://apache.fayea.com/thrift/0.10.0/thrift-0.10.0.tar.gz
-        - tar zxvf thrift-0.10.0.tar.gz  
-        - cd thrift-0.10.0  
+    - [Install Thrift 0.11.0+](http://thrift.apache.org/docs/install/)
+        - wget http://apache.fayea.com/thrift/0.11.0/thrift-0.11.0.tar.gz
+        - tar zxvf thrift-0.11.0.tar.gz  
+        - cd thrift-0.11.0  
         - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
         - make 
         - make install 
      
-
-    - export environment variable
+        - export environment variable
 
         ```
             export WITH_BOOST_PATH=/boost root path/
             export WITH_THRIFT_PATH=/thrift root path/
-            export LD_LIBRARY_PATH=/boost lib/:/thrift/:\$LD_LIBRARY_PATH
+            export LD_LIBRARY_PATH=/boost lib/:/thrift/:$LD_LIBRARY_PATH
         ```
 
-    Option 2. Use git submodule
 
-        $ cd pinpoint-c-agent
-        $ git submodule init
-        $ git submodule update --init --recursive
      
 -  [phpize](http://php.net/manual/en/install.pecl.phpize.php) (In your php installation path)
   
@@ -112,7 +113,7 @@ gcc| 4.4.7+
 
 Pinpoint Version | PHP|GCC|Boost| Thrift|
 ---------------- | ----- | --------- |----|----|
-1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.10.0+|
+1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.11.0+|
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
