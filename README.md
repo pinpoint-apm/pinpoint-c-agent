@@ -21,6 +21,7 @@ OS| 64bit only
 Boost | 1.5.8+
 Thirft|0.11.0+
 gcc| 4.4.7+
+pinpoint| 1.8.0-RC1
 
 
 
@@ -79,7 +80,7 @@ gcc| 4.4.7+
 
 1. Checking phpize is in your PATH.
     If not, install phpize and export in your system PATH.(eg:export PATH=/path to phpize/:$PATH)
-2. Run cd pinpoint_php && ./Build.sh  && make install
+2. Run cd pinpoint_php && ./Build.sh  && sudo make install
 3. If **_2_** running successfully, agent had installed into php module.
 
 #### Startup 
@@ -113,7 +114,7 @@ gcc| 4.4.7+
 
 Pinpoint Version | PHP|GCC|Boost| Thrift|
 ---------------- | ----- | --------- |----|----|
-1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.11.0+|
+1.8.0-RC1 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.11.0+|
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
