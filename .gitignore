@@ -17,3 +17,5 @@ simulate/shell/*.html
 .settings/
 CI/
 *.txt
+thirdparty/boost
+thirdparty/thrift

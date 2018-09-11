@@ -260,7 +260,7 @@ namespace Pinpoint
         {
         public:
             static std::string int64ToString(int64_t value);
-            static int64_t stringToInt64(const std::string& value) throw (std::invalid_argument);
+            static int64_t stringToInt64(const std::string& value);
             static std::string getExceptionMsg(const char* file, int32_t lineno, const char* msg);
             static std::string getErrorMsg(const char* file, int32_t lineno, const char* msg);
             static std::string formatMsg(const char* header,const char* file, int32_t lineno, const char* msg);
@@ -317,7 +317,7 @@ namespace Pinpoint
             return tmp;
         }
 
-        int64_t FormatConverterImp::stringToInt64(const std::string &value) throw (std::invalid_argument)
+        int64_t FormatConverterImp::stringToInt64(const std::string &value)
         {
             PStream pStream = getPStream();
             int64_t result;
@@ -331,7 +331,7 @@ namespace Pinpoint
             const char* p = value.c_str();
 
             /* skip space */
-            for (; p != '\0' && ((char)*p == ' ' || (char)*p == '\t'); p++)
+            for (; p != NULL && ((char)*p == ' ' || (char)*p == '\t'); p++)
                 ;
 
             if (strlen(p) == 0)
@@ -378,7 +378,7 @@ namespace Pinpoint
             return FormatConverterImp::int64ToString(value);
         }
 
-        int64_t FormatConverter::stringToInt64(const std::string &value) throw (std::invalid_argument)
+        int64_t FormatConverter::stringToInt64(const std::string &value) 
         {
             return FormatConverterImp::stringToInt64(value);
         }

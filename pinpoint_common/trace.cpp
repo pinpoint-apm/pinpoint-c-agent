@@ -988,7 +988,7 @@ namespace Pinpoint
             return formatBytes(transactionId.agentId, transactionId.agentStartTime, transactionId.transactionSequence);
         }
 
-        TransactionId TransactionId::parseTransactionId(const std::vector<int8_t>& transactionId) throw (invalid_argument)
+        TransactionId TransactionId::parseTransactionId(const std::vector<int8_t>& transactionId) 
         {
             AutoBuffer buffer(transactionId);
             const int8_t version = buffer.readByte();
@@ -1012,7 +1012,7 @@ namespace Pinpoint
             return TransactionId(agentIdString, agentStartTime,transactionSequence);
         }
 
-        TransactionId TransactionId::parseTransactionId(const string& transactionId) throw (invalid_argument)
+        TransactionId TransactionId::parseTransactionId(const string& transactionId) 
         {
             string::size_type start = 0;
             string::size_type index = 0;

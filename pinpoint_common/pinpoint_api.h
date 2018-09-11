@@ -60,7 +60,7 @@ namespace Pinpoint
         {
         public:
             static std::string int64ToString(int64_t value);
-            static int64_t stringToInt64(const std::string& value) throw (std::invalid_argument);
+            static int64_t stringToInt64(const std::string& value);
             static std::string getErrorMsg(const char* file, int32_t lineno, const char* msg);
             static std::string getExceptionMsg(const char* file, int32_t lineno, const char* msg);
             static std::string formatMsg(const char* header,const char* file, int32_t lineno, const char* msg);
