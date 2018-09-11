@@ -21,6 +21,7 @@ OS| 64bit only
 Boost | 1.5.8+
 Thirft|0.11.0+
 gcc| 4.4.7+
+pinpoint| 1.8.0-RC1
 
 
 
@@ -53,13 +54,13 @@ gcc| 4.4.7+
         - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
         - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
         - ./bootstrap.sh
-        - ./b2 install --prefix=PREFIX
+        - ./b2 install --prefix=$PREFIX
     
     - [Install Thrift 0.11.0+](http://thrift.apache.org/docs/install/)
         - wget http://apache.fayea.com/thrift/0.11.0/thrift-0.11.0.tar.gz
         - tar zxvf thrift-0.11.0.tar.gz  
         - cd thrift-0.11.0  
-        - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
+        - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no -with-boost=$PREFIX
         - make 
         - make install 
      
@@ -79,7 +80,7 @@ gcc| 4.4.7+
 
 1. Checking phpize is in your PATH.
     If not, install phpize and export in your system PATH.(eg:export PATH=/path to phpize/:$PATH)
-2. Run cd pinpoint_php && ./Build.sh  && make install
+2. Run cd pinpoint_php && ./Build.sh  && sudo make install
 3. If **_2_** running successfully, agent had installed into php module.
 
 #### Startup 
@@ -113,7 +114,7 @@ gcc| 4.4.7+
 
 Pinpoint Version | PHP|GCC|Boost| Thrift|
 ---------------- | ----- | --------- |----|----|
-1.7.3 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.11.0+|
+1.8.0-RC1 | 5.3.x <br> 5.4.x <br> 5.5.x <br> 5.6.x <br> 7.x |gcc 4.4.7+|1.5.8+|0.11.0+|
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
