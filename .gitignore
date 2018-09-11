@@ -7,7 +7,6 @@ thirdparty/var
 test/pinpoint_unittest
 simulate/collector/test_checker
 simulate/collector/test_collector
-pinpoint_common/thrift/gen-cpp
 simulate/tmp/
 simulate/log/
 simulate/shell/*.html

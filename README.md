@@ -54,13 +54,13 @@ pinpoint| 1.8.0-RC1
         - wget https://jaist.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz
         - tar -zxvf boost_1_63_0.tar.gz && cd boost_1_63_0
         - ./bootstrap.sh
-        - ./b2 install --prefix=PREFIX
+        - ./b2 install --prefix=$PREFIX
     
     - [Install Thrift 0.11.0+](http://thrift.apache.org/docs/install/)
         - wget http://apache.fayea.com/thrift/0.11.0/thrift-0.11.0.tar.gz
         - tar zxvf thrift-0.11.0.tar.gz  
         - cd thrift-0.11.0  
-        - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no
+        - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no -with-boost=$PREFIX
         - make 
         - make install 
      
