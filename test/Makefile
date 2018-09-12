@@ -1,4 +1,4 @@
-CPPFLAGS=-fPIC -Wall -g3 -DRUN_TEST -DDEBUG
+CPPFLAGS=-fPIC -Wall -g3 -DRUN_TEST -DDEBUG -DBOOST_NO_CXX11_SMART_PTR
 CFLAGS=-fPIC -Wall -g3  -DRUN_TEST -DDEBUG
 INC="-I/usr/local/include"
 LIBS="-L/usr/local/lib"
