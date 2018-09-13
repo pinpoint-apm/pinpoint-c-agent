@@ -1,7 +1,6 @@
 /.vscode
 /.idea
 *.o
-thirdparty/var
 *.result
 *.a
 test/pinpoint_unittest
@@ -17,5 +16,5 @@ simulate/shell/*.html
 .settings/
 CI/
 *.txt
-thirdparty/boost
-thirdparty/thrift
+thirdparty
+cmake-build-debug

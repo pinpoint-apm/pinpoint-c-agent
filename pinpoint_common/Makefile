@@ -1,4 +1,4 @@
-CPPFLAGS=-fPIC -Wall $(PINPOINT_CXXFLAG) -DBOOST_NO_CXX11_SMART_PTR
+CPPFLAGS=-fPIC -Wall $(PINPOINT_CXXFLAG) 
 CFLAGS=-fPIC -Wall $(PINPOINT_CFLAG) 
 # -I changto -isystem
 INC=#/usr/local/include
