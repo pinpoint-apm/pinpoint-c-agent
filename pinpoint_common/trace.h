@@ -315,9 +315,9 @@ namespace Pinpoint
             static std::vector<int8_t> formatBytes(const TransactionId &transactionId);
 
             static TransactionId parseTransactionId(
-                    const std::vector<int8_t> &transactionId) throw(std::invalid_argument);
+                    const std::vector<int8_t> &transactionId);
 
-            static TransactionId parseTransactionId(const std::string &transactionId) throw(std::invalid_argument);
+            static TransactionId parseTransactionId(const std::string &transactionId);
 
             static bool isValidTransactionIdStr(const std::string &transactionId);
 

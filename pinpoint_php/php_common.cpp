@@ -74,7 +74,7 @@ static inline std::string getNameFromHeaderMap(const char* pstr)
 static uint32_t find_first_of_char(const char*pstr, uint32_t strLen ,char C)
 {
     uint32_t i =0;
-    for( ;pstr != '\0' && i < strLen ;pstr++,i++)
+    for( ;pstr != NULL && i < strLen ;pstr++,i++)
     {
         if((char)*pstr == C)
             break;

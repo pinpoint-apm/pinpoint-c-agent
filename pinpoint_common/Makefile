@@ -1,5 +1,5 @@
-CPPFLAGS=-fPIC -Wall $(PINPOINT_CXXFLAG)
-CFLAGS=-fPIC -Wall $(PINPOINT_CFLAG)
+CPPFLAGS=-fPIC -Wall $(PINPOINT_CXXFLAG) 
+CFLAGS=-fPIC -Wall $(PINPOINT_CFLAG) 
 # -I changto -isystem
 INC=#/usr/local/include
 LIBS=#-L/usr/local/lib
