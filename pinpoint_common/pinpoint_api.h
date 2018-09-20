@@ -474,6 +474,7 @@ namespace Pinpoint
             virtual void addDoubleValue(double d) = 0;
             virtual void addIntStringValue(int32_t intValue, const std::string& s) = 0;
             virtual void addIntStringStringValue(int32_t intValue, const std::string& s1, const std::string& s2) = 0;
+            virtual void addTLongIntIntByteByteStringValue(std::string&,int) = 0;
         };
     }
 }

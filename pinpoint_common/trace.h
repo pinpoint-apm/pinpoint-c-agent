@@ -135,6 +135,7 @@ namespace Pinpoint
             virtual void addDoubleValue(double d);
             virtual void addIntStringValue(int32_t intValue, const std::string& s);
             virtual void addIntStringStringValue(int32_t intValue, const std::string& s1, const std::string& s2);
+            virtual void addTLongIntIntByteByteStringValue(std::string&,int);
             virtual ~DefaultAnnotation(){}
             const TAnnotation& getTAnnotation()const ;
         private:

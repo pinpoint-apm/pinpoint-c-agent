@@ -1323,6 +1323,64 @@ namespace Pinpoint
             v.__set_intStringValue(value);
             tAnnotation.__set_value(v);
         }
+
+
+
+
+        void DefaultAnnotation::addTLongIntIntByteByteStringValue(std::string &value,int type)
+        {
+            TAnnotationValue v;
+            const char*stripped = value.c_str();
+            TLongIntIntByteByteStringValue tvalue;
+
+            LOGD("addTLongIntIntByteByteStringValue %d %s ",type,stripped);
+            while(*stripped==' '){
+                            stripped++;
+            }
+
+//           Pinpoint-ProxyApache:  t=991424704447256 D=3775428 i=51 b=49
+//           Pinpoint-ProxyNginx:   t=1504248328.423 D=0.123
+//           Pinpoint-ProxyApp:     t=1502861340 app=foo-bar
+
+            long int lv = 0;
+            int v2 = 0;
+            int bv1 = 0;
+            int bv2 = 0;
+            std::string appid="";
+
+            char tbuf[33]={0};
+
+            switch(type){
+            case TYPE_APP:
+                {
+                    sscanf(stripped,"t=%ld%*[^a]app=%32s",&lv,tbuf);
+                    tvalue.__set_stringValue(std::string(tbuf));
+                }
+                break;
+            case TYPE_NGINX:
+                {
+                    sscanf(stripped,"t=%ld%*[^D]D=%d",&lv,&v2);
+                    tvalue.__set_intValue2(v2);
+                }
+                break;
+            case TYPE_APACHE:
+                {
+                    sscanf(stripped,"t=%ld%*[^D]D=%d%*[^i]i=%d%*[^b]b=%d",&lv,&v2,&bv1,&bv2);
+                    tvalue.__set_intValue2(v2);
+                    tvalue.__set_byteValue1((int8_t)bv1);
+                    tvalue.__set_byteValue2((int8_t)bv2);
+                }
+                break;
+            default:return ;
+            }
+
+
+            tvalue.__set_longValue(lv);
+            tvalue.__set_intValue1(type);
+
+            v.__set_longIntIntByteByteStringValue(tvalue);
+            tAnnotation.__set_value(v);
+        }
         //</editor-fold>
     }
 }
