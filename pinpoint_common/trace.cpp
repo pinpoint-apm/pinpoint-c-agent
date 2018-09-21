@@ -20,6 +20,7 @@
 #include "pinpoint_agent_context.h"
 #include "pinpoint_agent.h"
 #include "trace_data_sender.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 using namespace Pinpoint::utils;
@@ -1330,53 +1331,73 @@ namespace Pinpoint
         void DefaultAnnotation::addTLongIntIntByteByteStringValue(std::string &value,int type)
         {
             TAnnotationValue v;
-            const char*stripped = value.c_str();
             TLongIntIntByteByteStringValue tvalue;
 
-            LOGD("addTLongIntIntByteByteStringValue %d %s ",type,stripped);
-            while(*stripped==' '){
-                            stripped++;
-            }
+            LOGD("addTLongIntIntByteByteStringValue %d %s ",type,value.c_str());
 
 //           Pinpoint-ProxyApache:  t=991424704447256 D=3775428 i=51 b=49
 //           Pinpoint-ProxyNginx:   t=1504248328.423 D=0.123
 //           Pinpoint-ProxyApp:     t=1502861340 app=foo-bar
 
-            long int lv = 0;
-            int v2 = 0;
-            int bv1 = 0;
-            int bv2 = 0;
-            std::string appid="";
 
-            char tbuf[33]={0};
+#define tSTR    "t="
+#define appSTR  "app="
+#define DSTR    "D="
+#define iSTR    "i="
+#define bSTR    "b="
+
+#define PARSE_STR(name) ((pvalue = strstr(value.c_str(),(name))) != NULL && (pvalue += strlen(name)) != NULL)
+
+            const char* pvalue=NULL;
+
+            if(PARSE_STR(tSTR))
+            {
+                tvalue.__set_longValue(atol(pvalue));
+            }
+
+            tvalue.__set_intValue1(type);
+
 
             switch(type){
             case TYPE_APP:
                 {
-                    sscanf(stripped,"t=%ld%*[^a]app=%32s",&lv,tbuf);
-                    tvalue.__set_stringValue(std::string(tbuf));
+                    if(PARSE_STR(appSTR))
+                    {
+                        std::string app = std::string(pvalue); // if NULL app is null
+                        boost::trim(app);
+                        tvalue.__set_stringValue(app);
+                    }
                 }
                 break;
             case TYPE_NGINX:
                 {
-                    sscanf(stripped,"t=%ld%*[^D]D=%d",&lv,&v2);
-                    tvalue.__set_intValue2(v2);
+                    if(PARSE_STR(DSTR))
+                    {
+                        tvalue.__set_intValue2(atoi(pvalue));
+                    }
                 }
                 break;
             case TYPE_APACHE:
                 {
-                    sscanf(stripped,"t=%ld%*[^D]D=%d%*[^i]i=%d%*[^b]b=%d",&lv,&v2,&bv1,&bv2);
-                    tvalue.__set_intValue2(v2);
-                    tvalue.__set_byteValue1((int8_t)bv1);
-                    tvalue.__set_byteValue2((int8_t)bv2);
+                    if(PARSE_STR(iSTR))
+                    {
+                        tvalue.__set_byteValue1((int8_t)atoi(pvalue));
+                    }
+
+                    if (PARSE_STR(bSTR))
+                    {
+                        tvalue.__set_byteValue2((int8_t) atoi(pvalue));
+                    }
+
+                    if(PARSE_STR(DSTR))
+                    {
+                        tvalue.__set_intValue2(atoi(pvalue));
+                    }
+
                 }
                 break;
             default:return ;
             }
-
-
-            tvalue.__set_longValue(lv);
-            tvalue.__set_intValue1(type);
 
             v.__set_longIntIntByteByteStringValue(tvalue);
             tAnnotation.__set_value(v);
