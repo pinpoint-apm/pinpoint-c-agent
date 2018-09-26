@@ -80,6 +80,22 @@ namespace Pinpoint
         }
 
 
+        /// 1504248328.423 1504248328423
+        int64_t dotsec_to_milisec(const char* pvalue)
+        {
+            int64_t milis= 0;
+            milis = atoll(pvalue);
+            milis *=1000;
+
+            const char* pdot = strchr(pvalue,'.');
+            if(pdot != NULL && *(pdot + 1) !='\0')
+            {
+                milis+= atoi(pdot + 1);
+            }
+
+            return milis;
+        }
+
         int32_t safe_strlen(const char* str)
         {
             if (str == NULL)

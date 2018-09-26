@@ -47,6 +47,8 @@ namespace Pinpoint
     {
         extern int64_t double_to_long_bits(double value);
         extern double long_bits_to_double(int64_t value);
+        extern int64_t dotsec_to_milisec(const char*);
+
 
         extern int32_t safe_strlen(const char* str);
 

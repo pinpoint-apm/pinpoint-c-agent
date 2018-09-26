@@ -1346,14 +1346,10 @@ namespace Pinpoint
 #define iSTR    "i="
 #define bSTR    "b="
 
-#define PARSE_STR(name) ((pvalue = strstr(value.c_str(),(name))) != NULL && (pvalue += strlen(name)) != NULL)
+#define PARSE_STR(name) ((pvalue = strstr(value.c_str(),(name))) != NULL && *(pvalue += strlen(name)) != '\0')
 
             const char* pvalue=NULL;
 
-            if(PARSE_STR(tSTR))
-            {
-                tvalue.__set_longValue(atol(pvalue));
-            }
 
             tvalue.__set_intValue1(type);
 
@@ -1367,14 +1363,27 @@ namespace Pinpoint
                         boost::trim(app);
                         tvalue.__set_stringValue(app);
                     }
+
+                    if(PARSE_STR(tSTR))
+                    {
+                      tvalue.__set_longValue(atoll(pvalue));
+                    }
+
                 }
                 break;
             case TYPE_NGINX:
                 {
                     if(PARSE_STR(DSTR))
                     {
-                        tvalue.__set_intValue2(atoi(pvalue));
+                        tvalue.__set_intValue2(dotsec_to_milisec(pvalue));
                     }
+
+
+                    if(PARSE_STR(tSTR))
+                    {
+                      tvalue.__set_longValue(dotsec_to_milisec(pvalue));
+                    }
+
                 }
                 break;
             case TYPE_APACHE:
@@ -1393,6 +1402,14 @@ namespace Pinpoint
                     {
                         tvalue.__set_intValue2(atoi(pvalue));
                     }
+
+                    if(PARSE_STR(tSTR))
+                    {
+                        int64_t v =atoll(pvalue);
+                        v =( v > 1000) ?(v/1000):(v);
+                        tvalue.__set_longValue(v);
+                    }
+
 
                 }
                 break;
