@@ -264,6 +264,358 @@ void TIntStringStringValue::printTo(std::ostream& out) const {
 }
 
 
+TLongIntIntByteByteStringValue::~TLongIntIntByteByteStringValue() throw() {
+}
+
+
+void TLongIntIntByteByteStringValue::__set_longValue(const int64_t val) {
+  this->longValue = val;
+}
+
+void TLongIntIntByteByteStringValue::__set_intValue1(const int32_t val) {
+  this->intValue1 = val;
+}
+
+void TLongIntIntByteByteStringValue::__set_intValue2(const int32_t val) {
+  this->intValue2 = val;
+__isset.intValue2 = true;
+}
+
+void TLongIntIntByteByteStringValue::__set_byteValue1(const int8_t val) {
+  this->byteValue1 = val;
+__isset.byteValue1 = true;
+}
+
+void TLongIntIntByteByteStringValue::__set_byteValue2(const int8_t val) {
+  this->byteValue2 = val;
+__isset.byteValue2 = true;
+}
+
+void TLongIntIntByteByteStringValue::__set_stringValue(const std::string& val) {
+  this->stringValue = val;
+__isset.stringValue = true;
+}
+std::ostream& operator<<(std::ostream& out, const TLongIntIntByteByteStringValue& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+uint32_t TLongIntIntByteByteStringValue::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I64) {
+          xfer += iprot->readI64(this->longValue);
+          this->__isset.longValue = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->intValue1);
+          this->__isset.intValue1 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->intValue2);
+          this->__isset.intValue2 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_BYTE) {
+          xfer += iprot->readByte(this->byteValue1);
+          this->__isset.byteValue1 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 5:
+        if (ftype == ::apache::thrift::protocol::T_BYTE) {
+          xfer += iprot->readByte(this->byteValue2);
+          this->__isset.byteValue2 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 6:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->stringValue);
+          this->__isset.stringValue = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t TLongIntIntByteByteStringValue::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("TLongIntIntByteByteStringValue");
+
+  xfer += oprot->writeFieldBegin("longValue", ::apache::thrift::protocol::T_I64, 1);
+  xfer += oprot->writeI64(this->longValue);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("intValue1", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->intValue1);
+  xfer += oprot->writeFieldEnd();
+
+  if (this->__isset.intValue2) {
+    xfer += oprot->writeFieldBegin("intValue2", ::apache::thrift::protocol::T_I32, 3);
+    xfer += oprot->writeI32(this->intValue2);
+    xfer += oprot->writeFieldEnd();
+  }
+  if (this->__isset.byteValue1) {
+    xfer += oprot->writeFieldBegin("byteValue1", ::apache::thrift::protocol::T_BYTE, 4);
+    xfer += oprot->writeByte(this->byteValue1);
+    xfer += oprot->writeFieldEnd();
+  }
+  if (this->__isset.byteValue2) {
+    xfer += oprot->writeFieldBegin("byteValue2", ::apache::thrift::protocol::T_BYTE, 5);
+    xfer += oprot->writeByte(this->byteValue2);
+    xfer += oprot->writeFieldEnd();
+  }
+  if (this->__isset.stringValue) {
+    xfer += oprot->writeFieldBegin("stringValue", ::apache::thrift::protocol::T_STRING, 6);
+    xfer += oprot->writeString(this->stringValue);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+void swap(TLongIntIntByteByteStringValue &a, TLongIntIntByteByteStringValue &b) {
+  using ::std::swap;
+  swap(a.longValue, b.longValue);
+  swap(a.intValue1, b.intValue1);
+  swap(a.intValue2, b.intValue2);
+  swap(a.byteValue1, b.byteValue1);
+  swap(a.byteValue2, b.byteValue2);
+  swap(a.stringValue, b.stringValue);
+  swap(a.__isset, b.__isset);
+}
+
+TLongIntIntByteByteStringValue::TLongIntIntByteByteStringValue(const TLongIntIntByteByteStringValue& other4) {
+  longValue = other4.longValue;
+  intValue1 = other4.intValue1;
+  intValue2 = other4.intValue2;
+  byteValue1 = other4.byteValue1;
+  byteValue2 = other4.byteValue2;
+  stringValue = other4.stringValue;
+  __isset = other4.__isset;
+}
+TLongIntIntByteByteStringValue& TLongIntIntByteByteStringValue::operator=(const TLongIntIntByteByteStringValue& other5) {
+  longValue = other5.longValue;
+  intValue1 = other5.intValue1;
+  intValue2 = other5.intValue2;
+  byteValue1 = other5.byteValue1;
+  byteValue2 = other5.byteValue2;
+  stringValue = other5.stringValue;
+  __isset = other5.__isset;
+  return *this;
+}
+void TLongIntIntByteByteStringValue::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "TLongIntIntByteByteStringValue(";
+  out << "longValue=" << to_string(longValue);
+  out << ", " << "intValue1=" << to_string(intValue1);
+  out << ", " << "intValue2="; (__isset.intValue2 ? (out << to_string(intValue2)) : (out << "<null>"));
+  out << ", " << "byteValue1="; (__isset.byteValue1 ? (out << to_string(byteValue1)) : (out << "<null>"));
+  out << ", " << "byteValue2="; (__isset.byteValue2 ? (out << to_string(byteValue2)) : (out << "<null>"));
+  out << ", " << "stringValue="; (__isset.stringValue ? (out << to_string(stringValue)) : (out << "<null>"));
+  out << ")";
+}
+
+
+TIntBooleanIntBooleanValue::~TIntBooleanIntBooleanValue() throw() {
+}
+
+
+void TIntBooleanIntBooleanValue::__set_intValue1(const int32_t val) {
+  this->intValue1 = val;
+}
+
+void TIntBooleanIntBooleanValue::__set_boolValue1(const bool val) {
+  this->boolValue1 = val;
+}
+
+void TIntBooleanIntBooleanValue::__set_intValue2(const int32_t val) {
+  this->intValue2 = val;
+}
+
+void TIntBooleanIntBooleanValue::__set_boolValue2(const bool val) {
+  this->boolValue2 = val;
+}
+std::ostream& operator<<(std::ostream& out, const TIntBooleanIntBooleanValue& obj)
+{
+  obj.printTo(out);
+  return out;
+}
+
+
+uint32_t TIntBooleanIntBooleanValue::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  ::apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->intValue1);
+          this->__isset.intValue1 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_BOOL) {
+          xfer += iprot->readBool(this->boolValue1);
+          this->__isset.boolValue1 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 3:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->intValue2);
+          this->__isset.intValue2 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 4:
+        if (ftype == ::apache::thrift::protocol::T_BOOL) {
+          xfer += iprot->readBool(this->boolValue2);
+          this->__isset.boolValue2 = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t TIntBooleanIntBooleanValue::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  ::apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
+  xfer += oprot->writeStructBegin("TIntBooleanIntBooleanValue");
+
+  xfer += oprot->writeFieldBegin("intValue1", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->intValue1);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("boolValue1", ::apache::thrift::protocol::T_BOOL, 2);
+  xfer += oprot->writeBool(this->boolValue1);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("intValue2", ::apache::thrift::protocol::T_I32, 3);
+  xfer += oprot->writeI32(this->intValue2);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("boolValue2", ::apache::thrift::protocol::T_BOOL, 4);
+  xfer += oprot->writeBool(this->boolValue2);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+void swap(TIntBooleanIntBooleanValue &a, TIntBooleanIntBooleanValue &b) {
+  using ::std::swap;
+  swap(a.intValue1, b.intValue1);
+  swap(a.boolValue1, b.boolValue1);
+  swap(a.intValue2, b.intValue2);
+  swap(a.boolValue2, b.boolValue2);
+  swap(a.__isset, b.__isset);
+}
+
+TIntBooleanIntBooleanValue::TIntBooleanIntBooleanValue(const TIntBooleanIntBooleanValue& other6) {
+  intValue1 = other6.intValue1;
+  boolValue1 = other6.boolValue1;
+  intValue2 = other6.intValue2;
+  boolValue2 = other6.boolValue2;
+  __isset = other6.__isset;
+}
+TIntBooleanIntBooleanValue& TIntBooleanIntBooleanValue::operator=(const TIntBooleanIntBooleanValue& other7) {
+  intValue1 = other7.intValue1;
+  boolValue1 = other7.boolValue1;
+  intValue2 = other7.intValue2;
+  boolValue2 = other7.boolValue2;
+  __isset = other7.__isset;
+  return *this;
+}
+void TIntBooleanIntBooleanValue::printTo(std::ostream& out) const {
+  using ::apache::thrift::to_string;
+  out << "TIntBooleanIntBooleanValue(";
+  out << "intValue1=" << to_string(intValue1);
+  out << ", " << "boolValue1=" << to_string(boolValue1);
+  out << ", " << "intValue2=" << to_string(intValue2);
+  out << ", " << "boolValue2=" << to_string(boolValue2);
+  out << ")";
+}
+
+
 TAnnotationValue::~TAnnotationValue() throw() {
 }
 
@@ -316,6 +668,16 @@ __isset.intStringValue = true;
 void TAnnotationValue::__set_intStringStringValue(const TIntStringStringValue& val) {
   this->intStringStringValue = val;
 __isset.intStringStringValue = true;
+}
+
+void TAnnotationValue::__set_longIntIntByteByteStringValue(const TLongIntIntByteByteStringValue& val) {
+  this->longIntIntByteByteStringValue = val;
+__isset.longIntIntByteByteStringValue = true;
+}
+
+void TAnnotationValue::__set_intBooleanIntBooleanValue(const TIntBooleanIntBooleanValue& val) {
+  this->intBooleanIntBooleanValue = val;
+__isset.intBooleanIntBooleanValue = true;
 }
 std::ostream& operator<<(std::ostream& out, const TAnnotationValue& obj)
 {
@@ -425,6 +787,22 @@ uint32_t TAnnotationValue::read(::apache::thrift::protocol::TProtocol* iprot) {
           xfer += iprot->skip(ftype);
         }
         break;
+      case 11:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->longIntIntByteByteStringValue.read(iprot);
+          this->__isset.longIntIntByteByteStringValue = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 12:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->intBooleanIntBooleanValue.read(iprot);
+          this->__isset.intBooleanIntBooleanValue = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
       default:
         xfer += iprot->skip(ftype);
         break;
@@ -492,6 +870,16 @@ uint32_t TAnnotationValue::write(::apache::thrift::protocol::TProtocol* oprot) c
     xfer += this->intStringStringValue.write(oprot);
     xfer += oprot->writeFieldEnd();
   }
+  if (this->__isset.longIntIntByteByteStringValue) {
+    xfer += oprot->writeFieldBegin("longIntIntByteByteStringValue", ::apache::thrift::protocol::T_STRUCT, 11);
+    xfer += this->longIntIntByteByteStringValue.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  if (this->__isset.intBooleanIntBooleanValue) {
+    xfer += oprot->writeFieldBegin("intBooleanIntBooleanValue", ::apache::thrift::protocol::T_STRUCT, 12);
+    xfer += this->intBooleanIntBooleanValue.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
@@ -509,34 +897,40 @@ void swap(TAnnotationValue &a, TAnnotationValue &b) {
   swap(a.byteValue, b.byteValue);
   swap(a.intStringValue, b.intStringValue);
   swap(a.intStringStringValue, b.intStringStringValue);
+  swap(a.longIntIntByteByteStringValue, b.longIntIntByteByteStringValue);
+  swap(a.intBooleanIntBooleanValue, b.intBooleanIntBooleanValue);
   swap(a.__isset, b.__isset);
 }
 
-TAnnotationValue::TAnnotationValue(const TAnnotationValue& other4) {
-  stringValue = other4.stringValue;
-  boolValue = other4.boolValue;
-  intValue = other4.intValue;
-  longValue = other4.longValue;
-  shortValue = other4.shortValue;
-  doubleValue = other4.doubleValue;
-  binaryValue = other4.binaryValue;
-  byteValue = other4.byteValue;
-  intStringValue = other4.intStringValue;
-  intStringStringValue = other4.intStringStringValue;
-  __isset = other4.__isset;
+TAnnotationValue::TAnnotationValue(const TAnnotationValue& other8) {
+  stringValue = other8.stringValue;
+  boolValue = other8.boolValue;
+  intValue = other8.intValue;
+  longValue = other8.longValue;
+  shortValue = other8.shortValue;
+  doubleValue = other8.doubleValue;
+  binaryValue = other8.binaryValue;
+  byteValue = other8.byteValue;
+  intStringValue = other8.intStringValue;
+  intStringStringValue = other8.intStringStringValue;
+  longIntIntByteByteStringValue = other8.longIntIntByteByteStringValue;
+  intBooleanIntBooleanValue = other8.intBooleanIntBooleanValue;
+  __isset = other8.__isset;
 }
-TAnnotationValue& TAnnotationValue::operator=(const TAnnotationValue& other5) {
-  stringValue = other5.stringValue;
-  boolValue = other5.boolValue;
-  intValue = other5.intValue;
-  longValue = other5.longValue;
-  shortValue = other5.shortValue;
-  doubleValue = other5.doubleValue;
-  binaryValue = other5.binaryValue;
-  byteValue = other5.byteValue;
-  intStringValue = other5.intStringValue;
-  intStringStringValue = other5.intStringStringValue;
-  __isset = other5.__isset;
+TAnnotationValue& TAnnotationValue::operator=(const TAnnotationValue& other9) {
+  stringValue = other9.stringValue;
+  boolValue = other9.boolValue;
+  intValue = other9.intValue;
+  longValue = other9.longValue;
+  shortValue = other9.shortValue;
+  doubleValue = other9.doubleValue;
+  binaryValue = other9.binaryValue;
+  byteValue = other9.byteValue;
+  intStringValue = other9.intStringValue;
+  intStringStringValue = other9.intStringStringValue;
+  longIntIntByteByteStringValue = other9.longIntIntByteByteStringValue;
+  intBooleanIntBooleanValue = other9.intBooleanIntBooleanValue;
+  __isset = other9.__isset;
   return *this;
 }
 void TAnnotationValue::printTo(std::ostream& out) const {
@@ -552,6 +946,8 @@ void TAnnotationValue::printTo(std::ostream& out) const {
   out << ", " << "byteValue="; (__isset.byteValue ? (out << to_string(byteValue)) : (out << "<null>"));
   out << ", " << "intStringValue="; (__isset.intStringValue ? (out << to_string(intStringValue)) : (out << "<null>"));
   out << ", " << "intStringStringValue="; (__isset.intStringStringValue ? (out << to_string(intStringStringValue)) : (out << "<null>"));
+  out << ", " << "longIntIntByteByteStringValue="; (__isset.longIntIntByteByteStringValue ? (out << to_string(longIntIntByteByteStringValue)) : (out << "<null>"));
+  out << ", " << "intBooleanIntBooleanValue="; (__isset.intBooleanIntBooleanValue ? (out << to_string(intBooleanIntBooleanValue)) : (out << "<null>"));
   out << ")";
 }
 
@@ -650,15 +1046,15 @@ void swap(TAnnotation &a, TAnnotation &b) {
   swap(a.__isset, b.__isset);
 }
 
-TAnnotation::TAnnotation(const TAnnotation& other6) {
-  key = other6.key;
-  value = other6.value;
-  __isset = other6.__isset;
+TAnnotation::TAnnotation(const TAnnotation& other10) {
+  key = other10.key;
+  value = other10.value;
+  __isset = other10.__isset;
 }
-TAnnotation& TAnnotation::operator=(const TAnnotation& other7) {
-  key = other7.key;
-  value = other7.value;
-  __isset = other7.__isset;
+TAnnotation& TAnnotation::operator=(const TAnnotation& other11) {
+  key = other11.key;
+  value = other11.value;
+  __isset = other11.__isset;
   return *this;
 }
 void TAnnotation::printTo(std::ostream& out) const {
@@ -838,14 +1234,14 @@ uint32_t TSpanEvent::read(::apache::thrift::protocol::TProtocol* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->annotations.clear();
-            uint32_t _size8;
-            ::apache::thrift::protocol::TType _etype11;
-            xfer += iprot->readListBegin(_etype11, _size8);
-            this->annotations.resize(_size8);
-            uint32_t _i12;
-            for (_i12 = 0; _i12 < _size8; ++_i12)
+            uint32_t _size12;
+            ::apache::thrift::protocol::TType _etype15;
+            xfer += iprot->readListBegin(_etype15, _size12);
+            this->annotations.resize(_size12);
+            uint32_t _i16;
+            for (_i16 = 0; _i16 < _size12; ++_i16)
             {
-              xfer += this->annotations[_i12].read(iprot);
+              xfer += this->annotations[_i16].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -971,10 +1367,10 @@ uint32_t TSpanEvent::write(::apache::thrift::protocol::TProtocol* oprot) const {
     xfer += oprot->writeFieldBegin("annotations", ::apache::thrift::protocol::T_LIST, 14);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->annotations.size()));
-      std::vector<TAnnotation> ::const_iterator _iter13;
-      for (_iter13 = this->annotations.begin(); _iter13 != this->annotations.end(); ++_iter13)
+      std::vector<TAnnotation> ::const_iterator _iter17;
+      for (_iter17 = this->annotations.begin(); _iter17 != this->annotations.end(); ++_iter17)
       {
-        xfer += (*_iter13).write(oprot);
+        xfer += (*_iter17).write(oprot);
       }
       xfer += oprot->writeListEnd();
     }
@@ -1046,43 +1442,43 @@ void swap(TSpanEvent &a, TSpanEvent &b) {
   swap(a.__isset, b.__isset);
 }
 
-TSpanEvent::TSpanEvent(const TSpanEvent& other14) {
-  spanId = other14.spanId;
-  sequence = other14.sequence;
-  startElapsed = other14.startElapsed;
-  endElapsed = other14.endElapsed;
-  rpc = other14.rpc;
-  serviceType = other14.serviceType;
-  endPoint = other14.endPoint;
-  annotations = other14.annotations;
-  depth = other14.depth;
-  nextSpanId = other14.nextSpanId;
-  destinationId = other14.destinationId;
-  apiId = other14.apiId;
-  exceptionInfo = other14.exceptionInfo;
-  asyncId = other14.asyncId;
-  nextAsyncId = other14.nextAsyncId;
-  asyncSequence = other14.asyncSequence;
-  __isset = other14.__isset;
+TSpanEvent::TSpanEvent(const TSpanEvent& other18) {
+  spanId = other18.spanId;
+  sequence = other18.sequence;
+  startElapsed = other18.startElapsed;
+  endElapsed = other18.endElapsed;
+  rpc = other18.rpc;
+  serviceType = other18.serviceType;
+  endPoint = other18.endPoint;
+  annotations = other18.annotations;
+  depth = other18.depth;
+  nextSpanId = other18.nextSpanId;
+  destinationId = other18.destinationId;
+  apiId = other18.apiId;
+  exceptionInfo = other18.exceptionInfo;
+  asyncId = other18.asyncId;
+  nextAsyncId = other18.nextAsyncId;
+  asyncSequence = other18.asyncSequence;
+  __isset = other18.__isset;
 }
-TSpanEvent& TSpanEvent::operator=(const TSpanEvent& other15) {
-  spanId = other15.spanId;
-  sequence = other15.sequence;
-  startElapsed = other15.startElapsed;
-  endElapsed = other15.endElapsed;
-  rpc = other15.rpc;
-  serviceType = other15.serviceType;
-  endPoint = other15.endPoint;
-  annotations = other15.annotations;
-  depth = other15.depth;
-  nextSpanId = other15.nextSpanId;
-  destinationId = other15.destinationId;
-  apiId = other15.apiId;
-  exceptionInfo = other15.exceptionInfo;
-  asyncId = other15.asyncId;
-  nextAsyncId = other15.nextAsyncId;
-  asyncSequence = other15.asyncSequence;
-  __isset = other15.__isset;
+TSpanEvent& TSpanEvent::operator=(const TSpanEvent& other19) {
+  spanId = other19.spanId;
+  sequence = other19.sequence;
+  startElapsed = other19.startElapsed;
+  endElapsed = other19.endElapsed;
+  rpc = other19.rpc;
+  serviceType = other19.serviceType;
+  endPoint = other19.endPoint;
+  annotations = other19.annotations;
+  depth = other19.depth;
+  nextSpanId = other19.nextSpanId;
+  destinationId = other19.destinationId;
+  apiId = other19.apiId;
+  exceptionInfo = other19.exceptionInfo;
+  asyncId = other19.asyncId;
+  nextAsyncId = other19.nextAsyncId;
+  asyncSequence = other19.asyncSequence;
+  __isset = other19.__isset;
   return *this;
 }
 void TSpanEvent::printTo(std::ostream& out) const {
@@ -1347,14 +1743,14 @@ uint32_t TSpan::read(::apache::thrift::protocol::TProtocol* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->annotations.clear();
-            uint32_t _size16;
-            ::apache::thrift::protocol::TType _etype19;
-            xfer += iprot->readListBegin(_etype19, _size16);
-            this->annotations.resize(_size16);
-            uint32_t _i20;
-            for (_i20 = 0; _i20 < _size16; ++_i20)
+            uint32_t _size20;
+            ::apache::thrift::protocol::TType _etype23;
+            xfer += iprot->readListBegin(_etype23, _size20);
+            this->annotations.resize(_size20);
+            uint32_t _i24;
+            for (_i24 = 0; _i24 < _size20; ++_i24)
             {
-              xfer += this->annotations[_i20].read(iprot);
+              xfer += this->annotations[_i24].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -1383,14 +1779,14 @@ uint32_t TSpan::read(::apache::thrift::protocol::TProtocol* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->spanEventList.clear();
-            uint32_t _size21;
-            ::apache::thrift::protocol::TType _etype24;
-            xfer += iprot->readListBegin(_etype24, _size21);
-            this->spanEventList.resize(_size21);
-            uint32_t _i25;
-            for (_i25 = 0; _i25 < _size21; ++_i25)
+            uint32_t _size25;
+            ::apache::thrift::protocol::TType _etype28;
+            xfer += iprot->readListBegin(_etype28, _size25);
+            this->spanEventList.resize(_size25);
+            uint32_t _i29;
+            for (_i29 = 0; _i29 < _size25; ++_i29)
             {
-              xfer += this->spanEventList[_i25].read(iprot);
+              xfer += this->spanEventList[_i29].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -1529,10 +1925,10 @@ uint32_t TSpan::write(::apache::thrift::protocol::TProtocol* oprot) const {
     xfer += oprot->writeFieldBegin("annotations", ::apache::thrift::protocol::T_LIST, 15);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->annotations.size()));
-      std::vector<TAnnotation> ::const_iterator _iter26;
-      for (_iter26 = this->annotations.begin(); _iter26 != this->annotations.end(); ++_iter26)
+      std::vector<TAnnotation> ::const_iterator _iter30;
+      for (_iter30 = this->annotations.begin(); _iter30 != this->annotations.end(); ++_iter30)
       {
-        xfer += (*_iter26).write(oprot);
+        xfer += (*_iter30).write(oprot);
       }
       xfer += oprot->writeListEnd();
     }
@@ -1552,10 +1948,10 @@ uint32_t TSpan::write(::apache::thrift::protocol::TProtocol* oprot) const {
     xfer += oprot->writeFieldBegin("spanEventList", ::apache::thrift::protocol::T_LIST, 18);
     {
       xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->spanEventList.size()));
-      std::vector<TSpanEvent> ::const_iterator _iter27;
-      for (_iter27 = this->spanEventList.begin(); _iter27 != this->spanEventList.end(); ++_iter27)
+      std::vector<TSpanEvent> ::const_iterator _iter31;
+      for (_iter31 = this->spanEventList.begin(); _iter31 != this->spanEventList.end(); ++_iter31)
       {
-        xfer += (*_iter27).write(oprot);
+        xfer += (*_iter31).write(oprot);
       }
       xfer += oprot->writeListEnd();
     }
@@ -1629,57 +2025,57 @@ void swap(TSpan &a, TSpan &b) {
   swap(a.__isset, b.__isset);
 }
 
-TSpan::TSpan(const TSpan& other28) {
-  agentId = other28.agentId;
-  applicationName = other28.applicationName;
-  agentStartTime = other28.agentStartTime;
-  transactionId = other28.transactionId;
-  spanId = other28.spanId;
-  parentSpanId = other28.parentSpanId;
-  startTime = other28.startTime;
-  elapsed = other28.elapsed;
-  rpc = other28.rpc;
-  serviceType = other28.serviceType;
-  endPoint = other28.endPoint;
-  remoteAddr = other28.remoteAddr;
-  annotations = other28.annotations;
-  flag = other28.flag;
-  err = other28.err;
-  spanEventList = other28.spanEventList;
-  parentApplicationName = other28.parentApplicationName;
-  parentApplicationType = other28.parentApplicationType;
-  acceptorHost = other28.acceptorHost;
-  apiId = other28.apiId;
-  exceptionInfo = other28.exceptionInfo;
-  applicationServiceType = other28.applicationServiceType;
-  loggingTransactionInfo = other28.loggingTransactionInfo;
-  __isset = other28.__isset;
+TSpan::TSpan(const TSpan& other32) {
+  agentId = other32.agentId;
+  applicationName = other32.applicationName;
+  agentStartTime = other32.agentStartTime;
+  transactionId = other32.transactionId;
+  spanId = other32.spanId;
+  parentSpanId = other32.parentSpanId;
+  startTime = other32.startTime;
+  elapsed = other32.elapsed;
+  rpc = other32.rpc;
+  serviceType = other32.serviceType;
+  endPoint = other32.endPoint;
+  remoteAddr = other32.remoteAddr;
+  annotations = other32.annotations;
+  flag = other32.flag;
+  err = other32.err;
+  spanEventList = other32.spanEventList;
+  parentApplicationName = other32.parentApplicationName;
+  parentApplicationType = other32.parentApplicationType;
+  acceptorHost = other32.acceptorHost;
+  apiId = other32.apiId;
+  exceptionInfo = other32.exceptionInfo;
+  applicationServiceType = other32.applicationServiceType;
+  loggingTransactionInfo = other32.loggingTransactionInfo;
+  __isset = other32.__isset;
 }
-TSpan& TSpan::operator=(const TSpan& other29) {
-  agentId = other29.agentId;
-  applicationName = other29.applicationName;
-  agentStartTime = other29.agentStartTime;
-  transactionId = other29.transactionId;
-  spanId = other29.spanId;
-  parentSpanId = other29.parentSpanId;
-  startTime = other29.startTime;
-  elapsed = other29.elapsed;
-  rpc = other29.rpc;
-  serviceType = other29.serviceType;
-  endPoint = other29.endPoint;
-  remoteAddr = other29.remoteAddr;
-  annotations = other29.annotations;
-  flag = other29.flag;
-  err = other29.err;
-  spanEventList = other29.spanEventList;
-  parentApplicationName = other29.parentApplicationName;
-  parentApplicationType = other29.parentApplicationType;
-  acceptorHost = other29.acceptorHost;
-  apiId = other29.apiId;
-  exceptionInfo = other29.exceptionInfo;
-  applicationServiceType = other29.applicationServiceType;
-  loggingTransactionInfo = other29.loggingTransactionInfo;
-  __isset = other29.__isset;
+TSpan& TSpan::operator=(const TSpan& other33) {
+  agentId = other33.agentId;
+  applicationName = other33.applicationName;
+  agentStartTime = other33.agentStartTime;
+  transactionId = other33.transactionId;
+  spanId = other33.spanId;
+  parentSpanId = other33.parentSpanId;
+  startTime = other33.startTime;
+  elapsed = other33.elapsed;
+  rpc = other33.rpc;
+  serviceType = other33.serviceType;
+  endPoint = other33.endPoint;
+  remoteAddr = other33.remoteAddr;
+  annotations = other33.annotations;
+  flag = other33.flag;
+  err = other33.err;
+  spanEventList = other33.spanEventList;
+  parentApplicationName = other33.parentApplicationName;
+  parentApplicationType = other33.parentApplicationType;
+  acceptorHost = other33.acceptorHost;
+  apiId = other33.apiId;
+  exceptionInfo = other33.exceptionInfo;
+  applicationServiceType = other33.applicationServiceType;
+  loggingTransactionInfo = other33.loggingTransactionInfo;
+  __isset = other33.__isset;
   return *this;
 }
 void TSpan::printTo(std::ostream& out) const {
@@ -1841,14 +2237,14 @@ uint32_t TSpanChunk::read(::apache::thrift::protocol::TProtocol* iprot) {
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->spanEventList.clear();
-            uint32_t _size30;
-            ::apache::thrift::protocol::TType _etype33;
-            xfer += iprot->readListBegin(_etype33, _size30);
-            this->spanEventList.resize(_size30);
-            uint32_t _i34;
-            for (_i34 = 0; _i34 < _size30; ++_i34)
+            uint32_t _size34;
+            ::apache::thrift::protocol::TType _etype37;
+            xfer += iprot->readListBegin(_etype37, _size34);
+            this->spanEventList.resize(_size34);
+            uint32_t _i38;
+            for (_i38 = 0; _i38 < _size34; ++_i38)
             {
-              xfer += this->spanEventList[_i34].read(iprot);
+              xfer += this->spanEventList[_i38].read(iprot);
             }
             xfer += iprot->readListEnd();
           }
@@ -1914,10 +2310,10 @@ uint32_t TSpanChunk::write(::apache::thrift::protocol::TProtocol* oprot) const {
   xfer += oprot->writeFieldBegin("spanEventList", ::apache::thrift::protocol::T_LIST, 10);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRUCT, static_cast<uint32_t>(this->spanEventList.size()));
-    std::vector<TSpanEvent> ::const_iterator _iter35;
-    for (_iter35 = this->spanEventList.begin(); _iter35 != this->spanEventList.end(); ++_iter35)
+    std::vector<TSpanEvent> ::const_iterator _iter39;
+    for (_iter39 = this->spanEventList.begin(); _iter39 != this->spanEventList.end(); ++_iter39)
     {
-      xfer += (*_iter35).write(oprot);
+      xfer += (*_iter39).write(oprot);
     }
     xfer += oprot->writeListEnd();
   }
@@ -1947,29 +2343,29 @@ void swap(TSpanChunk &a, TSpanChunk &b) {
   swap(a.__isset, b.__isset);
 }
 
-TSpanChunk::TSpanChunk(const TSpanChunk& other36) {
-  agentId = other36.agentId;
-  applicationName = other36.applicationName;
-  agentStartTime = other36.agentStartTime;
-  serviceType = other36.serviceType;
-  transactionId = other36.transactionId;
-  spanId = other36.spanId;
-  endPoint = other36.endPoint;
-  spanEventList = other36.spanEventList;
-  applicationServiceType = other36.applicationServiceType;
-  __isset = other36.__isset;
+TSpanChunk::TSpanChunk(const TSpanChunk& other40) {
+  agentId = other40.agentId;
+  applicationName = other40.applicationName;
+  agentStartTime = other40.agentStartTime;
+  serviceType = other40.serviceType;
+  transactionId = other40.transactionId;
+  spanId = other40.spanId;
+  endPoint = other40.endPoint;
+  spanEventList = other40.spanEventList;
+  applicationServiceType = other40.applicationServiceType;
+  __isset = other40.__isset;
 }
-TSpanChunk& TSpanChunk::operator=(const TSpanChunk& other37) {
-  agentId = other37.agentId;
-  applicationName = other37.applicationName;
-  agentStartTime = other37.agentStartTime;
-  serviceType = other37.serviceType;
-  transactionId = other37.transactionId;
-  spanId = other37.spanId;
-  endPoint = other37.endPoint;
-  spanEventList = other37.spanEventList;
-  applicationServiceType = other37.applicationServiceType;
-  __isset = other37.__isset;
+TSpanChunk& TSpanChunk::operator=(const TSpanChunk& other41) {
+  agentId = other41.agentId;
+  applicationName = other41.applicationName;
+  agentStartTime = other41.agentStartTime;
+  serviceType = other41.serviceType;
+  transactionId = other41.transactionId;
+  spanId = other41.spanId;
+  endPoint = other41.endPoint;
+  spanEventList = other41.spanEventList;
+  applicationServiceType = other41.applicationServiceType;
+  __isset = other41.__isset;
   return *this;
 }
 void TSpanChunk::printTo(std::ostream& out) const {
@@ -2114,19 +2510,19 @@ void swap(TStringMetaData &a, TStringMetaData &b) {
   swap(a.__isset, b.__isset);
 }
 
-TStringMetaData::TStringMetaData(const TStringMetaData& other38) {
-  agentId = other38.agentId;
-  agentStartTime = other38.agentStartTime;
-  stringId = other38.stringId;
-  stringValue = other38.stringValue;
-  __isset = other38.__isset;
+TStringMetaData::TStringMetaData(const TStringMetaData& other42) {
+  agentId = other42.agentId;
+  agentStartTime = other42.agentStartTime;
+  stringId = other42.stringId;
+  stringValue = other42.stringValue;
+  __isset = other42.__isset;
 }
-TStringMetaData& TStringMetaData::operator=(const TStringMetaData& other39) {
-  agentId = other39.agentId;
-  agentStartTime = other39.agentStartTime;
-  stringId = other39.stringId;
-  stringValue = other39.stringValue;
-  __isset = other39.__isset;
+TStringMetaData& TStringMetaData::operator=(const TStringMetaData& other43) {
+  agentId = other43.agentId;
+  agentStartTime = other43.agentStartTime;
+  stringId = other43.stringId;
+  stringValue = other43.stringValue;
+  __isset = other43.__isset;
   return *this;
 }
 void TStringMetaData::printTo(std::ostream& out) const {
@@ -2266,19 +2662,19 @@ void swap(TSqlMetaData &a, TSqlMetaData &b) {
   swap(a.__isset, b.__isset);
 }
 
-TSqlMetaData::TSqlMetaData(const TSqlMetaData& other40) {
-  agentId = other40.agentId;
-  agentStartTime = other40.agentStartTime;
-  sqlId = other40.sqlId;
-  sql = other40.sql;
-  __isset = other40.__isset;
+TSqlMetaData::TSqlMetaData(const TSqlMetaData& other44) {
+  agentId = other44.agentId;
+  agentStartTime = other44.agentStartTime;
+  sqlId = other44.sqlId;
+  sql = other44.sql;
+  __isset = other44.__isset;
 }
-TSqlMetaData& TSqlMetaData::operator=(const TSqlMetaData& other41) {
-  agentId = other41.agentId;
-  agentStartTime = other41.agentStartTime;
-  sqlId = other41.sqlId;
-  sql = other41.sql;
-  __isset = other41.__isset;
+TSqlMetaData& TSqlMetaData::operator=(const TSqlMetaData& other45) {
+  agentId = other45.agentId;
+  agentStartTime = other45.agentStartTime;
+  sqlId = other45.sqlId;
+  sql = other45.sql;
+  __isset = other45.__isset;
   return *this;
 }
 void TSqlMetaData::printTo(std::ostream& out) const {
@@ -2456,23 +2852,23 @@ void swap(TApiMetaData &a, TApiMetaData &b) {
   swap(a.__isset, b.__isset);
 }
 
-TApiMetaData::TApiMetaData(const TApiMetaData& other42) {
-  agentId = other42.agentId;
-  agentStartTime = other42.agentStartTime;
-  apiId = other42.apiId;
-  apiInfo = other42.apiInfo;
-  line = other42.line;
-  type = other42.type;
-  __isset = other42.__isset;
+TApiMetaData::TApiMetaData(const TApiMetaData& other46) {
+  agentId = other46.agentId;
+  agentStartTime = other46.agentStartTime;
+  apiId = other46.apiId;
+  apiInfo = other46.apiInfo;
+  line = other46.line;
+  type = other46.type;
+  __isset = other46.__isset;
 }
-TApiMetaData& TApiMetaData::operator=(const TApiMetaData& other43) {
-  agentId = other43.agentId;
-  agentStartTime = other43.agentStartTime;
-  apiId = other43.apiId;
-  apiInfo = other43.apiInfo;
-  line = other43.line;
-  type = other43.type;
-  __isset = other43.__isset;
+TApiMetaData& TApiMetaData::operator=(const TApiMetaData& other47) {
+  agentId = other47.agentId;
+  agentStartTime = other47.agentStartTime;
+  apiId = other47.apiId;
+  apiInfo = other47.apiInfo;
+  line = other47.line;
+  type = other47.type;
+  __isset = other47.__isset;
   return *this;
 }
 void TApiMetaData::printTo(std::ostream& out) const {
@@ -2582,15 +2978,15 @@ void swap(TResult &a, TResult &b) {
   swap(a.__isset, b.__isset);
 }
 
-TResult::TResult(const TResult& other44) {
-  success = other44.success;
-  message = other44.message;
-  __isset = other44.__isset;
+TResult::TResult(const TResult& other48) {
+  success = other48.success;
+  message = other48.message;
+  __isset = other48.__isset;
 }
-TResult& TResult::operator=(const TResult& other45) {
-  success = other45.success;
-  message = other45.message;
-  __isset = other45.__isset;
+TResult& TResult::operator=(const TResult& other49) {
+  success = other49.success;
+  message = other49.message;
+  __isset = other49.__isset;
   return *this;
 }
 void TResult::printTo(std::ostream& out) const {

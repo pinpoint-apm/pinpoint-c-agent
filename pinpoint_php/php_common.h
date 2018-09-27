@@ -30,6 +30,11 @@
 #define PP_SERVER_ADDR "SERVER_ADDR"
 #define PP_SERVER_PORT "SERVER_PORT"
 #define PP_REQUEST_URI "REQUEST_URI"
+
+#define PP_NGINX_PROXY "Pinpoint-ProxyNginx"
+#define PP_APACHE_PROXY "Pinpoint-ProxyApache"
+#define PP_APP_PROXY "Pinpoint-ProxyApp"
+
 #define PP_REDIRECT_STATUS "REDIRECT_STATUS"
 #define MAX_STRING_FROM_ZVAL 1024
 
@@ -55,6 +60,8 @@ extern std::string get_remote_addr();
 extern std::string get_rpc();
 
 extern int32_t get_http_response_status();
+
+extern bool get_proxy_http_header(std::string &,int&);
 
 extern void init_evn_before_agent_real_startup(Pinpoint::Configuration::Config&);
 

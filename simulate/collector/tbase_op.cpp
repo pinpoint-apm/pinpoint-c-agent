@@ -591,7 +591,7 @@ int32_t TBaseOPImp::checkTSpanEvent(const TSpanEvent &answer, const TSpanEvent &
         scanTAnnotation<TAnnotation>(result.annotations);
         return Pinpoint::FAILED;
     }
-
+    
     for(ip1 = answer.annotations.begin(), ip2 = result.annotations.begin();
         ip1 != answer.annotations.end(); ++ip1, ++ip2)
     {
