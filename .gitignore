@@ -18,3 +18,6 @@ CI/
 *.txt
 thirdparty
 cmake-build-debug
+*.gcda
+*.gcno
+core.*

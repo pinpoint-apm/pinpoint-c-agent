@@ -524,8 +524,8 @@ class QuickStartPlugin extends \Pinpoint\Plugin
   public function __construct()
   {
     // you have to call the construct of parent class here
+    pinpoint_log(PINPOINT_DEBUG, "__construct");
     parent::__construct();
-
     $this->addSimpleInterceptor("Redis::connect", -1);
     $this->addSimpleInterceptor("test_simple_interceptor", -1);
     $this->addSimpleInterceptor("Redis::set", -1);
@@ -562,6 +562,7 @@ class QuickStartPlugin extends \Pinpoint\Plugin
     $this->addSimpleInterceptor("test_cumsum4", -1);
     $this->addSimpleInterceptor("test_cumsum_e2", -1);
     $this->addSimpleInterceptor("test_exception3", -1);
+    
   }
 };
 ?>

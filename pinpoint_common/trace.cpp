@@ -20,6 +20,7 @@
 #include "pinpoint_agent_context.h"
 #include "pinpoint_agent.h"
 #include "trace_data_sender.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 using namespace Pinpoint::utils;
@@ -1321,6 +1322,101 @@ namespace Pinpoint
             value.__set_intValue(intValue);
             value.__set_stringValue(s);
             v.__set_intStringValue(value);
+            tAnnotation.__set_value(v);
+        }
+
+
+
+
+        void DefaultAnnotation::addTLongIntIntByteByteStringValue(std::string &value,int type)
+        {
+            TAnnotationValue v;
+            TLongIntIntByteByteStringValue tvalue;
+
+            LOGD("addTLongIntIntByteByteStringValue %d %s ",type,value.c_str());
+
+//           Pinpoint-ProxyApache:  t=991424704447256 D=3775428 i=51 b=49
+//           Pinpoint-ProxyNginx:   t=1504248328.423 D=0.123
+//           Pinpoint-ProxyApp:     t=1502861340 app=foo-bar
+
+
+#define tSTR    "t="
+#define appSTR  "app="
+#define DSTR    "D="
+#define iSTR    "i="
+#define bSTR    "b="
+
+#define PARSE_STR(name) ((pvalue = strstr(value.c_str(),(name))) != NULL && *(pvalue += strlen(name)) != '\0')
+
+            const char* pvalue=NULL;
+
+
+            tvalue.__set_intValue1(type);
+
+
+            switch(type){
+            case TYPE_APP:
+                {
+                    if(PARSE_STR(appSTR))
+                    {
+                        std::string app = std::string(pvalue); // if NULL app is null
+                        boost::trim(app);
+                        tvalue.__set_stringValue(app);
+                    }
+
+                    if(PARSE_STR(tSTR))
+                    {
+                      tvalue.__set_longValue(atoll(pvalue));
+                    }
+
+                }
+                break;
+            case TYPE_NGINX:
+                {
+                    if(PARSE_STR(DSTR))
+                    {
+                        tvalue.__set_intValue2(dotsec_to_milisec(pvalue));
+                    }
+
+
+                    if(PARSE_STR(tSTR))
+                    {
+                      tvalue.__set_longValue(dotsec_to_milisec(pvalue));
+                    }
+
+                }
+                break;
+            case TYPE_APACHE:
+                {
+                    if(PARSE_STR(iSTR))
+                    {
+                        tvalue.__set_byteValue1((int8_t)atoi(pvalue));
+                    }
+
+                    if (PARSE_STR(bSTR))
+                    {
+                        tvalue.__set_byteValue2((int8_t) atoi(pvalue));
+                    }
+
+                    if(PARSE_STR(DSTR))
+                    {
+                        tvalue.__set_intValue2(atoi(pvalue));
+                    }
+
+                    if(PARSE_STR(tSTR))
+                    {
+                        int64_t v =atoll(pvalue);
+                        v =( v > 1000) ?(v/1000):(v);
+                        tvalue.__set_longValue(v);
+                    }
+
+
+                }
+                break;
+            default:return ;
+            }
+
+            v.__set_longIntIntByteByteStringValue(tvalue);
             tAnnotation.__set_value(v);
         }
         //</editor-fold>

@@ -79,6 +79,12 @@ namespace Pinpoint
         API_CORRUPTED = 900
     } ApiType;
 
+    typedef enum{
+        TYPE_APP = 1,
+        TYPE_NGINX = 2,
+        TYPE_APACHE = 3
+    }ProxyHeaderType;
+
     namespace Trace
     {
         /* copy from AnnotationKey.java */
@@ -147,6 +153,7 @@ namespace Pinpoint
             static const int32_t ASYNC = -100;
 
             /* PHP */
+            static const int32_t PROXY_HTTP_HEADER = 300;
             static const int32_t PHP_RETURN = 921;
             static const int32_t PHP_ARGS = 922;
             static const int32_t PHP_DESCRIPTION = 923;

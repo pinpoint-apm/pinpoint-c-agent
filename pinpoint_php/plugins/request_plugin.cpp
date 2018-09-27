@@ -141,6 +141,20 @@ void PhpRequestInterceptor::onEnd(uint64_t callId,
         tracePtr->addAnnotationPtr(annotationPtr);
     }
 
+
+    /// add PROXY_HTTP_HEADER when request end
+    std::string proxyHeader="";
+
+    annotationPtr = Annotation::createAnnotation(AnnotationKey::PROXY_HTTP_HEADER);
+    int type = 0;
+    if (annotationPtr != NULL && get_proxy_http_header(proxyHeader,type))
+    {
+        LOGD("proxy_header %s",proxyHeader.c_str());
+
+        annotationPtr->addTLongIntIntByteByteStringValue(proxyHeader,type);
+        tracePtr->addAnnotationPtr(annotationPtr);
+    }
+
     int32_t err = endTrace();
 
     if (err != SUCCESS)
