@@ -8,6 +8,9 @@ git:
 
 sudo : required
 
+env:
+  - ROOT=$PWD
+
 addons:
   apt:
     sources:
@@ -48,5 +51,5 @@ install:
 - export PINPOINT_CFLAG='-DTEST_SIMULATE'
 
 script:
-- cd simulate/shell
-- echo "run python run_test.py" && python run_test.py ../conf/php_test_conf_ci.json
+# - cd $ROOT/test/ && make && ./pinpoint_unittest && make clean
+- cd $ROOT/simulate/shell && echo "run python run_test.py" && python run_test.py ../conf/php_test_conf_ci.json 

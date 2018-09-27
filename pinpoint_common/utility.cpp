@@ -83,6 +83,11 @@ namespace Pinpoint
         /// 1504248328.423 1504248328423
         int64_t dotsec_to_milisec(const char* pvalue)
         {
+            if(pvalue == NULL)
+            {
+                return 0;
+            }
+
             int64_t milis= 0;
             milis = atoll(pvalue);
             milis *=1000;
@@ -93,7 +98,7 @@ namespace Pinpoint
                 milis+= atoi(pdot + 1);
             }
 
-            return milis;
+            return (milis > 0) ?(milis):(0);
         }
 
         int32_t safe_strlen(const char* str)
