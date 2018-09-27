@@ -757,8 +757,12 @@ int32_t turn_on_aop()
     ori_execute_internal = zend_execute_internal;
     zend_execute_internal = pp_execute_internal;
 
-    old_zend_throw_exception_hook = zend_throw_exception_hook;
-    zend_throw_exception_hook = apm_throw_exception_hook;
+// todo
+    if(PINPOINT_G(ignExp))
+    {
+        old_zend_throw_exception_hook = zend_throw_exception_hook;
+        zend_throw_exception_hook = apm_throw_exception_hook;
+    }
 
     old_error_cb = zend_error_cb;
     zend_error_cb = apm_error_cb;
@@ -782,12 +786,13 @@ int32_t turn_off_aop()
 
     zend_execute_internal = ori_execute_internal;
 
-
-    zend_throw_exception_hook = NULL;
-
     zend_error_cb = old_error_cb;
 
-    zend_throw_exception_hook= old_zend_throw_exception_hook;
+
+    if(PINPOINT_G(ignExp))
+    {
+        zend_throw_exception_hook = old_zend_throw_exception_hook;
+    }
 
     return SUCCESS;
 }

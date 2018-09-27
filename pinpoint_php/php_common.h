@@ -173,5 +173,4 @@ public:
 
 };
 
-extern AgentConf g_AgentConf;
 #endif

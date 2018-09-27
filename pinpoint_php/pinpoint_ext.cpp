@@ -104,7 +104,7 @@ PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("pinpoint_agent.config_full_name", "", PHP_INI_SYSTEM,
         OnUpdateString,configFileName,zend_pinpoint_globals,pinpoint_globals)
 
-STD_PHP_INI_ENTRY("pinpoint_agent.suppress_exp",  "0", PHP_INI_SYSTEM,
+STD_PHP_INI_ENTRY("pinpoint_agent.trace_excption",  "false", PHP_INI_SYSTEM,
         OnUpdateBool, ignExp, zend_pinpoint_globals, pinpoint_globals)
 
 PHP_INI_END()
@@ -444,15 +444,12 @@ static void load_php_interface_plugins()
 
     int orig_start_lineno = CG(start_lineno);
     CG(start_lineno) = 0;
-//    zend_try{
-    err = zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, prepend_file_p);
-    if (err != SUCCESS)
-    {
-        LOGE("register php interface plugins failed.");
-    }
-//    } zend_catch{
+    zend_try{
+        zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, prepend_file_p);
+    } zend_catch{
 //        LOGE("zend_execute_scripts failed. Maybe your plugins have syntax error. Please see PHP log to check the error.");
-//    } zend_end_try();
+    } zend_end_try();
+
     CG(start_lineno) = orig_start_lineno;
 }
 
