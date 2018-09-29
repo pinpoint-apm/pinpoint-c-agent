@@ -40,7 +40,7 @@ class curl_exec_interceptor extends \Pinpoint\Interceptor
 
                 $event->setNextSpanId($spanid);
             }
-            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,json_encode(curl_getinfo($args[0],CURLINFO_EFFECTIVE_URL));
+            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,json_encode(curl_getinfo($args[0],CURLINFO_EFFECTIVE_URL)));
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_REMOTE);
