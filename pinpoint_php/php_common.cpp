@@ -280,7 +280,7 @@ int32_t get_http_response_status()
     try
     {
        std::string codeStr = getNameFromHeaderMap(PP_REDIRECT_STATUS);
-       return (codeStr== "" ) ? (sapi_globals.sapi_headers.http_response_code ):(boost::lexical_cast<int32_t>(codeStr));
+       return (codeStr== "" ) ? (SG(sapi_headers).http_response_code ):(boost::lexical_cast<int32_t>(codeStr));
     }
     catch (...)
     {
