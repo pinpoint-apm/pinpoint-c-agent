@@ -55,7 +55,7 @@ typedef struct _per_reqeust_state_{
 }PRS;
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint)
-    zend_bool ignExp;
+    zend_bool trace_excption;
     char* configFileName;
     PRS prs;// must reset in every request,valid in request
 ZEND_END_MODULE_GLOBALS(pinpoint)

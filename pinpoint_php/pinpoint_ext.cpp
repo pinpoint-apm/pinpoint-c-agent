@@ -105,7 +105,7 @@ STD_PHP_INI_ENTRY("pinpoint_agent.config_full_name", "", PHP_INI_SYSTEM,
         OnUpdateString,configFileName,zend_pinpoint_globals,pinpoint_globals)
 
 STD_PHP_INI_ENTRY("pinpoint_agent.trace_excption",  "false", PHP_INI_SYSTEM,
-        OnUpdateBool, ignExp, zend_pinpoint_globals, pinpoint_globals)
+        OnUpdateBool, trace_excption, zend_pinpoint_globals, pinpoint_globals)
 
 PHP_INI_END()
 
@@ -120,7 +120,7 @@ boost::shared_ptr<boost::thread> agent_start_thread_ptr;
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
 {
     _pinpoint_globals->configFileName = NULL;
-    _pinpoint_globals->ignExp= 1;
+    _pinpoint_globals->trace_excption= 1;
 }
 
 PHP_MINIT_FUNCTION(pinpoint)
