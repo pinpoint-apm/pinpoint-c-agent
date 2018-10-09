@@ -653,9 +653,16 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
 
     do
     {
+        /// fatal error, avoiding calling multiple times
         if(PINPOINT_G(prs).fatal_error_catched == true)
         {
-            // error had been catched
+            // error had been caught
+            break;
+        }
+
+        // keep the same with error_reporting
+        if(!(EG(error_reporting) & type) )
+        {
             break;
         }
 
@@ -663,13 +670,14 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
         {
             break;
         }
+
         Pinpoint::Plugin::InterceptorPtr interceptorPtr =
             aop->getRequestInterceptorPtr();
         if (interceptorPtr == NULL)
         {
             break;
         }
-     if (type & (E_ERROR
+        if(type & (E_ERROR
                 |E_PARSE
                 |E_CORE_ERROR
                 |E_COMPILE_ERROR
@@ -757,8 +765,8 @@ int32_t turn_on_aop()
     ori_execute_internal = zend_execute_internal;
     zend_execute_internal = pp_execute_internal;
 
-// todo
-    if(PINPOINT_G(trace_excption))
+
+    if(PINPOINT_G(trace_caught_exception))
     {
         old_zend_throw_exception_hook = zend_throw_exception_hook;
         zend_throw_exception_hook = apm_throw_exception_hook;
@@ -789,7 +797,7 @@ int32_t turn_off_aop()
     zend_error_cb = old_error_cb;
 
 
-    if(PINPOINT_G(trace_excption))
+    if(PINPOINT_G(trace_caught_exception))
     {
         zend_throw_exception_hook = old_zend_throw_exception_hook;
     }

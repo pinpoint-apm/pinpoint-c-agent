@@ -104,8 +104,8 @@ PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("pinpoint_agent.config_full_name", "", PHP_INI_SYSTEM,
         OnUpdateString,configFileName,zend_pinpoint_globals,pinpoint_globals)
 
-STD_PHP_INI_ENTRY("pinpoint_agent.trace_excption",  "false", PHP_INI_SYSTEM,
-        OnUpdateBool, trace_excption, zend_pinpoint_globals, pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint_agent.trace_caught_exception",  "false", PHP_INI_SYSTEM,
+        OnUpdateBool, trace_caught_exception, zend_pinpoint_globals, pinpoint_globals)
 
 PHP_INI_END()
 
@@ -120,7 +120,7 @@ boost::shared_ptr<boost::thread> agent_start_thread_ptr;
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
 {
     _pinpoint_globals->configFileName = NULL;
-    _pinpoint_globals->trace_excption= 1;
+    _pinpoint_globals->trace_caught_exception= 1;
 }
 
 PHP_MINIT_FUNCTION(pinpoint)
@@ -195,12 +195,12 @@ PHP_MINIT_FUNCTION(pinpoint)
     }
 
     /* constant */
-    REGISTER_LONG_CONSTANT("PINPOINT_PHP_SERVER_TYPE", Pinpoint::PHP, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("PINPOINT_PHP_RPC_TYPE", Pinpoint::PHP_METHOD_CALL, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("PINPOINT_PHP_REMOTE", Pinpoint::PHP_REMOTE_METHOD, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PINPOINT_PHP_SERVER_TYPE", (long)Pinpoint::PHP, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PINPOINT_PHP_RPC_TYPE", (long)Pinpoint::PHP_METHOD_CALL, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PINPOINT_PHP_REMOTE", (long)Pinpoint::PHP_REMOTE_METHOD, CONST_CS | CONST_PERSISTENT);
 
-    REGISTER_LONG_CONSTANT("PINPOINT_ANNOTATION_RETURN", Pinpoint::Trace::AnnotationKey::RETURN_DATA, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("PINPOINT_ANNOTATION_ARGS", Pinpoint::Trace::AnnotationKey::ARGS0, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PINPOINT_ANNOTATION_RETURN", (long)Pinpoint::Trace::AnnotationKey::RETURN_DATA, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PINPOINT_ANNOTATION_ARGS", (long)Pinpoint::Trace::AnnotationKey::ARGS0, CONST_CS | CONST_PERSISTENT);
 
     REGISTER_LONG_CONSTANT("PINPOINT_DEBUG", PP_LOG_DEBUG, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("PINPOINT_INFO", PP_LOG_INFO, CONST_CS | CONST_PERSISTENT);
