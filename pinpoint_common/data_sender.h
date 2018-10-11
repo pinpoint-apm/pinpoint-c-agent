@@ -19,8 +19,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-#define __STDC_LIMIT_MACROS 
-#include <stdint.h>
+#include "stdint.h"
 #include "executor.h"
 #include "utility.h"
 
@@ -172,25 +171,13 @@ namespace Pinpoint
 
             virtual int32_t getSocketId() = 0;
 
-            virtual void   init() = 0;
-
-            virtual void   stop()=0;
-
         protected:
-            DataSender(const std::string &ip, uint32_t port) :
-            	m_ip(ip),
-				m_port(port),
-				nstate(E_CLOSE)
-            {};
+            DataSender(const std::string &ip, uint32_t port) : m_ip(ip), m_port(port)
+            { };
 
             std::string m_ip;
             uint32_t m_port;
 
-            ///E_EXIT force close the  connection
-            ///E_CLOSE initialized state
-            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} ;
-
-            E_NState nstate;
         private:
             explicit DataSender(const DataSender&);
             DataSender& operator=(const DataSender&);
@@ -212,10 +199,6 @@ namespace Pinpoint
 
             virtual int32_t getSocketId();
 
-            virtual void stop();
-
-            virtual void init();
-
             static const uint32_t MAX_REFRESH_MSEC = 100;
             static const uint32_t UDP_BUFFER_LEN = 1000;
             static const uint32_t MAX_GET_WAIT_MSEC = 100;
@@ -228,7 +211,12 @@ namespace Pinpoint
 
             boost::atomic<uint32_t> m_sendCount;
 
-            void io_send_udp_packet(const boost::system::error_code & ec);
+            void init();
+//            void executeTask();
+//
+//            void stopTask();
+
+            void send_udp_packet();
 
         };
     }

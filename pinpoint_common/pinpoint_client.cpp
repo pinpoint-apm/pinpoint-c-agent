@@ -195,6 +195,16 @@ namespace Pinpoint
             }
         }
 
+        void PinpointClient::write_timer_event(const boost::system::error_code& /*e*/)
+        {
+            start_write();
+        }
+
+        void PinpointClient::connect_timer_event(const boost::system::error_code& /*e*/)
+        {
+            try_connect();
+        }
+
         void PinpointClient::try_connect()
         {
 
@@ -220,10 +230,6 @@ namespace Pinpoint
                 socket_.async_connect(endpoint_,
                                       boost::bind(&PinpointClient::handle_connect_event,
                                                   this, _1));
-
-            	timer_.expires_from_now(boost::posix_time::seconds(interval));
-            	timer_.async_wait(boost::bind(&PinpointClient::connect_timeout,this,_1));
-
                 nstate = E_CONNECTING;
 
             }
@@ -235,29 +241,38 @@ namespace Pinpoint
 
         }
 
-        void PinpointClient::connect_timeout(const boost::system::error_code &ec)
-        {
-        	if( nstate != E_CONNECTED)
-        	{
-        		handle_error(ec);
-        	}
-        }
 
         void PinpointClient::handle_error(const boost::system::error_code &ec)
         {
             // close current socket
+
+            if(nstate == E_CONNECTING )
+            {
+                return ;
+            }
+
             this->socket_.close();
-            nstate = E_CLOSE;
-            try_connect();
+
+            // retry + timer
+            timer_.cancel();
+            timer_.expires_from_now(boost::posix_time::seconds(interval));
+            timer_.async_wait(boost::bind(&PinpointClient::connect_timer_event,this,_1));
+            LOGE("connect %s:%u timeout:%d failed try again",endpoint_.address().to_string().c_str(), endpoint_.port(),interval);
+            nstate = E_CONNECTING;
+
         }
 
         void PinpointClient::handle_connect_event(const boost::system::error_code &ec)
         {
 
-            if (!ec)
+            if (ec)
+            {
+                handle_error(ec);
+            }
+            else
             {
                 state.toConnected();
-                LOGI(" Connect [%s:%d] success.",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
+                LOGI(" Connect success.");
                 state.toRunWithoutHandshake();
                 try
                 {
@@ -404,10 +419,10 @@ namespace Pinpoint
         void PinpointClient::start_write()
         {
 
-            if (nstate != E_CONNECTED )
+
+            if (nstate != E_CONNECTED)
             {
-                // no needs to cancel write_timer_event, timer is  connect_timer_event
-            	LOGD("connection not ready, wait for next time");
+                // no needs to cancel write_timer_event, timer is   connect_timer_event
                 return;
             }
 
@@ -446,9 +461,9 @@ namespace Pinpoint
         void PinpointClient::handle_write(const boost::system::error_code &error, PacketPtr& packetPtr)
         {
 
+
             if (!error)
             {
-            	LOGD("send [%d bytes] to collector",packetPtr->getCodedData().length());
                 start_write();
             }
             else
@@ -471,10 +486,11 @@ namespace Pinpoint
                 {
                     LOGW("connect broken: %s:%d", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
                     handle_error(error);
+
                 }
                 else
                 {
-                    LOGE("handle_write: %s ",error.message().c_str());
+                    LOGI("handle_write: %s ",error.message().c_str());
                     assert(0);
                 }
             }
@@ -572,6 +588,7 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_type error: err=%s", error.message().c_str());
+
                 handle_error(error);
             }
         }
@@ -642,8 +659,6 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_header error: err=%s", error.message().c_str());
-                handle_error(error);
-
             }
         }
 
@@ -699,7 +714,6 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_header error: err=%s", error.message().c_str());
-                handle_error(error);
             }
         }
 
@@ -846,13 +860,11 @@ namespace Pinpoint
             return SUCCESS;
         }
 
-        void PinpointClient::stop()
+        void PinpointClient::stopTask()
         {
-        	state.toClosedByClient();
-        	socket_.cancel();
+//            io_.stop();
+            state.toClosedByClient();
             socket_.close();
-            LOGD("[%s:%d] connection closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
-            nstate = E_EXIT;
         }
 
         int32_t PinpointClient::getSocketId()

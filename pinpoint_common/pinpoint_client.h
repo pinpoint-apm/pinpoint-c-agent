@@ -16,8 +16,7 @@
 #ifndef PINPOINT_CLIENT_H
 #define PINPOINT_CLIENT_H
 
-#define __STDC_LIMIT_MACROS 
-#include <stdint.h>
+#include "stdint.h"
 #include "string"
 #include "pinpoint_api.h"
 #include "executor.h"
@@ -298,9 +297,7 @@ namespace Pinpoint
             boost::asio::ip::tcp::socket& getSocket() { return this->socket_; };
 #endif
 
-            virtual void init();
-
-            virtual void stop();
+            void init();
 
         protected:
             static const uint32_t TCP_RESPONSE_HEADER_LEN = 2;
@@ -315,6 +312,8 @@ namespace Pinpoint
 #endif
             // not thread safe
             int32_t sendPacket_(boost::shared_ptr<Packet> &packetPtr, int32_t timeout);
+
+            virtual void stopTask();
 
         private:
             PinpointClient(const PinpointClient&);
@@ -342,12 +341,12 @@ namespace Pinpoint
 
             void start_connect_timer();
             void try_connect();
+            void connect_timer_event(const boost::system::error_code& /*e*/);
+            void write_timer_event(const boost::system::error_code& /*e*/);
 
             void handle_connect_event(const boost::system::error_code &ec);
 
             void handle_error(const boost::system::error_code &error);
-
-            void connect_timeout(const boost::system::error_code &error);
 
             void start_write();
             void handle_write(const boost::system::error_code& error, PacketPtr& packetPtr);
@@ -363,6 +362,10 @@ namespace Pinpoint
             int32_t requestResponseHandler();
 
             void doRequest(PacketPtr& packetPtr);
+
+            typedef enum {E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} E_NState;
+
+            E_NState nstate;
 
         };
         typedef boost::shared_ptr<PinpointClient> PinpointClientPtr;
