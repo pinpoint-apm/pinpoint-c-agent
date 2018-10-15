@@ -417,9 +417,9 @@ namespace Pinpoint
 
             int32_t err = SUCCESS;
 
-            boost::dynamic_pointer_cast<Executor>(pinpointClientPtr)->stop();
-            boost::dynamic_pointer_cast<Executor>(statUdpSender)->stop();
-            boost::dynamic_pointer_cast<Executor>(spanUdpSender)->stop();
+//            boost::dynamic_pointer_cast<Executor>(pinpointClientPtr)->stop();
+//            boost::dynamic_pointer_cast<Executor>(statUdpSender)->stop();
+//            boost::dynamic_pointer_cast<Executor>(spanUdpSender)->stop();
             // todo
 //            scheduledExecutor->stop();
 
