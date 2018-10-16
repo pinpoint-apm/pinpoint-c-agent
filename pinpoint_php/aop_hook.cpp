@@ -760,7 +760,7 @@ int32_t turn_on_aop()
     zend_execute_internal = pp_execute_internal;
 
 
-    if(PINPOINT_G(trace_caught_exception))
+    if(PINPOINT_G(trace_exception))
     {
         old_zend_throw_exception_hook = zend_throw_exception_hook;
         zend_throw_exception_hook = apm_throw_exception_hook;
@@ -791,7 +791,7 @@ int32_t turn_off_aop()
     zend_error_cb = old_error_cb;
 
 
-    if(PINPOINT_G(trace_caught_exception))
+    if(PINPOINT_G(trace_exception))
     {
         zend_throw_exception_hook = old_zend_throw_exception_hook;
     }
