@@ -478,11 +478,14 @@ namespace Pinpoint
         };
     }
 }
-#define PP_LOG_DEBUG      4
+#define PP_LOG_DEBUG      5
+#define PP_LOG_TRACE      4
 #define PP_LOG_INFO       3
 #define PP_LOG_WARNING    2
 #define PP_LOG_ERROR      1
+
 #define LOGD(format, ...)  Pinpoint::log::printf_to_stderr_ex(PP_LOG_DEBUG,   __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
+#define LOGT(format, ...)   Pinpoint::log::printf_to_stderr_ex(PP_LOG_TRACE,    __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
 #define LOGI(format, ...)   Pinpoint::log::printf_to_stderr_ex(PP_LOG_INFO,    __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
 #define LOGW(format, ...)   Pinpoint::log::printf_to_stderr_ex(PP_LOG_WARNING, __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
 #define LOGE(format, ...)  Pinpoint::log::printf_to_stderr_ex(PP_LOG_ERROR,   __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));

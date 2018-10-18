@@ -387,7 +387,7 @@ static void start_pinpoint_agent()
 
     pluginPtrVector.insert(pluginPtrVector.end(), v1.begin(), v1.end());
 
-    LOGI("c++ plugin count=%d", v1.size());
+    LOGT("c++ plugin count=%d", v1.size());
 
     PhpInterfacePluginManager* interfacePluginManager = PhpInterfacePluginManager::getManager();
     PINPOINT_ASSERT (interfacePluginManager != NULL);
@@ -395,9 +395,9 @@ static void start_pinpoint_agent()
     PluginPtrVector& v2 = interfacePluginManager->getAllPlugins();
 
     pluginPtrVector.insert(pluginPtrVector.end(), v2.begin(), v2.end());
-    LOGI("php plugin count=%d", v2.size());
+    LOGT("php plugin count=%d", v2.size());
 
-    LOGI("all plugins count = %d", pluginPtrVector.size());
+    LOGT("all plugins count = %d", pluginPtrVector.size());
 
     err = agentPtr->init(pluginPtrVector);
     if (err != SUCCESS)

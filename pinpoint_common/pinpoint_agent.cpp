@@ -497,7 +497,7 @@ namespace Pinpoint
             {
                 Plugin::PluginPtr& pluginPtr = (*ip);
 
-                LOGI("plugin=%s", pluginPtr->getName().c_str());
+                LOGT("plugin=%s", pluginPtr->getName().c_str());
                 if (this->args->pluginIncludeIsSet)
                 {
                     if (includeSet.find(pluginPtr->getName()) == includeSet.end())
