@@ -279,10 +279,4 @@ typedef struct _pt_frame_t{
     char fullname[NAME_LEN*2];                /* class name + function name*/
 }pt_frame_t;
 
-typedef struct _agent_config{
-    // 1 yes suppress
-    // 0 show the exception to user
-    int ignExp; //suppress exception in intercepter
-}AgentConf;
-
 #endif /* PINPOINT_PHP_PHP7_PHP_DEFINE_WAPPER_H_ */

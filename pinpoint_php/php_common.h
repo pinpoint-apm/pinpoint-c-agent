@@ -42,6 +42,8 @@
 #define TER_MIN(a,b,c) (((a<b)&&(a<c))?(a):((b>c)?(c):(b)))
 #define MAX_ARRAY_ELEMENT 10
 
+#define AGENT_ERROR  (E_ERROR|E_PARSE|E_CORE_ERROR|E_COMPILE_ERROR|E_USER_ERROR|E_RECOVERABLE_ERROR)
+#define AGENT_WARNG  (E_WARNING|E_NOTICE|E_CORE_WARNING|E_COMPILE_WARNING|E_USER_WARNING|E_USER_NOTICE|E_DEPRECATED|E_STRICT|E_USER_DEPRECATED)
 
 using Pinpoint::Naming::eName;
 
@@ -173,5 +175,4 @@ public:
 
 };
 
-extern AgentConf g_AgentConf;
 #endif
