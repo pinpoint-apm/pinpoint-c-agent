@@ -297,7 +297,9 @@ namespace Pinpoint
             boost::asio::ip::tcp::socket& getSocket() { return this->socket_; };
 #endif
 
-            void init();
+            virtual void init();
+
+            virtual void stop();
 
         protected:
             static const uint32_t TCP_RESPONSE_HEADER_LEN = 2;
@@ -312,8 +314,6 @@ namespace Pinpoint
 #endif
             // not thread safe
             int32_t sendPacket_(boost::shared_ptr<Packet> &packetPtr, int32_t timeout);
-
-            virtual void stopTask();
 
         private:
             PinpointClient(const PinpointClient&);

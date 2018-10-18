@@ -150,7 +150,6 @@ namespace Pinpoint
 
 
         //<editor-fold desc="PinpointAgent">
-
         PinpointAgent::PinpointAgent()
         {
             status = (volatile AgentStatus)AGENT_CREATED;
@@ -163,7 +162,7 @@ namespace Pinpoint
 
         PinpointAgent::~PinpointAgent()
         {
-            stop();
+
         }
 
         int32_t PinpointAgent::sendTrace(const Trace::TracePtr &tracePtr)
@@ -267,10 +266,11 @@ namespace Pinpoint
                 statUdpSender.reset(new UdpDataSender(TaskDispatcher::getInstance().getAsio(),"collectorStatSender",
                                                       args->collectorStatIp,
                                                       args->collectorStatPort));
-
+                statUdpSender->init();
                 spanUdpSender.reset(new UdpDataSender(TaskDispatcher::getInstance().getAsio(),"collectorSpanSender",
                                                       args->collectorSpanIp,
                                                       args->collectorSpanPort));
+                spanUdpSender->init();
 
                 /* init scheduledExecutor */
                 scheduledExecutor.reset(new ScheduledExecutor(TaskDispatcher::getInstance().getAsio(),"scheduledExecutor"));
@@ -378,19 +378,11 @@ namespace Pinpoint
             try
             {
 
-//#if 0
                 agentDataSender->start();
                 agentMonitorSender->start();
                 traceDataSender->start();
                 apiDataSender->start();
                 stringDataSender->start();
-
-//                boost::dynamic_pointer_cast<Executor>(pinpointClientPtr)->start();
-//                boost::dynamic_pointer_cast<Executor>(statUdpSender)->start();
-//                boost::dynamic_pointer_cast<Executor>(spanUdpSender)->start();
-
-//                scheduledExecutor->start();
-//#endif
 
                 TaskDispatcher::getInstance().start();
 
@@ -407,6 +399,17 @@ namespace Pinpoint
 
         }
 
+
+        void PinpointAgent::asyStopAllTask()
+        {
+        	// todo
+//        	stringDataSender->st
+            pinpointClientPtr->stop();
+            spanUdpSender->stop();
+            statUdpSender->stop();
+
+        }
+
         int32_t PinpointAgent::stop()
         {
             if (this->status != AGENT_STARTED)
@@ -417,11 +420,20 @@ namespace Pinpoint
 
             int32_t err = SUCCESS;
 
-//            boost::dynamic_pointer_cast<Executor>(pinpointClientPtr)->stop();
-//            boost::dynamic_pointer_cast<Executor>(statUdpSender)->stop();
-//            boost::dynamic_pointer_cast<Executor>(spanUdpSender)->stop();
-            // todo
-//            scheduledExecutor->stop();
+#if 0
+
+			agentDataSender->start();
+			agentMonitorSender->start();
+			traceDataSender->start();
+			apiDataSender->start();
+			stringDataSender->start();
+#endif
+
+
+            TaskDispatcher::getInstance().postEvent(boost::bind(&PinpointAgent::asyStopAllTask,this));
+
+            // as the background thread exit
+            TaskDispatcher::getInstance().stop();
 
             status = (volatile AgentStatus)AGENT_STOPPED;
 

@@ -171,6 +171,10 @@ namespace Pinpoint
 
             virtual int32_t getSocketId() = 0;
 
+            virtual void   init() = 0;
+
+            virtual void   stop()=0;
+
         protected:
             DataSender(const std::string &ip, uint32_t port) : m_ip(ip), m_port(port)
             { };
@@ -199,6 +203,10 @@ namespace Pinpoint
 
             virtual int32_t getSocketId();
 
+            virtual void stop();
+
+            virtual void init();
+
             static const uint32_t MAX_REFRESH_MSEC = 100;
             static const uint32_t UDP_BUFFER_LEN = 1000;
             static const uint32_t MAX_GET_WAIT_MSEC = 100;
@@ -211,10 +219,7 @@ namespace Pinpoint
 
             boost::atomic<uint32_t> m_sendCount;
 
-            void init();
-//            void executeTask();
-//
-//            void stopTask();
+
 
             void send_udp_packet();
 

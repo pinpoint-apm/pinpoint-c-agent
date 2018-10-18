@@ -52,35 +52,12 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint);
 
 typedef struct _per_reqeust_state_{
     zend_bool fatal_error_catched;
-    // show the plugins call depth
-    int stackDepth;
 }PRS;
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint)
-    zend_bool module_enable;
     zend_bool trace_exception;
 	zend_bool unittest;
-	zend_bool proxy_headers;
-//    char* configFileName;
-    char* pluginsRootPath;
-    char pluginsAbsolutePath[MAXPATHLEN];
-    char* entryFilename;
-    char* logFileRootPath;
-    char* PPLogLevel;
-    char* agentID;
-    char* applicationName;
-    char* collectorSpanIp;
-    long CollectorSpanPort;
-    char* CollectorStatIp;
-    long CollectorStatPort;
-    char* CollectorTcpIp;
-    long CollectorTcpPort;
-    char* PluginExclude;
-    char* PluginInclude;
-    char* TraceLimit ;
-    long SkipTraceTime;
-    long reconInterval;
-    char* ApiTableFile;
+    char* configFileName;
     PRS prs;// must reset in every request,valid in request
 ZEND_END_MODULE_GLOBALS(pinpoint)
 

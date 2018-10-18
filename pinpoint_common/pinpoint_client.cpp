@@ -860,10 +860,10 @@ namespace Pinpoint
             return SUCCESS;
         }
 
-        void PinpointClient::stopTask()
+        void PinpointClient::stop()
         {
-//            io_.stop();
-            state.toClosedByClient();
+        	state.toClosedByClient();
+        	socket_.cancel();
             socket_.close();
         }
 

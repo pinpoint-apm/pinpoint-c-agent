@@ -16,7 +16,6 @@
 #ifndef PINPOINT_COMMON_AGENT_H
 #define PINPOINT_COMMON_AGENT_H
 
-#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 #include "executor.h"
 #include "data_sender.h"
@@ -71,16 +70,13 @@ namespace Pinpoint
             friend class Agent;
             int32_t preInit(AgentType agentType,
                             const AgentFunction& agentFunction,
-                            struct AgentConfigArgs& conf);
+                            Configuration::Config& conf);
             int32_t init(Plugin::PluginPtrVector& pluginPtrVector);
 
             int32_t start();
             int32_t stop();
             int32_t addApi(const char* api_info, int32_t line, ApiType type);
             int32_t addString(const std::string& stringValue);
-
-            int32_t updatePlugins(Plugin::PluginPtrVector& pluginPtrVector);
-
             void     asyStopAllTask();
             volatile AgentStatus getAgentStatus() const;
 
@@ -92,6 +88,7 @@ namespace Pinpoint
         private:
             PinpointAgent();
             static int16_t detectServiceType(AgentType agentType);
+            int32_t registerPlugins(Plugin::PluginPtrVector& pluginPtrVector);
             static int32_t addPredefinedType();
             AgentFunction agentFunction;
             boost::shared_ptr<ScheduledExecutor> scheduledExecutor;

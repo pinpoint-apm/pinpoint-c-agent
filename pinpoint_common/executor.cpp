@@ -335,13 +335,14 @@ namespace Pinpoint
 
         void TaskDispatcher::start()
         {
-
+        	boost::mutex::scoped_lock lock(thrMutex);
         	// 1. start the background thread
         	pth = new boost::thread(&TaskDispatcher::run,this);
         	// 2. wait thread running success
-        	boost::mutex::scoped_lock lock(thrMutex);
-        	thrCon.wait(lock);
-        	lock.unlock();
+        	while(thrStatus != E_Running ){
+        		thrCon.wait(lock);
+        	}
+
         }
 
         void TaskDispatcher::stop()
@@ -350,14 +351,15 @@ namespace Pinpoint
         	io.stop();
         	// 2. wait thread stop
         	pth->join();
+        	thrStatus = E_Stop;
 	    }
 
     	void TaskDispatcher::run()
 		{
     		boost::mutex::scoped_lock lock(thrMutex);
+    		thrStatus = E_Running;
     		thrCon.notify_one(); //thread is working
     	    lock.unlock();
-
 			try
 			{
 				io.run();
@@ -369,6 +371,11 @@ namespace Pinpoint
 			LOGW("background task finished");
 
 		}
+
+    	void TaskDispatcher::postEvent(const boost::function<void(void)> fun)
+    	{
+    		io.post(fun);
+    	}
 
     }
 }

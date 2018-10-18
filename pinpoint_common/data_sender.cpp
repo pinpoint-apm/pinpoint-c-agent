@@ -38,12 +38,18 @@ namespace Pinpoint
 				  timer_(agentIo),
 				  m_sendCount(0)
         {
-        	init();
+
         }
 
         UdpDataSender::~UdpDataSender()
         {
 
+        }
+
+        void UdpDataSender::stop()
+        {
+        	timer_.cancel();
+        	socket_.close();
         }
 
         void UdpDataSender::init()
@@ -70,11 +76,6 @@ namespace Pinpoint
             timer_.expires_from_now(boost::posix_time::milliseconds(0));
             timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this));
         }
-
-//        void UdpDataSender::stopTask()
-//        {
-////            io.stop();
-//        }
 
         int32_t UdpDataSender::sendPacket(boost::shared_ptr<Packet> &packetPtr, int32_t timeout)
         {

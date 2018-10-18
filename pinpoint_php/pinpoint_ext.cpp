@@ -107,6 +107,8 @@ STD_PHP_INI_ENTRY("pinpoint_agent.config_full_name", "", PHP_INI_SYSTEM,
 STD_PHP_INI_ENTRY("pinpoint_agent.trace_exception",  "false", PHP_INI_SYSTEM,
         OnUpdateBool, trace_exception, zend_pinpoint_globals, pinpoint_globals)
 
+STD_PHP_INI_ENTRY("pinpoint_agent.unittest",  "false", PHP_INI_SYSTEM,
+		OnUpdateBool, unittest, zend_pinpoint_globals, pinpoint_globals)
 PHP_INI_END()
 
 #ifdef COMPILE_DL_PINPOINT
@@ -213,7 +215,7 @@ PHP_MINIT_FUNCTION(pinpoint)
     // register hook
     // fix 151
     turn_on_aop();
-
+    printf("agent init \n");
     return SUCCESS;
 }
 
@@ -242,6 +244,7 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
     __gcov_flush();
 #endif
 
+    printf("agent shutdown \n");
     return SUCCESS;
 }
 
@@ -296,6 +299,8 @@ PHP_RINIT_FUNCTION(pinpoint)
         }
 
     }
+
+    printf("request start\n");
 
     return SUCCESS;
 }
@@ -356,7 +361,7 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint)
 #ifdef HAVE_GCOV
     __gcov_flush();
 #endif
-
+    printf("request shutdown\n");
     return SUCCESS;
 }
 

@@ -126,9 +126,11 @@ namespace Pinpoint
         class TaskDispatcher
         {
 
+
         private:
         	TaskDispatcher() {
         		pth = NULL;
+        		thrStatus = E_Uninited;
         	}
 
         	virtual ~TaskDispatcher()
@@ -152,6 +154,8 @@ namespace Pinpoint
         		return io;
         	}
 
+        	void postEvent(const boost::function<void(void)> fun);
+
         public:
 
         	static TaskDispatcher& getInstance()
@@ -161,8 +165,10 @@ namespace Pinpoint
         	}
 
         private:
+        	typedef enum { E_Uninited,E_Running,E_Stop } Status;
 
         	void run();
+        	Status thrStatus;
 
         private:
         	boost::thread* pth;
