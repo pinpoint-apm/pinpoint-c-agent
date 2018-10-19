@@ -21,3 +21,4 @@ cmake-build-debug
 *.gcda
 *.gcno
 core.*
+*.bak
