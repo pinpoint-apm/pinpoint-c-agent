@@ -156,8 +156,7 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
 
     /* zend function */
     zf = obtain_zend_function(internal, execute_data, op_array TSRMLS_CC);
-    /// add more logger
-    /// PP_U_TRACE("get_active_function_name: %s ",  get_active_function_name());
+
     /* types, level */
     frame->type = type;
     frame->functype = internal ? PT_FUNC_INTERNAL : 0x00;
@@ -363,7 +362,7 @@ ZEND_API void pp_execute_origin_core(int internal, zend_execute_data *execute_da
 #endif
 
 }
-
+#define DEBUG_HOOK LOGD
 
 #if PHP_VERSION_ID < 50500
 ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_data, zend_op_array *op_array, int rvu TSRMLS_DC)
@@ -406,6 +405,7 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
     frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, NULL TSRMLS_CC);
 #endif
 
+
     PHPFuncArgFetcher phpFuncArgFetcher;
 
     PhpAop* aop = PhpAop::getInstance();
@@ -414,8 +414,7 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
 
     if(interceptorPtr != NULL)
     {
-
-    	PP_U_TRACE("call %s's interceptorPtr::onBefore",frame.fullname);
+        DEBUG_HOOK("%s begin",frame.fullname);
         /* Register return value ptr */
     #if PHP_VERSION_ID < 70000
         if (!internal && EG(return_value_ptr_ptr) == NULL) {
@@ -447,12 +446,11 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
 #else
         call_php_kernel_debug_backtrace(0,frame,DEBUG_BACKTRACE_PROVIDE_OBJECT);
 #endif
-        PINPOINT_G(prs).stackDepth++;
+
         phpFuncArgFetcher.setInArgs(frame);
         call_id = interceptorPtr->assignCallId();
         (void)aop->resetCurrentInterceptor(interceptorPtr, call_id);
         interceptorPtr->before(call_id, phpFuncArgFetcher);
-        PINPOINT_G(prs).stackDepth--;
     }
 
 #if PHP_VERSION_ID < 50500
@@ -504,14 +502,11 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
             }
 #endif
 
-
          PhpFuncResultFetcher phpFuncResultFetcher(frame);
-         PP_U_TRACE("call %s's interceptorPtr::onEnd",frame.fullname);
-         PINPOINT_G(prs).stackDepth++;
+         DEBUG_HOOK("%s end",frame.fullname);
          interceptorPtr->end(call_id, phpFuncArgFetcher, phpFuncResultFetcher);
-         PINPOINT_G(prs).stackDepth--;
-
          (void)aop->resetCurrentInterceptor();
+
          free_frame(frame);
 
 #if PHP_VERSION_ID < 70000
@@ -612,7 +607,6 @@ void apm_throw_exception_plugin_hook(EG_EXP_TPYE exception TSRMLS_DC)
 
             Pinpoint::Plugin::ExceptionInfo exceptionInfo = get_exception_info(exception);
             interceptorPtr->exception(call_id, exceptionInfo);
-            PP_U_TRACE("[EXCEPTION] file:[%s] line:[%d] msg:[%s]",exceptionInfo.file.c_str(),exceptionInfo.line,exceptionInfo.message.c_str());
         }
     }
 
@@ -644,6 +638,7 @@ void apm_throw_exception_hook(zval* exception TSRMLS_DC)
       old_zend_throw_exception_hook(exception);
 #endif
     }
+
 }
 
 
@@ -714,8 +709,6 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
                 std::string errorMsg = Pinpoint::utils::FormatConverter::formatMsg("Warning", error_filename,
                                                                                    error_lineno, msg);
                 tracePtr->setExceptionInfo(Pinpoint::Plugin::WARNINGS_STRING_ID, errorMsg);
-                PINPOINT_G(prs).stackDepth = 0;
-                PP_U_TRACE("[ERROR] file:[%s] line:[%d] msg:[%s]",error_filename,error_lineno,msg);
             }
             catch (...)
             {
@@ -779,7 +772,7 @@ int32_t turn_on_aop()
     old_error_cb = zend_error_cb;
     zend_error_cb = apm_error_cb;
 
-    RunOriginExecute::stop();
+    RunOriginExecute::start();
 
     return SUCCESS;
 }

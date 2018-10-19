@@ -176,12 +176,20 @@ namespace Pinpoint
             virtual void   stop()=0;
 
         protected:
-            DataSender(const std::string &ip, uint32_t port) : m_ip(ip), m_port(port)
-            { };
+            DataSender(const std::string &ip, uint32_t port) :
+            	m_ip(ip),
+				m_port(port),
+				nstate(E_CLOSE)
+            {};
 
             std::string m_ip;
             uint32_t m_port;
 
+            ///E_EXIT force close the  connection
+            ///E_CLOSE initialized state
+            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} ;
+
+            E_NState nstate;
         private:
             explicit DataSender(const DataSender&);
             DataSender& operator=(const DataSender&);
@@ -219,7 +227,7 @@ namespace Pinpoint
 
             boost::atomic<uint32_t> m_sendCount;
 
-            void send_udp_packet(const boost::system::error_code & ec);
+            void io_send_udp_packet(const boost::system::error_code & ec);
 
         };
     }

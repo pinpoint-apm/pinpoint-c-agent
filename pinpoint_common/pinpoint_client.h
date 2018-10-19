@@ -363,12 +363,6 @@ namespace Pinpoint
 
             void doRequest(PacketPtr& packetPtr);
 
-            ///E_EXIT force close the TCP connection
-            ///E_CLOSE initialized state
-            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} ;
-
-            E_NState nstate;
-
         };
         typedef boost::shared_ptr<PinpointClient> PinpointClientPtr;
     }

@@ -461,9 +461,9 @@ namespace Pinpoint
         void PinpointClient::handle_write(const boost::system::error_code &error, PacketPtr& packetPtr)
         {
 
-
             if (!error)
             {
+            	LOGD("send [%d bytes] to collector",packetPtr->getCodedData().length());
                 start_write();
             }
             else
@@ -588,7 +588,6 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_type error: err=%s", error.message().c_str());
-
                 handle_error(error);
             }
         }
@@ -865,7 +864,7 @@ namespace Pinpoint
         	state.toClosedByClient();
         	socket_.cancel();
             socket_.close();
-            LOGD("[%s:%d] connect closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
+            LOGD("[%s:%d] connection closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
             nstate = E_EXIT;
         }
 

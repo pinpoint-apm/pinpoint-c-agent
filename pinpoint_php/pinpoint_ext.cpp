@@ -115,8 +115,6 @@ PHP_INI_END()
 ZEND_GET_MODULE(pinpoint)
 #endif
 
-// we can not turn on aop in a request
-volatile bool is_aop_turn_on = false;
 boost::shared_ptr<boost::thread> agent_start_thread_ptr;
 
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
@@ -236,10 +234,7 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
         agentPtr->stop();
     }
 
-    if (is_aop_turn_on)
-    {
-        turn_off_aop();
-    }
+    turn_off_aop();
 
     UNREGISTER_INI_ENTRIES();
 
@@ -261,9 +256,8 @@ PHP_RINIT_FUNCTION(pinpoint)
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
 
-    if (!is_aop_turn_on && agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
     {
-        is_aop_turn_on = true;
         RunOriginExecute::stop();
     }
 
@@ -275,7 +269,7 @@ PHP_RINIT_FUNCTION(pinpoint)
         start_pinpoint_agent_async();
     }
 
-    if (is_aop_turn_on && agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
+    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
     {
         // call longjmp: destructor is not called ...
         RunOriginExecute::stop();
@@ -308,13 +302,13 @@ PHP_RINIT_FUNCTION(pinpoint)
 
 PHP_RSHUTDOWN_FUNCTION(pinpoint)
 {
-	LOGD("request shutdown\n");
+	LOGD("request shutdown");
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT_RETURN ((agentPtr != NULL), SUCCESS);
 
     PhpAop *aop = PhpAop::getInstance();
 
-    if (is_aop_turn_on && agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
     {
         PINPOINT_ASSERT_RETURN ((aop != NULL), SUCCESS);
         Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr = aop->getRequestInterceptorPtr();

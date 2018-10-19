@@ -181,7 +181,6 @@ namespace Pinpoint
             if (repeatedTaskPtr->callTimes == -1 || repeatedTaskPtr->callTimes > 0)
             {
 
-            	LOGI("%ld",timerPtr->expires_from_now().seconds());
                 timerPtr->expires_from_now(boost::posix_time::milliseconds(repeatedTaskPtr->interval));
                 timerPtr->async_wait(boost::bind(&RepeatedTask::run,_1,repeatedTaskPtr, timerPtr));
             }
