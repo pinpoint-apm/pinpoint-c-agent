@@ -23,7 +23,6 @@
 #include "php_plugin.h"
 #include "aop_hook.h"
 #include "php_define_wapper.h"
-#include "pinpoint_def.h"
 
 
 using namespace Pinpoint::log;
@@ -34,7 +33,7 @@ static zend_class_entry* ce_span_event_recorder = NULL;
 static zend_class_entry* ce_plugin = NULL;
 static zend_class_entry* ce_interceptor = NULL;
 
-#if 0
+
 #define CHECK_AGENT_STARTED do {\
     Pinpoint::Agent::AgentPtr agentPtr = Pinpoint::Agent::Agent::getAgentPtr(); \
     if (agentPtr == NULL || agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_STARTED) \
@@ -43,10 +42,6 @@ static zend_class_entry* ce_interceptor = NULL;
         return; \
     } \
 } while(0);
-#endif
-
-#define CHECK_AGENT_STARTED
-
 
 #define CHECK_AGENT_BEFORE_START do {\
     Pinpoint::Agent::AgentPtr agentPtr = Pinpoint::Agent::Agent::getAgentPtr(); \
@@ -200,8 +195,6 @@ PHP_METHOD(SpanEventRecorder, setExceptionInfo)
     {
         spanEventRecorderPtr->setExceptionInfo(Pinpoint::Plugin::EXCEPTION_STRING_ID, exceptionInfo);
     }
-
-    PP_U_TRACE("setExceptionInfo:%s",exceptionInfo.c_str());
 }
 
 PHP_METHOD(SpanEventRecorder, markBeforeTime)
@@ -256,7 +249,6 @@ PHP_METHOD(SpanEventRecorder, setApiId)
         spanEventRecorderPtr->setApiId(apiId);
     }
 
-    PP_U_TRACE("setApiId:%ld",apiId);
 }
 
 PHP_METHOD(SpanEventRecorder, setServiceType)
@@ -278,8 +270,6 @@ PHP_METHOD(SpanEventRecorder, setServiceType)
     {
         spanEventRecorderPtr->setServiceType(serviceType);
     }
-
-    PP_U_TRACE("setServiceType:%ld",serviceType);
 }
 
 
@@ -346,8 +336,6 @@ PHP_METHOD(SpanEventRecorder, addAnnotation)
 
     annotationPtr->addStringValue(ts1);
     spanEventRecorderPtr->addAnnotationPtr(annotationPtr);
-    PP_U_TRACE("addAnnotation %ld:%s",key,ts1.c_str());
-
 }
 
 PHP_METHOD(SpanEventRecorder, setEndPoint)
@@ -391,12 +379,12 @@ PHP_METHOD(SpanEventRecorder, setDestinationId)
         RETURN_NULL();
     }
 
+    char* p_destination = NULL;
+    int destination_len;
     std::string destination = "";
     
 #if PHP_VERSION_ID < 70000
 
-    int destination_len;
-    char* p_destination = NULL;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &p_destination, &destination_len) == FAILURE)
     {
         zend_error(E_ERROR, "setDestinationId() expects (string).");
@@ -425,7 +413,6 @@ PHP_METHOD(SpanEventRecorder, setDestinationId)
     Pinpoint::Trace::TracePtr tracePtr = Pinpoint::Trace::Trace::getCurrentTrace();
     PINPOINT_ASSERT (tracePtr != NULL);
     spanEventRecorderPtr->setDestinationId(destination);
-    PP_U_TRACE("setDestinationId:%s",destination.c_str());
 }
 
 
@@ -483,8 +470,6 @@ PHP_METHOD(SpanEventRecorder, setNextSpanId)
     PINPOINT_ASSERT (tracePtr != NULL);
 
     spanEventRecorderPtr->setNextSpanId(nextSpanId);
-
-    PP_U_TRACE("setNextSpanId:%ld",nextSpanId);
 }
 //</editor-fold>
 
@@ -683,8 +668,6 @@ PHP_METHOD(Trace, setApiId)
     PINPOINT_ASSERT (tracePtr != NULL);
 
     tracePtr->setApiId(apiId);
-
-    PP_U_TRACE("setApiId:%ld",apiId);
 }
 
 PHP_METHOD(Trace, addAnnotation)
@@ -694,17 +677,15 @@ PHP_METHOD(Trace, addAnnotation)
     zend_long key;
     std::string ts1;
 
-    if (!Pinpoint::Trace::Trace::isStarted())
-    {
-        RETURN_NULL();
-    }
-
 #if PHP_VERSION_ID < 70000
 
     char* s1 = NULL;
     int s1_len;
 
-
+    if (!Pinpoint::Trace::Trace::isStarted())
+    {
+        RETURN_NULL();
+    }
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &key, &s1, &s1_len) == FAILURE)
     {
@@ -716,6 +697,10 @@ PHP_METHOD(Trace, addAnnotation)
 #else
 
     zend_string* s1;
+    if (!Pinpoint::Trace::Trace::isStarted())
+    {
+       RETURN_NULL();
+    }
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lS", &key, &s1) == FAILURE)
     {
@@ -746,7 +731,6 @@ PHP_METHOD(Trace, addAnnotation)
 
     tracePtr->addAnnotationPtr(annotationPtr);
 
-    PP_U_TRACE("addAnnotation:%ld %s",key,ts1.c_str());
 }
 
 PHP_METHOD(Trace, setEndPoint)
@@ -794,7 +778,6 @@ PHP_METHOD(Trace, setRemoteAddr)
     PINPOINT_ASSERT (tracePtr != NULL);
 
     tracePtr->setRemoteAddr(remote);
-    PP_U_TRACE("setRemoteAddr: %s ",remote);
 }
 
 PHP_METHOD(Trace, setRpc)
@@ -818,7 +801,6 @@ PHP_METHOD(Trace, setRpc)
     }
 
     tracePtr->setRpc(rpc);
-    PP_U_TRACE("setRpc: %s ",rpc);
 }
 
 
@@ -954,7 +936,7 @@ void PhpInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher 
     const static char call_name[] = "onbefore";
     const static int32_t name_len = sizeof(call_name) / sizeof(char) - 1;
 
-//    CHECK_AGENT_STARTED;
+    CHECK_AGENT_STARTED;
 
     status = PHP_INTERCEPTOR_BEFORE;
 
@@ -980,7 +962,7 @@ void PhpInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher 
     ZVAL_LONG(id, callId);
 
     // turn off aop
-    RunOriginExecute watch;
+    RunOriginExecute tDpF;
 
     if (objectCache.callMethod(call_name, name_len, NULL,args ? (2):(1) , id, args) != SUCCESS)
     {
@@ -1004,7 +986,7 @@ void PhpInterceptor::onEnd(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher &ar
     const static char* args_key_str = "args";
     const static char* result_key_str = "result";
 
-//    CHECK_AGENT_STARTED;
+    CHECK_AGENT_STARTED;
 
     status = PHP_INTERCEPTOR_END;
 
@@ -1087,7 +1069,7 @@ void PhpInterceptor::onException(uint64_t callId, const Pinpoint::Plugin::Except
     const static char call_name[] = "onexception";
     const static int32_t name_len = sizeof(call_name) / sizeof(char) - 1;
 
-//    CHECK_AGENT_STARTED;
+    CHECK_AGENT_STARTED;
 
     status = PHP_INTERCEPTOR_EXCEPTION;
 
@@ -1114,7 +1096,6 @@ void PhpInterceptor::onException(uint64_t callId, const Pinpoint::Plugin::Except
     ZVAL_STRING(error, errorMsg.c_str(), 1);
 
     RunOriginExecute watch;
-
     if (objectCache.callMethod(call_name, name_len, NULL, 2, id, error) != SUCCESS)
     {
         LOGE("Interceptor name=[%s] onexception failed!!! please check your code!!!",
@@ -1587,11 +1568,9 @@ PHP_METHOD(Plugin, addInterceptor)
                Pinpoint::Agent::PinpointAgentContext::getContextPtr()->agentConfigArgsPtr;
 
     PINPOINT_ASSERT(contextPtr != NULL);
-    interceptorPtr->setPhpImplObject(obj, path_join(PINPOINT_G(pluginsAbsolutePath), Tdefinition_path).c_str());
+    interceptorPtr->setPhpImplObject(obj, path_join(contextPtr->pluginDir, Tdefinition_path).c_str());
 
     phpInterfacePluginPtr->addInterceptor(interceptorPtr);
-
-    PP_U_TRACE("addInterceptor name:%s class:%s",TinterceptorFuncName.c_str(),Tdefinition_path.c_str());
 }
 
 
@@ -1664,8 +1643,6 @@ PHP_METHOD(Plugin, addSimpleInterceptor)
     }
 
     phpInterfacePluginPtr->addInterceptor(interceptorPtr);
-
-    PP_U_TRACE("addSimpleInterceptor name:%s",funcName.c_str());
 }
 
 
@@ -1728,49 +1705,6 @@ PHP_FUNCTION(pinpoint_end_trace)
     }
 }
 
-PHP_FUNCTION(pinpint_aop_reload)
-{
-	using  Pinpoint::Agent::Agent;
-	using  Pinpoint::Agent::AgentPtr;
-	using  Pinpoint::Plugin::PluginPtrVector;
-	AgentPtr agentPtr = Agent::getAgentPtr();
-	PluginPtrVector pluginPtrVector;
-	get_all_plugins(pluginPtrVector);
-    if (agentPtr->updatePlugins(pluginPtrVector) != SUCCESS)
-    {
-    	zend_error(E_ERROR, "init_pinpoint_agent failed");
-    	PP_U_TRACE("init_pinpoint_agent failed");
-    	return ;
-    }
-}
-
-PHP_FUNCTION(pinpoint_data_thread_start)
-{
-	/// todo
-	/// add more state tracing is better
-
-	using  Pinpoint::Agent::Agent;
-	using  Pinpoint::Agent::AgentPtr;
-	AgentPtr agentPtr = Agent::getAgentPtr();
-
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_INITED){
-    	start_pinpoint_agent();
-    }else{
-    	zend_error(E_ERROR, "pinpoint_connect_collector: initialized");
-    	return ;
-    }
-}
-
-PHP_FUNCTION(pinpoint_start_calltrace)
-{
-	start_a_new_calltrace();
-}
-
-PHP_FUNCTION(pinpoint_end_calltrace)
-{
-	end_current_calltrace();
-}
-
 PHP_FUNCTION(pinpoint_add_api)
 {
     CHECK_AGENT_PRE_INITED;
@@ -1807,15 +1741,12 @@ PHP_FUNCTION(pinpoint_add_api)
     int32_t apiid = agentPtr->addApi(_PSTR(api_info), lineno);
 
     RETURN_LONG(apiid);
-
-    PP_U_TRACE("pinpoint_add_api %s %ld",_PSTR(api_info),lineno);
 }
 
-// remove unused code
-//PHP_FUNCTION(pinpoint_add_string)
-//{
-//    CHECK_AGENT_PRE_INITED;
-//}
+PHP_FUNCTION(pinpoint_add_string)
+{
+    CHECK_AGENT_PRE_INITED;
+}
 
 PHP_FUNCTION(pinpoint_add_plugin)
 {
@@ -1879,7 +1810,7 @@ PHP_FUNCTION(pinpoint_add_plugin)
              Pinpoint::Agent::PinpointAgentContext::getContextPtr()->agentConfigArgsPtr;
 
     PINPOINT_ASSERT(contextPtr != NULL);
-    phpInterfacePluginPtr->setObject(object, path_join(PINPOINT_G(pluginsAbsolutePath), Tdefinition_path).c_str());
+    phpInterfacePluginPtr->setObject(object, path_join(contextPtr->pluginDir, Tdefinition_path).c_str());
 }
 
 PHP_FUNCTION(pinpoint_log)

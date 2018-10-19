@@ -267,6 +267,7 @@ namespace Pinpoint
                                                       args->collectorStatIp,
                                                       args->collectorStatPort));
                 statUdpSender->init();
+
                 spanUdpSender.reset(new UdpDataSender(TaskDispatcher::getInstance().getAsio(),"collectorSpanSender",
                                                       args->collectorSpanIp,
                                                       args->collectorSpanPort));
@@ -403,8 +404,14 @@ namespace Pinpoint
         void PinpointAgent::asyStopAllTask()
         {
         	// todo
-//        	stringDataSender->st
+
+        	// timer event
+        	scheduledExecutor->stopScheduleExecutor();
+
+        	// tcp event
             pinpointClientPtr->stop();
+
+            // udp event
             spanUdpSender->stop();
             statUdpSender->stop();
 
@@ -421,7 +428,6 @@ namespace Pinpoint
             int32_t err = SUCCESS;
 
 #if 0
-
 			agentDataSender->start();
 			agentMonitorSender->start();
 			traceDataSender->start();

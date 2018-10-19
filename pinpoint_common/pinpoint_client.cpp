@@ -246,7 +246,7 @@ namespace Pinpoint
         {
             // close current socket
 
-            if(nstate == E_CONNECTING )
+            if(nstate == E_CONNECTING || nstate ==  E_EXIT )
             {
                 return ;
             }
@@ -272,7 +272,7 @@ namespace Pinpoint
             else
             {
                 state.toConnected();
-                LOGI(" Connect success.");
+                LOGI(" Connect [%s:%d] success.",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
                 state.toRunWithoutHandshake();
                 try
                 {
@@ -419,10 +419,10 @@ namespace Pinpoint
         void PinpointClient::start_write()
         {
 
-
-            if (nstate != E_CONNECTED)
+            if (nstate != E_CONNECTED )
             {
-                // no needs to cancel write_timer_event, timer is   connect_timer_event
+                // no needs to cancel write_timer_event, timer is  connect_timer_event
+            	LOGD("connection not ready, wait for next time");
                 return;
             }
 
@@ -865,6 +865,8 @@ namespace Pinpoint
         	state.toClosedByClient();
         	socket_.cancel();
             socket_.close();
+            LOGD("[%s:%d] connect closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
+            nstate = E_EXIT;
         }
 
         int32_t PinpointClient::getSocketId()

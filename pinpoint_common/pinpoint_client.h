@@ -363,7 +363,9 @@ namespace Pinpoint
 
             void doRequest(PacketPtr& packetPtr);
 
-            typedef enum {E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} E_NState;
+            ///E_EXIT force close the TCP connection
+            ///E_CLOSE initialized state
+            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} ;
 
             E_NState nstate;
 

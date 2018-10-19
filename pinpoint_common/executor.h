@@ -34,6 +34,7 @@
 #include <string>
 #include <queue>
 #include <functional>
+#include <vector>
 
 
 namespace Pinpoint
@@ -167,7 +168,8 @@ namespace Pinpoint
         private:
         	typedef enum { E_Uninited,E_Running,E_Stop } Status;
 
-        	void run();
+        	void bgRun();
+
         	Status thrStatus;
 
         private:
@@ -364,12 +366,16 @@ namespace Pinpoint
 
             int32_t addTask(const ExecutorTaskPtr& pTask, uint32_t interval, int32_t callTimes);
 
+            // NOTE ONLY SAFE WHEN CALL IN IOTHREAD
+            void stopScheduleExecutor();
+
         private:
 
             class RepeatedTask
             {
             public:
-                static int32_t run(boost::shared_ptr<RepeatedTask>& repeatedTask,
+                static int32_t run(const boost::system::error_code& e,
+                				  boost::shared_ptr<RepeatedTask>& repeatedTask,
                                    boost::shared_ptr<boost::asio::deadline_timer>& timerPtr);
 
                 RepeatedTask(const boost::shared_ptr<ExecutorTask> &pTask, uint32_t interval, int32_t callTimes);
@@ -395,14 +401,12 @@ namespace Pinpoint
             };
 
             boost::asio::io_service& io;
-//            boost::asio::io_service::work work;
 
-            virtual void executeTask();
+            int32_t addIoTask_(const boost::shared_ptr<RepeatedTask>& repeatedTaskPtr);
 
-            virtual void stopTask();
-
-            int32_t addTask_(const boost::shared_ptr<RepeatedTask>& repeatedTaskPtr);
-
+        private:
+            std::vector<boost::shared_ptr<boost::asio::deadline_timer> > timerSet;
+            enum SE_STATUES {E_RUNNING,E_STOPPED} _status;
         };
 
         typedef boost::shared_ptr<ScheduledExecutor> ScheduledExecutorPtr;
@@ -453,7 +457,7 @@ namespace Pinpoint
             } ShmMainProcFlag;
 
 #if 0
-            int32_t run()
+            int32_t bgRun()
             {
                 OS_process_id_t mainPid;
                 isMainProcess(mainPid);

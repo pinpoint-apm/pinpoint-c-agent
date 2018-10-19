@@ -215,13 +215,16 @@ PHP_MINIT_FUNCTION(pinpoint)
     // register hook
     // fix 151
     turn_on_aop();
-    printf("agent init \n");
+
+    LOGI("agent initialized");
     return SUCCESS;
 }
 
 
 PHP_MSHUTDOWN_FUNCTION(pinpoint)
 {
+	LOGI("agent shutdown ");
+
     if(agent_start_thread_ptr)
     {
         agent_start_thread_ptr->join();
@@ -244,13 +247,14 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
     __gcov_flush();
 #endif
 
-    printf("agent shutdown \n");
+
     return SUCCESS;
 }
 
 
 PHP_RINIT_FUNCTION(pinpoint)
 {
+	LOGD("request start ");
     PhpRequestCounter::increment();
     memset(&PINPOINT_G(prs),0,sizeof(PRS));
 
@@ -299,14 +303,12 @@ PHP_RINIT_FUNCTION(pinpoint)
         }
 
     }
-
-    printf("request start\n");
-
     return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(pinpoint)
 {
+	LOGD("request shutdown\n");
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT_RETURN ((agentPtr != NULL), SUCCESS);
 
@@ -361,7 +363,7 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint)
 #ifdef HAVE_GCOV
     __gcov_flush();
 #endif
-    printf("request shutdown\n");
+
     return SUCCESS;
 }
 
@@ -469,7 +471,6 @@ static void start_pinpoint_agent_async()
     contextPtr->ports = get_host_process_info(Pinpoint::Naming::SERVER_PORT);
     contextPtr->hostname = get_host_process_info(Pinpoint::Naming::HTTP_HOST);
 
-//    agent_start_thread_ptr.reset(new boost::thread(start_pinpoint_agent));
     start_pinpoint_agent();
 }
 

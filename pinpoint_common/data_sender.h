@@ -219,9 +219,7 @@ namespace Pinpoint
 
             boost::atomic<uint32_t> m_sendCount;
 
-
-
-            void send_udp_packet();
+            void send_udp_packet(const boost::system::error_code & ec);
 
         };
     }

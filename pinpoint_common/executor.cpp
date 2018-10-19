@@ -45,7 +45,8 @@ namespace Pinpoint
         //<editor-fold desc="ScheduledExecutor">
 
         ScheduledExecutor::ScheduledExecutor(boost::asio::io_service& agentIo,const std::string &executorName)
-                : io(agentIo)
+                : io(agentIo),
+				  _status(E_RUNNING)
         {
 
         }
@@ -56,19 +57,26 @@ namespace Pinpoint
         }
 
 
-        void ScheduledExecutor::executeTask()
+        void ScheduledExecutor::stopScheduleExecutor()
         {
-//            io.run();
-        }
-
-        void ScheduledExecutor::stopTask()
-        {
-//            io.stop();
-//            LOGI("ScheduledExecutor::stopTask(): stop io");
+        	std::vector<boost::shared_ptr<boost::asio::deadline_timer> >::const_iterator cit = timerSet.begin();
+        	while(cit !=timerSet.end())
+        	{
+        		LOGD("cancel a ScheduledExecutor");
+        		(*cit)->cancel();
+        		cit++;
+        	}
+        	_status = E_STOPPED;
         }
 
         int32_t ScheduledExecutor::addTask(const ExecutorTaskPtr& pTask, uint32_t interval, int32_t callTimes)
         {
+        	if(_status == E_STOPPED)
+        	{
+        		LOGI("ScheduledExecutor stopped");
+        		return SUCCESS;
+        	}
+
             LOGD("ScheduledExecutor add task: name=%s, interval=%d, callTimes=%d", pTask->getTaskName().c_str(), interval, callTimes);
 
             try
@@ -77,7 +85,7 @@ namespace Pinpoint
 
                 boost::shared_ptr<RepeatedTask> repeatedTaskPtr = boost::shared_ptr<RepeatedTask>(repeatedTask);
 
-                io.post(boost::bind(&ScheduledExecutor::addTask_, this, repeatedTaskPtr));
+                io.post(boost::bind(&ScheduledExecutor::addIoTask_, this, repeatedTaskPtr));
             }
             catch (std::exception& exception)
             {
@@ -88,7 +96,7 @@ namespace Pinpoint
             return SUCCESS;
         }
 
-        int32_t ScheduledExecutor::addTask_(const boost::shared_ptr<RepeatedTask> &repeatedTaskPtr)
+        int32_t ScheduledExecutor::addIoTask_(const boost::shared_ptr<RepeatedTask> &repeatedTaskPtr)
         {
             LOGD("run addTask_ in io.run() thread: add %s", repeatedTaskPtr->getTaskName().c_str());
 
@@ -98,10 +106,12 @@ namespace Pinpoint
 
                 boost::shared_ptr<boost::asio::deadline_timer> timerPtr =
                         boost::shared_ptr<boost::asio::deadline_timer>(pTimer);
+                // store this timer, cancel it when ScheduledExecutor exit;
+                timerSet.push_back(timerPtr);
 
                 timerPtr->expires_from_now(boost::posix_time::milliseconds(repeatedTaskPtr->getInterval()));
+                timerPtr->async_wait(boost::bind(&RepeatedTask::run,_1, repeatedTaskPtr, timerPtr));
 
-                timerPtr->async_wait(boost::bind(&RepeatedTask::run, repeatedTaskPtr, timerPtr));
             }
             catch (std::exception& exception)
             {
@@ -125,11 +135,19 @@ namespace Pinpoint
             this->interval = interval;
         }
 
-        int32_t ScheduledExecutor::RepeatedTask::run(boost::shared_ptr<RepeatedTask>& repeatedTaskPtr,
+        int32_t ScheduledExecutor::RepeatedTask::run(const boost::system::error_code& e,
+        											 boost::shared_ptr<RepeatedTask>& repeatedTaskPtr,
                                                      boost::shared_ptr<boost::asio::deadline_timer>& timerPtr)
         {
 
             int32_t err = SUCCESS;
+
+			if(e ==  boost::asio::error::operation_aborted)
+			{
+				// timer had been canceled
+				LOGD("timer canceled");
+				return FAILED;
+			}
 
             try
             {
@@ -155,12 +173,17 @@ namespace Pinpoint
                 repeatedTaskPtr->callTimes--;
             }
 
+            if(timerPtr->expires_from_now() == boost::posix_time::milliseconds(0))
+            {
+            	return err;
+            }
+
             if (repeatedTaskPtr->callTimes == -1 || repeatedTaskPtr->callTimes > 0)
             {
 
+            	LOGI("%ld",timerPtr->expires_from_now().seconds());
                 timerPtr->expires_from_now(boost::posix_time::milliseconds(repeatedTaskPtr->interval));
-
-                timerPtr->async_wait(boost::bind(&RepeatedTask::run, repeatedTaskPtr, timerPtr));
+                timerPtr->async_wait(boost::bind(&RepeatedTask::run,_1,repeatedTaskPtr, timerPtr));
             }
 
             return err;
@@ -243,7 +266,7 @@ namespace Pinpoint
 
                     assert (taskPtr != NULL);
 
-                    taskPtr->run();
+                    taskPtr->bgRun();
                 }
                 catch (boost::thread_interrupted const &)
                 {
@@ -337,7 +360,7 @@ namespace Pinpoint
         {
         	boost::mutex::scoped_lock lock(thrMutex);
         	// 1. start the background thread
-        	pth = new boost::thread(&TaskDispatcher::run,this);
+        	pth = new boost::thread(&TaskDispatcher::bgRun,this);
         	// 2. wait thread running success
         	while(thrStatus != E_Running ){
         		thrCon.wait(lock);
@@ -348,13 +371,15 @@ namespace Pinpoint
         void TaskDispatcher::stop()
 	    {
         	// 1. stop io
-        	io.stop();
+
+//        	io.stop();
+
         	// 2. wait thread stop
         	pth->join();
         	thrStatus = E_Stop;
 	    }
 
-    	void TaskDispatcher::run()
+    	void TaskDispatcher::bgRun()
 		{
     		boost::mutex::scoped_lock lock(thrMutex);
     		thrStatus = E_Running;
@@ -364,10 +389,11 @@ namespace Pinpoint
 			{
 				io.run();
 			}
-			catch (std::exception& e){
-
-				 LOGE("io_service throw %s", e.what());
+			catch (std::exception& e)
+			{
+				LOGE("io_service throw %s", e.what());
 			}
+
 			LOGW("background task finished");
 
 		}

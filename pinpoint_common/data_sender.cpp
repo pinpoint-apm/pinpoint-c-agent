@@ -50,6 +50,7 @@ namespace Pinpoint
         {
         	timer_.cancel();
         	socket_.close();
+        	LOGD("UdpDataSender exit");
         }
 
         void UdpDataSender::init()
@@ -74,7 +75,7 @@ namespace Pinpoint
 
             endpoint_ = boost::asio::ip::udp::endpoint(add, short(this->m_port));
             timer_.expires_from_now(boost::posix_time::milliseconds(0));
-            timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this));
+            timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this,_1));
         }
 
         int32_t UdpDataSender::sendPacket(boost::shared_ptr<Packet> &packetPtr, int32_t timeout)
@@ -116,8 +117,22 @@ namespace Pinpoint
             return err;
         }
 
-        void UdpDataSender::send_udp_packet()
+        void UdpDataSender::send_udp_packet(const boost::system::error_code & ec)
         {
+        	if(ec )
+        	{
+        		if(ec == boost::asio::error::operation_aborted)
+        		{
+        			LOGI("udpdateSender canceled");
+        		}
+        		else
+        		{
+					LOGW("udpdateSender %s",ec.message().c_str());
+        		}
+
+        		return ;
+        	}
+
             typedef std::vector<PacketPtr> PacketPtrVec;
             PacketPtrVec packetPtrVec;
 
@@ -152,9 +167,8 @@ namespace Pinpoint
 
             timer_.expires_from_now(boost::posix_time::milliseconds(0)); // recheck it
 	_AGAIN:
-			timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this));
+			timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this,_1));
 
-//            io.post(boost::bind(&UdpDataSender::send_udp_packet, this));
         }
 
         uint32_t UdpDataSender::getSendCount()
