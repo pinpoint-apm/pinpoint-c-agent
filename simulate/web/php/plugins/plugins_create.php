@@ -26,10 +26,10 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, "quickstart_plugin.php");
 
 $p = new ExcludePlugin();
-pinpoint_add_plugin($p, "quickstart_plugin.php");
+pinpoint_add_plugin($p, "exclude_plugin.php");
 
 $p = new CurlPlugin();
-pinpoint_add_plugin($p, "quickstart_plugin.php");
+pinpoint_add_plugin($p, "curl_plugin.php");
 
 $p =new TestPlugin();
 pinpoint_add_plugin($p, "test_plugin.php");

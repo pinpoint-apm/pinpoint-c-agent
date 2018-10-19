@@ -12,7 +12,7 @@ CollectorTcpPort=xx
 
 TraceLimit = -1
 SkipTraceTime = -1
-# DEBUG|INFO|WARNING|ERROR|STDERR
+# DEBUG|INFO|WARN|ERROR
 PPLogLevel = INFO
 LogFileRootPath = /path where logger to/
 # AgentType -> NGINX | APACHE |PHP |TEST
