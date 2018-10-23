@@ -700,24 +700,11 @@ class QuickStartPlugin extends \Pinpoint\Plugin
    $i = new TestFunc2Interceptor();
    $this->addInterceptor($i, "testNameSpace\\test_func2", "quickstart_plugin.php");
 
-    // $i =  new TestWorker();
-    // $this->addInterceptor($i,  "Workerman\Worker::run","quickstart_plugin.php");
-
-    // $i = new  TestTcpMessage();
-    // $this->addInterceptor($i,  "closure{http_server.php:23}","quickstart_plugin.php");
-
-
-    // $i = new TestTcpdestroy();
-    // $this->addInterceptor($i,  "Workerman\Connection\TcpConnection::destroy","quickstart_plugin.php");
-    // $this->addSimpleInterceptor("hello", -1);
-
-   $this->addSimpleInterceptor("test_cumsum2", -1);
-   $this->addSimpleInterceptor("test_cumsum4", -1);
-   $this->addSimpleInterceptor("test_cumsum_e2", -1);
-   $this->addSimpleInterceptor("test_exception3", -1);
-   $this->addSimpleInterceptor("closure{test_closure.php:21}",-1);
-   $this->addSimpleInterceptor("closure{http_server.php:21}",-1);
-
+    $this->addSimpleInterceptor("test_cumsum2", -1);
+    $this->addSimpleInterceptor("test_cumsum4", -1);
+    $this->addSimpleInterceptor("test_cumsum_e2", -1);
+    $this->addSimpleInterceptor("test_exception3", -1);
+    $this->addSimpleInterceptor("closure{test_closure.php:21}",-1);
   }
 };
 ?>
