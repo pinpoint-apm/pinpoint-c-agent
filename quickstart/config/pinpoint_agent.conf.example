@@ -12,7 +12,7 @@ CollectorTcpPort=xx
 
 TraceLimit = -1
 SkipTraceTime = -1
-# DEBUG|INFO|WARNING|ERROR|STDERR
+# DEBUG|INFO|WARN|ERROR
 PPLogLevel = INFO
 LogFileRootPath = /path where logger to/
 # AgentType -> NGINX | APACHE |PHP |TEST
@@ -21,7 +21,7 @@ AgentType="NGINX"
 # plugin
 # PhpInternalFunctionsPlugin
 PluginExclude = ExcludePlugin
-PluginInclude = PhpRequestPlugin;QuickStartPlugin  ; PhpInternalFunctionsPlugin ;ExcludePlugin ;PDOPlugin;NextSpanPlugin;
+PluginInclude = PhpRequestPlugin;QuickStartPlugin  ; PhpInternalFunctionsPlugin ;ExcludePlugin ;PDOPlugin;CurlPlugin;
 
 
 [PHP]

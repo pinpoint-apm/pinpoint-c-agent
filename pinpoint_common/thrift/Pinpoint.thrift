@@ -46,6 +46,18 @@ struct TAgentInfo {
 	30: optional TJvmInfo   jvmInfo
 }
 
+
+struct TJvmGcDetailed {
+    1: optional i64 jvmGcNewCount
+    2: optional i64 jvmGcNewTime
+    3: optional double jvmPoolCodeCacheUsed
+    4: optional double jvmPoolNewGenUsed
+    5: optional double jvmPoolOldGenUsed
+    6: optional double jvmPoolSurvivorSpaceUsed
+    7: optional double jvmPoolPermGenUsed
+    8: optional double jvmPoolMetaspaceUsed
+}
+
 struct TJvmGc {
     1: TJvmGcType   type = TJvmGcType.UNKNOWN
     2: i64          jvmMemoryHeapUsed
@@ -58,16 +70,6 @@ struct TJvmGc {
 
 }
 
-struct TJvmGcDetailed {
-    1: optional i64 jvmGcNewCount
-    2: optional i64 jvmGcNewTime
-    3: optional double jvmPoolCodeCacheUsed
-    4: optional double jvmPoolNewGenUsed
-    5: optional double jvmPoolOldGenUsed
-    6: optional double jvmPoolSurvivorSpaceUsed
-    7: optional double jvmPoolPermGenUsed
-    8: optional double jvmPoolMetaspaceUsed
-}
 
 struct TCpuLoad {
     1: optional double       jvmCpuLoad

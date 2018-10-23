@@ -30,6 +30,11 @@
 #define PP_SERVER_ADDR "SERVER_ADDR"
 #define PP_SERVER_PORT "SERVER_PORT"
 #define PP_REQUEST_URI "REQUEST_URI"
+
+#define PP_NGINX_PROXY "Pinpoint-ProxyNginx"
+#define PP_APACHE_PROXY "Pinpoint-ProxyApache"
+#define PP_APP_PROXY "Pinpoint-ProxyApp"
+
 #define PP_REDIRECT_STATUS "REDIRECT_STATUS"
 #define MAX_STRING_FROM_ZVAL 1024
 
@@ -37,6 +42,8 @@
 #define TER_MIN(a,b,c) (((a<b)&&(a<c))?(a):((b>c)?(c):(b)))
 #define MAX_ARRAY_ELEMENT 10
 
+#define AGENT_ERROR  (E_ERROR|E_PARSE|E_CORE_ERROR|E_COMPILE_ERROR|E_USER_ERROR|E_RECOVERABLE_ERROR)
+#define AGENT_WARNG  (E_WARNING|E_NOTICE|E_CORE_WARNING|E_COMPILE_WARNING|E_USER_WARNING|E_USER_NOTICE|E_DEPRECATED|E_STRICT|E_USER_DEPRECATED)
 
 using Pinpoint::Naming::eName;
 
@@ -55,6 +62,8 @@ extern std::string get_remote_addr();
 extern std::string get_rpc();
 
 extern int32_t get_http_response_status();
+
+extern bool get_proxy_http_header(std::string &,int&);
 
 extern void init_evn_before_agent_real_startup(Pinpoint::Configuration::Config&);
 
@@ -166,5 +175,4 @@ public:
 
 };
 
-extern AgentConf g_AgentConf;
 #endif

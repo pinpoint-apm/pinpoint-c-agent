@@ -24,12 +24,12 @@ PHP_ARG_ENABLE(release, release,
 
 
 if test "$PHP_RELEASE" = "yes"; then
-    BOOST_LIB="-L$BOOST_PATH/lib  -l:libboost_system.a -l:libboost_thread.a -l:libboost_filesystem.a  -l:libboost_date_time.a"
-    THRIFT_LIB="-L$THRIFT_PATH/lib  -l:libthrift.a"
+    BOOST_LIB="-L$WITH_BOOST_PATH/lib  -l:libboost_system.a -l:libboost_thread.a -l:libboost_filesystem.a  -l:libboost_date_time.a"
+    THRIFT_LIB="-L$WITH_THRIFT_PATH/lib  -l:libthrift.a"
     echo "PINPOINT_SHARED_LIBADD" $BOOST_LIB
 else
-    BOOST_LIB="-L$BOOST_PATH/lib  -lboost_system -lboost_thread -lboost_filesystem  -lboost_date_time"
-    THRIFT_LIB="-L$THRIFT_PATH/lib  -lthrift"
+    BOOST_LIB="-L$WITH_BOOST_PATH/lib  -lboost_system -lboost_thread -lboost_filesystem  -lboost_date_time"
+    THRIFT_LIB="-L$WITH_THRIFT_PATH/lib  -lthrift"
 fi
 
 

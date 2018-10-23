@@ -135,6 +135,7 @@ namespace Pinpoint
             virtual void addDoubleValue(double d);
             virtual void addIntStringValue(int32_t intValue, const std::string& s);
             virtual void addIntStringStringValue(int32_t intValue, const std::string& s1, const std::string& s2);
+            virtual void addTLongIntIntByteByteStringValue(std::string&,int);
             virtual ~DefaultAnnotation(){}
             const TAnnotation& getTAnnotation()const ;
         private:
@@ -315,9 +316,9 @@ namespace Pinpoint
             static std::vector<int8_t> formatBytes(const TransactionId &transactionId);
 
             static TransactionId parseTransactionId(
-                    const std::vector<int8_t> &transactionId) throw(std::invalid_argument);
+                    const std::vector<int8_t> &transactionId);
 
-            static TransactionId parseTransactionId(const std::string &transactionId) throw(std::invalid_argument);
+            static TransactionId parseTransactionId(const std::string &transactionId);
 
             static bool isValidTransactionIdStr(const std::string &transactionId);
 

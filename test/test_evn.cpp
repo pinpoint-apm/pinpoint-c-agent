@@ -24,9 +24,11 @@
 using namespace Pinpoint;
 using namespace Pinpoint::log;
 
-void test_log_output(const char* msg, uint32_t)
+// for test-case
+uint64_t test_log_output(const char* msg, uint32_t)
 {
     fprintf(stderr, "%s", msg);
+    return 0;
 }
 
 int32_t init_test_env()

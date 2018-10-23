@@ -222,7 +222,7 @@ namespace Pinpoint
                 }
 
                 tbasePtr->read(protocolOut.get());
-                LOGI("get tbase: type=%d, context=%s", header.getType(),
+                LOGT("get tbase: type=%d, context=%s", header.getType(),
                      utils::TBaseToString2(tbasePtr).c_str());
                 return SUCCESS;
             }

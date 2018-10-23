@@ -85,7 +85,7 @@ namespace Pinpoint
 
                 PINPOINT_ASSERT_RETURN ((spanPtr != NULL), FAILED);
 
-                LOGI("Span: [%s]", utils::TBaseToString(spanPtr->getTSpan()).c_str());
+                LOGT("Span: [%s]", utils::TBaseToString(spanPtr->getTSpan()).c_str());
 
                 err = serializer.serializer(spanPtr->getTSpan(), data);
                 if (err != SUCCESS)

@@ -609,17 +609,22 @@ void apm_throw_exception_plugin_hook(EG_EXP_TPYE exception TSRMLS_DC)
 
 }
 
+
 void apm_throw_exception_hook(zval* exception TSRMLS_DC)
 {
     if(!exception){
         return ;
     }
-
-#if PHP_VERSION_ID < 70000
-    apm_throw_exception_plugin_hook(exception TSRMLS_CC);
-#else
-    apm_throw_exception_plugin_hook(Z_OBJ_P(exception) TSRMLS_CC);
-#endif
+    /// dynamically exception, but must be an error
+    /// error_reporting ignore this, agent does it also
+	if( EG(error_reporting) & AGENT_ERROR )
+	{
+	#if PHP_VERSION_ID < 70000
+		apm_throw_exception_plugin_hook(exception TSRMLS_CC);
+	#else
+		apm_throw_exception_plugin_hook(Z_OBJ_P(exception) TSRMLS_CC);
+	#endif
+	}
 
     if(old_zend_throw_exception_hook ){
 #if PHP_VERSION_ID >= 70000
@@ -653,9 +658,16 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
 
     do
     {
+        /// fatal error, avoiding calling multiple times
         if(PINPOINT_G(prs).fatal_error_catched == true)
         {
-            // error had been catched
+            // error had been caught
+            break;
+        }
+
+        // keep the same with error_reporting
+        if(!(EG(error_reporting) & type) )
+        {
             break;
         }
 
@@ -663,18 +675,16 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
         {
             break;
         }
+
         Pinpoint::Plugin::InterceptorPtr interceptorPtr =
             aop->getRequestInterceptorPtr();
         if (interceptorPtr == NULL)
         {
             break;
         }
-     if (type & (E_ERROR
-                |E_PARSE
-                |E_CORE_ERROR
-                |E_COMPILE_ERROR
-                |E_USER_ERROR
-                |E_RECOVERABLE_ERROR ))
+
+        /// treats this type as an error in agent
+        if(type & AGENT_ERROR)
         {
             Pinpoint::Plugin::ErrorInfo errorInfo;
             errorInfo.message = msg;
@@ -683,15 +693,7 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
             interceptorPtr->error(errorInfo);
             PINPOINT_G(prs).fatal_error_catched = true;
         }
-        else if (type & (E_WARNING          |
-                E_NOTICE          |
-                E_CORE_WARNING      |
-                E_COMPILE_WARNING  |
-                E_USER_WARNING      |
-                E_USER_NOTICE       |
-                E_DEPRECATED       |
-                E_STRICT |
-                E_USER_DEPRECATED ))
+        else if (type & AGENT_WARNG)  /// treats this type as an warning in agent
         {
             using namespace Pinpoint::Trace;
             TracePtr tracePtr = Trace::Trace::getCurrentTrace();
@@ -757,8 +759,12 @@ int32_t turn_on_aop()
     ori_execute_internal = zend_execute_internal;
     zend_execute_internal = pp_execute_internal;
 
-    old_zend_throw_exception_hook = zend_throw_exception_hook;
-    zend_throw_exception_hook = apm_throw_exception_hook;
+
+    if(PINPOINT_G(trace_exception))
+    {
+        old_zend_throw_exception_hook = zend_throw_exception_hook;
+        zend_throw_exception_hook = apm_throw_exception_hook;
+    }
 
     old_error_cb = zend_error_cb;
     zend_error_cb = apm_error_cb;
@@ -782,12 +788,13 @@ int32_t turn_off_aop()
 
     zend_execute_internal = ori_execute_internal;
 
-
-    zend_throw_exception_hook = NULL;
-
     zend_error_cb = old_error_cb;
 
-    zend_throw_exception_hook= old_zend_throw_exception_hook;
+
+    if(PINPOINT_G(trace_exception))
+    {
+        zend_throw_exception_hook = old_zend_throw_exception_hook;
+    }
 
     return SUCCESS;
 }

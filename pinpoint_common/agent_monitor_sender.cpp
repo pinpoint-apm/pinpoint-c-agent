@@ -125,7 +125,7 @@ namespace Pinpoint
                 statBatch.__set_startTimestamp((int32_t)contextPtr->startTimestamp);
                 statBatch.__set_agentStats(stats);
 
-                LOGI("TAgentStatBatch: [%s]", utils::TBaseToString(statBatch).c_str());
+                LOGT("TAgentStatBatch: [%s]", utils::TBaseToString(statBatch).c_str());
 
                 std::string data;
 

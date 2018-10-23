@@ -132,6 +132,9 @@ namespace Pinpoint
                 case PP_LOG_DEBUG:
                     return "DEBUG";
 
+                case PP_LOG_TRACE:
+                     return "TRACE";
+
                 default:
                     return "INFO";
             };
@@ -144,6 +147,7 @@ namespace Pinpoint
                             "ERROR",
                             "WARN",
                             "INFO",
+							"TRACE",
                             "DEBUG",
                             NULL
                     };

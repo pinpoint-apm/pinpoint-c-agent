@@ -12,6 +12,21 @@ struct TIntStringStringValue {
     3: optional string stringValue2;
 }
 
+struct TLongIntIntByteByteStringValue {
+    1: i64 longValue;
+    2: i32 intValue1;
+    3: optional i32 intValue2;
+    4: optional i8 byteValue1;
+    5: optional i8 byteValue2;
+    6: optional string stringValue;
+}
+
+struct TIntBooleanIntBooleanValue {
+    1: i32 intValue1;
+    2: bool boolValue1;
+    3: i32 intValue2;
+    4: bool boolValue2;
+}
 
 union TAnnotationValue {
   1: string stringValue
@@ -21,9 +36,11 @@ union TAnnotationValue {
   5: i16 shortValue
   6: double doubleValue;
   7: binary binaryValue;
-  8: byte byteValue;
+  8: i8 byteValue;
   9: TIntStringValue intStringValue;
   10: TIntStringStringValue intStringStringValue;
+  11: TLongIntIntByteByteStringValue longIntIntByteByteStringValue;
+  12: TIntBooleanIntBooleanValue intBooleanIntBooleanValue;
 }
 
 struct TAnnotation {
@@ -101,7 +118,7 @@ struct TSpan {
   26: optional TIntStringValue exceptionInfo;
   
   30: optional i16 applicationServiceType;
-  31: optional byte loggingTransactionInfo;
+  31: optional i8 loggingTransactionInfo;
 }
 
 struct TSpanChunk {

@@ -26,10 +26,8 @@ try {
 }
 
 
-
 $pdo->query("CREATE DATABASE IF NOT EXISTS `DBTest` DEFAULT CHARACTER SET utf8 ");
 $pdo->query("use DBTest");
-exit;
 // create table
 $pdo->query("CREATE TABLE IF NOT EXISTS user ( `name` VARCHAR(16) NOT NULL) ");
 $pdo->query("truncate table user");
@@ -41,16 +39,4 @@ $sth->execute();
 $result = $sth->fetchAll();
 print_r($result);
 
-$con = mysql_connect("dev-mysql-host","phpuser","1234");
-if (!$con)
-{
-    echo 'Could not connect: ' . mysql_error();
-    exit;
-}
-
-$sql = "SELECT * FROM `DBTest.user`";
-$result = mysql_query($sql,$con);
-print_r(mysql_fetch_array($result));
-
-mysql_close($con);
 

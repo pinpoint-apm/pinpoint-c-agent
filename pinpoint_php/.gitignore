@@ -8,6 +8,7 @@
 !README.md
 !.gitignore
 !Build.sh
+!deploy_third_pary.sh
 /config.h
 !*.php
 run-tests.php
