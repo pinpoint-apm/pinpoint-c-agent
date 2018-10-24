@@ -617,27 +617,18 @@ void vec_to_str(iVecStr istart,iVecStr iend,std::string& out)
     }
 }
 
-void get_all_plugins(Pinpoint::Plugin::PluginPtrVector &pluginPtrVector)
+void get_new_php_interface_plugins(Pinpoint::Plugin::PluginPtrVector &pluginPtrVector)
 {
+    PluginPtrVector& v2 =  PhpInterfacePluginManager::getManager()->getAllPlugins();
 
-    PhpPluginManager *phpPluginManager = PhpPluginManager::getInstance();
-    if (phpPluginManager == NULL)
-    {
-        LOGE("get PhpPluginManager failed.");
-    }
+    pluginPtrVector.insert(pluginPtrVector.end(), v2.begin(), v2.end());
+    v2.clear();
 
-    int err = phpPluginManager->registerPlugins();
-    if (err != SUCCESS)
-    {
-        LOGE("registerPlugins failed.");
-    }
+}
 
-    PluginPtrVector& v1 = phpPluginManager->getAllPlugins();
 
-    pluginPtrVector.insert(pluginPtrVector.end(), v1.begin(), v1.end());
-
-    LOGT("c++ plugin count=%d", v1.size());
-
+void get_plugins_by_php(Pinpoint::Plugin::PluginPtrVector &pluginPtrVector)
+{
     PhpInterfacePluginManager* interfacePluginManager = PhpInterfacePluginManager::getManager();
 
     PINPOINT_ASSERT (interfacePluginManager != NULL);
@@ -646,9 +637,10 @@ void get_all_plugins(Pinpoint::Plugin::PluginPtrVector &pluginPtrVector)
 
     pluginPtrVector.insert(pluginPtrVector.end(), v2.begin(), v2.end());
 
+    v2.clear();
+
     LOGT("php plugin count=%d", v2.size());
 
-    LOGT("all plugins count = %d", pluginPtrVector.size());
 }
 
 int init_pinpoint_agent()
@@ -664,8 +656,32 @@ int init_pinpoint_agent()
 	contextPtr->ip = get_host_process_info(Pinpoint::Naming::SERVER_ADDR);
 	contextPtr->ports = get_host_process_info(Pinpoint::Naming::SERVER_PORT);
 	contextPtr->hostname = get_host_process_info(Pinpoint::Naming::HTTP_HOST);
-	PluginPtrVector pluginPtrVector;
-	get_all_plugins(pluginPtrVector);
+
+    PluginPtrVector pluginPtrVector;
+
+    { /// insert c++ plugins
+        PhpPluginManager *phpPluginManager = PhpPluginManager::getInstance();
+        if (phpPluginManager == NULL)
+        {
+            LOGE("get PhpPluginManager failed.");
+        }
+
+        int err = phpPluginManager->registerPlugins();
+        if (err != SUCCESS)
+        {
+            LOGE("registerPlugins failed.");
+        }
+
+        PluginPtrVector& v1 = phpPluginManager->getAllPlugins();
+        pluginPtrVector.insert(pluginPtrVector.end(), v1.begin(), v1.end());
+
+        LOGT("c++ plugin count=%d", v1.size());
+    }
+
+	get_plugins_by_php(pluginPtrVector);
+
+    LOGT("all plugins count = %d", pluginPtrVector.size());
+
 	err = agentPtr->init(pluginPtrVector);
 	if (err != SUCCESS)
 	{
@@ -690,7 +706,15 @@ void start_pinpoint_agent()
 
 void end_current_calltrace()
 {
+    if( PINPOINT_G(prs).traceStatus == 0)
+    {
+        LOGW("current trace stopped");
+        return ;
+    }
+
     PINPOINT_G(prs).stackDepth = 0;
+    PINPOINT_G(prs).traceStatus = 0;
+
     PP_TRACE("request shutdown");
 
     AgentPtr agentPtr = Agent::getAgentPtr();
@@ -748,11 +772,18 @@ void end_current_calltrace()
 
 void start_a_new_calltrace()
 {
+    if(PINPOINT_G(prs).traceStatus == 1 )
+    {
+        LOGW("calltrace is not stopped");
+        return;
+    }
+
     PhpRequestCounter::increment();
     memset(&PINPOINT_G(prs),0,sizeof(PRS));
 
     PP_TRACE("request start");
     PINPOINT_G(prs).stackDepth++;
+    PINPOINT_G(prs).traceStatus = 1 ;
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT((agentPtr != NULL));

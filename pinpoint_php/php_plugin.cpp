@@ -57,6 +57,7 @@ int32_t PhpPluginManager::registerPlugins()
     try
     {
         pluginPtr.reset(new PhpRequestPlugin());
+        pluginPtr->init();
     }
     catch (std::bad_alloc&)
     {
@@ -79,7 +80,6 @@ int32_t PhpPluginManager::registerPlugins()
     }
     this->plugins.push_back(pluginPtr);
 #endif
-
 
     return Pinpoint::SUCCESS;
 }

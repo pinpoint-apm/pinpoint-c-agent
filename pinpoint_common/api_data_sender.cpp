@@ -242,6 +242,7 @@ namespace Pinpoint
             return SUCCESS;
         }
 
+        // update metaData
         int32_t ApiDataSender::start()
         {
             if (!isInitSuccess)

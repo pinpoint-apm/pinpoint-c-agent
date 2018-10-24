@@ -16,7 +16,8 @@
 #ifndef PINPOINT_EXECUTOR_H
 #define PINPOINT_EXECUTOR_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "pinpoint_error.h"
 #include "utility.h"
 #include "memory_pool.h"

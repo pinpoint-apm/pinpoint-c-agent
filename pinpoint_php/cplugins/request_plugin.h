@@ -47,6 +47,12 @@ public:
                           const PhpRequestPluginPtr& pluginPtr);
     virtual int32_t init();
 
+    virtual ~PhpRequestInterceptor()
+    {
+        LOGW("why you realloc PhpRequestInterceptor");
+        state=E_STOP;
+    }
+
 protected:
     virtual void onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher& argFetcher);
     virtual void onEnd(uint64_t callId,

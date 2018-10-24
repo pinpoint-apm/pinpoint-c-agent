@@ -1,12 +1,11 @@
 --TEST--
 Test pinpoint
 --INI--
+pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
-pinpoint_agent.config_full_name=/home/liumingyi/git/pinpoint-c-agent/simulate/tmp/pinpoint_agent.conf
 profiler.proxy.http.header.enable=true
 pinpoint_agent.unittest=true
-//pinpoint_agent.pluginsRootPath=php-plugins
-//pinpoint_agent.entryFilename=plugins_create.php
+
 --FILE--
 <?php
 
@@ -33,10 +32,10 @@ hello("pinpoint");
 ?>
 --EXPECTF--
 request start
-  addSimpleInterceptor name:hello
+  addSimpleInterceptor name:[hello]
   call hello's interceptorPtr::onBefore
-    SimpleInterceptor->addAnnotation key:-1 value:{[0]:pinpoint } 
+    SimpleInterceptor->addAnnotation key:[%s] value:[{[0]:pinpoint }] 
 hello pinpoint
   call hello's interceptorPtr::onEnd
-    SimpleInterceptor->addAnnotation key:14 value:pinpoint 
+    SimpleInterceptor->addAnnotation key:[%s] value:[pinpoint] 
 request shutdown

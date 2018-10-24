@@ -39,6 +39,7 @@ public:
     CurrentInterceptorInfo getCurrentInterceptorInfo();
 
     const static Pinpoint::Plugin::InterceptorPtr NULL_INTERCEPTOR;
+    virtual ~InterceptorManager(){}
 
 protected:
     Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr;
@@ -52,6 +53,7 @@ public:
     virtual const Pinpoint::Plugin::InterceptorPtr& find(const std::string& funcName);
     virtual int32_t add(const Pinpoint::Plugin::InterceptorPtr& interceptorPtr);
     virtual int32_t del(const std::string& funcName);
+    virtual ~InterceptorManagerBasedMap(){}
 private:
     typedef std::map<std::string, Pinpoint::Plugin::InterceptorPtr> InterceptorMap;
     InterceptorMap interceptors;

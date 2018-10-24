@@ -162,7 +162,7 @@ function build_agent(){
 
     make  $MAKE_PARAS -j$CPUNUM
     export NO_INTERACTION
-    make test || exit 1
+    #make test || exit 1
 }
 
 function main(){

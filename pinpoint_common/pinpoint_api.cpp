@@ -64,7 +64,7 @@ namespace Pinpoint
 
             if (tracePtr->isCodeError())
             {
-                LOGI("error happen! skip onend call.");
+                LOGW("error happen! skip onEnd call.");
                 return;
             }
 

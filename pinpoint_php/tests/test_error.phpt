@@ -1,12 +1,13 @@
 --TEST--
 Test pinpoint
 --INI--
+pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
-pinpoint_agent.config_full_name=/home/liumingyi/git/pinpoint-c-agent/simulate/tmp/pinpoint_agent.conf
+display_errors =On
+error_reporting = E_ERROR
 profiler.proxy.http.header.enable=true
 pinpoint_agent.unittest=true
-//pinpoint_agent.pluginsRootPath=php-plugins
-//pinpoint_agent.entryFilename=plugins_create.php
+
 --FILE--
 <?php
 
@@ -71,6 +72,7 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
+
 function hello_phpt($who)
 {
     echo "hello " .$who."\n";
@@ -78,25 +80,18 @@ function hello_phpt($who)
 }
 hello_phpt();
 
+
 --EXPECTF--
 request start
-  addInterceptor name:hello_phpt class:test_error
+  addInterceptor name:[hello_phpt] class:[test_error]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:-28
-    setServiceType:1501
-    addAnnotation -1:Array
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
 )
-
-[ERROR] file:[%s] line:[%s] msg:[Missing argument 1 for hello_phpt(), called in %s on line %d and defined]
-
-Warning: Missing argument 1 for hello_phpt(), called in %s on line %d and defined in %s on line %s
-[ERROR] file:[%s] line:[%d] msg:[Undefined variable: who]
-
-Notice: Undefined variable: who in %s on line %d
-hello 
-[ERROR] file:[%s] line:[%d] msg:[Undefined variable: who]
-
-Notice: Undefined variable: who in %s on line %d
-call hello_phpt's interceptorPtr::onEnd
+]
+%S
+  call hello_phpt's interceptorPtr::onEnd
+%A%A%A%A%A%A
 request shutdown

@@ -6,6 +6,9 @@ pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.unittest=true
 
+pinpoint.common.TraceLimit = 0
+pinpoint.common.SkipTraceTime = -1
+
 --FILE--
 <?php
 
@@ -73,24 +76,23 @@ pinpint_aop_reload();
 function hello_phpt($who)
 {
     echo "hello " .$who."\n";
-    throw new Exception("I don't care it");
     return $who;
 }
-hello_phpt("Mike");
+
+hello_phpt("phpt, \n how old are you!!!");
+
+hello_phpt("phpt, \n how old are you!!!");
 
 --EXPECTF--
 request start
-  addInterceptor name:[hello_phpt] class:[test_exception]
+  This trace had ignored by TraceLimit
+  addInterceptor name:[hello_phpt] class:[test_tracelimit]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[%i]
-    setServiceType:[1501]
-    addAnnotation [-1]:[Array
-(
-    [0] =&gt; Mike
-)
-]
-hello Mike
-  [EXCEPTION] file:[%s] line:[%d] msg:[I don't care it]
+hello phpt, 
+ how old are you!!!
   call hello_phpt's interceptorPtr::onEnd
-%A%A%A%A%A%A%A
+  call hello_phpt's interceptorPtr::onBefore
+hello phpt, 
+ how old are you!!!
+  call hello_phpt's interceptorPtr::onEnd
 request shutdown

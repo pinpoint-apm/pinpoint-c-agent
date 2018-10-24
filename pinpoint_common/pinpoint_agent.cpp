@@ -14,6 +14,7 @@
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
 #include <cstdio>
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 #include <cassert>
 
@@ -174,9 +175,16 @@ namespace Pinpoint
             return FAILED;
         }
 
+        void PinpointAgent::refreshMetaData()
+        {
+           if(apiDataSender){
+               apiDataSender->start();
+           }
+        }
+
         int32_t PinpointAgent::preInit(AgentType agentType,
                                        const AgentFunction &agentFunction,
-                                       Configuration::Config& conf)
+                                       struct AgentConfigArgs& conf)
         {
             int32_t err;
 
@@ -193,7 +201,7 @@ namespace Pinpoint
                 return FAILED;
             }
 
-            args->assignArgs(&conf);
+            *args = conf;
 
             err = PinpointAgentContext::initContext();
             if (err != SUCCESS)
@@ -241,31 +249,46 @@ namespace Pinpoint
             return err;
         }
 
-        int32_t PinpointAgent::init(Plugin::PluginPtrVector &pluginPtrVector)
+        int32_t PinpointAgent::init(Plugin::PluginPtrVector& pluginPtrVector)
         {
-            if (this->status != AGENT_PRE_INITED)
+            addPredefinedType();
+
+        	/// register all plugins
+        	updatePlugins(pluginPtrVector);
+
+			/* sampling */
+			samplingPtr.reset(new DefaultSampling(args->traceLimit, args->skipTraceTime));
+
+            this->status = (volatile AgentStatus)AGENT_INITED;
+            return SUCCESS;
+        }
+
+
+        int32_t PinpointAgent::start()
+        {
+            if (this->status != AGENT_INITED)
             {
+            	LOGD("start agent failed, as status != AGENT_INITED");
                 return FAILED;
             }
-
-            int32_t err = SUCCESS;
 
             PinpointAgentContextPtr contextPtr = PinpointAgentContext::getContextPtr();
 
             PINPOINT_ASSERT_RETURN((contextPtr != NULL), FAILED);
 
-        	Pinpoint::Agent::OS_process_id_t mainPid;
-        	Pinpoint::Agent::MainProcessChecker* checker = Pinpoint::Agent::MainProcessChecker::createChecker();
-        	checker->setMaxFreeTime(60);
-        	checker->isMainProcess(mainPid);
+            Pinpoint::Agent::OS_process_id_t mainPid;
+            Pinpoint::Agent::MainProcessChecker* checker = Pinpoint::Agent::MainProcessChecker::createChecker();
+            checker->setMaxFreeTime(60);
+            checker->isMainProcess(mainPid);
 
-        	contextPtr->mainProcessPid = (uint32_t)mainPid;
+            contextPtr->mainProcessPid = (uint32_t)mainPid;
 
             try
             {
+
                 statUdpSender.reset(new UdpDataSender(TaskDispatcher::getInstance().getAsio(),"collectorStatSender",
-                                                      args->collectorStatIp,
-                                                      args->collectorStatPort));
+                                                                      args->collectorStatIp,
+                                                                      args->collectorStatPort));
                 statUdpSender->init();
 
                 spanUdpSender.reset(new UdpDataSender(TaskDispatcher::getInstance().getAsio(),"collectorSpanSender",
@@ -281,7 +304,6 @@ namespace Pinpoint
                                                            args->collectorTcpPort,
                                                            scheduledExecutor,
                                                            args->reconInterval));
-
                 boost::shared_ptr<DataSender> tcpDataSender =
                         boost::dynamic_pointer_cast<DataSender>(pinpointClientPtr);
 
@@ -297,87 +319,16 @@ namespace Pinpoint
                 /* agentStatSender */
                 agentMonitorSender.reset(new AgentMonitorSender(scheduledExecutor, statUdpSender));
 
-
                 /* traceDataSender */
                 traceDataSender.reset(new TraceDataSender(spanUdpSender));
 
-                /* sampling */
-                samplingPtr.reset(new DefaultSampling(args->traceLimit, args->skipTraceTime));
-            }
-            catch (std::bad_alloc&)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return FAILED;
-            }
+                traceDataSender->init();
 
-
-            err = agentDataSender->init();
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            err = agentMonitorSender->init();
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            err = traceDataSender->init();
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            err = apiDataSender->init();
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            err = stringDataSender->init();
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            err = addPredefinedType();
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            /* register plugins */
-            err = registerPlugins(pluginPtrVector);
-            if (err != SUCCESS)
-            {
-                this->status = (volatile AgentStatus)AGENT_INIT_FAILURE;
-                return err;
-            }
-
-            pinpointClientPtr->init();
-
-            this->status = (volatile AgentStatus)AGENT_INITED;
-            return err;
-
-        }
-
-
-        int32_t PinpointAgent::start()
-        {
-            if (this->status != AGENT_INITED)
-            {
-                return FAILED;
-            }
-
-            try
-            {
+	            agentMonitorSender->init();
+	            agentDataSender->init();
+	            apiDataSender->init();
+	            stringDataSender->init();
+	            pinpointClientPtr->init();
 
                 agentDataSender->start();
                 agentMonitorSender->start();
@@ -403,12 +354,12 @@ namespace Pinpoint
 
         void PinpointAgent::asyStopAllTask()
         {
-        	// todo
+            // todo
 
-        	// timer event
-        	scheduledExecutor->stopScheduleExecutor();
+            // timer event
+            scheduledExecutor->stopScheduleExecutor();
 
-        	// tcp event
+            // tcp event
             pinpointClientPtr->stop();
 
             // udp event
@@ -428,11 +379,11 @@ namespace Pinpoint
             int32_t err = SUCCESS;
 
 #if 0
-			agentDataSender->start();
-			agentMonitorSender->start();
-			traceDataSender->start();
-			apiDataSender->start();
-			stringDataSender->start();
+            agentDataSender->start();
+            agentMonitorSender->start();
+            traceDataSender->start();
+            apiDataSender->start();
+            stringDataSender->start();
 #endif
 
 
@@ -450,11 +401,12 @@ namespace Pinpoint
         {
             ApiDataManagerPtr& manager = ApiDataManager::getInstance();
             PINPOINT_ASSERT_RETURN((manager != NULL), INVALID_API_ID);
-            if (status >= AGENT_STARTED)
-            {
-                LOGE("You should call this function before agent init.")
-                return INVALID_API_ID;
-            }
+
+//            if (status >= AGENT_STARTED)
+//            {
+//                LOGE("You should call this function before agent init.")
+//                return INVALID_API_ID;
+//            }
 
             return manager->addApi(std::string(api_info), line, type);
         }
@@ -492,7 +444,7 @@ namespace Pinpoint
 
         }
 
-        int32_t PinpointAgent::registerPlugins(Plugin::PluginPtrVector &pluginPtrVector)
+        int32_t PinpointAgent::updatePlugins(Plugin::PluginPtrVector &pluginPtrVector)
         {
             int32_t err = SUCCESS;
             LOGI("PinpointAgent::registerPlugins len(plugins)=%d", pluginPtrVector.size());
@@ -502,7 +454,7 @@ namespace Pinpoint
             std::vector<std::string> includes;
             if (this->args->pluginIncludeIsSet)
             {
-                utils::split_string(this->args->pluginInclude, includes, ";");
+                utils::split_string(this->args->pluginInclude, includes, ",");
                 std::for_each(includes.begin(), includes.end(),
                               boost::bind(&boost::trim<std::string>, _1, std::locale()));
             }
@@ -511,7 +463,7 @@ namespace Pinpoint
             std::vector<std::string> excludes;
             if (this->args->pluginExcludeIsSet)
             {
-                utils::split_string(this->args->pluginExclude, excludes, ";");
+                utils::split_string(this->args->pluginExclude, excludes, ",");
                 std::for_each(excludes.begin(), excludes.end(),
                               boost::bind(&boost::trim<std::string>, _1, std::locale()));
             }

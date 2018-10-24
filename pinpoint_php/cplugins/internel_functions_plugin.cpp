@@ -86,6 +86,7 @@ void PhpInfoInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetc
 {
     if (!Trace::isStarted())
     {
+        LOGW("why trace is started");
         return;
     }
 
@@ -109,6 +110,7 @@ void PhpInfoInterceptor::onEnd(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher
 {
     if (!Trace::isStarted())
     {
+        LOGW("trace is not started, why stop it");
         return;
     }
 

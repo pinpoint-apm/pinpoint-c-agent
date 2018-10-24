@@ -215,7 +215,16 @@ const InterceptorPtr& InterceptorManagerBasedMap::find(const std::string &funcNa
 int32_t InterceptorManagerBasedMap::add(const InterceptorPtr& interceptorPtr)
 {
     assert (interceptorPtr != NULL);
-    interceptors[interceptorPtr->getInterceptedFuncName()] = interceptorPtr;
+
+    /// if name is exist, refuse to add it
+    if(interceptors.find(interceptorPtr->getInterceptedFuncName()) == interceptors.end())
+    {
+        interceptors[interceptorPtr->getInterceptedFuncName()] = interceptorPtr;
+    }else{
+        LOGW("InterceptorManagerBasedMap: refuse update [%s]",interceptorPtr->getInterceptedFuncName().c_str());
+        PP_U_TRACE("InterceptorManagerBasedMap: refuse update [%s]",interceptorPtr->getInterceptedFuncName().c_str());
+    }
+
     return SUCCESS;
 }
 
@@ -291,7 +300,7 @@ void SimpleInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetch
         annotationPtr->addStringValue(value);
 
         spanEventRecorderPtr->addAnnotationPtr(annotationPtr);
-        PP_U_TRACE("SimpleInterceptor->addAnnotation key:%d value:%s ",Pinpoint::Plugin::INDEX_ARGS[0],value.c_str());
+        PP_U_TRACE("SimpleInterceptor->addAnnotation key:[%d] value:[%s] ",Pinpoint::Plugin::INDEX_ARGS[0],value.c_str());
 
 #if 0
         VecStr vec;
@@ -387,7 +396,7 @@ void SimpleInterceptor::onEnd(uint64_t callId,
             annotationPtr->addStringValue(value);
             spanEventRecorderPtr->addAnnotationPtr(annotationPtr);
 
-            PP_U_TRACE("SimpleInterceptor->addAnnotation key:%d value:%s ",Pinpoint::Trace::AnnotationKey::RETURN_DATA,value.c_str());
+            PP_U_TRACE("SimpleInterceptor->addAnnotation key:[%d] value:[%s] ",Pinpoint::Trace::AnnotationKey::RETURN_DATA,value.c_str());
         }
     }
     catch (std::exception& e)

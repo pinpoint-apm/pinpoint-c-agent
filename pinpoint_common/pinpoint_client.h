@@ -16,7 +16,8 @@
 #ifndef PINPOINT_CLIENT_H
 #define PINPOINT_CLIENT_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "string"
 #include "pinpoint_api.h"
 #include "executor.h"
@@ -341,12 +342,12 @@ namespace Pinpoint
 
             void start_connect_timer();
             void try_connect();
-            void connect_timer_event(const boost::system::error_code& /*e*/);
-            void write_timer_event(const boost::system::error_code& /*e*/);
 
             void handle_connect_event(const boost::system::error_code &ec);
 
             void handle_error(const boost::system::error_code &error);
+
+            void connect_timeout(const boost::system::error_code &error);
 
             void start_write();
             void handle_write(const boost::system::error_code& error, PacketPtr& packetPtr);

@@ -1,12 +1,11 @@
 --TEST--
 Test pinpoint
 --INI--
+pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
-pinpoint_agent.config_full_name=/home/liumingyi/git/pinpoint-c-agent/simulate/tmp/pinpoint_agent.conf
 profiler.proxy.http.header.enable=true
 pinpoint_agent.unittest=true
-//pinpoint_agent.pluginsRootPath=php-plugins
-//pinpoint_agent.entryFilename=plugins_create.php
+
 --FILE--
 <?php
 
@@ -80,24 +79,24 @@ hello_phpt("phpt, \n how old are you!!!");
 
 --EXPECTF--
 request start
-  addInterceptor name:hello_phpt class:hello_phpt
+  addInterceptor name:[hello_phpt] class:[hello_phpt]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:-28
-    setServiceType:1501
-    addAnnotation -1:Array
+    setApiId:[%s]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
     [0] =&gt; phpt, 
  how old are you!!!
 )
-
+]
 hello phpt, 
  how old are you!!!
   call hello_phpt's interceptorPtr::onEnd
-    addAnnotation 14:args:Array
+    addAnnotation [14]:[args:Array
 (
     [0] => phpt, 
  how old are you!!!
 )
 , return:phpt, 
- how old are you!!! 
+ how old are you!!! ]
 request shutdown

@@ -75,7 +75,9 @@ void php_getcwd(std::string&);
 
 int file_exist_and_readable(std::string& fullName);
 
-void get_all_plugins(Pinpoint::Plugin::PluginPtrVector &);
+void get_plugins_by_php(Pinpoint::Plugin::PluginPtrVector &);
+
+void get_new_php_interface_plugins(Pinpoint::Plugin::PluginPtrVector &);
 
 extern int32_t get_http_response_status();
 
@@ -174,13 +176,13 @@ public:
         // pls use threadself iRuning ...
         iRunning = 1;
         tTimes = iTimes++;
-        LOGD("DeclarePluginFun %d %ld", tTimes, gettid());
+//        LOGD("DeclarePluginFun %d %ld", tTimes, gettid());
     }
 
     ~RunOriginExecute(void)
     {
         iRunning = 0;
-        LOGD("~DeclarePluginFun %d %ld", tTimes, gettid());
+//        LOGD("~DeclarePluginFun %d %ld", tTimes, gettid());
     }
 
     static void start(void)

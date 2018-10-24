@@ -38,8 +38,6 @@ using  Pinpoint::Plugin::Plugin;
 using  Pinpoint::Plugin::PluginPtrVector;
 
 
-static void start_pinpoint_agent();
-static void start_pinpoint_agent_async();
 static void load_php_interface_plugins();
 
 
@@ -71,6 +69,13 @@ const static zend_function_entry pinpoint_functions[] = {
     PHP_FE(pinpoint_add_plugin, NULL)
     PHP_FE(pinpoint_add_api, arginfo_add_api)
     PHP_FE(pinpoint_log, arginfo_log)
+
+    PHP_FE(pinpint_aop_reload,NULL)
+    PHP_FE(pinpoint_data_thread_start,NULL)
+
+    PHP_FE(pinpoint_start_calltrace ,NULL)
+    PHP_FE(pinpoint_end_calltrace,NULL)
+
     {NULL, NULL, NULL, 0, 0}
 };
 //</editor-fold>
@@ -101,26 +106,117 @@ ZEND_DECLARE_MODULE_GLOBALS(pinpoint)
 
 PHP_INI_BEGIN()
 
-STD_PHP_INI_ENTRY("pinpoint_agent.config_full_name", "", PHP_INI_SYSTEM,
-        OnUpdateString,configFileName,zend_pinpoint_globals,pinpoint_globals)
+// discard
+//STD_PHP_INI_ENTRY("pinpoint_agent.config_full_name", "", PHP_INI_SYSTEM,OnUpdateString,configFileName,zend_pinpoint_globals,pinpoint_globals)
 
-STD_PHP_INI_ENTRY("pinpoint_agent.trace_exception",  "false", PHP_INI_SYSTEM,
+STD_PHP_INI_ENTRY("pinpoint_agent.pluginsRootPath", "", PHP_INI_SYSTEM,
+        OnUpdateString,pluginsRootPath,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint_agent.entryFilename", "", PHP_INI_SYSTEM,
+        OnUpdateString,entryFilename,zend_pinpoint_globals,pinpoint_globals)
+
+STD_PHP_INI_ENTRY("pinpoint_agent.trace_exception",  "0", PHP_INI_SYSTEM,
         OnUpdateBool, trace_exception, zend_pinpoint_globals, pinpoint_globals)
 
-STD_PHP_INI_ENTRY("pinpoint_agent.unittest",  "false", PHP_INI_SYSTEM,
-		OnUpdateBool, unittest, zend_pinpoint_globals, pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint_agent.unittest",  "0", PHP_INI_SYSTEM,
+        OnUpdateBool, unittest, zend_pinpoint_globals, pinpoint_globals)
+
+STD_PHP_INI_ENTRY("pinpoint_agent.pinpoint_enable","false",PHP_INI_SYSTEM,
+        OnUpdateBool,module_enable,zend_pinpoint_globals,pinpoint_globals)
+
+STD_PHP_INI_ENTRY("profiler.proxy.http.header.enable",  "true", PHP_INI_SYSTEM,
+        OnUpdateBool, proxy_headers, zend_pinpoint_globals, pinpoint_globals)
+
+        // log
+STD_PHP_INI_ENTRY("pinpoint.common.LogFileRootPath", "/tmp/", PHP_INI_SYSTEM,
+        OnUpdateString, logFileRootPath, zend_pinpoint_globals, pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.PPLogLevel", "DEBUG", PHP_INI_SYSTEM,
+        OnUpdateString, PPLogLevel, zend_pinpoint_globals, pinpoint_globals)
+
+        // agentid
+STD_PHP_INI_ENTRY("pinpoint.common.AgentID","uninitiated agentid", PHP_INI_SYSTEM,
+        OnUpdateString,agentID,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.ApplicationName","uninitiated applicationName", PHP_INI_SYSTEM,
+        OnUpdateString,applicationName,zend_pinpoint_globals,pinpoint_globals)
+
+        // collector info
+STD_PHP_INI_ENTRY("pinpoint.common.CollectorSpanIp","127.0.0.1", PHP_INI_SYSTEM,
+        OnUpdateString,collectorSpanIp,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.CollectorSpanPort","8000", PHP_INI_SYSTEM,
+        OnUpdateLong,CollectorSpanPort,zend_pinpoint_globals,pinpoint_globals)
+
+STD_PHP_INI_ENTRY("pinpoint.common.CollectorStatIp","127.0.0.1", PHP_INI_SYSTEM,
+        OnUpdateString,CollectorStatIp,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.CollectorStatPort","8000", PHP_INI_SYSTEM,
+        OnUpdateLong,CollectorStatPort,zend_pinpoint_globals,pinpoint_globals)
+
+STD_PHP_INI_ENTRY("pinpoint.common.CollectorTcpIp","127.0.0.1", PHP_INI_SYSTEM,
+        OnUpdateString,CollectorTcpIp,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.CollectorTcpPort","8000", PHP_INI_SYSTEM,
+        OnUpdateLong,CollectorTcpPort,zend_pinpoint_globals,pinpoint_globals)
+
+        //Plugins exclude and include
+STD_PHP_INI_ENTRY("pinpoint.common.PluginExclude","", PHP_INI_SYSTEM,
+        OnUpdateString,PluginExclude,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.PluginInclude","", PHP_INI_SYSTEM,
+        OnUpdateString,PluginInclude,zend_pinpoint_globals,pinpoint_globals)
+
+        // timeout
+STD_PHP_INI_ENTRY("pinpoint.common.ReconTimeOut","5",PHP_INI_SYSTEM,
+        OnUpdateLong,reconInterval,zend_pinpoint_globals,pinpoint_globals)
+
+        // Trace
+STD_PHP_INI_ENTRY("pinpoint.common.TraceLimit","-1",PHP_INI_SYSTEM,
+        OnUpdateLong,TraceLimit,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.SkipTraceTime","-1",PHP_INI_SYSTEM,
+        OnUpdateLong,SkipTraceTime,zend_pinpoint_globals,pinpoint_globals)
+
+        // API
+STD_PHP_INI_ENTRY("pinpoint.common.ApiTableFile","",PHP_INI_SYSTEM,
+        OnUpdateString,ApiTableFile,zend_pinpoint_globals,pinpoint_globals)
+
 PHP_INI_END()
 
 #ifdef COMPILE_DL_PINPOINT
 ZEND_GET_MODULE(pinpoint)
 #endif
 
-boost::shared_ptr<boost::thread> agent_start_thread_ptr;
+
+#define IS_MODULE_ENABLE()\
+do{\
+    if(PINPOINT_G(module_enable) == 0) return SUCCESS;\
+}while(0)
+
+void print_ini()
+{
+//    LOGD("configFileName:%s",PINPOINT_G(configFileName));
+    LOGD("trace_exception:%d",PINPOINT_G(trace_exception));
+    LOGD("unittest:%d",PINPOINT_G(unittest));
+    LOGD("pluginsRootPath:%d",PINPOINT_G(pluginsRootPath));
+    LOGD("entryFilename:%d",PINPOINT_G(entryFilename));
+    LOGD("proxy.http.header.enable:%d",PINPOINT_G(proxy_headers));
+
+    LOGD("common.agentID:%s",PINPOINT_G(agentID));
+    LOGD("common.applicationName:%s",PINPOINT_G(applicationName));
+    LOGD("common.collectorSpanIp:%s",PINPOINT_G(collectorSpanIp));
+    LOGD("common.CollectorSpanPort:%l",PINPOINT_G(CollectorSpanPort));
+    LOGD("common.CollectorStatIp:%s",PINPOINT_G(CollectorStatIp));
+    LOGD("common.CollectorStatPort:%l",PINPOINT_G(CollectorStatPort));
+    LOGD("common.CollectorTcpIp:%s",PINPOINT_G(CollectorTcpIp));
+    LOGD("common.CollectorTcpPort:%l",PINPOINT_G(CollectorTcpPort));
+    LOGD("common.PluginExclude:%s",PINPOINT_G(PluginExclude));
+    LOGD("common.PluginInclude:%s",PINPOINT_G(PluginInclude));
+
+    LOGD("common.TraceLimit:%d",PINPOINT_G(TraceLimit));
+    LOGD("common.SkipTraceTime:%d",PINPOINT_G(SkipTraceTime));
+
+    LOGD("common.reconInterval:%l",PINPOINT_G(reconInterval));
+    LOGD("common.ApiTableFile:%s",PINPOINT_G(ApiTableFile));
+}
+
 
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
 {
-    _pinpoint_globals->configFileName = NULL;
-    _pinpoint_globals->trace_exception= 1;
+//    _pinpoint_globals->trace_exception= 1;
 }
 
 PHP_MINIT_FUNCTION(pinpoint)
@@ -129,19 +225,17 @@ PHP_MINIT_FUNCTION(pinpoint)
 
     REGISTER_INI_ENTRIES();
 
+    IS_MODULE_ENABLE();
 
-    if(strcmp(PINPOINT_G(configFileName),"") == 0) // not find ini file
-    {
-        // no effect for PHP
-        return SUCCESS;
+    if( PINPOINT_G(pluginsRootPath) == NULL){
+        strncpy(PINPOINT_G(pluginsAbsolutePath),expand_filepath(PINPOINT_G(pluginsRootPath),NULL),MAXPATHLEN);
     }
+
 
     int32_t err = SUCCESS;
     try
     {
-        Pinpoint::Configuration::ConfFileObject fileobj(PINPOINT_G(configFileName));
-        Pinpoint::Configuration::Config config(fileobj);
-        init_evn_before_agent_real_startup(config);
+        init_evn_before_agent_real_startup();
 
         err = register_pinpoint_class();
         if (err != SUCCESS)
@@ -165,6 +259,28 @@ PHP_MINIT_FUNCTION(pinpoint)
         agentFunction.addInterceptorFunc = add_interceptor;
         agentFunction.getHostProcessInfo = get_host_process_info;
 
+#define IS_SET(offset) (strlen(PINPOINT_G(offset))==0?(0):(1))
+
+        Pinpoint::Agent::AgentConfigArgs config= {
+                PINPOINT_G(agentID),
+                PINPOINT_G(applicationName),
+                PINPOINT_G(collectorSpanIp),
+                PINPOINT_G(CollectorSpanPort),
+                PINPOINT_G(CollectorStatIp),
+                PINPOINT_G(CollectorStatPort),
+                PINPOINT_G(CollectorTcpIp),
+                PINPOINT_G(CollectorTcpPort),
+                PINPOINT_G(PluginInclude),
+                PINPOINT_G(PluginExclude),
+                IS_SET(ApiTableFile),
+                PINPOINT_G(ApiTableFile),
+                PINPOINT_G(TraceLimit),
+                PINPOINT_G(SkipTraceTime),
+                PINPOINT_G(reconInterval),
+                IS_SET(PluginInclude),
+                IS_SET(PluginExclude),
+        };
+
         err = agentPtr->preInit(Pinpoint::Agent::PHP_AGENT_TYPE,
                                 agentFunction,
                                 config);
@@ -177,8 +293,7 @@ PHP_MINIT_FUNCTION(pinpoint)
     }
     catch (std::invalid_argument& ex)
     {
-       fprintf(stderr,"pinpoint startup error "
-                        "please check config file %s !!!\n", PINPOINT_G(configFileName));
+       fprintf(stderr,"pinpoint startup error please check config file  !!!\n");
        return FAILED;
     }
     catch (...)
@@ -210,23 +325,17 @@ PHP_MINIT_FUNCTION(pinpoint)
     REGISTER_STRING_CONSTANT("PINPOINT_SAMPLE_HTTP_HEADER", const_cast<char*>(Pinpoint::HTTP_SAMPLED), CONST_CS | CONST_PERSISTENT);
     REGISTER_STRING_CONSTANT("PINPOINT_SAMPLE_FALSE", const_cast<char*>(Pinpoint::Agent::Sampling::SAMPLING_RATE_FALSE), CONST_CS | CONST_PERSISTENT);
 
-    // register hook
-    // fix 151
     turn_on_aop();
-
-    LOGI("agent initialized");
+    print_ini();
+    LOGI("pinpoint module initialized");
     return SUCCESS;
 }
 
 
 PHP_MSHUTDOWN_FUNCTION(pinpoint)
 {
-	LOGI("agent shutdown ");
-
-    if(agent_start_thread_ptr)
-    {
-        agent_start_thread_ptr->join();
-    }
+    IS_MODULE_ENABLE();
+    LOGI("pinpoint module shutdown ");
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     if (agentPtr != NULL)
@@ -246,113 +355,41 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
     return SUCCESS;
 }
 
-
+/// only valid in php-fpm
 PHP_RINIT_FUNCTION(pinpoint)
 {
-	LOGD("request start ");
-    PhpRequestCounter::increment();
-    memset(&PINPOINT_G(prs),0,sizeof(PRS));
+    IS_MODULE_ENABLE();
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
-
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
-    {
-        RunOriginExecute::stop();
-    }
 
     if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_PRE_INITED)
     {
         // Most of PHP configurations are not thread-safety.
         // So we read plugins that are wrote by php synchronized.
         load_php_interface_plugins();
-        start_pinpoint_agent_async();
-    }
 
-    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
-    {
-        // call longjmp: destructor is not called ...
-        RunOriginExecute::stop();
-
-        Pinpoint::Plugin::HttpHeader* header = Pinpoint::Plugin::RequestHeader::getCurrentRequestHeader();
-        if (header != NULL)
+        if(init_pinpoint_agent() != SUCCESS)
         {
-            Pinpoint::Plugin::HeaderMap headerMap;
-            if (get_php_request_headers(headerMap) == SUCCESS)
-            {
-                header->updateHeader(headerMap);
-            }
+        	return -1;
         }
 
-        PhpAop *aop = PhpAop::getInstance();
-        PINPOINT_ASSERT_RETURN ((aop != NULL), SUCCESS);
-
-        Pinpoint::Plugin::InterceptorPtr interceptorPtr = aop->getRequestInterceptorPtr();
-
-        if (interceptorPtr != NULL)
+        if( PINPOINT_G(unittest) == 0) // unittest not enable
         {
-            uint64_t call_id = interceptorPtr->assignCallId();
-            aop->resetCurrentInterceptor(interceptorPtr, call_id);
-            interceptorPtr->before(call_id, Pinpoint::Plugin::notSupportedFuncArgFetcher);
+            start_pinpoint_agent();
         }
 
+        start_a_new_calltrace();
     }
+
+
     return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(pinpoint)
 {
-	LOGD("request shutdown");
-    AgentPtr agentPtr = Agent::getAgentPtr();
-    PINPOINT_ASSERT_RETURN ((agentPtr != NULL), SUCCESS);
-
-    PhpAop *aop = PhpAop::getInstance();
-
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED)
-    {
-        PINPOINT_ASSERT_RETURN ((aop != NULL), SUCCESS);
-        Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr = aop->getRequestInterceptorPtr();
-
-        // maybe user call exit
-        CurrentInterceptorInfo currentInterceptorInfo = aop->getCurrentInterceptorInfo();
-        Pinpoint::Plugin::InterceptorPtr interceptorPtr = currentInterceptorInfo.first;
-        uint64_t call_id = currentInterceptorInfo.second;
-        if (interceptorPtr != NULL && interceptorPtr != requestInterceptorPtr)
-        {
-            PINPOINT_ASSERT_RETURN((call_id != Pinpoint::Plugin::INVALID_CALL_ID), FAILED);
-            Pinpoint::Trace::TracePtr tracePtr = Pinpoint::Trace::Trace::getCurrentTrace();
-            if (tracePtr != NULL)
-            {
-                Pinpoint::Trace::SpanEventRecorderPtr spanEventRecorderPtr = tracePtr->getSpanEventRecorderPtr(call_id);
-                if (spanEventRecorderPtr != NULL)
-                {
-                    spanEventRecorderPtr->markAfterTime();
-                    tracePtr->traceBlockEnd(spanEventRecorderPtr);
-                }
-            }
-        }
-
-        Pinpoint::Plugin::HttpHeader* header = Pinpoint::Plugin::ResponseHeader::getCurrentResponseHeader();
-        if (header != NULL)
-        {
-            Pinpoint::Plugin::HeaderMap headerMap;
-            if (get_php_response_headers(headerMap) == SUCCESS)
-            {
-                header->updateHeader(headerMap);
-            }
-        }
-
-        if (requestInterceptorPtr != NULL)
-        {
-            requestInterceptorPtr->end(Pinpoint::Plugin::IGNORE_CALL_ID,
-                                       Pinpoint::Plugin::notSupportedFuncArgFetcher,
-                                       Pinpoint::Plugin::notSupportedFuncResultFetcher);
-        }
-
-
-        aop->resetCurrentInterceptor();
-        aop->reqShutdownClean();
-    }
+    IS_MODULE_ENABLE();
+    end_current_calltrace();
 
 #ifdef HAVE_GCOV
     __gcov_flush();
@@ -361,77 +398,30 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint)
     return SUCCESS;
 }
 
-static void start_pinpoint_agent()
-{
-    AgentPtr agentPtr = Agent::getAgentPtr();
-    PINPOINT_ASSERT (agentPtr != NULL);
-
-    int32_t err;
-
-    PluginPtrVector pluginPtrVector;
-
-    PhpPluginManager *phpPluginManager = PhpPluginManager::getInstance();
-    if (phpPluginManager == NULL)
-    {
-        LOGE("get PhpPluginManager failed.");
-        return;
-    }
-
-    err = phpPluginManager->registerPlugins();
-    if (err != SUCCESS)
-    {
-        LOGE("registerPlugins failed.");
-        return;
-    }
-
-    PluginPtrVector& v1 = phpPluginManager->getAllPlugins();
-
-    pluginPtrVector.insert(pluginPtrVector.end(), v1.begin(), v1.end());
-
-    LOGT("c++ plugin count=%d", v1.size());
-
-    PhpInterfacePluginManager* interfacePluginManager = PhpInterfacePluginManager::getManager();
-    PINPOINT_ASSERT (interfacePluginManager != NULL);
-
-    PluginPtrVector& v2 = interfacePluginManager->getAllPlugins();
-
-    pluginPtrVector.insert(pluginPtrVector.end(), v2.begin(), v2.end());
-    LOGT("php plugin count=%d", v2.size());
-
-    LOGT("all plugins count = %d", pluginPtrVector.size());
-
-    err = agentPtr->init(pluginPtrVector);
-    if (err != SUCCESS)
-    {
-        LOGE("init Agent failed!");
-        return;
-    }
-
-    err = agentPtr->start();
-
-    LOGI(" pinpoint agent start !!! code = %d", err);
-}
-
 static void load_php_interface_plugins()
 {
     TSRMLS_FETCH();
 
-    int32_t err;
-
-    Pinpoint::Agent::AgentConfigArgsPtr contextPtr =
-            Pinpoint::Agent::PinpointAgentContext::getContextPtr()->agentConfigArgsPtr;
-    PINPOINT_ASSERT(contextPtr != NULL);
-
-    const char* phpCreatePluginsFileName = contextPtr->pluginFileName.c_str();
-    std::string pluginsDir =  contextPtr->pluginDir;
+    const char* phpCreatePluginsFileName = PINPOINT_G(entryFilename);
+    std::string pluginsDir =  PINPOINT_G(pluginsAbsolutePath);
 
     /* interfaces */
     zend_file_handle *prepend_file_p;
     zend_file_handle prepend_file;
     memset(&prepend_file, 0, sizeof(zend_file_handle));
 
-    const std::string p = path_join(pluginsDir, phpCreatePluginsFileName);
+    std::string p = path_join(pluginsDir, phpCreatePluginsFileName);
     LOGD("plugins full path %s", p.c_str());
+
+    if(file_exist_and_readable(p) == -1)
+    {
+        LOGW("\n\n");
+        LOGW("------------------------------------------------------------------------------------------------------------------------------------");
+        LOGW("------ %s can't read it ---------------------",p.c_str());
+        LOGW("------------------------------------------------------------------------------------------------------------------------------------");
+        LOGW("\n\n");
+    	return ;
+    }
 
 #if PHP_VERSION_ID < 50400
     prepend_file.filename = const_cast<char*>(p.c_str());
@@ -445,27 +435,18 @@ static void load_php_interface_plugins()
 
     int orig_start_lineno = CG(start_lineno);
     CG(start_lineno) = 0;
+
     zend_try{
         zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, prepend_file_p);
     } zend_catch{
-        LOGE("zend_execute_scripts failed. Maybe your plugins have syntax error. Please see PHP log to check the error.");
+        LOGE("\n\n");
+        LOGE("------------------------------------------------------------------------------------------------------------------------------------");
+        LOGE("------------your plugins have syntax error. Please see PHP log to check the error.--------------------------------------------------");
+        LOGE("------------------------------------------------------------------------------------------------------------------------------------");
+        LOGE("\n\n");
     } zend_end_try();
 
     CG(start_lineno) = orig_start_lineno;
-}
-
-
-static void start_pinpoint_agent_async()
-{
-
-    Pinpoint::Agent::PinpointAgentContextPtr& contextPtr = Pinpoint::Agent::PinpointAgentContext::getContextPtr();
-    PINPOINT_ASSERT (contextPtr != NULL);
-
-    contextPtr->ip = get_host_process_info(Pinpoint::Naming::SERVER_ADDR);
-    contextPtr->ports = get_host_process_info(Pinpoint::Naming::SERVER_PORT);
-    contextPtr->hostname = get_host_process_info(Pinpoint::Naming::HTTP_HOST);
-
-    start_pinpoint_agent();
 }
 
 

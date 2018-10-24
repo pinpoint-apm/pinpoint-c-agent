@@ -266,6 +266,7 @@ namespace Pinpoint
             void end(uint64_t callId, FuncArgFetcher& argFetcher, FuncResultFetcher& resultFetcher);
             void error(const ErrorInfo& errorInfo);
             void exception(uint64_t callId, const ExceptionInfo& exceptionInfo);
+            virtual ~Interceptor(){}
         protected:
             virtual void onBefore(uint64_t callId, FuncArgFetcher& argFetcher) = 0;
             virtual void onEnd(uint64_t callId, FuncArgFetcher& argFetcher, FuncResultFetcher& resultFetcher) = 0;
@@ -393,6 +394,7 @@ namespace Pinpoint
             virtual volatile AgentStatus getAgentStatus() const = 0;
             virtual SamplingPtr& getSamplingPtr() = 0;
             virtual int32_t sendTrace(const Trace::TracePtr &tracePtr) = 0;
+            virtual void refreshMetaData() = 0;
             virtual ~Agent(){};
         private:
             static AgentPtr agentPtr;

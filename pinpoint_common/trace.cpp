@@ -400,6 +400,7 @@ namespace Pinpoint
                     else
                     {
                         LOGI("skip trace: traceElapse=%d", traceElapse);
+                        err = SAMPLING_IGNORE;
                     }
                 }
             }
@@ -738,15 +739,8 @@ namespace Pinpoint
         CallStack::CallStack()
                 : sequence(0), index(0), latestStackIndex(0)
         {
-            try
-            {
-                stack.reserve(DEFAULT_STACK_LEN);
-            }
-            catch (std::bad_alloc)
-            {
-
-            }
-
+            // if error, throw to uplevel
+            stack.reserve(DEFAULT_STACK_LEN);
         }
 
         int32_t CallStack::push(SpanEventPtr &spanEventPtr)

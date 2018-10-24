@@ -19,7 +19,8 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "executor.h"
 #include "utility.h"
 
@@ -187,7 +188,7 @@ namespace Pinpoint
 
             ///E_EXIT force close the  connection
             ///E_CLOSE initialized state
-            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} ;
+            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED} ;
 
             E_NState nstate;
         private:

@@ -29,7 +29,6 @@ PhpRequestInterceptor::PhpRequestInterceptor(const std::string &interceptedFuncN
                                              const PhpRequestPluginPtr &pluginPtr)
         : Pinpoint::Plugin::Interceptor(interceptedFuncName), state(E_STOP), pluginPtr(pluginPtr)
 {
-
 }
 
 
@@ -40,6 +39,7 @@ int32_t PhpRequestInterceptor::startTrace()
     int32_t err = Trace::startTrace(pHeader);
     if (err == Pinpoint::SAMPLING_IGNORE)
     {
+        PP_U_TRACE("This trace had ignored by TraceLimit");
         return Pinpoint::SAMPLING_IGNORE;
     }
     else if (err != SUCCESS)
@@ -96,7 +96,6 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
                                      Pinpoint::Plugin::FuncArgFetcher& argFetcher)
 {
     (void)callId;
-
     switch (startTrace())
     {
         case Pinpoint::SAMPLING_IGNORE:
@@ -116,6 +115,8 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
             state = E_STARTED;
         }
     }
+
+    LOGI(" called %p %d ",this,state);
 
     // add proxy header checking
     if(!PINPOINT_G(proxy_headers))
@@ -147,8 +148,9 @@ void PhpRequestInterceptor::onEnd(uint64_t callId,
                                   Pinpoint::Plugin::FuncResultFetcher& resultFetcher)
 {
 
-    if( state != E_STARTED)
+    if( state != E_STARTED )
     {
+        LOGW("phprequest interceptor no started");
         return;
     }
 
@@ -167,10 +169,14 @@ void PhpRequestInterceptor::onEnd(uint64_t callId,
 
     int32_t err = endTrace();
 
-    if (err != SUCCESS)
+    if (err == Pinpoint::FAILED)
     {
         LOGE("endTrace failed.");
     }
+
+    PP_U_TRACE("%s",err == Pinpoint::SAMPLING_IGNORE?("This trace had ignored by skiptracetime"):(""));
+
+    state = E_STOP;
 
     return;
 }
@@ -182,6 +188,7 @@ void PhpRequestInterceptor::onEnd(uint64_t callId,
 PhpRequestPlugin::PhpRequestPlugin()
         : requestApiId(INVALID_API_ID)
 {
+
 
 }
 
@@ -197,22 +204,30 @@ int32_t PhpRequestPlugin::init()
 //    this->exceptionStringId = agentPtr->addString("Exception");
 
     // 3, add interceptor
+//    Pinpoint::Plugin::InterceptorPtr interceptorPtr;
+//    try
+//    {
+//        interceptorPtr.reset(new PhpRequestInterceptor(PHP_REQUEST_FUNC_NAME, shared_from_this()));
+//        // new and initialize it
+//        interceptorPtr->init();
+//    }
+//    catch (std::bad_alloc&)
+//    {
+//        LOGE("create PhpRequestInterceptor failed.");
+//        return Pinpoint::FAILED;
+//    }
+
+//    this->interceptors.push_back(interceptorPtr);
+
+
     Pinpoint::Plugin::InterceptorPtr interceptorPtr;
-    try
-    {
-        interceptorPtr.reset(new PhpRequestInterceptor(PHP_REQUEST_FUNC_NAME, shared_from_this()));
-    }
-    catch (std::bad_alloc&)
-    {
-        LOGE("create PhpRequestInterceptor failed.");
-        return Pinpoint::FAILED;
-    }
-
-    this->interceptors.push_back(interceptorPtr);
-
+    interceptorPtr.reset(new PhpRequestInterceptor(PHP_REQUEST_FUNC_NAME, shared_from_this()));
+    // new and initialize it
+    interceptorPtr->init();
     PhpAop* aop = PhpAop::getInstance();
     assert (aop != NULL);
     aop->setRequestInterceptorPtr(interceptorPtr);
+
 
     return SUCCESS;
 }
