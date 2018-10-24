@@ -24,6 +24,10 @@ class TIntStringValue;
 
 class TIntStringStringValue;
 
+class TLongIntIntByteByteStringValue;
+
+class TIntBooleanIntBooleanValue;
+
 class TAnnotationValue;
 
 class TAnnotation;
@@ -150,8 +154,148 @@ void swap(TIntStringStringValue &a, TIntStringStringValue &b);
 
 std::ostream& operator<<(std::ostream& out, const TIntStringStringValue& obj);
 
+typedef struct _TLongIntIntByteByteStringValue__isset {
+  _TLongIntIntByteByteStringValue__isset() : longValue(false), intValue1(false), intValue2(false), byteValue1(false), byteValue2(false), stringValue(false) {}
+  bool longValue :1;
+  bool intValue1 :1;
+  bool intValue2 :1;
+  bool byteValue1 :1;
+  bool byteValue2 :1;
+  bool stringValue :1;
+} _TLongIntIntByteByteStringValue__isset;
+
+class TLongIntIntByteByteStringValue : public virtual ::apache::thrift::TBase {
+ public:
+
+  TLongIntIntByteByteStringValue(const TLongIntIntByteByteStringValue&);
+  TLongIntIntByteByteStringValue& operator=(const TLongIntIntByteByteStringValue&);
+  TLongIntIntByteByteStringValue() : longValue(0), intValue1(0), intValue2(0), byteValue1(0), byteValue2(0), stringValue() {
+  }
+
+  virtual ~TLongIntIntByteByteStringValue() throw();
+  int64_t longValue;
+  int32_t intValue1;
+  int32_t intValue2;
+  int8_t byteValue1;
+  int8_t byteValue2;
+  std::string stringValue;
+
+  _TLongIntIntByteByteStringValue__isset __isset;
+
+  void __set_longValue(const int64_t val);
+
+  void __set_intValue1(const int32_t val);
+
+  void __set_intValue2(const int32_t val);
+
+  void __set_byteValue1(const int8_t val);
+
+  void __set_byteValue2(const int8_t val);
+
+  void __set_stringValue(const std::string& val);
+
+  bool operator == (const TLongIntIntByteByteStringValue & rhs) const
+  {
+    if (!(longValue == rhs.longValue))
+      return false;
+    if (!(intValue1 == rhs.intValue1))
+      return false;
+    if (__isset.intValue2 != rhs.__isset.intValue2)
+      return false;
+    else if (__isset.intValue2 && !(intValue2 == rhs.intValue2))
+      return false;
+    if (__isset.byteValue1 != rhs.__isset.byteValue1)
+      return false;
+    else if (__isset.byteValue1 && !(byteValue1 == rhs.byteValue1))
+      return false;
+    if (__isset.byteValue2 != rhs.__isset.byteValue2)
+      return false;
+    else if (__isset.byteValue2 && !(byteValue2 == rhs.byteValue2))
+      return false;
+    if (__isset.stringValue != rhs.__isset.stringValue)
+      return false;
+    else if (__isset.stringValue && !(stringValue == rhs.stringValue))
+      return false;
+    return true;
+  }
+  bool operator != (const TLongIntIntByteByteStringValue &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const TLongIntIntByteByteStringValue & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(TLongIntIntByteByteStringValue &a, TLongIntIntByteByteStringValue &b);
+
+std::ostream& operator<<(std::ostream& out, const TLongIntIntByteByteStringValue& obj);
+
+typedef struct _TIntBooleanIntBooleanValue__isset {
+  _TIntBooleanIntBooleanValue__isset() : intValue1(false), boolValue1(false), intValue2(false), boolValue2(false) {}
+  bool intValue1 :1;
+  bool boolValue1 :1;
+  bool intValue2 :1;
+  bool boolValue2 :1;
+} _TIntBooleanIntBooleanValue__isset;
+
+class TIntBooleanIntBooleanValue : public virtual ::apache::thrift::TBase {
+ public:
+
+  TIntBooleanIntBooleanValue(const TIntBooleanIntBooleanValue&);
+  TIntBooleanIntBooleanValue& operator=(const TIntBooleanIntBooleanValue&);
+  TIntBooleanIntBooleanValue() : intValue1(0), boolValue1(0), intValue2(0), boolValue2(0) {
+  }
+
+  virtual ~TIntBooleanIntBooleanValue() throw();
+  int32_t intValue1;
+  bool boolValue1;
+  int32_t intValue2;
+  bool boolValue2;
+
+  _TIntBooleanIntBooleanValue__isset __isset;
+
+  void __set_intValue1(const int32_t val);
+
+  void __set_boolValue1(const bool val);
+
+  void __set_intValue2(const int32_t val);
+
+  void __set_boolValue2(const bool val);
+
+  bool operator == (const TIntBooleanIntBooleanValue & rhs) const
+  {
+    if (!(intValue1 == rhs.intValue1))
+      return false;
+    if (!(boolValue1 == rhs.boolValue1))
+      return false;
+    if (!(intValue2 == rhs.intValue2))
+      return false;
+    if (!(boolValue2 == rhs.boolValue2))
+      return false;
+    return true;
+  }
+  bool operator != (const TIntBooleanIntBooleanValue &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const TIntBooleanIntBooleanValue & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+  virtual void printTo(std::ostream& out) const;
+};
+
+void swap(TIntBooleanIntBooleanValue &a, TIntBooleanIntBooleanValue &b);
+
+std::ostream& operator<<(std::ostream& out, const TIntBooleanIntBooleanValue& obj);
+
 typedef struct _TAnnotationValue__isset {
-  _TAnnotationValue__isset() : stringValue(false), boolValue(false), intValue(false), longValue(false), shortValue(false), doubleValue(false), binaryValue(false), byteValue(false), intStringValue(false), intStringStringValue(false) {}
+  _TAnnotationValue__isset() : stringValue(false), boolValue(false), intValue(false), longValue(false), shortValue(false), doubleValue(false), binaryValue(false), byteValue(false), intStringValue(false), intStringStringValue(false), longIntIntByteByteStringValue(false), intBooleanIntBooleanValue(false) {}
   bool stringValue :1;
   bool boolValue :1;
   bool intValue :1;
@@ -162,6 +306,8 @@ typedef struct _TAnnotationValue__isset {
   bool byteValue :1;
   bool intStringValue :1;
   bool intStringStringValue :1;
+  bool longIntIntByteByteStringValue :1;
+  bool intBooleanIntBooleanValue :1;
 } _TAnnotationValue__isset;
 
 class TAnnotationValue : public virtual ::apache::thrift::TBase {
@@ -183,6 +329,8 @@ class TAnnotationValue : public virtual ::apache::thrift::TBase {
   int8_t byteValue;
   TIntStringValue intStringValue;
   TIntStringStringValue intStringStringValue;
+  TLongIntIntByteByteStringValue longIntIntByteByteStringValue;
+  TIntBooleanIntBooleanValue intBooleanIntBooleanValue;
 
   _TAnnotationValue__isset __isset;
 
@@ -205,6 +353,10 @@ class TAnnotationValue : public virtual ::apache::thrift::TBase {
   void __set_intStringValue(const TIntStringValue& val);
 
   void __set_intStringStringValue(const TIntStringStringValue& val);
+
+  void __set_longIntIntByteByteStringValue(const TLongIntIntByteByteStringValue& val);
+
+  void __set_intBooleanIntBooleanValue(const TIntBooleanIntBooleanValue& val);
 
   bool operator == (const TAnnotationValue & rhs) const
   {
@@ -247,6 +399,14 @@ class TAnnotationValue : public virtual ::apache::thrift::TBase {
     if (__isset.intStringStringValue != rhs.__isset.intStringStringValue)
       return false;
     else if (__isset.intStringStringValue && !(intStringStringValue == rhs.intStringStringValue))
+      return false;
+    if (__isset.longIntIntByteByteStringValue != rhs.__isset.longIntIntByteByteStringValue)
+      return false;
+    else if (__isset.longIntIntByteByteStringValue && !(longIntIntByteByteStringValue == rhs.longIntIntByteByteStringValue))
+      return false;
+    if (__isset.intBooleanIntBooleanValue != rhs.__isset.intBooleanIntBooleanValue)
+      return false;
+    else if (__isset.intBooleanIntBooleanValue && !(intBooleanIntBooleanValue == rhs.intBooleanIntBooleanValue))
       return false;
     return true;
   }

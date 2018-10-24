@@ -110,7 +110,7 @@ namespace Pinpoint
                 PacketData& packetData = packetPtr->getPacketData();
                 packetData = tBasePtr;
 
-                LOGI("TStringMetaData: [%s]", utils::TBaseToString(packetData).c_str());
+                LOGT("TStringMetaData: [%s]", utils::TBaseToString(packetData).c_str());
 
                 dataSender->sendPacket(packetPtr, 100);
             }

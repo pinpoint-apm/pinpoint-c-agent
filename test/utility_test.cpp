@@ -159,3 +159,18 @@ TEST(utility_test, base64)
     assert(Pinpoint::utils::Base64Decode(decoded, coded));
     ASSERT_EX((raw == decoded), raw, decoded);
 }
+
+TEST(utility_test,dotsec_to_milisec)
+{
+    using Pinpoint::utils::dotsec_to_milisec;
+    EXPECT_EQ(0,dotsec_to_milisec(NULL));
+    EXPECT_EQ(1000,dotsec_to_milisec("1.0"));
+    EXPECT_EQ(1001,dotsec_to_milisec("1.1"));
+    EXPECT_EQ(999,dotsec_to_milisec("1.-1"));
+    EXPECT_EQ(0,dotsec_to_milisec("-1.1"));
+    EXPECT_EQ(0,dotsec_to_milisec("-abc.d"));
+
+}
+
+
+

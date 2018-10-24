@@ -170,7 +170,7 @@ namespace Pinpoint
                 return defaultValue;
             }
 
-            LOGI("%s=%s", configNodeName.c_str(), s.c_str());
+            LOGT("%s=%s", configNodeName.c_str(), s.c_str());
 
             return s;
         }
@@ -204,7 +204,7 @@ namespace Pinpoint
             int32_t i32_value = _pteeObj.get < int32_t > (configNodeName, omit);
             if (i32_value == omit)
             {
-                LOGI(" [%s] config not find use default [%d]", configNodeName.c_str(),
+                LOGT(" [%s] config not find use default [%d]", configNodeName.c_str(),
                          defaultValue);
                 return defaultValue;
             }

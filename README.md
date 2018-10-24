@@ -1,5 +1,7 @@
 ![Pinpoint](images/logo.png)
 
+[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=dev)](https://travis-ci.com/naver/pinpoint-c-agent)
+
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
@@ -60,7 +62,7 @@ pinpoint| 1.8.0-RC1
         - wget http://apache.fayea.com/thrift/0.11.0/thrift-0.11.0.tar.gz
         - tar zxvf thrift-0.11.0.tar.gz  
         - cd thrift-0.11.0  
-        - ./configure --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no -with-boost=$PREFIX
+        - ./configure CXXFLAGS="-DFORCE_BOOST_SMART_PTR" --with-cpp --with-php=no --with-python=no --with-ruby=no --with-nodejs=no --with-qt4=no --with-java=no -with-boost=$PREFIX
         - make 
         - make install 
      

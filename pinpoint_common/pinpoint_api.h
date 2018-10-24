@@ -60,7 +60,7 @@ namespace Pinpoint
         {
         public:
             static std::string int64ToString(int64_t value);
-            static int64_t stringToInt64(const std::string& value) throw (std::invalid_argument);
+            static int64_t stringToInt64(const std::string& value);
             static std::string getErrorMsg(const char* file, int32_t lineno, const char* msg);
             static std::string getExceptionMsg(const char* file, int32_t lineno, const char* msg);
             static std::string formatMsg(const char* header,const char* file, int32_t lineno, const char* msg);
@@ -474,14 +474,18 @@ namespace Pinpoint
             virtual void addDoubleValue(double d) = 0;
             virtual void addIntStringValue(int32_t intValue, const std::string& s) = 0;
             virtual void addIntStringStringValue(int32_t intValue, const std::string& s1, const std::string& s2) = 0;
+            virtual void addTLongIntIntByteByteStringValue(std::string&,int) = 0;
         };
     }
 }
-#define PP_LOG_DEBUG      4
+#define PP_LOG_DEBUG      5
+#define PP_LOG_TRACE      4
 #define PP_LOG_INFO       3
 #define PP_LOG_WARNING    2
 #define PP_LOG_ERROR      1
+
 #define LOGD(format, ...)  Pinpoint::log::printf_to_stderr_ex(PP_LOG_DEBUG,   __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
+#define LOGT(format, ...)   Pinpoint::log::printf_to_stderr_ex(PP_LOG_TRACE,    __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
 #define LOGI(format, ...)   Pinpoint::log::printf_to_stderr_ex(PP_LOG_INFO,    __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
 #define LOGW(format, ...)   Pinpoint::log::printf_to_stderr_ex(PP_LOG_WARNING, __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));
 #define LOGE(format, ...)  Pinpoint::log::printf_to_stderr_ex(PP_LOG_ERROR,   __FILE__, __LINE__, Pinpoint::log::format_log_message_ex(format, ##__VA_ARGS__));

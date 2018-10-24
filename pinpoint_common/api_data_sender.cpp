@@ -81,7 +81,7 @@ namespace Pinpoint
                             ss >> id;
                             if (!ss.fail() && id < INVALID_API_ID)
                             {
-                                LOGI("read api: apiInfo=[%s], apiId=[%d]", api.c_str(), id);
+                                LOGT("read api: apiInfo=[%s], apiId=[%d]", api.c_str(), id);
 
                                 // the api has been assigned
                                 ApiAssignTable::iterator ip = apiAssignTable.find(api);
@@ -277,7 +277,7 @@ namespace Pinpoint
                 PacketData& packetData = packetPtr->getPacketData();
                 packetData = tBasePtr;
 
-                LOGI("TApiMetaData: [%s]", utils::TBaseToString(packetData).c_str());
+                LOGT("TApiMetaData: [%s]", utils::TBaseToString(packetData).c_str());
 
                 dataSender->sendPacket(packetPtr, 100);
             }

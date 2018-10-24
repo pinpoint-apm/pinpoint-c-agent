@@ -74,7 +74,7 @@ static inline std::string getNameFromHeaderMap(const char* pstr)
 static uint32_t find_first_of_char(const char*pstr, uint32_t strLen ,char C)
 {
     uint32_t i =0;
-    for( ;pstr != '\0' && i < strLen ;pstr++,i++)
+    for( ;pstr != NULL && i < strLen ;pstr++,i++)
     {
         if((char)*pstr == C)
             break;
@@ -244,6 +244,36 @@ std::string get_rpc()
 {
     return  getNameFromHeaderMap(PP_REQUEST_URI);
 }
+
+
+
+
+bool get_proxy_http_header(std::string &value,int& type)
+{
+
+//    TYPE_APP = 1,
+//     TYPE_NGINX = 2,
+//     TYPE_APACHE = 3
+
+    std::string header ="";
+
+    if( (header = getNameFromHeaderMap(PP_NGINX_PROXY)) != "") {
+        type = Pinpoint::TYPE_NGINX;
+    }else if( (header = getNameFromHeaderMap(PP_APACHE_PROXY) )!= ""){
+        type = Pinpoint::TYPE_APACHE;
+    }else if( (header = getNameFromHeaderMap(PP_APP_PROXY)) != "")
+    {
+        type = Pinpoint::TYPE_APP;
+    }else{
+        return false;
+    }
+
+    value = header;
+    return true;
+}
+
+
+
 
 int32_t get_http_response_status()
 {

@@ -116,6 +116,21 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
         }
     }
 
+    TracePtr tracePtr = Trace::getCurrentTrace();
+    PINPOINT_ASSERT (tracePtr != NULL);
+    /// add PROXY_HTTP_HEADER when request start
+    /// avoiding error jmp, if that the end-callback could be jmp
+    std::string proxyHeader="";
+
+    AnnotationPtr annotationPtr = Annotation::createAnnotation(AnnotationKey::PROXY_HTTP_HEADER);
+    int type = 0;
+    if (annotationPtr != NULL && get_proxy_http_header(proxyHeader,type))
+    {
+        LOGD("proxy_header %s",proxyHeader.c_str());
+
+        annotationPtr->addTLongIntIntByteByteStringValue(proxyHeader,type);
+        tracePtr->addAnnotationPtr(annotationPtr);
+    }
 }
 
 void PhpRequestInterceptor::onEnd(uint64_t callId,
