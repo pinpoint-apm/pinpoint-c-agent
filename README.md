@@ -5,7 +5,7 @@
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [v0.1.0](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [v0.1.1](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint C Agent
 
@@ -37,17 +37,17 @@ pinpoint| 1.8.0-RC1
 
     > Ubuntu 
 
-        sudo apt-get install automake bison flex g++ git libtool make pkg-config
+        sudo apt-get install automake bison flex g++ git libtool make pkg-config openssl libssl-dev 
 
     > Centos
     
-        sudo yum install automake libtool flex bison pkgconfig gcc-c++
+        sudo yum install automake libtool flex bison pkgconfig gcc-c++ openssl-devel
 
 - Install third-library  
 
     Option 1. Use agent build tools (install boost and Thirft in $PWD/../thirdlibray/var)
 
-        $ cd pinpoint-c-agent
+        $ cd pinpoint-c-agent/pinpoint_php
         $ ./Build.sh
         $ export LD_LIBRARY_PATH=$PWD/../thirdlibray/var/:$LD_LIBRARY_PATH
 
@@ -80,8 +80,8 @@ pinpoint| 1.8.0-RC1
   
 #### Build php-agent
 
-1. Checking phpize is in your PATH.
-    If not, install phpize and export in your system PATH.(eg:export PATH=/path to phpize/:$PATH)
+1. Checking phpize and php-config is in your PATH.
+    If not, install phpize and export in your system PATH.(eg:export PATH=/path to phpize/:/path to php-config/:$PATH)
 2. Run cd pinpoint_php && ./Build.sh  && sudo make install
 3. If **_2_** running successfully, agent had installed into php module.
 
@@ -94,6 +94,7 @@ pinpoint| 1.8.0-RC1
       LogFileRootPath=/absolute ​path where logging to/
       PluginRootDir​=/absolute path to /web/plugins/​
 ```
+ (eg: make sure LogFileRootPath has been created.)
 2. Enable pinpoint-agent-php into php.ini, and configuring extension and pinpoint_agent.config_full_name (eg:pinpoint_c_agent/quickstart/config/php.ini.example)
 3. Restart php-fpm/Apache
 4. After restart php-fpm/Apache, if you meet "xxx pinpoint_api.cpp:158 [INFO] common.AgentID=php_pinpoint ...." in your LogFileRootPath/pinpoint_log.txt, pinpoint-agent-php installed successfully. If not, contract us without hesitation. 
