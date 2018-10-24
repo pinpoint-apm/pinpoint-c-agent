@@ -87,14 +87,14 @@ pinpoint| 1.8.0-RC1
 
 #### Startup 
 1. Modifying below options in the "pinpoint_agent.conf" (eg:pinpoint_c_agent/quickstart/config/pinpoint_agent.conf.example)
-```
-      AgentID=uniquely identifies the application instance in which the agent is running on
-      ApplicationName= groups a number of identical application instances as a single service
-      Collector*= pinpoint collector information  
-      LogFileRootPath=/absolute ​path where logging to/
-      PluginRootDir​=/absolute path to /web/plugins/​
-```
- (eg: make sure LogFileRootPath has been created.)
+    ```
+          AgentID=uniquely identifies the application instance in which the agent is running on
+          ApplicationName= groups a number of identical application instances as a single service
+          Collector*= pinpoint collector information  
+          LogFileRootPath=/absolute ​path where logging to/
+          PluginRootDir​=/absolute path to /web/plugins/​
+    ```
+    (eg: make sure LogFileRootPath has been created.)
 2. Enable pinpoint-agent-php into php.ini, and configuring extension and pinpoint_agent.config_full_name (eg:pinpoint_c_agent/quickstart/config/php.ini.example)
 3. Restart php-fpm/Apache
 4. After restart php-fpm/Apache, if you meet "xxx pinpoint_api.cpp:158 [INFO] common.AgentID=php_pinpoint ...." in your LogFileRootPath/pinpoint_log.txt, pinpoint-agent-php installed successfully. If not, contract us without hesitation. 
