@@ -103,6 +103,7 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
         case Pinpoint::FAILED:
         {
             state = E_STOP;
+            return ;
         }
         break;
         case SUCCESS:
