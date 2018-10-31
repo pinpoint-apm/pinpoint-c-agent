@@ -248,7 +248,7 @@ namespace Pinpoint
             if (!ec)
             {
                 state.toConnected();
-                LOGI("%s: Connect success.", this->getName().c_str());
+                LOGI("%s:%d Connect success.", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
                 state.toRunWithoutHandshake();
                 try
                 {
