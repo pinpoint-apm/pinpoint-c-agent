@@ -186,16 +186,6 @@ namespace Pinpoint
             }
         }
 
-        void PinpointClient::write_timer_event(const boost::system::error_code& /*e*/)
-        {
-            start_write();
-        }
-
-        void PinpointClient::connect_timer_event(const boost::system::error_code& /*e*/)
-        {
-            try_connect();
-        }
-
         void PinpointClient::try_connect()
         {
 
@@ -221,6 +211,10 @@ namespace Pinpoint
                 socket_.async_connect(endpoint_,
                                       boost::bind(&PinpointClient::handle_connect_event,
                                                   this, _1));
+
+            	timer_.expires_from_now(boost::posix_time::seconds(interval));
+            	timer_.async_wait(boost::bind(&PinpointClient::connect_timeout,this,_1));
+
                 nstate = E_CONNECTING;
 
             }
@@ -232,38 +226,29 @@ namespace Pinpoint
 
         }
 
+        void PinpointClient::connect_timeout(const boost::system::error_code &ec)
+        {
+        	if( nstate != E_CONNECTED)
+        	{
+        		handle_error(ec);
+        	}
+        }
 
         void PinpointClient::handle_error(const boost::system::error_code &ec)
         {
             // close current socket
-
-            if(nstate == E_CONNECTING )
-            {
-                return ;
-            }
-
             this->socket_.close();
-
-            // retry + timer
-            timer_.cancel();
-            timer_.expires_from_now(boost::posix_time::seconds(interval));
-            timer_.async_wait(boost::bind(&PinpointClient::connect_timer_event,this,_1));
-            LOGE("connect %s:%u timeout:%d failed try again",endpoint_.address().to_string().c_str(), endpoint_.port(),interval);
-            nstate = E_CONNECTING;
-
+            nstate = E_CLOSE;
+            try_connect();
         }
 
         void PinpointClient::handle_connect_event(const boost::system::error_code &ec)
         {
 
-            if (ec)
-            {
-                handle_error(ec);
-            }
-            else
+            if (!ec)
             {
                 state.toConnected();
-                LOGI("%s: Connect success.", this->getName().c_str());
+                LOGI("%s:%d Connect success.", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
                 state.toRunWithoutHandshake();
                 try
                 {
@@ -476,15 +461,12 @@ namespace Pinpoint
                     (boost::asio::error::bad_descriptor == error))
                 {
                     LOGW("connect broken: %s:%d", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
-
                     handle_error(error);
-
                 }
                 else
                 {
-                    LOGI("handle_write: %s ",error.message().c_str());
+                    LOGE("handle_write: %s ",error.message().c_str());
                     assert(0);
-//                    start_write();
                 }
             }
 
@@ -652,6 +634,8 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_header error: err=%s", error.message().c_str());
+                handle_error(error);
+
             }
         }
 
@@ -707,6 +691,7 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_header error: err=%s", error.message().c_str());
+                handle_error(error);
             }
         }
 
