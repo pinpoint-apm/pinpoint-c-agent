@@ -836,7 +836,7 @@ namespace Pinpoint
 
         void SpanEvent::markAfterTime()
         {
-            tSpanEvent.__set_endElapsed(utils::get_current_microsec_stamp64() - spanPtr->getBeforeTime());
+            tSpanEvent.__set_endElapsed(utils::get_current_microsec_stamp64() - spanPtr->getBeforeTime() - tSpanEvent.startElapsed);
         }
 
         void SpanEvent::setApiId(int32_t apiId)
