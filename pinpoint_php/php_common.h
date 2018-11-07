@@ -20,6 +20,7 @@
 #include "pinpoint_api.h"
 #include "php_pinpoint.h"
 
+
 #include <boost/thread.hpp>
 
 #define PP_SERVER "_SERVER"
@@ -45,6 +46,15 @@
 #define AGENT_ERROR  (E_ERROR|E_PARSE|E_CORE_ERROR|E_COMPILE_ERROR|E_USER_ERROR|E_RECOVERABLE_ERROR)
 #define AGENT_WARNG  (E_WARNING|E_NOTICE|E_CORE_WARNING|E_COMPILE_WARNING|E_USER_WARNING|E_USER_NOTICE|E_DEPRECATED|E_STRICT|E_USER_DEPRECATED)
 
+#define PP_U_TRACE(msg,...) (PINPOINT_G(unittest)?(fprintf(stderr,"%*s" msg"\n",PINPOINT_G(prs).stackDepth*2,"",##__VA_ARGS__)):(0));
+
+#define PP_TRACE(msg,...)\
+		do{\
+			PP_U_TRACE(msg,##__VA_ARGS__);\
+			LOGT(msg,##__VA_ARGS__);\
+		}while(0)
+
+
 using Pinpoint::Naming::eName;
 
 typedef std::map<std::string,std::string> KV;
@@ -61,11 +71,17 @@ extern std::string get_remote_addr();
 
 extern std::string get_rpc();
 
+void php_getcwd(std::string&);
+
+int file_exist_and_readable(std::string& fullName);
+
+void get_all_plugins(Pinpoint::Plugin::PluginPtrVector &);
+
 extern int32_t get_http_response_status();
 
 extern bool get_proxy_http_header(std::string &,int&);
 
-extern void init_evn_before_agent_real_startup(Pinpoint::Configuration::Config&);
+extern void init_evn_before_agent_real_startup();
 
 extern std::string get_host_process_info(eName name);
 
@@ -75,9 +91,9 @@ extern bool is_interface_impl(zval* obj, const char* interface_name);
 
 extern bool is_class_impl(zval* obj, const char* class_name);
 
-extern const std::string zval_to_string(zval* value,int32_t);
+extern const std::string zval_to_string(zval* value,uint32_t);
 
-extern const std::string path_join(std::string , std::string );
+extern std::string path_join(std::string , std::string );
 
 extern const Pinpoint::Plugin::ExceptionInfo get_exception_info(EG_EXP_TPYE exception);
 
@@ -88,6 +104,15 @@ void zval_args_to_vec(VecStr &vec, zval* val, int32_t maxELemSize,int32_t maxDat
 void map_to_str(const KV &map,std::string &str);
 
 void vec_to_str(iVecStr istart,iVecStr iend,std::string& out);
+
+int init_pinpoint_agent();
+
+void start_pinpoint_agent();
+
+void start_a_new_calltrace();
+
+void end_current_calltrace();
+
 
 class PhpRequestCounter
 {
@@ -122,7 +147,7 @@ private:
     int32_t load();
 
     unsigned char *buf;
-    size_t bufLen;
+    uint64_t bufLen;
     char* classDefinitionPath;
     bool isCacheSuccess;
     zend_uchar type;

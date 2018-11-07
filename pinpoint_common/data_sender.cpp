@@ -30,9 +30,13 @@ namespace Pinpoint
 
         //<editor-fold desc="UdpDataSender">
 
-        UdpDataSender::UdpDataSender(const std::string &name, const std::string &ip, uint32_t port)
-                : ThreadExecutor(name), DataSender(ip, port),
-                  sendQueue(UDP_BUFFER_LEN), io(), socket_(io), timer_(io), m_sendCount(0)
+        UdpDataSender::UdpDataSender(boost::asio::io_service& agentIo,const std::string &name, const std::string &ip, uint32_t port)
+                : DataSender(ip, port),
+                  sendQueue(UDP_BUFFER_LEN),
+				  io(agentIo),
+				  socket_(agentIo),
+				  timer_(agentIo),
+				  m_sendCount(0)
         {
 
         }
@@ -42,7 +46,14 @@ namespace Pinpoint
 
         }
 
-        void UdpDataSender::executeTask()
+        void UdpDataSender::stop()
+        {
+        	timer_.cancel();
+        	nstate = E_EXIT;
+        	LOGD("UdpDataSender exit");
+        }
+
+        void UdpDataSender::init()
         {
             socket_.open(boost::asio::ip::udp::v4());
             boost::asio::ip::address add;
@@ -53,26 +64,18 @@ namespace Pinpoint
             }
             catch (std::exception &e)
             {
-                LOGE("%s ip error: ip=%s, err=%s",
-                          this->getName().c_str(), this->m_ip.c_str(), e.what());
+                LOGE(" ip error: ip=%s, err=%s", this->m_ip.c_str(), e.what());
                 return;
             }
             catch (...)
             {
-                LOGE("%s ip error: ip=%s, err=%s",
-                          this->getName().c_str(), this->m_ip.c_str(), "unknown");
+                LOGE(" ip error: ip=%s, err=%s" , this->m_ip.c_str(), "unknown");
                 return;
             }
 
             endpoint_ = boost::asio::ip::udp::endpoint(add, short(this->m_port));
             timer_.expires_from_now(boost::posix_time::milliseconds(0));
-            timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this));
-            io.run();
-        }
-
-        void UdpDataSender::stopTask()
-        {
-            io.stop();
+            timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
         }
 
         int32_t UdpDataSender::sendPacket(boost::shared_ptr<Packet> &packetPtr, int32_t timeout)
@@ -114,18 +117,23 @@ namespace Pinpoint
             return err;
         }
 
-        void UdpDataSender::send_udp_packet()
+        void UdpDataSender::io_send_udp_packet(const boost::system::error_code & ec)
         {
+        	if( ec && ec != boost::asio::error::operation_aborted)
+        	{
+        		LOGI("io_send_udp_packet met %s ",ec.message().c_str());
+        		return ;
+        	}
+
             typedef std::vector<PacketPtr> PacketPtrVec;
             PacketPtrVec packetPtrVec;
 
             int32_t err = sendQueue.getAll(packetPtrVec, MAX_GET_WAIT_MSEC);
             if (err != SUCCESS || packetPtrVec.empty())
             {
-//                LOGD("%s: sendQueue is empty.", this->getName().c_str());
+
                 timer_.expires_from_now(boost::posix_time::milliseconds(MAX_REFRESH_MSEC));
-                timer_.async_wait(boost::bind(&UdpDataSender::send_udp_packet, this));
-                return;
+                goto _AGAIN;
             }
 
             for(PacketPtrVec::iterator ip = packetPtrVec.begin(); ip != packetPtrVec.end(); ++ip)
@@ -139,6 +147,7 @@ namespace Pinpoint
                 try
                 {
                     socket_.send_to(boost::asio::buffer((*ip)->getCodedData()), endpoint_);
+                    LOGD("send_to [%d bytes] to [%s:%d] ",(*ip)->getCodedData().length(),this->m_ip.c_str(),this->m_port);
                 }
                 catch (std::exception& e)
                 {
@@ -146,7 +155,17 @@ namespace Pinpoint
                 }
 
             }
-            io.post(boost::bind(&UdpDataSender::send_udp_packet, this));
+
+            timer_.expires_from_now(boost::posix_time::milliseconds(0)); // recheck it
+	_AGAIN:
+			if(!ec){ // no error find, go on
+				timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
+			}else{
+				socket_.close();
+				if(nstate != E_EXIT){
+					init();
+				}
+			}
         }
 
         uint32_t UdpDataSender::getSendCount()

@@ -83,7 +83,6 @@ headers = pinpoint_agent.h \
           string_data_sender.h \
           pinpoint_api.h \
           pinpoint_plugin.h \
-          pinpoint_type.h \
           pinpoint_client.h \
           pinpoint_ping.h
 
@@ -106,7 +105,6 @@ cpp_src = pinpoint_agent.cpp \
           string_data_sender.cpp \
           pinpoint_api.cpp \
           pinpoint_plugin.cpp \
-          pinpoint_type.cpp \
           pinpoint_client.cpp \
           pinpoint_ping.cpp
 

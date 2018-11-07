@@ -120,11 +120,11 @@ namespace Pinpoint
                 PacketData& packetData = packetPtr->getPacketData();
                 packetData = tBasePtr;
 
-                LOGI("TAgentInfo: [%s]", utils::TBaseToString(packetData).c_str());
+                LOGI("TAgentInfo: MainProcess [%s]", utils::TBaseToString(packetData).c_str());
 
                 dataSender->sendPacket(packetPtr, 100);
             }
-            catch (std::exception exception)
+            catch (std::exception& exception)
             {
                 LOGE("send agentData exception. exception=%s", exception.what());
             }

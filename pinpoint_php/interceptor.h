@@ -17,12 +17,8 @@
 #define PINPOINT_INSPECTOR_H
 
 #include "pinpoint_api.h"
-
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/thread.hpp>
-#include <map>
-#include <list>
+
 
 #define DEBUG_MODULE 0 //DEBUG_MODULE
 

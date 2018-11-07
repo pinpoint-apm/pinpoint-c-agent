@@ -19,7 +19,8 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "executor.h"
 #include "utility.h"
 
@@ -171,13 +172,25 @@ namespace Pinpoint
 
             virtual int32_t getSocketId() = 0;
 
+            virtual void   init() = 0;
+
+            virtual void   stop()=0;
+
         protected:
-            DataSender(const std::string &ip, uint32_t port) : m_ip(ip), m_port(port)
-            { };
+            DataSender(const std::string &ip, uint32_t port) :
+            	m_ip(ip),
+				m_port(port),
+				nstate(E_CLOSE)
+            {};
 
             std::string m_ip;
             uint32_t m_port;
 
+            ///E_EXIT force close the  connection
+            ///E_CLOSE initialized state
+            enum E_NState {E_EXIT,E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} ;
+
+            E_NState nstate;
         private:
             explicit DataSender(const DataSender&);
             DataSender& operator=(const DataSender&);
@@ -186,10 +199,10 @@ namespace Pinpoint
         typedef boost::shared_ptr<DataSender> DataSenderPtr;
 
 
-        class UdpDataSender : public ThreadExecutor, public DataSender
+        class UdpDataSender : public DataSender
         {
         public:
-            UdpDataSender(const std::string &name, const std::string &ip, uint32_t port);
+            UdpDataSender(boost::asio::io_service&,const std::string &name, const std::string &ip, uint32_t port);
 
             int32_t sendPacket(boost::shared_ptr<Packet> &packetPtr, int32_t timeout);
 
@@ -199,23 +212,23 @@ namespace Pinpoint
 
             virtual int32_t getSocketId();
 
+            virtual void stop();
+
+            virtual void init();
+
             static const uint32_t MAX_REFRESH_MSEC = 100;
             static const uint32_t UDP_BUFFER_LEN = 1000;
             static const uint32_t MAX_GET_WAIT_MSEC = 100;
         private:
             SynchronizedFixedLengthQueue<boost::shared_ptr<Packet> > sendQueue;
-            boost::asio::io_service io;
+            boost::asio::io_service& io;
             boost::asio::ip::udp::socket socket_;
             boost::asio::ip::udp::endpoint endpoint_;
             boost::asio::deadline_timer timer_;
 
             boost::atomic<uint32_t> m_sendCount;
 
-            void executeTask();
-
-            void stopTask();
-
-            void send_udp_packet();
+            void io_send_udp_packet(const boost::system::error_code & ec);
 
         };
     }

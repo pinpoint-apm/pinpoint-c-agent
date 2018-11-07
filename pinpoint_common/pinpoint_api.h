@@ -16,14 +16,14 @@
 #ifndef PINPOINT_API_H
 #define PINPOINT_API_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <boost/function.hpp>
 #include "pinpoint_error.h"
 #include "pinpoint_def.h"
-#include "pinpoint_type.h"
 #include "pinpoint_agent_context.h"
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/atomic.hpp>
@@ -150,6 +150,7 @@ namespace Pinpoint
          private:
             ConfigObject& _confObj;
         };
+
     }
 
     namespace Plugin
@@ -382,8 +383,9 @@ namespace Pinpoint
             static AgentPtr &getAgentPtr();
             virtual int32_t preInit(AgentType agentType,
                                     const AgentFunction& agentFunction,
-                                    Pinpoint::Configuration::Config &conf) = 0;
+                                    struct AgentConfigArgs &conf) = 0;
             virtual int32_t init(Plugin::PluginPtrVector& pluginPtrVector) = 0;
+            virtual int32_t updatePlugins(Plugin::PluginPtrVector& pluginPtrVector) = 0;
             virtual int32_t start() = 0;
             virtual int32_t stop() = 0;
             virtual int32_t addApi(const char* api_info, int32_t line, ApiType type=API_UNDEFINED) = 0;
@@ -391,8 +393,8 @@ namespace Pinpoint
             virtual volatile AgentStatus getAgentStatus() const = 0;
             virtual SamplingPtr& getSamplingPtr() = 0;
             virtual int32_t sendTrace(const Trace::TracePtr &tracePtr) = 0;
+            virtual ~Agent(){};
         private:
-
             static AgentPtr agentPtr;
         };
     };

@@ -114,7 +114,7 @@ namespace Pinpoint
 
                 dataSender->sendPacket(packetPtr, 100);
             }
-            catch (std::exception exception)
+            catch (std::exception& exception)
             {
                 LOGE("send StringMetaData exception. exception=%s", exception.what());
             }

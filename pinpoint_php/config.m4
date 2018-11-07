@@ -33,7 +33,7 @@ else
 fi
 
 
-PINPOINT_PLUGINS="plugins/request_plugin.cpp plugins/internel_functions_plugin.cpp"
+PINPOINT_PLUGINS="cplugins/request_plugin.cpp cplugins/internel_functions_plugin.cpp"
 
 PINPOINT_SRC="$PINPOINT_SRC $PINPOINT_PLUGINS"
 

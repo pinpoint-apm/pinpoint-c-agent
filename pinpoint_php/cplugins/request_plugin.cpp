@@ -13,9 +13,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
-#include "../php_common.h"
-#include "request_plugin.h"
 #include "interceptor.h"
+#include "request_plugin.h"
+#include "../php_common.h"
 
 using namespace Pinpoint::log;
 using namespace Pinpoint::Plugin;
@@ -117,8 +117,16 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
         }
     }
 
+    // add proxy header checking
+    if(!PINPOINT_G(proxy_headers))
+    {
+    	return ;
+    }
+
     TracePtr tracePtr = Trace::getCurrentTrace();
     PINPOINT_ASSERT (tracePtr != NULL);
+
+
     /// add PROXY_HTTP_HEADER when request start
     /// avoiding error jmp, if that the end-callback could be jmp
     std::string proxyHeader="";

@@ -16,7 +16,10 @@
 #ifndef PINPOINT_BUFFER_H
 #define PINPOINT_BUFFER_H
 
-#include "stdint.h"
+
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
+
 #include <deque>
 #include <vector>
 #include <string>

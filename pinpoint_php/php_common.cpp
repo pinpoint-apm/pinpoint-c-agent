@@ -14,7 +14,6 @@
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
 #include "php_common.h"
-#include "pinpoint_type.h"
 #include <cstdio>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
@@ -27,6 +26,8 @@
 #include "php_function_helper.h"
 #include "aop_hook.h"
 #include "zend_types.h"
+#include "php_plugin.h"
+#include "php_interfaces.h"
 
 #if PHP_VERSION_ID >=50400
 #include "zend_string.h"
@@ -42,9 +43,13 @@ using Pinpoint::Plugin::RequestHeader;
 using Pinpoint::Plugin::HttpHeader;
 using Pinpoint::Plugin::HeaderMap;
 
-#define DEFAULT_LOGPATH "/tmp"
-#define DEFAULT_LOGLEVER "DEBUG"
 
+using  Pinpoint::FAILED;
+using  Pinpoint::Agent::Agent;
+using  Pinpoint::Agent::AgentPtr;
+using  Pinpoint::Agent::AgentFunction;
+using  Pinpoint::Plugin::Plugin;
+using  Pinpoint::Plugin::PluginPtrVector;
 
 using std::string ;
 static std::map<string, string> _moduleInfo;
@@ -245,13 +250,39 @@ std::string get_rpc()
     return  getNameFromHeaderMap(PP_REQUEST_URI);
 }
 
+void  php_getcwd(std::string& path)
+{
 
+	char _path[PATH_MAX] = {0};
+	char *ret=NULL;
 
+#if HAVE_GETCWD
+	ret = VCWD_GETCWD(_path, PATH_MAX);
+#elif HAVE_GETWD
+	ret = VCWD_GETWD(_path);
+#endif
+
+	path = ret;
+}
+
+int file_exist_and_readable(std::string& fullName)
+{
+	 struct stat info;
+	 if(stat(fullName.c_str(),&info) == -1 )
+	 {
+
+	 }else if( S_ISREG( info.st_mode) && (info.st_mode& S_IRUSR ))
+	 {
+		 return 0;
+	 }
+
+	 return -1 ;
+}
 
 bool get_proxy_http_header(std::string &value,int& type)
 {
 
-//    TYPE_APP = 1,
+//     TYPE_APP = 1,
 //     TYPE_NGINX = 2,
 //     TYPE_APACHE = 3
 
@@ -313,21 +344,18 @@ string get_host_process_info(eName name)
     return "";
 }
 
-static void init_log_from_ConfTree(Pinpoint::Configuration::Config &config)
+static void init_log_from_ConfTree(void)
 {
-    _moduleInfo["LogFileRootPath"] = config.readString( "common.LogFileRootPath",
-            DEFAULT_LOGPATH);
-
-    _moduleInfo["PPLogLevel"] = config.readString( "common.PPLogLevel",
-            DEFAULT_LOGLEVER);
+    _moduleInfo["LogFileRootPath"] =  PINPOINT_G(logFileRootPath);
+    _moduleInfo["PPLogLevel"] = PINPOINT_G(PPLogLevel);
 
     Pinpoint::log::set_logging_file(_moduleInfo["LogFileRootPath"].c_str());
     Pinpoint::log::set_log_level(_moduleInfo["PPLogLevel"].c_str());
 }
 
-void init_evn_before_agent_real_startup(Pinpoint::Configuration::Config &config)
+void init_evn_before_agent_real_startup()
 {
-    init_log_from_ConfTree(config);
+    init_log_from_ConfTree();
     LOGD(" start agent ...");
 }
 
@@ -394,11 +422,21 @@ bool is_class_impl(zval* obj, const char* class_name)
     return ce->parent != NULL && ce->parent->name != NULL && strcmp(_PSTR(ce->parent->name), class_name) == 0;
 }
 
-const std::string path_join(std::string _dir, std::string fileName)
+std::string path_join(std::string _dir, std::string fileName)
 {
     namespace fs = boost::filesystem;
     fs::path dir(_dir);
+#if 0
+    if(dir.is_relative())
+    {
+    	std::string cur;
+    	php_getcwd(cur);
+    	fs::path curDir(cur);
+    	dir = (curDir/= _dir);
+    }
+#endif
     dir /= fileName;
+
     return dir.string();
 }
 
@@ -579,9 +617,175 @@ void vec_to_str(iVecStr istart,iVecStr iend,std::string& out)
     }
 }
 
+void get_all_plugins(Pinpoint::Plugin::PluginPtrVector &pluginPtrVector)
+{
+
+    PhpPluginManager *phpPluginManager = PhpPluginManager::getInstance();
+    if (phpPluginManager == NULL)
+    {
+        LOGE("get PhpPluginManager failed.");
+    }
+
+    int err = phpPluginManager->registerPlugins();
+    if (err != SUCCESS)
+    {
+        LOGE("registerPlugins failed.");
+    }
+
+    PluginPtrVector& v1 = phpPluginManager->getAllPlugins();
+
+    pluginPtrVector.insert(pluginPtrVector.end(), v1.begin(), v1.end());
+
+    LOGT("c++ plugin count=%d", v1.size());
+
+    PhpInterfacePluginManager* interfacePluginManager = PhpInterfacePluginManager::getManager();
+
+    PINPOINT_ASSERT (interfacePluginManager != NULL);
+
+    PluginPtrVector& v2 = interfacePluginManager->getAllPlugins();
+
+    pluginPtrVector.insert(pluginPtrVector.end(), v2.begin(), v2.end());
+
+    LOGT("php plugin count=%d", v2.size());
+
+    LOGT("all plugins count = %d", pluginPtrVector.size());
+}
+
+int init_pinpoint_agent()
+{
+
+    int32_t err = 0;
+    AgentPtr agentPtr = Agent::getAgentPtr();
+
+    PINPOINT_ASSERT_RETURN (agentPtr != NULL,FAILED);
+
+	Pinpoint::Agent::PinpointAgentContextPtr& contextPtr = Pinpoint::Agent::PinpointAgentContext::getContextPtr();
+
+	contextPtr->ip = get_host_process_info(Pinpoint::Naming::SERVER_ADDR);
+	contextPtr->ports = get_host_process_info(Pinpoint::Naming::SERVER_PORT);
+	contextPtr->hostname = get_host_process_info(Pinpoint::Naming::HTTP_HOST);
+	PluginPtrVector pluginPtrVector;
+	get_all_plugins(pluginPtrVector);
+	err = agentPtr->init(pluginPtrVector);
+	if (err != SUCCESS)
+	{
+		LOGE("init Agent failed!");
+		return FAILED;
+	}
+
+	return SUCCESS;
+}
 
 
-const std::string zval_to_string(zval* value, int32_t limit)
+void start_pinpoint_agent()
+{
+
+    AgentPtr agentPtr = Agent::getAgentPtr();
+    PINPOINT_ASSERT (agentPtr != NULL);
+
+    agentPtr->start();
+
+    LOGI("pinpoint agent start");
+}
+
+void end_current_calltrace()
+{
+    PINPOINT_G(prs).stackDepth = 0;
+    PP_TRACE("request shutdown");
+
+    AgentPtr agentPtr = Agent::getAgentPtr();
+    PINPOINT_ASSERT((agentPtr != NULL));
+
+    PhpAop *aop = PhpAop::getInstance();
+
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(unittest) == 1)
+    {
+        PINPOINT_ASSERT ((aop != NULL) );
+        Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr = aop->getRequestInterceptorPtr();
+
+        // maybe user call exit
+        CurrentInterceptorInfo currentInterceptorInfo = aop->getCurrentInterceptorInfo();
+        Pinpoint::Plugin::InterceptorPtr interceptorPtr = currentInterceptorInfo.first;
+        uint64_t call_id = currentInterceptorInfo.second;
+        if (interceptorPtr != NULL && interceptorPtr != requestInterceptorPtr)
+        {
+            PINPOINT_ASSERT((call_id != Pinpoint::Plugin::INVALID_CALL_ID));
+            Pinpoint::Trace::TracePtr tracePtr = Pinpoint::Trace::Trace::getCurrentTrace();
+            if (tracePtr != NULL)
+            {
+                Pinpoint::Trace::SpanEventRecorderPtr spanEventRecorderPtr = tracePtr->getSpanEventRecorderPtr(call_id);
+                if (spanEventRecorderPtr != NULL)
+                {
+                    spanEventRecorderPtr->markAfterTime();
+                    tracePtr->traceBlockEnd(spanEventRecorderPtr);
+                }
+            }
+        }
+
+        Pinpoint::Plugin::HttpHeader* header = Pinpoint::Plugin::ResponseHeader::getCurrentResponseHeader();
+        if (header != NULL)
+        {
+            Pinpoint::Plugin::HeaderMap headerMap;
+            if (get_php_response_headers(headerMap) == SUCCESS)
+            {
+                header->updateHeader(headerMap);
+            }
+        }
+
+        if (requestInterceptorPtr != NULL)
+        {
+            requestInterceptorPtr->end(Pinpoint::Plugin::IGNORE_CALL_ID,
+                                       Pinpoint::Plugin::notSupportedFuncArgFetcher,
+                                       Pinpoint::Plugin::notSupportedFuncResultFetcher);
+        }
+
+        aop->resetCurrentInterceptor();
+        aop->reqShutdownClean();
+    }
+
+
+}
+
+void start_a_new_calltrace()
+{
+    PhpRequestCounter::increment();
+    memset(&PINPOINT_G(prs),0,sizeof(PRS));
+
+    PP_TRACE("request start");
+    PINPOINT_G(prs).stackDepth++;
+
+    AgentPtr agentPtr = Agent::getAgentPtr();
+    PINPOINT_ASSERT((agentPtr != NULL));
+    //  PINPOINT_G(unittest) == 1 open for unittest
+    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(unittest) == 1 )
+    {
+       // call longjmp: destructor is not called ...
+       RunOriginExecute::stop();
+       Pinpoint::Plugin::HttpHeader* header = Pinpoint::Plugin::RequestHeader::getCurrentRequestHeader();
+       if (header != NULL)
+       {
+           Pinpoint::Plugin::HeaderMap headerMap;
+           if (get_php_request_headers(headerMap) == SUCCESS)
+           {
+               header->updateHeader(headerMap);
+           }
+       }
+       PhpAop *aop = PhpAop::getInstance();
+       PINPOINT_ASSERT((aop != NULL));
+
+       Pinpoint::Plugin::InterceptorPtr interceptorPtr = aop->getRequestInterceptorPtr();
+
+       if (interceptorPtr != NULL)
+       {
+           uint64_t call_id = interceptorPtr->assignCallId();
+           aop->resetCurrentInterceptor(interceptorPtr, call_id);
+           interceptorPtr->before(call_id, Pinpoint::Plugin::notSupportedFuncArgFetcher);
+       }
+    }
+
+}
+
+const std::string zval_to_string(zval* value, uint32_t limit)
 {
 
     if( value == NULL || limit <=0 )
@@ -624,7 +828,7 @@ again:
         return buf;
     case IS_STRING:
     {
-        int32_t tlen = TER_MIN(limit, MAX_ANNOTATION_SIZE, Z_STRLEN_P(value));
+        uint32_t tlen = TER_MIN(limit, MAX_ANNOTATION_SIZE, Z_STRLEN_P(value));
 
         std::string tvalue(Z_STRVAL_P(value), tlen);
 
@@ -745,6 +949,7 @@ PObjectCache::PObjectCache()
     obj = NULL;
     requestNum = PhpRequestCounter::INVALID_COUNT;
     zval_class_instance= NULL;
+    type = 0;
 
 }
 
@@ -788,6 +993,7 @@ int32_t PObjectCache::store(zval *z_class_instance, const char* classDefinitionP
     if(call_php_kernel_serialize(&retval,z_class_instance) != 0)
     {
         LOGE("call_php_kernel_serialize failed %s",classDefinitionPath);
+        w_zval_ptr_dtor(z_class_instance);
         return Pinpoint::FAILED;
     }
 
@@ -811,7 +1017,6 @@ int32_t PObjectCache::store(zval *z_class_instance, const char* classDefinitionP
     buf[bufLen] = '\0';                       // compatible for php <7
 
     zval_dtor(&retval);
-
     return SUCCESS;
 
 }
@@ -868,7 +1073,7 @@ int32_t PObjectCache::load()
 
     if(zval_class_instance == NULL)
     {
-        MAKE_STD_ZVAL( zval_class_instance);
+        MAKE_STD_ZVAL(zval_class_instance);
 
         if (call_php_kernel_unserialize(zval_class_instance,obj_seried) != SUCCESS)
         {

@@ -16,7 +16,8 @@
 #ifndef PINPOINT_UTILITY_H
 #define PINPOINT_UTILITY_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include <sstream>
 #include <boost/thread.hpp>
 #include <boost/circular_buffer.hpp>

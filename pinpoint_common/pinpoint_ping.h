@@ -16,7 +16,8 @@
 #ifndef PINPOINT_PING_H
 #define PINPOINT_PING_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "executor.h"
 #include "data_sender.h"
 #include "buffer.h"

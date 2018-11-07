@@ -18,6 +18,7 @@
 
 #include "pinpoint_lock.h"
 #include "pinpoint_api.h"
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
@@ -47,6 +48,7 @@ private:
     uint32_t number;
 };
 
+#if 0
 template <typename T>
 class TestMemPool : public MemPool<T>
 {
@@ -61,7 +63,7 @@ public:
 
     void free(T* ptr)
     {
-        return ::free(ptr);
+        ::free(ptr);
     }
 
     T* try_get(int64_t i64Msec) { }
@@ -70,6 +72,7 @@ public:
 private:
     uint32_t number;
 };
+#endif
 
 #define DEBUG_SSM 
 
@@ -102,10 +105,12 @@ private:
             {
                 return &mType->t;
             }
+
             PSMutexLock& getWriteLock()
             {
                 return mType->writeLock;
             }
+
             explicit SafeShareMemory(const char* uniqName)
             {
                 shm = boost::shared_ptr<shared_memory_object>(new shared_memory_object(open_or_create, uniqName, read_write));

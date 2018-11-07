@@ -2,13 +2,14 @@
 !*.c
 !*.cpp
 !*.h
-!plugins
+!cplugins
 !compile_checking
 !config.m4
 !README.md
 !.gitignore
 !Build.sh
 !deploy_third_pary.sh
+!tests
 /config.h
-!*.php
+!*.phpt
 run-tests.php

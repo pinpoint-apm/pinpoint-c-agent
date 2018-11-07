@@ -15,31 +15,17 @@
  * limitations under the License.
  */
 
-// include_once("quickstart_plugin.php");
 
-$path=dirname(__FILE__);
-foreach (glob($path ."/*plugin.php") as  $value) {
-    include_once($value);
+
+function createbell($time) {
+              return function() use ($time) {
+                  echo "$time". "di di di  di ...";
+                  return $time;
+              };
 }
 
-$p = new QuickStartPlugin();
-pinpoint_add_plugin($p, "quickstart_plugin.php");
-//
-$p = new ExcludePlugin();
-pinpoint_add_plugin($p, "exclude_plugin.php");
+$de11_1 = createbell(date("Y/m/d"));
 
-$p = new CurlPlugin();
-pinpoint_add_plugin($p, "curl_plugin.php");
-
-$p =new TestPlugin();
-pinpoint_add_plugin($p, "test_plugin.php");
-
-$p =new TestPlugin01();
-pinpoint_add_plugin($p, "test_01_plugin.php");
-
-$p = new Issue200Plugin();
-pinpoint_add_plugin($p, "issue200_plugin.php");
-
-pinpint_aop_reload();
+$de11_1(); 
 
 ?>

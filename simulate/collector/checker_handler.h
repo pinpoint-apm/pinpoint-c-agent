@@ -16,7 +16,7 @@
 #ifndef SIMULATE_CHECKER_HANDLER_H
 #define SIMULATE_CHECKER_HANDLER_H
 
-#include "stdint.h"
+#include <stdint.h>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 

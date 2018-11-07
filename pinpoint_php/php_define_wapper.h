@@ -255,6 +255,7 @@ typedef zend_object * EG_EXP_TPYE;
 #define PT_FUNC_REQUIRE         0x12
 #define PT_FUNC_REQUIRE_ONCE    0x13
 
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
         
 #define NAME_LEN 128

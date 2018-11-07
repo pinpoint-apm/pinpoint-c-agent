@@ -17,6 +17,7 @@
 #define REQUEST_PLUGIN_H
 
 #include "pinpoint_api.h"
+#include <boost/enable_shared_from_this.hpp>
 
 class PhpRequestPlugin : public Pinpoint::Plugin::Plugin, public boost::enable_shared_from_this<PhpRequestPlugin>
 {

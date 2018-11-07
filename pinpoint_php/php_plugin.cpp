@@ -15,8 +15,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "php_config.h"
 #include "php_plugin.h"
-#include "plugins/request_plugin.h"
-#include "plugins/internel_functions_plugin.h"
+
+#include "cplugins/internel_functions_plugin.h"
+#include "cplugins/request_plugin.h"
 
 
 using namespace Pinpoint::Plugin;
@@ -55,7 +56,7 @@ int32_t PhpPluginManager::registerPlugins()
     // 1, request plugin
     try
     {
-        pluginPtr.reset(new PhpRequestPlugin);
+        pluginPtr.reset(new PhpRequestPlugin());
     }
     catch (std::bad_alloc&)
     {
@@ -63,6 +64,7 @@ int32_t PhpPluginManager::registerPlugins()
         return Pinpoint::FAILED;
     }
     this->plugins.push_back(pluginPtr);
+
 
 #if defined(DEBUG) || defined(TEST_SIMULATE)
     // 2, internal functions plugin
@@ -77,6 +79,7 @@ int32_t PhpPluginManager::registerPlugins()
     }
     this->plugins.push_back(pluginPtr);
 #endif
+
 
     return Pinpoint::SUCCESS;
 }

@@ -16,7 +16,8 @@
 #ifndef PINPOINT_SERIALIZER_H
 #define PINPOINT_SERIALIZER_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "buffer.h"
 #include "pinpoint_api.h"
 #include <string>

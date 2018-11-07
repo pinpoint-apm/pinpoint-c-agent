@@ -16,7 +16,7 @@
 #ifndef PINPOINT_SIMULATE_COLLECTOR_CONTEXT_H
 #define PINPOINT_SIMULATE_COLLECTOR_CONTEXT_H
 
-#include "stdint.h"
+#include <stdint.h>
 #include <string>
 
 class CollectorContext

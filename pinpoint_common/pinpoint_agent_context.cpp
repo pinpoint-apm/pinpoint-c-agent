@@ -21,6 +21,8 @@ namespace Pinpoint
 {
     namespace Agent
     {
+
+#if 0
         const static AgentConfigArgs defaultConfigArgs = {
                 "uninitiated agentid",
                 "uninitiated applicationName",
@@ -40,11 +42,9 @@ namespace Pinpoint
                 false,
                 "",
                 -1,
-                -1,
-                "plugins_create.php",
-                "/tmp/"
+                -1
         };
-
+#endif
         PinpointAgentContextPtr PinpointAgentContext::instance;
 
         int32_t PinpointAgentContext::initContext()
@@ -65,6 +65,7 @@ namespace Pinpoint
             return PinpointAgentContext::instance;
         }
 
+#if 0
         bool AgentConfigArgs::assignArgs(Configuration::Config* config)
         {
             const static std::string notSet = "NULL";
@@ -103,15 +104,17 @@ namespace Pinpoint
             apiAssignFileName = config->readString("test.ApiTableFile", notSet);
             apiAssignFileNameIsSet = apiAssignFileName != notSet;
 
-            pluginFileName = config->readString("PHP.PluginEntryFile",
-                    defaultConfigArgs.pluginFileName);
-            pluginDir = config->readString("PHP.PluginRootDir",
-                    defaultConfigArgs.pluginDir);
+//            pluginFileName = config->readString("PHP.PluginEntryFile",
+//                    defaultConfigArgs.pluginFileName);
+//            pluginDir = config->readString("PHP.PluginRootDir",
+//                    defaultConfigArgs.pluginDir);
 
             reconInterval = (uint32_t)config->readInt32("common.ReconTimeOut", defaultConfigArgs.reconInterval);
 
             return true;
         }
+#endif
+
     }
 }
 

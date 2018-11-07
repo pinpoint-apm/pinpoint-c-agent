@@ -518,6 +518,148 @@ class TestCumsumE1Interceptor extends \Pinpoint\Interceptor
 }
 
 
+
+
+
+
+class TestWorker extends \Pinpoint\Interceptor
+{
+  var $apiId = -1;
+  public function __construct()
+  {
+    echo "class TestWorker extends \Pinpoint\Interceptor \n";
+    $this->apiId = pinpoint_add_api("Workerman\Worker::run", -1); // functionName, lineno
+  }
+
+  public function onBefore($callId, $args)
+  {
+    // make aop function works
+    pinpoint_data_thread_start();
+
+  }
+
+  public function onEnd($callId, $data)
+  {
+    return ;
+  }
+
+  public function onException($callId, $exceptionStr)
+  {
+
+  }
+}
+
+
+class TestTcpMessage extends \Pinpoint\Interceptor
+{
+  var $apiId = -1;
+  public function __construct()
+  {
+    $this->apiId = pinpoint_add_api("closure{http_server.php:23}", -1); // functionName, lineno
+  }
+
+  public function onBefore($callId, $args)
+  {
+      // make aop function works
+      // connection
+      if( !isset($args[0]->aop_flag) || $args[0]->aop_flag == false)
+      {
+          $args[0]->aop_flag=true;
+          pinpoint_start_calltrace();
+      }
+
+     $trace = pinpoint_get_current_trace();
+     if ($trace)
+     {
+        $event = $trace->traceBlockBegin($callId);
+        $event->markBeforeTime();
+        $event->setApiId($this->apiId);
+        $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
+        $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,htmlspecialchars(print_r($args,true),ENT_QUOTES));
+     }
+  }
+
+  public function onEnd($callId, $data)
+  {
+      $trace = pinpoint_get_current_trace();
+      if ($trace)
+      {
+          $args = $data["args"];
+          $retArgs = $data["result"];
+          $event = $trace->getEvent($callId);
+          if ($event)
+          {
+              if ($retArgs)
+              {
+                  $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
+              }
+              $event->markAfterTime();
+              $trace->traceBlockEnd($event);
+          }
+      }
+
+  }
+
+  public function onException($callId, $exceptionStr)
+  {
+
+  }
+}
+
+class TestTcpdestroy extends \Pinpoint\Interceptor
+{
+    var $apiId = -1;
+    public function __construct()
+    {
+        $this->apiId = pinpoint_add_api("Workerman\Connection\TcpConnection::destroy", -1); // functionName, lineno
+    }
+
+    public function onBefore($callId, $args)
+    {
+//
+//        $trace = pinpoint_get_current_trace();
+//        if ($trace)
+//        {
+//            $event = $trace->traceBlockBegin($callId);
+//            $event->markBeforeTime();
+//            $event->setApiId($this->apiId);
+//            $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
+//            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,htmlspecialchars(print_r($args,true),ENT_QUOTES));
+//        }
+    }
+
+    public function onEnd($callId, $data)
+    {
+//        $trace = pinpoint_get_current_trace();
+//        if ($trace)
+//        {
+//            $args = $data["args"];
+//            $retArgs = $data["result"];
+//            $event = $trace->getEvent($callId);
+//            if ($event)
+//            {
+//                if ($retArgs)
+//                {
+//                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
+//                }
+//                $event->markAfterTime();
+//                $trace->traceBlockEnd($event);
+//            }
+//        }
+
+        pinpoint_end_calltrace();
+        $self = $this->getSelf();
+        echo "---------------------".$self->aop_flag."-----------------------------";
+        $self->aop_flag=false;
+    }
+
+    public function onException($callId, $exceptionStr)
+    {
+
+    }
+}
+
+
 class QuickStartPlugin extends \Pinpoint\Plugin
 {
 
@@ -526,43 +668,56 @@ class QuickStartPlugin extends \Pinpoint\Plugin
     // you have to call the construct of parent class here
     pinpoint_log(PINPOINT_DEBUG, "__construct");
     parent::__construct();
-    $this->addSimpleInterceptor("Redis::connect", -1);
-    $this->addSimpleInterceptor("test_simple_interceptor", -1);
-    $this->addSimpleInterceptor("Redis::set", -1);
-    $this->addSimpleInterceptor("Redis::get", -1);
+   $this->addSimpleInterceptor("Redis::connect", -1);
+   $this->addSimpleInterceptor("test_simple_interceptor", -1);
+   $this->addSimpleInterceptor("Redis::set", -1);
+   $this->addSimpleInterceptor("Redis::get", -1);
 
-    $this->addSimpleInterceptor("Redis::delete", -1);
-    $this->addSimpleInterceptor("Redis::keys", -1);
+   $this->addSimpleInterceptor("Redis::delete", -1);
+   $this->addSimpleInterceptor("Redis::keys", -1);
 
-    $i = new TestMethodInterceptor();
-    $this->addInterceptor($i, "testNameSpace\\TestClass::getVarAdd", "quickstart_plugin.php");
+   $i = new TestMethodInterceptor();
+   $this->addInterceptor($i, "testNameSpace\\TestClass::getVarAdd", "quickstart_plugin.php");
 
-    $i = new TestCumsum1Interceptor();
-    $this->addInterceptor($i, "test_cumsum1", "quickstart_plugin.php");
+   $i = new TestCumsum1Interceptor();
+   $this->addInterceptor($i, "test_cumsum1", "quickstart_plugin.php");
 
-    $i = new TestCumsum3Interceptor();
-    $this->addInterceptor($i, "test_cumsum3", "quickstart_plugin.php");
+   $i = new TestCumsum3Interceptor();
+   $this->addInterceptor($i, "test_cumsum3", "quickstart_plugin.php");
 
-    $i = new TestCumsumE1Interceptor();
-    $this->addInterceptor($i, "test_cumsum_e1", "quickstart_plugin.php");
+   $i = new TestCumsumE1Interceptor();
+   $this->addInterceptor($i, "test_cumsum_e1", "quickstart_plugin.php");
 
-    $i = new GetDateInterceptor();
-    $this->addInterceptor($i, "date", "quickstart_plugin.php");
+   $i = new GetDateInterceptor();
+   $this->addInterceptor($i, "date", "quickstart_plugin.php");
 
-    $i = new TestFunc1Interceptor();
-    $this->addInterceptor($i, "test_func1", "quickstart_plugin.php");
+   $i = new TestFunc1Interceptor();
+   $this->addInterceptor($i, "test_func1", "quickstart_plugin.php");
 
-    $i = new TestFunc1NULLInterceptor();
-    $this->addInterceptor($i, "test_null", "quickstart_plugin.php");
+   $i = new TestFunc1NULLInterceptor();
+   $this->addInterceptor($i, "test_null", "quickstart_plugin.php");
 
-    $i = new TestFunc2Interceptor();
-    $this->addInterceptor($i, "testNameSpace\\test_func2", "quickstart_plugin.php");
+   $i = new TestFunc2Interceptor();
+   $this->addInterceptor($i, "testNameSpace\\test_func2", "quickstart_plugin.php");
 
-    $this->addSimpleInterceptor("test_cumsum2", -1);
-    $this->addSimpleInterceptor("test_cumsum4", -1);
-    $this->addSimpleInterceptor("test_cumsum_e2", -1);
-    $this->addSimpleInterceptor("test_exception3", -1);
-    
+    // $i =  new TestWorker();
+    // $this->addInterceptor($i,  "Workerman\Worker::run","quickstart_plugin.php");
+
+    // $i = new  TestTcpMessage();
+    // $this->addInterceptor($i,  "closure{http_server.php:23}","quickstart_plugin.php");
+
+
+    // $i = new TestTcpdestroy();
+    // $this->addInterceptor($i,  "Workerman\Connection\TcpConnection::destroy","quickstart_plugin.php");
+    // $this->addSimpleInterceptor("hello", -1);
+
+   $this->addSimpleInterceptor("test_cumsum2", -1);
+   $this->addSimpleInterceptor("test_cumsum4", -1);
+   $this->addSimpleInterceptor("test_cumsum_e2", -1);
+   $this->addSimpleInterceptor("test_exception3", -1);
+   $this->addSimpleInterceptor("closure{test_closure.php:21}",-1);
+   $this->addSimpleInterceptor("closure{http_server.php:21}",-1);
+
   }
 };
 ?>

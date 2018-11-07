@@ -19,7 +19,7 @@ class PinPointLock
 {
 public:
     virtual int lock() = 0;
-    virtual int try_lock(int64_t i64Msec)=0;
+    virtual int try_lock(int64_t i64Msec) =0;
     virtual int unlock() = 0;
     virtual ~PinPointLock(){}
     public:
@@ -36,7 +36,6 @@ protected:
 
 
 
-
 class MutexLock : public PinPointLock
 {
 public:
@@ -45,7 +44,7 @@ public:
     {
 
 
-            pthread_mutex_init(&_mutex, NULL);
+        pthread_mutex_init(&_mutex, NULL);
     }
 
     virtual ~MutexLock()
@@ -112,6 +111,8 @@ public:
         BOOST_DELETED_FUNCTION(pthread_mutex_attributes(pthread_mutex_attributes const&))
         BOOST_DELETED_FUNCTION(pthread_mutex_attributes& operator=(pthread_mutex_attributes const&))
     };
+
+    /// process safe mutexlock only works on linux
     class PSMutexLock : public PinPointLock
     {
     private:
@@ -156,11 +157,13 @@ public:
             }
             ownPid = getpid();
         }
+
         virtual ~PSMutexLock()
         {
             pthread_mutex_destroy(&this->mutex);
         }
-        int lock()
+
+        virtual int lock()
         {
             int err = pthread_mutex_lock(&this->mutex);
             if (BOOST_UNLIKELY(err == EOWNERDEAD)) {
@@ -172,11 +175,13 @@ public:
             }
             return err;
         }
-        int unlock()
+
+        virtual int unlock()
         {
             return pthread_mutex_unlock(&this->mutex);
         }
-        int try_lock(int64_t i64Msec)
+
+        virtual int try_lock(int64_t i64Msec)
         {
             struct timespec abs_time;
             clock_gettime(CLOCK_REALTIME, &abs_time);
@@ -191,6 +196,7 @@ public:
             }
             return err;
         }
+
         pid_t getCurrentOwner() const
         {
             return ownPid;

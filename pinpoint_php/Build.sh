@@ -15,7 +15,7 @@
 
 #for debug
 set -e
-set -x
+# set -x
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -161,6 +161,8 @@ function build_agent(){
     fi
 
     make  $MAKE_PARAS -j$CPUNUM
+    export NO_INTERACTION
+    make test || exit 1
 }
 
 function main(){

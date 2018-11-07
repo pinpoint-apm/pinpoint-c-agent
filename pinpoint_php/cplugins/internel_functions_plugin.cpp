@@ -15,13 +15,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "zend_types.h"
 
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 
 #if PHP_VERSION_ID < 50500
 #include "zend.h"
 #endif
 
-#include "internel_functions_plugin.h"
+#include "../cplugins/internel_functions_plugin.h"
 
 using namespace Pinpoint::Trace;
 using namespace Pinpoint::log;

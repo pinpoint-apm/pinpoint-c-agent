@@ -137,8 +137,8 @@ namespace Pinpoint
             static const std::string CODE;
             static const std::string SUB_CODE;
 
-            HandShakeSender(boost::shared_ptr<ScheduledExecutor> &scheduledExecutor,
-                            boost::shared_ptr<DataSender> &dataSender);
+            HandShakeSender(boost::shared_ptr<ScheduledExecutor> scheduledExecutor,
+                            boost::shared_ptr<DataSender> dataSender);
 
             ~HandShakeSender();
 

@@ -135,25 +135,35 @@ namespace Pinpoint
 
         //<editor-fold desc="PinpointClient">
 
-        PinpointClient::PinpointClient(const std::string &executorName,
+        PinpointClient::PinpointClient(boost::asio::io_service& agentIo,const std::string &executorName,
                                        const std::string& ip,
                                        uint32_t port,
                                        boost::shared_ptr<ScheduledExecutor>& scheduledExecutor,
                                        uint32_t reconInter)
-                : ThreadExecutor(executorName), DataSender(ip, port),
-                  sendQueue(SEND_QUEUE_LEN), sendCount(0), requestCount(0), io_(), work(io_), socket_(io_),timer_(io_),
-                  interval(reconInter),state(), isWriting(false), scheduledExecutor(scheduledExecutor)
+                : DataSender(ip, port),
+                  sendQueue(SEND_QUEUE_LEN),
+				  sendCount(0),
+				  requestCount(0),
+				  io_(agentIo),
+//				  work(agentIo),
+				  socket_(agentIo),
+				  timer_(agentIo),
+                  interval(reconInter),
+				  state(),
+				  isWriting(false),
+				  scheduledExecutor(scheduledExecutor)
         {
             nstate  = E_CLOSE;
+
         }
 
-        void PinpointClient::executeTask()
+        void PinpointClient::init()
         {
             try
             {
 
                 PinpointClientPtr pinpointClientPtr = shared_from_this();
-                DataSenderPtr dataSenderPtr = boost::dynamic_pointer_cast<DataSender>(pinpointClientPtr);
+                DataSenderPtr dataSenderPtr =  boost::dynamic_pointer_cast<DataSender>(pinpointClientPtr);
 
                 handShakeSender.reset(new HandShakeSender(scheduledExecutor,
                                                           dataSenderPtr));
@@ -165,7 +175,7 @@ namespace Pinpoint
                 }
 
                 pingPongHandler.reset(new PinpointPingPongHandler(scheduledExecutor,
-                                                                  pinpointClientPtr));
+                		pinpointClientPtr));
 
                 if (pingPongHandler->init() != SUCCESS)
                 {
@@ -178,7 +188,6 @@ namespace Pinpoint
                 add = boost::asio::ip::address::from_string(this->DataSender::m_ip);
                 endpoint_ = boost::asio::ip::tcp::endpoint(add, short(this->DataSender::m_port));
                 try_connect();
-                io_.run();
             }
             catch (std::exception& exception)
             {
@@ -248,7 +257,7 @@ namespace Pinpoint
             if (!ec)
             {
                 state.toConnected();
-                LOGI("%s:%d Connect success.", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
+                LOGI(" Connect [%s:%d] success.",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
                 state.toRunWithoutHandshake();
                 try
                 {
@@ -395,10 +404,10 @@ namespace Pinpoint
         void PinpointClient::start_write()
         {
 
-
-            if (nstate != E_CONNECTED)
+            if (nstate != E_CONNECTED )
             {
-                // no needs to cancel write_timer_event, timer is   connect_timer_event
+                // no needs to cancel write_timer_event, timer is  connect_timer_event
+            	LOGD("connection not ready, wait for next time");
                 return;
             }
 
@@ -437,9 +446,9 @@ namespace Pinpoint
         void PinpointClient::handle_write(const boost::system::error_code &error, PacketPtr& packetPtr)
         {
 
-
             if (!error)
             {
+            	LOGD("send [%d bytes] to collector",packetPtr->getCodedData().length());
                 start_write();
             }
             else
@@ -563,7 +572,6 @@ namespace Pinpoint
             else
             {
                 LOGE("handle_read_type error: err=%s", error.message().c_str());
-
                 handle_error(error);
             }
         }
@@ -838,11 +846,13 @@ namespace Pinpoint
             return SUCCESS;
         }
 
-        void PinpointClient::stopTask()
+        void PinpointClient::stop()
         {
-            io_.stop();
-            state.toClosedByClient();
+        	state.toClosedByClient();
+        	socket_.cancel();
             socket_.close();
+            LOGD("[%s:%d] connection closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
+            nstate = E_EXIT;
         }
 
         int32_t PinpointClient::getSocketId()

@@ -442,7 +442,7 @@ namespace Pinpoint
 
         bool Trace::isStarted()
         {
-            return TraceImp::isStarted();
+            return TraceImp::isStarted() ;
         }
 
         Trace::~Trace()

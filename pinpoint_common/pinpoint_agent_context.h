@@ -18,7 +18,8 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 
 namespace Pinpoint
 {
@@ -42,27 +43,15 @@ namespace Pinpoint
             uint32_t collectorStatPort;
             std::string collectorTcpIp;
             uint32_t collectorTcpPort;
-            std::string logFileRootPath;
-            std::string logLevel;
-            uint32_t reconInterval;
-
-            bool pluginIncludeIsSet;
-            bool pluginExcludeIsSet;
             std::string pluginInclude;
             std::string pluginExclude;
-
             bool apiAssignFileNameIsSet;
             std::string apiAssignFileName;
-
             int32_t traceLimit;
             int32_t skipTraceTime;
-
-            // #64
-            std::string pluginFileName;
-            std::string pluginDir;
-
-            bool assignArgs(Configuration::Config*);
-
+            int32_t reconInterval;
+            bool pluginIncludeIsSet;
+            bool pluginExcludeIsSet;
         };
         typedef boost::shared_ptr<AgentConfigArgs> AgentConfigArgsPtr;
 

@@ -80,4 +80,6 @@ test_issue115::testFunc;-77
 test_Warning01::testFunc;-78
 test_Warning02::testFunc;-79
 test_Warning03::testFunc;-80
+test_Warning03::testFunc;-80
+closure{test_closure.php:21};-81
 

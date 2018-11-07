@@ -15,6 +15,7 @@
  ******************************************************************************/
 #ifndef PINPOINT_COMMON_ERROR
 #define PINPOINT_COMMON_ERROR
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 namespace Pinpoint {
 

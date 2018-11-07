@@ -7,6 +7,7 @@
 
 #ifndef PINPOINT_COMMON_LOG_H_
 #define PINPOINT_COMMON_LOG_H_
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 #if defined(__cplusplus)||defined(c_plusplus)
 extern "C"{

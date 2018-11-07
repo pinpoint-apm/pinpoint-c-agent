@@ -17,7 +17,6 @@
 
 #include "aop_hook.h"
 #include "php_common.h"
-
 #include "interceptor.h"
 
 using namespace Pinpoint::log;
@@ -292,6 +291,7 @@ void SimpleInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetch
         annotationPtr->addStringValue(value);
 
         spanEventRecorderPtr->addAnnotationPtr(annotationPtr);
+        PP_U_TRACE("SimpleInterceptor->addAnnotation key:%d value:%s ",Pinpoint::Plugin::INDEX_ARGS[0],value.c_str());
 
 #if 0
         VecStr vec;
@@ -382,17 +382,12 @@ void SimpleInterceptor::onEnd(uint64_t callId,
                 LOGE("createAnnotation failed!!!");
                 goto error_and_exit;
             }
-#if DEBUG_MODULE
-            //@bluse
+
             std::string value = zval_to_string(phpFuncResultFetcher.getResult(),MAX_ANNOTATION_SIZE);
-            LOGI("result: %s",value.c_str());
             annotationPtr->addStringValue(value);
-#else
-            annotationPtr->addStringValue(
-                    zval_to_string(phpFuncResultFetcher.getResult(),
-                            MAX_ANNOTATION_SIZE));
-#endif
             spanEventRecorderPtr->addAnnotationPtr(annotationPtr);
+
+            PP_U_TRACE("SimpleInterceptor->addAnnotation key:%d value:%s ",Pinpoint::Trace::AnnotationKey::RETURN_DATA,value.c_str());
         }
     }
     catch (std::exception& e)

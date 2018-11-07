@@ -16,7 +16,8 @@
 #ifndef PINPOINT_CLIENT_H
 #define PINPOINT_CLIENT_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "string"
 #include "pinpoint_api.h"
 #include "executor.h"
@@ -278,11 +279,11 @@ namespace Pinpoint
 
         typedef std::map<int32_t, PacketPtr> WaitResponseQueue;
 
-        class PinpointClient : public ThreadExecutor, public DataSender, public boost::enable_shared_from_this<PinpointClient>
+        class PinpointClient : public DataSender, public boost::enable_shared_from_this<PinpointClient>
         {
         public:
             friend class TcpDataSenderV2;
-            PinpointClient(const std::string &executorName,
+            PinpointClient(boost::asio::io_service& ,const std::string &executorName,
                            const std::string& ip,
                            uint32_t port,
                            boost::shared_ptr<ScheduledExecutor>& scheduledExecutor,
@@ -292,10 +293,14 @@ namespace Pinpoint
             uint32_t getSendCount() {return sendCount;}
             int32_t getSocketId();
             boost::asio::io_service& getIO() {return this->io_;}
-            volatile SocketState* getState() {return &state;};
+            volatile SocketState* getState() {return &state;}
 #ifdef RUN_TEST
             boost::asio::ip::tcp::socket& getSocket() { return this->socket_; };
 #endif
+
+            virtual void init();
+
+            virtual void stop();
 
         protected:
             static const uint32_t TCP_RESPONSE_HEADER_LEN = 2;
@@ -311,10 +316,6 @@ namespace Pinpoint
             // not thread safe
             int32_t sendPacket_(boost::shared_ptr<Packet> &packetPtr, int32_t timeout);
 
-            virtual void executeTask();
-
-            virtual void stopTask();
-
         private:
             PinpointClient(const PinpointClient&);
             PinpointClient& operator=(const PinpointClient&);
@@ -322,8 +323,7 @@ namespace Pinpoint
             WaitResponseQueue waitResponseQueue;
             boost::atomic<uint32_t> sendCount;
             boost::atomic<uint32_t> requestCount;
-            boost::asio::io_service io_;
-            boost::asio::io_service::work work;
+            boost::asio::io_service &io_;
             boost::asio::ip::tcp::socket socket_;
             boost::asio::ip::tcp::endpoint endpoint_;
             boost::asio::deadline_timer timer_;
@@ -363,10 +363,6 @@ namespace Pinpoint
             int32_t requestResponseHandler();
 
             void doRequest(PacketPtr& packetPtr);
-
-            typedef enum {E_CLOSE,E_CONNECTING,E_CONNECTED,E_WRITTING,E_READING} E_NState;
-
-            E_NState nstate;
 
         };
         typedef boost::shared_ptr<PinpointClient> PinpointClientPtr;

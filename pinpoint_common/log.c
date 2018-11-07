@@ -51,6 +51,7 @@ D:\Program Files\boost_1_63_0\libs\iostreams\src\file_descriptor.cpp
 #include <string.h>
 #include <stdarg.h>
 #include <unistd.h>
+#define __STDC_LIMIT_MACROS 
 #include <stdint.h>
 
 typedef int fd_t;

@@ -16,13 +16,15 @@
 #ifndef PINPOINT_EXECUTOR_H
 #define PINPOINT_EXECUTOR_H
 
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "pinpoint_error.h"
 #include "utility.h"
 #include "memory_pool.h"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/condition.hpp>
 #include <boost/circular_buffer.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
@@ -33,6 +35,7 @@
 #include <string>
 #include <queue>
 #include <functional>
+#include <vector>
 
 
 namespace Pinpoint
@@ -121,6 +124,63 @@ namespace Pinpoint
             boost::shared_ptr<boost::thread> m_pThread;
         };
 
+
+        class TaskDispatcher
+        {
+
+
+        private:
+        	TaskDispatcher() {
+        		pth = NULL;
+        		thrStatus = E_Uninited;
+        	}
+
+        	virtual ~TaskDispatcher()
+        	{
+        		stop();
+
+        		if(pth){
+        			delete pth;
+        		}
+        	}
+
+        public:
+
+        	/// Note: use try { } catch { }
+        	void  start();
+
+        	void  stop();
+
+        	boost::asio::io_service& getAsio()
+        	{
+        		return io;
+        	}
+
+        	void postEvent(const boost::function<void(void)> fun);
+
+        public:
+
+        	static TaskDispatcher& getInstance()
+        	{
+        		static TaskDispatcher _task;
+        		return _task;
+        	}
+
+        private:
+        	typedef enum { E_Uninited,E_Running,E_Stop } Status;
+
+        	void bgRun();
+
+        	Status thrStatus;
+
+        private:
+        	boost::thread* pth;
+        	boost::condition thrCon;
+        	boost::mutex     thrMutex;
+        	boost::asio::io_service io;
+        };
+
+
         template<typename T>
         class ThreadSafeQueue
         {
@@ -145,6 +205,7 @@ namespace Pinpoint
             virtual int32_t put_try(T &item) = 0;
 
             virtual int32_t get_try(T &item, uint32_t timeout) = 0;
+
         };
 
 
@@ -297,21 +358,25 @@ namespace Pinpoint
             boost::condition buffer_not_full, buffer_not_empty;
         };
 
-        class ScheduledExecutor : public ThreadExecutor
+        class ScheduledExecutor
         {
         public:
-            explicit  ScheduledExecutor(const std::string &executorName);
+            explicit  ScheduledExecutor(boost::asio::io_service& agentIo, const std::string &executorName);
 
-            ~ScheduledExecutor();
+            virtual   ~ScheduledExecutor();
 
             int32_t addTask(const ExecutorTaskPtr& pTask, uint32_t interval, int32_t callTimes);
+
+            // NOTE ONLY SAFE WHEN CALL IN IOTHREAD
+            void stopScheduleExecutor();
 
         private:
 
             class RepeatedTask
             {
             public:
-                static int32_t run(boost::shared_ptr<RepeatedTask>& repeatedTask,
+                static int32_t run(const boost::system::error_code& e,
+                				  boost::shared_ptr<RepeatedTask>& repeatedTask,
                                    boost::shared_ptr<boost::asio::deadline_timer>& timerPtr);
 
                 RepeatedTask(const boost::shared_ptr<ExecutorTask> &pTask, uint32_t interval, int32_t callTimes);
@@ -336,15 +401,13 @@ namespace Pinpoint
                 int32_t callTimes;
             };
 
-            boost::asio::io_service io;
-            boost::asio::io_service::work work;
+            boost::asio::io_service& io;
 
-            virtual void executeTask();
+            int32_t addIoTask_(const boost::shared_ptr<RepeatedTask>& repeatedTaskPtr);
 
-            virtual void stopTask();
-
-            int32_t addTask_(const boost::shared_ptr<RepeatedTask>& repeatedTaskPtr);
-
+        private:
+            std::vector<boost::shared_ptr<boost::asio::deadline_timer> > timerSet;
+            enum SE_STATUES {E_RUNNING,E_STOPPED} _status;
         };
 
         typedef boost::shared_ptr<ScheduledExecutor> ScheduledExecutorPtr;
@@ -377,7 +440,7 @@ namespace Pinpoint
         using Pinpoint::utils::get_current_unixsec_stamp;
         using Pinpoint::utils::get_current_process_id;
 
-        class MainProcessChecker : public Pinpoint::Agent::ExecutorTask
+        class MainProcessChecker //: public Pinpoint::Agent::ExecutorTask
         {
         private:
             typedef struct _SelfFlag
@@ -393,14 +456,16 @@ namespace Pinpoint
                     expireTime = 0;
                 }
             } ShmMainProcFlag;
-            int32_t run()
+
+#if 0
+            int32_t bgRun()
             {
                 OS_process_id_t mainPid;
-                if (isMainProcess(mainPid)) {
-                } else {
-                }
+                isMainProcess(mainPid);
                 return SUCCESS;
             }
+#endif
+
         public:
             static MainProcessChecker* createChecker();
 

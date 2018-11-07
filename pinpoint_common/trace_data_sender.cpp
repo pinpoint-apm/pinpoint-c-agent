@@ -41,21 +41,12 @@ namespace Pinpoint
         {
             LOGI("TraceDataSender::init() start. ");
 
-            TMemoryBuffer *tb = new(std::nothrow) TMemoryBuffer();
-            if (tb == NULL)
-            {
-                LOGE("new TMemoryBuffer fail.");
-                return FAILED;
-            }
+            TMemoryBuffer *tb = new TMemoryBuffer();
 
             this->transportOut.reset(tb);
 
-            TCompactProtocol *tp = new(std::nothrow) TCompactProtocol(this->transportOut);
-            if (tp == NULL)
-            {
-                LOGE("new TCompactProtocol fail.");
-                return FAILED;
-            }
+            TCompactProtocol *tp = new TCompactProtocol(this->transportOut);
+
             this->protocolOut.reset(tp);
 
             return SUCCESS;

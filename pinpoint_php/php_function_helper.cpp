@@ -158,7 +158,7 @@ void call_php_kernel_debug_backtrace(int skip_last, pt_frame_t &frame, int optio
     HashPosition pos;
     zval * current = NULL;
     zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(&ret_val), &pos);
-    if( current = zend_hash_get_current_data_ex(Z_ARRVAL_P(&ret_val), &pos))
+    if( (current = zend_hash_get_current_data_ex(Z_ARRVAL_P(&ret_val), &pos)) )
     {
         full_fill_frame_with_zval(&frame, current);
     }

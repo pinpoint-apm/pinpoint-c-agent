@@ -19,7 +19,8 @@
 #include <boost/shared_ptr.hpp>
 #include <stdio.h>
 #include <boost/thread.hpp>
-#include "stdint.h"
+#define __STDC_LIMIT_MACROS 
+#include <stdint.h>
 #include "pinpoint_api.h"
 
 namespace Pinpoint
