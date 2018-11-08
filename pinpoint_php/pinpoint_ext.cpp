@@ -191,8 +191,6 @@ void print_ini()
 //    LOGD("configFileName:%s",PINPOINT_G(configFileName));
     LOGD("trace_exception:%d",PINPOINT_G(trace_exception));
     LOGD("unittest:%d",PINPOINT_G(unittest));
-    LOGD("pluginsRootPath:%d",PINPOINT_G(pluginsRootPath));
-    LOGD("entryFilename:%d",PINPOINT_G(entryFilename));
     LOGD("proxy.http.header.enable:%d",PINPOINT_G(proxy_headers));
 
     LOGD("common.agentID:%s",PINPOINT_G(agentID));
@@ -203,6 +201,10 @@ void print_ini()
     LOGD("common.CollectorStatPort:%l",PINPOINT_G(CollectorStatPort));
     LOGD("common.CollectorTcpIp:%s",PINPOINT_G(CollectorTcpIp));
     LOGD("common.CollectorTcpPort:%l",PINPOINT_G(CollectorTcpPort));
+
+    LOGD("common.entryFilename:%s",PINPOINT_G(entryFilename));
+    LOGD("common.pluginsRootPath:%s",PINPOINT_G(pluginsRootPath));
+
     LOGD("common.PluginExclude:%s",PINPOINT_G(PluginExclude));
     LOGD("common.PluginInclude:%s",PINPOINT_G(PluginInclude));
 
@@ -211,12 +213,14 @@ void print_ini()
 
     LOGD("common.reconInterval:%l",PINPOINT_G(reconInterval));
     LOGD("common.ApiTableFile:%s",PINPOINT_G(ApiTableFile));
+
 }
 
 
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
 {
 //    _pinpoint_globals->trace_exception= 1;
+    memset(_pinpoint_globals,0,sizeof(*_pinpoint_globals));
 }
 
 PHP_MINIT_FUNCTION(pinpoint)
@@ -226,9 +230,16 @@ PHP_MINIT_FUNCTION(pinpoint)
     REGISTER_INI_ENTRIES();
 
     IS_MODULE_ENABLE();
-
-    if( PINPOINT_G(pluginsRootPath) == NULL){
+    if(PINPOINT_G(pluginsRootPath)[0]==0)
+    {
+        strncpy(PINPOINT_G(pluginsAbsolutePath),php_getcwd(),MAXPATHLEN);
+    }
+    else if(PINPOINT_G(pluginsRootPath)[0] !='/' ){
+        /// absolute Path
         strncpy(PINPOINT_G(pluginsAbsolutePath),expand_filepath(PINPOINT_G(pluginsRootPath),NULL),MAXPATHLEN);
+    }else{
+        // related path /home/apps/plugins/
+        strncpy(PINPOINT_G(pluginsAbsolutePath),PINPOINT_G(pluginsRootPath),MAXPATHLEN);
     }
 
 
@@ -379,9 +390,9 @@ PHP_RINIT_FUNCTION(pinpoint)
             start_pinpoint_agent();
         }
 
-        start_a_new_calltrace();
     }
 
+    start_a_new_calltrace();
 
     return SUCCESS;
 }
@@ -411,7 +422,7 @@ static void load_php_interface_plugins()
     memset(&prepend_file, 0, sizeof(zend_file_handle));
 
     std::string p = path_join(pluginsDir, phpCreatePluginsFileName);
-    LOGD("plugins full path %s", p.c_str());
+    LOGD("plugins full path [%s]", p.c_str());
 
     if(file_exist_and_readable(p) == -1)
     {

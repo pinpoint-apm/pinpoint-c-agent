@@ -71,7 +71,8 @@ extern std::string get_remote_addr();
 
 extern std::string get_rpc();
 
-void php_getcwd(std::string&);
+/// not thread safe
+const char* php_getcwd();
 
 int file_exist_and_readable(std::string& fullName);
 

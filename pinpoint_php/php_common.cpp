@@ -250,10 +250,10 @@ std::string get_rpc()
     return  getNameFromHeaderMap(PP_REQUEST_URI);
 }
 
-void  php_getcwd(std::string& path)
+const char* php_getcwd()
 {
 
-    char _path[PATH_MAX] = {0};
+    static char _path[PATH_MAX];
     char *ret=NULL;
 
 #if HAVE_GETCWD
@@ -262,7 +262,7 @@ void  php_getcwd(std::string& path)
     ret = VCWD_GETWD(_path);
 #endif
 
-    path = ret;
+    return ret;
 }
 
 int file_exist_and_readable(std::string& fullName)
@@ -627,9 +627,9 @@ void get_plugins_by_php(Pinpoint::Plugin::PluginPtrVector &pluginPtrVector)
 
     pluginPtrVector.insert(pluginPtrVector.end(), v2.begin(), v2.end());
 
-    v2.clear();
-
     LOGT("php plugin count=%d", v2.size());
+
+    v2.clear();
 
 }
 
@@ -1015,7 +1015,6 @@ int32_t PObjectCache::store(zval *z_class_instance, const char* classDefinitionP
     if(call_php_kernel_serialize(&retval,z_class_instance) != 0)
     {
         LOGE("call_php_kernel_serialize failed %s",classDefinitionPath);
-        w_zval_ptr_dtor(z_class_instance);
         return Pinpoint::FAILED;
     }
 
@@ -1070,6 +1069,8 @@ int32_t PObjectCache::load()
 
             zend_try
             {
+
+                LOGD("include [%s]",prepend_file_p->filename);
                 if (zend_execute_scripts(ZEND_INCLUDE_ONCE TSRMLS_CC, NULL, 1, prepend_file_p) != 0)
                 {
                     zend_string_release(classname);
@@ -1092,9 +1093,9 @@ int32_t PObjectCache::load()
     zval* obj_seried;
     MAKE_STD_ZVAL(obj_seried);
     W_ZVAL_STRINGL(obj_seried, (char*)buf, bufLen);
-
     if(zval_class_instance == NULL)
     {
+        LOGD("seried string:[%*s]",bufLen,buf);
         MAKE_STD_ZVAL(zval_class_instance);
 
         if (call_php_kernel_unserialize(zval_class_instance,obj_seried) != SUCCESS)
@@ -1117,10 +1118,10 @@ int32_t PObjectCache::load()
     PhpAop *aop = PhpAop::getInstance();
     PINPOINT_ASSERT_RETURN((aop != NULL), Pinpoint::FAILED);
 
-    LOGD("%s register reqShutDownHandler", className.c_str());
+
     aop->addReqShutdownHandler(boost::bind(&PObjectCache::reqShutDownHandler, this));
 
-    LOGD(" load once ");
+    LOGD("[%s] load once ", className.c_str());
 
     return SUCCESS;
 }
