@@ -253,11 +253,11 @@ namespace Pinpoint
         {
             addPredefinedType();
 
-        	/// register all plugins
-        	updatePlugins(pluginPtrVector);
+            /// register all plugins
+            updatePlugins(pluginPtrVector);
 
-			/* sampling */
-			samplingPtr.reset(new DefaultSampling(args->traceLimit, args->skipTraceTime));
+            /* sampling */
+            samplingPtr.reset(new DefaultSampling(args->traceLimit, args->skipTraceTime));
 
             this->status = (volatile AgentStatus)AGENT_INITED;
             return SUCCESS;
@@ -268,7 +268,7 @@ namespace Pinpoint
         {
             if (this->status != AGENT_INITED)
             {
-            	LOGD("start agent failed, as status != AGENT_INITED");
+                LOGD("start agent failed, as status != AGENT_INITED");
                 return FAILED;
             }
 
@@ -324,11 +324,11 @@ namespace Pinpoint
 
                 traceDataSender->init();
 
-	            agentMonitorSender->init();
-	            agentDataSender->init();
-	            apiDataSender->init();
-	            stringDataSender->init();
-	            pinpointClientPtr->init();
+                agentMonitorSender->init();
+                agentDataSender->init();
+                apiDataSender->init();
+                stringDataSender->init();
+                pinpointClientPtr->init();
 
                 agentDataSender->start();
                 agentMonitorSender->start();

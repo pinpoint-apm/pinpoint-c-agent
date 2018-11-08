@@ -123,8 +123,8 @@ namespace Pinpoint
             ip = headers.find(extName);
             if (ip != headers.end())
             {
-            	header = ip->second;
-            	return true;
+                header = ip->second;
+                return true;
             }
 
             return false;

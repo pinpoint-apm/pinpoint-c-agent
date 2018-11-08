@@ -33,10 +33,10 @@ namespace Pinpoint
         UdpDataSender::UdpDataSender(boost::asio::io_service& agentIo,const std::string &name, const std::string &ip, uint32_t port)
                 : DataSender(ip, port),
                   sendQueue(UDP_BUFFER_LEN),
-				  io(agentIo),
-				  socket_(agentIo),
-				  timer_(agentIo),
-				  m_sendCount(0)
+                  io(agentIo),
+                  socket_(agentIo),
+                  timer_(agentIo),
+                  m_sendCount(0)
         {
 
         }
@@ -48,9 +48,9 @@ namespace Pinpoint
 
         void UdpDataSender::stop()
         {
-        	timer_.cancel();
-        	nstate = E_EXIT;
-        	LOGD("UdpDataSender exit");
+            timer_.cancel();
+            nstate = E_EXIT;
+            LOGD("UdpDataSender exit");
         }
 
         void UdpDataSender::init()
@@ -64,12 +64,12 @@ namespace Pinpoint
             }
             catch (std::exception &e)
             {
-                LOGE(" ip error: ip=%s, err=%s", this->m_ip.c_str(), e.what());
+                LOGE(" ip error: ip=[%s], err=[%s]", this->m_ip.c_str(), e.what());
                 return;
             }
             catch (...)
             {
-                LOGE(" ip error: ip=%s, err=%s" , this->m_ip.c_str(), "unknown");
+                LOGE(" ip error: ip=[%s], err=[%s]" , this->m_ip.c_str(), "unknown");
                 return;
             }
 
@@ -119,11 +119,11 @@ namespace Pinpoint
 
         void UdpDataSender::io_send_udp_packet(const boost::system::error_code & ec)
         {
-        	if( ec && ec != boost::asio::error::operation_aborted)
-        	{
-        		LOGI("io_send_udp_packet met %s ",ec.message().c_str());
-        		return ;
-        	}
+            if( ec && ec != boost::asio::error::operation_aborted)
+            {
+                LOGI("io_send_udp_packet met [%s] ",ec.message().c_str());
+                return ;
+            }
 
             typedef std::vector<PacketPtr> PacketPtrVec;
             PacketPtrVec packetPtrVec;
@@ -151,21 +151,21 @@ namespace Pinpoint
                 }
                 catch (std::exception& e)
                 {
-                    LOGE("send udp packet failed. e=%s, length=%ld]", e.what(),(*ip)->getCodedData().length());
+                    LOGE("send udp packet failed. e=%s, length=[%ld]", e.what(),(*ip)->getCodedData().length());
                 }
 
             }
 
             timer_.expires_from_now(boost::posix_time::milliseconds(0)); // recheck it
-	_AGAIN:
-			if(!ec){ // no error find, go on
-				timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
-			}else{
-				socket_.close();
-				if(nstate != E_EXIT){
-					init();
-				}
-			}
+    _AGAIN:
+            if(!ec){ // no error find, go on
+                timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
+            }else{
+                socket_.close();
+                if(nstate != E_EXIT){
+                    init();
+                }
+            }
         }
 
         uint32_t UdpDataSender::getSendCount()

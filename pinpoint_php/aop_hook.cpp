@@ -203,10 +203,10 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
 
         /* function name */
         if (strcmp(P7_STR(zf->common.function_name), "{closure}") == 0) {
-        	// drop the end line, filename+start line could make it unique
-        	//  snprintf(frame->function,NAME_LEN, "closure:%s:%d-%d", P7_STR(zf->op_array.filename), zf->op_array.line_start, zf->op_array.line_end);
-        	const char* offset = strrchr(P7_STR(zf->op_array.filename),'/');
-        	snprintf(frame->function,NAME_LEN, "closure{%s:%d}",(offset?(offset+1):(NULL)), zf->op_array.line_start);
+            // drop the end line, filename+start line could make it unique
+            //  snprintf(frame->function,NAME_LEN, "closure:%s:%d-%d", P7_STR(zf->op_array.filename), zf->op_array.line_start, zf->op_array.line_end);
+            const char* offset = strrchr(P7_STR(zf->op_array.filename),'/');
+            snprintf(frame->function,NAME_LEN, "closure{%s:%d}",(offset?(offset+1):(NULL)), zf->op_array.line_start);
         } else if (strcmp(P7_STR(zf->common.function_name), "__lambda_func") == 0) {
             snprintf( frame->function ,NAME_LEN, "{lambda:%s}", P7_STR(zf->op_array.filename));
 #if PHP_VERSION_ID >= 50414

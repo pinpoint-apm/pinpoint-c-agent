@@ -178,9 +178,9 @@ namespace Pinpoint
 
         protected:
             DataSender(const std::string &ip, uint32_t port) :
-            	m_ip(ip),
-				m_port(port),
-				nstate(E_CLOSE)
+                m_ip(ip),
+                m_port(port),
+                nstate(E_CLOSE)
             {};
 
             std::string m_ip;

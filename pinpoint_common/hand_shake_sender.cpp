@@ -83,10 +83,12 @@ namespace Pinpoint
         const std::string HandShakeSender::CODE("code");
         const std::string HandShakeSender::SUB_CODE("subCode");
 
-        HandShakeSender::HandShakeSender(boost::shared_ptr<ScheduledExecutor> scheduledExecutor,
-                                         boost::shared_ptr<DataSender> dataSender)
-                : scheduledExecutor(scheduledExecutor), dataSender(dataSender), handShakeCount(0),
-                  status(STATE_INIT), responseCode(NULL)
+        HandShakeSender::HandShakeSender(boost::shared_ptr<ScheduledExecutor> scheduledExecutor,boost::shared_ptr<DataSender> dataSender)
+                                : scheduledExecutor(scheduledExecutor),
+                                  dataSender(dataSender),
+                                  handShakeCount(0),
+                                  status(STATE_INIT),
+                                  responseCode(NULL)
         {
 
         }

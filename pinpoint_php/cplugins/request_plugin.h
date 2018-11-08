@@ -49,7 +49,6 @@ public:
 
     virtual ~PhpRequestInterceptor()
     {
-        LOGW("why you realloc PhpRequestInterceptor");
         state=E_STOP;
     }
 

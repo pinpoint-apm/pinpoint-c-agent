@@ -130,54 +130,54 @@ namespace Pinpoint
 
 
         private:
-        	TaskDispatcher() {
-        		pth = NULL;
-        		thrStatus = E_Uninited;
-        	}
+            TaskDispatcher() {
+                pth = NULL;
+                thrStatus = E_Uninited;
+            }
 
-        	virtual ~TaskDispatcher()
-        	{
-        		stop();
+            virtual ~TaskDispatcher()
+            {
+                stop();
 
-        		if(pth){
-        			delete pth;
-        		}
-        	}
-
-        public:
-
-        	/// Note: use try { } catch { }
-        	void  start();
-
-        	void  stop();
-
-        	boost::asio::io_service& getAsio()
-        	{
-        		return io;
-        	}
-
-        	void postEvent(const boost::function<void(void)> fun);
+                if(pth){
+                    delete pth;
+                }
+            }
 
         public:
 
-        	static TaskDispatcher& getInstance()
-        	{
-        		static TaskDispatcher _task;
-        		return _task;
-        	}
+            /// Note: use try { } catch { }
+            void  start();
+
+            void  stop();
+
+            boost::asio::io_service& getAsio()
+            {
+                return io;
+            }
+
+            void postEvent(const boost::function<void(void)> fun);
+
+        public:
+
+            static TaskDispatcher& getInstance()
+            {
+                static TaskDispatcher _task;
+                return _task;
+            }
 
         private:
-        	typedef enum { E_Uninited,E_Running,E_Stop } Status;
+            typedef enum { E_Uninited,E_Running,E_Stop } Status;
 
-        	void bgRun();
+            void bgRun();
 
-        	Status thrStatus;
+            Status thrStatus;
 
         private:
-        	boost::thread* pth;
-        	boost::condition thrCon;
-        	boost::mutex     thrMutex;
-        	boost::asio::io_service io;
+            boost::thread* pth;
+            boost::condition thrCon;
+            boost::mutex     thrMutex;
+            boost::asio::io_service io;
         };
 
 
@@ -376,7 +376,7 @@ namespace Pinpoint
             {
             public:
                 static int32_t run(const boost::system::error_code& e,
-                				  boost::shared_ptr<RepeatedTask>& repeatedTask,
+                                   boost::shared_ptr<RepeatedTask>& repeatedTask,
                                    boost::shared_ptr<boost::asio::deadline_timer>& timerPtr);
 
                 RepeatedTask(const boost::shared_ptr<ExecutorTask> &pTask, uint32_t interval, int32_t callTimes);

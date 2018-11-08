@@ -1732,51 +1732,51 @@ PHP_FUNCTION(pinpoint_end_trace)
 
 PHP_FUNCTION(pinpint_aop_reload)
 {
-	using  Pinpoint::Agent::Agent;
-	using  Pinpoint::Agent::AgentPtr;
-	using  Pinpoint::Plugin::PluginPtrVector;
-	AgentPtr agentPtr = Agent::getAgentPtr();
+    using  Pinpoint::Agent::Agent;
+    using  Pinpoint::Agent::AgentPtr;
+    using  Pinpoint::Plugin::PluginPtrVector;
+    AgentPtr agentPtr = Agent::getAgentPtr();
 
-	PluginPtrVector pluginPtrVector;
-	get_plugins_by_php(pluginPtrVector);
+    PluginPtrVector pluginPtrVector;
+    get_plugins_by_php(pluginPtrVector);
     if (agentPtr->updatePlugins(pluginPtrVector) != SUCCESS)
     {
-    	zend_error(E_ERROR, "init_pinpoint_agent failed");
-    	PP_U_TRACE("init_pinpoint_agent failed");
-    	return ;
+        zend_error(E_ERROR, "init_pinpoint_agent failed");
+        PP_U_TRACE("init_pinpoint_agent failed");
+        return ;
     }
 
-	if(agentPtr)
-	{
-	    agentPtr->refreshMetaData();
-	}
+    if(agentPtr)
+    {
+        agentPtr->refreshMetaData();
+    }
 }
 
 PHP_FUNCTION(pinpoint_data_thread_start)
 {
-	/// todo
-	/// add more state tracing is better
+    /// todo
+    /// add more state tracing is better
 
-	using  Pinpoint::Agent::Agent;
-	using  Pinpoint::Agent::AgentPtr;
-	AgentPtr agentPtr = Agent::getAgentPtr();
+    using  Pinpoint::Agent::Agent;
+    using  Pinpoint::Agent::AgentPtr;
+    AgentPtr agentPtr = Agent::getAgentPtr();
 
     if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_INITED){
-    	start_pinpoint_agent();
+        start_pinpoint_agent();
     }else{
-    	zend_error(E_ERROR, "pinpoint_connect_collector: initialized");
-    	return ;
+//        zend_error(E_ERROR, "pinpoint_connect_collector: initialized");
+        return ;
     }
 }
 
 PHP_FUNCTION(pinpoint_start_calltrace)
 {
-	start_a_new_calltrace();
+    start_a_new_calltrace();
 }
 
 PHP_FUNCTION(pinpoint_end_calltrace)
 {
-	end_current_calltrace();
+    end_current_calltrace();
 }
 
 PHP_FUNCTION(pinpoint_add_api)

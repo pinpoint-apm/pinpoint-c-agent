@@ -52,16 +52,15 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint);
 
 typedef struct _per_reqeust_state_{
     zend_bool fatal_error_catched;
-    // show the plugins call depth
-    int stackDepth;
-    int traceStatus;
+    int stackDepth;     // show the plugins callback depth
+    int traceStatus;    // trace status, as user could call end_current_callback in php
 }PRS;
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint)
     zend_bool module_enable;
     zend_bool trace_exception;
-	zend_bool unittest;
-	zend_bool proxy_headers;
+    zend_bool unittest;
+    zend_bool proxy_headers;
 //    char* configFileName;
     char* pluginsRootPath;
     char pluginsAbsolutePath[MAXPATHLEN];

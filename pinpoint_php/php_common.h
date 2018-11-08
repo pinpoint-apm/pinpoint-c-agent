@@ -49,10 +49,10 @@
 #define PP_U_TRACE(msg,...) (PINPOINT_G(unittest)?(fprintf(stderr,"%*s" msg"\n",PINPOINT_G(prs).stackDepth*2,"",##__VA_ARGS__)):(0));
 
 #define PP_TRACE(msg,...)\
-		do{\
-			PP_U_TRACE(msg,##__VA_ARGS__);\
-			LOGT(msg,##__VA_ARGS__);\
-		}while(0)
+        do{\
+            PP_U_TRACE(msg,##__VA_ARGS__);\
+            LOGT(msg,##__VA_ARGS__);\
+        }while(0)
 
 
 using Pinpoint::Naming::eName;
@@ -76,8 +76,6 @@ void php_getcwd(std::string&);
 int file_exist_and_readable(std::string& fullName);
 
 void get_plugins_by_php(Pinpoint::Plugin::PluginPtrVector &);
-
-void get_new_php_interface_plugins(Pinpoint::Plugin::PluginPtrVector &);
 
 extern int32_t get_http_response_status();
 

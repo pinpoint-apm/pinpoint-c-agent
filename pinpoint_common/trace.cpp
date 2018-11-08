@@ -218,24 +218,24 @@ namespace Pinpoint
 
         //</editor-fold>
 
-		//<editor-fold desc="TranSequenceGenerator">
-		ProcessShareDataManager* ProcessShareDataManager::instance()
-		{
-			static ProcessShareDataManager instance;
-			return &instance;
-		}
+        //<editor-fold desc="TranSequenceGenerator">
+        ProcessShareDataManager* ProcessShareDataManager::instance()
+        {
+            static ProcessShareDataManager instance;
+            return &instance;
+        }
 
-		int64_t ProcessShareDataManager::generateTranSequence()
-		{
-			Pinpoint::ScopeLock _lock(&pSShmFlag->getWriteLock());
-			procsSharefeData* pData = pSShmFlag->getData();
+        int64_t ProcessShareDataManager::generateTranSequence()
+        {
+            Pinpoint::ScopeLock _lock(&pSShmFlag->getWriteLock());
+            procsSharefeData* pData = pSShmFlag->getData();
 
-			pData->iVersion++;
-			pData->tSequenceGenerator++;
+            pData->iVersion++;
+            pData->tSequenceGenerator++;
 
-			return pData->tSequenceGenerator;
-		}
-		//</editor-fold>
+            return pData->tSequenceGenerator;
+        }
+        //</editor-fold>
 
         //<editor-fold desc="Trace">
 
@@ -936,8 +936,8 @@ namespace Pinpoint
         bool operator==(const TransactionId &a, const TransactionId &b)
         {
             return (a.agentId == b.agentId) && \
-			(a.agentStartTime == b.agentStartTime) && \
-			(a.transactionSequence == b.transactionSequence);
+            (a.agentStartTime == b.agentStartTime) && \
+            (a.transactionSequence == b.transactionSequence);
         }
 
         // int8_t TransactionIdUtils::TVERSION(0);

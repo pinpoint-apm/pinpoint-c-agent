@@ -147,7 +147,7 @@ namespace Pinpoint
                             "ERROR",
                             "WARN",
                             "INFO",
-							"TRACE",
+                            "TRACE",
                             "DEBUG",
                             NULL
                     };

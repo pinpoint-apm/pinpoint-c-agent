@@ -142,16 +142,16 @@ namespace Pinpoint
                                        uint32_t reconInter)
                 : DataSender(ip, port),
                   sendQueue(SEND_QUEUE_LEN),
-				  sendCount(0),
-				  requestCount(0),
-				  io_(agentIo),
-//				  work(agentIo),
-				  socket_(agentIo),
-				  timer_(agentIo),
+                  sendCount(0),
+                  requestCount(0),
+                  io_(agentIo),
+//                  work(agentIo),
+                  socket_(agentIo),
+                  timer_(agentIo),
                   interval(reconInter),
-				  state(),
-				  isWriting(false),
-				  scheduledExecutor(scheduledExecutor)
+                  state(),
+                  isWriting(false),
+                  scheduledExecutor(scheduledExecutor)
         {
             nstate  = E_CLOSE;
 
@@ -175,7 +175,7 @@ namespace Pinpoint
                 }
 
                 pingPongHandler.reset(new PinpointPingPongHandler(scheduledExecutor,
-                		pinpointClientPtr));
+                        pinpointClientPtr));
 
                 if (pingPongHandler->init() != SUCCESS)
                 {
@@ -224,8 +224,8 @@ namespace Pinpoint
                                       boost::bind(&PinpointClient::handle_connect_event,
                                                   this, _1));
 
-            	timer_.expires_from_now(boost::posix_time::seconds(interval));
-            	timer_.async_wait(boost::bind(&PinpointClient::connect_timeout,this,_1));
+                timer_.expires_from_now(boost::posix_time::seconds(interval));
+                timer_.async_wait(boost::bind(&PinpointClient::connect_timeout,this,_1));
 
                 nstate = E_CONNECTING;
 
@@ -454,12 +454,12 @@ namespace Pinpoint
 
             if (!error)
             {
-            	LOGD("send [%d bytes] to collector",packetPtr->getCodedData().length());
+                LOGD("send [%d] bytes to collector",packetPtr->getCodedData().length());
                 start_write();
             }
             else
             {
-                LOGW("write failed: error=%s", error.message().c_str());
+                LOGW("write failed: error=[%s]", error.message().c_str());
 
                 if (packetPtr->retry())
                 {
@@ -475,12 +475,12 @@ namespace Pinpoint
                     (boost::asio::error::broken_pipe == error) ||
                     (boost::asio::error::bad_descriptor == error))
                 {
-                    LOGW("connect broken: %s:%d", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
+                    LOGW("connect broken: [%s]:[%d]", this->DataSender::m_ip.c_str(), this->DataSender::m_port);
                     handle_error(error);
                 }
                 else
                 {
-                    LOGE("handle_write: %s ",error.message().c_str());
+                    LOGE("handle_write: [%s] ",error.message().c_str());
                     assert(0);
                 }
             }
@@ -854,8 +854,8 @@ namespace Pinpoint
 
         void PinpointClient::stop()
         {
-        	state.toClosedByClient();
-        	socket_.cancel();
+            state.toClosedByClient();
+            socket_.cancel();
             socket_.close();
             LOGD("[%s:%d] connection closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);
             nstate = E_EXIT;

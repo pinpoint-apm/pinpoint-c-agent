@@ -121,7 +121,7 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
     // add proxy header checking
     if(!PINPOINT_G(proxy_headers))
     {
-    	return ;
+        return ;
     }
 
     TracePtr tracePtr = Trace::getCurrentTrace();
@@ -220,6 +220,7 @@ int32_t PhpRequestPlugin::init()
 //    this->interceptors.push_back(interceptorPtr);
 
 
+    /// phprequest intercepter is a special plugin, user can't redefined it
     Pinpoint::Plugin::InterceptorPtr interceptorPtr;
     interceptorPtr.reset(new PhpRequestInterceptor(PHP_REQUEST_FUNC_NAME, shared_from_this()));
     // new and initialize it

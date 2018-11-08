@@ -46,7 +46,7 @@ namespace Pinpoint
 
         ScheduledExecutor::ScheduledExecutor(boost::asio::io_service& agentIo,const std::string &executorName)
                 : io(agentIo),
-				  _status(E_RUNNING)
+                  _status(E_RUNNING)
         {
 
         }
@@ -59,23 +59,23 @@ namespace Pinpoint
 
         void ScheduledExecutor::stopScheduleExecutor()
         {
-        	std::vector<boost::shared_ptr<boost::asio::deadline_timer> >::const_iterator cit = timerSet.begin();
-        	while(cit !=timerSet.end())
-        	{
-        		LOGD("cancel a ScheduledExecutor");
-        		(*cit)->cancel();
-        		cit++;
-        	}
-        	_status = E_STOPPED;
+            std::vector<boost::shared_ptr<boost::asio::deadline_timer> >::const_iterator cit = timerSet.begin();
+            while(cit !=timerSet.end())
+            {
+                LOGD("cancel a ScheduledExecutor");
+                (*cit)->cancel();
+                cit++;
+            }
+            _status = E_STOPPED;
         }
 
         int32_t ScheduledExecutor::addTask(const ExecutorTaskPtr& pTask, uint32_t interval, int32_t callTimes)
         {
-        	if(_status == E_STOPPED)
-        	{
-        		LOGI("ScheduledExecutor stopped");
-        		return SUCCESS;
-        	}
+            if(_status == E_STOPPED)
+            {
+                LOGI("ScheduledExecutor stopped");
+                return SUCCESS;
+            }
 
             LOGD("ScheduledExecutor add task: name=%s, interval=%d, callTimes=%d", pTask->getTaskName().c_str(), interval, callTimes);
 
@@ -136,18 +136,18 @@ namespace Pinpoint
         }
 
         int32_t ScheduledExecutor::RepeatedTask::run(const boost::system::error_code& e,
-        											 boost::shared_ptr<RepeatedTask>& repeatedTaskPtr,
+                                                     boost::shared_ptr<RepeatedTask>& repeatedTaskPtr,
                                                      boost::shared_ptr<boost::asio::deadline_timer>& timerPtr)
         {
 
             int32_t err = SUCCESS;
 
-			if(e ==  boost::asio::error::operation_aborted)
-			{
-				// timer had been canceled
-				LOGD("timer canceled");
-				return FAILED;
-			}
+            if(e ==  boost::asio::error::operation_aborted)
+            {
+                // timer had been canceled
+                LOGD("timer canceled");
+                return FAILED;
+            }
 
             try
             {
@@ -175,7 +175,7 @@ namespace Pinpoint
 
             if(timerPtr->expires_from_now() == boost::posix_time::milliseconds(0))
             {
-            	return err;
+                return err;
             }
 
             if (repeatedTaskPtr->callTimes == -1 || repeatedTaskPtr->callTimes > 0)
@@ -357,50 +357,50 @@ namespace Pinpoint
 
         void TaskDispatcher::start()
         {
-        	boost::mutex::scoped_lock lock(thrMutex);
-        	// 1. start the background thread
-        	pth = new boost::thread(&TaskDispatcher::bgRun,this);
-        	// 2. wait thread running success
-        	while(thrStatus != E_Running ){
-        		thrCon.wait(lock);
-        	}
+            boost::mutex::scoped_lock lock(thrMutex);
+            // 1. start the background thread
+            pth = new boost::thread(&TaskDispatcher::bgRun,this);
+            // 2. wait thread running success
+            while(thrStatus != E_Running ){
+                thrCon.wait(lock);
+            }
 
         }
 
         void TaskDispatcher::stop()
-	    {
-        	// 1. stop io
+        {
+            // 1. stop io
 
-//        	io.stop();
+//            io.stop();
 
-        	// 2. wait thread stop
-        	pth->join();
-        	thrStatus = E_Stop;
-	    }
+            // 2. wait thread stop
+            pth->join();
+            thrStatus = E_Stop;
+        }
 
-    	void TaskDispatcher::bgRun()
-		{
-    		boost::mutex::scoped_lock lock(thrMutex);
-    		thrStatus = E_Running;
-    		thrCon.notify_one(); //thread is working
-    	    lock.unlock();
-			try
-			{
-				io.run();
-			}
-			catch (std::exception& e)
-			{
-				LOGE("io_service throw %s", e.what());
-			}
+        void TaskDispatcher::bgRun()
+        {
+            boost::mutex::scoped_lock lock(thrMutex);
+            thrStatus = E_Running;
+            thrCon.notify_one(); //thread is working
+            lock.unlock();
+            try
+            {
+                io.run();
+            }
+            catch (std::exception& e)
+            {
+                LOGE("io_service throw %s", e.what());
+            }
 
-			LOGW("background task finished");
+            LOGW("background task finished");
 
-		}
+        }
 
-    	void TaskDispatcher::postEvent(const boost::function<void(void)> fun)
-    	{
-    		io.post(fun);
-    	}
+        void TaskDispatcher::postEvent(const boost::function<void(void)> fun)
+        {
+            io.post(fun);
+        }
 
     }
 }
