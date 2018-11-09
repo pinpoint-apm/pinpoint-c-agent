@@ -691,7 +691,7 @@ void start_pinpoint_agent()
 
     agentPtr->start();
 
-    LOGI("pinpoint agent start");
+    LOGD("data proxy thread start");
     PP_U_TRACE("data proxy thread start");
 }
 
@@ -713,7 +713,7 @@ void end_current_calltrace()
 
     PhpAop *aop = PhpAop::getInstance();
 
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(unittest) == 1)
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(testCovered) == 1)
     {
         PINPOINT_ASSERT ((aop != NULL) );
         Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr = aop->getRequestInterceptorPtr();
@@ -778,8 +778,8 @@ void start_a_new_calltrace()
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT((agentPtr != NULL));
-    //  PINPOINT_G(unittest) == 1 open for unittest
-    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(unittest) == 1 )
+    //  PINPOINT_G(testCovered) == 1 open for testCovered
+    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(testCovered) == 1 )
     {
        // call longjmp: destructor is not called ...
        RunOriginExecute::stop();

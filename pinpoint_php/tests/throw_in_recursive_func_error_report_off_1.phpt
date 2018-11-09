@@ -4,7 +4,7 @@ Test pinpoint
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
-pinpoint_agent.unittest=true
+pinpoint_agent.testCovered=1
 display_errors = On
 error_reporting = 0
 --FILE--

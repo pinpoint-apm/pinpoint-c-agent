@@ -118,7 +118,7 @@ namespace Pinpoint
             ApiAssignTable::iterator ip = apiAssignTable.find(apiInfo);
             if (ip != apiAssignTable.end())
             {
-                LOGW("api=[%s] has been assigned. Id=[%d]", ip->first.c_str(), ip->second);
+                LOGI("api=[%s] has been assigned. Id=[%d]", ip->first.c_str(), ip->second);
                 return ip->second;
             }
 

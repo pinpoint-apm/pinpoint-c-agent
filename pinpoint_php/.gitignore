@@ -12,4 +12,5 @@
 !tests
 /config.h
 !*.phpt
+!*.inc
 run-tests.php

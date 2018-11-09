@@ -86,7 +86,8 @@ int set_logfile_root_path(const char* logFileDirectory)
     int fd = open(filePathName, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
     if (0 > fd)
     {
-        fprintf(stderr,"open %s failed : %s \n",filePathName,strerror(errno));
+        /// this code could pollute the php output
+        /// fprintf(stdout,"open %s failed : %s \n",filePathName,strerror(errno));
         return -1;
     }
     _logInfo.fileFd = fd;
@@ -113,6 +114,6 @@ int64_t log_message(const char *msgStr,uint32_t msgLen)
         return 0;
     }
 
-    return write(_logInfo.fileFd > -1 ? _logInfo.fileFd : STDERR_FILENO, msgStr,msgLen);
+    return write((_logInfo.fileFd > -1) ? (_logInfo.fileFd) : (STDERR_FILENO), msgStr,msgLen);
 }
 #endif 

@@ -242,6 +242,7 @@ namespace Pinpoint
         {
             if( nstate != E_CONNECTED)
             {
+                LOGW("PinpointClient connect timeout expiredTime:[%d]",interval);
                 handle_error(ec);
             }
         }

@@ -117,8 +117,8 @@ STD_PHP_INI_ENTRY("pinpoint_agent.entryFilename", "", PHP_INI_SYSTEM,
 STD_PHP_INI_ENTRY("pinpoint_agent.trace_exception",  "0", PHP_INI_SYSTEM,
         OnUpdateBool, trace_exception, zend_pinpoint_globals, pinpoint_globals)
 
-STD_PHP_INI_ENTRY("pinpoint_agent.unittest",  "0", PHP_INI_SYSTEM,
-        OnUpdateBool, unittest, zend_pinpoint_globals, pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint_agent.testCovered",  "0", PHP_INI_SYSTEM,
+        OnUpdateLong, testCovered, zend_pinpoint_globals, pinpoint_globals)
 
 STD_PHP_INI_ENTRY("pinpoint_agent.pinpoint_enable","false",PHP_INI_SYSTEM,
         OnUpdateBool,module_enable,zend_pinpoint_globals,pinpoint_globals)
@@ -127,9 +127,9 @@ STD_PHP_INI_ENTRY("profiler.proxy.http.header.enable",  "true", PHP_INI_SYSTEM,
         OnUpdateBool, proxy_headers, zend_pinpoint_globals, pinpoint_globals)
 
         // log
-STD_PHP_INI_ENTRY("pinpoint.common.LogFileRootPath", "/tmp/", PHP_INI_SYSTEM,
+STD_PHP_INI_ENTRY("pinpoint.common.LogFileRootPath", "not-existed-path", PHP_INI_SYSTEM,
         OnUpdateString, logFileRootPath, zend_pinpoint_globals, pinpoint_globals)
-STD_PHP_INI_ENTRY("pinpoint.common.PPLogLevel", "DEBUG", PHP_INI_SYSTEM,
+STD_PHP_INI_ENTRY("pinpoint.common.PPLogLevel", "ERROR", PHP_INI_SYSTEM,
         OnUpdateString, PPLogLevel, zend_pinpoint_globals, pinpoint_globals)
 
         // agentid
@@ -190,7 +190,7 @@ void print_ini()
 {
 //    LOGD("configFileName:%s",PINPOINT_G(configFileName));
     LOGD("trace_exception:%d",PINPOINT_G(trace_exception));
-    LOGD("unittest:%d",PINPOINT_G(unittest));
+    LOGD("testCovered:%d",PINPOINT_G(testCovered));
     LOGD("proxy.http.header.enable:%d",PINPOINT_G(proxy_headers));
 
     LOGD("common.agentID:%s",PINPOINT_G(agentID));
@@ -349,9 +349,10 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
     LOGI("pinpoint module shutdown ");
 
     AgentPtr agentPtr = Agent::getAgentPtr();
-    if (agentPtr != NULL)
+    if (agentPtr != NULL )
     {
         agentPtr->stop();
+        LOGD("data proxy thread stopped");
     }
 
     turn_off_aop();
@@ -385,7 +386,9 @@ PHP_RINIT_FUNCTION(pinpoint)
             return -1;
         }
 
-        if( PINPOINT_G(unittest) == 0) // unittest not enable
+        /// test not enable
+        /// try to test bgthreadtask
+        if( PINPOINT_G(testCovered) == 0 || (PINPOINT_G(testCovered) & E_BGTASK) )
         {
             start_pinpoint_agent();
         }
@@ -414,6 +417,13 @@ static void load_php_interface_plugins()
     TSRMLS_FETCH();
 
     const char* phpCreatePluginsFileName = PINPOINT_G(entryFilename);
+    if(phpCreatePluginsFileName[0] == 0)
+    {
+        LOGI("-----------------------------------------");
+        LOGI("----php.ini:Entry file not setting ------");
+        LOGI("-----------------------------------------");
+        return ;
+    }
     std::string pluginsDir =  PINPOINT_G(pluginsAbsolutePath);
 
     /* interfaces */
@@ -428,7 +438,7 @@ static void load_php_interface_plugins()
     {
         LOGW("\n\n");
         LOGW("------------------------------------------------------------------------------------------------------------------------------------");
-        LOGW("------ %s can't read it ---------------------",p.c_str());
+        LOGW("------plugins entry file [%s] can't read it ---------------------",p.c_str());
         LOGW("------------------------------------------------------------------------------------------------------------------------------------");
         LOGW("\n\n");
         return ;

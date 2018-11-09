@@ -6,7 +6,7 @@ pinpoint_agent.trace_exception=true
 display_errors =On
 error_reporting = E_ERROR
 profiler.proxy.http.header.enable=true
-pinpoint_agent.unittest=true
+pinpoint_agent.testCovered=1
 
 --SKIPIF--
 <?php
