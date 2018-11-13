@@ -270,7 +270,7 @@ PHP_MINIT_FUNCTION(pinpoint)
         agentFunction.addInterceptorFunc = add_interceptor;
         agentFunction.getHostProcessInfo = get_host_process_info;
 
-#define IS_SET(offset) (strlen(PINPOINT_G(offset))==0?(0):(1))
+#define IS_SET(offset) (strlen(PINPOINT_G(offset))==0?((zend_bool)0):(zend_bool)(1))
 
         Pinpoint::Agent::AgentConfigArgs config= {
                 PINPOINT_G(agentID),

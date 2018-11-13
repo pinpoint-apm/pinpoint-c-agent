@@ -13,9 +13,14 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
+
+#include <cmath>
+using std::isfinite;
+
 #include "interceptor.h"
 #include "request_plugin.h"
 #include "../php_common.h"
+
 
 using namespace Pinpoint::log;
 using namespace Pinpoint::Plugin;

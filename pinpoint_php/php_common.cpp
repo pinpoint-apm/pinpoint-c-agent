@@ -928,7 +928,7 @@ const Pinpoint::Plugin::ExceptionInfo get_exception_info(EG_EXP_TPYE exception)
 #if PHP_VERSION_ID >= 70000
     zval rv;
 #endif
-    zend_class_entry* default_ce;
+    
 
     Pinpoint::Plugin::ExceptionInfo exceptionInfo;
 
@@ -938,7 +938,6 @@ const Pinpoint::Plugin::ExceptionInfo get_exception_info(EG_EXP_TPYE exception)
         return exceptionInfo;
     }
 
-    default_ce = zend_exception_get_default(TSRMLS_C);
 
 #if PHP_VERSION_ID >= 70000
     zval zv ;
@@ -947,6 +946,8 @@ const Pinpoint::Plugin::ExceptionInfo get_exception_info(EG_EXP_TPYE exception)
     file   = zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("file"), 0, &rv);
     line   = zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("line"), 0, &rv);
 #else
+    zend_class_entry* default_ce;
+    default_ce = zend_exception_get_default(TSRMLS_C);
     message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
     file = zend_read_property(default_ce, exception, "file", sizeof("file")-1, 0 TSRMLS_CC);
     line = zend_read_property(default_ce, exception, "line", sizeof("line")-1, 0 TSRMLS_CC);
