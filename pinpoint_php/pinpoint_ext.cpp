@@ -196,11 +196,11 @@ void print_ini()
     LOGD("common.agentID:%s",PINPOINT_G(agentID));
     LOGD("common.applicationName:%s",PINPOINT_G(applicationName));
     LOGD("common.collectorSpanIp:%s",PINPOINT_G(collectorSpanIp));
-    LOGD("common.CollectorSpanPort:%l",PINPOINT_G(CollectorSpanPort));
+    LOGD("common.CollectorSpanPort:%ld",PINPOINT_G(CollectorSpanPort));
     LOGD("common.CollectorStatIp:%s",PINPOINT_G(CollectorStatIp));
-    LOGD("common.CollectorStatPort:%l",PINPOINT_G(CollectorStatPort));
+    LOGD("common.CollectorStatPort:%ld",PINPOINT_G(CollectorStatPort));
     LOGD("common.CollectorTcpIp:%s",PINPOINT_G(CollectorTcpIp));
-    LOGD("common.CollectorTcpPort:%l",PINPOINT_G(CollectorTcpPort));
+    LOGD("common.CollectorTcpPort:%ld",PINPOINT_G(CollectorTcpPort));
 
     LOGD("common.entryFilename:%s",PINPOINT_G(entryFilename));
     LOGD("common.pluginsRootPath:%s",PINPOINT_G(pluginsRootPath));
