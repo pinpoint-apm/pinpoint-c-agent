@@ -626,14 +626,14 @@ void apm_throw_exception_hook(zval* exception TSRMLS_DC)
     }
     /// dynamically exception, but must be an error
     /// error_reporting ignore this, agent does it also
-	if( EG(error_reporting) & AGENT_ERROR )
-	{
-	#if PHP_VERSION_ID < 70000
-		apm_throw_exception_plugin_hook(exception TSRMLS_CC);
-	#else
-		apm_throw_exception_plugin_hook(Z_OBJ_P(exception) TSRMLS_CC);
-	#endif
-	}
+    if( EG(error_reporting) & AGENT_ERROR )
+    {
+    #if PHP_VERSION_ID < 70000
+        apm_throw_exception_plugin_hook(exception TSRMLS_CC);
+    #else
+        apm_throw_exception_plugin_hook(Z_OBJ_P(exception) TSRMLS_CC);
+    #endif
+    }
 
     if(old_zend_throw_exception_hook ){
 #if PHP_VERSION_ID >= 70000

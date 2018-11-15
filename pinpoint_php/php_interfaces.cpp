@@ -1108,6 +1108,8 @@ void PhpInterceptor::onException(uint64_t callId, const Pinpoint::Plugin::Except
     MAKE_STD_ZVAL(id);
     ZVAL_LONG(id, callId);
 
+    PP_U_TRACE("call [%s::%s]",objectCache.getClassName().c_str(),call_name);
+
 #if PHP_VERSION_ID < 70000
     zval* error = NULL;
     ALLOC_INIT_ZVAL(error);

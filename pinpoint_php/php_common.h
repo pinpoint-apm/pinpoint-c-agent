@@ -145,6 +145,8 @@ public:
                         int32_t parameterCount, zval* arg1, zval* arg2);
 
     void reqShutDownHandler();
+
+    const std::string & getClassName()const;
 private:
 
     int32_t load();

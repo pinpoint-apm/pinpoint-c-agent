@@ -82,7 +82,7 @@ hello_phpt("Mike");
 request start
   addInterceptor name:[hello_phpt] class:[test_exception]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-2]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -90,7 +90,16 @@ request start
 )
 ]
 hello Mike
+  call [GetDateInterceptor::onexception]
   [EXCEPTION] file:[%s] line:[%d] msg:[I don't care it]
   call hello_phpt's interceptorPtr::onEnd
-%A%A%A%A%A%A%A
+[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
+
+Notice: Undefined variable: retArgs in %s on line %d
+
+Fatal error: Uncaught Exception: I don't care it in %s:%d
+Stack trace:
+#0 %s(%d): hello_phpt('Mike')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

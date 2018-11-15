@@ -1127,6 +1127,10 @@ int32_t PObjectCache::load()
     return SUCCESS;
 }
 
+const std::string & PObjectCache::getClassName()const
+{
+    return className;
+}
 
 void PObjectCache::reqShutDownHandler()
 {

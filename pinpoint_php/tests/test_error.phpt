@@ -89,13 +89,19 @@ hello_phpt();
 request start
   addInterceptor name:[hello_phpt] class:[test_error]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-2]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
 )
 ]
-%S
+  call [GetDateInterceptor::onexception]
+  [EXCEPTION] file:[%s] line:[%d] msg:[Too few arguments to function hello_phpt(), 0 passed in %s on line 70 and exactly 1 expected]
   call hello_phpt's interceptorPtr::onEnd
-%A%A%A%A%A%A
+
+Fatal error: Uncaught ArgumentCountError: Too few arguments to function hello_phpt(), 0 passed in %s on line 70 and exactly 1 expected in %s:%d
+Stack trace:
+#0 %s(70): hello_phpt()
+#1 {main}
+  thrown in %s on line %d
 request shutdown
