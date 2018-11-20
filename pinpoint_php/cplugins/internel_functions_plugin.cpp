@@ -22,6 +22,7 @@
 #include "zend.h"
 #endif
 
+#include "php_common.h"
 #include "../cplugins/internel_functions_plugin.h"
 
 #include "zend_types.h"
@@ -42,23 +43,31 @@ int32_t PhpInternalFunctionsPlugin::init()
 {
     AgentPtr& agentPtr = Agent::getAgentPtr();
     assert (agentPtr != NULL);
+    Pinpoint::Plugin::InterceptorPtr interceptorPtr;
 
+#if defined(DEBUG) || defined(TEST_SIMULATE)
     // 1, add api
     this->phpInfoApiId = agentPtr->addApi("phpinfo", -1, Pinpoint::API_DEFAULT);
 
     // 2, add interceptor
-    Pinpoint::Plugin::InterceptorPtr interceptorPtr;
     try
     {
         interceptorPtr.reset(new PhpInfoInterceptor(shared_from_this()));
+        this->interceptors.push_back(interceptorPtr);
     }
     catch (std::bad_alloc&)
     {
         LOGE("create PhpInfoInterceptor failed.");
         return FAILED;
     }
+#endif
 
-    this->interceptors.push_back(interceptorPtr);
+    if(PINPOINT_G(RedefineAgentMain)[0] != 0)
+    {
+        interceptorPtr.reset( new AgentMainRedefineInterceptor(shared_from_this(),PINPOINT_G(RedefineAgentMain)));
+        this->interceptors.push_back( interceptorPtr);
+    }
+
 
     return SUCCESS;
 }
@@ -139,3 +148,27 @@ void PhpInfoInterceptor::onEnd(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher
 
     tracePtr->traceBlockEnd(spanEventRecorderPtr);
 }
+
+
+AgentMainRedefineInterceptor::AgentMainRedefineInterceptor(const PhpInternalFunctionsPluginPtr& _pluginPtr,
+        std::string func):
+                Pinpoint::Plugin::Interceptor(func),
+                pluginPtr(_pluginPtr)
+{
+    LOGD("agent main had redefined by [%s]",func.c_str());
+}
+
+ void AgentMainRedefineInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher& argFetcher)
+ {
+     using  Pinpoint::Agent::Agent;
+     using  Pinpoint::Agent::AgentPtr;
+     AgentPtr agentPtr = Agent::getAgentPtr();
+
+     if (agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_INITED){
+         PP_U_TRACE("The agentstatus said agent had initialized");
+         LOGD("The agentstatus said agent had initialized");
+         return ;
+     }
+
+     start_pinpoint_agent();
+ }

@@ -81,6 +81,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pinpoint)
     long SkipTraceTime;
     long reconInterval;
     char* ApiTableFile;
+    char* RedefineAgentMain;
     PRS prs;// must reset in every request,valid in request
 ZEND_END_MODULE_GLOBALS(pinpoint)
 

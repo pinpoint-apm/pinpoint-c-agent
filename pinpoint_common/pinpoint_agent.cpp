@@ -495,12 +495,12 @@ namespace Pinpoint
                     }
                 }
 
-                err = pluginPtr->init();
-                if (err != SUCCESS)
-                {
-                    LOGE("plugin=%s init failed! err=%d", err);
-                    continue;
-                }
+//                err = pluginPtr->init();
+//                if (err != SUCCESS)
+//                {
+//                    LOGE("plugin=%s init failed! err=%d", err);
+//                    continue;
+//                }
 
                 Plugin::InterceptorPtrVector& interceptorPtrVector = pluginPtr->getAllInterceptors();
                 Plugin::InterceptorPtrVector::iterator iip;

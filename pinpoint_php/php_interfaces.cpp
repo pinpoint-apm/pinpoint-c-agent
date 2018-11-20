@@ -1763,12 +1763,13 @@ PHP_FUNCTION(pinpoint_data_thread_start)
     using  Pinpoint::Agent::AgentPtr;
     AgentPtr agentPtr = Agent::getAgentPtr();
 
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_INITED){
-        start_pinpoint_agent();
-    }else{
-//        zend_error(E_ERROR, "pinpoint_connect_collector: initialized");
+    if (agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_INITED){
+        PP_U_TRACE("The agentstatus said agent had initialized");
+        LOGD("The agentstatus said agent had initialized");
         return ;
     }
+
+    start_pinpoint_agent();
 }
 
 PHP_FUNCTION(pinpoint_start_calltrace)

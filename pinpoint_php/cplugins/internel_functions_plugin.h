@@ -50,5 +50,24 @@ private:
     PhpInternalFunctionsPluginPtr pluginPtr;
 };
 
+
+class AgentMainRedefineInterceptor : public Pinpoint::Plugin::Interceptor
+{
+public:
+    AgentMainRedefineInterceptor(const PhpInternalFunctionsPluginPtr& _pluginPtr,std::string func);
+
+protected:
+    virtual void onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher& argFetcher);
+    virtual void onEnd(uint64_t callId,
+                       Pinpoint::Plugin::FuncArgFetcher& argFetcher,
+                       Pinpoint::Plugin::FuncResultFetcher& resultFetcher){
+        /// do nothing
+    }
+private:
+    PhpInternalFunctionsPluginPtr pluginPtr;
+};
+
+
+
 #endif
 

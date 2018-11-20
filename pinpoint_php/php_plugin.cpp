@@ -66,12 +66,11 @@ int32_t PhpPluginManager::registerPlugins()
     }
     this->plugins.push_back(pluginPtr);
 
-
-#if defined(DEBUG) || defined(TEST_SIMULATE)
     // 2, internal functions plugin
     try
     {
         pluginPtr.reset(new PhpInternalFunctionsPlugin);
+        pluginPtr->init();
     }
     catch (std::bad_alloc&)
     {
@@ -79,7 +78,6 @@ int32_t PhpPluginManager::registerPlugins()
         return Pinpoint::FAILED;
     }
     this->plugins.push_back(pluginPtr);
-#endif
 
     return Pinpoint::SUCCESS;
 }

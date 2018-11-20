@@ -20,7 +20,7 @@ using std::isfinite;
 #include "interceptor.h"
 #include "request_plugin.h"
 #include "../php_common.h"
-
+#include "internel_functions_plugin.h"
 
 using namespace Pinpoint::log;
 using namespace Pinpoint::Plugin;
@@ -224,11 +224,10 @@ int32_t PhpRequestPlugin::init()
 
 //    this->interceptors.push_back(interceptorPtr);
 
-
     /// phprequest intercepter is a special plugin, user can't redefined it
     Pinpoint::Plugin::InterceptorPtr interceptorPtr;
     interceptorPtr.reset(new PhpRequestInterceptor(PHP_REQUEST_FUNC_NAME, shared_from_this()));
-    // new and initialize it
+    // new and initialized it
     interceptorPtr->init();
     PhpAop* aop = PhpAop::getInstance();
     assert (aop != NULL);
@@ -247,6 +246,7 @@ int32_t PhpRequestPlugin::getRequestApi()
 {
     return this->requestApiId;
 }
+
 
 
 //</editor-fold>

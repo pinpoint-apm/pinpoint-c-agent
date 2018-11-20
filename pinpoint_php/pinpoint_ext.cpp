@@ -174,6 +174,9 @@ STD_PHP_INI_ENTRY("pinpoint.common.SkipTraceTime","-1",PHP_INI_SYSTEM,
 STD_PHP_INI_ENTRY("pinpoint.common.ApiTableFile","",PHP_INI_SYSTEM,
         OnUpdateString,ApiTableFile,zend_pinpoint_globals,pinpoint_globals)
 
+STD_PHP_INI_ENTRY("pinpoint.common.RedefineAgentMain","",PHP_INI_SYSTEM,
+        OnUpdateString,RedefineAgentMain,zend_pinpoint_globals,pinpoint_globals)
+
 PHP_INI_END()
 
 #ifdef COMPILE_DL_PINPOINT
@@ -388,11 +391,12 @@ PHP_RINIT_FUNCTION(pinpoint)
 
         /// test not enable
         /// try to test bgthreadtask
-        if( PINPOINT_G(testCovered) == 0 || (PINPOINT_G(testCovered) & E_BGTASK) )
+        /// RedefineAgentMain user want to redefine "start_pinpint_agent"
+
+        if((PINPOINT_G(testCovered) & E_BGTASK) || (PINPOINT_G(testCovered) == 0 && PINPOINT_G(RedefineAgentMain)[0] == 0 ))
         {
             start_pinpoint_agent();
         }
-
     }
 
     start_a_new_calltrace();

@@ -40,7 +40,7 @@ class GetDateInterceptor extends \Pinpoint\Interceptor
             $event = $trace->getEvent($callId);
             if ($event)
             {
-                if ($retArgs)
+                if (isset($retArgs))
                 {
                     $event->addAnnotation(PINPOINT_ANNOTATION_RETURN,sprintf("args:%s, return:%s ",print_r($args,true),print_r($retArgs,true)));
                 }
@@ -93,13 +93,10 @@ hello Mike
   call [GetDateInterceptor::onexception]
   [EXCEPTION] file:[%s] line:[%d] msg:[I don't care it]
   call hello_phpt's interceptorPtr::onEnd
-[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
-
-Notice: Undefined variable: retArgs in %s on line %d
 
 Fatal error: Uncaught Exception: I don't care it in %s:%d
 Stack trace:
-#0 %s(%d): hello_phpt('Mike')
+#0 %s(70): hello_phpt('Mike')
 #1 {main}
   thrown in %s on line %d
 request shutdown
