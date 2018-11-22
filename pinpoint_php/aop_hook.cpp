@@ -398,13 +398,18 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
     }
 #endif
 
+    const char* fun =  get_active_function_name();
+    LOGD("func name %s",fun);
 
+    strncpy(frame.fullname,fun,NAME_LEN*2);
 //
-#if PHP_VERSION_ID < 50500
-    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, op_array TSRMLS_CC);
-#else
-    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, NULL TSRMLS_CC);
-#endif
+//#if PHP_VERSION_ID < 50500
+//    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, op_array TSRMLS_CC);
+//#else
+//    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, NULL TSRMLS_CC);
+//#endif
+
+//    assert(strcmp(fun,frame.fullname) == 0);
 
     PHPFuncArgFetcher phpFuncArgFetcher;
 
