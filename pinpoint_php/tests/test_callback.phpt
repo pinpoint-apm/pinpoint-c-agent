@@ -5,40 +5,32 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
-
 --FILE--
 <?php
 
-class TestAbstract1Interceptor extends \Pinpoint\Interceptor
+class TestCallback1Interceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
-    var $save_event;
-//    public function TestFunc1Interceptor()
-    function __construct()
+    public function __construct()
     {
-        $this->apiId = pinpoint_add_api("Student::drink", 32); // functionName, lineno
+        $this->apiId = pinpoint_add_api("fnCallback", 10); // functionName, lineno
     }
-
     public function onBefore($callId, $args)
     {
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
+
             $event = $trace->traceBlockBegin($callId);
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
+            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
 
-            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, print_r($args,true));
-
-
-            $this->save_event = $event;
         }
     }
-
     public function onEnd($callId, $data)
     {
-
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
@@ -47,7 +39,10 @@ class TestAbstract1Interceptor extends \Pinpoint\Interceptor
             $event = $trace->getEvent($callId);
             if ($event)
             {
-                $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
+                if ($retArgs)
+                {
+                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN,sprintf("args:%s, return:%s ",print_r($args,true),print_r($retArgs,true)));
+                }
                 $event->markAfterTime();
                 $trace->traceBlockEnd($event);
             }
@@ -56,28 +51,17 @@ class TestAbstract1Interceptor extends \Pinpoint\Interceptor
 
     public function onException($callId, $exceptionStr)
     {
-        $trace = pinpoint_get_current_trace();
-        if ($trace)
-        {
-            $event = $trace->getEvent($callId);
-            if ($event)
-            {
-                $event->markAfterTime();
-                $event->setExceptionInfo($exceptionStr);
-//                $trace->traceBlockEnd($event);
-            }
-        }
+
     }
 }
 
-class TestAbstract2Interceptor extends \Pinpoint\Interceptor
+class TestCallbackInterceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
     var $save_event;
-//    public function TestFunc1Interceptor()
-    function __construct()
+    public function __construct()
     {
-        $this->apiId = pinpoint_add_api("Person::breath", 32); // functionName, lineno
+        $this->apiId = pinpoint_add_api("MyClass::fnCallBack", 2); // functionName, lineno
     }
 
     public function onBefore($callId, $args)
@@ -85,12 +69,13 @@ class TestAbstract2Interceptor extends \Pinpoint\Interceptor
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
+
             $event = $trace->traceBlockBegin($callId);
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
 
-            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, print_r($args,true));
+            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
 
 
             $this->save_event = $event;
@@ -125,7 +110,6 @@ class TestAbstract2Interceptor extends \Pinpoint\Interceptor
             {
                 $event->markAfterTime();
                 $event->setExceptionInfo($exceptionStr);
-//                $trace->traceBlockEnd($event);
             }
         }
     }
@@ -136,11 +120,10 @@ class QuickStartPlugin extends \Pinpoint\Plugin
     public function __construct()
     {
         parent::__construct();
-        $i = new TestAbstract1Interceptor();
-        $this->addInterceptor($i, "Student::drink", basename(__FILE__, '.php'));
-
-        $i = new TestAbstract2Interceptor();
-        $this->addInterceptor($i, "Person::breath", basename(__FILE__, '.php'));
+        $p = new TestCallback1Interceptor();
+        $this->addInterceptor($p,"fnCallback",basename(__FILE__, '.php'));
+        $p = new TestCallbackInterceptor();
+        $this->addInterceptor($p,"MyClass::fnCallBack",basename(__FILE__, '.php'));
     }
 }
 
@@ -148,61 +131,51 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-abstract class Person{
-    protected $name;
+function fnCallback($msg1, $msg2){
+    return $msg1.$msg2;
+}
+call_user_func_array("fnCallback", array("hello","world"));
 
-    abstract function eat();
-    abstract function drink();
-
-    function breath(){
-        return $this->name." is alive.<br/>";
+class MyClass{
+    function fnCallBack($msg1, $msg2){
+        return $msg1.$msg2;
     }
 }
+$className = new MyClass();
+call_user_func_array(array($className, "fnCallBack"), array("hello", "world"));
 
-class Student extends Person{
-    protected $name;
-
-    function __construct($name)
-    {
-        $this->name = $name;
-    }
-
-    function eat(){
-        return $this->name." is eating.<br/>";
-    }
-
-    function drink(){
-        return $this->name." is drinking.<br/>";
-    }
-}
-
-$stu = new Student("sam");
-echo $stu->eat();
-echo $stu->drink();
-echo $stu->breath();
 ?>
 
 --EXPECTF--
 %Srequest start
-%SaddInterceptor name:[Student::drink] class:[test_abstract]
-%SaddInterceptor name:[Person::breath] class:[test_abstract]
-%Ssam is eating.<br/>  call Student::drink's interceptorPtr::onBefore
+%SaddInterceptor name:[fnCallback] class:[test_callback]
+%SaddInterceptor name:[MyClass::fnCallBack] class:[test_callback]
+%Scall fnCallback's interceptorPtr::onBefore
 %SsetApiId:[%s]
 %SsetServiceType:[1501]
 %SaddAnnotation [-1]:[Array
 %S(
+%S[0] =&gt; hello
+%S[1] =&gt; world
 %S)
 %S]
-%Scall Student::drink's interceptorPtr::onEnd
-%SaddAnnotation [14]:[sam is drinking.&lt;br/&gt;]
-%Ssam is drinking.<br/>  call Person::breath's interceptorPtr::onBefore
-%SsetApiId:[%s]
+%Acall fnCallback's interceptorPtr::onEnd
+%SaddAnnotation [14]:[args:Array
+(
+%S[0] => hello
+%S[1] => world
+)
+%S, return:helloworld ]
+%Scall MyClass::fnCallBack's interceptorPtr::onBefore
+%SsetApiId:[-3]
 %SsetServiceType:[1501]
 %SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall Person::breath's interceptorPtr::onEnd
-%SaddAnnotation [14]:[sam is alive.&lt;br/&gt;]
-%Ssam is alive.<br/>
+(
+%S[0] =&gt; hello
+%S[1] =&gt; world
+)
+]
+%Scall MyClass::fnCallBack's interceptorPtr::onEnd
+%SaddAnnotation [14]:[helloworld]
+
 %Srequest shutdown

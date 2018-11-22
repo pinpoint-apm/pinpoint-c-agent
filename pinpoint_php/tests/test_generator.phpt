@@ -5,7 +5,10 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
-
+--SKIPIF--
+<?php
+if (substr(phpversion(), 0, 1) == '7') die("skip this test is for php 5");
+?>
 --FILE--
 <?php
 

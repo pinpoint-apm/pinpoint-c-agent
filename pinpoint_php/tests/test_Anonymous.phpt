@@ -5,16 +5,15 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
-date.timezone=PRC
 --FILE--
 <?php
 
-class GetDateInterceptor extends \Pinpoint\Interceptor
+class TestAnonymousInterceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
     public function __construct()
     {
-        $this->apiId = pinpoint_add_api("date", 10); // functionName, lineno
+        $this->apiId = pinpoint_add_api("MyClass::fnCallBack", 10); // functionName, lineno
     }
     public function onBefore($callId, $args)
     {
@@ -61,8 +60,8 @@ class QuickStartPlugin extends \Pinpoint\Plugin
     public function __construct()
     {
         parent::__construct();
-        $p = new GetDateInterceptor();
-        $this->addInterceptor($p,"date",basename(__FILE__, '.php'));
+        $p = new TestAnonymousInterceptor();
+        $this->addInterceptor($p,"MyClass::fnCallBack",basename(__FILE__, '.php'));
     }
 }
 
@@ -70,27 +69,34 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-echo date("Y/m/d");
-//md5("abcdefg");
-//phpinfo();
+class MyClass{
+    function fnCallBack($msg1, $msg2){
+        return $msg1.$msg2;
+    }
+}
+$myObj = new MyClass();
+$anonymous = function(){global $myObj;return $myObj->fnCallBack("hello","world");};
+$anonymous();
 ?>
 
 --EXPECTF--
 %Srequest start
-%SaddInterceptor name:[date] class:[get_date]
-%Scall date's interceptorPtr::onBefore
+%SaddInterceptor name:[MyClass::fnCallBack] class:[test_Anonymous]
+%Scall MyClass::fnCallBack's interceptorPtr::onBefore
 %SsetApiId:[%s]
 %SsetServiceType:[1501]
 %SaddAnnotation [-1]:[Array
 %S(
-%S[0] =&gt; Y/m/d
+%S[0] =&gt; hello
+%S[1] =&gt; world
 %S)
 %S]
-%Acall date's interceptorPtr::onEnd
+%Acall MyClass::fnCallBack's interceptorPtr::onEnd
 %SaddAnnotation [14]:[args:Array
 %S(
-%S[0] => Y/m/d
+%S[0] => hello
+%S[1] => world
 %S)
-%S, return:%d%e%d%e%d ]
-%S%d%e%d%e%d
+%S, return:helloworld ]
+
 %Srequest shutdown

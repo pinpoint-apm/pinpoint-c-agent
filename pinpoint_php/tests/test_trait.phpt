@@ -8,12 +8,15 @@ pinpoint_agent.testCovered=1
 
 --FILE--
 <?php
-class TestFunc1Interceptor extends \Pinpoint\Interceptor
+
+class TestTraitInterceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
-    public function __construct()
+    var $save_event;
+//    public function TestFunc1Interceptor()
+    function __construct()
     {
-        $this->apiId = pinpoint_add_api("test_func1", 10); // functionName, lineno
+        $this->apiId = pinpoint_add_api("MyHelloWorld::sayHello", 32); // functionName, lineno
     }
 
     public function onBefore($callId, $args)
@@ -21,25 +24,21 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
-
             $event = $trace->traceBlockBegin($callId);
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
-            $self = $this->getSelf();
-            if ($self)
-            {
-                $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,
-                    sprintf("[ %s ] \n this.num=%d ",htmlspecialchars(print_r($args,true),ENT_QUOTES),$self->num));
-            }else{
-                $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
-            }
 
+            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, print_r($args,true));
+
+
+            $this->save_event = $event;
         }
     }
 
     public function onEnd($callId, $data)
     {
+
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
@@ -48,10 +47,7 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
             $event = $trace->getEvent($callId);
             if ($event)
             {
-                if ($retArgs)
-                {
-                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
-                }
+                $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
                 $event->markAfterTime();
                 $trace->traceBlockEnd($event);
             }
@@ -68,18 +64,20 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
             {
                 $event->markAfterTime();
                 $event->setExceptionInfo($exceptionStr);
+//                $trace->traceBlockEnd($event);
             }
         }
     }
 }
 
-class QuickStartPlugin extends \Pinpoint\Plugin
+class QuickStartPlugin extends Pinpoint\Plugin
 {
     public function __construct()
     {
         parent::__construct();
-        $i = new TestFunc1Interceptor();
-        $this->addInterceptor($i, "test_func1", basename(__FILE__, '.php'));
+
+        $i = new TestTraitInterceptor();
+        $this->addInterceptor($i, "MyHelloWorld::sayHello", basename(__FILE__, '.php'));
     }
 }
 
@@ -87,27 +85,31 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-function test_func1($arg1, $arg2)
-{
-    return sprintf("this is test_func1: arg1=%s, arg2=%s", (string)$arg1, (string)$arg2);
+trait SayWorld {
+    public function sayHello($name) {
+        return "Hello!".$name;
+    }
 }
 
-$a = test_func1("one", 2);
-echo $a;
+class MyHelloWorld{
+    use SayWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello("Evy");
 
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[test_func1] class:[test_func1]
-%Scall test_func1's interceptorPtr::onBefore
-%SsetApiId:[-2]
+request start
+%SaddInterceptor name:[MyHelloWorld::sayHello] class:[test_trait]
+%Scall MyHelloWorld::sayHello's interceptorPtr::onBefore
+%SsetApiId:[%i]
 %SsetServiceType:[1501]
 %SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; one
-%S[1] =&gt; 2
-%S)
-%S]
-%Scall test_func1's interceptorPtr::onEnd
-%SaddAnnotation [14]:[this is test_func1: arg1=one, arg2=2]
-%Sthis is test_func1: arg1=one, arg2=2request shutdown
+(
+%S[0] => Evy
+)
+]
+%Scall MyHelloWorld::sayHello's interceptorPtr::onEnd
+%SaddAnnotation [14]:[Hello!Evy]
+request shutdown

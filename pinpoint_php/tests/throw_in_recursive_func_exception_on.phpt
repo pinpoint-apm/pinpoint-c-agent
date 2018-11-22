@@ -48,7 +48,7 @@ request start
   call test_cumsum_e1's interceptorPtr::onEnd
   call test_cumsum_e1's interceptorPtr::onEnd
 
-Fatal error: Uncaught Exception: n < 1 in %s:%d
+Fatal error: Uncaught%SException%Sn < 1%s:%d
 Stack trace:
 #0 %s(20): test_cumsum_e1(0)
 #1 %s(20): test_cumsum_e1(1)

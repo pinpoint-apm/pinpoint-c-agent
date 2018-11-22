@@ -8,14 +8,13 @@ pinpoint_agent.testCovered=1
 
 --FILE--
 <?php
-class TestFunc1Interceptor extends \Pinpoint\Interceptor
+class TestExceptionInterceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
     public function __construct()
     {
-        $this->apiId = pinpoint_add_api("test_func1", 10); // functionName, lineno
+        $this->apiId = pinpoint_add_api("testException", 10); // functionName, lineno
     }
-
     public function onBefore($callId, $args)
     {
         $trace = pinpoint_get_current_trace();
@@ -26,18 +25,10 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
-            $self = $this->getSelf();
-            if ($self)
-            {
-                $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,
-                    sprintf("[ %s ] \n this.num=%d ",htmlspecialchars(print_r($args,true),ENT_QUOTES),$self->num));
-            }else{
-                $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
-            }
+            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
 
         }
     }
-
     public function onEnd($callId, $data)
     {
         $trace = pinpoint_get_current_trace();
@@ -48,10 +39,7 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
             $event = $trace->getEvent($callId);
             if ($event)
             {
-                if ($retArgs)
-                {
-                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
-                }
+                $event->addAnnotation(PINPOINT_ANNOTATION_RETURN,sprintf("args:%s",print_r($args,true)));
                 $event->markAfterTime();
                 $trace->traceBlockEnd($event);
             }
@@ -78,8 +66,9 @@ class QuickStartPlugin extends \Pinpoint\Plugin
     public function __construct()
     {
         parent::__construct();
-        $i = new TestFunc1Interceptor();
-        $this->addInterceptor($i, "test_func1", basename(__FILE__, '.php'));
+
+        $p = new TestExceptionInterceptor();
+        $this->addInterceptor($p,"testException",basename(__FILE__, '.php'));
     }
 }
 
@@ -87,27 +76,35 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-function test_func1($arg1, $arg2)
+function testException($num)
 {
-    return sprintf("this is test_func1: arg1=%s, arg2=%s", (string)$arg1, (string)$arg2);
+    $num = "hello world!";
+    throw new Exception("This is an uncaught exception!");
+    return $num;
 }
 
-$a = test_func1("one", 2);
-echo $a;
-
-?>
+testException("Mike");
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[test_func1] class:[test_func1]
-%Scall test_func1's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; one
-%S[1] =&gt; 2
-%S)
-%S]
-%Scall test_func1's interceptorPtr::onEnd
-%SaddAnnotation [14]:[this is test_func1: arg1=one, arg2=2]
-%Sthis is test_func1: arg1=one, arg2=2request shutdown
+request start
+  addInterceptor name:[testException] class:[test_uncaught_exception_true]
+  call testException's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; Mike
+)
+]
+%Scall [TestExceptionInterceptor::onexception]
+%SsetExceptionInfo:[Fatal error: This is an uncaught exception! in %s]
+%S[EXCEPTION] file:[%s] line:[%d] msg:[This is an uncaught exception!]
+%Scall testException's interceptorPtr::onEnd
+%SaddAnnotation [14]:[args:Array
+(
+%S[0] => %s
+)
+]
+
+%SFatal error: Uncaught%SException%SThis is an uncaught exception!%s
+%A
+request shutdown

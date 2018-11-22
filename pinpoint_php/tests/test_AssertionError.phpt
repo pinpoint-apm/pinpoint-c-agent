@@ -3,19 +3,25 @@ Test pinpoint
 --INI--
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
+display_errors =On
+error_reporting = E_ALL
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
-
+zend.assertions=1
+assert.exception=1
+--SKIPIF--
+<?php
+if (substr(phpversion(), 0, 1) != '7') die("skip this test is for php 7");
+?>
 --FILE--
 <?php
-class TestFunc1Interceptor extends \Pinpoint\Interceptor
+class TestAssertionErrorInterceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
     public function __construct()
     {
-        $this->apiId = pinpoint_add_api("test_func1", 10); // functionName, lineno
+        $this->apiId = pinpoint_add_api("testAssertionError", 10); // functionName, lineno
     }
-
     public function onBefore($callId, $args)
     {
         $trace = pinpoint_get_current_trace();
@@ -26,18 +32,10 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
-            $self = $this->getSelf();
-            if ($self)
-            {
-                $event->addAnnotation(PINPOINT_ANNOTATION_ARGS,
-                    sprintf("[ %s ] \n this.num=%d ",htmlspecialchars(print_r($args,true),ENT_QUOTES),$self->num));
-            }else{
-                $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
-            }
+            $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
 
         }
     }
-
     public function onEnd($callId, $data)
     {
         $trace = pinpoint_get_current_trace();
@@ -48,10 +46,7 @@ class TestFunc1Interceptor extends \Pinpoint\Interceptor
             $event = $trace->getEvent($callId);
             if ($event)
             {
-                if ($retArgs)
-                {
-                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
-                }
+                $event->addAnnotation(PINPOINT_ANNOTATION_RETURN,print_r($retArgs,true));
                 $event->markAfterTime();
                 $trace->traceBlockEnd($event);
             }
@@ -78,8 +73,8 @@ class QuickStartPlugin extends \Pinpoint\Plugin
     public function __construct()
     {
         parent::__construct();
-        $i = new TestFunc1Interceptor();
-        $this->addInterceptor($i, "test_func1", basename(__FILE__, '.php'));
+        $p = new TestAssertionErrorInterceptor();
+        $this->addInterceptor($p,"testAssertionError",basename(__FILE__, '.php'));
     }
 }
 
@@ -87,27 +82,28 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-function test_func1($arg1, $arg2)
+function testAssertionError()
 {
-    return sprintf("this is test_func1: arg1=%s, arg2=%s", (string)$arg1, (string)$arg2);
+    $value = 1;
+    assert($value === 0);
 }
-
-$a = test_func1("one", 2);
-echo $a;
-
+testAssertionError();
 ?>
 --EXPECTF--
 %Srequest start
-%SaddInterceptor name:[test_func1] class:[test_func1]
-%Scall test_func1's interceptorPtr::onBefore
-%SsetApiId:[-2]
+%SaddInterceptor name:[testAssertionError] class:[test_AssertionError]
+%Scall testAssertionError's interceptorPtr::onBefore
+%SsetApiId:[%s]
 %SsetServiceType:[1501]
 %SaddAnnotation [-1]:[Array
 %S(
-%S[0] =&gt; one
-%S[1] =&gt; 2
 %S)
 %S]
-%Scall test_func1's interceptorPtr::onEnd
-%SaddAnnotation [14]:[this is test_func1: arg1=one, arg2=2]
-%Sthis is test_func1: arg1=one, arg2=2request shutdown
+%Scall [TestAssertionErrorInterceptor::onexception]
+%SsetExceptionInfo:[Fatal error: assert($value === 0) in %s]
+%S[EXCEPTION] file:[%s] line:[%d] msg:[assert($value === 0)]
+%Scall testAssertionError's interceptorPtr::onEnd%A
+%SaddAnnotation [14]:[]
+%A
+Fatal error: Uncaught AssertionError: assert($value === 0) in %A
+request shutdown
