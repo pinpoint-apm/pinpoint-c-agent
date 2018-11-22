@@ -196,7 +196,7 @@ namespace Pinpoint
 
         void PinpointClient::try_connect()
         {
-            if(nstate == E_EXIT || nstate == E_CONNECTED)
+            if( nstate == E_EXIT || nstate == E_CONNECTED)
             {
                 LOGD("try_connect refused ,as nstate=[%d]",nstate);
                 return ;
@@ -240,7 +240,7 @@ namespace Pinpoint
 
         void PinpointClient::connect_timeout(const boost::system::error_code &ec)
         {
-            if( nstate != E_CONNECTED)
+            if(ec !=  boost::asio::error::operation_aborted && nstate != E_CONNECTED)
             {
                 LOGW("PinpointClient connect timeout expiredTime:[%d]",interval);
                 handle_error(ec);
@@ -393,6 +393,12 @@ namespace Pinpoint
 
         int32_t PinpointClient::sendPacket(boost::shared_ptr<Packet> &packetPtr, int32_t timeout)
         {
+
+            if( nstate == E_EXIT )
+            {
+                return SUCCESS;
+            }
+
             try
             {
                 sendCount++;
@@ -411,7 +417,7 @@ namespace Pinpoint
         void PinpointClient::start_write()
         {
 
-            if (nstate != E_CONNECTED )
+            if ( nstate != E_CONNECTED )
             {
                 // no needs to cancel write_timer_event, timer is  connect_timer_event
                 LOGD("connection not ready, wait for next time");
@@ -492,6 +498,12 @@ namespace Pinpoint
         {
             // Caution: if read error, stop read.
             // we get packets one by one, if one packet fails to be decoded, we can not decode others.
+
+            if ( nstate != E_CONNECTED )
+            {
+                LOGD("connection not ready, stop reading");
+                return;
+            }
 
             try
             {
@@ -856,6 +868,13 @@ namespace Pinpoint
         void PinpointClient::stop()
         {
             state.toClosedByClient();
+
+            // stop immediately
+            if(nstate == E_CONNECTING)
+            {
+                timer_.cancel();
+            }
+
             socket_.cancel();
             socket_.close();
             LOGD("[%s:%d] connection closed",this->DataSender::m_ip.c_str(),this->DataSender::m_port);

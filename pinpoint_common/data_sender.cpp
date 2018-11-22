@@ -50,6 +50,7 @@ namespace Pinpoint
         {
             timer_.cancel();
             nstate = E_EXIT;
+            socket_.close();
             LOGD("UdpDataSender exit");
         }
 
@@ -81,6 +82,12 @@ namespace Pinpoint
         int32_t UdpDataSender::sendPacket(boost::shared_ptr<Packet> &packetPtr, int32_t timeout)
         {
             assert (timeout > 0 || (timeout < 0 && timeout == -1));
+
+            if(nstate == E_EXIT)
+            {
+                // as the Sender exit
+                return SUCCESS;
+            }
 
             int32_t err;
 
@@ -119,16 +126,21 @@ namespace Pinpoint
 
         void UdpDataSender::io_send_udp_packet(const boost::system::error_code & ec)
         {
-            if( ec && ec != boost::asio::error::operation_aborted)
-            {
-                LOGI("io_send_udp_packet met [%s] ",ec.message().c_str());
-                return ;
-            }
-
             typedef std::vector<PacketPtr> PacketPtrVec;
             PacketPtrVec packetPtrVec;
+            int32_t err = 0;
+            if( ec == boost::asio::error::operation_aborted)
+            {
+                LOGD("sender canceled");
+                return ;
+            }else if(ec){
+                LOGW("send catch [%s]",ec.message().c_str());
+                goto _AGAIN;
+            }
 
-            int32_t err = sendQueue.getAll(packetPtrVec, MAX_GET_WAIT_MSEC);
+
+
+            err = sendQueue.getAll(packetPtrVec, MAX_GET_WAIT_MSEC);
             if (err != SUCCESS || packetPtrVec.empty())
             {
 
@@ -157,14 +169,13 @@ namespace Pinpoint
             }
 
             timer_.expires_from_now(boost::posix_time::milliseconds(0)); // recheck it
-    _AGAIN:
-            if(!ec){ // no error find, go on
-                timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
-            }else{
-                socket_.close();
-                if(nstate != E_EXIT){
-                    init();
-                }
+            timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
+            return ;
+      _AGAIN:
+            socket_.close();
+            if(nstate != E_EXIT)
+            {
+                init();
             }
         }
 

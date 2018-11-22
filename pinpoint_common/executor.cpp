@@ -59,6 +59,7 @@ namespace Pinpoint
 
         void ScheduledExecutor::stopScheduleExecutor()
         {
+            _status = E_STOPPED;
             std::vector<boost::shared_ptr<boost::asio::deadline_timer> >::const_iterator cit = timerSet.begin();
             while(cit !=timerSet.end())
             {
@@ -66,7 +67,6 @@ namespace Pinpoint
                 (*cit)->cancel();
                 cit++;
             }
-            _status = E_STOPPED;
         }
 
         int32_t ScheduledExecutor::addTask(const ExecutorTaskPtr& pTask, uint32_t interval, int32_t callTimes)
@@ -98,6 +98,12 @@ namespace Pinpoint
 
         int32_t ScheduledExecutor::addIoTask_(const boost::shared_ptr<RepeatedTask> &repeatedTaskPtr)
         {
+
+            if(_status == E_STOPPED)
+            {
+               return SUCCESS;
+            }
+
             LOGD("run addTask_ in io.run() thread: add %s", repeatedTaskPtr->getTaskName().c_str());
 
             try
@@ -209,6 +215,7 @@ namespace Pinpoint
 
         void ThreadExecutor::stop()
         {
+            assert(0);
             stopTask();
 
             if (m_pThread != NULL)
