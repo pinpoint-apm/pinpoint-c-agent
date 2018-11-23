@@ -215,7 +215,6 @@ namespace Pinpoint
 
         void ThreadExecutor::stop()
         {
-            assert(0);
             stopTask();
 
             if (m_pThread != NULL)

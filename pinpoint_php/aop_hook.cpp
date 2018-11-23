@@ -143,6 +143,47 @@ static inline zend_function *obtain_zend_function(zend_bool internal, zend_execu
 
 static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char type, zend_execute_data *caller, zend_execute_data *execute_data, zend_op_array *op_array TSRMLS_DC)
 {
+    if (!zend_is_executing()) {
+        return ;
+    }
+
+    const char* funcname  =  get_active_function_name();
+    const char* filename  = zend_get_executed_filename();
+
+
+/// adjust difference between php
+#if PHP_VERSION_ID >= 70000
+    zend_function *func;
+    func = EG(current_execute_data)->func;
+    if( func->type == ZEND_INTERNAL_FUNCTION &&
+        func->common.function_name  == NULL)
+    {
+        funcname = NULL;
+    }
+#endif
+
+    if(strncmp(funcname,"{closure}",sizeof("{closure}") -1) == 0)
+    {
+        LOGD("filename %s",filename);
+        const char* offset = strrchr(filename,'/');
+        const int   lineno    = zend_get_executed_lineno();
+        snprintf(frame->fullname,NAME_LEN*2, "closure{%s:%d}",(offset?(offset+1):(NULL)), lineno);
+    }else
+    {
+        const char* classname = get_active_class_name(NULL);
+        if(classname[0] != 0)
+        {
+            snprintf(frame->fullname,NAME_LEN*2,"%s::%s",classname,funcname);
+        }
+        else
+        {
+            snprintf(frame->fullname,NAME_LEN*2,"%s",funcname);
+        }
+    }
+
+    LOGD("func name %s",frame->fullname);
+
+#if 0
     zend_function *zf;
 
     /* init */
@@ -266,6 +307,8 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
     } else {
         frame->filename [0] = 0;
     }
+
+#endif
 }
 
 #if PHP_VERSION_ID < 70000
@@ -398,20 +441,11 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
     }
 #endif
 
-    const char* fun =  get_active_function_name();
-    LOGD("func name %s",fun);
-    if(fun)
-    {
-        strncpy(frame.fullname,fun,NAME_LEN*2);
-    }else{
-        frame.fullname[0]= 0;
-    }
-//
-//#if PHP_VERSION_ID < 50500
-//    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, op_array TSRMLS_CC);
-//#else
-//    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, NULL TSRMLS_CC);
-//#endif
+#if PHP_VERSION_ID < 50500
+    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, op_array TSRMLS_CC);
+#else
+    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, NULL TSRMLS_CC);
+#endif
 
 //    assert(strcmp(fun,frame.fullname) == 0);
 

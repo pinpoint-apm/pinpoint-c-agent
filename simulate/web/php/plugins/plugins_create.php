@@ -15,30 +15,34 @@
  * limitations under the License.
  */
 
-// include_once("quickstart_plugin.php");
+include_once("/home/liumingyi/git/pinpoint-c-agent/simulate/web/php/plugins/workerman_plugin.php");
 
-$path=dirname(__FILE__);
-foreach (glob($path ."/*plugin.php") as  $value) {
-    include_once($value);
-}
+// $path=dirname(__FILE__);
+// foreach (glob($path ."/*plugin.php") as  $value) {
+//     include_once($value);
+//     echo $value. "\n";
+// }
 
-$p = new QuickStartPlugin();
-pinpoint_add_plugin($p, "quickstart_plugin.php");
-//
-$p = new ExcludePlugin();
-pinpoint_add_plugin($p, "exclude_plugin.php");
+// $p = new QuickStartPlugin();
+// pinpoint_add_plugin($p, "quickstart_plugin.php");
+// //
+// $p = new ExcludePlugin();
+// pinpoint_add_plugin($p, "exclude_plugin.php");
 
-$p = new CurlPlugin();
-pinpoint_add_plugin($p, "curl_plugin.php");
+// $p = new CurlPlugin();
+// pinpoint_add_plugin($p, "curl_plugin.php");
 
-$p =new TestPlugin();
-pinpoint_add_plugin($p, "test_plugin.php");
+// $p =new TestPlugin();
+// pinpoint_add_plugin($p, "test_plugin.php");
 
-$p =new TestPlugin01();
-pinpoint_add_plugin($p, "test_01_plugin.php");
+// $p =new TestPlugin01();
+// pinpoint_add_plugin($p, "test_01_plugin.php");
 
-$p = new Issue200Plugin();
-pinpoint_add_plugin($p, "issue200_plugin.php");
+// $p = new Issue200Plugin();
+// pinpoint_add_plugin($p, "issue200_plugin.php");
+
+$p =  new WorkerManPlugins();
+pinpoint_add_plugin($p,"workerman_plugin.php");
 
 pinpint_aop_reload();
 
