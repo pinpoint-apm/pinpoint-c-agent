@@ -94,7 +94,7 @@ $a->testFunc("hello");
 request start
   addInterceptor name:[MyClass::testFunc] class:[test_exception_onEnd]
   call MyClass::testFunc's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-2]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -102,7 +102,7 @@ request start
 )
 ]
   call [TestGetSelfInterceptor::onexception]
-  setExceptionInfo:[Fatal error: I am Exception! in %s]
+  setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
   [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
   call MyClass::testFunc's interceptorPtr::onEnd
     addAnnotation [14]:[args:Array
@@ -111,14 +111,20 @@ request start
 )
 ]
     call [TestGetSelfInterceptor::onexception]
-    setExceptionInfo:[Fatal error: I am Exception in onEnd! in %s]
+    setExceptionInfo:[Fatal error: I am Exception in onEnd! in %s on line %d]
     [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception in onEnd!]
-%s[ERROR] w_zend_call_method throw: [exception: I am Exception in onEnd! in %s]
-%s[ERROR] Interceptor name=[MyClass::testFunc] onend failed!!! please check your code!!!
-%s[ERROR] mark bad trace !!! check your plugins...
+%s %s [pinpoint] [%d] php_common.cpp:%d [ERROR] w_zend_call_method throw: [exception: I am Exception in onEnd! in %s on line %d]
+ %s %s [pinpoint] [%d] php_interfaces.cpp:%d [ERROR] Interceptor name=[MyClass::testFunc] onend failed!!! please check your code!!!
+ %s %s [pinpoint] [%d] trace.cpp:%d [ERROR] mark bad trace !!! check your plugins...
+ 
+Fatal error: Uncaught Exception: I am Exception! in %s:%d
+Stack trace:
+#0 %s(81): MyClass->testFunc('hello')
+#1 {main}
 
-Fatal error: Uncaught%sException%sI am Exception!%s
-%A
-Next%sException%sI am Exception in onEnd!%s
-%A
+Next Exception: I am Exception in onEnd! in %s:%d
+Stack trace:
+#0 %s(81): TestGetSelfInterceptor->onEnd(%d, Array)
+#1 {main}
+  thrown in %s on line %d
 request shutdown

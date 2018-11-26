@@ -100,24 +100,16 @@ $a->testFunc("hello");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[MyClass::testFunc] class:[test_getSelf2]
-%Scall MyClass::testFunc's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-    addAnnotation [-1]:[MyClass Object
-(
-    [name] => Evy
-)
-]
+  addInterceptor name:[MyClass::testFunc] class:[test_getSelf2]
+  call MyClass::testFunc's interceptorPtr::onBefore
+    setApiId:[-2]
+    setServiceType:[1501]
+    addAnnotation [-1]:[]
   call [TestGetSelfInterceptor::onexception]
-%s[ERROR] call getself not in before/end method.
-  setExceptionInfo:[Fatal error: I am Exception! in %s]
+%s %s [pinpoint] [%d] php_interfaces.cpp:%d [ERROR] call getself not in before/end method.
+   setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
   addAnnotation [14]:[]
   [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
 I am Exception!  call MyClass::testFunc's interceptorPtr::onEnd
-    addAnnotation [14]:[MyClass Object
-(
-    [name] =&gt; Evy
-)
-]
+    addAnnotation [14]:[]
 request shutdown

@@ -167,30 +167,29 @@ echo $t->getVarAdd(8);
 ?>
 
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testNameSpace\test_func2] class:[test_namespace]
-%SaddInterceptor name:[testNameSpace\TestClass::getVarAdd] class:[test_namespace]
-%Scall testNameSpace\test_func2's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; the one
-%S[1] =&gt; 22
-%S)
-%S]
-%Scall testNameSpace\test_func2's interceptorPtr::onEnd
-%SaddAnnotation [14]:[this is test_func2 in namespace testNameSpace: arg1=the one, arg2=22]
-%Sthis is test_func2 in namespace testNameSpace: arg1=the one, arg2=22  call testNameSpace\TestClass::getVarAdd's interceptorPtr::onBefore
-%SsetApiId:[-3]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[[ Array
-%S(
-%S[0] =&gt; 8
-%S)
-%S] 
-%Sthis.num=80 ]
-%Scall testNameSpace\TestClass::getVarAdd's interceptorPtr::onEnd
-%SaddAnnotation [14]:[88]
-%S88
-%Srequest shutdown
+request start
+  addInterceptor name:[testNameSpace\test_func2] class:[test_namespace]
+  addInterceptor name:[testNameSpace\TestClass::getVarAdd] class:[test_namespace]
+  call testNameSpace\test_func2's interceptorPtr::onBefore
+    setApiId:[-2]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; the one
+    [1] =&gt; 22
+)
+]
+  call testNameSpace\test_func2's interceptorPtr::onEnd
+    addAnnotation [14]:[this is test_func2 in namespace testNameSpace: arg1=the one, arg2=22]
+this is test_func2 in namespace testNameSpace: arg1=the one, arg2=22  call testNameSpace\TestClass::getVarAdd's interceptorPtr::onBefore
+    setApiId:[-3]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; 8
+)
+]
+  call testNameSpace\TestClass::getVarAdd's interceptorPtr::onEnd
+    addAnnotation [14]:[88]
+88
+request shutdown

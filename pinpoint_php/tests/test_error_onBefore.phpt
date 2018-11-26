@@ -95,26 +95,32 @@ $a->testFunc("hello");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[MyClass::testFunc] class:[test_error_onBefore]
-%Scall MyClass::testFunc's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  addInterceptor name:[MyClass::testFunc] class:[test_error_onBefore]
+  call MyClass::testFunc's interceptorPtr::onBefore
+    setApiId:[-2]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => hello
+    [0] => hello
 )
 ]
     call [TestGetSelfInterceptor::onexception]
-    setExceptionInfo:[Fatal error: Call to undefined function xxx() in %s]
+    setExceptionInfo:[Fatal error: Call to undefined function xxx() in %s on line %d]
     [EXCEPTION] file:[%s] line:[%d] msg:[Call to undefined function xxx()]
-%s[ERROR] w_zend_call_method throw: [exception: Call to undefined function xxx() in %s]
-%s[ERROR] Interceptor name=[MyClass::testFunc] onbefore failed!!! please check your code!!!
-%s[ERROR] mark bad trace !!! check your plugins...
-  call MyClass::testFunc's interceptorPtr::onEnd
+%s %s [pinpoint] [%d] php_common.cpp:%d [ERROR] w_zend_call_method throw: [exception: Call to undefined function xxx() in %s on line %d]
+ %s %s [pinpoint] [%d] php_interfaces.cpp:%d [ERROR] Interceptor name=[MyClass::testFunc] onbefore failed!!! please check your code!!!
+ %s %s [pinpoint] [%d] trace.cpp:%d [ERROR] mark bad trace !!! check your plugins...
+   call MyClass::testFunc's interceptorPtr::onEnd
     addAnnotation [14]:[Array
 (
     [0] =&gt; hello
 )
 ]
-%A
+
+Fatal error: Uncaught Error: Call to undefined function xxx() in %s:%d
+Stack trace:
+#0 %s(76): TestGetSelfInterceptor->onBefore(101, Array)
+#1 %s(81): MyClass->testFunc('hello')
+#2 {main}
+  thrown in %s on line %d
 request shutdown
