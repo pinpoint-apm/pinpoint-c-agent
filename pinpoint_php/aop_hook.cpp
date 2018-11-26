@@ -181,8 +181,6 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
         }
     }
 
-    LOGD("func name %s",frame->fullname);
-
 #if 0
     zend_function *zf;
 
@@ -441,13 +439,7 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
     }
 #endif
 
-#if PHP_VERSION_ID < 50500
-    frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, op_array TSRMLS_CC);
-#else
     frame_build(&frame, internal, PT_FRAME_ENTRY, caller, execute_data, NULL TSRMLS_CC);
-#endif
-
-//    assert(strcmp(fun,frame.fullname) == 0);
 
     PHPFuncArgFetcher phpFuncArgFetcher;
 
