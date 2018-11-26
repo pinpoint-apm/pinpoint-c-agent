@@ -99,15 +99,19 @@ testFunc("hello");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[testFunc] class:[test_getSelf3]
-%Scall testFunc's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
+  addInterceptor name:[testFunc] class:[test_getSelf3]
+  call testFunc's interceptorPtr::onBefore
+    setApiId:[-2]
+    setServiceType:[1501]
 getSelf is null  call [TestGetSelfInterceptor::onexception]
-%s[ERROR] call getself not in before/end method.
-  setExceptionInfo:[Fatal error: I am Exception! in %s]
+%s %s [pinpoint] [%d] php_interfaces.cpp:%d [ERROR] call getself not in before/end method.
+   setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
 getSelf is null  [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
   call testFunc's interceptorPtr::onEnd
 getSelf is null
-%A
+Fatal error: Uncaught Exception: I am Exception! in %s:%d
+Stack trace:
+#0 %s(%d): testFunc('hello')
+#1 {main}
+  thrown in %s on line %d
 request shutdown
