@@ -106,8 +106,8 @@ request start
     setServiceType:[1501]
     addAnnotation [-1]:[]
   call [TestGetSelfInterceptor::onexception]
-%s %s [pinpoint] [%d] php_interfaces.cpp:%d [ERROR] call getself not in before/end method.
-   setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
+%s %s [pinpoint] [%s] php_interfaces.cpp:%d [ERROR] call getself not in before/end method.
+  setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
   addAnnotation [14]:[]
   [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
 I am Exception!  call MyClass::testFunc's interceptorPtr::onEnd

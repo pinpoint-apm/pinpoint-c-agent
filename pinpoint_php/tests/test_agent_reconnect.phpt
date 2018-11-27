@@ -34,8 +34,8 @@ hello pinpoint
   call hello's interceptorPtr::onEnd
     SimpleInterceptor->addAnnotation key:[14] value:[pinpoint] 
 %s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
- %s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
- %s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
- request shutdown
+%s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
+%s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
+request shutdown
 
 %s %s [pinpoint] [%s] executor.cpp:%d [WARN] background task finished
