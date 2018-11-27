@@ -148,7 +148,6 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
     }
 
     const char* funcname  =  get_active_function_name();
-    const char* filename  = zend_get_executed_filename();
 
 
 /// adjust difference between php
@@ -162,8 +161,9 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
     }
 #endif
 
-    if(strncmp(funcname,"{closure}",sizeof("{closure}") -1) == 0)
+    if( funcname && strncmp(funcname,"{closure}",sizeof("{closure}") -1) == 0)
     {
+        const char* filename  = zend_get_executed_filename();
         LOGD("filename %s",filename);
         const char* offset = strrchr(filename,'/');
         const int   lineno    = zend_get_executed_lineno();
