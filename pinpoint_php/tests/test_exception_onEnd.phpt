@@ -113,10 +113,10 @@ request start
     call [TestGetSelfInterceptor::onexception]
     setExceptionInfo:[Fatal error: I am Exception in onEnd! in %s on line %d]
     [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception in onEnd!]
-%s %s [pinpoint] [%d] php_common.cpp:%d [ERROR] w_zend_call_method throw: [exception: I am Exception in onEnd! in %s on line %d]
- %s %s [pinpoint] [%d] php_interfaces.cpp:%d [ERROR] Interceptor name=[MyClass::testFunc] onend failed!!! please check your code!!!
- %s %s [pinpoint] [%d] trace.cpp:%d [ERROR] mark bad trace !!! check your plugins...
- 
+%s %s [pinpoint] [%s] php_common.cpp:%d [ERROR] w_zend_call_method throw: [exception: I am Exception in onEnd! in %s on line %d]
+%s %s [pinpoint] [%s] php_interfaces.cpp:%d [ERROR] Interceptor name=[MyClass::testFunc] onend failed!!! please check your code!!!
+%s %s [pinpoint] [%s] trace.cpp:%d [ERROR] mark bad trace !!! check your plugins...
+
 Fatal error: Uncaught Exception: I am Exception! in %s:%d
 Stack trace:
 #0 %s(81): MyClass->testFunc('hello')

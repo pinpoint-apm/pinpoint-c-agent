@@ -227,7 +227,7 @@ namespace Pinpoint
                     this->getLocalTimeString().c_str(),::getpid(), gettid(),
                     ::basename((char *) file), line, LogUtility::logLevelToString(level), msg);
 #else
-            msgLen = snprintf(fullLogBuf, FORMAT_LOG_BUF_SIZE, "%s [pinpoint] [%4d] %s:%d [%s] %s\n ",
+            msgLen = snprintf(fullLogBuf, FORMAT_LOG_BUF_SIZE, "%s [pinpoint] [%4d] %s:%d [%s] %s\n",
                                          this->getLocalTimeString().c_str(),
                     ::getpid(), ::basename((char *) file), line, LogUtility::logLevelToString(level), msg);
 #endif
@@ -240,7 +240,6 @@ namespace Pinpoint
                     strncpy(fullLogBuf+(FORMAT_LOG_BUF_SIZE - sizeof(trun_str)),trun_str,sizeof(trun_str));
                     msgLen = FORMAT_LOG_BUF_SIZE;
                 }
-
                 this->logOutputFunc(fullLogBuf, msgLen);
             }
         }
