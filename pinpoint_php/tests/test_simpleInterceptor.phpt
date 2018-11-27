@@ -62,11 +62,11 @@ fclose($myfile);
 ?>
 
 --EXPECTF--
-%Srequest start
-%SaddSimpleInterceptor name:[test_simple_interceptor]
-%Scall test_simple_interceptor's interceptorPtr::onBefore
+request start
+  addSimpleInterceptor name:[test_simple_interceptor]
+  call test_simple_interceptor's interceptorPtr::onBefore
     SimpleInterceptor->addAnnotation key:[-1] value:[{[0]:NULL [1]:123 [2]:3.1415 [3]:true [4]:array(...) [5]:object%SSObject%S [6]:object%SSObjectString%S [7]:abcd [8]:resource(stream) [9]:Hello you! How are you today? }] 
-%Scall test_simple_interceptor's interceptorPtr::onEnd
-%SSimpleInterceptor->addAnnotation key:[14] value:[return xxx] 
+  call test_simple_interceptor's interceptorPtr::onEnd
+    SimpleInterceptor->addAnnotation key:[14] value:[return xxx] 
 
 request shutdown

@@ -102,7 +102,7 @@ request start
 )
 ]
   call [TestGetSelfInterceptor::onexception]
-  setExceptionInfo:[Fatal error: I am Exception! in %s]
+  setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
   [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
   call MyClass::testFunc's interceptorPtr::onEnd
     addAnnotation [14]:[args:Array
@@ -110,5 +110,10 @@ request start
     [0] => hello
 )
 ]
-%A
+
+Fatal error: Uncaught%sException%sI am Exception!%s
+Stack trace:
+#0 %s(%d): MyClass->testFunc('hello')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

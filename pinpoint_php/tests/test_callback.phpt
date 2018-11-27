@@ -147,35 +147,35 @@ call_user_func_array(array($className, "fnCallBack"), array("hello", "world"));
 ?>
 
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[fnCallback] class:[test_callback]
-%SaddInterceptor name:[MyClass::fnCallBack] class:[test_callback]
-%Scall fnCallback's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; hello
-%S[1] =&gt; world
-%S)
-%S]
-%Acall fnCallback's interceptorPtr::onEnd
-%SaddAnnotation [14]:[args:Array
+request start
+  addInterceptor name:[fnCallback] class:[test_callback]
+  addInterceptor name:[MyClass::fnCallBack] class:[test_callback]
+  call fnCallback's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => hello
-%S[1] => world
-)
-%S, return:helloworld ]
-%Scall MyClass::fnCallBack's interceptorPtr::onBefore
-%SsetApiId:[-3]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-(
-%S[0] =&gt; hello
-%S[1] =&gt; world
+    [0] =&gt; hello
+    [1] =&gt; world
 )
 ]
-%Scall MyClass::fnCallBack's interceptorPtr::onEnd
-%SaddAnnotation [14]:[helloworld]
+  call fnCallback's interceptorPtr::onEnd
+    addAnnotation [14]:[args:Array
+(
+    [0] => hello
+    [1] => world
+)
+, return:helloworld ]
+  call MyClass::fnCallBack's interceptorPtr::onBefore
+    setApiId:[-3]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; hello
+    [1] =&gt; world
+)
+]
+  call MyClass::fnCallBack's interceptorPtr::onEnd
+    addAnnotation [14]:[helloworld]
 
-%Srequest shutdown
+request shutdown

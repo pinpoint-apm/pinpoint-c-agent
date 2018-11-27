@@ -94,13 +94,16 @@ request start
     [0] =&gt; Mike
 )
 ]
-%Scall testException's interceptorPtr::onEnd
-%SaddAnnotation [14]:[args:Array
+  call testException's interceptorPtr::onEnd
+    addAnnotation [14]:[args:Array
 (
-%S[0] => %s
+    [0] => %s
 )
 ]
 
-%SFatal error: Uncaught%SException%SThis is an uncaught exception!%s
-%A
+Fatal error: Uncaught%SException%SThis is an uncaught exception!%s
+Stack trace:
+#0 %s(%d): testException('hello world!')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

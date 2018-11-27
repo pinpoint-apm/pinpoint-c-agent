@@ -88,20 +88,27 @@ function testDivisionByZeroError()
 testDivisionByZeroError();
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testDivisionByZeroError] class:[test_DivisionByZeroError]
-%Scall testDivisionByZeroError's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall [TestDivisionByZeroErrorInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: Modulo by zero in %s]
-%S[EXCEPTION] file:[%s] line:[%s] msg:[Modulo by zero]
-%Scall testDivisionByZeroError's interceptorPtr::onEnd%A
-%SaddAnnotation [14]:[]
-%A
-Fatal error: Uncaught DivisionByZeroError: Modulo by zero in %A
+request start
+  addInterceptor name:[testDivisionByZeroError] class:[test_DivisionByZeroError]
+  call testDivisionByZeroError's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call [TestDivisionByZeroErrorInterceptor::onexception]
+  setExceptionInfo:[Fatal error: Modulo by zero in %s on line %d]
+  [EXCEPTION] file:[%s] line:[%s] msg:[Modulo by zero]
+  call testDivisionByZeroError's interceptorPtr::onEnd
+[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
+
+Notice: Undefined variable: retArgs in %s on line %d
+addAnnotation [14]:[]
+
+Fatal error: Uncaught DivisionByZeroError: Modulo by zero in %s
+Stack trace:
+#0 %s(%d): testDivisionByZeroError()
+#1 {main}
+  thrown in %s on line %d
 request shutdown

@@ -93,21 +93,21 @@ $a->testFunc("hello");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[MyClass::testFunc] class:[test_warning_onBefore]
-%Scall MyClass::testFunc's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  addInterceptor name:[MyClass::testFunc] class:[test_warning_onBefore]
+  call MyClass::testFunc's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => hello
+    [0] => hello
 )
 ]
 [ERROR] file:[%s] line:[%d] msg:[Division by zero]
 
 Warning: Division by zero in %s
 %scall [TestGetSelfInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: I am Exception! in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
+  setExceptionInfo:[Fatal error: I am Exception! in %s]
+  [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
   call MyClass::testFunc's interceptorPtr::onEnd
 addAnnotation [14]:[Array
 (
@@ -115,5 +115,9 @@ addAnnotation [14]:[Array
 )
 ]
 
-%A
+Fatal error: Uncaught%sException%sI am Exception!%s
+Stack trace:
+#0 %s(%d): MyClass->testFunc('hello')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

@@ -97,15 +97,15 @@ $a->staticFunction("hello world");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[BaseClass::staticFunction] class:[test_static]
-%Scall BaseClass::staticFunction's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  addInterceptor name:[BaseClass::staticFunction] class:[test_static]
+  call BaseClass::staticFunction's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => hello world
+    [0] => hello world
 )
 ]
-%Scall BaseClass::staticFunction's interceptorPtr::onEnd
-%SaddAnnotation [14]:[hello world]
+  call BaseClass::staticFunction's interceptorPtr::onEnd
+    addAnnotation [14]:[hello world]
 request shutdown

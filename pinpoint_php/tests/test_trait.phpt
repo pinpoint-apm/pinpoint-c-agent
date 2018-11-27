@@ -101,15 +101,15 @@ $o->sayHello("Evy");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[MyHelloWorld::sayHello] class:[test_trait]
-%Scall MyHelloWorld::sayHello's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  addInterceptor name:[MyHelloWorld::sayHello] class:[test_trait]
+  call MyHelloWorld::sayHello's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => Evy
+    [0] => Evy
 )
 ]
-%Scall MyHelloWorld::sayHello's interceptorPtr::onEnd
-%SaddAnnotation [14]:[Hello!Evy]
+  call MyHelloWorld::sayHello's interceptorPtr::onEnd
+    addAnnotation [14]:[Hello!Evy]
 request shutdown

@@ -183,26 +183,26 @@ echo $stu->breath();
 ?>
 
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[Student::drink] class:[test_abstract]
-%SaddInterceptor name:[Person::breath] class:[test_abstract]
-%Ssam is eating.<br/>  call Student::drink's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall Student::drink's interceptorPtr::onEnd
-%SaddAnnotation [14]:[sam is drinking.&lt;br/&gt;]
-%Ssam is drinking.<br/>  call Person::breath's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall Person::breath's interceptorPtr::onEnd
-%SaddAnnotation [14]:[sam is alive.&lt;br/&gt;]
-%Ssam is alive.<br/>
-%Srequest shutdown
+request start
+  addInterceptor name:[Student::drink] class:[test_abstract]
+  addInterceptor name:[Person::breath] class:[test_abstract]
+sam is eating.<br/>  call Student::drink's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call Student::drink's interceptorPtr::onEnd
+    addAnnotation [14]:[sam is drinking.&lt;br/&gt;]
+sam is drinking.<br/>  call Person::breath's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call Person::breath's interceptorPtr::onEnd
+    addAnnotation [14]:[sam is alive.&lt;br/&gt;]
+sam is alive.<br/>
+request shutdown

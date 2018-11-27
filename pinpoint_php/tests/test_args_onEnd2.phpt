@@ -82,22 +82,22 @@ fclose($f1);
 fclose($f2);
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testFunc] class:[test_args_onEnd2]
-%Scall testFunc's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+request start
+  addInterceptor name:[testFunc] class:[test_args_onEnd2]
+  call testFunc's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] =&gt; one
-%S[1] =&gt; Resource id #5
+    [0] =&gt; one
+    [1] =&gt; Resource id #5
 )
 ]
 Arguments has been changed!  call testFunc's interceptorPtr::onEnd
-%SaddAnnotation [14]:[Array
+    addAnnotation [14]:[Array
 (
-%S[0] =&gt; %s
-%S[1] =&gt; %s
+    [0] =&gt; %s
+    [1] =&gt; %s
 )
 ]
 request shutdown

@@ -109,28 +109,33 @@ function func1($name)
 func1("Evy");
 ?>
 --EXPECTF--
-%Srequest start
+request start
 %S[ERROR] LogTest_error_PluginClass
-%SaddInterceptor name:[func1] class:[test_PPLogLevel_ERROR]
-%Scall func1's interceptorPtr::onBefore
+  addInterceptor name:[func1] class:[test_PPLogLevel_ERROR]
+  call func1's interceptorPtr::onBefore
 %S[ERROR] LogTest_error_onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; Evy
-%S)
-%S]
-%Scall [Func1Interceptor::onexception]
-%S[ERROR] LogTest_error_onException
-%SsetExceptionInfo:[Fatal error: I am Exception! in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
-%Scall func1's interceptorPtr::onEnd
-%S[ERROR] LogTest_error_onEnd
-%SaddAnnotation [14]:[Array
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] =&gt; Evy
+    [0] =&gt; Evy
 )
 ]
-%A
+  call [Func1Interceptor::onexception]
+%S[ERROR] LogTest_error_onException
+  setExceptionInfo:[Fatal error: I am Exception! in %s]
+  [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
+  call func1's interceptorPtr::onEnd
+%S[ERROR] LogTest_error_onEnd
+    addAnnotation [14]:[Array
+(
+    [0] =&gt; Evy
+)
+]
+
+Fatal error: Uncaught%sException%sI am Exception!%s
+Stack trace:
+#0 %s(%d): func1('Evy')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

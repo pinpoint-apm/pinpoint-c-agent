@@ -99,13 +99,13 @@ request start
     [0] =&gt; Mike
 )
 ]
-%Scall [TestExceptionInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: This is an uncaught exception! in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[This is an uncaught exception!]
+  call [TestExceptionInterceptor::onexception]
+  setExceptionInfo:[Fatal error: This is an uncaught exception! in %s on line %d]
+  [EXCEPTION] file:[%s] line:[%d] msg:[This is an uncaught exception!]
 This is an uncaught exception!  call testException's interceptorPtr::onEnd
-%SaddAnnotation [14]:[args:Array
+    addAnnotation [14]:[args:Array
 (
-%S[0] => %s
+    [0] => %s
 )
 , return:hello world! ]
 request shutdown

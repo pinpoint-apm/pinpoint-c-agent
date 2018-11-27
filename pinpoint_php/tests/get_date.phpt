@@ -76,21 +76,21 @@ echo date("Y/m/d");
 ?>
 
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[date] class:[get_date]
-%Scall date's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; Y/m/d
-%S)
-%S]
-%Acall date's interceptorPtr::onEnd
-%SaddAnnotation [14]:[args:Array
-%S(
-%S[0] => Y/m/d
-%S)
-%S, return:%d%e%d%e%d ]
-%S%d%e%d%e%d
-%Srequest shutdown
+request start
+  addInterceptor name:[date] class:[get_date]
+  call date's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; Y/m/d
+)
+]
+  call date's interceptorPtr::onEnd
+    addAnnotation [14]:[args:Array
+(
+    [0] => Y/m/d
+)
+, return:%d%e%d%e%d ]
+%d%e%d%e%d
+request shutdown

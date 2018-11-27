@@ -92,37 +92,37 @@ echo test_cumsum(3);
 ?>
 
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[test_cumsum] class:[test_recursive]
-%Scall test_cumsum's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; 3
-%S)
-%S]
-%Scall test_cumsum's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; 2
-%S)
-%S]
-%Scall test_cumsum's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; 1
-%S)
-%S]
-%Scall test_cumsum's interceptorPtr::onEnd
-%SaddAnnotation [14]:[1]
-%Scall test_cumsum's interceptorPtr::onEnd
-%SaddAnnotation [14]:[3]
-%Scall test_cumsum's interceptorPtr::onEnd
-%SaddAnnotation [14]:[6]
-%S6
-%Srequest shutdown
+request start
+  addInterceptor name:[test_cumsum] class:[test_recursive]
+  call test_cumsum's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; 3
+)
+]
+  call test_cumsum's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; 2
+)
+]
+  call test_cumsum's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; 1
+)
+]
+  call test_cumsum's interceptorPtr::onEnd
+    addAnnotation [14]:[1]
+  call test_cumsum's interceptorPtr::onEnd
+    addAnnotation [14]:[3]
+  call test_cumsum's interceptorPtr::onEnd
+    addAnnotation [14]:[6]
+6
+request shutdown

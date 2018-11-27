@@ -117,16 +117,16 @@ print $template->getHtml("hello {sam}");
 
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[Template::getHtml] class:[test_interface]
-%Scall Template::getHtml's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] => hello {sam}
-%S)
-%S]
-%Acall Template::getHtml's interceptorPtr::onEnd
-%SaddAnnotation [14]:[hello lijin]
-%Shello lijinrequest shutdown
+request start
+  addInterceptor name:[Template::getHtml] class:[test_interface]
+  call Template::getHtml's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] => hello {sam}
+)
+]
+  call Template::getHtml's interceptorPtr::onEnd
+    addAnnotation [14]:[hello lijin]
+hello lijinrequest shutdown

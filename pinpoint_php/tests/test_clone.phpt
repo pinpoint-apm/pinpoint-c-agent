@@ -116,24 +116,25 @@ $tv2->setColor("white");
 echo $tv2->getColor()."<br/>";
 ?>
 --EXPECTF--
-%Srequest start%A
-%SaddInterceptor name:[Television::getColor] class:[test_clone]
-%Scall Television::getColor's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Acall Television::getColor's interceptorPtr::onEnd
-%SaddAnnotation [14]:[ChangHong color is red]
-%SChangHong color is red<br/>  call Television::getColor's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall Television::getColor's interceptorPtr::onEnd
-%SaddAnnotation [14]:[ClonableName color is white]
-%SClonableName color is white<br/>request shutdown
+request start
+
+  addInterceptor name:[Television::getColor] class:[test_clone]
+  call Television::getColor's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call Television::getColor's interceptorPtr::onEnd
+    addAnnotation [14]:[ChangHong color is red]
+ChangHong color is red<br/>  call Television::getColor's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call Television::getColor's interceptorPtr::onEnd
+    addAnnotation [14]:[ClonableName color is white]
+ClonableName color is white<br/>request shutdown
