@@ -5,10 +5,7 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
---SKIPIF--
-<?php
-if (substr(phpversion(), 0, 1) != '7') die("skip this test is for php 7");
-?>
+
 --FILE--
 <?php
 
@@ -97,7 +94,7 @@ hello Mike
   [EXCEPTION] file:[%s] line:[%d] msg:[I don't care it]
   call hello_phpt's interceptorPtr::onEnd
 
-Fatal error: Uncaught Exception: I don't care it in %s:%d
+Fatal error: Uncaught%sException%sI don't care it%s:%d
 Stack trace:
 #0 %s(70): hello_phpt('Mike')
 #1 {main}

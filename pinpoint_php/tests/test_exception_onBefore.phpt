@@ -5,10 +5,7 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
---SKIPIF--
-<?php
-if (substr(phpversion(), 0, 1) != '7') die("skip this test is for php 7");
-?>
+
 --FILE--
 <?php
 
@@ -117,7 +114,7 @@ request start
 )
 ]
 
-Fatal error: Uncaught Exception: I am Exception in onBefore! in %s:%d
+Fatal error: Uncaught%sException%sI am Exception in onBefore!%s:%d
 Stack trace:
 #0 %s(%d): TestGetSelfInterceptor->onBefore(%d, Array)
 #1 %s(%d): MyClass->testFunc('hello')
