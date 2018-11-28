@@ -114,5 +114,10 @@ request start
 [ERROR] file:[%s] line:[%d] msg:[Division by zero]
 
 Warning: Division by zero in %s
-%A
+%S
+Fatal error: Uncaught%sException%sI am Exception!%s
+Stack trace:
+#0 %s(%d): MyClass->testFunc('hello')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

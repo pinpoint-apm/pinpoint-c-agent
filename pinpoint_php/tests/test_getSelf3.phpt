@@ -109,7 +109,7 @@ getSelf is null  call [TestGetSelfInterceptor::onexception]
 getSelf is null  [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
   call testFunc's interceptorPtr::onEnd
 getSelf is null
-Fatal error: Uncaught Exception: I am Exception! in %s:%d
+Fatal error: Uncaught%sException%sI am Exception!%s:%d
 Stack trace:
 #0 %s(%d): testFunc('hello')
 #1 {main}

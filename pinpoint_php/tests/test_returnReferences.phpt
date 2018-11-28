@@ -5,16 +5,16 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
-
 --FILE--
 <?php
 
-class TestCumsumInterceptor extends \Pinpoint\Interceptor
+class TestGeneratorInterceptor extends \Pinpoint\Interceptor
 {
     var $apiId = -1;
+    var $save_event;
     public function __construct()
     {
-        $this->apiId = pinpoint_add_api("test_cumsum", -1); // functionName, lineno
+        $this->apiId = pinpoint_add_api("MyClass::returns_reference", 2); // functionName, lineno
     }
 
     public function onBefore($callId, $args)
@@ -27,14 +27,17 @@ class TestCumsumInterceptor extends \Pinpoint\Interceptor
             $event->markBeforeTime();
             $event->setApiId($this->apiId);
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
+
             $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
 
 
+            $this->save_event = $event;
         }
     }
 
     public function onEnd($callId, $data)
     {
+
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
@@ -43,10 +46,7 @@ class TestCumsumInterceptor extends \Pinpoint\Interceptor
             $event = $trace->getEvent($callId);
             if ($event)
             {
-                if ($retArgs)
-                {
-                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
-                }
+                $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
                 $event->markAfterTime();
                 $trace->traceBlockEnd($event);
             }
@@ -55,7 +55,6 @@ class TestCumsumInterceptor extends \Pinpoint\Interceptor
 
     public function onException($callId, $exceptionStr)
     {
-        pinpoint_log(PINPOINT_INFO, "call TestExceptionInterceptor onException.");
         $trace = pinpoint_get_current_trace();
         if ($trace)
         {
@@ -64,18 +63,20 @@ class TestCumsumInterceptor extends \Pinpoint\Interceptor
             {
                 $event->markAfterTime();
                 $event->setExceptionInfo($exceptionStr);
+//                $trace->traceBlockEnd($event);
             }
         }
     }
 }
+
 
 class QuickStartPlugin extends \Pinpoint\Plugin
 {
     public function __construct()
     {
         parent::__construct();
-        $p = new TestCumsumInterceptor();
-        $this->addInterceptor($p,"test_cumsum",basename(__FILE__, '.php'));
+        $p = new TestGeneratorInterceptor();
+        $this->addInterceptor($p,"MyClass::returns_reference",basename(__FILE__, '.php'));
     }
 }
 
@@ -83,46 +84,26 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-function test_cumsum($n)
-{
-    if ($n == 1) return 1;
-    return $n + test_cumsum($n - 1);
+class MyClass{
+    public $someref = 1;
+    function &returns_reference()
+    {
+        return $this->someref;
+    }
 }
-echo test_cumsum(3);
+$a = new MyClass();
+$newref = &$a->returns_reference();
 ?>
-
 --EXPECTF--
 request start
-  addInterceptor name:[test_cumsum] class:[test_recursive]
-  call test_cumsum's interceptorPtr::onBefore
-    setApiId:[%i]
+  addInterceptor name:[MyClass::returns_reference] class:[test_returnReferences]
+  call MyClass::returns_reference's interceptorPtr::onBefore
+    setApiId:[-2]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
-    [0] =&gt; 3
 )
 ]
-  call test_cumsum's interceptorPtr::onBefore
-    setApiId:[%i]
-    setServiceType:[1501]
-    addAnnotation [-1]:[Array
-(
-    [0] =&gt; 2
-)
-]
-  call test_cumsum's interceptorPtr::onBefore
-    setApiId:[%i]
-    setServiceType:[1501]
-    addAnnotation [-1]:[Array
-(
-    [0] =&gt; 1
-)
-]
-  call test_cumsum's interceptorPtr::onEnd
+  call MyClass::returns_reference's interceptorPtr::onEnd
     addAnnotation [14]:[1]
-  call test_cumsum's interceptorPtr::onEnd
-    addAnnotation [14]:[3]
-  call test_cumsum's interceptorPtr::onEnd
-    addAnnotation [14]:[6]
-6
 request shutdown

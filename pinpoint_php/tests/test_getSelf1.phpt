@@ -5,7 +5,6 @@ pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
-
 --FILE--
 <?php
 
@@ -109,7 +108,7 @@ request start
   call MyClass::testFunc's interceptorPtr::onEnd
     addAnnotation [14]:[]
 
-Fatal error: Uncaught Exception: I am Exception! in %s:%d
+Fatal error: Uncaught%sException%sI am Exception!%s:%d
 Stack trace:
 #0 %s(85): MyClass->testFunc('hello')
 #1 {main}

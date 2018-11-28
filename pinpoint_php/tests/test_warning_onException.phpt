@@ -113,5 +113,10 @@ call MyClass::testFunc's interceptorPtr::onEnd
     [0] => hello
 )
 ]
-%A
+
+Fatal error: Uncaught%sException%sI am Exception!%s
+Stack trace:
+#0 %s(%d): MyClass->testFunc('hello')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

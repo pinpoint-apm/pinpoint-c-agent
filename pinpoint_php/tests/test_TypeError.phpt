@@ -87,23 +87,28 @@ function testTypeError(int $integer)
 testTypeError("str");
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testTypeError] class:[test_TypeError]
-%Scall testTypeError's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; str
-%S)
-%S]
-%Scall [TestTypeErrorInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: Argument 1 passed to testTypeError() must be of the type integer, string given, called in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[Argument 1 passed to testTypeError() must be of the type integer, string given, called in %s]
-%Scall testTypeError's interceptorPtr::onEnd
-%A%A
-%SaddAnnotation [14]:[]
-%A
+request start
+  addInterceptor name:[testTypeError] class:[test_TypeError]
+  call testTypeError's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; str
+)
+]
+  call [TestTypeErrorInterceptor::onexception]
+  setExceptionInfo:[Fatal error: Argument 1 passed to testTypeError() must be of the type integer, string given, called in %s]
+  [EXCEPTION] file:[%s] line:[%d] msg:[Argument 1 passed to testTypeError() must be of the type integer, string given, called in %s]
+  call testTypeError's interceptorPtr::onEnd
+[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
+
+Notice: Undefined variable: retArgs in %s on line %d
+addAnnotation [14]:[]
+
 Fatal error: Uncaught TypeError: Argument 1 passed to testTypeError() must be of the type integer, string given, called in%S
-%A
+Stack trace:
+#0 %s(%d): testTypeError('str')
+#1 {main}
+  thrown in %s on line %d
 request shutdown

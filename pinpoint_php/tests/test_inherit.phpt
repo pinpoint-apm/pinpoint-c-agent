@@ -257,26 +257,26 @@ $person = new Student();
 echo $person->eat();
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[Student::eat] class:[test_inherit]
-%SaddInterceptor name:[Docker::eat] class:[test_inherit]
-%SaddInterceptor name:[Person::eat] class:[test_inherit]
-%Scall Person::eat's interceptorPtr::onBefore
-%SsetApiId:[-4]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Sfather eating!<br/>  call Person::eat's interceptorPtr::onEnd
-%SaddAnnotation [14]:[father]
-%Sfather  call Student::eat's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%SStudent eating<br/>  call Student::eat's interceptorPtr::onEnd
-%SaddAnnotation [14]:[Student]
-%SStudentrequest shutdown
+request start
+  addInterceptor name:[Student::eat] class:[test_inherit]
+  addInterceptor name:[Docker::eat] class:[test_inherit]
+  addInterceptor name:[Person::eat] class:[test_inherit]
+  call Person::eat's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+father eating!<br/>  call Person::eat's interceptorPtr::onEnd
+    addAnnotation [14]:[father]
+father  call Student::eat's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+Student eating<br/>  call Student::eat's interceptorPtr::onEnd
+    addAnnotation [14]:[Student]
+Studentrequest shutdown

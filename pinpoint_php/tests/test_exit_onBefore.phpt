@@ -92,13 +92,13 @@ $a->testFunc("hello");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[MyClass::testFunc] class:[test_exit_onBefore]
-%Scall MyClass::testFunc's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  addInterceptor name:[MyClass::testFunc] class:[test_exit_onBefore]
+  call MyClass::testFunc's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => hello
+    [0] => hello
 )
 ]
 request shutdown

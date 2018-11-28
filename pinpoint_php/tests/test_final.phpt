@@ -169,26 +169,26 @@ $b->func("abc");
 ?>
 --EXPECTF--
 request start
-%SaddInterceptor name:[BaseClass::finalFunction] class:[test_final]
-%SaddInterceptor name:[finalClass::func] class:[test_final]
-%Scall BaseClass::finalFunction's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  addInterceptor name:[BaseClass::finalFunction] class:[test_final]
+  addInterceptor name:[finalClass::func] class:[test_final]
+  call BaseClass::finalFunction's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => 10
+    [0] => 10
 )
 ]
-%Scall BaseClass::finalFunction's interceptorPtr::onEnd
-%SaddAnnotation [14]:[10]
-%Scall finalClass::func's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
+  call BaseClass::finalFunction's interceptorPtr::onEnd
+    addAnnotation [14]:[10]
+  call finalClass::func's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
 (
-%S[0] => abc
+    [0] => abc
 )
 ]
-%Scall finalClass::func's interceptorPtr::onEnd
-%SaddAnnotation [14]:[abc]
+  call finalClass::func's interceptorPtr::onEnd
+    addAnnotation [14]:[abc]
 request shutdown

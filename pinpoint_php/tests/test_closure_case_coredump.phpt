@@ -6,6 +6,10 @@ pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
 pinpoint_agent.testCovered=1
 ;pinpoint.common.PPLogLevel = DEBUG
+--SKIPIF--
+<?php
+if (substr(phpversion(), 0, 1) != '7') die("skip this test is for php 7");
+?>
 --FILE--
 <?php
 

@@ -97,17 +97,17 @@ echo $a;
 
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[test_func1] class:[test_func1]
-%Scall test_func1's interceptorPtr::onBefore
-%SsetApiId:[-2]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; one
-%S[1] =&gt; 2
-%S)
-%S]
-%Scall test_func1's interceptorPtr::onEnd
-%SaddAnnotation [14]:[this is test_func1: arg1=one, arg2=2]
-%Sthis is test_func1: arg1=one, arg2=2request shutdown
+request start
+  addInterceptor name:[test_func1] class:[test_func1]
+  call test_func1's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; one
+    [1] =&gt; 2
+)
+]
+  call test_func1's interceptorPtr::onEnd
+    addAnnotation [14]:[this is test_func1: arg1=one, arg2=2]
+this is test_func1: arg1=one, arg2=2request shutdown

@@ -88,20 +88,27 @@ function testArithmeticError()
 testArithmeticError();
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testArithmeticError] class:[test_ArithmeticError]
-%Scall testArithmeticError's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall [TestArithmeticErrorInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: Bit shift by negative number in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[Bit shift by negative number]
-%Scall testArithmeticError's interceptorPtr::onEnd%A
-%SaddAnnotation [14]:[]
-%A
-Fatal error: Uncaught ArithmeticError: Bit shift by negative number in %A
+request start
+  addInterceptor name:[testArithmeticError] class:[test_ArithmeticError]
+  call testArithmeticError's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call [TestArithmeticErrorInterceptor::onexception]
+  setExceptionInfo:[Fatal error: Bit shift by negative number in %s on line %d]
+  [EXCEPTION] file:[%s] line:[%d] msg:[Bit shift by negative number]
+  call testArithmeticError's interceptorPtr::onEnd
+[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
+
+Notice: Undefined variable: retArgs in %s on line %d
+addAnnotation [14]:[]
+
+Fatal error: Uncaught ArithmeticError: Bit shift by negative number in %s
+Stack trace:
+#0 %s(%d): testArithmeticError()
+#1 {main}
+  thrown in %s on line %d
 request shutdown

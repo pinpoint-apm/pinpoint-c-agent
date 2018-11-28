@@ -117,14 +117,15 @@ request start
 %s %s [pinpoint] [%s] php_interfaces.cpp:%d [ERROR] Interceptor name=[MyClass::testFunc] onend failed!!! please check your code!!!
 %s %s [pinpoint] [%s] trace.cpp:%d [ERROR] mark bad trace !!! check your plugins...
 
-Fatal error: Uncaught Exception: I am Exception! in %s:%d
+Fatal error: Uncaught%sException%sI am Exception!%s:%d
 Stack trace:
 #0 %s(81): MyClass->testFunc('hello')
 #1 {main}
 
-Next Exception: I am Exception in onEnd! in %s:%d
+Next%sException%sI am Exception in onEnd!%s:%d
 Stack trace:
 #0 %s(81): TestGetSelfInterceptor->onEnd(%d, Array)
-#1 {main}
+%A
+#%d {main}
   thrown in %s on line %d
 request shutdown

@@ -90,21 +90,23 @@ function testParseError()
 testParseError();
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testParseError] class:[test_ParseError]
-%Scall testParseError's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall [TestParseErrorInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: syntax error, unexpected 'is' (T_STRING) in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[syntax error, unexpected 'is' (T_STRING)]
-%Scall testParseError's interceptorPtr::onEnd
-%A
-%SaddAnnotation [14]:[]
-%A
-Parse error: syntax error, unexpected 'is' (T_STRING) in %s
+request start
+  addInterceptor name:[testParseError] class:[test_ParseError]
+  call testParseError's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call [TestParseErrorInterceptor::onexception]
+  setExceptionInfo:[Fatal error: syntax error, unexpected 'is' (T_STRING) in %s on line %d]
+  [EXCEPTION] file:[%s] line:[%d] msg:[syntax error, unexpected 'is' (T_STRING)]
+  call testParseError's interceptorPtr::onEnd
+[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
+
+Notice: Undefined variable: retArgs in %s on line %d
+addAnnotation [14]:[]
+
+Parse error: syntax error, unexpected 'is' (T_STRING) in %s : eval()'d code on line %d
 request shutdown

@@ -182,17 +182,17 @@ func2("Evy");
 
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[func1] class:[test_PluginExclude]
-%SaddInterceptor name:[func2] class:[test_PluginExclude]
-%Scall func1's interceptorPtr::onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; Evy
-%S)
-%S]
-%Scall func1's interceptorPtr::onEnd
-%SaddAnnotation [14]:[Hello!Evy]
+request start
+  addInterceptor name:[func1] class:[test_PluginExclude]
+  addInterceptor name:[func2] class:[test_PluginExclude]
+  call func1's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; Evy
+)
+]
+  call func1's interceptorPtr::onEnd
+    addAnnotation [14]:[Hello!Evy]
 request shutdown

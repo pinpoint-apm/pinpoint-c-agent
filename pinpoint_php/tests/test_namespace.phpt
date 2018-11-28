@@ -159,7 +159,7 @@ $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, basename(__FILE__, '.php'));
 pinpint_aop_reload();
 
-include("test_namespace_demo.php");
+include("test_namespace_demo.inc");
 echo testNameSpace\test_func2("the one", 22);
 $t = new testNameSpace\TestClass();
 $t->num = 80;

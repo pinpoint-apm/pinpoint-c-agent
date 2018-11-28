@@ -90,20 +90,28 @@ function testAssertionError()
 testAssertionError();
 ?>
 --EXPECTF--
-%Srequest start
-%SaddInterceptor name:[testAssertionError] class:[test_AssertionError]
-%Scall testAssertionError's interceptorPtr::onBefore
-%SsetApiId:[%s]
-%SsetServiceType:[1501]
-%SaddAnnotation [-1]:[Array
-%S(
-%S)
-%S]
-%Scall [TestAssertionErrorInterceptor::onexception]
-%SsetExceptionInfo:[Fatal error: assert($value === 0) in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[assert($value === 0)]
-%Scall testAssertionError's interceptorPtr::onEnd%A
-%SaddAnnotation [14]:[]
-%A
-Fatal error: Uncaught AssertionError: assert($value === 0) in %A
+request start
+  addInterceptor name:[testAssertionError] class:[test_AssertionError]
+  call testAssertionError's interceptorPtr::onBefore
+    setApiId:[%i]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+)
+]
+  call [TestAssertionErrorInterceptor::onexception]
+  setExceptionInfo:[Fatal error: assert($value === 0) in %s on line %d]
+  [EXCEPTION] file:[%s] line:[%d] msg:[assert($value === 0)]
+  call testAssertionError's interceptorPtr::onEnd
+[ERROR] file:[%s] line:[%d] msg:[Undefined variable: retArgs]
+
+Notice: Undefined variable: retArgs in %s on line %d
+addAnnotation [14]:[]
+
+Fatal error: Uncaught AssertionError: assert($value === 0) in %s
+Stack trace:
+#0 %s(%d): assert(false, 'assert($value =...')
+#1 %s(%d): testAssertionError()
+#2 {main}
+  thrown in %s on line %d
 request shutdown

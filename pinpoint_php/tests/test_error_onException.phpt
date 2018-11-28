@@ -29,7 +29,6 @@ class TestGetSelfInterceptor extends \Pinpoint\Interceptor
             $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
             $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, print_r($args,true));
             $this->save_event = $event;
-            throw new Exception("I am Exception in onBefore!");
         }
     }
 
@@ -42,7 +41,7 @@ class TestGetSelfInterceptor extends \Pinpoint\Interceptor
             $args = $data["args"];
             $retArgs = $data["result"];
             $event = $trace->getEvent($callId);
-            $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($args,true),ENT_QUOTES));
+            $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, sprintf("args:%s",print_r($args,true)));
             $event->markAfterTime();
             $trace->traceBlockEnd($event);
         }
@@ -58,7 +57,7 @@ class TestGetSelfInterceptor extends \Pinpoint\Interceptor
             {
                 $event->markAfterTime();
                 $event->setExceptionInfo($exceptionStr);
-//                $trace->traceBlockEnd($event);
+                xxx();
             }
         }
     }
@@ -92,32 +91,17 @@ $a->testFunc("hello");
 ?>
 --EXPECTF--
 request start
-  addInterceptor name:[MyClass::testFunc] class:[test_exception_onBefore]
+  addInterceptor name:[MyClass::testFunc] class:[test_error_onException]
   call MyClass::testFunc's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
     [0] => hello
 )
 ]
-    call [TestGetSelfInterceptor::onexception]
-    setExceptionInfo:[Fatal error: I am Exception in onBefore! in %s on line %d]
-    [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception in onBefore!]
-%s %s [pinpoint] [%s] php_common.cpp:%d [ERROR] w_zend_call_method throw: [exception: I am Exception in onBefore! in %s on line %d]
-%s %s [pinpoint] [%s] php_interfaces.cpp:%d [ERROR] Interceptor name=[MyClass::testFunc] onbefore failed!!! please check your code!!!
-%s %s [pinpoint] [%s] trace.cpp:%d [ERROR] mark bad trace !!! check your plugins...
-  call MyClass::testFunc's interceptorPtr::onEnd
-    addAnnotation [14]:[Array
-(
-    [0] =&gt; hello
-)
-]
+  call [TestGetSelfInterceptor::onexception]
+  setExceptionInfo:[Fatal error: I am Exception! in %s]
 
-Fatal error: Uncaught%sException%sI am Exception in onBefore!%s:%d
-Stack trace:
-#0 %s(%d): TestGetSelfInterceptor->onBefore(%d, Array)
-#1 %s(%d): MyClass->testFunc('hello')
-#2 {main}
-  thrown in %s on line %d
+%A
 request shutdown

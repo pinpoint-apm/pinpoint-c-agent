@@ -96,13 +96,13 @@ request start
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
-%S[0] =&gt; Mike
+    [0] =&gt; Mike
 )
 ]
 This is an uncaught exception!  call testException's interceptorPtr::onEnd
-%SaddAnnotation [14]:[args:Array
+    addAnnotation [14]:[args:Array
 (
-%S[0] => %s
+    [0] => %s
 )
 , return:hello world! ]
 request shutdown

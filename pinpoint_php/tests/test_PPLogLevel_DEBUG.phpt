@@ -113,45 +113,50 @@ func1("Evy");
 ?>
 --EXPECTF--
 %A
-%Srequest start
+request start
 %A
 %S[DEBUG] LogTest_debug_PluginClass
 %S[INFO] LogTest_info_PluginClass
 %S[WARN] LogTest_warn_PluginClass
 %S[ERROR] LogTest_error_PluginClass
-%SaddInterceptor name:[func1] class:[test_PPLogLevel_DEBUG]
+  addInterceptor name:[func1] class:[test_PPLogLevel_DEBUG]
 %A
-%Scall func1's interceptorPtr::onBefore
+  call func1's interceptorPtr::onBefore
 %A
 %S[DEBUG] LogTest_debug_onBefore
 %S[INFO] LogTest_info_onBefore
 %S[WARN] LogTest_warning_onBefore
 %S[ERROR] LogTest_error_onBefore
-%SsetApiId:[%i]
-%SsetServiceType:[1501]
+    setApiId:[%i]
+    setServiceType:[1501]
 %A
-%SaddAnnotation [-1]:[Array
-%S(
-%S[0] =&gt; Evy
-%S)
-%S]
-%Scall [Func1Interceptor::onexception]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; Evy
+)
+]
+  call [Func1Interceptor::onexception]
 %S[DEBUG] LogTest_debug_onException
 %S[INFO] LogTest_info_onException
 %S[WARN] LogTest_warn_onException
 %S[ERROR] LogTest_error_onException
-%SsetExceptionInfo:[Fatal error: I am Exception! in %s]
-%S[EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
-%Scall func1's interceptorPtr::onEnd
+  setExceptionInfo:[Fatal error: I am Exception! in %s on line %d]
+  [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
+  call func1's interceptorPtr::onEnd
 %S[DEBUG] LogTest_debug_onEnd
 %S[INFO] LogTest_info_onEnd
 %S[WARN] LogTest_warning_onEnd
 %S[ERROR] LogTest_error_onEnd
-%SaddAnnotation [14]:[Array
+    addAnnotation [14]:[Array
 (
-%S[0] =&gt; Evy
+    [0] =&gt; Evy
 )
 ]
-%A
+
+Fatal error: Uncaught%sException%sI am Exception!%s
+Stack trace:
+#0 %s(%d): func1('Evy')
+#1 {main}
+  thrown in %s on line %d
 request shutdown
 %A
