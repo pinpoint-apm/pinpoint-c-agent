@@ -161,7 +161,7 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
     }
 #endif
 
-    if( funcname && strncmp(funcname,"{closure}",sizeof("{closure}") -1) == 0)
+    if(funcname && strncmp(funcname,"{closure}",sizeof("{closure}") -1) == 0)
     {
         const char* filename  = zend_get_executed_filename();
         LOGD("filename %s",filename);
