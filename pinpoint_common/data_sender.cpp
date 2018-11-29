@@ -48,9 +48,9 @@ namespace Pinpoint
 
         void UdpDataSender::stop()
         {
-            timer_.cancel();
             nstate = E_EXIT;
-            socket_.close();
+            /// timer cancel could activity the timer
+            timer_.cancel();
             LOGD("UdpDataSender exit");
         }
 
@@ -86,10 +86,9 @@ namespace Pinpoint
             if(nstate == E_EXIT)
             {
                 // as the Sender exit
+                timer_.cancel();
                 return SUCCESS;
             }
-
-            int32_t err;
 
             if(packetPtr == NULL || packetPtr->getType() != PacketType::HEADLESS)
             {
@@ -109,7 +108,7 @@ namespace Pinpoint
                 return SUCCESS;
             }
 
-
+            int32_t err;
             if (timeout == -1)
             {
                 err = sendQueue.put(packetPtr);
@@ -129,23 +128,30 @@ namespace Pinpoint
             typedef std::vector<PacketPtr> PacketPtrVec;
             PacketPtrVec packetPtrVec;
             int32_t err = 0;
-            if( ec == boost::asio::error::operation_aborted)
+
+            if(ec == boost::asio::error::operation_aborted)
             {
                 LOGD("sender canceled");
+                socket_.close();
                 return ;
-            }else if(ec){
+            }else if(ec)
+            {
                 LOGW("send catch [%s]",ec.message().c_str());
-                goto _ERROR;
+                init();
+                return ;
+            }else if(nstate == E_EXIT)
+            {
+                timer_.cancel();
+                socket_.close();
+                return ;
             }
-
-
 
             err = sendQueue.getAll(packetPtrVec, MAX_GET_WAIT_MSEC);
             if (err != SUCCESS || packetPtrVec.empty())
             {
-
                 timer_.expires_from_now(boost::posix_time::milliseconds(MAX_REFRESH_MSEC));
-                goto _AGAIN;
+                timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
+                return ;
             }
 
             for(PacketPtrVec::iterator ip = packetPtrVec.begin(); ip != packetPtrVec.end(); ++ip)
@@ -165,19 +171,10 @@ namespace Pinpoint
                 {
                     LOGE("send udp packet failed. e=%s, length=[%ld]", e.what(),(*ip)->getCodedData().length());
                 }
-
             }
-
             timer_.expires_from_now(boost::posix_time::milliseconds(0)); // recheck it
-      _AGAIN:
             timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
             return ;
-      _ERROR:
-            socket_.close();
-            if(nstate != E_EXIT)
-            {
-                init();
-            }
         }
 
         uint32_t UdpDataSender::getSendCount()
