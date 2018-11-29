@@ -1588,7 +1588,7 @@ PHP_METHOD(Plugin, addInterceptor)
                Pinpoint::Agent::PinpointAgentContext::getContextPtr()->agentConfigArgsPtr;
 
     PINPOINT_ASSERT(contextPtr != NULL);
-    interceptorPtr->setPhpImplObject(obj, path_join(PINPOINT_G(pluginsAbsolutePath), Tdefinition_path).c_str());
+    interceptorPtr->setPhpImplObject(obj, path_join(PPG(pluginsAbsolutePath), Tdefinition_path).c_str());
 
     phpInterfacePluginPtr->addInterceptor(interceptorPtr);
 
@@ -1892,7 +1892,7 @@ PHP_FUNCTION(pinpoint_add_plugin)
              Pinpoint::Agent::PinpointAgentContext::getContextPtr()->agentConfigArgsPtr;
 
     PINPOINT_ASSERT(contextPtr != NULL);
-    phpInterfacePluginPtr->setObject(object, path_join(PINPOINT_G(pluginsAbsolutePath), Tdefinition_path).c_str());
+    phpInterfacePluginPtr->setObject(object, path_join(PPG(pluginsAbsolutePath), Tdefinition_path).c_str());
 }
 
 PHP_FUNCTION(pinpoint_log)

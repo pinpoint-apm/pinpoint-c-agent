@@ -48,7 +48,7 @@
 
 enum UNIT_TEST_TYPE{E_NO_TEST=0,E_TSAPN=0x1,E_BGTASK=0x2,E_TSALLFUN=0x4};
 
-#define PP_U_TRACE(msg,...) (PINPOINT_G(testCovered)?(fprintf(stderr,"%*s" msg"\n",PINPOINT_G(prs).stackDepth*2,"",##__VA_ARGS__)):(0));
+#define PP_U_TRACE(msg,...) (PPG(testCovered)?(fprintf(stderr,"%*s" msg"\n",PPG(prs).stackDepth*2,"",##__VA_ARGS__)):(0));
 
 #define PP_TRACE(msg,...)\
         do{\

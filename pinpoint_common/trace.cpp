@@ -599,7 +599,6 @@ namespace Pinpoint
             {
                 return;
             }
-
             SpanEventPtr spanEventPtr = callStack.pop();
 
             PINPOINT_ASSERT(spanEventPtr != NULL);

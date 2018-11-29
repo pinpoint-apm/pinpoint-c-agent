@@ -174,8 +174,9 @@ STD_PHP_INI_ENTRY("pinpoint.common.SkipTraceTime","-1",PHP_INI_SYSTEM,
 STD_PHP_INI_ENTRY("pinpoint.common.ApiTableFile","",PHP_INI_SYSTEM,
         OnUpdateString,ApiTableFile,zend_pinpoint_globals,pinpoint_globals)
 
-STD_PHP_INI_ENTRY("pinpoint.common.RedefineAgentMain","",PHP_INI_SYSTEM,
-        OnUpdateString,RedefineAgentMain,zend_pinpoint_globals,pinpoint_globals)
+STD_PHP_INI_ENTRY("pinpoint.common.DefineCallTree","0",PHP_INI_SYSTEM,
+        OnUpdateBool,DefineCallTree,zend_pinpoint_globals,pinpoint_globals)
+
 
 PHP_INI_END()
 
@@ -186,44 +187,97 @@ ZEND_GET_MODULE(pinpoint)
 
 #define IS_MODULE_ENABLE()\
 do{\
-    if(PINPOINT_G(module_enable) == 0) return SUCCESS;\
+    if(PPG(module_enable) == 0) return SUCCESS;\
 }while(0)
 
 void print_ini()
 {
 //    LOGD("configFileName:%s",PINPOINT_G(configFileName));
-    LOGD("trace_exception:%d",PINPOINT_G(trace_exception));
-    LOGD("testCovered:%d",PINPOINT_G(testCovered));
-    LOGD("proxy.http.header.enable:%d",PINPOINT_G(proxy_headers));
+    LOGD("trace_exception:%d",PPG(trace_exception));
+    LOGD("testCovered:%d",PPG(testCovered));
+    LOGD("proxy.http.header.enable:%d",PPG(proxy_headers));
 
-    LOGD("common.agentID:%s",PINPOINT_G(agentID));
-    LOGD("common.applicationName:%s",PINPOINT_G(applicationName));
-    LOGD("common.collectorSpanIp:%s",PINPOINT_G(collectorSpanIp));
-    LOGD("common.CollectorSpanPort:%ld",PINPOINT_G(CollectorSpanPort));
-    LOGD("common.CollectorStatIp:%s",PINPOINT_G(CollectorStatIp));
-    LOGD("common.CollectorStatPort:%ld",PINPOINT_G(CollectorStatPort));
-    LOGD("common.CollectorTcpIp:%s",PINPOINT_G(CollectorTcpIp));
-    LOGD("common.CollectorTcpPort:%ld",PINPOINT_G(CollectorTcpPort));
+    LOGD("common.agentID:%s",PPG(agentID));
+    LOGD("common.applicationName:%s",PPG(applicationName));
+    LOGD("common.collectorSpanIp:%s",PPG(collectorSpanIp));
+    LOGD("common.CollectorSpanPort:%ld",PPG(CollectorSpanPort));
+    LOGD("common.CollectorStatIp:%s",PPG(CollectorStatIp));
+    LOGD("common.CollectorStatPort:%ld",PPG(CollectorStatPort));
+    LOGD("common.CollectorTcpIp:%s",PPG(CollectorTcpIp));
+    LOGD("common.CollectorTcpPort:%ld",PPG(CollectorTcpPort));
 
-    LOGD("common.entryFilename:%s",PINPOINT_G(entryFilename));
-    LOGD("common.pluginsRootPath:%s",PINPOINT_G(pluginsRootPath));
+    LOGD("common.entryFilename:%s",PPG(entryFilename));
+    LOGD("common.pluginsRootPath:%s",PPG(pluginsRootPath));
 
-    LOGD("common.PluginExclude:%s",PINPOINT_G(PluginExclude));
-    LOGD("common.PluginInclude:%s",PINPOINT_G(PluginInclude));
+    LOGD("common.PluginExclude:%s",PPG(PluginExclude));
+    LOGD("common.PluginInclude:%s",PPG(PluginInclude));
 
-    LOGD("common.TraceLimit:%d",PINPOINT_G(TraceLimit));
-    LOGD("common.SkipTraceTime:%d",PINPOINT_G(SkipTraceTime));
+    LOGD("common.TraceLimit:%d",PPG(TraceLimit));
+    LOGD("common.SkipTraceTime:%d",PPG(SkipTraceTime));
 
-    LOGD("common.reconInterval:%l",PINPOINT_G(reconInterval));
-    LOGD("common.ApiTableFile:%s",PINPOINT_G(ApiTableFile));
+    LOGD("common.reconInterval:%l",PPG(reconInterval));
+    LOGD("common.ApiTableFile:%s",PPG(ApiTableFile));
+    LOGD("common.DefineCallTrace:%d",PPG(DefineCallTree));
 
 }
 
+static int common_call_trace_start(int , int )
+{
+
+    AgentPtr agentPtr = Agent::getAgentPtr();
+    PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
+
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_PRE_INITED)
+    {
+        // Most of PHP configurations are not thread-safety.
+        // So we read plugins that are wrote by php synchronized.
+        load_php_interface_plugins();
+        if(init_pinpoint_agent() != SUCCESS)
+        {
+            return -1;
+        }
+    }
+
+    start_a_new_calltrace();
+
+    return SUCCESS;
+}
+
+static int common_call_trace_end(int , int )
+{
+    end_current_calltrace();
+    return SUCCESS;
+}
+
+static int user_call_trace_start(int , int )
+{
+    AgentPtr agentPtr = Agent::getAgentPtr();
+    PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
+
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_PRE_INITED)
+    {
+        // Most of PHP configurations are not thread-safety.
+        // So we read plugins that are wrote by php synchronized.
+        load_php_interface_plugins();
+        if(init_pinpoint_agent() != SUCCESS)
+        {
+            return -1;
+        }
+    }
+    return SUCCESS;
+}
+
+static int user_call_trace_end(int , int )
+{
+//    end_current_calltrace();
+    return SUCCESS;
+}
 
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
 {
-//    _pinpoint_globals->trace_exception= 1;
     memset(_pinpoint_globals,0,sizeof(*_pinpoint_globals));
+    _pinpoint_globals->call_trace_start =  common_call_trace_start;
+    _pinpoint_globals->call_trace_end   =  common_call_trace_end;
 }
 
 PHP_MINIT_FUNCTION(pinpoint)
@@ -233,18 +287,27 @@ PHP_MINIT_FUNCTION(pinpoint)
     REGISTER_INI_ENTRIES();
 
     IS_MODULE_ENABLE();
-    if(PINPOINT_G(pluginsRootPath)[0]==0)
+
+
+    if(PPG(pluginsRootPath)[0]==0)
     {
-        strncpy(PINPOINT_G(pluginsAbsolutePath),php_getcwd(),MAXPATHLEN);
+        strncpy(PPG(pluginsAbsolutePath),php_getcwd(),MAXPATHLEN);
     }
-    else if(PINPOINT_G(pluginsRootPath)[0] !='/' ){
+    else if(PPG(pluginsRootPath)[0] !='/' ){
         /// absolute Path
-        strncpy(PINPOINT_G(pluginsAbsolutePath),expand_filepath(PINPOINT_G(pluginsRootPath),NULL),MAXPATHLEN);
+        strncpy(PPG(pluginsAbsolutePath),expand_filepath(PPG(pluginsRootPath),NULL),MAXPATHLEN);
     }else{
         // related path /home/apps/plugins/
-        strncpy(PINPOINT_G(pluginsAbsolutePath),PINPOINT_G(pluginsRootPath),MAXPATHLEN);
+        strncpy(PPG(pluginsAbsolutePath),PPG(pluginsRootPath),MAXPATHLEN);
     }
 
+
+    /// check the calltrace
+    if(PPG(DefineCallTree))
+    {
+        PPG(call_trace_start) =  user_call_trace_start;
+        PPG(call_trace_end)  =  user_call_trace_end;
+    }
 
     int32_t err = SUCCESS;
     try
@@ -273,24 +336,24 @@ PHP_MINIT_FUNCTION(pinpoint)
         agentFunction.addInterceptorFunc = add_interceptor;
         agentFunction.getHostProcessInfo = get_host_process_info;
 
-#define IS_SET(offset) (strlen(PINPOINT_G(offset))==0?((zend_bool)0):(zend_bool)(1))
+#define IS_SET(offset) (strlen(PPG(offset))==0?((zend_bool)0):(zend_bool)(1))
 
         Pinpoint::Agent::AgentConfigArgs config= {
-                PINPOINT_G(agentID),
-                PINPOINT_G(applicationName),
-                PINPOINT_G(collectorSpanIp),
-                PINPOINT_G(CollectorSpanPort),
-                PINPOINT_G(CollectorStatIp),
-                PINPOINT_G(CollectorStatPort),
-                PINPOINT_G(CollectorTcpIp),
-                PINPOINT_G(CollectorTcpPort),
-                PINPOINT_G(PluginInclude),
-                PINPOINT_G(PluginExclude),
+                PPG(agentID),
+                PPG(applicationName),
+                PPG(collectorSpanIp),
+                PPG(CollectorSpanPort),
+                PPG(CollectorStatIp),
+                PPG(CollectorStatPort),
+                PPG(CollectorTcpIp),
+                PPG(CollectorTcpPort),
+                PPG(PluginInclude),
+                PPG(PluginExclude),
                 IS_SET(ApiTableFile),
-                PINPOINT_G(ApiTableFile),
-                PINPOINT_G(TraceLimit),
-                PINPOINT_G(SkipTraceTime),
-                PINPOINT_G(reconInterval),
+                PPG(ApiTableFile),
+                PPG(TraceLimit),
+                PPG(SkipTraceTime),
+                PPG(reconInterval),
                 IS_SET(PluginInclude),
                 IS_SET(PluginExclude),
         };
@@ -370,44 +433,25 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
     return SUCCESS;
 }
 
-/// only valid in php-fpm
 PHP_RINIT_FUNCTION(pinpoint)
 {
     IS_MODULE_ENABLE();
+
     PP_TRACE("request start");
-    AgentPtr agentPtr = Agent::getAgentPtr();
-    PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
+    if(PPG(call_trace_start))
+        PPG(call_trace_start)( type,  module_number);
 
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_PRE_INITED)
-    {
-        // Most of PHP configurations are not thread-safety.
-        // So we read plugins that are wrote by php synchronized.
-        load_php_interface_plugins();
-
-        if(init_pinpoint_agent() != SUCCESS)
-        {
-            return -1;
-        }
-
-        /// test not enable
-        /// try to test bgthreadtask
-        /// RedefineAgentMain user want to redefine "start_pinpint_agent"
-
-        if((PINPOINT_G(testCovered) & E_BGTASK) || (PINPOINT_G(testCovered) == 0 && PINPOINT_G(RedefineAgentMain)[0] == 0 ))
-        {
-            start_pinpoint_agent();
-        }
-    }
-
-    start_a_new_calltrace();
     return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(pinpoint)
 {
     IS_MODULE_ENABLE();
-    end_current_calltrace();
+
+    if(PPG(call_trace_end))
+        PPG(call_trace_end)( type,  module_number);
     PP_TRACE("request shutdown");
+
 #ifdef HAVE_GCOV
     __gcov_flush();
 #endif
@@ -419,7 +463,7 @@ static void load_php_interface_plugins()
 {
     TSRMLS_FETCH();
 
-    const char* phpCreatePluginsFileName = PINPOINT_G(entryFilename);
+    const char* phpCreatePluginsFileName = PPG(entryFilename);
     if(phpCreatePluginsFileName[0] == 0)
     {
         LOGI("-----------------------------------------");
@@ -427,7 +471,7 @@ static void load_php_interface_plugins()
         LOGI("-----------------------------------------");
         return ;
     }
-    std::string pluginsDir =  PINPOINT_G(pluginsAbsolutePath);
+    std::string pluginsDir =  PPG(pluginsAbsolutePath);
 
     /* interfaces */
     zend_file_handle *prepend_file_p;

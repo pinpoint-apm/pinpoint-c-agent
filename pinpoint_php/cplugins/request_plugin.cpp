@@ -45,6 +45,7 @@ int32_t PhpRequestInterceptor::startTrace()
     if (err == Pinpoint::SAMPLING_IGNORE)
     {
         PP_U_TRACE("This trace had ignored by TraceLimit");
+        LOGD("This trace had ignored by TraceLimit");
         return Pinpoint::SAMPLING_IGNORE;
     }
     else if (err != SUCCESS)
@@ -124,7 +125,7 @@ void PhpRequestInterceptor::onBefore(uint64_t callId,
     LOGI(" called %p %d ",this,state);
 
     // add proxy header checking
-    if(!PINPOINT_G(proxy_headers))
+    if(!PPG(proxy_headers))
     {
         return ;
     }

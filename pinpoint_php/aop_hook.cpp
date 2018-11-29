@@ -357,12 +357,12 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
 #else
         call_php_kernel_debug_backtrace(0,frame,DEBUG_BACKTRACE_PROVIDE_OBJECT);
 #endif
-        PINPOINT_G(prs).stackDepth++;
+        PPG(prs).stackDepth++;
         phpFuncArgFetcher.setInArgs(frame);
         call_id = interceptorPtr->assignCallId();
         (void)aop->resetCurrentInterceptor(interceptorPtr, call_id);
         interceptorPtr->before(call_id, phpFuncArgFetcher);
-        PINPOINT_G(prs).stackDepth--;
+        PPG(prs).stackDepth--;
     }
 #if PHP_VERSION_ID < 50500
         if (internal) {
@@ -415,9 +415,9 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
 
          PhpFuncResultFetcher phpFuncResultFetcher(frame);
          PP_U_TRACE("call %s's interceptorPtr::onEnd",frame.fullname);
-         PINPOINT_G(prs).stackDepth++;
+         PPG(prs).stackDepth++;
          interceptorPtr->end(call_id, phpFuncArgFetcher, phpFuncResultFetcher);
-         PINPOINT_G(prs).stackDepth--;
+         PPG(prs).stackDepth--;
 
          (void)aop->resetCurrentInterceptor();
          free_frame(frame);
@@ -576,7 +576,7 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
     do
     {
         /// fatal error, avoiding calling multiple times
-        if(PINPOINT_G(prs).fatal_error_catched == true)
+        if(PPG(prs).fatal_error_catched == true)
         {
             // error had been caught
             break;
@@ -608,7 +608,7 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
             errorInfo.file = error_filename;
             errorInfo.line = error_lineno;
             interceptorPtr->error(errorInfo);
-            PINPOINT_G(prs).fatal_error_catched = true;
+            PPG(prs).fatal_error_catched = true;
         }
         else if (type & AGENT_WARNG)  /// treats this type as an warning in agent
         {
@@ -623,7 +623,7 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
                 std::string errorMsg = Pinpoint::utils::FormatConverter::formatMsg("Warning", error_filename,
                                                                                    error_lineno, msg);
                 tracePtr->setExceptionInfo(Pinpoint::Plugin::WARNINGS_STRING_ID, errorMsg);
-                PINPOINT_G(prs).stackDepth = 0;
+                PPG(prs).stackDepth = 0;
                 PP_U_TRACE("[ERROR] file:[%s] line:[%d] msg:[%s]",error_filename,error_lineno,msg);
             }
             catch (...)
@@ -679,7 +679,7 @@ int32_t turn_on_aop()
     zend_execute_internal = pp_execute_internal;
 
 
-    if(PINPOINT_G(trace_exception))
+    if(PPG(trace_exception))
     {
         old_zend_throw_exception_hook = zend_throw_exception_hook;
         zend_throw_exception_hook = apm_throw_exception_hook;
@@ -709,7 +709,7 @@ int32_t turn_off_aop()
     zend_error_cb = old_error_cb;
 
 
-    if(PINPOINT_G(trace_exception))
+    if(PPG(trace_exception))
     {
         zend_throw_exception_hook = old_zend_throw_exception_hook;
     }
