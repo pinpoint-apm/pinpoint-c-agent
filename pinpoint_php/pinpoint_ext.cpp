@@ -63,7 +63,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_log, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 const static zend_function_entry pinpoint_functions[] = {
-    PHP_FE(pinpoint_start_trace, NULL)
+//    PHP_FE(pinpoint_start_trace, NULL)
     PHP_FE(pinpoint_get_current_trace, NULL)
     PHP_FE(pinpoint_end_trace, NULL)
     PHP_FE(pinpoint_add_plugin, NULL)
@@ -374,7 +374,7 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint)
 PHP_RINIT_FUNCTION(pinpoint)
 {
     IS_MODULE_ENABLE();
-
+    PP_TRACE("request start");
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
 
@@ -400,7 +400,6 @@ PHP_RINIT_FUNCTION(pinpoint)
     }
 
     start_a_new_calltrace();
-
     return SUCCESS;
 }
 
@@ -408,7 +407,7 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint)
 {
     IS_MODULE_ENABLE();
     end_current_calltrace();
-
+    PP_TRACE("request shutdown");
 #ifdef HAVE_GCOV
     __gcov_flush();
 #endif

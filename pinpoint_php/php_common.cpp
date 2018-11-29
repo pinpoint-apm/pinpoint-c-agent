@@ -702,11 +702,8 @@ void end_current_calltrace()
         LOGW("current trace stopped");
         return ;
     }
-
     PINPOINT_G(prs).stackDepth = 0;
     PINPOINT_G(prs).traceStatus = 0;
-
-    PP_TRACE("request shutdown");
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT((agentPtr != NULL));
@@ -717,7 +714,6 @@ void end_current_calltrace()
     {
         PINPOINT_ASSERT ((aop != NULL) );
         Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr = aop->getRequestInterceptorPtr();
-
         // maybe user call exit
         CurrentInterceptorInfo currentInterceptorInfo = aop->getCurrentInterceptorInfo();
         Pinpoint::Plugin::InterceptorPtr interceptorPtr = currentInterceptorInfo.first;
@@ -749,9 +745,12 @@ void end_current_calltrace()
 
         if (requestInterceptorPtr != NULL)
         {
+
+
             requestInterceptorPtr->end(Pinpoint::Plugin::IGNORE_CALL_ID,
                                        Pinpoint::Plugin::notSupportedFuncArgFetcher,
                                        Pinpoint::Plugin::notSupportedFuncResultFetcher);
+
         }
 
         aop->resetCurrentInterceptor();
@@ -772,14 +771,13 @@ void start_a_new_calltrace()
     PhpRequestCounter::increment();
     memset(&PINPOINT_G(prs),0,sizeof(PRS));
 
-    PP_TRACE("request start");
+
     PINPOINT_G(prs).stackDepth++;
-    PINPOINT_G(prs).traceStatus = 1 ;
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT((agentPtr != NULL));
     //  PINPOINT_G(testCovered) == 1 open for testCovered
-    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(testCovered) == 1 )
+    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(testCovered) == E_TSAPN )
     {
        // call longjmp: destructor is not called ...
        RunOriginExecute::stop();
@@ -803,6 +801,8 @@ void start_a_new_calltrace()
            aop->resetCurrentInterceptor(interceptorPtr, call_id);
            interceptorPtr->before(call_id, Pinpoint::Plugin::notSupportedFuncArgFetcher);
        }
+
+       PINPOINT_G(prs).traceStatus = 1 ;
     }
 
 }

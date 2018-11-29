@@ -4,7 +4,7 @@ Test data thread reload
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
 profiler.proxy.http.header.enable=true
-pinpoint_agent.testCovered=4
+pinpoint_agent.testCovered=1
 pinpoint.common.CollectorSpanIp=127.0.0.1
 pinpoint.common.CollectorSpanPort=79
 pinpoint.common.CollectorStatIp=127.0.0.1
@@ -36,6 +36,8 @@ request start
     data proxy thread start
 ttt  call ttt's interceptorPtr::onEnd
   call hello's interceptorPtr::onBefore
+    SimpleInterceptor->addAnnotation key:[-1] value:[{[0]:pinpoint }] 
 hello pinpoint
   call hello's interceptorPtr::onEnd
+    SimpleInterceptor->addAnnotation key:[14] value:[pinpoint] 
 request shutdown

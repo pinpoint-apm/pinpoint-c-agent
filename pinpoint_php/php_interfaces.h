@@ -54,7 +54,7 @@ PHP_METHOD(Interceptor, onException);
 PHP_METHOD(Interceptor, getSelf);
 
 
-PHP_FUNCTION(pinpoint_start_trace);
+//PHP_FUNCTION(pinpoint_start_trace);
 PHP_FUNCTION(pinpoint_get_current_trace);
 PHP_FUNCTION(pinpoint_end_trace);
 PHP_FUNCTION(pinpoint_add_plugin);

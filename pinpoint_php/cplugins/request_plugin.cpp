@@ -179,7 +179,10 @@ void PhpRequestInterceptor::onEnd(uint64_t callId,
         LOGE("endTrace failed.");
     }
 
-    PP_U_TRACE("%s",err == Pinpoint::SAMPLING_IGNORE?("This trace had ignored by skiptracetime"):(""));
+    if(err == Pinpoint::SAMPLING_IGNORE)
+    {
+        PP_U_TRACE("This trace had ignored by skiptracetime");
+    }
 
     state = E_STOP;
 

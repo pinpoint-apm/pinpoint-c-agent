@@ -1055,7 +1055,6 @@ void PhpInterceptor::onEnd(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher &ar
     add_assoc_zval(array, result_key_str, result);
 
     RunOriginExecute watch;
-
     if (objectCache.callMethod(call_name, name_len, NULL, 2, id, array) != SUCCESS)
     {
         LOGE("Interceptor name=[%s] onend failed!!! please check your code!!!", this->getInterceptedFuncName().c_str());
@@ -1670,7 +1669,7 @@ PHP_METHOD(Plugin, addSimpleInterceptor)
     PP_U_TRACE("addSimpleInterceptor name:[%s]",funcName.c_str());
 }
 
-
+#if 0
 //<editor-fold desc="Global">
 PHP_FUNCTION(pinpoint_start_trace)
 {
@@ -1696,6 +1695,7 @@ PHP_FUNCTION(pinpoint_start_trace)
         RETURN_NULL();
     }
 }
+#endif
 
 PHP_FUNCTION(pinpoint_get_current_trace)
 {
@@ -1728,8 +1728,10 @@ PHP_FUNCTION(pinpoint_end_trace)
     {
         LOGE("end trace failed.")
     }
-
-    PP_U_TRACE("%s",err == Pinpoint::SAMPLING_IGNORE?("This trace had ignored by skiptracetime"):(""));
+    else if(err == Pinpoint::SAMPLING_IGNORE)
+    {
+        PP_U_TRACE("This trace had ignored by skiptracetime");
+    }
 }
 
 PHP_FUNCTION(pinpint_aop_reload)

@@ -18,8 +18,8 @@ function hello($who)
 hello("pinpoint");
 ?>
 --EXPECTF--
-addSimpleInterceptor name:[hello]
 request start
+addSimpleInterceptor name:[hello]
   call hello's interceptorPtr::onBefore
     SimpleInterceptor->addAnnotation key:[-1] value:[{[0]:pinpoint }] 
 hello pinpoint

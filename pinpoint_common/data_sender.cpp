@@ -135,7 +135,7 @@ namespace Pinpoint
                 return ;
             }else if(ec){
                 LOGW("send catch [%s]",ec.message().c_str());
-                goto _AGAIN;
+                goto _ERROR;
             }
 
 
@@ -169,9 +169,10 @@ namespace Pinpoint
             }
 
             timer_.expires_from_now(boost::posix_time::milliseconds(0)); // recheck it
+      _AGAIN:
             timer_.async_wait(boost::bind(&UdpDataSender::io_send_udp_packet, this,_1));
             return ;
-      _AGAIN:
+      _ERROR:
             socket_.close();
             if(nstate != E_EXIT)
             {

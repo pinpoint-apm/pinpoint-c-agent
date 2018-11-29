@@ -148,8 +148,6 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
     }
 
     const char* funcname  =  get_active_function_name();
-
-
 /// adjust difference between php
 #if PHP_VERSION_ID >= 70000
     zend_function *func;
@@ -181,132 +179,10 @@ static void frame_build(pt_frame_t *frame, zend_bool internal, unsigned char typ
         }
     }
 
-#if 0
-    zend_function *zf;
-
-    /* init */
-    memset(frame, 0, sizeof(pt_frame_t));
-
-#if PHP_VERSION_ID < 50500
-    if (internal || execute_data) {
-        op_array = execute_data->op_array;
-    }
-#endif
-
-    /* zend function */
-    zf = obtain_zend_function(internal, execute_data, op_array TSRMLS_CC);
-    /// add more logger
-    /// PP_U_TRACE("get_active_function_name: %s ",  get_active_function_name());
-    /* types, level */
-    frame->type = type;
-    frame->functype = internal ? PT_FUNC_INTERNAL : 0x00;
-
-    frame->arg_count = 0;
-
-    /* names */
-    if (zf->common.function_name)
+    if(frame->fullname[0] !=0)
     {
-        /* functype, class name */
-#if PHP_VERSION_ID < 70000
-        if (caller && P7_EX_OBJ(caller)) {
-#else
-        if (execute_data && P7_EX_OBJ(execute_data))
-        {
-#endif
-            frame->functype |= PT_FUNC_MEMBER;
-            /* User care about which method is called exactly, so use
-             * zf->common.scope->name instead of ex->object->name. */
-            if (zf->common.scope) {
-                snprintf(frame->classname ,NAME_LEN,"%s::",P7_STR(zf->common.scope->name));
-            } else {
-
-                php_error(E_WARNING, "Trace catch a entry with ex->object but without zf->common.scope");
-            }
-// note self only valid in a normal member function
-#if  PHP_VERSION_ID < 70000
-            if (caller != NULL)
-            {
-                frame->self = caller->object;
-            }
-#else
-            frame->self = &execute_data->This;
-#endif
-        } else if (zf->common.scope)
-        {
-            frame->functype |= PT_FUNC_STATIC;
-            snprintf( frame->classname,NAME_LEN ,"%s::",P7_STR(zf->common.scope->name));
-        } else
-        {
-            frame->functype |= PT_FUNC_NORMAL;
-        }
-
-        /* function name */
-        if (strcmp(P7_STR(zf->common.function_name), "{closure}") == 0) {
-            // drop the end line, filename+start line could make it unique
-            //  snprintf(frame->function,NAME_LEN, "closure:%s:%d-%d", P7_STR(zf->op_array.filename), zf->op_array.line_start, zf->op_array.line_end);
-            const char* offset = strrchr(P7_STR(zf->op_array.filename),'/');
-            snprintf(frame->function,NAME_LEN, "closure{%s:%d}",(offset?(offset+1):(NULL)), zf->op_array.line_start);
-        } else if (strcmp(P7_STR(zf->common.function_name), "__lambda_func") == 0) {
-            snprintf( frame->function ,NAME_LEN, "{lambda:%s}", P7_STR(zf->op_array.filename));
-#if PHP_VERSION_ID >= 50414
-        } else if (zf->common.scope && zf->common.scope->trait_aliases) {
-            strncpy( frame->function ,P7_STR(zend_resolve_method_name(P7_EX_OBJ(execute_data) ? P7_EX_OBJCE(execute_data) : zf->common.scope, zf)),NAME_LEN);
-#endif
-        } else {
-            strncpy( frame->function , P7_STR(zf->common.function_name),NAME_LEN);
-        }
-
-        // add full name
-        snprintf(frame->fullname,sizeof(frame->fullname),"%s%s",frame->classname,frame->function);
+        LOGD("%s",frame->fullname);
     }
-
-
-#if PHP_VERSION_ID >= 70000
-
-    if (caller && caller->opline && caller->prev_execute_data &&
-            caller->func && caller->func->op_array.opcodes == NULL) {
-        caller = caller->prev_execute_data;
-    }
-
-    /* skip internal handler */
-    if (caller && caller->opline && caller->prev_execute_data &&
-            caller->opline->opcode != ZEND_DO_FCALL &&
-            caller->opline->opcode != ZEND_DO_ICALL &&
-            caller->opline->opcode != ZEND_DO_UCALL &&
-            caller->opline->opcode != ZEND_DO_FCALL_BY_NAME &&
-            caller->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
-        caller = caller->prev_execute_data;
-    }
-#endif
-
-
-    /* filename */
-#if PHP_VERSION_ID < 70000
-    if (caller && caller->op_array) {
-        op_array = caller->op_array;
-    } else if (caller && caller->prev_execute_data && caller->prev_execute_data->op_array) {
-        op_array = caller->prev_execute_data->op_array; /* try using prev */
-    }
-#else
-    if (caller->func && ZEND_USER_CODE(caller->func->common.type)) {
-        op_array = &(caller->func->op_array);
-    } else if (caller->prev_execute_data && caller->prev_execute_data->func &&
-            ZEND_USER_CODE(caller->prev_execute_data->func->common.type)) {
-        op_array = &(caller->prev_execute_data->func->op_array); /* try using prev */
-    }
-#endif
-    /* Same as upper
-     * } else if (caller != EG(current_execute_data) && EG(current_execute_data)->op_array) {
-     *     op_array = EG(current_execute_data)->op_array [> try using current <]
-     * }
-     */
-    if (op_array) {
-       strncpy( frame->filename , P7_STR(op_array->filename),NAME_LEN);
-    } else {
-        frame->filename [0] = 0;
-    }
-
-#endif
 }
 
 #if PHP_VERSION_ID < 70000
@@ -429,7 +305,6 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
     if (execute_data->prev_execute_data) {
         caller = execute_data->prev_execute_data;
     }
-
 #elif PHP_VERSION_ID >= 50500
     /* In PHP 5.5 and later, execute_data is the data going to be executed, not
      * the entry point, so we switch to previous data. The internal function is
@@ -489,7 +364,6 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
         interceptorPtr->before(call_id, phpFuncArgFetcher);
         PINPOINT_G(prs).stackDepth--;
     }
-
 #if PHP_VERSION_ID < 50500
         if (internal) {
             if (ori_execute_internal) {
@@ -522,7 +396,6 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
         }
 #endif
 
-
      if (interceptorPtr != NULL)
      {
 #if PHP_VERSION_ID < 50500
@@ -551,17 +424,18 @@ ZEND_API void pp_execute_plugin_core(int internal, zend_execute_data *execute_da
 
 #if PHP_VERSION_ID < 70000
         /* Free return value */
-    if (!internal && retval != NULL) {
-        zval_ptr_dtor(&retval);
-        EG(return_value_ptr_ptr) = NULL;
-    }
+        if (!internal && retval != NULL) {
+            zval_ptr_dtor(&retval);
+            EG(return_value_ptr_ptr) = NULL;
+        }
 #else
 
-    if (retAlive) {
-        zval_dtor(&retval);
-    }
+        if (retAlive) {
+            zval_dtor(&retval);
+        }
 #endif
      }
+
 
 }
 
