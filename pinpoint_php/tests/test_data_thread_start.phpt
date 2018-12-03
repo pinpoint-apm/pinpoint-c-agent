@@ -23,8 +23,8 @@ function hello($who)
 hello("pinpoint");
 ?>
 --EXPECTF--
-data proxy thread start
 request start
+data proxy thread start
   addSimpleInterceptor name:[hello]
   call hello's interceptorPtr::onBefore
     SimpleInterceptor->addAnnotation key:[-1] value:[{[0]:pinpoint }] 

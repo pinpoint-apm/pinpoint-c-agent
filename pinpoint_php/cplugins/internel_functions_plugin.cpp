@@ -62,11 +62,11 @@ int32_t PhpInternalFunctionsPlugin::init()
     }
 #endif
 
-    if(PINPOINT_G(RedefineAgentMain)[0] != 0)
-    {
-        interceptorPtr.reset( new AgentMainRedefineInterceptor(shared_from_this(),PINPOINT_G(RedefineAgentMain)));
-        this->interceptors.push_back( interceptorPtr);
-    }
+//    if(PINPOINT_G(RedefineAgentMain)[0] != 0)
+//    {
+//        interceptorPtr.reset( new AgentMainRedefineInterceptor(shared_from_this(),PINPOINT_G(RedefineAgentMain)));
+//        this->interceptors.push_back( interceptorPtr);
+//    }
 
 
     return SUCCESS;

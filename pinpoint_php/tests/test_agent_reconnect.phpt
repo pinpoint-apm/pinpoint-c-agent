@@ -25,8 +25,8 @@ hello("pinpoint");
 sleep(3);
 ?>
 --EXPECTF--
-data proxy thread start
 request start
+data proxy thread start
   addSimpleInterceptor name:[hello]
   call hello's interceptorPtr::onBefore
     SimpleInterceptor->addAnnotation key:[-1] value:[{[0]:pinpoint }] 
@@ -37,5 +37,4 @@ hello pinpoint
 %s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
 %s %s [pinpoint] [%s] pinpoint_client.cpp:%d [WARN] PinpointClient connect timeout expiredTime:[1]
 request shutdown
-
 %s %s [pinpoint] [%s] executor.cpp:%d [WARN] background task finished

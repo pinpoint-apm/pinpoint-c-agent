@@ -81,16 +81,18 @@ ZEND_BEGIN_MODULE_GLOBALS(pinpoint)
     long SkipTraceTime;
     long reconInterval;
     char* ApiTableFile;
-    char* RedefineAgentMain;
+    zend_bool DefineCallTree;
     PRS prs;// must reset in every request,valid in request
+    int (*call_trace_start)(int , int );
+    int (*call_trace_end)(int , int );
 ZEND_END_MODULE_GLOBALS(pinpoint)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint);
 
 #ifdef ZTS
-#define PINPOINT_G(v) TSRMG(pinpoint_globals_id, zend_pinpoint_globals *, v)
+#define PPG(v) TSRMG(pinpoint_globals_id, zend_pinpoint_globals *, v)
 #else
-#define PINPOINT_G(v) (pinpoint_globals.v)
+#define PPG(v) (pinpoint_globals.v)
 #endif
 
 #if defined(__cplusplus)||defined(c_plusplus)

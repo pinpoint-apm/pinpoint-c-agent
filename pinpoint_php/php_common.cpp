@@ -346,8 +346,8 @@ string get_host_process_info(eName name)
 
 static void init_log_from_ConfTree(void)
 {
-    _moduleInfo["LogFileRootPath"] =  PINPOINT_G(logFileRootPath);
-    _moduleInfo["PPLogLevel"] = PINPOINT_G(PPLogLevel);
+    _moduleInfo["LogFileRootPath"] =  PPG(logFileRootPath);
+    _moduleInfo["PPLogLevel"] = PPG(PPLogLevel);
 
     Pinpoint::log::set_logging_file(_moduleInfo["LogFileRootPath"].c_str());
     Pinpoint::log::set_log_level(_moduleInfo["PPLogLevel"].c_str());
@@ -697,27 +697,24 @@ void start_pinpoint_agent()
 
 void end_current_calltrace()
 {
-    if( PINPOINT_G(prs).traceStatus == 0)
+    LOGD("try to end call trace");
+    if( PPG(prs).traceStatus == 0)
     {
         LOGW("current trace stopped");
         return ;
     }
-
-    PINPOINT_G(prs).stackDepth = 0;
-    PINPOINT_G(prs).traceStatus = 0;
-
-    PP_TRACE("request shutdown");
+    PPG(prs).stackDepth = 0;
+    PPG(prs).traceStatus = 0;
 
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT((agentPtr != NULL));
 
     PhpAop *aop = PhpAop::getInstance();
 
-    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(testCovered) == 1)
+    if (agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PPG(testCovered) == 1)
     {
         PINPOINT_ASSERT ((aop != NULL) );
         Pinpoint::Plugin::InterceptorPtr requestInterceptorPtr = aop->getRequestInterceptorPtr();
-
         // maybe user call exit
         CurrentInterceptorInfo currentInterceptorInfo = aop->getCurrentInterceptorInfo();
         Pinpoint::Plugin::InterceptorPtr interceptorPtr = currentInterceptorInfo.first;
@@ -749,9 +746,12 @@ void end_current_calltrace()
 
         if (requestInterceptorPtr != NULL)
         {
+
+
             requestInterceptorPtr->end(Pinpoint::Plugin::IGNORE_CALL_ID,
                                        Pinpoint::Plugin::notSupportedFuncArgFetcher,
                                        Pinpoint::Plugin::notSupportedFuncResultFetcher);
+
         }
 
         aop->resetCurrentInterceptor();
@@ -763,23 +763,26 @@ void end_current_calltrace()
 
 void start_a_new_calltrace()
 {
-    if(PINPOINT_G(prs).traceStatus == 1 )
+    if(PPG(prs).traceStatus == 1 )
     {
         LOGW("calltrace is not stopped");
         return;
     }
 
-    PhpRequestCounter::increment();
-    memset(&PINPOINT_G(prs),0,sizeof(PRS));
-
-    PP_TRACE("request start");
-    PINPOINT_G(prs).stackDepth++;
-    PINPOINT_G(prs).traceStatus = 1 ;
-
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT((agentPtr != NULL));
-    //  PINPOINT_G(testCovered) == 1 open for testCovered
-    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PINPOINT_G(testCovered) == 1 )
+
+    if( ((PPG(testCovered) & E_BGTASK) || PPG(testCovered) == 0 ) &&
+            (agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_STARTED) )
+    {
+        start_pinpoint_agent();
+    }
+
+    PhpRequestCounter::increment();
+    memset(&PPG(prs),0,sizeof(PRS));
+    PPG(prs).stackDepth++;
+
+    if ( agentPtr->getAgentStatus() == Pinpoint::Agent::AGENT_STARTED ||  PPG(testCovered) == E_TSAPN )
     {
        // call longjmp: destructor is not called ...
        RunOriginExecute::stop();
@@ -796,13 +799,13 @@ void start_a_new_calltrace()
        PINPOINT_ASSERT((aop != NULL));
 
        Pinpoint::Plugin::InterceptorPtr interceptorPtr = aop->getRequestInterceptorPtr();
+       assert(interceptorPtr != NULL);
+       uint64_t call_id = interceptorPtr->assignCallId();
+       aop->resetCurrentInterceptor(interceptorPtr, call_id);
+       interceptorPtr->before(call_id, Pinpoint::Plugin::notSupportedFuncArgFetcher);
 
-       if (interceptorPtr != NULL)
-       {
-           uint64_t call_id = interceptorPtr->assignCallId();
-           aop->resetCurrentInterceptor(interceptorPtr, call_id);
-           interceptorPtr->before(call_id, Pinpoint::Plugin::notSupportedFuncArgFetcher);
-       }
+       PPG(prs).traceStatus = 1 ;
+       LOGD("start new calltrace");
     }
 
 }

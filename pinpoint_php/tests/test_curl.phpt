@@ -186,7 +186,7 @@ class curlgetinfoInterceptor extends \Pinpoint\Interceptor
             {
                 if ($retArgs)
                 {
-                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN,sprintf("args:%s, return:%s ",print_r($args,true),print_r($retArgs,true)));
+                    $event->addAnnotation(PINPOINT_ANNOTATION_RETURN,sprintf("args:%s, return: url(%s) ",print_r($args,true),$retArgs["url"]));
                 }
                 $event->markAfterTime();
                 $trace->traceBlockEnd($event);
@@ -282,7 +282,8 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array('setting:xiaozan'));
 
 $output = curl_exec($ch);
 $info = curl_getinfo($ch);
-print_r($output);
+// disable this line, as the output is libcurl ddependency
+// print_r($output);
 curl_close($ch);
 
 ?>
@@ -295,7 +296,7 @@ request start
   addInterceptor name:[curl_getinfo] class:[test_curl]
   addInterceptor name:[curl_close] class:[test_curl]
   call curl_init's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-2]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -307,7 +308,7 @@ request start
 )
 , return:Resource id #4 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-3]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -325,7 +326,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-3]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -343,7 +344,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-3]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -361,7 +362,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-3]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -387,7 +388,7 @@ request start
 )
 , return:1 ]
   call curl_exec's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-4]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -396,7 +397,7 @@ request start
 ]
   call curl_exec's interceptorPtr::onEnd
   call curl_getinfo's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-5]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -408,41 +409,9 @@ request start
 (
     [0] => Resource id #4
 )
-, return:Array
-(
-    [url] => http://abc.com/
-    [content_type] => 
-    [http_code] => 0
-    [header_size] => 0
-    [request_size] => %d
-    [filetime] => %s
-    [ssl_verify_result] => 0
-    [redirect_count] => 0
-    [total_time] => %f
-    [namelookup_time] => %f
-    [connect_time] => %f
-    [pretransfer_time] => %f
-    [size_upload] => 0
-    [size_download] => 0
-    [speed_download] => 0
-    [speed_upload] => 0
-    [download_content_length] => %i
-    [upload_content_length] => %i
-    [starttransfer_time] => 0
-    [redirect_time] => 0
-    [redirect_url] => 
-    [primary_ip] => %s
-    [certinfo] => Array
-        (
-        )
-
-    [primary_port] => %d
-    [local_ip] => %s
-    [local_port] => %d
-)
- ]
+, return: url(http://abc.com/) ]
   call curl_close's interceptorPtr::onBefore
-    setApiId:[%i]
+    setApiId:[-6]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
