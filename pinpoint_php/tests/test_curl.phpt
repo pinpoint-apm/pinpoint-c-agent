@@ -1,5 +1,5 @@
 --TEST--
-Test pinpoint
+Test Function In curl
 --INI--
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true

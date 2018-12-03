@@ -1,5 +1,5 @@
 --TEST--
-Test pinpoint
+Test Exception onEnd
 --INI--
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
@@ -125,6 +125,7 @@ Stack trace:
 Next%sException%sI am Exception in onEnd!%s:%d
 Stack trace:
 #0 %s(81): TestGetSelfInterceptor->onEnd(%d, Array)
-#1 {main}
+%A
+#%d {main}
   thrown in %s on line %d
 request shutdown

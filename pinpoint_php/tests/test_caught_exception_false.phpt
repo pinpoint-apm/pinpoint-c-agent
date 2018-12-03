@@ -1,5 +1,5 @@
 --TEST--
-Test pinpoint
+Test Caught Excetion
 --INI--
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=false
