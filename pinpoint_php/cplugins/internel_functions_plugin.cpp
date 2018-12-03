@@ -149,6 +149,7 @@ void PhpInfoInterceptor::onEnd(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher
     tracePtr->traceBlockEnd(spanEventRecorderPtr);
 }
 
+#if 0
 
 AgentMainRedefineInterceptor::AgentMainRedefineInterceptor(const PhpInternalFunctionsPluginPtr& _pluginPtr,
         std::string func):
@@ -158,17 +159,19 @@ AgentMainRedefineInterceptor::AgentMainRedefineInterceptor(const PhpInternalFunc
     LOGD("agent main had redefined by [%s]",func.c_str());
 }
 
- void AgentMainRedefineInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher& argFetcher)
- {
-     using  Pinpoint::Agent::Agent;
-     using  Pinpoint::Agent::AgentPtr;
-     AgentPtr agentPtr = Agent::getAgentPtr();
+void AgentMainRedefineInterceptor::onBefore(uint64_t callId, Pinpoint::Plugin::FuncArgFetcher& argFetcher)
+{
+    using  Pinpoint::Agent::Agent;
+    using  Pinpoint::Agent::AgentPtr;
+    AgentPtr agentPtr = Agent::getAgentPtr();
 
-     if (agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_INITED){
-         PP_U_TRACE("The agentstatus said agent had initialized");
-         LOGD("The agentstatus said agent had initialized");
-         return ;
-     }
+    if (agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_INITED){
+        PP_U_TRACE("The agentstatus said agent had initialized");
+        LOGD("The agentstatus said agent had initialized");
+        return ;
+    }
 
-     start_pinpoint_agent();
- }
+    start_pinpoint_agent();
+}
+#endif
+

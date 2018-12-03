@@ -50,7 +50,7 @@ private:
     PhpInternalFunctionsPluginPtr pluginPtr;
 };
 
-
+#if 0
 class AgentMainRedefineInterceptor : public Pinpoint::Plugin::Interceptor
 {
 public:
@@ -66,7 +66,7 @@ protected:
 private:
     PhpInternalFunctionsPluginPtr pluginPtr;
 };
-
+#endif
 
 
 #endif

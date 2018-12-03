@@ -481,7 +481,7 @@ namespace Pinpoint
                 {
                     if (includeSet.find(pluginPtr->getName()) == includeSet.end())
                     {
-                        LOGI("plugin=%s not in includes, ignore!", pluginPtr->getName().c_str());
+                        LOGW("plugin=%s not in includes, ignore!", pluginPtr->getName().c_str());
                         continue;
                     }
                 }
@@ -490,7 +490,7 @@ namespace Pinpoint
                 {
                     if (excludeSet.find(pluginPtr->getName()) != excludeSet.end())
                     {
-                        LOGI("plugin=%s in excludes, ignore!", pluginPtr->getName().c_str());
+                        LOGW("plugin=%s in excludes, ignore!", pluginPtr->getName().c_str());
                         continue;
                     }
                 }

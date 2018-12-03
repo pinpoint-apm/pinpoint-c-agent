@@ -15,69 +15,7 @@
  * limitations under the License.
  */
 
-
-class OnClientCloseInterceptor extends \Pinpoint\Interceptor
-{
-  var $apiId = -1;
-  public function __construct()
-  {
-    $this->apiId = pinpoint_add_api("call_user_func", 10); // functionName, lineno
-  }
-
-  public function onBefore($callId, $args)
-  {
-    // $connection = $data["args"][0];
-
-    // if(!isset($connection->traced))
-    // {
-    pinpoint_start_calltrace();
-      // $connection->traced = 1;
-    // }
-
-    echo "-------------call---------------";
-    $trace = pinpoint_get_current_trace();
-    if ($trace)
-    {
-      $event = $trace->traceBlockBegin($callId);
-      $event->markBeforeTime();
-      $event->setApiId($this->apiId);
-      $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
-      // $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, "");
-    }
-  }
-
-  public function onEnd($callId, $data)
-  {
-    $trace = pinpoint_get_current_trace();
-    // $connection = $data["args"][0];
-    
-    if ($trace)
-    {
-      $retArgs = $data["result"];
-      $event = $trace->getEvent($callId);
-      if ($event)
-      {
-        // if ($retArgs)
-        // {
-          // $event->addAnnotation(PINPOINT_ANNOTATION_RETURN, htmlspecialchars(print_r($retArgs,true),ENT_QUOTES));
-        // }
-        $event->markAfterTime();
-        $trace->traceBlockEnd($event);
-      }
-    }
-
-    pinpoint_end_calltrace();
-  }
-
-  public function onException($callId, $exceptionStr)
-  {
-
-  }
-}
-
-
-
-class onClientMessageInterceptor extends \Pinpoint\Interceptor
+class onCallTreeInterceptor extends \Pinpoint\Interceptor
 {
   var $apiId = -1;
   public function __construct()
@@ -137,17 +75,12 @@ class WorkerManPlugins extends \Pinpoint\Plugin
     {
         parent::__construct();
 
-        $i =  new OnClientCloseInterceptor();
+        $i =  new onCallTreeInterceptor();
         $this->addInterceptor($i,"closure{http_server.php:25}",basename(__FILE__));
-
-        // $i =  new onClientMessageInterceptor();
-        // $this->addInterceptor($i,"GatewayWorker\Gateway::onClientMessage",basename(__FILE__));
 
 
         $this->addSimpleInterceptor("Workerman\Connection\TcpConnection::send",-1);
         $this->addSimpleInterceptor("Workerman\Protocols\Http::encode",-1);
-        // $this->addSimpleInterceptor("getmypid",-1);
-        // $this->addSimpleInterceptor("GatewayWorker\Gateway::ping",-1);
     }
 };
 
