@@ -1,5 +1,5 @@
 --TEST--
-Test pinpoint
+Test PPLogLevel-TRACE
 --INI--
 pinpoint_agent.pinpoint_enable=true
 pinpoint_agent.trace_exception=true
@@ -19,10 +19,12 @@ class Func1Interceptor extends \Pinpoint\Interceptor
     public function onBefore($callId, $args)
     {
         $trace = pinpoint_get_current_trace();
+        echo "-----------------------------------------------"."\n";
         pinpoint_log(PINPOINT_DEBUG, "LogTest_debug_onBefore");
         pinpoint_log(PINPOINT_INFO, "LogTest_info_onBefore");
         pinpoint_log(PINPOINT_WARN, "LogTest_warning_onBefore");
         pinpoint_log(PINPOINT_ERROR, "LogTest_error_onBefore");
+        echo "-----------------------------------------------"."\n";
         if ($trace)
         {
 
@@ -45,10 +47,12 @@ class Func1Interceptor extends \Pinpoint\Interceptor
     public function onEnd($callId, $data)
     {
         $trace = pinpoint_get_current_trace();
+        echo "-----------------------------------------------"."\n";
         pinpoint_log(PINPOINT_DEBUG, "LogTest_debug_onEnd");
         pinpoint_log(PINPOINT_INFO, "LogTest_info_onEnd");
         pinpoint_log(PINPOINT_WARN, "LogTest_warning_onEnd");
         pinpoint_log(PINPOINT_ERROR, "LogTest_error_onEnd");
+        echo "-----------------------------------------------"."\n";
         if ($trace)
         {
             $args = $data["args"];
@@ -66,10 +70,12 @@ class Func1Interceptor extends \Pinpoint\Interceptor
     public function onException($callId, $exceptionStr)
     {
         $trace = pinpoint_get_current_trace();
+        echo "-----------------------------------------------"."\n";
         pinpoint_log(PINPOINT_DEBUG, "LogTest_debug_onException");
         pinpoint_log(PINPOINT_INFO, "LogTest_info_onException");
         pinpoint_log(PINPOINT_WARN, "LogTest_warn_onException");
         pinpoint_log(PINPOINT_ERROR, "LogTest_error_onException");
+        echo "-----------------------------------------------"."\n";
         if ($trace)
         {
             $event = $trace->getEvent($callId);
@@ -88,11 +94,12 @@ class TestPlugin extends \Pinpoint\Plugin
     public function __construct()
     {
         parent::__construct();
-
+        echo "-----------------------------------------------"."\n";
         pinpoint_log(PINPOINT_DEBUG, "LogTest_debug_PluginClass");
         pinpoint_log(PINPOINT_INFO, "LogTest_info_PluginClass");
         pinpoint_log(PINPOINT_WARN, "LogTest_warn_PluginClass");
         pinpoint_log(PINPOINT_ERROR, "LogTest_error_PluginClass");
+        echo "-----------------------------------------------"."\n";
 
         $i = new Func1Interceptor();
         $this->addInterceptor($i, "func1", basename(__FILE__, '.php'));
@@ -113,44 +120,27 @@ func1("Evy");
 ?>
 --EXPECTF--
 %A
-request start
-%A
+-----------------------------------------------
 %S[INFO] LogTest_info_PluginClass
 %S[WARN] LogTest_warn_PluginClass
 %S[ERROR] LogTest_error_PluginClass
-  addInterceptor name:[func1] class:[test_PPLogLevel_TRACE]
+-----------------------------------------------
 %A
-  call func1's interceptorPtr::onBefore
+-----------------------------------------------
 %S[INFO] LogTest_info_onBefore
 %S[WARN] LogTest_warning_onBefore
 %S[ERROR] LogTest_error_onBefore
-    setApiId:[%i]
-    setServiceType:[1501]
-    addAnnotation [-1]:[Array
-(
-    [0] =&gt; Evy
-)
-]
-  call [Func1Interceptor::onexception]
+-----------------------------------------------
+%A
+-----------------------------------------------
 %S[INFO] LogTest_info_onException
 %S[WARN] LogTest_warn_onException
 %S[ERROR] LogTest_error_onException
-  setExceptionInfo:[Fatal error: I am Exception! in %s]
-  [EXCEPTION] file:[%s] line:[%d] msg:[I am Exception!]
-  call func1's interceptorPtr::onEnd
+-----------------------------------------------
+%A
+-----------------------------------------------
 %S[INFO] LogTest_info_onEnd
 %S[WARN] LogTest_warning_onEnd
 %S[ERROR] LogTest_error_onEnd
-    addAnnotation [14]:[Array
-(
-    [0] =&gt; Evy
-)
-]
-
-Fatal error: Uncaught%sException%sI am Exception!%s
-Stack trace:
-#0 %s(%d): func1('Evy')
-#1 {main}
-  thrown in %s on line %d
-request shutdown
+-----------------------------------------------
 %A
