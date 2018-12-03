@@ -126,6 +126,5 @@ Next%sException%sI am Exception in onEnd!%s:%d
 Stack trace:
 #0 %s(81): TestGetSelfInterceptor->onEnd(%d, Array)
 %A
-#%d {main}
   thrown in %s on line %d
 request shutdown
