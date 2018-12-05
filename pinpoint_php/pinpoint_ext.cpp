@@ -269,7 +269,12 @@ static int user_call_trace_start(int , int )
 
 static int user_call_trace_end(int , int )
 {
-//    end_current_calltrace();
+    /// reqshutdown should be called even the calltree not started
+    PhpAop *aop = PhpAop::getInstance();
+    if(aop)
+    {
+        aop->reqShutdownClean();
+    }
     return SUCCESS;
 }
 

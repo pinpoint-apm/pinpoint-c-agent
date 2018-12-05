@@ -277,6 +277,9 @@ $address = "http://abc.com";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt($ch, CURLOPT_NOBODY, 0);
+/// add timeout 
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0); 
+curl_setopt($ch, CURLOPT_TIMEOUT, 400); //timeout in seconds
 curl_setopt($ch, CURLOPT_URL, $address);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('setting:xiaozan'));
 
@@ -341,6 +344,42 @@ request start
     [0] => Resource id #4
     [1] => 44
     [2] => 0
+)
+, return:1 ]
+  call curl_setopt's interceptorPtr::onBefore
+    setApiId:[-3]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; Resource id #4
+    [1] =&gt; 78
+    [2] =&gt; 0
+)
+]
+  call curl_setopt's interceptorPtr::onEnd
+    addAnnotation [14]:[args:Array
+(
+    [0] => Resource id #4
+    [1] => 78
+    [2] => 0
+)
+, return:1 ]
+  call curl_setopt's interceptorPtr::onBefore
+    setApiId:[-3]
+    setServiceType:[1501]
+    addAnnotation [-1]:[Array
+(
+    [0] =&gt; Resource id #4
+    [1] =&gt; 13
+    [2] =&gt; 400
+)
+]
+  call curl_setopt's interceptorPtr::onEnd
+    addAnnotation [14]:[args:Array
+(
+    [0] => Resource id #4
+    [1] => 13
+    [2] => 400
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
