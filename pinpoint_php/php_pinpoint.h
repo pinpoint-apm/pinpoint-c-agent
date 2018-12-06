@@ -83,8 +83,8 @@ ZEND_BEGIN_MODULE_GLOBALS(pinpoint)
     char* ApiTableFile;
     zend_bool DefineCallTree;
     PRS prs;// must reset in every request,valid in request
-    int (*call_trace_start)(int , int );
-    int (*call_trace_end)(int , int );
+    int (*call_tree_start)(int , int );
+    int (*call_tree_end)(int , int );
 ZEND_END_MODULE_GLOBALS(pinpoint)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint);

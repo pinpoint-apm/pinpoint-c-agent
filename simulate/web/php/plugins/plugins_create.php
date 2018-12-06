@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-// include_once("/home/liumingyi/git/pinpoint-c-agent/simulate/web/php/plugins/workerman_plugin.php");
-
 $path=dirname(__FILE__);
 foreach (glob($path ."/*plugin.php") as  $value) {
     include_once($value);
@@ -25,7 +23,7 @@ foreach (glob($path ."/*plugin.php") as  $value) {
 
 $p = new QuickStartPlugin();
 pinpoint_add_plugin($p, "quickstart_plugin.php");
-//
+
 $p = new ExcludePlugin();
 pinpoint_add_plugin($p, "exclude_plugin.php");
 

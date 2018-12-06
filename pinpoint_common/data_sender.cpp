@@ -49,7 +49,7 @@ namespace Pinpoint
         void UdpDataSender::stop()
         {
             nstate = E_EXIT;
-            /// timer cancel could activity the timer
+            /// timer cancel could activate the timer
             timer_.cancel();
             LOGD("UdpDataSender exit");
         }

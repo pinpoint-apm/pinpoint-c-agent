@@ -440,7 +440,7 @@ namespace Pinpoint
         using Pinpoint::utils::get_current_unixsec_stamp;
         using Pinpoint::utils::get_current_process_id;
 
-        class MainProcessChecker //: public Pinpoint::Agent::ExecutorTask
+        class MainProcessChecker
         {
         private:
             typedef struct _SelfFlag
@@ -456,15 +456,6 @@ namespace Pinpoint
                     expireTime = 0;
                 }
             } ShmMainProcFlag;
-
-#if 0
-            int32_t bgRun()
-            {
-                OS_process_id_t mainPid;
-                isMainProcess(mainPid);
-                return SUCCESS;
-            }
-#endif
 
         public:
             static MainProcessChecker* createChecker();

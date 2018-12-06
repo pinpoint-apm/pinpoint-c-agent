@@ -221,7 +221,7 @@ void print_ini()
 
 }
 
-static int common_call_trace_start(int , int )
+static int common_call_tree_start(int , int )
 {
 
     AgentPtr agentPtr = Agent::getAgentPtr();
@@ -243,13 +243,13 @@ static int common_call_trace_start(int , int )
     return SUCCESS;
 }
 
-static int common_call_trace_end(int , int )
+static int common_call_tree_end(int , int )
 {
     end_current_calltrace();
     return SUCCESS;
 }
 
-static int user_call_trace_start(int , int )
+static int user_call_tree_start(int , int )
 {
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT_RETURN((agentPtr != NULL), SUCCESS);
@@ -267,22 +267,16 @@ static int user_call_trace_start(int , int )
     return SUCCESS;
 }
 
-static int user_call_trace_end(int , int )
+static int user_call_tree_end(int , int )
 {
-    /// reqshutdown should be called even the calltree not started
-    PhpAop *aop = PhpAop::getInstance();
-    if(aop)
-    {
-        aop->reqShutdownClean();
-    }
     return SUCCESS;
 }
 
 static void php_pinpoint_init_globals(zend_pinpoint_globals *_pinpoint_globals)
 {
     memset(_pinpoint_globals,0,sizeof(*_pinpoint_globals));
-    _pinpoint_globals->call_trace_start =  common_call_trace_start;
-    _pinpoint_globals->call_trace_end   =  common_call_trace_end;
+    _pinpoint_globals->call_tree_start =  common_call_tree_start;
+    _pinpoint_globals->call_tree_end   =  common_call_tree_end;
 }
 
 PHP_MINIT_FUNCTION(pinpoint)
@@ -310,8 +304,8 @@ PHP_MINIT_FUNCTION(pinpoint)
     /// check the calltrace
     if(PPG(DefineCallTree))
     {
-        PPG(call_trace_start) =  user_call_trace_start;
-        PPG(call_trace_end)  =  user_call_trace_end;
+        PPG(call_tree_start) =  user_call_tree_start;
+        PPG(call_tree_end)  =  user_call_tree_end;
     }
 
     int32_t err = SUCCESS;
@@ -443,8 +437,8 @@ PHP_RINIT_FUNCTION(pinpoint)
     IS_MODULE_ENABLE();
 
     PP_TRACE("request start");
-    if(PPG(call_trace_start))
-        PPG(call_trace_start)( type,  module_number);
+    if(PPG(call_tree_start))
+        PPG(call_tree_start)( type,  module_number);
 
     return SUCCESS;
 }
@@ -453,8 +447,16 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint)
 {
     IS_MODULE_ENABLE();
 
-    if(PPG(call_trace_end))
-        PPG(call_trace_end)( type,  module_number);
+    if(PPG(call_tree_end))
+        PPG(call_tree_end)( type,  module_number);
+
+    /// reqshutdown should be called even the calltree not started
+    PhpAop *aop = PhpAop::getInstance();
+    if(aop)
+    {
+        aop->reqShutdownClean();
+    }
+
     PP_TRACE("request shutdown");
 
 #ifdef HAVE_GCOV

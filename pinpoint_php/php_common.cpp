@@ -689,7 +689,10 @@ void start_pinpoint_agent()
     AgentPtr agentPtr = Agent::getAgentPtr();
     PINPOINT_ASSERT (agentPtr != NULL);
 
-    agentPtr->start();
+    if(agentPtr->start() == FAILED)
+    {
+        return ;
+    }
 
     LOGD("data proxy thread start");
     PP_U_TRACE("data proxy thread start");
@@ -755,9 +758,9 @@ void end_current_calltrace()
         }
 
         aop->resetCurrentInterceptor();
-        aop->reqShutdownClean();
+        /// 6/12/18 move to PHP_RSHUTDOWN_FUNCTION
+//        aop->reqShutdownClean();
     }
-
 
 }
 
