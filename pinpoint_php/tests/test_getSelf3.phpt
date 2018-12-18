@@ -101,7 +101,7 @@ testFunc("hello");
 request start
   addInterceptor name:[testFunc] class:[test_getSelf3]
   call testFunc's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
 getSelf is null  call [TestGetSelfInterceptor::onexception]
 %s %s [pinpoint] [%s] php_interfaces.cpp:%d [ERROR] call getself not in before/end method.

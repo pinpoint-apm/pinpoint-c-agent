@@ -30,6 +30,8 @@ class onCallTreeInterceptor extends \Pinpoint\Interceptor
       $event->setServiceType(PINPOINT_PHP_RPC_TYPE);
       $event->addAnnotation(PINPOINT_ANNOTATION_ARGS, htmlspecialchars(print_r($args,true),ENT_QUOTES));
     }
+    pinpoint_start_calltree();
+    pinpoint_start_calltree();
   }
 
   public function onEnd($callId, $data)
@@ -48,6 +50,8 @@ class onCallTreeInterceptor extends \Pinpoint\Interceptor
       }
     }
 
+    pinpoint_end_calltree();
+    pinpoint_end_calltree();
     pinpoint_end_calltree();
   }
 
@@ -102,7 +106,7 @@ call hello's interceptorPtr::onBefore
 hello Should not show
 call hello's interceptorPtr::onEnd
 call heComes's interceptorPtr::onBefore
-  setApiId:[-2]
+  setApiId:[%i]
   setServiceType:[1501]
   addAnnotation [-1]:[Array
 (

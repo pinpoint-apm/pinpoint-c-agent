@@ -89,7 +89,7 @@ hello_phpt();
 request start
   addInterceptor name:[hello_phpt] class:[test_error]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (

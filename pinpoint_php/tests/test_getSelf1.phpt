@@ -97,7 +97,7 @@ $a->testFunc("hello");
 request start
   addInterceptor name:[MyClass::testFunc] class:[test_getSelf1]
   call MyClass::testFunc's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[]
   call [TestGetSelfInterceptor::onexception]

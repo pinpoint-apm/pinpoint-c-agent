@@ -171,7 +171,7 @@ request start
   addInterceptor name:[testNameSpace\test_func2] class:[test_namespace]
   addInterceptor name:[testNameSpace\TestClass::getVarAdd] class:[test_namespace]
   call testNameSpace\test_func2's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -182,7 +182,7 @@ request start
   call testNameSpace\test_func2's interceptorPtr::onEnd
     addAnnotation [14]:[this is test_func2 in namespace testNameSpace: arg1=the one, arg2=22]
 this is test_func2 in namespace testNameSpace: arg1=the one, arg2=22  call testNameSpace\TestClass::getVarAdd's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (

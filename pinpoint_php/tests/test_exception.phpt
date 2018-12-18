@@ -52,7 +52,16 @@ class GetDateInterceptor extends \Pinpoint\Interceptor
 
     public function onException($callId, $exceptionStr)
     {
-
+        $trace = pinpoint_get_current_trace();
+        if ($trace)
+        {
+          $event = $trace->getEvent($callId);
+          if ($event)
+          {
+            $event->markAfterTime();
+            $event->setExceptionInfo($exceptionStr);
+          }
+        }
     }
 }
 
@@ -82,7 +91,7 @@ hello_phpt("Mike");
 request start
   addInterceptor name:[hello_phpt] class:[test_exception]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -91,12 +100,13 @@ request start
 ]
 hello Mike
   call [GetDateInterceptor::onexception]
+  setExceptionInfo:[Fatal error: I don't care it in %s on line %d]
   [EXCEPTION] file:[%s] line:[%d] msg:[I don't care it]
   call hello_phpt's interceptorPtr::onEnd
 
-Fatal error: Uncaught%sException%sI don't care it%s:%d
+Fatal error: Uncaught Exception: I don't care it in %s:%d
 Stack trace:
-#0 %s(70): hello_phpt('Mike')
+#0 %s(79): hello_phpt('Mike')
 #1 {main}
   thrown in %s on line %d
 request shutdown

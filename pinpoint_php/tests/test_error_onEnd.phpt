@@ -97,7 +97,7 @@ $a->testFunc("hello");
 request start
   addInterceptor name:[MyClass::testFunc] class:[test_error_onEnd]
   call MyClass::testFunc's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (

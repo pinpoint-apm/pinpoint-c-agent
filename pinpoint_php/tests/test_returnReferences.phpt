@@ -98,7 +98,7 @@ $newref = &$a->returns_reference();
 request start
   addInterceptor name:[MyClass::returns_reference] class:[test_returnReferences]
   call MyClass::returns_reference's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (

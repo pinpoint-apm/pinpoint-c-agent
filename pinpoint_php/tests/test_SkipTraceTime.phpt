@@ -88,7 +88,7 @@ hello_phpt("phpt, \n how old are you!!!");
 request start
   addInterceptor name:[hello_phpt] class:[test_SkipTraceTime]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -107,7 +107,7 @@ hello phpt,
 , return:phpt, 
  how old are you!!! ]
   call hello_phpt's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (

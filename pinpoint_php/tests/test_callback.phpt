@@ -167,7 +167,7 @@ request start
 )
 , return:helloworld ]
   call MyClass::fnCallBack's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (

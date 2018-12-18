@@ -299,7 +299,7 @@ request start
   addInterceptor name:[curl_getinfo] class:[test_curl]
   addInterceptor name:[curl_close] class:[test_curl]
   call curl_init's interceptorPtr::onBefore
-    setApiId:[-2]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -311,7 +311,7 @@ request start
 )
 , return:Resource id #4 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -329,7 +329,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -347,7 +347,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -365,7 +365,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -383,7 +383,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -401,7 +401,7 @@ request start
 )
 , return:1 ]
   call curl_setopt's interceptorPtr::onBefore
-    setApiId:[-3]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -427,7 +427,7 @@ request start
 )
 , return:1 ]
   call curl_exec's interceptorPtr::onBefore
-    setApiId:[-4]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -436,7 +436,7 @@ request start
 ]
   call curl_exec's interceptorPtr::onEnd
   call curl_getinfo's interceptorPtr::onBefore
-    setApiId:[-5]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
@@ -450,7 +450,7 @@ request start
 )
 , return: url(http://abc.com/) ]
   call curl_close's interceptorPtr::onBefore
-    setApiId:[-6]
+    setApiId:[%i]
     setServiceType:[1501]
     addAnnotation [-1]:[Array
 (
