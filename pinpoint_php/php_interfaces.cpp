@@ -1774,12 +1774,12 @@ PHP_FUNCTION(pinpoint_data_thread_start)
     start_pinpoint_agent();
 }
 
-PHP_FUNCTION(pinpoint_start_calltrace)
+PHP_FUNCTION(pinpoint_start_calltree)
 {
     start_a_new_calltrace();
 }
 
-PHP_FUNCTION(pinpoint_end_calltrace)
+PHP_FUNCTION(pinpoint_end_calltree)
 {
     end_current_calltrace();
 }

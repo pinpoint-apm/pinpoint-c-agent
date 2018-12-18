@@ -20,7 +20,7 @@ class onCallTreeInterceptor extends \Pinpoint\Interceptor
 
   public function onBefore($callId, $args)
   {
-    pinpoint_start_calltrace();
+    pinpoint_start_calltree();
     $trace = pinpoint_get_current_trace();
     if ($trace)
     {
@@ -48,7 +48,7 @@ class onCallTreeInterceptor extends \Pinpoint\Interceptor
       }
     }
 
-    pinpoint_end_calltrace();
+    pinpoint_end_calltree();
   }
 
   public function onException($callId, $exceptionStr)

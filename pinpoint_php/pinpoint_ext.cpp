@@ -73,8 +73,8 @@ const static zend_function_entry pinpoint_functions[] = {
     PHP_FE(pinpint_aop_reload,NULL)
     PHP_FE(pinpoint_data_thread_start,NULL)
 
-    PHP_FE(pinpoint_start_calltrace ,NULL)
-    PHP_FE(pinpoint_end_calltrace,NULL)
+    PHP_FE(pinpoint_start_calltree ,NULL)
+    PHP_FE(pinpoint_end_calltree,NULL)
 
     {NULL, NULL, NULL, 0, 0}
 };
