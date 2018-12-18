@@ -63,16 +63,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_log, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 const static zend_function_entry pinpoint_functions[] = {
-//    PHP_FE(pinpoint_start_trace, NULL)
     PHP_FE(pinpoint_get_current_trace, NULL)
     PHP_FE(pinpoint_end_trace, NULL)
     PHP_FE(pinpoint_add_plugin, NULL)
     PHP_FE(pinpoint_add_api, arginfo_add_api)
     PHP_FE(pinpoint_log, arginfo_log)
-
     PHP_FE(pinpint_aop_reload,NULL)
-    PHP_FE(pinpoint_data_thread_start,NULL)
-
     PHP_FE(pinpoint_start_calltree ,NULL)
     PHP_FE(pinpoint_end_calltree,NULL)
 

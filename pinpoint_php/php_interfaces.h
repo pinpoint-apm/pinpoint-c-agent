@@ -63,7 +63,6 @@ PHP_FUNCTION(pinpoint_log);
 
 
 PHP_FUNCTION(pinpint_aop_reload);
-PHP_FUNCTION(pinpoint_data_thread_start);
 
 PHP_FUNCTION(pinpoint_start_calltree);
 PHP_FUNCTION(pinpoint_end_calltree);

@@ -1756,32 +1756,28 @@ PHP_FUNCTION(pinpint_aop_reload)
     }
 }
 
-PHP_FUNCTION(pinpoint_data_thread_start)
-{
-    /// todo
-    /// add more state tracing is better
-
-    using  Pinpoint::Agent::Agent;
-    using  Pinpoint::Agent::AgentPtr;
-    AgentPtr agentPtr = Agent::getAgentPtr();
-
-    if (agentPtr->getAgentStatus() != Pinpoint::Agent::AGENT_INITED){
-        PP_U_TRACE("The agentstatus said agent had initialized");
-        LOGD("The agentstatus said agent had initialized");
-        return ;
-    }
-
-    start_pinpoint_agent();
-}
-
 PHP_FUNCTION(pinpoint_start_calltree)
 {
-    start_a_new_calltrace();
+    if(PPG(DefineCallTree))
+    {
+        start_a_new_calltrace();
+        RETURN_TRUE;
+    }else{
+        php_error_docref(NULL, E_WARNING, "DefineCallTree=False. Nothing affected");
+        RETURN_FALSE;
+    }
 }
 
 PHP_FUNCTION(pinpoint_end_calltree)
 {
-    end_current_calltrace();
+    if(PPG(DefineCallTree))
+    {
+        end_current_calltrace();
+        RETURN_TRUE;
+    }else{
+        php_error_docref(NULL, E_WARNING, "DefineCallTree=False. Nothing affected");
+        RETURN_FALSE;
+    }
 }
 
 PHP_FUNCTION(pinpoint_add_api)
