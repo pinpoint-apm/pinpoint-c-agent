@@ -37,11 +37,11 @@ pinpoint| 1.8.0-RC1
 
     > Ubuntu 
 
-        sudo apt-get install automake bison flex g++ git libtool make pkg-config openssl libssl-dev 
+        sudo apt-get install automake bison flex g++ git libtool make pkg-config openssl libssl-dev python-dev libxml2-dev libxslt-dev
 
     > Centos
     
-        sudo yum install automake libtool flex bison pkgconfig gcc-c++ openssl-devel
+        sudo yum install automake libtool flex bison pkgconfig gcc-c++ openssl-devel python-devel libxml2-devel libxslt-devel
 
 - Install third-library  
 
