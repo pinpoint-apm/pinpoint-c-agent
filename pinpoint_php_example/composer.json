@@ -1,0 +1,26 @@
+{
+    "name": "eeliu/apps",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "eeliu",
+            "email": "liumingyi@navercorp.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "app\\":"app/",
+            "app1\\": "app1",
+            "Plugins\\": "Plugins/"
+        }
+    },
+    "require": {
+        "eeliu/php_simple_aop": "dev-dev-built-in-not-support"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/eeliu/php_simple_aop.git"
+        }
+    ]
+}

@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+import psutil
+
+from Common import TCLogger
+from Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
+from Protocol import CollectorPro
+from Trains import DgramLayer, TrainLayer
+from Type import *
+
+
+class AgentStateManager(object):
+    def __init__(self, agentId,startTimeStamp,host):
+        self.state=TAgentStat()
+        self.cup_load=TCpuLoad()
+        self.state.agentId = agentId
+        self.state.startTimestamp = startTimeStamp
+        self.stateBatch = TAgentStatBatch()
+        self.stateBatch.agentId = agentId
+        self.stateBatch.startTimestamp = startTimeStamp
+        self.stateBatch.agentStats  = []
+        self.remote = host
+
+        self.trans_layer = DgramLayer(host, None)
+        self.trans_layer.start()
+
+        TrainLayer.registerTimers(self.sendState,20)
+        TCLogger.debug("register state timer")
+
+    def _upDateCurState(self):
+        self.stateBatch.agentStats = []
+        ## cpu
+        self.cup_load.systemCpuLoad = psutil.getloadavg()[0]
+        self.state.cpuLoad = self.cup_load
+
+        self.stateBatch.agentStats.append(self.state)
+
+    def sendState(self,layer):
+        self._upDateCurState()
+        body = CollectorPro.obj2bin(self.stateBatch, AGENT_STAT_BATCH)
+        TCLogger.debug("send state:%s",self.stateBatch)
+        self.trans_layer.sendData(body)
+
+
+# if __name__ == '__main__':
+    # state = AgentState('fdf',1645455556)
+    # state.getCurStatePacket()

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>pinpoint-php demo</title>
+</head>
+
+<body>
+
+<h3>Simple server</h3>
+
+<form method="get" action="index.php">
+    <table border="1">
+        <tr>
+            <th>Link</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <th>
+                Call internal function "date".
+            </th>
+            <th>
+                <button type="submit" name="type" value="get_date"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call user-defined function.
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_func1"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call user-defined function in a namespace
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_func2_caller"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Test db
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_db"> click me </button>
+            </th>
+        </tr>
+
+    </table>
+
+
+<h3>Error and exception</h3>
+
+    <form method="get" action="index.php">
+        <table border="2">
+            <tr>
+                <th>Link</th>
+                <th>Description</th>
+            </tr>
+
+            <tr>
+                <th>
+                    Call undefined function.
+                </th>
+
+                <th>
+                    <button type="submit" name="type"
+                            value="test_call_undefined_function"> click me </button>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    Call Static
+                </th>
+
+                <th>
+                    <button type="submit" name="type"
+                            value="test_call_static"> click me </button>
+                </th>
+            </tr>
+        </table>
+    </form>
+
+        <h3>Test curl</h3>
+        <form method="get" action="index.php">
+            remote url: <input type="text"  name="remote" value="http://10.34.130.134:8001/index.php?type=get_date"/>
+            <input type="submit" name="type" value="test_curl">
+        </form>
+
+</body>
+
+</html>
