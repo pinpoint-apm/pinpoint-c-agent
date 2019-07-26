@@ -1,7 +1,0 @@
-
-[pinpoint]
-extension=/path to/php-7.1.0-centos-6.x-release-pinpoint.so
-pinpoint_agent.config_full_name=/path to/pinpoint_agent.conf
-;eg:
-;extension=/home/apps/php-7.1.0/modules/pinpoint/php-7.1.0-centos-6.x-release-pinpoint.so
-;pinpoint_agent.config_full_name=/home/apps/php-7.1.0/pinpoint/conf/pinpoint_agent.conf

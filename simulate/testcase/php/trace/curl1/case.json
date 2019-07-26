@@ -1,4 +1,0 @@
-{
-  "api": "curl_caller.php",
-  "payload": {"address": "http://127.0.0.1:{{nginx_listen_port}}/test_func1.php"}
-}
