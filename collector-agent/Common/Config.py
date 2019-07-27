@@ -27,7 +27,14 @@ if PY2:
 else:
     import configparser as ConfigParser
 
-__config_path = os.path.abspath(os.path.dirname(__file__)) +"/../conf/collector.conf"
+
+if not 'COLLECTOR_CONFIG' in os.environ:
+    raise Exception("COLLECTOR_CONFIG not found in your environment")
+
+__config_path = os.environ['COLLECTOR_CONFIG']
+
+if not os.path.exists(__config_path):
+    raise Exception("COLLECTOR_CONFIG:%s not exist"%(__config_path))
 
 def get_conf(fullPath):
     config =  ConfigParser.ConfigParser()
