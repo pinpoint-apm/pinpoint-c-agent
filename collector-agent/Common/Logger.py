@@ -33,9 +33,10 @@ def ca_logger(name,config,filename):
     logger.setLevel(level)
     logger.addHandler(fileHandler)
 
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(caFormat)
-    logger.addHandler(streamHandler)
+    ## disable console print
+    # streamHandler = logging.StreamHandler()
+    # streamHandler.setFormatter(caFormat)
+    # logger.addHandler(streamHandler)
 
     return logger
 
