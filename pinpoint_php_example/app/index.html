@@ -26,6 +26,15 @@
 
         <tr>
             <th>
+                call control group get_date
+            </th>
+            <th>
+                <button type="submit" name="type" value="no_aop_get_date"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
                 Call user-defined function.
             </th>
             <th>
@@ -91,6 +100,22 @@
             remote url: <input type="text"  name="remote" value="http://10.34.130.134:8001/index.php?type=get_date"/>
             <input type="submit" name="type" value="test_curl">
         </form>
+
+
+<!--    <a href="NotWatchingAppDate.php" > test none aop </a>-->
+
+    <form method="get" action="non_aop_index.php">
+        <tr>
+            <th>
+                Call control group
+            </th>
+
+            <th>
+                <button type="submit" name="type"
+                        value="test_get_data"> click me </button>
+            </th>
+        </tr>
+    </form>
 
 </body>
 
