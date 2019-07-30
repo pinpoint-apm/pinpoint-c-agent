@@ -19,18 +19,20 @@ Dependency|Version
 ---|----
 APACHE| 2.2.x 2.4.x
 PHP| php 7+
+GCC| GCC 5+
 OS| 64bit only
 Python | Python 3
 pinpoint| 1.8.0-RC1
-composer| 1.9+
+composer| 
 
 
 
 ### Installation
 
 #### Pre-install
-- Download pinpoint-c-agent:  git clone https://github.com/naver/pinpoint-c-agent.git
- 
+1. Download pinpoint-c-agent:  git clone https://github.com/naver/pinpoint-c-agent.git and checkout branch *`new_aop_php_agent`*
+
+
 
 - Install Build-essential
 
@@ -55,10 +57,10 @@ composer| 1.9+
 ## Overview
 
 ### Distributed Tracking system
-![CallStack](images/1.png)
+
 
 ### Call Stack
-![CallStack](images/2.png)
+
 
 
 ## Compatibility
@@ -66,6 +68,10 @@ composer| 1.9+
 Pinpoint Version | PHP| Python
 ---------------- | ----- | -----
 1.8.0-RC1 | PHP 7+ | Python3
+
+## F&Q
+
+
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
