@@ -40,3 +40,4 @@ define("MEMCACHED","8050");
 define("PINPOINT_PHP_REMOTE",9700);
 define("NGINX_PROXY","Pinpoint-ProxyNginx");
 define("APACHE_PROXY","Pinpoint-ProxyApache");
+define("SAMPLED","Pinpoint-Sampled");

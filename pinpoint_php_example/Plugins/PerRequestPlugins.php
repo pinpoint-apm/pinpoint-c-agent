@@ -48,7 +48,6 @@ class PerRequestPlugins
     private function initTrace()
     {
         while (pinpoint_end_trace() >0);
-        $this->isLimit =pinpoint_tracelimit();
     }
 
     private function __construct()
@@ -116,12 +115,26 @@ class PerRequestPlugins
             pinpoint_add_clue("AP",$_SERVER[APACHE_PROXY]);
         }
 
+        if(isset($_SERVER[SAMPLED]) || array_key_exists(SAMPLED,$_SERVER))
+        {
+            if ($_SERVER[SAMPLED] == "s0"){
+                $this->isLimit = true;
+                //drop this request. collector could not receive any thing
+                pinpoint_drop_trace();
+            }
+        }else{
+            $this->isLimit = pinpoint_tracelimit();
+        }
+
+
         pinpoint_add_clue("tid",$this->tid);
         pinpoint_add_clue("sid",$this->sid);
 
     }
     public function __destruct()
     {
+        // reset limit
+        $this->isLimit = false;
         pinpoint_add_clues(HTTP_STATUS_CODE,http_response_code());
         pinpoint_end_trace();
     }

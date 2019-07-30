@@ -75,6 +75,7 @@ PHP_FUNCTION(pinpoint_add_clue);
 PHP_FUNCTION(pinpoint_add_clues);
 PHP_FUNCTION(pinpoint_unique_id);
 PHP_FUNCTION(pinpoint_tracelimit);
+PHP_FUNCTION(pinpoint_drop_trace);
 //
 PHP_FUNCTION(pinpoint_app_name);
 PHP_FUNCTION(pinpoint_app_id);
@@ -159,6 +160,7 @@ const zend_function_entry pinpoint_php_functions[] = {
         PHP_FE(pinpoint_test_main,NULL)
         PHP_FE(pinpoint_app_name,NULL)
         PHP_FE(pinpoint_app_id,NULL)
+        PHP_FE(pinpoint_drop_trace,NULL)
         PHP_FE(pinpoint_start_time,NULL)
         PHP_FE(pinpoint_tracelimit,arginfo_add_int)
         PHP_FE(pinpoint_add_clue,arginfo_add_key_value)
@@ -206,6 +208,11 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
         (x) = NULL;\
     }
 
+PHP_FUNCTION(pinpoint_drop_trace)
+{
+    PPG(limit)= 1;
+    RETURN_TRUE;
+}
 
 PHP_FUNCTION(pinpoint_app_name)
 {
