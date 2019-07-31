@@ -45,8 +45,8 @@ composer|
         # must be unix:(unix sock address)
         pinpoint_php.CollectorHost=unix:/tmp/collector-agent.sock
         pinpoint_php.SendSpanTimeOutMs=0 # 0 is recommanded
-        # request should be captured duing 1 second. <=0 means no limited
-        pinpoint_php.TraceLimit=0 
+        # request should be captured duing 1 second. < 0 means no limited
+        pinpoint_php.TraceLimit=-1 
         ```
 > Build Collect-agent
 3. Goto collector-agent
@@ -77,8 +77,7 @@ composer|
     5. export COLLECTOR_CONFIG=/full path of collector.conf/
     6. run  collector-agent
         ```
-        $ python run.py
-        $ nohup python run.py&
+        $ python run.py (or nohup python run.py&)
         ```
    
 > Try the aop example
