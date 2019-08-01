@@ -3,11 +3,11 @@
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [v0.1.1](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint C Agent
 
-It is an agent written by C/C++ PHP python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
+It is an agent written by C++, PHP, python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
 
 ## Getting Started
 
@@ -15,10 +15,8 @@ It is an agent written by C/C++ PHP python language. And we hope to support othe
 
 Dependency|Version
 ---|----
-APACHE| 2.2.x 2.4.x
 PHP| php 7+
 GCC| GCC 5+
-OS| 64bit only
 Python | Python 3
 pinpoint| 1.8.0-RC1
 composer| 
@@ -84,25 +82,34 @@ composer|
 4. Goto pinpoint_php_example
    1. Download composer.phar
    2. php composer.phar install
-   3. Set $PWD/app/ as your site root
+   3. Set $PWD/app/ as your web site root path
 
 ## Overview
 
+### Pinpoint-c-agent 
+![How does it work](images/pinpoint_0.2.jpg)
+
 ### Distributed Tracking system
-
-
+![phpmyadmin](images/phpmyadmin_example.png)
 ### Call Stack
-
+![phpmyadmin_detail](images/phpmyadmin_example_detail.png)
 ### TODO
 
--[] redis,mysql,memcache plugins
--[] workerman,php-swoole plugins 
+- [ ] redis,DB,memcache plugins ......
+- [ ] workerman,php-swoole plugins 
 
 ## Compatibility
 
 Pinpoint Version | PHP| Python
 ---------------- | ----- | -----
 1.8.0-RC1 | PHP 7+ | Python3
+
+## Changes
+
+- Fully support ZTS
+- More Stability 
+- Higher performance 
+- Easy to Use and Maintain
 
 ## F & Q
 
@@ -118,6 +125,11 @@ Watching the files status every time it is a bad deal.
 ### 3. How much performance loss when I use?
 
 After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660). While, the more function/method you watching, the more you taken. @TODO
+
+### Known Issues
+
+### 1 Exception or error message with a wrong file name.
+
 
 
 ## License
