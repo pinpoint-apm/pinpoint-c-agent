@@ -129,15 +129,15 @@ Watching the files status every time it is a bad deal.
 
 ### 3. How much performance loss when I use?
 
-After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660). While, the more function/method you watching, the more you taken. @TODO
+After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660). While, the more function/method you watching, the more you taken. @TODO  a test.
 
 ### Known Issues
 
 ### 1. Exception or Error Message With A Wrong Stack information.
 
-### 2. If I Do Not Use Composer,Can I Use this Version ?
+### 2. If I Do Not Use Composer/autoloader,Can I Use this Version ?
 
-Sorry, `php-simple-aop` not supported wrapping the user class (or internal class) without Composer. By the way [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
+Sorry, `php-simple-aop` not supported wrapping the user class (or internal class) without Composer/autoloader. By the way [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
 
 ### 3. Why not support PHP5.x?
 
