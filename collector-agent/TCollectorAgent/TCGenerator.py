@@ -196,17 +196,17 @@ class ConvertSpan(object):
                 arr = ConvertSpan._parseStrField(span['AP'])
                 value.intValue1 = 3
                 if 'i' in arr:
-                    value.byteValue1 = bytes(arr['i'])
+                    value.byteValue1 = int(arr['i'])
                 if 'b' in arr:
-                    value.byteValue2 = bytes(arr['b'])
+                    value.byteValue2 = int(arr['b'])
                 if 'D' in arr:
                     value.intValue2  = int(arr['D'])
                 if 't' in arr:
                     value.longValue  = int(arr['t'])
             ann = TAnnotation(PROXY_HTTP_HEADER,TAnnotationValue(longIntIntByteByteStringValue=value))
             tSpan.annotations.append(ann)
-        except:
-            TCLogger.error("input is illegal,check the span:%s")
+        except Exception as e:
+            TCLogger.error("input is illegal,Exception %s",e)
 
         return tSpan
 

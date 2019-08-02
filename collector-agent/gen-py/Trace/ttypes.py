@@ -244,11 +244,11 @@ class TLongIntIntByteByteStringValue(object):
             oprot.writeFieldEnd()
         if self.byteValue1 is not None:
             oprot.writeFieldBegin('byteValue1', TType.BYTE, 4)
-            oprot.writeChar(self.byteValue1)
+            oprot.writeByte(self.byteValue1)
             oprot.writeFieldEnd()
         if self.byteValue2 is not None:
             oprot.writeFieldBegin('byteValue2', TType.BYTE, 5)
-            oprot.writeChar(self.byteValue2)
+            oprot.writeByte(self.byteValue2)
             oprot.writeFieldEnd()
         if self.stringValue is not None:
             oprot.writeFieldBegin('stringValue', TType.STRING, 6)
@@ -506,7 +506,7 @@ class TAnnotationValue(object):
             oprot.writeFieldEnd()
         if self.byteValue is not None:
             oprot.writeFieldBegin('byteValue', TType.BYTE, 8)
-            oprot.writeChar(self.byteValue)
+            oprot.writeByte(self.byteValue)
             oprot.writeFieldEnd()
         if self.intStringValue is not None:
             oprot.writeFieldBegin('intStringValue', TType.STRUCT, 9)
@@ -1138,7 +1138,7 @@ class TSpan(object):
             oprot.writeFieldEnd()
         if self.loggingTransactionInfo is not None:
             oprot.writeFieldBegin('loggingTransactionInfo', TType.BYTE, 31)
-            oprot.writeChar(self.loggingTransactionInfo)
+            oprot.writeByte(self.loggingTransactionInfo)
             oprot.writeFieldEnd()
         oprot.writeFieldStop()
         oprot.writeStructEnd()

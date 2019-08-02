@@ -1320,7 +1320,7 @@ TAgentInfo.thrift_spec = (
     None,  # 0
     (1, TType.STRING, 'hostname', 'UTF8', None, ),  # 1
     (2, TType.STRING, 'ip', 'UTF8', None, ),  # 2
-    (3, TType.STRING, "ports", 'UTF8', None,),  # 3
+    (3, TType.STRING, 'ports', 'UTF8', None, ),  # 3
     (4, TType.STRING, 'agentId', 'UTF8', None, ),  # 4
     (5, TType.STRING, 'applicationName', 'UTF8', None, ),  # 5
     (6, TType.I16, 'serviceType', None, None, ),  # 6
