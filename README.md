@@ -5,7 +5,7 @@
 
 The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent/releases).
 
-# Pinpoint C Agent
+# Pinpoint PHP Agent
 
 It is an agent written by C++, PHP, python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
 
@@ -17,11 +17,10 @@ Dependency|Version
 ---|----
 PHP| php 7+
 GCC| GCC 5+
+*inux|
 Python | Python 3
 pinpoint| 1.8.0-RC1
-composer| 
-
-
+**Composer**| 
 
 ### Installation
 
@@ -86,6 +85,12 @@ composer|
 
 ## Overview
 
+> Why we refactor the pinpoint_c_agent (v0.1.x)
+
+1. Hard to support all versions.
+2. Slow, v0.1.x version hooks all function.
+3. Not support ZTS.
+
 ### Pinpoint-c-agent 
 ![How does it work](images/pinpoint_0.2.jpg)
 
@@ -128,9 +133,19 @@ After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660)
 
 ### Known Issues
 
-### 1 Exception or error message with a wrong file name.
+### 1. Exception or Error Message With A Wrong Stack information.
 
+### 2. If I Do Not Use Composer,Can I Use this Version ?
 
+Sorry, `php-simple-aop` not supported wrapping the user class (or internal class) without Composer. By the way [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
+
+### 3. Why not support PHP5.x?
+
+https://www.php.net/supported-versions.php
+
+### For the developer
+
+[Click me](pinpoint_php_example/Readme.md)
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
