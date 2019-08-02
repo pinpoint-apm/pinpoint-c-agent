@@ -196,9 +196,9 @@ class ConvertSpan(object):
                 arr = ConvertSpan._parseStrField(span['AP'])
                 value.intValue1 = 3
                 if 'i' in arr:
-                    value.byteValue1 = int(arr['i'])
+                    value.byteValue1 = bytes(arr['i'])
                 if 'b' in arr:
-                    value.byteValue2 = int(arr['b'])
+                    value.byteValue2 = bytes(arr['b'])
                 if 'D' in arr:
                     value.intValue2  = int(arr['D'])
                 if 't' in arr:

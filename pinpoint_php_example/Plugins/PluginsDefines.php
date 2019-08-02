@@ -39,5 +39,5 @@ define("REDIS","8200");
 define("MEMCACHED","8050");
 define("PINPOINT_PHP_REMOTE",9700);
 define("NGINX_PROXY","Pinpoint-ProxyNginx");
-define("APACHE_PROXY","HTTP_PINPOINT-PROXYAPACHE");
+define("APACHE_PROXY","HTTP_PINPOINT_PROXYAPACHE");
 define("SAMPLED","Pinpoint-Sampled");
