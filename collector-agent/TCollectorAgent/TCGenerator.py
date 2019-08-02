@@ -202,7 +202,7 @@ class ConvertSpan(object):
                 if 'D' in arr:
                     value.intValue2  = int(arr['D'])
                 if 't' in arr:
-                    value.longValue  = int(arr['t'])
+                    value.longValue  = int(int(arr['t'])/1000)
             ann = TAnnotation(PROXY_HTTP_HEADER,TAnnotationValue(longIntIntByteByteStringValue=value))
             tSpan.annotations.append(ann)
         except Exception as e:
