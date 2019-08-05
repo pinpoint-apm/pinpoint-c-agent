@@ -103,6 +103,7 @@ static size_t trans_layer_pool(TransLayer* t_layer);
 static void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data);
 static bool init_shared_obj();
 static bool register_shared_obj_address();
+static bool checking_and_init();
 static uint64_t generate_unique_id();
 static bool check_tracelimit(int64_t timestamp);
 static uint64_t get_current_msec_stamp();
@@ -881,13 +882,9 @@ void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data)
 
 uint64_t generate_unique_id()
 {
-    if(PPG(shared_obj).region == NULL)
+    if(!checking_and_init())
     {
-        if(register_shared_obj_address() && init_shared_obj())
-        {
-        }else{
-            return 0L;
-        }
+        return 0L;
     }
 
     uint64_t* value =  (uint64_t*)((char*)PPG(shared_obj).region + UNIQUE_ID_OFFSET);
@@ -975,14 +972,9 @@ bool register_shared_obj_address()
 
 bool check_tracelimit(int64_t timestamp)
 {
-   if(PPG(shared_obj).region == NULL)
-   {
-       if(register_shared_obj_address() && init_shared_obj())
-       {
-       }else{
-           return false;
-       }
-   }
+    if(!checking_and_init()){
+        return false;
+    }
 
    time_t ts = (timestamp == -1) ?(timestamp) :(time(NULL));
    int64_t* c_timestamp =  (int64_t*)((char*)PPG(shared_obj).region + TRACE_LIMIT);
@@ -1007,6 +999,21 @@ bool check_tracelimit(int64_t timestamp)
    }
 
    return false;
+}
+
+
+bool checking_and_init()
+{
+    if(PPG(shared_obj).region == NULL)
+    {
+        if(register_shared_obj_address() && init_shared_obj())
+        {
+        }else{
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
