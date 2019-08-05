@@ -36,7 +36,8 @@ pinpoint| 1.8.0-RC1
    4. make test # we commanded test the module is RIGHT
    5. make install 
    6. Activation pinpoint module
-       [ php.ini ]
+   
+       >  php.ini 
         ```ini
         extension=pinpoint_php.so
         # must be unix:(unix sock address)
@@ -46,12 +47,12 @@ pinpoint| 1.8.0-RC1
         pinpoint_php.TraceLimit=-1 
         ```
 > Build Collect-agent
-3. Goto collector-agent
+1. Goto collector-agent
    1. python3 -m venv env
    2. source env/bin/activate
    3. pip install -r requirements.txt
-   4. Change configuration file in conf/
-        [collector.conf]
+   4. Change configuration file in conf/collector.conf
+
         ```ini
         [Collector]
         # collectorhost and specific port
@@ -71,8 +72,8 @@ pinpoint| 1.8.0-RC1
         # the same as below "pinpoint_php.CollectorHost"
         Address=/tmp/collector-agent.sock
         ```
-    5. export COLLECTOR_CONFIG=/full path of collector.conf/
-    6. run  collector-agent
+    1. export COLLECTOR_CONFIG=/full path of collector.conf/
+    2. run  collector-agent
         ```
         $ python run.py (or nohup python run.py&)
         ```
@@ -87,8 +88,8 @@ pinpoint| 1.8.0-RC1
 
 > Why we refactor the pinpoint_c_agent (v0.1.x)
 
-1. Hard to support all versions.
-2. Slow, v0.1.x version hooks all function.
+1. Hard to support all php versions.
+2. Slow, v0.1.x version hooks all functions.
 3. Not support ZTS.
 
 ### Pinpoint-c-agent 
