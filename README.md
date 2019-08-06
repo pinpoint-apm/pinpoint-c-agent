@@ -80,7 +80,7 @@ pinpoint| 1.8.0-RC1
    
 > Try the aop example
 4. Goto pinpoint_php_example
-   1. Download composer.phar
+   1. Download composer.phar. [How To Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
    3. Set $PWD/app/ as your web site root path
 
@@ -126,7 +126,7 @@ Delete *__class_index_table* in Cache/
 ### 2. Why not support automaticaly update AOP files?
 
 We can DO but perfer not DO! Not found a good efficiency way to implement this.
-Watching the files status every time it is a bad deal.
+Watching the files status every time is a bad deal.
 
 ### 3. How much performance loss when I use?
 
