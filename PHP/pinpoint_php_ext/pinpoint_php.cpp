@@ -454,7 +454,7 @@ PHP_FUNCTION(pinpoint_tracelimit)
     zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp);
     timestamp = (timestamp == -1)?(time(NULL)):(timestamp);
     if(PPG(limit) == E_OFFLINE ){
-        RETURN_FALSE
+        RETURN_TRUE
     }
     else if(check_tracelimit(timestamp))
     {
@@ -802,7 +802,7 @@ void reset_remote(TransLayer* t_layer)
         t_layer->c_fd = -1;
     }
     t_layer->chunks->resetChunks();
-
+    PPG(limit) = E_OFFLINE;
 }
 
 
