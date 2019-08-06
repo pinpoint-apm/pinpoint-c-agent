@@ -20,7 +20,7 @@ from __future__ import print_function
 
 from gevent import socket as asy_socket
 
-from TrainsLayer import *
+from Trains.TrainsLayer import *
 
 
 class DgramLayer(TrainLayer):

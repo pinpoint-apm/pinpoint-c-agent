@@ -17,7 +17,7 @@
 # -*- coding: UTF-8 -*-
 
 import socket
-from Config import CAConfig
+from Common.Config import CAConfig
 
 class AgentHost(object):
     def __init__(self):

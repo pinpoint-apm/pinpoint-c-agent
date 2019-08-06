@@ -16,9 +16,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from TPackets import *
-from Trace.ttypes import TApiMetaData, TStringMetaData
+from TCollectorAgent.TPackets import *
+from Common.Trace.ttypes import TApiMetaData, TStringMetaData
 from TCollectorAgent.Type import *
+from Common.Logger import TCLogger
 
 class APIMeta(object):
     API_META_INDEX = 1

@@ -18,7 +18,7 @@
 
 import logging
 
-import Config
+import Common.Config
 
 
 def ca_logger(name,config,filename):
@@ -45,8 +45,8 @@ def ca_logger(name,config,filename):
 TCLogger response for thrift collector
 PALogger response for php agent
 """
-TCLogger=ca_logger("TC",Config.CAConfig, "collector.agent.log")
-PALogger=ca_logger("PA",Config.CAConfig, "php.agent.log")
+TCLogger=ca_logger("TC",Common.Config.CAConfig, "collector.agent.log")
+PALogger=ca_logger("PA",Common.Config.CAConfig, "php.agent.log")
 
 if __name__ == '__main__':
     TCLogger.debug("test tc info")

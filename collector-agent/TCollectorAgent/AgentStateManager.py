@@ -18,8 +18,8 @@
 import psutil
 
 from Common import TCLogger
-from Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
-from Protocol import CollectorPro
+from Common.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
+from TCollectorAgent.Protocol import CollectorPro
 from Trains import DgramLayer, TrainLayer
 from TCollectorAgent.Type import *
 

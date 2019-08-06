@@ -22,8 +22,8 @@ import struct
 from thrift.protocol import TCompactProtocol
 from thrift.transport import TTransport
 
-from Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
-from Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
+from Common.Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
+from Common.Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
 from TCollectorAgent.Type import *
 
 TSPAN_VERSION= 0

@@ -21,11 +21,12 @@ import time
 
 import gevent
 
-from APIMeta import *
-from AgentStateManager import AgentStateManager
-from CollectorAgentConf import CollectorAgentConf
+from Common import AgentHost
+from TCollectorAgent.APIMeta import *
+from TCollectorAgent.AgentStateManager import AgentStateManager
+from TCollectorAgent.CollectorAgentConf import CollectorAgentConf
 from PinpointAgent.PinpointAgent import PinpointAgent
-from TCGenerator import *
+from TCollectorAgent.TCGenerator import *
 from Trains import *
 
 

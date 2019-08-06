@@ -25,7 +25,7 @@ from gevent import socket as asy_socket
 from gevent.event import Event  ## write signal
 
 from Common import *
-from TrainsLayer import *
+from Trains.TrainsLayer import *
 
 
 class StreamClientLayer(TrainLayer):

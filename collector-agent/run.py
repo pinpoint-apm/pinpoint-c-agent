@@ -15,10 +15,11 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+
 from TCollectorAgent import *
 from PHPAgent import PHPAgent,PHPAgentConf
 from Common import *
-from CollectorAgentConf import CollectorAgentConf
+from TCollectorAgent.CollectorAgentConf import CollectorAgentConf
 from gevent.event import Event
 import gevent,signal
 

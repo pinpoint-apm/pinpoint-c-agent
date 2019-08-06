@@ -49,8 +49,8 @@
 
 # from Intercept import interceptManger
 from Common import TCLogger
-from Protocol import *
-from Trace.ttypes import TAnnotation, TSpanEvent, TAnnotationValue, TIntStringValue,TLongIntIntByteByteStringValue
+from TCollectorAgent.Protocol import *
+from Common.Trace.ttypes import TAnnotation, TSpanEvent, TAnnotationValue, TIntStringValue,TLongIntIntByteByteStringValue
 
 
 class TCGenerator(object):
