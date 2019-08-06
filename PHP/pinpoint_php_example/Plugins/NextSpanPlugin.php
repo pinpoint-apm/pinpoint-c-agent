@@ -83,6 +83,11 @@ class NextSpanPlugin extends Candy
     function gethostFromCh($ch)
     {
         $URL   = parse_url(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
-        return sprintf('%s:%d',$URL['host'],$URL['port']);
+        if(isset($URL['port']))
+        {
+            return $URL['host'].":".$URL['port'];
+        }else{
+            return $URL['host'];
+        }
     }
 }
