@@ -89,7 +89,13 @@ typedef struct shared_object_s{
     char  address[NAMING_SIZE];
 }SharedObject_T;
 
-enum{
+enum E_ANGET_STATUS{
+    E_OFFLINE= 0,
+    E_TRACE_PASS,
+    E_TRACE_BLOCK
+};
+
+enum E_SHM_OFFSET{
     UNIQUE_ID_OFFSET = 0,
     TRACE_LIMIT= 8,
 };

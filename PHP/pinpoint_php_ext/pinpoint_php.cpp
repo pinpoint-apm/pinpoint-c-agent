@@ -100,7 +100,7 @@ static void handle_agent_info(int type,const char* buf,size_t len);
 static void reset_remote(TransLayer* t_layer);
 static size_t trans_layer_pool(TransLayer* t_layer);
 
-static void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data);
+static inline void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data);
 static bool init_shared_obj();
 static bool register_shared_obj_address();
 static bool checking_and_init();
@@ -211,7 +211,7 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
 
 PHP_FUNCTION(pinpoint_drop_trace)
 {
-    PPG(limit)= 1;
+    PPG(limit)= E_TRACE_BLOCK;
     RETURN_TRUE;
 }
 
@@ -303,7 +303,7 @@ PHP_FUNCTION(pinpoint_end_trace)
     if( callstack->size() == 1 ) // ancestor node
     {
         TraceNode& ancestor =  callstack->top();
-        if(PPG(limit)== 0)
+        if(PPG(limit)== E_TRACE_PASS)
         {
             ancestor.node["E"] = PPG(fetal_error_time) != 0? ( PPG(fetal_error_time) - ancestor.start_time ): timestamp - ancestor.start_time;
 
@@ -316,7 +316,13 @@ PHP_FUNCTION(pinpoint_end_trace)
             std::string buf((char*)&header,sizeof(header));
             buf += trace;
             asy_send_msg_to_agent(&PPG(t_layer),buf);
+            trans_layer_pool(&PPG(t_layer));
             pp_trace("this span:(%s)",trace.c_str());
+        }else if(PPG(limit)== E_TRACE_BLOCK){
+            // do nothing
+        }
+        else { // E_OFF
+            trans_layer_pool(&PPG(t_layer));
         }
         ancestor.node.clear();
         callstack->pop();
@@ -447,13 +453,16 @@ PHP_FUNCTION(pinpoint_tracelimit)
     int64_t timestamp = -1;
     zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp);
     timestamp = (timestamp == -1)?(time(NULL)):(timestamp);
-    if(check_tracelimit(timestamp))
+    if(PPG(limit) == E_OFFLINE ){
+        RETURN_FALSE
+    }
+    else if(check_tracelimit(timestamp))
     {
-        PPG(limit) = 1;
+        PPG(limit) = E_TRACE_BLOCK;
         pp_trace("this span should be dropped by trace limit:%d",PPG(tracelimit));
         RETURN_TRUE
     }else{
-        PPG(limit) = 0;
+        PPG(limit) = E_TRACE_PASS;
         RETURN_FALSE
     }
 }
@@ -619,6 +628,7 @@ void handle_agent_info(int type,const char* buf,size_t len)
 //        /// Get shared region
 //        init_shared_obj();
 //    }
+    PPG(limit)= E_TRACE_PASS;
 
     pp_trace("starttime:%ld appid:%s mem_file:%s",PPG(agent_info).start_time,PPG(agent_info).appid,PPG(shared_obj).address);
 }
@@ -862,20 +872,13 @@ ERROR:
 }
 
 
-void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data)
+inline void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data)
 {
     // append to end
-
     if(insert_into_chunks(t_layer->chunks,data) != 0 )
     {
         pp_trace("Send buffer is full. size:[%d]",data.length());
         return ;
-    }
-
-    // try send
-    int total = trans_layer_pool(t_layer);
-    if(total <= 0){
-        return;
     }
 
 }
