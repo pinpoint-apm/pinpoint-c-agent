@@ -24,7 +24,7 @@ from thrift.transport import TTransport
 
 from Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
 from Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
-from Type import *
+from TCollectorAgent.Type import *
 
 TSPAN_VERSION= 0
 

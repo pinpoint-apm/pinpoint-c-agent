@@ -15,13 +15,6 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
-import os
-import sys
-cur_dir = os.path.dirname(os.path.realpath(__file__))
-for dir in ['TCollectorAgent','PHPAgent','gen-py','Common','Trains','PinpointAgent']:
-    sys.path.append(cur_dir+'/'+dir)
-
 from TCollectorAgent import *
 from PHPAgent import PHPAgent,PHPAgentConf
 from Common import *

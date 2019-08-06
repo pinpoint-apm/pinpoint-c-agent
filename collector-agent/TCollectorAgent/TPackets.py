@@ -19,6 +19,7 @@
 
 from Common import *
 from Protocol import *
+from TCollectorAgent.Type import *
 
 
 
@@ -38,7 +39,7 @@ class Packet(object):
         if body is not None:
             self.buf += body
 
-        TCLogger.debug("current type:%d  totalLen:%d", hType, len(self.buf))
+        # TCLogger.debug("current type:%d  totalLen:%d", hType, len(self.buf))
 
     def getSerializedData(self):
         return self.buf

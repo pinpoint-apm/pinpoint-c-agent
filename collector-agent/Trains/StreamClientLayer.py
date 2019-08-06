@@ -29,7 +29,7 @@ from TrainsLayer import *
 
 
 class StreamClientLayer(TrainLayer):
-    def __init__(self,remote,recv_msg_cb,hello_cb,auto_recover=True,timeout= 2):
+    def __init__(self,remote,recv_msg_cb,hello_cb,auto_recover=True,timeout= 5):
         '''
 
         :param list remote:
@@ -48,7 +48,7 @@ class StreamClientLayer(TrainLayer):
         self._read_watcher = None
         self._write_watcher = None
         self.loop = get_hub().loop
-        self.timer = None
+        self.timer = self.loop.timer(timeout)
         self.send_buf =b''
 
 
@@ -61,6 +61,9 @@ class StreamClientLayer(TrainLayer):
         self.state = E_CLOSED
         ## reset send buffer
         self.send_buf = b''
+        self.timer =  self.loop.timer(self.timeout)
+        self.timer.start(self._connectPeerWithHello,self.remote)
+
 
     def _connected(self, addr):
         self.peer = addr
@@ -91,11 +94,9 @@ class StreamClientLayer(TrainLayer):
         self._read_watcher.start(self._start_recv)
 
     def _actionTimeOut(self,time):
-
         if self.state == E_CONNETING:
             TCLogger.info("connecting state:%d timeout:%ds",self.state,time)
             self.close()
-            self._connectPeerWithHello(self.remote)
         elif self.state & E_WRITING == E_WRITING:
             TCLogger.info("waiting writing %d timeout:%ds", self.state, time)
         else:
@@ -103,7 +104,6 @@ class StreamClientLayer(TrainLayer):
 
     def _connectPeerAsy(self, addr, time):
         self.socket = asy_socket.socket(asy_socket.AF_INET, asy_socket.SOCK_STREAM)
-        self.timer = self.loop.timer(time)
         self.socket.setblocking(False)
         self._read_watcher = self.loop.io(self.socket.fileno(), 1)
         self._write_watcher = self.loop.io(self.socket.fileno(), 2)
@@ -115,13 +115,10 @@ class StreamClientLayer(TrainLayer):
                 TCLogger.warning("connect:%s error:%s" % (addr, str(e)))
                 self.close()
                 return False
-
+        self.timer = self.loop.timer(self.timeout)
         self.timer.start(self._actionTimeOut,time)
         self._write_watcher.start(self._connected, addr)
         return True
-    #
-    # def _delayConnecting(self):
-    #     self._connectPeerAsy(self.remote,self.timeout)
 
     def _connectPeerWithHello(self, remote):
         TCLogger.info("try to connect:%s with timeout:%d",str(remote),self.timeout)
@@ -151,8 +148,6 @@ class StreamClientLayer(TrainLayer):
                 self.pRBufStart[0:self.rest_data_sz] = self.pRBufStart[rLen - self.rest_data_sz:rLen]
         elif rLen < 0:
             self.close()
-            self.timer.start(self._actionTimeOut, self.timeout)
-            self._write_watcher.start(self._connectPeerWithHello,self.remote)
 
     def start(self):
         try:
@@ -168,7 +163,6 @@ class StreamClientLayer(TrainLayer):
         except asy_socket.error as e:
             TCLogger.error("_sendData  %s",e)
             self.close()
-            self._connectPeerWithHello(self.remote)
             return
         if ret != len(self.send_buf):
             self.send_buf = self.send_buf[ret:]

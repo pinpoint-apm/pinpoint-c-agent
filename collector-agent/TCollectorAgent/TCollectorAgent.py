@@ -248,7 +248,7 @@ class ThriftAgent(PinpointAgent):
     def __sendPing(self,tcp_layer):
         ping_data = self.__getPingPacket().getSerializedData()
         tcp_layer.sendData(ping_data)
-        TCLogger.debug("send ping len:%d", len(ping_data))
+        # TCLogger.debug("send ping len:%d", len(ping_data))
 
     def __sendAgentInfo(self,tcp_layer):
         agent_data = self.__getTAgentInfoPacket().getSerializedData()

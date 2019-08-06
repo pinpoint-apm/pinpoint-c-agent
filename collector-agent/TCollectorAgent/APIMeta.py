@@ -18,7 +18,7 @@
 
 from TPackets import *
 from Trace.ttypes import TApiMetaData, TStringMetaData
-
+from TCollectorAgent.Type import *
 
 class APIMeta(object):
     API_META_INDEX = 1

@@ -21,7 +21,7 @@ from Common import TCLogger
 from Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
 from Protocol import CollectorPro
 from Trains import DgramLayer, TrainLayer
-from Type import *
+from TCollectorAgent.Type import *
 
 
 class AgentStateManager(object):

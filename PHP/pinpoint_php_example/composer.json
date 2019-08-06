@@ -15,12 +15,12 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "master"
+        "eeliu/pinpoint-c-agent": "dev-php-simple-aop"
     },
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/eeliu/php_simple_aop.git"
+            "url": "https://github.com/eeliu/pinpoint-c-agent.git"
         }
     ]
 }
