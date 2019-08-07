@@ -15,7 +15,7 @@ if(pinpoint_tracelimit() || pinpoint_tracelimit() ||pinpoint_tracelimit() || pin
 {
     echo "pass";
 }else{
-    echo "pinpoint_tracelimit blocked";
+    echo "pinpoint_tracelimit failed";
 }
 --EXPECTF--
 [%d] triger:1
