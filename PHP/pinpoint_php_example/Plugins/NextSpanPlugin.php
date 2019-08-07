@@ -25,38 +25,68 @@ use Plugins\PerRequestPlugins;
 ///@hook:app\AccessRemote::\curl_close
 class NextSpanPlugin extends Candy
 {
+    private function handleHttpHeader($ch,&$headers)
+    {
+        $headers[] ='Pinpoint-Sampled:s1';
+        $headers[] ='Pinpoint-Flags:0';
+        $headers[] ='Pinpoint-Papptype:1500';
+        $headers[] ='Pinpoint-Pappname:'.pinpoint_app_name();
+
+        $headers[] = 'Pinpoint-Host:'.$this->gethostFromCh($ch);
+
+        $headers[] ='Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid;
+        $headers[] ='Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid;
+        $nsid = PerRequestPlugins::instance()->generateSpanID();
+        $headers[] ='Pinpoint-Spanid:'.$nsid;
+    }
+
+    /**
+     * Fix the bug when user not set  CURLOPT_HTTPHEADER.
+     * @param $ch
+     */
+    private function handleUrl($ch,$url)
+    {
+        $nsid = PerRequestPlugins::instance()->generateSpanID();
+        $header = array(
+            'Pinpoint-Sampled:s1',
+            'Pinpoint-Flags:0',
+            'Pinpoint-Papptype:1500',
+            'Pinpoint-Pappname:'.pinpoint_app_name(),
+            'Pinpoint-Host:'.$this->getHostFromURL($url),
+            'Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid,
+            'Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid,
+            'Pinpoint-Spanid:'.$nsid
+            );
+        \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
+    }
+
+
     function onBefore()
     {
+        if($this->apId !== 'curl_setopt'){
+            return ;
+        }
+
         $argv = &$this->args[0];
-        if( isset($argv[1]) && ($argv[1] == CURLOPT_HTTPHEADER)){
+        if( isset($argv[1])){
             $ch = $argv[0];
-            // check trace limited
-            // 1. Not send trace to collector-agent
-            // 2. Pass s0 to downstream
             if(PerRequestPlugins::instance()->traceLimit()){
+                // check trace limited
+                // 1. Not send trace to collector-agent
+                // 2. Pass s0 to downstream
                 $argv[2][] = 'Pinpoint-Sampled:s0';
                 return ;
             }
 
-            $argv[2][] ='Pinpoint-Sampled:s1';
-            $argv[2][] ='Pinpoint-Flags:0';
-            $argv[2][] ='Pinpoint-Papptype:1500';
-            $argv[2][] ='Pinpoint-Pappname:'.pinpoint_app_name();
+            if($argv[1] == CURLOPT_HTTPHEADER){
+                $this->handleHttpHeader($ch,$argv[2]);
+            }elseif ($argv[1] == CURLOPT_URL){
+                $this->handleUrl($ch,$argv[2]);
+            }
 
-            $argv[2][] = 'Pinpoint-Host:'.$this->gethostFromCh($ch);
-
-            $argv[2][] ='Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid;
-            $argv[2][] ='Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid;
-            $nsid = PerRequestPlugins::instance()->generateSpanID();
-            $argv[2][] ='Pinpoint-Spanid:'.$nsid;
-
-            pinpoint_add_clues(PHP_ARGS,"headers");
+            pinpoint_add_clues(PHP_ARGS,"...");
             pinpoint_add_clue("stp",PHP_METHOD);
-
-            return ;
         }
-
-
     }
 
     function onEnd(&$ret)
@@ -64,7 +94,7 @@ class NextSpanPlugin extends Candy
         if($this->apId == 'curl_exec'){
             $argv = &$this->args[0];
             $ch = $argv[0];
-            pinpoint_add_clue("dst",$this->gethostFromCh($ch));
+            pinpoint_add_clue("dst",$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)));
             pinpoint_add_clue("stp",PINPOINT_PHP_REMOTE);
             pinpoint_add_clue('nsid',PerRequestPlugins::instance()->getCurNextSpanId());
             pinpoint_add_clues(HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
@@ -79,15 +109,14 @@ class NextSpanPlugin extends Candy
     {
 
     }
-
-    function gethostFromCh($ch)
+    function getHostFromURL($url)
     {
-        $URL   = parse_url(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
-        if(isset($URL['port']))
+        $urlAr   = parse_url($url);
+        if(isset($urlAr['port']))
         {
-            return $URL['host'].":".$URL['port'];
+            return $urlAr['host'].":".$urlAr['port'];
         }else{
-            return $URL['host'];
+            return $urlAr['host'];
         }
     }
 }

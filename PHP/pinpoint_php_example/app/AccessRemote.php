@@ -14,12 +14,12 @@ class AccessRemote
 
         \curl_setopt($ch, CURLOPT_URL, $url);
 
-        $headers = array(
-            'Content-type: application/xml',
-            'Authorization: gfhjui',
-        );
-
-        \curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//        $headers = array(
+//            'Content-type: application/xml',
+//            'Authorization: gfhjui',
+//        );
+//
+//        \curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         echo \curl_exec($ch);
 
         curl_close($ch);
