@@ -1,7 +1,7 @@
 language: php
 
 php:
-- 7.1
+- 7.1-nts
 
 git:
   submodules: false
@@ -10,4 +10,4 @@ env:
   - ROOT=$PWD
 script:
 - cd $ROOT/PHP/pinpoint_php_ext/ && echo “cd $ROOT/pinpoint_php_ext/”
-- phpize && ./configure && make && make test
+- phpize && ./configure && make && make test || cat tests/*.diff
