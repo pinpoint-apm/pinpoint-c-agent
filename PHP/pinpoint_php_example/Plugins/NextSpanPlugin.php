@@ -25,14 +25,23 @@ use Plugins\PerRequestPlugins;
 ///@hook:app\AccessRemote::\curl_close
 class NextSpanPlugin extends Candy
 {
+    /**
+     * hook CURLOPT_HTTPHEADER
+     * @param $ch
+     */
     private function handleHttpHeader($ch,&$headers)
     {
+        if(PerRequestPlugins::instance()->traceLimit()){
+            $headers[] = 'Pinpoint-Sampled:s0';
+            return ;
+        }
+
         $headers[] ='Pinpoint-Sampled:s1';
         $headers[] ='Pinpoint-Flags:0';
         $headers[] ='Pinpoint-Papptype:1500';
         $headers[] ='Pinpoint-Pappname:'.pinpoint_app_name();
 
-        $headers[] = 'Pinpoint-Host:'.$this->gethostFromCh($ch);
+        $headers[] = 'Pinpoint-Host:'.$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
 
         $headers[] ='Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid;
         $headers[] ='Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid;
@@ -41,11 +50,16 @@ class NextSpanPlugin extends Candy
     }
 
     /**
-     * Fix the bug when user not set  CURLOPT_HTTPHEADER.
+     * Fix the bug when user not set  CURLOPT_URL.
      * @param $ch
      */
     private function handleUrl($ch,$url)
     {
+        if(PerRequestPlugins::instance()->traceLimit()){
+            \curl_setopt($ch,CURLOPT_HTTPHEADER,array("Pinpoint-Sampled:s0"));
+            return ;
+        }
+
         $nsid = PerRequestPlugins::instance()->generateSpanID();
         $header = array(
             'Pinpoint-Sampled:s1',
@@ -70,13 +84,6 @@ class NextSpanPlugin extends Candy
         $argv = &$this->args[0];
         if( isset($argv[1])){
             $ch = $argv[0];
-            if(PerRequestPlugins::instance()->traceLimit()){
-                // check trace limited
-                // 1. Not send trace to collector-agent
-                // 2. Pass s0 to downstream
-                $argv[2][] = 'Pinpoint-Sampled:s0';
-                return ;
-            }
 
             if($argv[1] == CURLOPT_HTTPHEADER){
                 $this->handleHttpHeader($ch,$argv[2]);
@@ -109,7 +116,7 @@ class NextSpanPlugin extends Candy
     {
 
     }
-    function getHostFromURL($url)
+    function getHostFromURL(string $url)
     {
         $urlAr   = parse_url($url);
         if(isset($urlAr['port']))

@@ -967,7 +967,6 @@ bool register_shared_obj_address()
     {
         int64_t pagesize = sysconf(_SC_PAGESIZE);
         ftruncate(fd,pagesize);
-        pp_trace("pagesize =%ld ",pagesize);
     }
     close(fd);
     return true;

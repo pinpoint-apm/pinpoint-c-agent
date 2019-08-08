@@ -2,12 +2,13 @@ language: php
 
 php:
 - 7.1
-
-git:
-  submodules: false
+- 7.2
+- 7.3
 
 env:
-  - ROOT=$PWD
+- ROOT=$PWD
 script:
-- cd $ROOT/PHP/pinpoint_php_ext/ && echo “cd $ROOT/pinpoint_php_ext/”
-- phpize && ./configure && make && make test
+- set -x
+- cd $ROOT/PHP/pinpoint_php_ext/
+- phpize && ./configure && make
+- make test
