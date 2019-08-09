@@ -34,7 +34,13 @@ class curl_exec_interceptor extends \Pinpoint\Interceptor
             $spanid = -1;
             if($trace->getNextSpanInfo($attachedHeader,$spanid))
             {
-                $opt_header = array_merge($attachedHeader,$_SERVER[(string)$args[0]][CURLOPT_HTTPHEADER]);
+                $opt_header = array();
+                //by linuxmyjob
+                if(!empty($_SERVER[(string)$args[0]][CURLOPT_HTTPHEADER])){
+                    $opt_header = array_merge($attachedHeader,$_SERVER[(string)$args[0]][CURLOPT_HTTPHEADER]);
+                }else{
+                    $opt_header = $attachedHeader;
+                }
                 array_push($opt_header,'Pinpoint-Host:'.$_SERVER[(string)$args[0]][CURLOPT_URL]);
                 curl_setopt($args[0], CURLOPT_HTTPHEADER,$opt_header);
 
