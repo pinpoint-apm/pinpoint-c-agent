@@ -119,11 +119,21 @@ class NextSpanPlugin extends Candy
     function getHostFromURL(string $url)
     {
         $urlAr   = parse_url($url);
+        $retUrl = '';
+        if(isset($urlAr['host']))
+        {
+            $retUrl.=$urlAr['host'];
+        }
+
+        if(isset($urlAr['path'])){
+            $retUrl.=$urlAr['path'];
+        }
+
         if(isset($urlAr['port']))
         {
-            return $urlAr['host'].":".$urlAr['port'];
-        }else{
-            return $urlAr['host'];
+            $retUrl .= ":".$urlAr['port'];
         }
+
+        return $retUrl;
     }
 }
