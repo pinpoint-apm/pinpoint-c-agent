@@ -25,7 +25,7 @@ pinpoint| 1.8.0-RC1
 ### Installation
 
 #### Steps
-1. git clone https://github.com/naver/pinpoint-c-agent.git @ *`new_aop_php_agent`*
+1. git clone https://github.com/naver/pinpoint-c-agent.git @ *`dev-2`*
    
 > Build pinpoint-php-module
 
@@ -50,7 +50,7 @@ pinpoint| 1.8.0-RC1
 1. Goto collector-agent
    1. python3 -m venv env
    2. source env/bin/activate
-   3. pip install -r requirements.txt
+   3. pip3 install -r requirements.txt
    4. Change configuration file in conf/collector.conf
 
         ```ini
@@ -79,7 +79,7 @@ pinpoint| 1.8.0-RC1
         ```
    
 > Try the aop example
-4. Goto pinpoint_php_example
+4. Goto PHP/pinpoint_php_example
    1. Download composer.phar. [How To Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
    3. Set $PWD/app/ as your web site root path
@@ -134,7 +134,7 @@ After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660)
 
 ### For the developer
 
-[pinpoint_php_example](pinpoint_php_example/Readme.md)
+[pinpoint_php_example](PHP/pinpoint_php_example/Readme.md)
 
 ### Known Issues
 
