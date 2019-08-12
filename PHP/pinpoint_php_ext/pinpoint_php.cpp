@@ -332,10 +332,6 @@ PHP_FUNCTION(pinpoint_end_trace)
          descendant.node["E"] =  PPG(fetal_error_time) != 0? ( PPG(fetal_error_time) - descendant.start_time ): timestamp - descendant.start_time;
          callstack->pop();
     }
-    else
-    {
-        fprintf(stderr," trace stack overflow");
-    }
 
     pp_trace("pinpoint_end_trace Done!");
     RETURN_LONG(callstack->size());
@@ -473,6 +469,7 @@ PHP_FUNCTION(pinpoint_tracelimit)
  */
 static void php_pinpoint_php_init_globals(zend_pinpoint_php_globals *pinpoint_php_globals)
 {
+    memset(pinpoint_php_globals,0,sizeof(zend_pinpoint_php_globals));
     pinpoint_php_globals->t_layer.c_fd = -1;
     // this address should not expose to anyone
     strcpy(pinpoint_php_globals->shared_obj.address,SOBJ_ADDRESS);
