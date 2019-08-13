@@ -6,6 +6,7 @@ app info
 pinpoint_php.CollectorHost=unix:/unexist_file.sock
 pinpoint_php.SendSpanTimeOutMs=0
 pinpoint_php.UnitTest=true
+pinpoint_php.DebugReport=true
 --FILE--
 <?php 
 var_dump(pinpoint_app_name());
