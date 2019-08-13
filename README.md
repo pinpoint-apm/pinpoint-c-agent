@@ -9,6 +9,10 @@ The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent
 
 It is an agent written by C++, PHP, python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
 
+## The Difference About v0.1.x And v0.2.x
+
+[Click me ☚](PHP/Readme.md)
+
 ## Getting Started
 
 ### Requirement
@@ -47,7 +51,7 @@ pinpoint| 1.8.0-RC1
         pinpoint_php.TraceLimit=-1 
         ```
 > Build Collect-agent
-1. Goto collector-agent
+3. Goto collector-agent
    1. python3 -m venv env
    2. source env/bin/activate
    3. pip3 install -r requirements.txt
@@ -72,8 +76,8 @@ pinpoint| 1.8.0-RC1
         # the same as below "pinpoint_php.CollectorHost"
         Address=/tmp/collector-agent.sock
         ```
-    1. export COLLECTOR_CONFIG=/full path of collector.conf/
-    2. run  collector-agent
+    5. export COLLECTOR_CONFIG=/full path of collector.conf/
+    6. run  collector-agent
         ```
         $ python run.py (or nohup python run.py&)
         ```
@@ -85,12 +89,6 @@ pinpoint| 1.8.0-RC1
    3. Set $PWD/app/ as your web site root path
 
 ## Overview
-
-> Why we refactor the pinpoint_c_agent (v0.1.x)
-
-1. Hard to support all php versions.
-2. Slow, v0.1.x version hooks all functions.
-3. Not support ZTS.
 
 ### Pinpoint-c-agent 
 ![How does it work](images/pinpoint_0.2.jpg)
@@ -134,7 +132,7 @@ After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660)
 
 ### For the developer
 
-[pinpoint_php_example](PHP/pinpoint_php_example/Readme.md)
+[Plugins Tutorial ☚](PHP/pinpoint_php_example/Readme.md)
 
 ### Known Issues
 
