@@ -8,6 +8,7 @@ pinpoint_php.SendSpanTimeOutMs=200
 pinpoint_php.UnitTest=true
 ;pinpoint_php._limit for internal use. User do not use it
 pinpoint_php._limit=yes
+pinpoint_php.DebugReport=true
 --FILE--
 <?php 
 

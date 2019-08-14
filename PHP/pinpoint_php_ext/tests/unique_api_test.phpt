@@ -6,6 +6,7 @@ Test pinpoint_unique_id
 pinpoint_php.CollectorHost=unix:/unexist_file.sock
 pinpoint_php.SendSpanTimeOutMs=0
 pinpoint_php.UnitTest=true
+pinpoint_php.DebugReport=true
 --FILE--
 <?php
  

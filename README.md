@@ -9,6 +9,10 @@ The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent
 
 It is an agent written by C++, PHP, python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
 
+## The Difference About v0.1.x And v0.2.x
+
+[Click me ☚](PHP/Readme.md)
+
 ## Getting Started
 
 ### Requirement
@@ -25,11 +29,11 @@ pinpoint| 1.8.0-RC1
 ### Installation
 
 #### Steps
-1. git clone https://github.com/naver/pinpoint-c-agent.git @ *`new_aop_php_agent`*
+1. git clone https://github.com/naver/pinpoint-c-agent.git @ *`dev-2`*
    
 > Build pinpoint-php-module
 
-2. Goto pinpoint_php_ext
+2. Goto PHP/pinpoint_php_ext
    1. phpize        
    2. ./configure
    3. make 
@@ -47,10 +51,10 @@ pinpoint| 1.8.0-RC1
         pinpoint_php.TraceLimit=-1 
         ```
 > Build Collect-agent
-1. Goto collector-agent
+3. Goto collector-agent
    1. python3 -m venv env
    2. source env/bin/activate
-   3. pip install -r requirements.txt
+   3. pip3 install -r requirements.txt
    4. Change configuration file in conf/collector.conf
 
         ```ini
@@ -65,40 +69,35 @@ pinpoint| 1.8.0-RC1
         [Common]
         # your web server (nginx&apache) port
         Web_Port=8001   
-        Log_Level=ERROR # debug in dev
+        # debug in dev
+        Log_Level=ERROR 
         # make sure LOG_DIR is exist
         LOG_DIR=/your log dir/
         [Agent]
         # the same as below "pinpoint_php.CollectorHost"
         Address=/tmp/collector-agent.sock
         ```
-    1. export COLLECTOR_CONFIG=/full path of collector.conf/
-    2. run  collector-agent
+    5. export COLLECTOR_CONFIG=/full path of collector.conf/
+    6. run  collector-agent
         ```
         $ python run.py (or nohup python run.py&)
         ```
    
 > Try the aop example
-4. Goto pinpoint_php_example
+4. Goto PHP/pinpoint_php_example
    1. Download composer.phar. [How To Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
    3. Set $PWD/app/ as your web site root path
 
 ## Overview
 
-> Why we refactor the pinpoint_c_agent (v0.1.x)
-
-1. Hard to support all php versions.
-2. Slow, v0.1.x version hooks all functions.
-3. Not support ZTS.
-
 ### Pinpoint-c-agent 
 ![How does it work](images/pinpoint_0.2.jpg)
 
 ### Distributed Tracking system
-![phpmyadmin](images/phpmyadmin_example.png)
+![php_agent_example](images/php_agent_example.png)
 ### Call Stack
-![phpmyadmin_detail](images/phpmyadmin_example_detail.png)
+![php_agent_example_detail](images/php_agent_example_detail.png)
 ### TODO
 
 - [ ] redis,DB,memcache plugins ......
@@ -130,11 +129,13 @@ Watching the files status every time is a bad deal.
 
 ### 3. How much performance loss when I use?
 
-After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660). While, the more function/method you watching, the more you taken. @TODO  a test.
+After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you taken. 
+
+[Test Result ☚](PHP/Readme.md#performance-loss)
 
 ### For the developer
 
-[pinpoint_php_example](pinpoint_php_example/Readme.md)
+[Plugins Tutorial ☚](PHP/pinpoint_php_example/Readme.md)
 
 ### Known Issues
 

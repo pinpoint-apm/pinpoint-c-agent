@@ -16,26 +16,26 @@
 #!/usr/bin/env python
 from unittest import TestCase
 
-from TPackets import *
+from TCollectorAgent.TPackets import *
 
 
 # -*- coding: UTF-8 -*-
 class TestPacket(TestCase):
     def test_parseNetByteStream(self):
-        netFlow = struct.pack('!hii9shih',PacketType.CONTROL_HANDSHAKE,2,9,"123456789",PacketType.APPLICATION_STREAM_CLOSE,12345,0)
+        netFlow = struct.pack('!hii9shih',PacketType.CONTROL_HANDSHAKE,2,9,"123456789".encode(),PacketType.APPLICATION_STREAM_CLOSE,12345,0)
         view = memoryview(netFlow)
 
         ipacket =  Packet.parseNetByteStream(view,len(netFlow))
 
-        tp = ipacket.next()
+        tp = next(ipacket)
 
 
         self.assertEqual(tp[0], 19)
         self.assertEqual(tp[1],PacketType.CONTROL_HANDSHAKE)
         self.assertEqual(tp[2], 2)
-        self.assertEqual(tp[3].tobytes(),"123456789")
+        self.assertEqual(tp[3].tobytes(),"123456789".encode())
 
-        tp = ipacket.next()
+        tp = next(ipacket)
 
 
         self.assertEqual(tp[0], 27)

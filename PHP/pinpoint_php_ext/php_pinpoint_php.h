@@ -108,6 +108,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pinpoint_php)
     uint  w_timeout_ms;
     zend_bool   utest_flag;
     zend_bool   limit;
+    zend_bool    debug_report;
     int   tracelimit;
     void*  call_stack;
     TransLayer t_layer;

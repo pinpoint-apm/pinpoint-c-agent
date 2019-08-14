@@ -135,6 +135,10 @@ STD_PHP_INI_ENTRY("pinpoint_php.TraceLimit","-1",PHP_INI_ALL,
         OnUpdateLong,tracelimit,zend_pinpoint_php_globals,pinpoint_php_globals)
 STD_PHP_INI_ENTRY("pinpoint_php._limit","no",PHP_INI_ALL,
         OnUpdateBool,limit,zend_pinpoint_php_globals,pinpoint_php_globals)
+STD_PHP_INI_ENTRY("pinpoint_php.DebugReport","no",PHP_INI_ALL,
+        OnUpdateBool,debug_report,zend_pinpoint_php_globals,pinpoint_php_globals)
+
+
 
 PHP_INI_END()
 
@@ -691,6 +695,12 @@ int recv_msg_from_collector(TransLayer *t_layer)
 
 int pp_trace(const char *format,...)
 {
+
+    if(!PPG(debug_report))
+    {
+       return 0;
+    }
+
     // insert more info
     int n = snprintf(&PPG(logBuffer)[0],LOG_SIZE,"[%d] ",getpid());
     //

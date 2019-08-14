@@ -2,7 +2,7 @@
 
 ### Tutorial
 
-1. First,you need to know how to use [php_simple_aop](https://github.com/eeliu/php_simple_aop/blob/master/Readme.md) and how it works. 
+1. First,you need to know how to use [ php_simple_aop ☚](https://github.com/eeliu/php_simple_aop/blob/master/Readme.md) and how it works. 
 2. Write your own XXXPlugin.php class.
    
    ```php
@@ -23,7 +23,7 @@
         }
     }
    ```
-   > You could find some out of box plugins in [[pinpoint_php_example/Plugins/](https://github.com/eeliu/pinpoint-c-agent/tree/new_aop_php_agent/pinpoint_php_example/Plugins)].
+   > You could find some out of box plugins in [[pinpoint_php_example/Plugins/](https://github.com/naver/pinpoint-c-agent/tree/dev-2/PHP/pinpoint_php_example/Plugins)].
     When you add clue(clues), DO NOT assignment with large string,or string included some special characters(https://www.freeformatter.com/json-escape.html)
 3. Add "//@hook:app\User::adduser (which function you cared)" located right before ClassName(XXXPlugins),onBefore,onEnd or onException if you cared about it when called before&after&around,before,after or around.
 
@@ -60,7 +60,7 @@
 
 ## Example
 
-https://github.com/eeliu/pinpoint-c-agent/tree/new_aop_php_agent/pinpoint_php_example/Plugins
+https://github.com/naver/pinpoint-c-agent/tree/dev-2/PHP/pinpoint_php_example/Plugins
 
 ## API of Pinpiont_php_ext
-[Goto pinpoint_ext_api](../pinpoint_php_ext/pinpoint_php_api.php)
+[Goto pinpoint_ext_api ☚](../pinpoint_php_ext/pinpoint_php_api.php)
