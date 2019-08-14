@@ -33,7 +33,7 @@ pinpoint| 1.8.0-RC1
    
 > Build pinpoint-php-module
 
-2. Goto pinpoint_php_ext
+2. Goto PHP/pinpoint_php_ext
    1. phpize        
    2. ./configure
    3. make 
@@ -69,7 +69,8 @@ pinpoint| 1.8.0-RC1
         [Common]
         # your web server (nginx&apache) port
         Web_Port=8001   
-        Log_Level=ERROR # debug in dev
+        # debug in dev
+        Log_Level=ERROR 
         # make sure LOG_DIR is exist
         LOG_DIR=/your log dir/
         [Agent]
@@ -94,9 +95,9 @@ pinpoint| 1.8.0-RC1
 ![How does it work](images/pinpoint_0.2.jpg)
 
 ### Distributed Tracking system
-![phpmyadmin](images/phpmyadmin_example.png)
+![php_agent_example](images/php_agent_example.png)
 ### Call Stack
-![phpmyadmin_detail](images/phpmyadmin_example_detail.png)
+![php_agent_example_detail](images/php_agent_example_detail.png)
 ### TODO
 
 - [ ] redis,DB,memcache plugins ......
@@ -128,7 +129,9 @@ Watching the files status every time is a bad deal.
 
 ### 3. How much performance loss when I use?
 
-After full test, the AOP code could consume at least 1ms in our env(cpu E5-2660). While, the more function/method you watching, the more you taken. @TODO  a test.
+After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you taken. 
+
+[Test Result ☚](PHP/Readme.md#performance-loss)
 
 ### For the developer
 
