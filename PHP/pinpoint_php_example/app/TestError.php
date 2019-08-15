@@ -10,18 +10,40 @@ class TestError
     public $name = "sam";
     static function throwException()
     {
+        $num = "hello world!";
         throw new \Exception("throw some thing");
+        return $num;
+    }
+
+    static function caughtException()
+    {
+        $num = "hello world!";
+        try{
+            throw new \Exception("throw some thing");
+        }catch(Exception $e){
+            echo $e->getMessage();
+        }
+        return $num;
     }
 
     static function error()
     {
-        xxx(234.343,456345,"fad",[1,2,3]);
+//        try{
+            xxx(234.343,456345,"fad",[1,2,3]);
+//        }catch (Exception $e){
+//            echo  $e->getMessage();
+//        }
     }
 
     static function test_cumsum_e1($n)
     {
         if ($n < 1) throw new Exception("n < 1");
-        $tmp = $n + static::test_cumsum_e1($n-1);
+//        try {
+            $tmp = $n + static::test_cumsum_e1($n - 1);
+//        }catch (Exception $e){
+//            echo $e->getMessage();
+//        }
+        return $tmp;
     }
 
     public function testRetParm(&$arg){
@@ -32,7 +54,7 @@ class TestError
     }
 
     public function testRetConst(&$arg){
-        //        unset($arg);
+//        unset($arg);
         $arg = "bbbb";
         echo "aaaaaaa";
         return "adfadf";
@@ -47,7 +69,7 @@ class TestError
     }
 
     public function testRetArgAndExp(&$arg){
-        //        unset($arg);
+//        unset($arg);
         $arg = "bbbb";
         throw new Exception("sssssssssssssss");
         echo "aaaaaaa";
@@ -56,7 +78,6 @@ class TestError
 
     public function Strict(&$arg){
         echo "Test";
-        print_r($arg);
     }
 
 
@@ -76,13 +97,13 @@ class TestError
     {
         if ($n < 1) throw new \Exception("n < 1");
         $tmp = $n;
-        try
-        {
+//        try
+//        {
             $tmp += $this->test_cumsum3($n-1);
-        }
-        catch( Exception $e)
-        {
-        }
+//        }
+//        catch( Exception $e)
+//        {
+//        }
         return $tmp;
     }
 
@@ -105,5 +126,36 @@ class TestError
         echo $this->test_cumsum2(3);
         echo $this->test_cumsum3(3);
         echo $this->test_cumsum4(3);
+    }
+
+    function testParseError()
+    {
+        $var = "test";
+        $str = 'This is a $var!';
+        eval("$str = \"$str\";");
+        echo $str."\n";
+    }
+
+    function testTypeError(int $integer)
+    {
+        return $integer;
+    }
+
+    function testArithmeticError()
+    {
+        $value = 1 << -1;
+        echo $value."\n";
+    }
+
+    function testDivisionByZeroError()
+    {
+        $value = 1 % 0;
+        return $value;
+    }
+
+    function testAssertionError()
+    {
+        $value = 1;
+        assert($value === 0);
     }
 }
