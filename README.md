@@ -11,7 +11,7 @@ The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent
 
 It is an agent written by C++, PHP, python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
 
-## The Difference About v0.1.x And v0.2.x
+## The Difference Between v0.1.x And v0.2.x
 
 [Click me ☚](PHP/Readme.md)
 
@@ -107,9 +107,9 @@ pinpoint| 1.8.0-RC1
 
 ## Compatibility
 
-Pinpoint Version | PHP| Python
----------------- | ----- | -----
-1.8.0-RC1 | PHP 7+ | Python3
+Pinpoint Version | PHP| Python|GCC
+---------------- | ----- | -----|---
+1.8.0-RC1 | PHP 7+ | Python3|GCC 5+
 
 ## Changes
 
@@ -131,9 +131,9 @@ Watching the files status every time is a bad deal.
 
 ### 3. How much performance loss when I use?
 
-After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you taken. 
+After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you loss. 
 
-[Test Result ☚](PHP/Readme.md#performance-loss)
+[Test Result ☚](PHP/Readme.md#performance-loss-under-stress-test)
 
 ### For the developer
 
@@ -141,7 +141,7 @@ After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @
 
 ### Known Issues
 
-#### 1. Exception or Error Message With A Wrong Stack information.
+#### 1. Exception or Error Message With A Wrong File Path.
 
 https://github.com/naver/pinpoint-c-agent/issues/99
 
