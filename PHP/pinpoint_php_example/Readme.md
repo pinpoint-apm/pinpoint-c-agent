@@ -29,8 +29,19 @@
 
 4. Removed the "__class_index_table" file under AOP_CACHE_DIR.
 
-5. Copy your plugins files into PLUGINS_DIR,then every thing is ready. Your plugins could be injected in next reqeust.
-
+5. Copy your plugins files into source tree/plugins_dir,and add this directory into composer.json{"autoload"}.
+   
+    ```
+    "autoload": {
+            "psr-4": {
+                ......
+                "Plugins\\": "your source tree/plugins_dir"
+            }
+        },
+    ```
+    
+6. Update your autoload. $ composer update
+7. Enjoy the pinpoint-php-agent
 ## Protocol
 
 > Json -> Thrift
