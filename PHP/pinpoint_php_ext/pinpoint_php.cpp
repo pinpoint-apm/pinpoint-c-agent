@@ -576,7 +576,12 @@ int do_write_data(const void *data,uint length,void *args)
     uint buf_ofs = 0;
 
     while(buf_ofs < length){
+#ifdef __APPLE__
+        ssize_t ret = send(t_layer->c_fd,buf + buf_ofs,length -buf_ofs ,0);
+#else
         ssize_t ret = send(t_layer->c_fd,buf + buf_ofs,length -buf_ofs ,MSG_NOSIGNAL);
+#endif
+
         if(ret > 0){
             buf_ofs += (uint) ret;
         }else if(ret == -1){
