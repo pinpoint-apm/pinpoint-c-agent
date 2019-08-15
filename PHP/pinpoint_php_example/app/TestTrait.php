@@ -3,8 +3,11 @@
 
 namespace app;
 
-trait TestTrait
+class TestTrait
 {
-    function getReturnType() { echo "1"; }
-    function getReturnDescription() { echo "\n TestTrait: 2 \n" ;}
+    use FuncInTrait;
+
+    public function test(){
+        echo "Func not in trait! ";
+    }
 }

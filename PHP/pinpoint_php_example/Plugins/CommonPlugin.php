@@ -22,6 +22,29 @@ use Plugins\Candy;
 /// @hook:test wrong format
 ///@hook:app\AppDate::\date app1\Foo::test_func_2 app\AopFunction::test_func1 app\TestError::Strict
 ///@hook:app\AppDate::outputDate
+///@hook:app\AppDate::\date
+///@hook:app\AopFunction::test_func1
+///@hook:app\AopFunction::test_func2  app1\Foo::test_func_2
+///@hook:app\Person::eat app\Teacher::eat app\Student::eat app\Doctor::other
+///@hook:app\TestGenerator::generator
+///@hook:app\AbstractStudent::eat app\AbstractStudent::drink app\AbstractStudent::breath
+///@hook:app\AbstractStudent::eat app\AbstractStudent::drink app\AbstractPerson::breath
+///@hook:app\InterfaceStudent::setVariable app\InterfaceStudent::getHtml app\InterfaceStudent::other
+///@hook:app\TestClone::setColor app\TestClone::getColor app\TestClone::__clone
+///@hook:app\TestRecursion::test_cumsum1 app\TestRecursion::test_cumsum2
+///@hook:app\TestAnonymous::createbell app\AopFunction::test_func1
+///@hook:app\TestStatic::static_func
+///@hook:app\TestFinalClass::test app\TestFinalFunc::test
+///@hook:app\FuncInTrait::traitfunc app\TestTrait::test
+///@hook:app\CallBackFunc::fnCallback1 app\CallBackFunc::fnCallback2
+///@hook:app\LevelClass::public_function app\LevelClass::protected_function app\LevelClass::private_function
+///@hook:app\TestError::throwException app\TestError::testRetConst app\TestError::testRetParm app\TestError::testRetConstAndExp app\TestError::testParseError app\TestError::testTypeError app\TestError::testArithmeticError app\TestError::testDivisionByZeroError app\TestError::testAssertionError
+///@hook:app\OverRideLevel::public_function app\OverRideLevel::protected_function app\OverRideLevel::private_function
+///@hook:app\TestArgs::test_atgs
+///@hook:app\TestReturn::test_return
+///@hook:app\DBcontrol::\PDO::beginTransaction app\DBcontrol::\PDO::commit app\DBcontrol::\PDO::__construct app\DBcontrol::\PDO::getAttribute app\DBcontrol::\PDO::prepare app\DBcontrol::\PDOStatement::fetch app\DBcontrol::\PDOStatement::execute app\DBcontrol::\PDOStatement::bindParam app\DBcontrol::\PDOStatement::fetchObject
+///@hook:app\TestMysqli::\mysqli::query app\TestMysqli::\mysqli::prepare app\TestMysqli::\mysqli_result::fetch_all
+///@hook:app\TestRedis::\Redis::connect app\TestRedis::\Redis::get app\TestRedis::\Redis::keys app\TestRedis::\Redis::del app\TestRedis::\Redis::set
 class CommonPlugin extends Candy
 {
     ///@hook:app\DBcontrol::connectDb
