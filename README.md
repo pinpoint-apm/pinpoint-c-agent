@@ -1,5 +1,7 @@
 ![Pinpoint](images/logo.png)
 
+[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=dev-2)](https://travis-ci.com/naver/pinpoint-c-agent)
+
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
@@ -141,15 +143,24 @@ After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @
 
 #### 1. Exception or Error Message With A Wrong Stack information.
 
+https://github.com/naver/pinpoint-c-agent/issues/99
+
 #### 2. If I Do Not Use Composer/autoloader,Can I Use this Version ?
 
 Sorry, `php-simple-aop` not supported wrapping the user class (or internal class) without Composer/autoloader. By the way [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
+
+https://github.com/naver/pinpoint-c-agent/issues/103
 
 #### 3. Why not support PHP5.x?
 
 https://www.php.net/supported-versions.php
 
+#### 4. Gernerator function not support.
 
+https://github.com/naver/pinpoint-c-agent/issues/100
+
+#### 5. Some built-in functions cant AOP
+https://github.com/naver/pinpoint-c-agent/issues/102
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
