@@ -131,7 +131,7 @@ Watching the files status every time is a bad deal.
 
 ### 3. How much performance loss when I use?
 
-After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you loss. 
+After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you taken. 
 
 [Test Result ☚](PHP/Readme.md#performance-loss-under-stress-test)
 
