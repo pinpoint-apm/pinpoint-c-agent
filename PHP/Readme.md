@@ -76,7 +76,7 @@ Hooked Times: 30
 Case|MTT
 ---|----
 phpmyadmin without pinpoint|387.28ms
-phpmyadmin with pinpoint-php v0.1|611.46ms
+phpmyadmin with pinpoint-php v0.1|511.46ms
 phpmyadmin with pinpoint-php v0.2|398.26ms
 
 
