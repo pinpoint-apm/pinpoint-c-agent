@@ -62,30 +62,26 @@ Functional|v0.1.x|v0.2.x
 
 #### Performance Loss Under Stress Test
 
-> Sample Rate: 50%
+> Test Scene
 
-Scene: 50% functions are watched. 50% functions are ignored
+```
+Test Object: PHPMYAdmin
+URL: http://dev-mysql-phpmyadmin/db_structure.php?server=1&db=testDB
+Plugins Amount: 4
+Hooked Times: 30
+```
 
-Amount|None pinpont-agent <br> has composer|v0.1.x <br>no composer|v0.2.x <br> has composer
-----|-----|-----|----
-20 functions|MTT=2.98ms|MTT=2.63ms|MTT=4.69ms
-100 functions|MTT=3.01ms|MTT=6.31ms|MTT=6.21ms
-200 functions|MTT=2.89ms|MTT=18.03ms|MTT=7.54ms
+> Test Result
 
-> Sample Rate: 5%
+Case|MTT
+---|----
+phpmyadmin without pinpoint|387.28ms
+phpmyadmin with pinpoint-php v0.1|611.46ms
+phpmyadmin with pinpoint-php v0.2|398.26ms
 
-Scene: 5% functions are watched. 95% functions are ignored
-Has composer
-
-Amount|None pinpont-agent|v0.1.x|v0.2.x
-----|-----|-----|----
-100 functions|MTT=2.78ms|MTT=4.01ms|MTT=5.18ms
 
 ```
 MTT: Mean RTT Time 
-None pinpont-agent: run php site without pinpoint-php agent 
-has composer: ues composer as classloader
-No composer: no classloader
 ```
 
 > By the way,pinpoint is an APM system, not a performance enhancement system. Loss can't avoiding from now on.
