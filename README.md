@@ -1,6 +1,6 @@
 ![Pinpoint](images/logo.png)
 
-[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=dev-2)](https://travis-ci.com/naver/pinpoint-c-agent)
+[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent)
 
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
@@ -31,7 +31,7 @@ pinpoint| 1.8.0-RC1
 ### Installation
 
 #### Steps
-1. git clone https://github.com/naver/pinpoint-c-agent.git @ *`dev-2`*
+1. git clone https://github.com/naver/pinpoint-c-agent.git
    
 > Build pinpoint-php-module
 
