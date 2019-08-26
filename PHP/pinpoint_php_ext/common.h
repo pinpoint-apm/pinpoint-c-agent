@@ -18,6 +18,11 @@
 
 #include <stdlib.h>
 
+//fix #129
+#ifndef uint
+#define uint unsigned int
+#endif
+
 typedef struct list{
 
     void *value;
