@@ -20,6 +20,8 @@
  *      Author: eeliu
  */
 
+#include "common.h"
+
 #include <stdlib.h>
 #include <list>
 #include <string.h>
