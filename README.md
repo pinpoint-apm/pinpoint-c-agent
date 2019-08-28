@@ -5,7 +5,7 @@
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [Lastest](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint PHP Agent
 
