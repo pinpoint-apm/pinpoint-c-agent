@@ -16,14 +16,15 @@ class HandleRequest
     {
         if(isset($_GET['name'])){
             $user = $_GET['name'];
-            if(!$this->user->checkUser($user))
-            {
-                $this->user->register($user);
-            }
-            $connection->send("hello ".$user." \n");
+        }else{
+            $user = $data;
         }
-        else{
-            $connection->send("hello no user\n");
+
+        if(!$this->user->checkUser($user))
+        {
+            $this->user->register($user);
         }
+
+        $connection->send("hello ".$user." \n");
     }
 }

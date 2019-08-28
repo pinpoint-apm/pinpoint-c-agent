@@ -19,7 +19,7 @@
 namespace  example\workerman\Plugins;
 require_once "PluginsDefines.php";
 
-///@hook:example\workerman\HandleRequest::onMessage
+/////@hook:example\workerman\HandleRequest::onMessage
 class PerRequestPlugin
 {
     public static $_intance = null;
