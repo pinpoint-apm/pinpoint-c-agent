@@ -16,10 +16,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from TCollectorAgent.CollectorAgentConf import CollectorAgentConf
-from TCollectorAgent.Protocol import CollectorPro
-from TCollectorAgent.TCollectorAgent import ThriftAgent
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from CollectorAgent.Protocol import CollectorPro
+from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
 
-__all__= ['CollectorAgentConf', 'ThriftAgent','CollectorPro']
+__all__= ['CollectorAgentConf', 'ThriftAgentImplement', 'CollectorPro']
 
 

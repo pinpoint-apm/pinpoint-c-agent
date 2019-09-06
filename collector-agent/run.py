@@ -16,23 +16,22 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from TCollectorAgent import *
-from PHPAgent import PHPAgent,PHPAgentConf
+from PHPAgent import *
 from Common import *
-from TCollectorAgent.CollectorAgentConf import CollectorAgentConf
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from gevent.event import Event
+from PinpointAgent.AppManagement import  AppManagement
 import gevent,signal
+
 
 class Server(object):
     def __init__(self):
-        self.cac  = CollectorAgentConf(CAConfig)
-        self.pac  = PHPAgentConf(CAConfig)
-        self.thrift_agent = ThriftAgent(self.cac)
-        self.php_agent    = PHPAgent(self.pac,self.thrift_agent.handlePHPAgentData)
-        self.php_agent.registerPHPAgentHello(self.thrift_agent.tellWhoAMI)
-        self.thrift_agent.startAll()
+        self.collector_conf = CollectorAgentConf(CAConfig)
+        self.pac = PHPAgentConf(CAConfig)
+        self.app_management = AppManagement(self.collector_conf)
+        self.php_agent = FrontAgent(self.pac, self.app_management.handle_front_agent_data)
+        self.php_agent.registerPHPAgentHello(self.app_management.tell_whoami)
         self.php_agent.start()
-
 
     def run(self):
         _stop_event = Event()
@@ -40,12 +39,9 @@ class Server(object):
         gevent.signal(signal.SIGTERM, _stop_event.set)
         gevent.signal(signal.SIGINT, _stop_event.set)
         _stop_event.wait()
-
-        self.thrift_agent.stop()
+        self.app_management.stop_all()
         self.php_agent.stop()
-
         TCLogger.warning("collector agent exit with SIGNAL")
-
 
 if __name__ == '__main__':
     server = Server()

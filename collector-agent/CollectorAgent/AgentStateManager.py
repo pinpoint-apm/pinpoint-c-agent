@@ -17,11 +17,13 @@
 # -*- coding: UTF-8 -*-
 import psutil
 
+from CollectorAgent.Protocol import CollectorPro
+from CollectorAgent.Type import AGENT_STAT_BATCH
 from Common import TCLogger
-from Common.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
-from TCollectorAgent.Protocol import CollectorPro
+from Proto.Trift.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
+
 from Trains import DgramLayer, TrainLayer
-from TCollectorAgent.Type import *
+
 
 
 class AgentStateManager(object):

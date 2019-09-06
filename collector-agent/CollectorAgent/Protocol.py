@@ -22,32 +22,27 @@ import struct
 from thrift.protocol import TCompactProtocol
 from thrift.transport import TTransport
 
-from Common.Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
-from Common.Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
-from TCollectorAgent.Type import *
+from Proto.Trift.Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
+from Proto.Trift.Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
+from CollectorAgent.Type import *
 
 TSPAN_VERSION= 0
 
 
 class CollectorPro(object):
-    transactionId = 0
-    sequenceId = 0
-    spanid = 0
-    @staticmethod
-    def createSpanid():
-        # return random.getrandbits(63)
-        CollectorPro.spanid +=1
-        return CollectorPro.spanid
-    @staticmethod
-    def createTransactionId():
-        # CollectorPro.transactionId+=1
-        CollectorPro.transactionId = random.randint(0,6666666)
-        return CollectorPro.transactionId
+    # transactionId = 0
+    # sequenceId = 0
+    # spanid = 0
+    # @staticmethod
+    # def createSpanid():
+    #     # return random.getrandbits(63)
+    #     CollectorPro.spanid +=1
+    #     return CollectorPro.spanid
 
-    @staticmethod
-    def createSequenceId():
-        CollectorPro.sequenceId += 1
-        return CollectorPro.sequenceId
+    # @staticmethod
+    # def createSequenceId():
+    #     CollectorPro.sequenceId += 1
+    #     return CollectorPro.sequenceId
 
     @staticmethod
     def typeHelper(type):

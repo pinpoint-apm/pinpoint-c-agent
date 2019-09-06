@@ -17,8 +17,8 @@
 # -*- coding: UTF-8 -*-
 
 
-from TCollectorAgent.Protocol import *
-from TCollectorAgent.Type import *
+from CollectorAgent.Protocol import *
+from CollectorAgent.Type import *
 
 
 
