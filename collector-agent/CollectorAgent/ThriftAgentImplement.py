@@ -49,7 +49,6 @@ class ThriftAgentImplement(PinpointAgent):
         self.tcpHost    =  (ac.CollectorTcpIp, ac.CollectorTcpPort)
         self.statHost   =  (ac.CollectorStatIp, ac.CollectorStatPort)
         self.spanHost   =  (ac.CollectorSpanIp, ac.CollectorSpanPort)
-        self.sequenceId = 1
         TCLogger.debug("CollectorTcp %s CollectorStat %s CollectorSpan %s" % (self.tcpHost, self.statHost, self.spanHost))
 
         self.tcpLayer = StreamClientLayer(self.tcpHost, self.handlerResponse, self.collectorTcpHello)
@@ -211,21 +210,21 @@ class ThriftAgentImplement(PinpointAgent):
 
 
 
-    def makeSpan(self, stackMap, tSpan=None, index=0):
+    def makeSpan(self, stackMap, tSpan=None, index=0,sequenceId=0):
 
         if tSpan is None:  ## A TSpan
             tSpan = self.genTspan(stackMap)
         else:  ## A span event
             spanEv = self.genSpanEvent(stackMap)
             # spanEv.spanId    = tSpan.spanId
-            spanEv.sequence = self.sequenceId
-            self.sequenceId += 1
+            spanEv.sequence = sequenceId
+            sequenceId+=1
             spanEv.depth = index
             tSpan.spanEventList.append(spanEv)
 
         if 'calls' in stackMap:
             for called in stackMap['calls']:
-                self.makeSpan(called, tSpan, index + 1)
+                self.makeSpan(called, tSpan, index + 1,sequenceId)
 
         return tSpan
 
