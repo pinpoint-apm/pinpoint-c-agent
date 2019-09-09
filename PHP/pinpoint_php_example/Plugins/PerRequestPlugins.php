@@ -61,8 +61,13 @@ class PerRequestPlugins
         pinpoint_add_clue("stp",PHP);
         pinpoint_add_clue("name","PHP Request");
 
-        if(defined('APPLICATIONNAME')){
-            pinpoint_add_clue("mname",APPLICATION_NAME);
+        if(defined('APPLICATION_NAME')){
+            pinpoint_add_clue("appname",APPLICATION_NAME);
+        }
+
+        if(defined('APPLICATION_ID'))
+        {
+            pinpoint_add_clue('appid',APPLICATION_ID);
         }
 
         if(isset($_SERVER['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID",$_SERVER))
@@ -162,8 +167,11 @@ class PerRequestPlugins
 
     public function generateTransactionID()
     {
-        return  pinpoint_app_id().'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
-//        return  APPLICATIONNAME.'^'.'1234567899754'.'^'.strval(pinpoint_unique_id());
+        if(defined('APPLICATION_ID')){
+            return  APPLICATION_ID.'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
+        }else{
+            return  pinpoint_app_id().'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
+        }
     }
 
 }

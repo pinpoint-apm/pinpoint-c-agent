@@ -18,7 +18,7 @@
 
 from CollectorAgent.Protocol import CollectorPro
 from CollectorAgent.TPackets import Packet
-from CollectorAgent.Type import PacketType, STRING_META_DATA, API_META_DATA, API_UNDEFINED
+from PinpointAgent.Type import PacketType, STRING_META_DATA, API_META_DATA, API_UNDEFINED
 
 from Common.Logger import TCLogger
 from Proto.Trift.Trace.ttypes import TApiMetaData, TStringMetaData

@@ -17,7 +17,10 @@
 # -*- coding: UTF-8 -*-
 
 from __future__ import print_function
+import errno
 from gevent import socket as asy_socket
+
+from Common import TCLogger
 from Trains.TrainsLayer import *
 
 
@@ -25,8 +28,15 @@ class DgramLayer(TrainLayer):
 
     def start(self):
         self.__socket = asy_socket.socket(asy_socket.AF_INET,asy_socket.SOCK_DGRAM)
-        self.__socket.connect(self.remote)
-        self.state = E_CONNECTED
+        self.__socket.setblocking(False)
+        try:
+            self.state = E_CONNECTED
+            self.__socket.connect(self.remote)
+        except  asy_socket.error as e:
+            if not (e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK)):
+                TCLogger.warning("connect:%s error:%s" % (self.remote, str(e)))
+                self.__socket.close()
+                raise Exception("create DgramLayer failed")
 
     def sendData(self, data):
         self.__socket.send(data)

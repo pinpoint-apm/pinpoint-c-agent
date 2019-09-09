@@ -15,20 +15,19 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
 from PHPAgent import *
 from Common import *
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from PinpointAgent import *
 from gevent.event import Event
-from PinpointAgent.AppManagement import  AppManagement
+from CollectorAgent import CollectorAgentConf
 import gevent,signal
 
 
 class Server(object):
     def __init__(self):
         self.collector_conf = CollectorAgentConf(CAConfig)
-        self.pac = PHPAgentConf(CAConfig)
         self.app_management = AppManagement(self.collector_conf)
+        self.pac = PHPAgentConf(CAConfig)
         self.php_agent = FrontAgent(self.pac, self.app_management.handle_front_agent_data)
         self.php_agent.registerPHPAgentHello(self.app_management.tell_whoami)
         self.php_agent.start()

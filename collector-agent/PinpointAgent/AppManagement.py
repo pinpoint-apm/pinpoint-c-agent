@@ -4,11 +4,12 @@
 import json
 import time
 
-from CollectorAgent import CollectorAgentConf
-from CollectorAgent.Type import PHP
-from Common import TCLogger
-from PinpointAgent.PinpointAgent import PinpointAgent
+from Common import *
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
+
+from PinpointAgent.PinpointAgent import PinpointAgent
+from PinpointAgent.Type import PHP
 
 
 class AppManagement(object):
@@ -18,10 +19,14 @@ class AppManagement(object):
         self.default_appid = self.collector_conf.AgentID
         self.default_appname = self.collector_conf.ApplicationName
         self.app_map = {}
-        self.default_app = ThriftAgentImplement(self.collector_conf,self.default_appid, self.default_appname,service_type)
+        self.default_app = None
+        self.startTimestamp = int(time.time()*1000)
+        self.create_default_implement(service_type)
+
+    def create_default_implement(self,service_type):
+        self.default_app = ThriftAgentImplement(self,self.collector_conf,self.default_appid, self.default_appname,service_type)
         self.default_app.start()
         self.app_map[self.default_appid] = self.default_app
-        self.startTimestamp = int(time.time()*1000)
 
     def find_app(self, app_id, app_name,service_type):
         if app_id in self.app_map:
@@ -34,7 +39,8 @@ class AppManagement(object):
 
         else:
             if  service_type == PHP:
-                app = ThriftAgentImplement(app_id, app_name)
+                TCLogger.info("collector-agent try to create a new application agent.[%s@%s]",app_id,app_name)
+                app = ThriftAgentImplement(self,self.collector_conf,app_id, app_name)
                 app.start()
                 self.app_map[app_id] = app
             else:
@@ -43,27 +49,28 @@ class AppManagement(object):
         return app
 
     def stop_all(self):
-        for app_id,instance in self.app_map:
+        for app_id,instance in self.app_map.items():
             assert(isinstance(instance,PinpointAgent))
-            TCLogger.info("application is stoping",app_id)
+            TCLogger.info("application is stopping [%s]",app_id)
             instance.stop()
 
     def handle_front_agent_data(self,client,type,body):
         content = body.decode('utf-8')
         stack = json.loads(content)
-        try:
-            for key in ['appid','appname','FT']:
-                assert key in stack, 'request must include %s'%(key)
-            appid = stack['appid']
-            appname = stack['appname']
-            ft = stack['FT']
-            app = self.find_app(appid,appname,ft)
-            app.sendSpan(stack)
 
-        except AssertionError as e:
-            TCLogger.error("front request dropped,as %s. body:[%s]",e,content)
-        except Exception as e:
-            TCLogger.error("front request dropped,as %s. body:[%s]",e,content)
+        if 'appid' not in stack:
+            appid = self.default_appid
+        else:
+            appid = stack['appid']
+
+        if 'appname' not in stack:
+            appname = self.default_appname
+        else:
+            appname = stack['appname']
+
+        ft = stack['FT']
+        app = self.find_app(appid,appname,ft)
+        app.sendSpan(stack)
 
     def tell_whoami(self):
         return {

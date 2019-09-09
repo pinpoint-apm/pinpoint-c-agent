@@ -16,10 +16,12 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
+from __future__ import absolute_import
+
+from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from CollectorAgent.Protocol import CollectorPro
-from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
-
 __all__= ['CollectorAgentConf', 'ThriftAgentImplement', 'CollectorPro']
+
 
 

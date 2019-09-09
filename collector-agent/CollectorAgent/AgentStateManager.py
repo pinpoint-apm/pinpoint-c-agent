@@ -18,7 +18,7 @@
 import psutil
 
 from CollectorAgent.Protocol import CollectorPro
-from CollectorAgent.Type import AGENT_STAT_BATCH
+from PinpointAgent.Type import AGENT_STAT_BATCH
 from Common import TCLogger
 from Proto.Trift.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
 

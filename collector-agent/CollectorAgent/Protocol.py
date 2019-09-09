@@ -22,12 +22,10 @@ import struct
 from thrift.protocol import TCompactProtocol
 from thrift.transport import TTransport
 
+from PinpointAgent.Type import SIGNATURE, HEADER_VERSION, SPAN, AGENT_INFO, AGENT_STAT, AGENT_STAT_BATCH, API_META_DATA, \
+    STRING_META_DATA, RESULT, TVERSION
 from Proto.Trift.Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
 from Proto.Trift.Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
-from CollectorAgent.Type import *
-
-TSPAN_VERSION= 0
-
 
 class CollectorPro(object):
     # transactionId = 0

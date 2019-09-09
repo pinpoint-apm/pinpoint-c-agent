@@ -15,7 +15,7 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from CollectorAgent.Type import PHP
+from PinpointAgent.Type import PHP
 
 
 class PinpointAgent(object):

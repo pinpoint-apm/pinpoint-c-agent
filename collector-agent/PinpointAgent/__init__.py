@@ -17,6 +17,5 @@
 # -*- coding: UTF-8 -*-
 
 from PinpointAgent.PinpointAgent import PinpointAgent
-from PinpointAgent.AppManagement import AppManagement
-
+from .AppManagement import AppManagement
 __all__=['PinpointAgent','AppManagement']

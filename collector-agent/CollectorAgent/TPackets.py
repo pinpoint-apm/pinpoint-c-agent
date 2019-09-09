@@ -18,9 +18,7 @@
 
 
 from CollectorAgent.Protocol import *
-from CollectorAgent.Type import *
-
-
+from PinpointAgent.Type import ControlMessageProtocolConstant, PacketType, AgentSocketCode
 
 
 class Packet(object):

@@ -261,6 +261,7 @@ PHP_FUNCTION(pinpoint_start_trace)
         }
         TraceNode ancestor(*root);
         ancestor.node["S"] = timestamp;
+        ancestor.node["FT"]= PHP;
         ancestor.ancestor_start_time = timestamp;
         ancestor.start_time = timestamp;
         callstack->push(ancestor);

@@ -24,6 +24,8 @@ import gevent
 
 from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage
 from Common import *
+from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode, AGENT_INFO, SPAN, PHP_METHOD_CALL, API_WEB_REQUEST, \
+    PROXY_HTTP_HEADER
 from Proto.Trift.Trace.ttypes import TSpan, TSpanEvent, TIntStringValue, TAnnotation, TAnnotationValue, \
     TLongIntIntByteByteStringValue
 from Trains import *
@@ -31,7 +33,7 @@ from CollectorAgent.TCGenerator import *
 from CollectorAgent.APIMeta import *
 from CollectorAgent.AgentStateManager import AgentStateManager
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
-from PinpointAgent.PinpointAgent import PinpointAgent
+from PinpointAgent import *
 
 
 class ThriftAgentImplement(PinpointAgent):
@@ -40,14 +42,14 @@ class ThriftAgentImplement(PinpointAgent):
     Negotiation=0
     Clear =1
 
-    def __init__(self,ac,app_id,app_name,serviceType=PHP):
+    def __init__(self,manage,ac,app_id,app_name,serviceType=PHP):
 
         super().__init__(app_id,app_name)
         self.ac         = ac
         self.tcpHost    =  (ac.CollectorTcpIp, ac.CollectorTcpPort)
         self.statHost   =  (ac.CollectorStatIp, ac.CollectorStatPort)
         self.spanHost   =  (ac.CollectorSpanIp, ac.CollectorSpanPort)
-        self.sequenceId = 0
+        self.sequenceId = 1
         TCLogger.debug("CollectorTcp %s CollectorStat %s CollectorSpan %s" % (self.tcpHost, self.statHost, self.spanHost))
 
         self.tcpLayer = StreamClientLayer(self.tcpHost, self.handlerResponse, self.collectorTcpHello)
@@ -75,8 +77,8 @@ class ThriftAgentImplement(PinpointAgent):
             PacketType.CONTROL_PONG : self.handle_recv_pong
         }
         self.socketCode = AgentSocketCode.NONE
-        self.startTimeStamp = ac.startTimestamp
-        self.agentId = app_id
+        self.manage = manage
+        self.startTimeStamp = self.manage.startTimestamp
         self.agentName= app_name
         self.agentInfo = TAgentInfo(
             agentId =app_id,
@@ -87,7 +89,7 @@ class ThriftAgentImplement(PinpointAgent):
             pid=os.getpid()
         )
 
-        self.agentState = AgentStateManager(self.agentId, self.startTimeStamp,self.statHost)
+        self.agentState = AgentStateManager(self.app_id, self.startTimeStamp,self.statHost)
         self.postponed_queue = []
         self.scanLocalInfo()
         self.api_metas = {}
@@ -259,7 +261,7 @@ class ThriftAgentImplement(PinpointAgent):
             tSpan.parentSpanId = int(span['psid'])
 
         if 'tid' in span:
-            tSpan.transactionId = TransactionId(encoded_str=  span['tid']).getBytes()
+            tSpan.transactionId = TransactionId(encoded_str= span['tid']).getBytes()
 
         if 'sid' in span:
             tSpan.spanId = int(span['sid'])
@@ -270,7 +272,7 @@ class ThriftAgentImplement(PinpointAgent):
         if 'E' in span:
             tSpan.elapsed = span['E']
 
-        if 'uri' in  span:
+        if 'uri' in span:
             tSpan.rpc = span['uri']
 
         if 'pname' in span:
@@ -336,8 +338,8 @@ class ThriftAgentImplement(PinpointAgent):
         self.agentInfo.ports = ah.port
 
     def start(self):
-        self.spanLayer.start()
         self.tcpLayer.start()
+        self.spanLayer.start()
 
 
     def stop(self):
@@ -475,7 +477,7 @@ class ThriftAgentImplement(PinpointAgent):
                     PHP,
                     self.agentInfo.pid,
                     self.agentInfo.agentVersion,
-                    self.agentInfo.startTimestamp)
+                    self.startTimeStamp)
 
         packet = Packet(PacketType.CONTROL_HANDSHAKE,
                         0, cmp.getDataLen(),
