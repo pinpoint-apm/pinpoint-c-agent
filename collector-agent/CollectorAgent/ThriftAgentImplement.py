@@ -54,7 +54,7 @@ class ThriftAgentImplement(PinpointAgent):
         self.tcpLayer = StreamClientLayer(self.tcpHost, self.handlerResponse, self.collectorTcpHello)
 
         self.spanLayer = DgramLayer(self.spanHost,None)
-
+        self.sequenceId = 0
         self.packetRoute = {
             PacketType.APPLICATION_SEND : self.handle_default,
             PacketType.APPLICATION_TRACE_SEND : self.handle_default,
@@ -152,6 +152,9 @@ class ThriftAgentImplement(PinpointAgent):
         :param json stack:
         :return:
         '''
+        ### must reset to zero
+        
+        self.sequenceId = 0
         tSpan = self.makeSpan(stack)
 
         body = CollectorPro.obj2bin(tSpan,SPAN)
@@ -209,7 +212,7 @@ class ThriftAgentImplement(PinpointAgent):
         return spanEv
 
 
-    def makeSpan(self, stackMap, tSpan=None, index=0,sequenceId=0):
+    def makeSpan(self, stackMap, tSpan=None, index=0):
         '''
 
         :param stackMap:
@@ -223,14 +226,14 @@ class ThriftAgentImplement(PinpointAgent):
         else:  ## A span event
             spanEv = self.genSpanEvent(stackMap)
             # spanEv.spanId    = tSpan.spanId
-            spanEv.sequence = sequenceId
-            sequenceId+=1
+            spanEv.sequence = self.sequenceId
+            self.sequenceId += 1
             spanEv.depth = index
             tSpan.spanEventList.append(spanEv)
 
         if 'calls' in stackMap:
             for called in stackMap['calls']:
-                self.makeSpan(called, tSpan, index + 1,sequenceId)
+                self.makeSpan(called, tSpan, index + 1)
 
         return tSpan
 
