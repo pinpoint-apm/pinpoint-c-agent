@@ -39,7 +39,7 @@ class NextSpanPlugin extends Candy
         $headers[] ='Pinpoint-Sampled:s1';
         $headers[] ='Pinpoint-Flags:0';
         $headers[] ='Pinpoint-Papptype:1500';
-        $headers[] ='Pinpoint-Pappname:'.pinpoint_app_name();
+        $headers[] ='Pinpoint-Pappname:'.PerRequestPlugins::instance()->app_name;
 
         $headers[] = 'Pinpoint-Host:'.$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
 
@@ -65,7 +65,7 @@ class NextSpanPlugin extends Candy
             'Pinpoint-Sampled:s1',
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
-            'Pinpoint-Pappname:'.pinpoint_app_name(),
+            'Pinpoint-Pappname:'.PerRequestPlugins::instance()->app_name,
             'Pinpoint-Host:'.$this->getHostFromURL($url),
             'Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid,
             'Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid,

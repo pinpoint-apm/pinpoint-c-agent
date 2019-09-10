@@ -28,6 +28,8 @@ class PerRequestPlugins
     public $pname = null;
     public $ptype = null;
     public $ah = null;
+    public $app_name=null;
+    public $app_id=null;
     private $curNextSpanId ='';
     private $isLimit =false;
 
@@ -63,11 +65,17 @@ class PerRequestPlugins
 
         if(defined('APPLICATION_NAME')){
             pinpoint_add_clue("appname",APPLICATION_NAME);
+            $this->app_name = APPLICATION_NAME;
+        }else{
+            $this->app_name = pinpoint_app_name();
         }
 
         if(defined('APPLICATION_ID'))
         {
             pinpoint_add_clue('appid',APPLICATION_ID);
+            $this->app_id = APPLICATION_ID;
+        }else{
+            $this->app_id = pinpoint_app_id();
         }
 
         if(isset($_SERVER['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID",$_SERVER))
@@ -167,11 +175,7 @@ class PerRequestPlugins
 
     public function generateTransactionID()
     {
-        if(defined('APPLICATION_ID')){
-            return  APPLICATION_ID.'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
-        }else{
-            return  pinpoint_app_id().'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
-        }
+        return  $this->app_id.'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
     }
 
 }
