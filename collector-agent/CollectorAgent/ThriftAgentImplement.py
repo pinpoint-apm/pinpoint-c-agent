@@ -209,9 +209,15 @@ class ThriftAgentImplement(PinpointAgent):
         return spanEv
 
 
-
     def makeSpan(self, stackMap, tSpan=None, index=0,sequenceId=0):
+        '''
 
+        :param stackMap:
+        :param tSpan:
+        :param index: the depth of call stack
+        :param sequenceId: reset from every span. Must start from zero
+        :return:
+        '''
         if tSpan is None:  ## A TSpan
             tSpan = self.genTspan(stackMap)
         else:  ## A span event
