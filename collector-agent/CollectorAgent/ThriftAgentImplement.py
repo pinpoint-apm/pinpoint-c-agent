@@ -149,11 +149,11 @@ class ThriftAgentImplement(PinpointAgent):
     def sendSpan(self,stack):
         '''
 
-        :param json stack:
+        :param dict stack:
         :return:
         '''
         ### must reset to zero
-        
+
         self.sequenceId = 0
         tSpan = self.makeSpan(stack)
 
