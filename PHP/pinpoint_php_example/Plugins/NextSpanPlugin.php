@@ -92,7 +92,7 @@ class NextSpanPlugin extends Candy
             }
 
             pinpoint_add_clues(PHP_ARGS,"...");
-            pinpoint_add_clue("stp",PHP_METHOD);
+
         }
     }
 
