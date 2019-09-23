@@ -365,7 +365,7 @@ PHP_FUNCTION(pinpoint_add_clue)
            return;
        }
        key = std::string(zkey,zkey_len);
-       value = std::string(zvalue,zkey_len);
+       value = std::string(zvalue,value_len);
 
    #else
        zend_string* zkey;
@@ -425,7 +425,7 @@ PHP_FUNCTION(pinpoint_add_clues)
            return;
        }
        key = std::string(zkey,zkey_len);
-       value = std::string(zvalue,zkey_len);
+       value = std::string(zvalue,value_len);
    #else
        zend_string* zkey;
        zend_string* zvalue;
