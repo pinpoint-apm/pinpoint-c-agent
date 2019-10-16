@@ -48,11 +48,26 @@ class TcpServerPerRequestPlugin extends Candy
         pinpoint_add_clue("stp",PHP);
         pinpoint_add_clue("name","TCP Request");
 
+        if(defined('APPLICATION_NAME')){
+            pinpoint_add_clue("appname",APPLICATION_NAME);
+            $this->app_name = APPLICATION_NAME;
+        }else{
+            $this->app_name = pinpoint_app_name();
+        }
+
+        if(defined('APPLICATION_ID'))
+        {
+            pinpoint_add_clue('appid',APPLICATION_ID);
+            $this->app_id = APPLICATION_ID;
+        }else{
+            $this->app_id = pinpoint_app_id();
+        }
+
         $this->sid = $this->generateSpanID();
         $this->tid = $this->generateTransactionID();
 
         pinpoint_add_clue("tid",$this->tid);
-        pinpoint_add_clue("sid",str($this->sid));
+        pinpoint_add_clue("sid",(string)$this->sid);
     }
 
     public function onEnd(&$ret)

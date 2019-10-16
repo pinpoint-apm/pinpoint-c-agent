@@ -24,26 +24,27 @@
 namespace Plugins;
 use Plugins\Candy;
 
-///@hook:app\DBcontrol::\PDO::query
-///@hook:app\DBcontrol::\PDO::exec
-///@hook:app\DBcontrol::\PDO::errorCode
+///@hook:app\TestPDO::\PDO::query app\TestPDO::\PDO::prepare
+///@hook:app\TestPDO::\PDO::__construct
+///@hook:app\TestMysqli::\mysqli::query app\TestMysqli::\mysqli::__construct
 class PDOCommonPlugin extends Candy
 {
     function onBefore()
     {
-        if($this->apId == 'app\PDO::query'){
+        pinpoint_add_clue("stp",MYSQL);
+        pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
+        pinpoint_add_clue("dst","MysqlHost");
 
-//            $this->who
-        }
     }
-    ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
     function onEnd(&$ret)
     {
-        // TODO: Implement onEnd() method.
+        echo "ret:";
+        var_dump($ret);
+        pinpoint_add_clues(PHP_RETURN, print_r($ret,true));
     }
 
     function onException($e)
     {
-        // TODO: Implement onException() method.
+        pinpoint_add_clue("EXP",$e->getMessage());
     }
 }

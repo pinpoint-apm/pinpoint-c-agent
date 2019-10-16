@@ -35,6 +35,7 @@ define("HTTP_IO",  49);
 define("MESSAGE_QUEUE_URI ",100);
 define("PHP_METHOD","1501");
 define("PHP","1500");
+define("MYSQL","2101");
 define("REDIS","8200");
 define("MEMCACHED","8050");
 define("PINPOINT_PHP_REMOTE",9700);
