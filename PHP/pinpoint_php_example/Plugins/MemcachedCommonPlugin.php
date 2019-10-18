@@ -24,14 +24,21 @@
 namespace Plugins;
 use Plugins\Candy;
 
-///@hook:app\TestMemcached::\memcached::__construct app\TestMemcached::\memcached::add app\TestMemcached::\memcached::get app\TestMemcached::\memcached::replace app\TestMemcached::\memcached::delete
+///@hook:app\TestMemcached::\memcached::addServer app\TestMemcached::\memcached::add app\TestMemcached::\memcached::get app\TestMemcached::\memcached::replace app\TestMemcached::\memcached::delete
 class MemcachedCommonPlugin extends Candy
 {
     function onBefore()
     {
         pinpoint_add_clue("stp",MEMCACHED);
-        pinpoint_add_clue("dst", "MemcachedHost");
-        pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
+        if(strpos($this->apId, "memcached::addServer")){
+            $this->who->url = sprintf("%s:%s",$this->args[0][0],$this->args[0][1]);
+            pinpoint_add_clues(PHP_ARGS, sprintf("host:%s,port:%s",$this->args[0][0], $this->args[0][1]));
+        }elseif(count($this->args[0])==2 && !strpos($this->apId, "memcached::addServer")){
+            pinpoint_add_clues(PHP_ARGS, sprintf("key:%s,value:%s",$this->args[0][0], $this->args[0][1]));
+        }elseif(count($this->args[0])==1){
+            pinpoint_add_clues(PHP_ARGS, sprintf("key:%s",$this->args[0][0]));
+        }
+        pinpoint_add_clue("dst", $this->who->url);
     }
     function onEnd(&$ret)
     {

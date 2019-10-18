@@ -10,7 +10,7 @@ class TestMemcached
 
     public function mem_connect(){
         $this->mc = new memcached();
-        $this->mc->addServer("10.34.130.152", "11211");
+        $this->mc->addServer("localhost", "11211");
     }
 
     public function mem_add($key, $value){

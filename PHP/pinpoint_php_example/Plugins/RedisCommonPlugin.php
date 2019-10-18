@@ -22,16 +22,27 @@
  */
 
 namespace Plugins;
+use pinpoint\test\TestTrait;
 use Plugins\Candy;
 
-///@hook:app\TestRedis::\Redis::get app\TestRedis::\Redis::keys app\TestRedis::\Redis::del app\TestRedis::\Redis::set app\TestRedis::\Redis::connect
+///@hook:app\TestRedis::\Redis::get app\TestRedis::\Redis::keys app\TestRedis::\Redis::del app\TestRedis::\Redis::connect app\TestRedis::\Redis::set
 class RedisCommonPlugin extends Candy
 {
     function onBefore()
     {
         pinpoint_add_clue("stp",REDIS);
-        pinpoint_add_clue("dst", "RedisHost");
-        pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
+        if(strpos($this->apId, "Redis::connect")){
+            $url = sprintf("%s:%s",$this->args[0][0],$this->args[0][1]);
+            pinpoint_add_clues(PHP_ARGS, $url);
+            $this->who->url=$url;
+        }elseif(strpos($this->apId, "Redis::set")){
+//            print_r($this->who->url);
+            pinpoint_add_clues(PHP_ARGS,sprintf("key:%s,value:%s",$this->args[0][0],$this->args[0][1]));
+        }else{
+            pinpoint_add_clues(PHP_ARGS,sprintf("key:%s",$this->args[0][0]));
+        }
+        pinpoint_add_clue("dst",$this->who->url);
+
     }
     function onEnd(&$ret)
     {

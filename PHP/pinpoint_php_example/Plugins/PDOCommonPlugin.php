@@ -26,25 +26,39 @@ use Plugins\Candy;
 
 ///@hook:app\TestPDO::\PDO::query app\TestPDO::\PDO::prepare
 ///@hook:app\TestPDO::\PDO::__construct
-///@hook:app\TestMysqli::\mysqli::query app\TestMysqli::\mysqli::__construct
 class PDOCommonPlugin extends Candy
 {
     function onBefore()
     {
         pinpoint_add_clue("stp",MYSQL);
-        pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
-        pinpoint_add_clue("dst","MysqlHost");
-
+        if(strpos($this->apId, "PDO::__construct")){
+            $this->who->url = $this->get_host($this->args[0][0]);
+            pinpoint_add_clues(PHP_ARGS, sprintf("dsn:%s,username:%s,password:%s",$this->args[0][0], $this->args[0][1], $this->args[0][2]));
+        }else{
+            pinpoint_add_clues(PHP_ARGS, sprintf("sql:%s",$this->args[0][0]));
+        }
+        pinpoint_add_clue("dst",$this->who->url);
     }
     function onEnd(&$ret)
     {
         echo "ret:";
         var_dump($ret);
-        pinpoint_add_clues(PHP_RETURN, print_r($ret,true));
     }
 
     function onException($e)
     {
         pinpoint_add_clue("EXP",$e->getMessage());
+    }
+
+    function get_host($dsn){
+        $dsn = explode(':', $dsn);
+        $temp = explode(';', $dsn[1]);
+        $host = [];
+        foreach ($temp as $h){
+            $h = explode('=', $h);
+            $host[] = $h[1];
+        }
+        $host = implode(":", $host);
+        return $host;
     }
 }
