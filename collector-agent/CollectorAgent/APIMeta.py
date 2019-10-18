@@ -78,33 +78,3 @@ class StringMetaData(object):
         packet = Packet(PacketType.APPLICATION_REQUEST,CollectorPro.getCurReqCount() ,len(body),body)
         return packet
 
-
-
-
-
-# class InterceptManager(object):
-#     def __init__(self, collector_cb, ac):
-#         '''
-#
-#         :param tcpLayer:
-#         :param CollectorAgentConf ac:
-#         '''
-#         self.collector_cb   = collector_cb
-#         self.api_metas = {}
-#         self.string_metas = {}
-#         self.startTimeStamp = ac.startTimestamp
-#         self.ac = ac
-#
-#     def sendMeta(self, meta):
-#         '''
-#
-#         :param APIMeta meta:
-#         :return:
-#         '''
-#         TCLogger.debug("meta: %s", meta.name)
-#         self.collector_cb(meta.toPacket().getSerializedData())
-
-
-
-
-# interceptManger = InterceptManager()

@@ -27,7 +27,7 @@ class PinpointAgent(object):
     def start(self):
         raise NotImplementedError()
 
-    def sendSpan(self):
+    def sendSpan(self,stack):
         raise NotImplementedError()
 
     def stop(self):
