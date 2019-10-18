@@ -24,7 +24,9 @@ class AppManagement(object):
         self.create_default_implement(service_type)
 
     def create_default_implement(self,service_type):
-        self.default_app = ThriftAgentImplement(self,self.collector_conf,self.default_appid, self.default_appname,service_type)
+
+        self.default_app = self.collector_conf.collector_implement(self, self.collector_conf, self.default_appid, self.default_appname, service_type)
+
         self.default_app.start()
         self.app_map[self.default_appid] = self.default_app
 
@@ -38,9 +40,9 @@ class AppManagement(object):
             ## check service_type
 
         else:
-            if  service_type == PHP:
+            if service_type == PHP:
                 TCLogger.info("collector-agent try to create a new application agent.[%s@%s]",app_id,app_name)
-                app = ThriftAgentImplement(self,self.collector_conf,app_id, app_name)
+                app = self.collector_conf.collector_implement(self, self.collector_conf, app_id, app_name)
                 app.start()
                 self.app_map[app_id] = app
             else:

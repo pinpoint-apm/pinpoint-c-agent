@@ -22,10 +22,10 @@ import struct
 
 from gevent import socket as gsocket
 
-from Common import *
 from PHPAgent.Type import RESPONSE_AGENT_INFO
 from PHPAgent.PHPAgentConf import PHPAgentConf
 from Trains import StreamServerLayer
+from Common import *
 
 
 class FrontAgent(object):
@@ -85,29 +85,3 @@ class FrontAgent(object):
 
     def stop(self):
         pass
-
-
-
-def handleAgentPacket(client,type,str):
-    '''
-
-    :param str str:
-    :return:
-    '''
-    TCLogger.debug("%d,%s",type,str)
-
-
-
-if __name__ == '__main__':
-    ac = PHPAgentConf(CAConfig)
-    agent = FrontAgent(ac, handleAgentPacket)
-    agent.start()
-    from gevent.event import Event
-    import gevent,signal
-    evt =Event()
-
-    gevent.signal(signal.SIGQUIT, evt.set)
-    gevent.signal(signal.SIGTERM, evt.set)
-    gevent.signal(signal.SIGINT, evt.set)
-
-    evt.wait()

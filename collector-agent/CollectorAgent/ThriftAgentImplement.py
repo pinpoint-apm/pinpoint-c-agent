@@ -39,8 +39,7 @@ from PinpointAgent import *
 class ThriftAgentImplement(PinpointAgent):
     PingCount= 0
     ReqCount = 0
-    Negotiation=0
-    Clear =1
+
 
     def __init__(self,manage,ac,app_id,app_name,serviceType=PHP):
 

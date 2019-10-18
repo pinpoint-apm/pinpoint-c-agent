@@ -59,6 +59,3 @@ class AgentStateManager(object):
         self.trans_layer.sendData(body)
 
 
-# if __name__ == '__main__':
-    # state = AgentState('fdf',1645455556)
-    # state.getCurStatePacket()

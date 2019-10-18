@@ -68,6 +68,10 @@ PHP_RETURN = 921
 PHP_ARGS = 922
 PHP_DESCRIPTION = 923
 
+#collector type
+SUPPORT_GRPC=1
+SUPPORT_THRIFT=2
+
 
 
 class AgentSocketCode(object):

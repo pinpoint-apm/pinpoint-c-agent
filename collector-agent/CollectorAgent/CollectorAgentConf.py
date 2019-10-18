@@ -15,7 +15,9 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
+from PinpointAgent.Type import SUPPORT_THRIFT, SUPPORT_GRPC
+from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
+from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
 AGENT_VERSION = '1.8.0-RC1'
 
 
@@ -25,22 +27,43 @@ class CollectorAgentConf(object):
 
         :param ConfigParser config:
         '''
-        self.CollectorSpanIp = config.get('Collector',
-                                         'CollectorSpanIp')
-        self.CollectorSpanPort = config.getint('Collector',
-                                          'CollectorSpanPort')
-        self.CollectorStatIp = config.get('Collector',
-                                          'CollectorStatIp')
-        self.CollectorStatPort = config.getint('Collector',
-                                          'CollectorStatPort')
-        self.CollectorTcpIp = config.get('Collector',
-                                          'CollectorTcpIp')
-        self.CollectorTcpPort = config.getint('Collector',
-                                         'CollectorTcpPort')
+        if  config.has_option('Collector','collector.grpc.agent.ip') and \
+            config.has_option('Collector','collector.grpc.stat.ip') and \
+            config.has_option('Collector', 'collector.grpc.span.ip'):
+            self.CollectorSpanIp = config.get('Collector',
+                                             'collector.grpc.span.ip')
+            self.CollectorSpanPort = config.getint('Collector',
+                                              'collector.grpc.span.port')
+            self.CollectorStatIp = config.get('Collector',
+                                              'collector.grpc.stat.ip')
+            self.CollectorStatPort = config.getint('Collector',
+                                              'collector.grpc.stat.port')
+            self.CollectorAgentIp = config.get('Collector',
+                                              'collector.grpc.agent.ip')
+            self.CollectorAgentPort = config.getint('Collector',
+                                             'collector.grpc.agent.port')
+            self.max_pending_size = config.getint('Collector',
+                                             'collector.grpc.discardpolicy.maxpendingthreshold')
+            self.collector_type = SUPPORT_GRPC
+            self.collector_implement = GrpcAgentImplement
+        else:
+            self.CollectorSpanIp = config.get('Collector',
+                                             'CollectorSpanIp')
+            self.CollectorSpanPort = config.getint('Collector',
+                                              'CollectorSpanPort')
+            self.CollectorStatIp = config.get('Collector',
+                                              'CollectorStatIp')
+            self.CollectorStatPort = config.getint('Collector',
+                                              'CollectorStatPort')
+            self.CollectorAgentIp = config.get('Collector',
+                                              'CollectorTcpIp')
+            self.CollectorAgentPort = config.getint('Collector',
+                                             'CollectorTcpPort')
+            self.collector_type = SUPPORT_THRIFT
+            self.collector_implement = ThriftAgentImplement
 
         self.AgentID = config.get('Collector',
                                          'AgentID')
-
         self.ApplicationName = config.get('Collector',
                                      'ApplicationName')
         self.version = AGENT_VERSION
@@ -53,7 +76,7 @@ class CollectorAgentConf(object):
         return ( self.CollectorStatIp,self.CollectorStatPort)
 
     def getTcpHost(self):
-        return ( self.CollectorTcpIp, self.CollectorTcpPort)
+        return (self.CollectorAgentIp, self.CollectorAgentPort)
 
     def clean(self):
         pass
