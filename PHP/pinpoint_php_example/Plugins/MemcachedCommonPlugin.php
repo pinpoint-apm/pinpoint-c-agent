@@ -15,11 +15,6 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-/**
- * User: eeliu
- * Date: 3/29/19
- * Time: 3:40 PM
- */
 
 namespace Plugins;
 use Plugins\Candy;
