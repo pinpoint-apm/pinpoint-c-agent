@@ -238,10 +238,9 @@ class ThriftAgent(PinpointAgent):
         :param int size:
         :return:
         '''
-        offset  = 0
         iterPacket = Packet.parseNetByteStream(view, size)
         for packet in iterPacket:
-            offset,ptype,header,vBody = packet
+            ptype,header,vBody = packet
             self.packetRoute[ptype](tcp_layer,ptype,header,vBody)
 
         return 0
