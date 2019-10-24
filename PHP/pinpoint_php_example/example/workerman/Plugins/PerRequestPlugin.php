@@ -16,10 +16,11 @@
 #-------------------------------------------------------------------------------
 
 
-namespace Plugins;
+namespace  example\workerman\Plugins;
 require_once "PluginsDefines.php";
 
-class PerRequestPlugins
+/////@hook:example\workerman\HandleRequest::onMessage
+class PerRequestPlugin
 {
     public static $_intance = null;
     public $tid = null;
@@ -28,8 +29,6 @@ class PerRequestPlugins
     public $pname = null;
     public $ptype = null;
     public $ah = null;
-    public $app_name=null;
-    public $app_id=null;
     private $curNextSpanId ='';
     private $isLimit =false;
 
@@ -42,7 +41,7 @@ class PerRequestPlugins
     {
         if (self::$_intance == null)
         {
-            self::$_intance = new PerRequestPlugins();
+            self::$_intance = new PerRequestPlugin();
         }
         return self::$_intance;
     }
@@ -52,7 +51,7 @@ class PerRequestPlugins
         while (pinpoint_end_trace() >0);
     }
 
-    private function __construct()
+    public function onBefore()
     {
         $this->initTrace();
 
@@ -62,24 +61,6 @@ class PerRequestPlugins
         pinpoint_add_clue("server",$_SERVER["HTTP_HOST"]);
         pinpoint_add_clue("stp",PHP);
         pinpoint_add_clue("name","PHP Request");
-
-        if(defined('APPLICATION_NAME')){
-//            pinpoint_add_clue("appname",APPLICATION_NAME);
-            $this->app_name = APPLICATION_NAME;
-        }else{
-            $this->app_name = pinpoint_app_name();
-        }
-
-        pinpoint_add_clue("appname",$this->app_name);
-        if(defined('APPLICATION_ID'))
-        {
-//            pinpoint_add_clue('appid',APPLICATION_ID);
-            $this->app_id = APPLICATION_ID;
-        }else{
-            $this->app_id = pinpoint_app_id();
-        }
-
-        pinpoint_add_clue('appid',$this->app_id);
 
         if(isset($_SERVER['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID",$_SERVER))
         {
@@ -151,7 +132,8 @@ class PerRequestPlugins
         pinpoint_add_clue("sid",$this->sid);
 
     }
-    public function __destruct()
+
+    public function onEnd(&$ret)
     {
         // reset limit
         $this->isLimit = false;
@@ -178,7 +160,12 @@ class PerRequestPlugins
 
     public function generateTransactionID()
     {
-        return  $this->app_id.'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
+        return  pinpoint_app_id().'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
     }
 
+
+    function onException($e)
+    {
+        // TODO: Implement onException() method.
+    }
 }

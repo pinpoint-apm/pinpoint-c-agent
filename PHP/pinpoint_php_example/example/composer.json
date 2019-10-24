@@ -9,10 +9,9 @@
     ],
     "autoload": {
         "psr-4": {
-            "app\\":"app/",
-            "app1\\": "app1",
-            "example\\": "example",
-            "Plugins\\": "Plugins/"
+            "example\\workerman\\": "workerman",
+            "example\\swoole\\": "swoole",
+            "example\\": "."
         }
     },
     "require": {

@@ -16,7 +16,7 @@
 #!/usr/bin/env python
 #coding:utf-8
 
-from PHPAgent.PHPAgent import PHPAgent
+from PHPAgent.FrontAgent import FrontAgent
 from PHPAgent.PHPAgentConf import PHPAgentConf
 
-__all__=['PHPAgent','PHPAgentConf']
+__all__=['FrontAgent', 'PHPAgentConf']

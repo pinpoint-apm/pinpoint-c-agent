@@ -37,8 +37,6 @@ define("PHP_METHOD","1501");
 define("PHP","1500");
 define("MYSQL","2101");
 define("REDIS","8200");
-define("REDIS_REDISSON","8203");
-define("REDIS_REDISSON_INTERNAL","8204");
 define("MEMCACHED","8050");
 define("PINPOINT_PHP_REMOTE",9700);
 define("NGINX_PROXY","Pinpoint-ProxyNginx");

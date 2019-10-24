@@ -1,5 +1,5 @@
 composer.phar
-/vendor/
+vendor
 .idea/
 Cache
 __class_index_table
