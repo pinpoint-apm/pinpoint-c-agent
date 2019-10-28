@@ -44,31 +44,9 @@ class TestPDO
     public function getData3($a)
     {
         $this->con->query("use DBTest;");
-//        $sth = $this->con->prepare($a);
-        $ret = $this->con->exec($a);
-
+        $sth = $this->con->prepare($a);
+        $ret = $sth->execute();
         return $ret;
-    }
-
-    public function test()
-    {
-        $this->con->beginTransaction();
-        $this->con->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-        $this->con->exec("use DBTest;");
-        $sql1 = 'INSERT INTO user (name) VALUES (?)';
-        $sth1 = $this->con->prepare($sql1);
-        $sth1->execute(array("Evy"));
-        $this->con->commit();
-
-        $n = null;
-        $sql2 = "SELECT name FROM user where name='xiaogao'";
-        $sth2 = $this->con->prepare($sql2);
-        $sth2->bindParam(1, $n);
-        $sth2->execute();
-        $result = $sth2->fetch(PDO::FETCH_BOUND);
-        var_dump($result);
-        $user = $sth2->fetchObject('app\User');
-        var_dump($user);
     }
 
     public function testerror($a)

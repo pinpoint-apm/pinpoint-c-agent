@@ -221,12 +221,20 @@ PHP_FUNCTION(pinpoint_drop_trace)
 
 PHP_FUNCTION(pinpoint_app_name)
 {
+#if PHP_VERSION_ID < 70000
+    RETURN_STRING(PPG(agent_info).appname,1);
+#else
     RETURN_STRING(PPG(agent_info).appname);
+#endif
 }
 
 PHP_FUNCTION(pinpoint_app_id)
 {
+#if PHP_VERSION_ID < 70000
+    RETURN_STRING(PPG(agent_info).appid,1);
+#else
     RETURN_STRING(PPG(agent_info).appid);
+#endif
 }
 PHP_FUNCTION(pinpoint_start_time)
 {
@@ -261,6 +269,7 @@ PHP_FUNCTION(pinpoint_start_trace)
         }
         TraceNode ancestor(*root);
         ancestor.node["S"] = timestamp;
+        ancestor.node["FT"]= PHP;
         ancestor.ancestor_start_time = timestamp;
         ancestor.start_time = timestamp;
         callstack->push(ancestor);
@@ -348,19 +357,15 @@ PHP_FUNCTION(pinpoint_add_clue)
 
    #if PHP_VERSION_ID < 70000
        char* zkey = NULL,* zvalue =  NULL;
-       int zkey_len,value_len,;
-       if (!Pinpoint::Trace::Trace::isStarted())
-       {
-           RETURN_NULL();
-       }
+       int zkey_len,value_len;
 
-       if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &zkey, &zkey_len,&zvalue, &zvalue_len) == FAILURE)
+       if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &zkey, &zkey_len,&zvalue, &value_len) == FAILURE)
        {
            zend_error(E_ERROR, "pinpoint_add_clue() expects (int, string).");
            return;
        }
        key = std::string(zkey,zkey_len);
-       value = std::string(zvalue,zkey_len);
+       value = std::string(zvalue,value_len);
 
    #else
        zend_string* zkey;
@@ -412,19 +417,15 @@ PHP_FUNCTION(pinpoint_add_clues)
 
    #if PHP_VERSION_ID < 70000
        char* zkey = NULL,* zvalue =  NULL;
-       int zkey_len,value_len,;
-       if (!Pinpoint::Trace::Trace::isStarted())
-       {
-           RETURN_NULL();
-       }
+       int zkey_len,value_len;
 
-       if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &zkey, &zkey_len,&zvalue, &zvalue_len) == FAILURE)
+       if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &zkey, &zkey_len,&zvalue, &value_len) == FAILURE)
        {
            zend_error(E_ERROR, "pinpoint_add_clues() expects (int, string).");
            return;
        }
        key = std::string(zkey,zkey_len);
-       value = std::string(zvalue,zkey_len);
+       value = std::string(zvalue,value_len);
    #else
        zend_string* zkey;
        zend_string* zvalue;
@@ -719,8 +720,11 @@ int pp_trace(const char *format,...)
         return 0;
     }
 
+#if PHP_VERSION_ID >= 70000
     php_log_err_with_severity(&PPG(logBuffer)[0] , LOG_DEBUG);
-
+#else
+    php_log_err(&PPG(logBuffer)[0]);
+#endif
     return 0;
 }
 

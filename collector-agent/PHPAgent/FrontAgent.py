@@ -28,7 +28,7 @@ from PHPAgent.PHPAgentConf import PHPAgentConf
 from Trains import StreamServerLayer
 
 
-class PHPAgent(object):
+class FrontAgent(object):
     HEADERSIZE = 8
     def __init__(self, ac, msgCallback):
         '''
@@ -50,14 +50,14 @@ class PHPAgent(object):
         p = 0
 
         ###
-        if bsz < PHPAgent.HEADERSIZE:
+        if bsz < FrontAgent.HEADERSIZE:
             return bsz
 
         while p < bsz:
-            type, len = struct.unpack('!ii', buf[p:p + PHPAgent.HEADERSIZE].tobytes())
-            p += PHPAgent.HEADERSIZE
+            type, len = struct.unpack('!ii', buf[p:p + FrontAgent.HEADERSIZE].tobytes())
+            p += FrontAgent.HEADERSIZE
             if p+len > bsz:
-                return p - PHPAgent.HEADERSIZE
+                return p - FrontAgent.HEADERSIZE
             body = buf[p:p + len].tobytes()
             self.msgHandleCallback(client, type, body)
             p+= len
@@ -80,9 +80,9 @@ class PHPAgent(object):
         TCLogger.debug("send hello:%d len:%d",client.socket.fileno(),len(buf))
 
 
-
     def start(self):
         self.server.start()
+
     def stop(self):
         pass
 
@@ -100,7 +100,7 @@ def handleAgentPacket(client,type,str):
 
 if __name__ == '__main__':
     ac = PHPAgentConf(CAConfig)
-    agent = PHPAgent(ac,handleAgentPacket)
+    agent = FrontAgent(ac, handleAgentPacket)
     agent.start()
     from gevent.event import Event
     import gevent,signal

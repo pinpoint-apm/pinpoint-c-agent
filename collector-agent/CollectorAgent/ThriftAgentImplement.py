@@ -17,40 +17,44 @@
 # -*- coding: UTF-8 -*-
 import json
 import os
+import struct
 import time
 
 import gevent
 
-from Common import AgentHost
-from TCollectorAgent.APIMeta import *
-from TCollectorAgent.AgentStateManager import AgentStateManager
-from TCollectorAgent.CollectorAgentConf import CollectorAgentConf
-from PinpointAgent.PinpointAgent import PinpointAgent
-from TCollectorAgent.TCGenerator import *
+from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage
+from Common import *
+from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode, AGENT_INFO, SPAN, PHP_METHOD_CALL, API_WEB_REQUEST, \
+    PROXY_HTTP_HEADER
+from Proto.Trift.Trace.ttypes import TSpan, TSpanEvent, TIntStringValue, TAnnotation, TAnnotationValue, \
+    TLongIntIntByteByteStringValue
 from Trains import *
+from CollectorAgent.TCGenerator import *
+from CollectorAgent.APIMeta import *
+from CollectorAgent.AgentStateManager import AgentStateManager
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from PinpointAgent import *
 
 
-class ThriftAgent(PinpointAgent):
+class ThriftAgentImplement(PinpointAgent):
     PingCount= 0
     ReqCount = 0
     Negotiation=0
     Clear =1
 
-    def __init__(self,ac):
-        '''
+    def __init__(self,manage,ac,app_id,app_name,serviceType=PHP):
 
-        :param CollectorAgentConf ac:
-        '''
-        self.ac     = ac
-        self.tcpHost   =  (ac.CollectorTcpIp, ac.CollectorTcpPort)
-        self.statHost  =  (ac.CollectorStatIp, ac.CollectorStatPort)
-        self.spanHost  =  (ac.CollectorSpanIp, ac.CollectorSpanPort)
-
+        super().__init__(app_id,app_name)
+        self.ac         = ac
+        self.tcpHost    =  (ac.CollectorTcpIp, ac.CollectorTcpPort)
+        self.statHost   =  (ac.CollectorStatIp, ac.CollectorStatPort)
+        self.spanHost   =  (ac.CollectorSpanIp, ac.CollectorSpanPort)
         TCLogger.debug("CollectorTcp %s CollectorStat %s CollectorSpan %s" % (self.tcpHost, self.statHost, self.spanHost))
 
         self.tcpLayer = StreamClientLayer(self.tcpHost, self.handlerResponse, self.collectorTcpHello)
-        self.spanLayer = DgramLayer(self.spanHost,None)
 
+        self.spanLayer = DgramLayer(self.spanHost,None)
+        self.sequenceId = 0
         self.packetRoute = {
             PacketType.APPLICATION_SEND : self.handle_default,
             PacketType.APPLICATION_TRACE_SEND : self.handle_default,
@@ -72,21 +76,23 @@ class ThriftAgent(PinpointAgent):
             PacketType.CONTROL_PONG : self.handle_recv_pong
         }
         self.socketCode = AgentSocketCode.NONE
-        self.startTimeStamp = ac.startTimestamp
-        self.agentId = ac.AgentID
-        self.agentName= ac.ApplicationName
+        self.manage = manage
+        self.startTimeStamp = self.manage.startTimestamp
+        self.agentName= app_name
         self.agentInfo = TAgentInfo(
-            agentId =ac.AgentID,
-            applicationName= ac.ApplicationName,
+            agentId =app_id,
+            applicationName= app_name,
             agentVersion= ac.version,
             startTimestamp= self.startTimeStamp,
-            serviceType=PHP,
+            serviceType=self.service_type,
             pid=os.getpid()
         )
-        self.interceptManger = InterceptManager(self.sendMsgToCollector,ac)
-        self.agentState = AgentStateManager(self.agentId, self.startTimeStamp,self.statHost)
+
+        self.agentState = AgentStateManager(self.app_id, self.startTimeStamp,self.statHost)
         self.postponed_queue = []
         self.scanLocalInfo()
+        self.api_metas = {}
+        self.string_metas = {}
 
     ## expose to other module
     def sendMsgToCollector(self,msg):
@@ -105,18 +111,51 @@ class ThriftAgent(PinpointAgent):
                 self.tcpLayer.sendData(m[:])
             self.postponed_queue = []
 
-    def upLoadTSpanEvent(self, client,type, data):
+
+
+    def updateApiMeta(self, name, api_type=API_DEFAULT):
+
+        if name in self.api_metas:
+            return self.api_metas[name]
+        else:
+            meta = APIMeta(name=name, type=api_type,
+                           agentStartTime=self.startTimeStamp, agentId=self.app_id,
+                           agentName=self.app_name)
+            self.sendMsgToCollector(meta.toPacket().getSerializedData())
+            self.api_metas[name] = meta
+            return meta
+
+    def sendMeta(self, meta):
         '''
-        id fd of client
-        :param bytearray data:
+
+        :param APIMeta meta:
         :return:
         '''
-        # json_str = json.dumps(jStack)
-        stack = json.loads(data.decode('utf-8'))
-        TCLogger.info("%s",stack)
-        convert = ConvertSpan(stack,self.interceptManger)
+        TCLogger.debug("meta: %s", meta.name)
+        self.sendMsgToCollector(meta.toPacket().getSerializedData())
 
-        tSpan = convert.toSpan()
+
+    def updateStringMeta(self,name):
+
+        if name in self.string_metas:
+            return self.string_metas[name]
+        else:
+
+            meta = StringMetaData(agentStartTime =self.startTimeStamp, agentId=self.app_id,name=name)
+            self.sendMeta(meta)
+            self.string_metas[name] = meta
+            return meta
+
+    def sendSpan(self,stack):
+        '''
+
+        :param dict stack:
+        :return:
+        '''
+        ### must reset to zero
+
+        self.sequenceId = 0
+        tSpan = self.makeSpan(stack)
 
         body = CollectorPro.obj2bin(tSpan,SPAN)
         # packet = Packet(PacketType.HEADLESS, len(body), body)
@@ -125,13 +164,180 @@ class ThriftAgent(PinpointAgent):
         TCLogger.debug("send TSpan:%s",tSpan)
 
 
-    def handlePHPAgentData(self,client,type,body):
-        # if type == 1:
-        #     self.handleGetAgentInfo(client,type,body)
-        # else:
-        self.upLoadTSpanEvent(client,type,body)
+    def genSpanEvent(self, span):
+        '''
+
+        :param  dict span:
+        :return TSpanEvent:
+        '''
+        assert 'name' in span
+        spanEv = TSpanEvent()
+
+        spanEv.apiId = self.updateApiMeta(span['name']).apiId
+        spanEv.annotations = []
+        if 'EXP' in  span:
+            id = self.updateStringMeta('EXP').apiId
+            spanEv.exceptionInfo = TIntStringValue(id, span['EXP'])
+
+        if 'dst' in  span:
+            spanEv.destinationId = span['dst']
+
+        if 'S' in  span:
+            spanEv.startElapsed = span['S']
+
+        if 'E' in span:
+            spanEv.endElapsed   = span['E']
+
+        if 'dst' in span:
+            spanEv.destinationId = span['dst']
+
+        if 'nsid' in span:
+            spanEv.nextSpanId   = int(span['nsid'])
+
+        if 'stp' in span:
+            spanEv.serviceType  = int(span['stp'])
+        else:
+            spanEv.serviceType = PHP_METHOD_CALL
+
+        if 'clues' in span:
+            for annotation in span['clues']:  # list
+                id, value = annotation.split(':', 1)
+
+                if value and value[0] =='[': ## value is a In
+                    pass
+                else: ## value is a string
+                    ann = TAnnotation(int(id), TAnnotationValue(stringValue=value))
+                    spanEv.annotations.append(ann)
+
+        return spanEv
 
 
+    def makeSpan(self, stackMap, tSpan=None, index=0):
+        '''
+
+        :param stackMap:
+        :param tSpan:
+        :param index: the depth of call stack
+        :param sequenceId: reset from every span. Must start from zero
+        :return:
+        '''
+        if tSpan is None:  ## A TSpan
+            tSpan = self.genTspan(stackMap)
+        else:  ## A span event
+            spanEv = self.genSpanEvent(stackMap)
+            # spanEv.spanId    = tSpan.spanId
+            spanEv.sequence = self.sequenceId
+            self.sequenceId += 1
+            spanEv.depth = index
+            tSpan.spanEventList.append(spanEv)
+
+        if 'calls' in stackMap:
+            for called in stackMap['calls']:
+                self.makeSpan(called, tSpan, index + 1)
+
+        return tSpan
+
+    def genTspan(self, span):
+        '''
+        :param dict span:
+        :param InterceptManager interceptManger
+        :return :
+        '''
+
+        tSpan = TSpan()
+        tSpan.apiId = self.updateApiMeta(span['name'], API_WEB_REQUEST).apiId
+        tSpan.agentStartTime = self.startTimeStamp
+
+        if 'appid' in span:
+            tSpan.agentId = span['appid']
+        else:
+            tSpan.agentId = self.app_id
+
+        if 'appname' in span:
+            tSpan.applicationName = span['appname']
+        else:
+            tSpan.applicationName = self.app_name
+
+        if 'stp' in span:
+            tSpan.serviceType = int(span['stp'])
+            tSpan.applicationServiceType = int(span['stp'])
+        else:
+            tSpan.serviceType = PHP
+            tSpan.applicationServiceType = PHP
+
+        if 'psid' in span:
+            tSpan.parentSpanId = int(span['psid'])
+
+        if 'tid' in span:
+            tSpan.transactionId = TransactionId(encoded_str= span['tid']).getBytes()
+
+        if 'sid' in span:
+            tSpan.spanId = int(span['sid'])
+
+        if 'S' in span:
+            tSpan.startTime = span['S']
+
+        if 'E' in span:
+            tSpan.elapsed = span['E']
+
+        if 'uri' in span:
+            tSpan.rpc = span['uri']
+
+        if 'pname' in span:
+            tSpan.parentApplicationName = span['pname']
+
+        if 'ptype' in span:
+            tSpan.parentApplicationType = int(span['ptype'])
+
+        if 'client' in span:
+            tSpan.remoteAddr = span['client']
+
+        if 'server' in span:
+            tSpan.endPoint = span['server']
+
+        if 'ERR' in span:
+            tSpan.err = 1
+            id = self.updateStringMeta('ERR').apiId
+            tSpan.exceptionInfo = TIntStringValue(id,span['ERR']['msg'])
+
+        if 'Ah' in span:
+            tSpan.acceptorHost = span['Ah']
+
+        tSpan.spanEventList = []
+        tSpan.annotations = []
+
+        if 'clues'  in span:
+            for annotation in span['clues']:  # list
+                id, value = annotation.split(':', 1)
+                ann = TAnnotation(int(id), TAnnotationValue(stringValue=value))
+                tSpan.annotations.append(ann)
+
+        try:
+            value = TLongIntIntByteByteStringValue()
+            if 'NP' in span: ## nginx
+                arr = ThriftProtocolUtil._parseStrField(span['NP'])
+                value.intValue1 = 2
+                if 'D' in arr:
+                    value.intValue2 =ThriftProtocolUtil._parseDotFormat(arr['D'])
+                if 't' in arr:
+                    value.longValue =ThriftProtocolUtil._parseDotFormat(arr['t'])
+            elif 'AP' in span: ## apache
+                arr = ThriftProtocolUtil._parseStrField(span['AP'])
+                value.intValue1 = 3
+                if 'i' in arr:
+                    value.byteValue1 = int(arr['i'])
+                if 'b' in arr:
+                    value.byteValue2 = int(arr['b'])
+                if 'D' in arr:
+                    value.intValue2  = int(arr['D'])
+                if 't' in arr:
+                    value.longValue  = int(int(arr['t'])/1000)
+            ann = TAnnotation(PROXY_HTTP_HEADER,TAnnotationValue(longIntIntByteByteStringValue=value))
+            tSpan.annotations.append(ann)
+        except Exception as e:
+            TCLogger.error("input is illegal,Exception %s",e)
+
+        return tSpan
 
     def scanLocalInfo(self):
         ah = AgentHost()
@@ -139,13 +345,15 @@ class ThriftAgent(PinpointAgent):
         self.agentInfo.ip = ah.ip
         self.agentInfo.ports = ah.port
 
-    def startAll(self):
-        self.spanLayer.start()
+    def start(self):
         self.tcpLayer.start()
+        self.spanLayer.start()
 
 
     def stop(self):
         self.ac.clean()
+        self.tcpLayer.stop()
+        self.spanLayer.stop()
 
 
     def handle_default(self, tcp_layer, ptype, header, vBody):
@@ -212,7 +420,7 @@ class ThriftAgent(PinpointAgent):
                               self.socketCode)
 
         packet = Packet(hType = PacketType.CONTROL_PING_PAYLOAD,body=pingBuf)
-        ThriftAgent.PingCount+= 1
+        ThriftAgentImplement.PingCount+= 1
         return packet
 
 
@@ -266,15 +474,6 @@ class ThriftAgent(PinpointAgent):
         tcp_layer.sendData(data)
         TCLogger.debug("send hand shake len:%d",len(data))
 
-
-    def tellWhoAMI(self):
-        return {
-            "time":str(self.startTimeStamp),
-            "id":self.agentId,
-            "name":self.agentName
-            # "shared_mem_file":self.ac.sharedObjectAddress
-        }
-
     def __getHandShakePacket(self,tcp_layer):
         cmp = HandShakeMessage(
                     tcp_layer.getRawSocketFd(),
@@ -286,7 +485,7 @@ class ThriftAgent(PinpointAgent):
                     PHP,
                     self.agentInfo.pid,
                     self.agentInfo.agentVersion,
-                    self.agentInfo.startTimestamp)
+                    self.startTimeStamp)
 
         packet = Packet(PacketType.CONTROL_HANDSHAKE,
                         0, cmp.getDataLen(),
@@ -298,7 +497,7 @@ class ThriftAgent(PinpointAgent):
         TCLogger.debug("agent:%s",self.agentInfo)
         body = CollectorPro.obj2bin(self.agentInfo, AGENT_INFO)
         packet = Packet(PacketType.APPLICATION_REQUEST,CollectorPro.getCurReqCount(),len(body),body)
-        ThriftAgent.ReqCount +=1
+        ThriftAgentImplement.ReqCount +=1
 
         return packet
 
@@ -307,24 +506,26 @@ class ThriftAgent(PinpointAgent):
 
 if __name__ == '__main__':
     ac = CollectorAgentConf(CAConfig)
-    agent = ThriftAgent(ac )
-    # agent.setAgentInfo('10.34.130.79','10.34.130.79')
-    # rawSpan='{"name":"a","args":"1,2,3","calls":[{"name":"b","args":"1"},{"name":"c","args":"1"},{"name":"d","args":"1"}]}'
-    # agent.upLoadTSpanEvent(rawSpan)
+    agent = ThriftAgentImplement(ac,'php-test-1','PHP-TEST-1')
+
     agent.startAll()
+    i = 0
     while True:
         stime = int(time.time()*1000)
+
         rawSpan='{"name":"PHP Request",' \
                 '"server":"10.34.130.79:28081",' \
-                '"sid":"3345567788","psid":"3345567789","tid":"test-agent^1560951035971^1",'\
+                '"sid":"3345567788","psid":"3345567789","tid":"php-test-1^1560951035971^%d",'\
                 '"S":%d,"E":20,' \
                 '"clues":["46:200"],' \
                 '"uri":"/index.html",' \
                 '"EC":1, "estr":"DIY",' \
                 '"calls":[{"name":"hello","S":0,"E":8,"calls":[{"name":"hello2","S":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":4,"E":4}]}]}],' \
-                '"client":"10.10.10.10"}'% (stime)
-
-        agent.upLoadTSpanEvent(None,1,rawSpan.encode())
+                '"client":"10.10.10.10"}'% (i,stime)
+        stack = json.loads(rawSpan)
+        TCLogger.info("%s", stack)
+        agent.sendSpan(stack)
+        i += 1
         gevent.sleep(10)
 
     g = Event()

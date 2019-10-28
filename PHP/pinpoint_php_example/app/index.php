@@ -8,6 +8,8 @@
 define('AUTOLOAD_FILE_ALIAS',__DIR__."/../vendor/autoload.php");
 define('AOP_CACHE_DIR',__DIR__.'/../Cache/');
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
+define('APPLICATION_NAME','APP-2');
+define('APPLICATION_ID','app-2');
 
 require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
 require_once __DIR__.'/Args.php';
@@ -40,6 +42,7 @@ use app\TestReturn;
 use app\TestPDO;
 use app\TestMysqli;
 use app\TestRedis;
+use app\TestMemcached;
 
 $type = null;
 if(isset($_GET["type"]))
@@ -135,7 +138,7 @@ switch($type)
         break;
     case 'test_final_func':
         $instance = new TestFinalFunc();
-        $instance->test();
+        $instance->test("abc");
 //        class swtest2 extends app\TestFinalFunc
 //        {
 //            public final function test(){
@@ -166,7 +169,7 @@ switch($type)
     case 'test_args':
         $myfile = fopen(__DIR__.'/Args.php', "r");
         $instance = new TestArgs();
-        $instance->test_atgs(null, 123, 3.1415, true, array(1, 2), new SObject(1), new SObjectString("ObjToString"), "abcd", $myfile, constant("GREETING"));
+        $instance->test_args(null, 123, 3.1415, true, array(1, 2), new SObject(1), new SObjectString("ObjToString"), "abcd", $myfile, constant("GREETING"));
         break;
     case 'test_return':
         $myfile = fopen(__DIR__.'/Args.php', "r");
@@ -219,7 +222,6 @@ switch($type)
         var_dump($pdo->getData2("select name from user;"));
         echo "<br>";
         var_dump($pdo->getData3("select * from user;"));
-        $pdo->test();
         break;
     case 'test_mysqli':
         $pdo =  new TestMysqli();
@@ -235,6 +237,14 @@ switch($type)
         $rd->getdata("cat");
         $rd->getkey();
         $rd->deldata("cat");
+        break;
+    case 'test_memcached':
+        $mc = new TestMemcached();
+        $mc->mem_connect();
+        $mc->mem_add("cat", "HuaMer");
+        $mc->mem_get("cat");
+        $mc->mem_replace("cat", "Miao");
+        $mc->mem_del("cat");
         break;
     default:
         echo "not supported type $type";

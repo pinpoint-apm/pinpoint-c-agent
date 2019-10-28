@@ -64,5 +64,5 @@ Stack trace:
   thrown in %s on line %d
 [%d] pinpoint_end_trace Done!
 [%d] connect:(/unexist_file.sock) failed as (No such file or directory)
-[%d] this span:({"E":%d,"ERR":{"file":"%s","line":%d,"msg":"Uncaught Exception: I am testting in %s:%d\nStack trace:\n#0 %s(34): Test()\n#1 {main}\n  thrown"},"S":%d,"calls":[{"E":%d,"S":%d,"name":"Foo"}]})
+[%d] this span:({"E":%d,"ERR":{"file":"%s","line":%d,"msg":"Uncaught Exception: I am testting in %s:%d\nStack trace:\n#0 %s(34): Test()\n#1 {main}\n  thrown"},"FT":1500,"S":%d,"calls":[{"E":%d,"S":%d,"name":"Foo"}]})
 [%d] pinpoint_end_trace Done!

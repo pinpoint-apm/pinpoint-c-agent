@@ -19,41 +19,30 @@
 namespace Plugins;
 use Plugins\Candy;
 
-///@hook:app\TestPDO::\PDO::query app\TestPDO::\PDO::prepare
-///@hook:app\TestPDO::\PDO::__construct
-class PDOCommonPlugin extends Candy
+///@hook:app\TestMemcached::\memcached::addServer app\TestMemcached::\memcached::add app\TestMemcached::\memcached::get app\TestMemcached::\memcached::replace app\TestMemcached::\memcached::delete
+class MemcachedCommonPlugin extends Candy
 {
     function onBefore()
     {
-        pinpoint_add_clue("stp",MYSQL);
-        if(strpos($this->apId, "PDO::__construct")){
-            $this->who->url = $this->get_host($this->args[0][0]);
-            pinpoint_add_clues(PHP_ARGS, sprintf("dsn:%s,username:%s,password:%s",$this->args[0][0], $this->args[0][1], $this->args[0][2]));
-        }else{
-            pinpoint_add_clues(PHP_ARGS, sprintf("sql:%s",$this->args[0][0]));
+        pinpoint_add_clue("stp",MEMCACHED);
+        if(strpos($this->apId, "memcached::addServer")){
+            $this->who->url = sprintf("%s:%s",$this->args[0][0],$this->args[0][1]);
+            pinpoint_add_clues(PHP_ARGS, sprintf("host:%s,port:%s",$this->args[0][0], $this->args[0][1]));
+        }elseif(count($this->args[0])==2 && !strpos($this->apId, "memcached::addServer")){
+            pinpoint_add_clues(PHP_ARGS, sprintf("key:%s,value:%s",$this->args[0][0], $this->args[0][1]));
+        }elseif(count($this->args[0])==1){
+            pinpoint_add_clues(PHP_ARGS, sprintf("key:%s",$this->args[0][0]));
         }
-        pinpoint_add_clue("dst",$this->who->url);
+        pinpoint_add_clue("dst", $this->who->url);
     }
     function onEnd(&$ret)
     {
         echo "ret:";
-        var_dump($ret);
+        pinpoint_add_clues(PHP_RETURN, print_r($ret,true));
     }
 
     function onException($e)
     {
         pinpoint_add_clue("EXP",$e->getMessage());
-    }
-
-    function get_host($dsn){
-        $dsn = explode(':', $dsn);
-        $temp = explode(';', $dsn[1]);
-        $host = [];
-        foreach ($temp as $h){
-            $h = explode('=', $h);
-            $host[] = $h[1];
-        }
-        $host = implode(":", $host);
-        return $host;
     }
 }
