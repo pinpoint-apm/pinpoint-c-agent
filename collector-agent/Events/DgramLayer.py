@@ -20,8 +20,8 @@ from __future__ import print_function
 import errno
 from gevent import socket as asy_socket
 
-from Common import TCLogger
-from Trains.TrainsLayer import *
+from Common.Logger import TCLogger
+from Events.TrainsLayer import *
 
 
 class DgramLayer(TrainLayer):

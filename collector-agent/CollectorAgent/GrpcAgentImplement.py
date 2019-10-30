@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 10/16/19
+import time
+
 import grpc
 
-from CollectorAgent import CollectorAgentConf
+from CollectorAgent.Grpc import CH_NOT_READY, CH_READY
 from PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, SUPPORT_GRPC
+from Stat_pb2 import PPing
 
-# ready means channel is free to use
-READY=1
-# wait ....
-NOT_READY=0
 
 class GrpcAgentImplement(PinpointAgent):
     socketUniqueId=0
     def __init__(self, manage, ac, app_id, app_name, serviceType=PHP):
+        from CollectorAgent import CollectorAgentConf
         assert(isinstance(ac,CollectorAgentConf))
         assert(ac.collector_type == SUPPORT_GRPC)
         super().__init__(app_id, app_name)
@@ -28,9 +28,9 @@ class GrpcAgentImplement(PinpointAgent):
         self.app_name = app_name
         self.max_pending_sz = ac.max_pending_size
         self.app_id = app_id
-        self.span_c_state = NOT_READY
-        self.stat_c_state = NOT_READY
-        self.agent_c_state = NOT_READY
+        self.span_c_state = CH_NOT_READY
+        self.stat_c_state = CH_NOT_READY
+        self.agent_c_state = CH_NOT_READY
         self.write_queue_ofs = 0
         self.span_buff=([],[])
         self.agent_addr = ac.CollectorAgentIp+':' + str(ac.CollectorAgentPort)
@@ -49,11 +49,6 @@ class GrpcAgentImplement(PinpointAgent):
 
         return agent_ch,stat_ch,span_ch
 
-
-
-
-    def _send_ping_session(self):
-        pass
 
     def set_span_channel_state(self,state):
         pass

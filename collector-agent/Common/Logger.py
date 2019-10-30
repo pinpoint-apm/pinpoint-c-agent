@@ -18,18 +18,19 @@
 
 import logging
 
-import Common.Config
+TCLogger = logging.getLogger(__name__)
+PALogger = logging.getLogger(__name__)
 
-
-def ca_logger(name,config,filename):
-    fullPath = config.get('Common',
-               'LOG_DIR')+filename
+def create_logger(name, filename,fullPath,level):
+    # fullPath = config.get('Common',
+    #            'LOG_DIR')+filename
+    fullPath =fullPath + filename
     logger = logging.getLogger(name)
     caFormat = logging.Formatter('[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')
     fileHandler = logging.FileHandler(fullPath)
     fileHandler.setFormatter(caFormat)
     # level = config.get('Common','Log_Level','DEBUG')
-    level = config.get('Common', 'Log_Level',fallback='DEBUG')
+    # level = config.get('Common', 'Log_Level',fallback='DEBUG')
     logger.setLevel(level)
     logger.addHandler(fileHandler)
 
@@ -37,17 +38,13 @@ def ca_logger(name,config,filename):
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(caFormat)
     logger.addHandler(streamHandler)
-
     return logger
-
 
 """
 TCLogger response for thrift collector
 PALogger response for php agent
 """
-TCLogger=ca_logger("TC",Common.Config.CAConfig, "collector.agent.log")
-PALogger=ca_logger("PA",Common.Config.CAConfig, "php.agent.log")
 
-if __name__ == '__main__':
-    TCLogger.debug("test tc info")
-    PALogger.info("test pa info")
+
+
+

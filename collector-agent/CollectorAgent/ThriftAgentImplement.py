@@ -24,16 +24,16 @@ import gevent
 
 from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage
 from Common import *
+from Common.AgentHost import AgentHost
+from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode, AGENT_INFO, SPAN, PHP_METHOD_CALL, API_WEB_REQUEST, \
     PROXY_HTTP_HEADER
 from Proto.Trift.Trace.ttypes import TSpan, TSpanEvent, TIntStringValue, TAnnotation, TAnnotationValue, \
     TLongIntIntByteByteStringValue
-from Trains import *
+from Events import *
 from CollectorAgent.TCGenerator import *
 from CollectorAgent.APIMeta import *
 from CollectorAgent.AgentStateManager import AgentStateManager
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
-from PinpointAgent import *
 
 
 class ThriftAgentImplement(PinpointAgent):
@@ -339,7 +339,7 @@ class ThriftAgentImplement(PinpointAgent):
         return tSpan
 
     def scanLocalInfo(self):
-        ah = AgentHost()
+        ah = AgentHost(self.ac)
         self.agentInfo.hostname = ah.hostname
         self.agentInfo.ip = ah.ip
         self.agentInfo.ports = ah.port
@@ -501,34 +501,34 @@ class ThriftAgentImplement(PinpointAgent):
         return packet
 
 
-
-
-if __name__ == '__main__':
-    ac = CollectorAgentConf(CAConfig)
-    agent = ThriftAgentImplement(ac,'php-test-1','PHP-TEST-1')
-
-    agent.startAll()
-    i = 0
-    while True:
-        stime = int(time.time()*1000)
-
-        rawSpan='{"name":"PHP Request",' \
-                '"server":"10.34.130.79:28081",' \
-                '"sid":"3345567788","psid":"3345567789","tid":"php-test-1^1560951035971^%d",'\
-                '"S":%d,"E":20,' \
-                '"clues":["46:200"],' \
-                '"uri":"/index.html",' \
-                '"EC":1, "estr":"DIY",' \
-                '"calls":[{"name":"hello","S":0,"E":8,"calls":[{"name":"hello2","S":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":4,"E":4}]}]}],' \
-                '"client":"10.10.10.10"}'% (i,stime)
-        stack = json.loads(rawSpan)
-        TCLogger.info("%s", stack)
-        agent.sendSpan(stack)
-        i += 1
-        gevent.sleep(10)
-
-    g = Event()
-    g.wait()
+#
+#
+# if __name__ == '__main__':
+#     ac = CollectorAgentConf(CAConfig)
+#     agent = ThriftAgentImplement(ac,'php-test-1','PHP-TEST-1')
+#
+#     agent.startAll()
+#     i = 0
+#     while True:
+#         stime = int(time.time()*1000)
+#
+#         rawSpan='{"name":"PHP Request",' \
+#                 '"server":"10.34.130.79:28081",' \
+#                 '"sid":"3345567788","psid":"3345567789","tid":"php-test-1^1560951035971^%d",'\
+#                 '"S":%d,"E":20,' \
+#                 '"clues":["46:200"],' \
+#                 '"uri":"/index.html",' \
+#                 '"EC":1, "estr":"DIY",' \
+#                 '"calls":[{"name":"hello","S":0,"E":8,"calls":[{"name":"hello2","S":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":4,"E":4}]}]}],' \
+#                 '"client":"10.10.10.10"}'% (i,stime)
+#         stack = json.loads(rawSpan)
+#         TCLogger.info("%s", stack)
+#         agent.sendSpan(stack)
+#         i += 1
+#         gevent.sleep(10)
+#
+#     g = Event()
+#     g.wait()
 
     # g1 = gevent.spawn(
     # time.sleep(1)

@@ -1,7 +1,7 @@
 gevent==1.4.0
 greenlet==0.4.15
-grpcio==1.23.0
-grpcio-tools==1.23.0
+grpcio==1.25.0rc1
+grpcio-tools==1.25.0rc1
 protobuf==3.9.1
 psutil==5.6.3
 six==1.12.0

@@ -27,21 +27,17 @@ if PY2:
 else:
     import configparser as ConfigParser
 
+def get_conf(env_name):
+    if not env_name in os.environ:
+        raise Exception("COLLECTOR_CONFIG not found in your environment")
 
-if not 'COLLECTOR_CONFIG' in os.environ:
-    raise Exception("COLLECTOR_CONFIG not found in your environment")
+    __config_path = os.environ[env_name]
+    if not os.path.exists(__config_path):
+        raise Exception("COLLECTOR_CONFIG:%s not exist" % (__config_path))
 
-__config_path = os.environ['COLLECTOR_CONFIG']
-
-if not os.path.exists(__config_path):
-    raise Exception("COLLECTOR_CONFIG:%s not exist"%(__config_path))
-
-def get_conf(fullPath):
     config =  ConfigParser.ConfigParser()
-    config.read(fullPath)
+    config.read(__config_path)
     return config
 
-CAConfig = get_conf(__config_path);
+CAConfig = get_conf('COLLECTOR_CONFIG');
 
-if __name__ == '__main__':
-    print(CAConfig.get('Common','LOG_DIR'))

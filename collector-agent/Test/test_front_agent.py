@@ -3,13 +3,16 @@
 # Created by eeliu at 10/16/19
 
 import sys,os
+
+from Common.Config import CAConfig
+
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('./helloworld'))
 
 from PHPAgent import PHPAgentConf
 from PHPAgent.FrontAgent import FrontAgent
 from Common import *
-import helloworld_pb2_grpc, helloworld_pb2
+import helloworld_pb2, helloworld_pb2
 
 
 import grpc
@@ -25,7 +28,7 @@ def handleAgentPacket(client,type,str):
 
     TCLogger.debug("%d,%s",type,str)
 
-    stub = helloworld_pb2_grpc.GreeterStub(channel)
+    stub = helloworld_pb2.GreeterStub(channel)
 
     def process_response(future):
         print(future.result().message)

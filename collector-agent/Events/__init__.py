@@ -16,12 +16,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from __future__ import absolute_import
+from Events.DgramLayer import DgramLayer
+from Events.StreamClientLayer import StreamClientLayer
+from Events.StreamServerLayer import StreamServerLayer
+from Events.TrainsLayer import TrainLayer
 
-from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
-from CollectorAgent.Protocol import CollectorPro
-__all__= ['CollectorAgentConf', 'ThriftAgentImplement', 'CollectorPro']
-
-
-
+__all__=['StreamClientLayer', 'DgramLayer','StreamServerLayer','TrainLayer']

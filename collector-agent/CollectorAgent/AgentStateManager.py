@@ -19,10 +19,10 @@ import psutil
 
 from CollectorAgent.Protocol import CollectorPro
 from PinpointAgent.Type import AGENT_STAT_BATCH
-from Common import TCLogger
+from Common.Logger import TCLogger
 from Proto.Trift.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
 
-from Trains import DgramLayer, TrainLayer
+from Events import DgramLayer, TrainLayer
 
 
 

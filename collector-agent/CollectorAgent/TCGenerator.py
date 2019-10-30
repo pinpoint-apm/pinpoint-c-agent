@@ -48,7 +48,7 @@
 # }
 
 # from Intercept import interceptManger
-from Common import TCLogger
+from Common.Logger import TCLogger
 from CollectorAgent.Protocol import *
 from Proto.Trift.Trace.ttypes import TAnnotation, TAnnotationValue, TIntStringValue,TLongIntIntByteByteStringValue
 
