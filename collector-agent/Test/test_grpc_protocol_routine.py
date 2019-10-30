@@ -4,6 +4,12 @@
 import grpc
 import time
 
+from gevent import monkey
+monkey.patch_all()
+import grpc.experimental.gevent as grpc_gevent
+grpc_gevent.init_gevent()
+
+from PinpointAgent.Type import PHP
 from Proto.grpc import Service_pb2_grpc
 from Proto.grpc.Stat_pb2 import PAgentInfo, PPing
 
@@ -20,8 +26,8 @@ def agentinfo():
                   ('starttime',starttime)]
 
     response, call = stub.RequestAgentInfo.with_call(
-        PAgentInfo(hostname='xxx', ip='ip', ports='456,546', pid=423, endTimestamp=-1,
-                   serviceType=1500),
+        PAgentInfo(hostname='xxx', ip='ip', ports='456', pid=423, endTimestamp=-1,
+                   serviceType=PHP),
         metadata=agent_meta
     )
 
@@ -31,6 +37,8 @@ def agentinfo():
     def ping_reqeust():
         for i in range(10):
             ping = PPing()
+            time.sleep(1)
+            print('-')
             yield ping
 
     ping_meta = agent_meta[:]
@@ -42,33 +50,33 @@ def agentinfo():
 
 
     ## send metadata
-    channel = grpc.insecure_channel('dev-pinpoint:9991')
-
-    meta_stub = Service_pb2_grpc.MetadataStub(channel)
-
-    result = meta_stub.RequestApiMetaData(PApiMetaData(apiId=1,apiInfo='name',line=10,type=0),metadata=agent_meta)
-    print(result)
-
-    ## snd span
-    channel = grpc.insecure_channel('dev-pinpoint:9993')
-    span_stub = Service_pb2_grpc.SpanStub(channel)
-
-    def request_span():
-        for i in range(5):
-            tid = PTransactionId(agentId='test-id',agentStartTime=int(time.time()),sequence=i)
-            span =PSpan(version = 1,
-                        transactionId=tid,
-                        startTime= int(time.time()),
-                        elapsed=10,
-                        apiId=1,
-                        serviceType=1500,
-                        applicationServiceType=1500)
-            meg= PSpanMessage(span=span)
-            yield meg
-
-    response = span_stub.SendSpan(request_span(),metadata=agent_meta)
-
-    print(response)
+    # channel = grpc.insecure_channel('dev-pinpoint:9991')
+    #
+    # meta_stub = Service_pb2_grpc.MetadataStub(channel)
+    #
+    # result = meta_stub.RequestApiMetaData(PApiMetaData(apiId=1,apiInfo='name',line=10,type=0),metadata=agent_meta)
+    # print(result)
+    #
+    # ## snd span
+    # channel = grpc.insecure_channel('dev-pinpoint:9993')
+    # span_stub = Service_pb2_grpc.SpanStub(channel)
+    #
+    # def request_span():
+    #     for i in range(5):
+    #         tid = PTransactionId(agentId='test-id',agentStartTime=int(time.time()),sequence=i)
+    #         span =PSpan(version = 1,
+    #                     transactionId=tid,
+    #                     startTime= int(time.time()),
+    #                     elapsed=10,
+    #                     apiId=1,
+    #                     serviceType=1500,
+    #                     applicationServiceType=1500)
+    #         meg= PSpanMessage(span=span)
+    #         yield meg
+    #
+    # response = span_stub.SendSpan(request_span(),metadata=agent_meta)
+    #
+    # print(response)
 
     # print(call.trailing_metadata())
 
@@ -81,9 +89,9 @@ def agentinfo():
 
     # while True:
     #     response, call = stub.PingSession(PPing(), metadata=agent_meta)
-        # print(response)
-        # print(call)
-        # time.sleep(1)
+    #     print(response)
+    #     print(call)
+    #     time.sleep(1)
 
 
 

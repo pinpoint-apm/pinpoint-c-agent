@@ -16,6 +16,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from PinpointAgent.PinpointAgent import PinpointAgent
-from .AppManagement import AppManagement
-__all__=['PinpointAgent','AppManagement']
+# from PinpointAgent.PinpointAgent import PinpointAgent
+# from PinpointAgent.AppManagement import AppManagement
+# __all__=['PinpointAgent','AppManagement']

@@ -15,6 +15,7 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+import Common
 from PinpointAgent.Type import SUPPORT_THRIFT, SUPPORT_GRPC
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
 from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
@@ -68,6 +69,10 @@ class CollectorAgentConf(object):
                                      'ApplicationName')
         self.version = AGENT_VERSION
         self.config = config
+        log_dir =  config.get('Common','LOG_DIR')
+        log_level = config.get('Common', 'Log_Level',fallback='DEBUG')
+        Common.Logger.TCLogger = Common.Logger.create_logger("TC", log_dir, "collector.agent.log",log_level)
+        Common.Logger.PALogger = Common.Logger.create_logger("PA",log_dir, "php.agent.log",log_level)
 
     def getSpanHost(self):
         return ( self.CollectorSpanIp,self.CollectorSpanPort)

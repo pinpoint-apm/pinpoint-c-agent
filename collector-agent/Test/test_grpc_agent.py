@@ -4,7 +4,7 @@
 from CollectorAgent import CollectorAgentConf
 from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
 import time
-from Common import *
+from Common.Config import CAConfig
 
 
 class FakeManager(object):

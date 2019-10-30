@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 10/18/19
-
+import collections
 import grpc
 
-from CollectorAgent.GrpcAgentImplement import NOT_READY,READY,BUSY
-from Proto.grpc import Service_pb2_grpc
-from Proto.grpc.Stat_pb2 import PAgentInfo, PPing
-from Span_pb2 import PSqlMetaData, PApiMetaData, PSpanMessage, PSpan, PTransactionId
 
 # copy from grpc example
+from CollectorAgent.Grpc import CH_NOT_READY, CH_READY
+from Common.Logger import TCLogger
+
+
 class _GenericClientInterceptor(
         grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor,
         grpc.StreamUnaryClientInterceptor, grpc.StreamStreamClientInterceptor):
@@ -44,27 +44,28 @@ class _GenericClientInterceptor(
         response_it = continuation(new_details, new_request_iterator)
         return postprocess(response_it) if postprocess else response_it
 
+class _ClientCallDetails(
+        collections.namedtuple(
+            '_ClientCallDetails',
+            ('method', 'timeout', 'metadata', 'credentials')),
+        grpc.ClientCallDetails):
+    pass
 
 class GrpcClient(object):
     def __init__(self,address,meta=None,maxPending=-1):
         self.address = address
-        self.meta = meta
+        self.meta = None
         self.max_pending_size = maxPending
-        self.state = NOT_READY
+        self.state = CH_NOT_READY
         channel = grpc.insecure_channel(address)
+
         if meta is not None:
-            pass
-        if maxPending != -1:
-            pass
-        self.channel =channel
-        self.channel.subscribe(self.channel_state_change)
-
-
-    def _add_meta_header(self):
-        pass
-
-    def get_stub(self):
-        pass
+            self.meta = meta
+            intercept_channel = grpc.intercept_channel(channel,
+                                                   self._interceptor_add_header(meta))
+            channel = intercept_channel
+        self.channel = channel
+        self.channel.subscribe(self._channel_state_change)
 
     def get_state(self):
         return self.state
@@ -82,14 +83,19 @@ class GrpcClient(object):
             return client_call_details, request_iterator, None
         return _GenericClientInterceptor(intercept_call)
 
-    def channel_state_change(self,activity):
+    def _channel_state_change(self, activity):
         if activity == grpc.ChannelConnectivity.TRANSIENT_FAILURE:
-            self.state = NOT_READY
+            self.state = CH_NOT_READY
         elif activity == grpc.ChannelConnectivity.CONNECTING:
-            self.state = NOT_READY
+            self.state = CH_NOT_READY
         elif activity ==  grpc.ChannelConnectivity.READY:
-            self.state = READY
+            self.state = CH_READY
+    def stop(self):
+        self.channel.close()
 
-class AgentClient(GrpcClient):
-    def __init__(self,address,meta=None,maxPending=-1):
-        super().__init__(address,meta,maxPending)
+    def print_return_stream_mesg(self,future):
+        # todo add try catch
+        # for ret in future.result():
+        #     print(ret.message)
+        # print(future)
+        pass

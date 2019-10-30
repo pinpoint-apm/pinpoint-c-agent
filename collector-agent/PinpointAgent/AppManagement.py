@@ -4,7 +4,6 @@
 import json
 import time
 
-from Common import *
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
 

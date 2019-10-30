@@ -24,7 +24,7 @@ from gevent import socket as gsocket
 
 from PHPAgent.Type import RESPONSE_AGENT_INFO
 from PHPAgent.PHPAgentConf import PHPAgentConf
-from Trains import StreamServerLayer
+from Events import StreamServerLayer
 from Common import *
 
 
