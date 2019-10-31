@@ -26,5 +26,5 @@ class TestGRPCRoutine(TestCase):
                       ('applicationname', 'test-name'),
                       ('starttime', starttime)]
         agent = AgentClient('dev-1230','10.10.12.23','2345',4569,'dev-pinpoint:9991',agent_meta)
-        time.sleep(10)
-        agent.stop()
+        time.sleep(1000)
+        # agent.stop()

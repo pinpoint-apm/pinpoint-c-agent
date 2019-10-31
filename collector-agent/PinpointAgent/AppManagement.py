@@ -5,7 +5,7 @@ import json
 import time
 
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
-from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
+from Common.Logger import TCLogger
 
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP

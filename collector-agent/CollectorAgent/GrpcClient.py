@@ -56,7 +56,8 @@ class GrpcClient(object):
         self.address = address
         self.meta = None
         self.max_pending_size = maxPending
-        self.state = CH_NOT_READY
+        # treat ready as default
+        self.state = CH_READY
         channel = grpc.insecure_channel(address)
 
         if meta is not None:
@@ -85,17 +86,25 @@ class GrpcClient(object):
 
     def _channel_state_change(self, activity):
         if activity == grpc.ChannelConnectivity.TRANSIENT_FAILURE:
-            self.state = CH_NOT_READY
-        elif activity == grpc.ChannelConnectivity.CONNECTING:
-            self.state = CH_NOT_READY
+            self.channel_is_error()
         elif activity ==  grpc.ChannelConnectivity.READY:
-            self.state = CH_READY
+            self.channel_is_ready()
+        elif activity == grpc.ChannelConnectivity.IDLE:
+            self.channel_is_idle()
+
+        TCLogger.debug("channel state change %s",activity)
+
+    def channel_is_ready(self):
+        raise NotImplemented()
+
+    def channel_is_idle(self):
+        raise NotImplemented()
+
+    def channel_is_error(self):
+        raise NotImplemented()
+
     def stop(self):
         self.channel.close()
 
-    def print_return_stream_mesg(self,future):
-        # todo add try catch
-        # for ret in future.result():
-        #     print(ret.message)
-        # print(future)
-        pass
+    def reinit(self):
+        raise NotImplemented()

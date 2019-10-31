@@ -15,4 +15,4 @@ if __name__ == '__main__':
     manager = FakeManager()
     agent = GrpcAgentImplement(manager,collector_conf,'test-id','test-id-15')
     agent.start()
-    time.sleep(3)
+    # time.sleep(3)
