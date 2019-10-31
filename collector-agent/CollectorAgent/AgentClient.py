@@ -21,45 +21,57 @@ class AgentClient(GrpcClient):
         self.ip = ip
         self.pid = pid
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
-        agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
+        self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
                                serviceType=PHP)
         self.pingid= AgentClient.PINGID
         AgentClient.PINGID += 1
         self.ping_meta = meta.append(('socketid', str(AgentClient.PINGID)))
-        self._register_agent(agentinfo)
-        self.ping_timeout =ping_timeout
+        self.ping_timeout = ping_timeout
 
-    def _register_agent(self, agentInfo):
-        assert isinstance(agentInfo,PAgentInfo)
-        call_future = self.stub.RequestAgentInfo.future(agentInfo)
-        callback = partial(self.print_return_unary_mesg,input=agentInfo)
+
+    def channel_is_ready(self):
+        self._start_ping_thread()
+
+    def channel_is_idle(self):
+        self._register_agent()
+
+    def channel_is_error(self):
+        self._register_agent()
+
+    def _register_agent(self):
+        assert isinstance(self.agentinfo,PAgentInfo)
+        call_future = self.stub.RequestAgentInfo.future(self.agentinfo)
+        callback = partial(self.reponse_agentinfo_callback, input=self.agentinfo)
         call_future.add_done_callback(callback)
 
-    def print_return_unary_mesg(self,future,input):
+    def reponse_agentinfo_callback(self, future, input):
         # start ping if future is success
+        if future.exception():
+            TCLogger.error("agent catch exception %s",future.exception())
+            return
+
         if future.result():
             TCLogger.debug("agent register done:%s",future.result())
-            self._try_ping_session()
+
 
     def _ping_PPing(self):
-        while self.state == CH_READY:
+        while True:
             ping = PPing()
             TCLogger.debug("%s send ping",self)
             yield ping
             import time
             time.sleep(10)
 
-    def _try_ping_session(self):
+    def _start_ping_thread(self):
         # create ping stub
-        ret_iter = self.stub.PingSession(self._ping_PPing(),metadata=self.ping_meta)
-        self.ping_reponse_task = threading.Thread(target=self._ping_response, args=(ret_iter))
+        iter_reponse = self.stub.PingSession(self._ping_PPing(),metadata=self.ping_meta)
+        self.ping_reponse_task = threading.Thread(target=self._ping_response, args=(iter_reponse,))
         self.ping_reponse_task.start()
 
     def _ping_response(self,response_iter):
         for response in response_iter:
             TCLogger.debug('get ping response %s',response)
-
-        TCLogger.warn('Agent [%s] ping thread stopped',self)
+        TCLogger.warning('Agent [%s] ping thread stopped',self)
 
     def __str__(self):
         return 'hostname:%s ip:%s  pid:%d address:%s'%(self.hostname,self.ip,self.pid,self.address )
