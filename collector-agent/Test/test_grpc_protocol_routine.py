@@ -34,19 +34,19 @@ def agentinfo():
     print(response)
     print(call.trailing_metadata())
 
-    def ping_reqeust():
-        for i in range(10):
-            ping = PPing()
-            time.sleep(1)
-            print('-')
-            yield ping
-
-    ping_meta = agent_meta[:]
-    ping_meta.append(('socketid', '55'))
-    ping_iter = stub.PingSession(ping_reqeust(),metadata=ping_meta)
-
-    for ping in ping_iter:
-        print(ping)
+    # def ping_reqeust():
+    #     for i in range(10):
+    #         ping = PPing()
+    #         time.sleep(1)
+    #         print('-')
+    #         yield ping
+    #
+    # ping_meta = agent_meta[:]
+    # ping_meta.append(('socketid', '55'))
+    # ping_iter = stub.PingSession(ping_reqeust(),metadata=ping_meta)
+    #
+    # for ping in ping_iter:
+    #     print(ping)
 
 
     ## send metadata
@@ -58,25 +58,30 @@ def agentinfo():
     # print(result)
     #
     # ## snd span
-    # channel = grpc.insecure_channel('dev-pinpoint:9993')
-    # span_stub = Service_pb2_grpc.SpanStub(channel)
+    channel = grpc.insecure_channel('dev-pinpoint:9993')
+    span_stub = Service_pb2_grpc.SpanStub(channel)
     #
-    # def request_span():
-    #     for i in range(5):
-    #         tid = PTransactionId(agentId='test-id',agentStartTime=int(time.time()),sequence=i)
-    #         span =PSpan(version = 1,
-    #                     transactionId=tid,
-    #                     startTime= int(time.time()),
-    #                     elapsed=10,
-    #                     apiId=1,
-    #                     serviceType=1500,
-    #                     applicationServiceType=1500)
-    #         meg= PSpanMessage(span=span)
-    #         yield meg
-    #
-    # response = span_stub.SendSpan(request_span(),metadata=agent_meta)
-    #
-    # print(response)
+    def request_span():
+        for i in range(5):
+            tid = PTransactionId(agentId='test-id',agentStartTime=int(time.time()),sequence=i)
+            span =PSpan(version = 1,
+                        transactionId=tid,
+                        startTime= int(time.time()),
+                        elapsed=10,
+                        apiId=1,
+                        serviceType=1500,
+                        applicationServiceType=1500)
+            meg= PSpanMessage(span=span)
+            yield meg
+    print("send span")
+
+    def resp(self,*args):
+        print(args)
+
+    response = span_stub.SendSpan.future(request_span(),metadata=agent_meta)
+    response.add_done_callback(resp)
+
+    time.sleep(3)
 
     # print(call.trailing_metadata())
 

@@ -5,9 +5,8 @@ from grpc import Future
 
 import Service_pb2_grpc
 import threading
+import time
 from functools import partial
-
-from CollectorAgent.Grpc import CH_READY
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 from PinpointAgent.Type import PHP
@@ -53,14 +52,12 @@ class AgentClient(GrpcClient):
         if future.result():
             TCLogger.debug("agent register done:%s",future.result())
 
-
     def _ping_PPing(self):
         while True:
             ping = PPing()
             TCLogger.debug("%s send ping",self)
             yield ping
-            import time
-            time.sleep(10)
+            time.sleep(self.ping_timeout)
 
     def _start_ping_thread(self):
         # create ping stub
@@ -74,4 +71,4 @@ class AgentClient(GrpcClient):
         TCLogger.warning('Agent [%s] ping thread stopped',self)
 
     def __str__(self):
-        return 'hostname:%s ip:%s  pid:%d address:%s'%(self.hostname,self.ip,self.pid,self.address )
+        return 'agentclient: hostname:%s ip:%s  pid:%d address:%s'%(self.hostname,self.ip,self.pid,self.address)
