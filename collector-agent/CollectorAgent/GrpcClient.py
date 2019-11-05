@@ -56,8 +56,7 @@ class GrpcClient(object):
         self.address = address
         self.meta = None
         self.max_pending_size = maxPending
-        # treat ready as default
-        self.state = CH_READY
+
         channel = grpc.insecure_channel(address)
 
         if meta is not None:
@@ -68,8 +67,6 @@ class GrpcClient(object):
         self.channel = channel
         self.channel.subscribe(self._channel_state_change)
 
-    def get_state(self):
-        return self.state
 
     def _interceptor_add_header(self,header):
         def intercept_call(client_call_details, request_iterator, request_streaming,
@@ -106,5 +103,3 @@ class GrpcClient(object):
     def stop(self):
         self.channel.close()
 
-    def reinit(self):
-        raise NotImplemented()
