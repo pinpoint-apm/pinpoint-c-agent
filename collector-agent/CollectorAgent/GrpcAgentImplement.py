@@ -1,79 +1,59 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 10/16/19
-import time
-
-import grpc
-
-from CollectorAgent.Grpc import CH_NOT_READY, CH_READY
-from PinpointAgent import PinpointAgent
+from CollectorAgent.AgentClient import AgentClient
+from CollectorAgent.MetaClient import MetaClient
+from CollectorAgent.SpanClient import SpanClient
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from Common.AgentHost import AgentHost
+from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, SUPPORT_GRPC
-from Stat_pb2 import PPing
+from Span_pb2 import PSpanMessage
+from queue import Queue
 
 
 class GrpcAgentImplement(PinpointAgent):
-    socketUniqueId=0
-    def __init__(self, manage, ac, app_id, app_name, serviceType=PHP):
-        from CollectorAgent import CollectorAgentConf
-        assert(isinstance(ac,CollectorAgentConf))
-        assert(ac.collector_type == SUPPORT_GRPC)
+    def __init__(self, ac, app_id, app_name, serviceType=PHP):
+
+        assert isinstance(ac,CollectorAgentConf)
+        assert ac.collector_type == SUPPORT_GRPC
         super().__init__(app_id, app_name)
         self.agent_metadata = [('starttime',self.manage.startTimestamp),
                                ('agentid', app_id),
                                ('applicationname',app_name)]
-        self.span_metadata = self.agent_metadata.append(())
-        self.ping_metadata = self.agent_metadata.append(('socketid',str(GrpcAgentImplement.socketUniqueId)))
-        GrpcAgentImplement.socketUniqueId += 1
         # maybe change in future
         self.app_name = app_name
         self.max_pending_sz = ac.max_pending_size
         self.app_id = app_id
-        self.span_c_state = CH_NOT_READY
-        self.stat_c_state = CH_NOT_READY
-        self.agent_c_state = CH_NOT_READY
         self.write_queue_ofs = 0
         self.span_buff=([],[])
         self.agent_addr = ac.CollectorAgentIp+':' + str(ac.CollectorAgentPort)
         self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorSpanPort)
         self.span_addr = ac.CollectorSpanIp + ':' + str(ac.CollectorSpanPort)
-        self.agent_channel,self.stat_channel,self.span_channel = self._initialize_channels()
-
-    def _initialize_channels(self):
-        agent_ch = grpc.insecure_channel(self.agent_addr)
-        stat_ch = grpc.insecure_channel(self.stat_addr)
-        span_ch = grpc.insecure_channel(self.span_addr)
-
-        # add state change hook
-
-
-
-        return agent_ch,stat_ch,span_ch
-
-
-    def set_span_channel_state(self,state):
-        pass
-
-    def set_agent_channel_state(self,state):
-        pass
-
-    def set_stat_channel_state(self,state):
-        pass
-
+        import os
+        ah = AgentHost(self.ac)
+        self.agent_client = AgentClient(ah.hostname,ah.ip,ah.port,os.getpid(),self.agent_addr,self.agent_meta)
+        self.meta_client = MetaClient(self.agent_addr, self.agent_meta)
+        self.span_client = SpanClient(self._generate_span, self.span_addr, self.agent_meta, self.max_pending_sz)
+        self.queue = Queue(10000)
+        self.sequenceId = 0
 
     def start(self):
-        # 1. create channel of span,agent,stat
-        # 2. register agent
-        # 3. keep ping
-        raise NotImplementedError()
+        pass
 
     def sendSpan(self, stack):
         # stack -> grpc-span
 
         # create stringid,
+        pass
 
-        # elapsed by 1s
-        raise NotImplementedError()
 
     def stop(self):
         # close all channel
         raise NotImplementedError()
+
+    def _generate_span(self):
+        # here return a PSpanMessage
+        span = self.queue.get()
+        assert isinstance(span,PSpanMessage)
+        return span

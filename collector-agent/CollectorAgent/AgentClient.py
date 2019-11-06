@@ -28,13 +28,13 @@ class AgentClient(GrpcClient):
         self.ping_timeout = ping_timeout
 
 
-    def channel_is_ready(self):
+    def channel_set_ready(self):
         self._start_ping_thread()
 
-    def channel_is_idle(self):
+    def channel_set_idle(self):
         self._register_agent()
 
-    def channel_is_error(self):
+    def channel_set_error(self):
         self._register_agent()
 
     def _register_agent(self):

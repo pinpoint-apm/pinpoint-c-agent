@@ -17,13 +17,13 @@ class SpanClient(GrpcClient):
         self._start_span()
 
 
-    def channel_is_ready(self):
+    def channel_set_ready(self):
         self.is_ok = True
 
-    def channel_is_idle(self):
+    def channel_set_idle(self):
         self.is_ok = True
 
-    def channel_is_error(self):
+    def channel_set_error(self):
         self.is_ok = False
 
     def _span_response(self,*args):

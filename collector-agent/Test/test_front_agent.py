@@ -5,14 +5,14 @@
 import sys,os
 
 from Common.Config import CAConfig
+from Common.Logger import TCLogger
+from Test.helloworld import helloworld_pb2
 
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('./helloworld'))
 
 from PHPAgent import PHPAgentConf
 from PHPAgent.FrontAgent import FrontAgent
-from Common import *
-import helloworld_pb2, helloworld_pb2
 
 
 import grpc

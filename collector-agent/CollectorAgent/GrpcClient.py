@@ -83,21 +83,21 @@ class GrpcClient(object):
 
     def _channel_state_change(self, activity):
         if activity == grpc.ChannelConnectivity.TRANSIENT_FAILURE:
-            self.channel_is_error()
+            self.channel_set_error()
         elif activity ==  grpc.ChannelConnectivity.READY:
-            self.channel_is_ready()
+            self.channel_set_ready()
         elif activity == grpc.ChannelConnectivity.IDLE:
-            self.channel_is_idle()
+            self.channel_set_idle()
 
         TCLogger.debug("channel state change %s",activity)
 
-    def channel_is_ready(self):
+    def channel_set_ready(self):
         raise NotImplemented()
 
-    def channel_is_idle(self):
+    def channel_set_idle(self):
         raise NotImplemented()
 
-    def channel_is_error(self):
+    def channel_set_error(self):
         raise NotImplemented()
 
     def stop(self):

@@ -20,7 +20,7 @@ from CollectorAgent.TPackets import *
 
 
 # -*- coding: UTF-8 -*-
-class TestPacket(TestCase):
+class TestUtil(TestCase):
     def test_parseNetByteStream(self):
         netFlow = struct.pack('!hii9shih',PacketType.CONTROL_HANDSHAKE,2,9,"123456789".encode(),PacketType.APPLICATION_STREAM_CLOSE,12345,0)
         view = memoryview(netFlow)
@@ -43,4 +43,37 @@ class TestPacket(TestCase):
         self.assertEqual(tp[2],12345)
         self.assertEqual(tp[3],None)
 
+    def test_queue(self):
 
+        import threading
+        from  queue import Queue
+        simple_queue = Queue()
+
+        def worker():
+            times = 10000
+            while times>0 :
+                item = simple_queue.get()
+                if item is None:
+                    raise
+                times-=1
+                print("-1")
+
+        def consumer():
+            times = 10000
+            while times > 0:
+                simple_queue.put(consumer)
+                times -= 1
+                print("+1")
+
+
+        producer = threading.Thread(target=worker)
+        cons     = threading.Thread(target=consumer)
+        producer.start()
+        cons.start()
+        producer.join()
+        cons.join()
+
+    def create_fun(self):
+        def fun():
+            return None
+        return fun

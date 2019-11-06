@@ -28,6 +28,17 @@ class CollectorAgentConf(object):
 
         :param ConfigParser config:
         '''
+
+        self.CollectorSpanIp =''
+        self.CollectorSpanPort =''
+        self.CollectorStatIp =''
+        self.CollectorStatPort =''
+        self.CollectorAgentIp =''
+        self.CollectorAgentPort = ''
+        self.max_pending_size =''
+        self.collector_type = -1
+        self.collector_implement = None
+
         if  config.has_option('Collector','collector.grpc.agent.ip') and \
             config.has_option('Collector','collector.grpc.stat.ip') and \
             config.has_option('Collector', 'collector.grpc.span.ip'):
