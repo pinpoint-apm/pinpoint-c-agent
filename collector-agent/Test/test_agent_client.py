@@ -55,12 +55,21 @@ class TestGRPCRoutine(TestCase):
         strings = ('aaaaaaaaaaaa','bbbbbbbbbbb','cccccccc')
         sqls=('ssss','bbbbb','ssssssss')
         meta_client = MetaClient('dev-pinpoint:9991',self.agent_meta)
-
+        id = 0
         for api in apis:
-            meta_client.update_api_meta(*api)
-
+            id = meta_client.update_api_meta(*api)
+        self.assertEqual(id,3)
         for string in strings:
-            meta_client.update_string_meta(string)
-
+            id = meta_client.update_string_meta(string)
+        self.assertEqual(id, 6)
         for sql in sqls:
-            meta_client.update_sql_meta(sql)
+            id = meta_client.update_sql_meta(sql)
+        self.assertEqual(id, 9)
+
+        id = meta_client.update_sql_meta('ssss')
+        self.assertEqual(id, 7)
+
+        id = meta_client.update_string_meta('bbbbbbbbbbb')
+        self.assertEqual(id, 5)
+
+        time.sleep(3)

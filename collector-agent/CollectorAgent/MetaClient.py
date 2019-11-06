@@ -3,6 +3,7 @@
 # Created by eeliu at 11/5/19
 import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
+from Common.Logger import TCLogger
 from Span_pb2 import PSqlMetaData, PApiMetaData, PStringMetaData
 
 
@@ -17,14 +18,17 @@ class MetaClient(GrpcClient):
         self.string_table={}
 
     def _send_sql_meta(self,meta):
+        assert isinstance(meta,PSqlMetaData)
         future = self.meta_stub.RequestSqlMetaData.future(meta)
         future.add_done_callback(self._response)
 
     def _send_api_meta(self, meta):
+        assert isinstance(meta, PApiMetaData)
         future = self.meta_stub.RequestApiMetaData.future(meta)
         future.add_done_callback(self._response)
 
     def _send_string_meta(self, meta):
+        assert isinstance(meta, PStringMetaData)
         future = self.meta_stub.RequestStringMetaData.future(meta)
         future.add_done_callback(self._response)
 
@@ -63,7 +67,10 @@ class MetaClient(GrpcClient):
             return id
 
     def _response(self,future):
-        pass
+        if future.exception():
+            TCLogger.warning("register meta failed")
+            return
+        TCLogger.debug(future.result())
 
     def channel_is_ready(self):
         self.is_ok = True
@@ -78,10 +85,10 @@ class MetaClient(GrpcClient):
     def _register_all_meta(self):
         # register sql
         for key,value in self.sql_table.items():
-            self._send_sql_meta(value)
+            self._send_sql_meta(value[1])
         # api
         for key,value in self.api_table.items():
-            self._send_api_meta(value)
+            self._send_api_meta(value[1])
         # string
         for key,value in self.string_table.items():
-            self._send_string_meta(value)
+            self._send_string_meta(value[1])
