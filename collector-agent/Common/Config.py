@@ -17,15 +17,7 @@
 # -*- coding: UTF-8 -*-
 
 import os
-import sys
-
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] >= 3
-
-if PY2:
-    import ConfigParser
-else:
-    import configparser as ConfigParser
+import configparser as ConfigParser
 
 def get_conf(env_name):
     if not env_name in os.environ:
@@ -39,5 +31,5 @@ def get_conf(env_name):
     config.read(__config_path)
     return config
 
-CAConfig = get_conf('COLLECTOR_CONFIG');
+CAConfig = get_conf('COLLECTOR_CONFIG')
 

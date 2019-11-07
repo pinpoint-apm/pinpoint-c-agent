@@ -18,33 +18,32 @@
 
 import logging
 
-TCLogger = logging.getLogger(__name__)
-PALogger = logging.getLogger(__name__)
-
-def create_logger(name, filename,fullPath,level):
-    # fullPath = config.get('Common',
-    #            'LOG_DIR')+filename
-    fullPath =fullPath + filename
+def _create_logger(name):
     logger = logging.getLogger(name)
-    caFormat = logging.Formatter('[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')
-    fileHandler = logging.FileHandler(fullPath)
-    fileHandler.setFormatter(caFormat)
-    # level = config.get('Common','Log_Level','DEBUG')
-    # level = config.get('Common', 'Log_Level',fallback='DEBUG')
-    logger.setLevel(level)
-    logger.addHandler(fileHandler)
-
-    # disable console print
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(caFormat)
-    logger.addHandler(streamHandler)
     return logger
 
-"""
-TCLogger response for thrift collector
-PALogger response for php agent
-"""
 
+TCLogger = _create_logger("TC")
+PALogger = _create_logger("PA")
 
+def set_logger_file(fullpath,format=logging.Formatter('[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')):
+    fileHandler = logging.FileHandler(fullpath+'/collector.agent.log')
+    fileHandler.setFormatter(format)
+    TCLogger.addHandler(fileHandler)
 
+    fileHandler = logging.FileHandler(fullpath+'/front.agent.log')
+    fileHandler.setFormatter(format)
+    PALogger.addHandler(fileHandler)
 
+def set_logger_level(level):
+    TCLogger.setLevel(level)
+    PALogger.setLevel(level)
+
+def logger_enable_console(format=logging.Formatter('[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')):
+    streamHandler = logging.StreamHandler()
+    streamHandler.setFormatter(format)
+    TCLogger.addHandler(streamHandler)
+
+    streamHandler = logging.StreamHandler()
+    streamHandler.setFormatter(format)
+    PALogger.addHandler(streamHandler)

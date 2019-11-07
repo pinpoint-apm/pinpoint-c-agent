@@ -15,12 +15,18 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from PHPAgent import *
-from Common import *
-from PinpointAgent import *
+import os,sys
+proto_class = os.getcwd()+'/Proto/grpc'
+sys.path.append(proto_class)
+
 from gevent.event import Event
-from CollectorAgent import CollectorAgentConf
 import gevent,signal
+
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from Common.Config import CAConfig
+from Common.Logger import TCLogger
+from PHPAgent import PHPAgentConf, FrontAgent
+from PinpointAgent.AppManagement import AppManagement
 
 
 class Server(object):

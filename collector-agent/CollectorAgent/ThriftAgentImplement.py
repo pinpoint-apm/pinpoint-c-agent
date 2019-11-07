@@ -15,21 +15,18 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import json
+# import json
 import os
-import struct
-import time
-
-import gevent
+# import struct
+# import time
+#
+# import gevent
 
 from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage
-from Common import *
+from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
 from Common.AgentHost import AgentHost
 from PinpointAgent.PinpointAgent import PinpointAgent
-from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode, AGENT_INFO, SPAN, PHP_METHOD_CALL, API_WEB_REQUEST, \
-    PROXY_HTTP_HEADER
-from Proto.Trift.Trace.ttypes import TSpan, TSpanEvent, TIntStringValue, TAnnotation, TAnnotationValue, \
-    TLongIntIntByteByteStringValue
+from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode
 from Events import *
 from CollectorAgent.TCGenerator import *
 from CollectorAgent.APIMeta import *
@@ -41,11 +38,11 @@ class ThriftAgentImplement(PinpointAgent):
     ReqCount = 0
 
 
-    def __init__(self,manage,ac,app_id,app_name,serviceType=PHP):
+    def __init__(self,ac,app_id,app_name,serviceType=PHP):
 
         super().__init__(app_id,app_name)
         self.ac         = ac
-        self.tcpHost    =  (ac.CollectorTcpIp, ac.CollectorTcpPort)
+        self.tcpHost    =  (ac.CollectorAgentIp, ac.CollectorAgentPort)
         self.statHost   =  (ac.CollectorStatIp, ac.CollectorStatPort)
         self.spanHost   =  (ac.CollectorSpanIp, ac.CollectorSpanPort)
         TCLogger.debug("CollectorTcp %s CollectorStat %s CollectorSpan %s" % (self.tcpHost, self.statHost, self.spanHost))
@@ -75,8 +72,7 @@ class ThriftAgentImplement(PinpointAgent):
             PacketType.CONTROL_PONG : self.handle_recv_pong
         }
         self.socketCode = AgentSocketCode.NONE
-        self.manage = manage
-        self.startTimeStamp = self.manage.startTimestamp
+        self.startTimeStamp = self.ac.startTimestamp
         self.agentName= app_name
         self.agentInfo = TAgentInfo(
             agentId =app_id,
@@ -92,6 +88,7 @@ class ThriftAgentImplement(PinpointAgent):
         self.scanLocalInfo()
         self.api_metas = {}
         self.string_metas = {}
+        self.span_factory = ThriftSpanFactory(self)
 
     ## expose to other module
     def sendMsgToCollector(self,msg):
@@ -147,202 +144,24 @@ class ThriftAgentImplement(PinpointAgent):
 
     def sendSpan(self,stack):
         '''
-
         :param dict stack:
         :return:
         '''
         ### must reset to zero
 
         self.sequenceId = 0
-        tSpan = self.makeSpan(stack)
-
+        tSpan = self.span_factory.make_span(stack)
         body = CollectorPro.obj2bin(tSpan,SPAN)
         # packet = Packet(PacketType.HEADLESS, len(body), body)
         self.spanLayer.sendData(body)
         # self.spanLayer.sendData(packet.getSerializedData())
         TCLogger.debug("send TSpan:%s",tSpan)
 
-
-    def genSpanEvent(self, span):
-        '''
-
-        :param  dict span:
-        :return TSpanEvent:
-        '''
-        assert 'name' in span
-        spanEv = TSpanEvent()
-
-        spanEv.apiId = self.updateApiMeta(span['name']).apiId
-        spanEv.annotations = []
-        if 'EXP' in  span:
-            id = self.updateStringMeta('EXP').apiId
-            spanEv.exceptionInfo = TIntStringValue(id, span['EXP'])
-
-        if 'dst' in  span:
-            spanEv.destinationId = span['dst']
-
-        if 'S' in  span:
-            spanEv.startElapsed = span['S']
-
-        if 'E' in span:
-            spanEv.endElapsed   = span['E']
-
-        if 'dst' in span:
-            spanEv.destinationId = span['dst']
-
-        if 'nsid' in span:
-            spanEv.nextSpanId   = int(span['nsid'])
-
-        if 'stp' in span:
-            spanEv.serviceType  = int(span['stp'])
-        else:
-            spanEv.serviceType = PHP_METHOD_CALL
-
-        if 'clues' in span:
-            for annotation in span['clues']:  # list
-                id, value = annotation.split(':', 1)
-
-                if value and value[0] =='[': ## value is a In
-                    pass
-                else: ## value is a string
-                    ann = TAnnotation(int(id), TAnnotationValue(stringValue=value))
-                    spanEv.annotations.append(ann)
-
-        return spanEv
-
-
-    def makeSpan(self, stackMap, tSpan=None, index=0):
-        '''
-
-        :param stackMap:
-        :param tSpan:
-        :param index: the depth of call stack
-        :param sequenceId: reset from every span. Must start from zero
-        :return:
-        '''
-        if tSpan is None:  ## A TSpan
-            tSpan = self.genTspan(stackMap)
-        else:  ## A span event
-            spanEv = self.genSpanEvent(stackMap)
-            # spanEv.spanId    = tSpan.spanId
-            spanEv.sequence = self.sequenceId
-            self.sequenceId += 1
-            spanEv.depth = index
-            tSpan.spanEventList.append(spanEv)
-
-        if 'calls' in stackMap:
-            for called in stackMap['calls']:
-                self.makeSpan(called, tSpan, index + 1)
-
-        return tSpan
-
-    def genTspan(self, span):
-        '''
-        :param dict span:
-        :param InterceptManager interceptManger
-        :return :
-        '''
-
-        tSpan = TSpan()
-        tSpan.apiId = self.updateApiMeta(span['name'], API_WEB_REQUEST).apiId
-        tSpan.agentStartTime = self.startTimeStamp
-
-        if 'appid' in span:
-            tSpan.agentId = span['appid']
-        else:
-            tSpan.agentId = self.app_id
-
-        if 'appname' in span:
-            tSpan.applicationName = span['appname']
-        else:
-            tSpan.applicationName = self.app_name
-
-        if 'stp' in span:
-            tSpan.serviceType = int(span['stp'])
-            tSpan.applicationServiceType = int(span['stp'])
-        else:
-            tSpan.serviceType = PHP
-            tSpan.applicationServiceType = PHP
-
-        if 'psid' in span:
-            tSpan.parentSpanId = int(span['psid'])
-
-        if 'tid' in span:
-            tSpan.transactionId = TransactionId(encoded_str= span['tid']).getBytes()
-
-        if 'sid' in span:
-            tSpan.spanId = int(span['sid'])
-
-        if 'S' in span:
-            tSpan.startTime = span['S']
-
-        if 'E' in span:
-            tSpan.elapsed = span['E']
-
-        if 'uri' in span:
-            tSpan.rpc = span['uri']
-
-        if 'pname' in span:
-            tSpan.parentApplicationName = span['pname']
-
-        if 'ptype' in span:
-            tSpan.parentApplicationType = int(span['ptype'])
-
-        if 'client' in span:
-            tSpan.remoteAddr = span['client']
-
-        if 'server' in span:
-            tSpan.endPoint = span['server']
-
-        if 'ERR' in span:
-            tSpan.err = 1
-            id = self.updateStringMeta('ERR').apiId
-            tSpan.exceptionInfo = TIntStringValue(id,span['ERR']['msg'])
-
-        if 'Ah' in span:
-            tSpan.acceptorHost = span['Ah']
-
-        tSpan.spanEventList = []
-        tSpan.annotations = []
-
-        if 'clues'  in span:
-            for annotation in span['clues']:  # list
-                id, value = annotation.split(':', 1)
-                ann = TAnnotation(int(id), TAnnotationValue(stringValue=value))
-                tSpan.annotations.append(ann)
-
-        try:
-            value = TLongIntIntByteByteStringValue()
-            if 'NP' in span: ## nginx
-                arr = ThriftProtocolUtil._parseStrField(span['NP'])
-                value.intValue1 = 2
-                if 'D' in arr:
-                    value.intValue2 =ThriftProtocolUtil._parseDotFormat(arr['D'])
-                if 't' in arr:
-                    value.longValue =ThriftProtocolUtil._parseDotFormat(arr['t'])
-            elif 'AP' in span: ## apache
-                arr = ThriftProtocolUtil._parseStrField(span['AP'])
-                value.intValue1 = 3
-                if 'i' in arr:
-                    value.byteValue1 = int(arr['i'])
-                if 'b' in arr:
-                    value.byteValue2 = int(arr['b'])
-                if 'D' in arr:
-                    value.intValue2  = int(arr['D'])
-                if 't' in arr:
-                    value.longValue  = int(int(arr['t'])/1000)
-            ann = TAnnotation(PROXY_HTTP_HEADER,TAnnotationValue(longIntIntByteByteStringValue=value))
-            tSpan.annotations.append(ann)
-        except Exception as e:
-            TCLogger.error("input is illegal,Exception %s",e)
-
-        return tSpan
-
     def scanLocalInfo(self):
-        ah = AgentHost(self.ac)
+        ah = AgentHost()
         self.agentInfo.hostname = ah.hostname
         self.agentInfo.ip = ah.ip
-        self.agentInfo.ports = ah.port
+        self.agentInfo.ports = self.ac.getWebPort()
 
     def start(self):
         self.tcpLayer.start()

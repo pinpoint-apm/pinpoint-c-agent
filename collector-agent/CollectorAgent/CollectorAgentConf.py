@@ -15,7 +15,10 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+import time
+
 import Common
+from Common.Logger import set_logger_file, set_logger_level, logger_enable_console
 from PinpointAgent.Type import SUPPORT_THRIFT, SUPPORT_GRPC
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
 from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
@@ -38,7 +41,8 @@ class CollectorAgentConf(object):
         self.max_pending_size =''
         self.collector_type = -1
         self.collector_implement = None
-
+        self.startTimestamp = int(time.time() * 1000)
+        self.config = config
         if  config.has_option('Collector','collector.grpc.agent.ip') and \
             config.has_option('Collector','collector.grpc.stat.ip') and \
             config.has_option('Collector', 'collector.grpc.span.ip'):
@@ -79,11 +83,15 @@ class CollectorAgentConf(object):
         self.ApplicationName = config.get('Collector',
                                      'ApplicationName')
         self.version = AGENT_VERSION
-        self.config = config
-        log_dir =  config.get('Common','LOG_DIR')
+
+        log_dir =  config.get('Common','LOG_DIR',fallback=None)
         log_level = config.get('Common', 'Log_Level',fallback='DEBUG')
-        Common.Logger.TCLogger = Common.Logger.create_logger("TC", log_dir, "collector.agent.log",log_level)
-        Common.Logger.PALogger = Common.Logger.create_logger("PA",log_dir, "php.agent.log",log_level)
+        if log_dir is not None:
+            set_logger_file(log_dir)
+        else:
+            logger_enable_console()
+        set_logger_level(log_level)
+
 
     def getSpanHost(self):
         return ( self.CollectorSpanIp,self.CollectorSpanPort)
@@ -93,6 +101,9 @@ class CollectorAgentConf(object):
 
     def getTcpHost(self):
         return (self.CollectorAgentIp, self.CollectorAgentPort)
+
+    def getWebPort(self):
+        return self.config.get('Common','Web_Port')
 
     def clean(self):
         pass

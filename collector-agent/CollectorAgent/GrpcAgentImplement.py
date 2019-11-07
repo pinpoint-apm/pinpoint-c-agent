@@ -4,7 +4,6 @@
 from CollectorAgent.AgentClient import AgentClient
 from CollectorAgent.MetaClient import MetaClient
 from CollectorAgent.SpanClient import SpanClient
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from Common.AgentHost import AgentHost
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, SUPPORT_GRPC
@@ -15,10 +14,9 @@ from queue import Queue
 class GrpcAgentImplement(PinpointAgent):
     def __init__(self, ac, app_id, app_name, serviceType=PHP):
 
-        assert isinstance(ac,CollectorAgentConf)
         assert ac.collector_type == SUPPORT_GRPC
         super().__init__(app_id, app_name)
-        self.agent_metadata = [('starttime',self.manage.startTimestamp),
+        self.agent_meta = [('starttime',ac.startTimestamp),
                                ('agentid', app_id),
                                ('applicationname',app_name)]
         # maybe change in future
@@ -31,8 +29,8 @@ class GrpcAgentImplement(PinpointAgent):
         self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorSpanPort)
         self.span_addr = ac.CollectorSpanIp + ':' + str(ac.CollectorSpanPort)
         import os
-        ah = AgentHost(self.ac)
-        self.agent_client = AgentClient(ah.hostname,ah.ip,ah.port,os.getpid(),self.agent_addr,self.agent_meta)
+        ah = AgentHost()
+        self.agent_client = AgentClient(ah.hostname,ah.ip,ac.getWebPort(),os.getpid(),self.agent_addr,self.agent_meta)
         self.meta_client = MetaClient(self.agent_addr, self.agent_meta)
         self.span_client = SpanClient(self._generate_span, self.span_addr, self.agent_meta, self.max_pending_sz)
         self.queue = Queue(10000)
