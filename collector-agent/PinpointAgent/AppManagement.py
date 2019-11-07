@@ -2,7 +2,6 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 9/4/19
 import json
-import time
 
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from Common.Logger import TCLogger
@@ -19,12 +18,11 @@ class AppManagement(object):
         self.default_appname = self.collector_conf.ApplicationName
         self.app_map = {}
         self.default_app = None
-        self.startTimestamp = int(time.time()*1000)
         self.create_default_implement(service_type)
 
     def create_default_implement(self,service_type):
 
-        self.default_app = self.collector_conf.collector_implement(self, self.collector_conf, self.default_appid, self.default_appname, service_type)
+        self.default_app = self.collector_conf.collector_implement(self.collector_conf, self.default_appid, self.default_appname, service_type)
 
         self.default_app.start()
         self.app_map[self.default_appid] = self.default_app
@@ -41,7 +39,7 @@ class AppManagement(object):
         else:
             if service_type == PHP:
                 TCLogger.info("collector-agent try to create a new application agent.[%s@%s]",app_id,app_name)
-                app = self.collector_conf.collector_implement(self, self.collector_conf, app_id, app_name)
+                app = self.collector_conf.collector_implement(self.collector_conf, app_id, app_name)
                 app.start()
                 self.app_map[app_id] = app
             else:
@@ -75,7 +73,7 @@ class AppManagement(object):
 
     def tell_whoami(self):
         return {
-            "time": str(self.startTimestamp),
+            "time": str(self.collector_conf.startTimestamp),
             "id": self.default_appid,
             "name": self.default_appname
         }

@@ -20,6 +20,9 @@ from CollectorAgent.TPackets import *
 
 
 # -*- coding: UTF-8 -*-
+from Common.Logger import create_logger
+
+
 class TestUtil(TestCase):
     def test_parseNetByteStream(self):
         netFlow = struct.pack('!hii9shih',PacketType.CONTROL_HANDSHAKE,2,9,"123456789".encode(),PacketType.APPLICATION_STREAM_CLOSE,12345,0)
@@ -72,8 +75,6 @@ class TestUtil(TestCase):
         cons.start()
         producer.join()
         cons.join()
-
-    def create_fun(self):
-        def fun():
-            return None
-        return fun
+    def test_logger(self):
+        logger = create_logger('noll',None,None,'DEBUG')
+        logger.debug("890")
