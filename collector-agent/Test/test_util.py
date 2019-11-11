@@ -21,7 +21,7 @@ from CollectorAgent.TPackets import *
 
 # -*- coding: UTF-8 -*-
 
-from Span_pb2 import PAcceptEvent, PSpan
+from Span_pb2 import PAcceptEvent, PSpan, PSpanEvent
 
 
 class TestUtil(TestCase):
@@ -84,3 +84,9 @@ class TestUtil(TestCase):
         span = PSpan()
         span.serviceType =100
         print(span)
+
+    def test_span_ev(self):
+        spanEv = PSpanEvent()
+        spanEv.depth = 1
+        spanEv.sequence = 1
+        print(spanEv)

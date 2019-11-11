@@ -35,7 +35,7 @@ class SpanClient(GrpcClient):
             try:
                 span = self.span_callback_fn()
                 if span is not None:
-                    TCLogger.debug("send span:%s",span)
+                    # TCLogger.debug("send span:%s",span)
                     yield span
                 else:
                     TCLogger.error(" get span failed, checking the span_callback_fn")
