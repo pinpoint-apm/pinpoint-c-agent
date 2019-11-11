@@ -36,19 +36,30 @@ class TestImplement(TestCase):
 
     def test_thrift(self):
         os.environ['COLLECTOR_CONFIG'] = self.thrift_config
+        self.run_app_manager()
+
+    def test_grpc(self):
+        os.environ['COLLECTOR_CONFIG'] = self.grpc_config
+        self.run_app_manager()
+
+    def run_app_manager(self):
         from Common.Config import CAConfig
         collector_conf = CollectorAgentConf(CAConfig)
         app_management = AppManagement(collector_conf)
         while True:
             stime = int(time.time())
-            span='{"name":"PHP Request","FT":1500,' \
-                    '"server":"10.34.130.79:28081",' \
-                    '"sid":"3345567788","psid":"3345567789","tid":"test-agent^1560951035971^1",'\
-                    '"S":%d,"E":20,' \
-                    '"clues":["46:200"],' \
-                    '"uri":"/index.html",' \
-                    '"EC":1, "estr":"DIY",' \
-                    '"calls":[{"name":"hello","S":0,"E":8,"calls":[{"name":"hello2","S":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":4,"E":4}]}]}],' \
-                    '"client":"10.10.10.10"}'% (stime)
-            app_management.handle_front_agent_data(None,None,span.encode())
-            gevent.sleep(1)
+            span = '{"name":"PHP Request","FT":1500,' \
+                   '"server":"10.34.130.79:28081",' \
+                   '"sid":"3345567788","psid":"3345567789","tid":"phpmyadmin^1560951035971^1",' \
+                   '"S":%d,"E":20,' \
+                   '"clues":["46:200"],' \
+                   '"uri":"/index.html",' \
+                    '"ERR":{"msg":"23456789op[xdcfvgbhnjmk"},' \
+                   '"EC":1, "estr":"DIY",' \
+                   '"calls":[{"name":"hello","S":0,"E":8,"calls":[{"name":"hello2","S":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":4,"E":4}]}]}],' \
+                   '"client":"10.10.10.10"}' % (stime)
+            app_management.handle_front_agent_data(None, None, span.encode())
+            time.sleep(3)
+            # gevent.sleep(1)
+
+# GRPC_TRACE=all;GRPC_VERBOSITY=DEBUG

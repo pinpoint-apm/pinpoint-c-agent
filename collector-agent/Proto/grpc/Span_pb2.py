@@ -3,6 +3,11 @@
 # source: Span.proto
 
 import sys
+from typing import Union
+
+from google.protobuf.internal.python_message import GeneratedProtocolMessageType
+from google.protobuf.pyext.cpp_message import GeneratedProtocolMessageType
+
 _b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
@@ -855,7 +860,7 @@ PSpan = _reflection.GeneratedProtocolMessageType('PSpan', (_message.Message,), {
   'DESCRIPTOR' : _PSPAN,
   '__module__' : 'Span_pb2'
   # @@protoc_insertion_point(class_scope:v1.PSpan)
-  })
+  })  # type: Union[GeneratedProtocolMessageType, GeneratedProtocolMessageType]
 _sym_db.RegisterMessage(PSpan)
 
 PTransactionId = _reflection.GeneratedProtocolMessageType('PTransactionId', (_message.Message,), {

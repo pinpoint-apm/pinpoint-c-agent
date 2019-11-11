@@ -4,6 +4,7 @@
 import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
+from Span_pb2 import PSpan
 
 
 class SpanClient(GrpcClient):
@@ -26,17 +27,22 @@ class SpanClient(GrpcClient):
     def channel_set_error(self):
         self.is_ok = False
 
-    def _span_response(self,*args):
-        print(args)
+    def _span_response(self,result):
+        TCLogger.debug(result)
 
     def _get_span(self):
-        #todo add is_ok checking
         while True:
-            span = self.span_callback_fn()
-            if span is not None:
-                yield span
-            else:
-                TCLogger.error(" get span failed, checking the span_callback_fn")
+            try:
+                span = self.span_callback_fn()
+                if span is not None:
+                    TCLogger.debug("send span:%s",span)
+                    yield span
+                else:
+                    TCLogger.error(" get span failed, checking the span_callback_fn")
+            except Exception as e:
+                TCLogger.error("get_span catch %s",e)
+                import sys
+                sys.exit(-1)
 
     def _start_span(self):
         self.future = self.span_stub.SendSpan.future(self._get_span())
