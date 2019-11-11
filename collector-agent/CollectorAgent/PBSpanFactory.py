@@ -151,6 +151,8 @@ class PBSpanFactory(SpanFactory):
 
     def set_sequenceid(self, span_ev, id):
         span_ev.sequence = id
+        TCLogger.debug("id %d", id)
 
     def set_depth(self, span_ev, depth):
         span_ev.depth = depth
+        TCLogger.debug("span_ev %s",span_ev)

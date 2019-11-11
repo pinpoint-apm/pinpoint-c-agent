@@ -47,17 +47,17 @@ class TestImplement(TestCase):
         collector_conf = CollectorAgentConf(CAConfig)
         app_management = AppManagement(collector_conf)
         while True:
-            stime = int(time.time())
+            # stime =1573438683
             span = '{"name":"PHP Request","FT":1500,' \
                    '"server":"10.34.130.79:28081",' \
                    '"sid":"3345567788","psid":"3345567789","tid":"phpmyadmin^1560951035971^1",' \
-                   '"S":%d,"E":20,' \
+                   '"S":1573438683,"E":20,' \
                    '"clues":["46:200"],' \
                    '"uri":"/index.html",' \
-                    '"ERR":{"msg":"23456789op[xdcfvgbhnjmk"},' \
+                   '"ERR":{"msg":"23456789op[xdcfvgbhnjmk"},' \
                    '"EC":1, "estr":"DIY",' \
-                   '"calls":[{"name":"hello","S":0,"E":8,"calls":[{"name":"hello2","S":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":4,"E":4}]}]}],' \
-                   '"client":"10.10.10.10"}' % (stime)
+                   '"calls":[{"name":"hello","S":1573438683,"E":8,"calls":[{"name":"hello2","1573438683":2,"E":2,"clues":["-1:null","14:2019/06/25"],"calls":[{"name":"hello3","S":1573438683,"E":4}]}]}],' \
+                   '"client":"10.10.10.10"}'
             app_management.handle_front_agent_data(None, None, span.encode())
             time.sleep(3)
             # gevent.sleep(1)

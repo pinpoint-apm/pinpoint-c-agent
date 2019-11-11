@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 11/6/19
+from Common.Logger import TCLogger
 from Span_pb2 import PSpanMessage
 
 
@@ -19,9 +20,11 @@ class SpanFactory(object):
         raise NotImplemented
 
     def make_span(self,stackMap):
-        self.sequenceid = 0
+        self.sequenceid = 1
         span = self.create_span(stackMap)
-        self.make_span_ev(span,stackMap)
+        if 'calls' in stackMap:
+            for called in stackMap['calls']:
+                self.make_span_ev(span,called)
         return span
 
     def make_span_ev(self, span, stackMap, depth=0):
@@ -30,7 +33,7 @@ class SpanFactory(object):
         self.sequenceid += 1
         self.set_depth(span_ev,depth)
         self.attach_span_event(span,span_ev)
-
+        TCLogger.debug(span_ev)
         if 'calls' in stackMap:
             for called in stackMap['calls']:
                 self.make_span_ev(span, called, depth + 1)
