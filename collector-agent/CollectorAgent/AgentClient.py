@@ -22,7 +22,7 @@ class AgentClient(GrpcClient):
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
                                serviceType=PHP)
-        self.pingid= AgentClient.PINGID
+        self.pingid = AgentClient.PINGID
         AgentClient.PINGID += 1
         self.ping_meta = meta.append(('socketid', str(AgentClient.PINGID)))
         self.ping_timeout = ping_timeout
@@ -40,11 +40,10 @@ class AgentClient(GrpcClient):
     def _register_agent(self):
         assert isinstance(self.agentinfo,PAgentInfo)
         call_future = self.stub.RequestAgentInfo.future(self.agentinfo)
-        callback = partial(self.reponse_agentinfo_callback, input=self.agentinfo)
-        call_future.add_done_callback(callback)
+        call_future.add_done_callback(self.reponse_agentinfo_callback)
+        TCLogger.debug("register agent %s",self.agentinfo)
 
-    def reponse_agentinfo_callback(self, future, input):
-        # start ping if future is success
+    def reponse_agentinfo_callback(self, future):
         if future.exception():
             TCLogger.error("agent catch exception %s",future.exception())
             return

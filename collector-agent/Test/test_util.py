@@ -20,7 +20,8 @@ from CollectorAgent.TPackets import *
 
 
 # -*- coding: UTF-8 -*-
-from Common.Logger import create_logger
+
+from Span_pb2 import PAcceptEvent, PSpan
 
 
 class TestUtil(TestCase):
@@ -75,6 +76,11 @@ class TestUtil(TestCase):
         cons.start()
         producer.join()
         cons.join()
-    def test_logger(self):
-        logger = create_logger('noll',None,None,'DEBUG')
-        logger.debug("890")
+    def test_span(self):
+        acceptEv = PAcceptEvent()
+        args ={
+            'acceptEvent':acceptEv
+        }
+        span = PSpan()
+        span.serviceType =100
+        print(span)

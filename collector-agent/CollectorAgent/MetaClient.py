@@ -42,6 +42,7 @@ class MetaClient(GrpcClient):
             self.api_table[row_str] = [id, meta]
             self._send_api_meta(meta)
             self.id += 1
+            TCLogger.debug("register api meta id:%d -> api:[%s]", id, row_str)
             return id
 
     def update_string_meta(self, value):
@@ -53,6 +54,7 @@ class MetaClient(GrpcClient):
             self.string_table[value] = [id, meta]
             self._send_string_meta(meta)
             self.id += 1
+            TCLogger.debug("register string meta id:%d -> value:[%s]",id,value)
             return id
 
     def update_sql_meta(self,sql):
@@ -64,11 +66,12 @@ class MetaClient(GrpcClient):
             self.sql_table[sql] = [id,meta]
             self._send_sql_meta(meta)
             self.id+=1
+            TCLogger.debug("register sql meta id:%d -> sql:[%s]", id, sql)
             return id
 
     def _response(self,future):
         if future.exception():
-            TCLogger.warning("register meta failed")
+            TCLogger.warning("register meta failed %s",future.exception)
             return
         TCLogger.debug(future.result())
 

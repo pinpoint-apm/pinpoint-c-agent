@@ -1,3 +1,156 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 11/7/19
+from google.protobuf.wrappers_pb2 import StringValue
+
+from Annotation_pb2 import PIntStringValue, PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
+from CollectorAgent.TCGenerator import ThriftProtocolUtil
+from Common.Logger import TCLogger
+from PHPAgent.SpanFactory import SpanFactory
+from PinpointAgent.Type import API_WEB_REQUEST, PHP, PHP_METHOD_CALL, PROXY_HTTP_HEADER
+from Span_pb2 import PSpan, PTransactionId, PAcceptEvent, PParentInfo, PSpanEvent, PNextEvent, PMessageEvent
+
+
+class PBSpanFactory(SpanFactory):
+    def create_span(self, stackMap):
+        tSpan = PSpan()
+        tSpan.apiId =self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST)
+        tSpan.version = 1
+        if 'stp' in stackMap:
+            tSpan.serviceType = int(stackMap['stp'])
+            tSpan.applicationServiceType = int(stackMap['stp'])
+        else:
+            tSpan.serviceType = PHP
+            tSpan.applicationServiceType = PHP
+
+        if 'psid' in stackMap:
+            tSpan.parentSpanId = int(stackMap['psid'])
+
+        if 'tid' in stackMap:
+            agentId, startTime, id = stackMap['tid'].split('^')
+            tSpan.transactionId.agentId = agentId
+            tSpan.transactionId.agentStartTime = int(startTime)
+            tSpan.transactionId.sequence =  int(id)
+
+        if 'sid' in stackMap:
+            tSpan.spanId = int(stackMap['sid'])
+
+        if 'S' in stackMap:
+            tSpan.startTime = stackMap['S']
+
+        if 'E' in stackMap:
+            tSpan.elapsed = stackMap['E']
+
+        accept = tSpan.acceptEvent
+
+        if 'uri' in stackMap:
+            accept.rpc = stackMap['uri']
+        if 'server' in stackMap:
+            accept.endPoint = stackMap['server']
+        if 'client' in stackMap:
+            accept.remoteAddr = stackMap['client']
+
+        parent_info =  accept.parentInfo
+
+        if 'pname' in stackMap:
+            parent_info.parentApplicationName = stackMap['pname']
+
+        if 'ptype' in stackMap:
+            parent_info.parentApplicationType = int(stackMap['ptype'])
+
+        if 'Ah' in stackMap:
+            parent_info.acceptorHost = stackMap['Ah']
+
+        if 'ERR' in stackMap:
+            id = self.agent.updateStringMeta('ERR')
+            value = StringValue(value=stackMap['ERR']['msg'])
+            tSpan.exceptionInfo.intValue = id
+            tSpan.exceptionInfo.stringValue.CopyFrom(value)
+
+        if 'clues' in stackMap:
+            for annotation in stackMap['clues']:  # list
+                id, value = annotation.split(':', 1)
+                ann = PAnnotation(key=int(id),value=PAnnotationValue(stringValue=value))
+                tSpan.annotation.append(ann)
+
+        try:
+            value = PLongIntIntByteByteStringValue()
+            if 'NP' in stackMap:  ## nginx
+                arr = ThriftProtocolUtil._parseStrField(stackMap['NP'])
+                value.intValue1 = 2
+                if 'D' in arr:
+                    value.intValue2 = ThriftProtocolUtil._parseDotFormat(arr['D'])
+                if 't' in arr:
+                    value.longValue = ThriftProtocolUtil._parseDotFormat(arr['t'])
+            elif 'AP' in stackMap:  ## apache
+                arr = ThriftProtocolUtil._parseStrField(stackMap['AP'])
+                value.intValue1 = 3
+                if 'i' in arr:
+                    value.byteValue1 = int(arr['i'])
+                if 'b' in arr:
+                    value.byteValue2 = int(arr['b'])
+                if 'D' in arr:
+                    value.intValue2 = int(arr['D'])
+                if 't' in arr:
+                    value.longValue = int(int(arr['t']) / 1000)
+            ann = PAnnotation(key=PROXY_HTTP_HEADER, value=PAnnotationValue(longIntIntByteByteStringValue=value))
+            tSpan.annotation.append(ann)
+        except Exception as e:
+            TCLogger.error("input is illegal,Exception %s", e)
+
+        return tSpan
+
+    def create_span_event(self, stackMap):
+        assert 'name' in stackMap
+        spanEv = PSpanEvent()
+        spanEv.apiId = self.agent.updateApiMeta(stackMap['name'])
+
+        if 'EXP' in stackMap:
+            id = self.agent.updateStringMeta('EXP')
+            value = StringValue(value=stackMap['EXP']['msg'])
+            spanEv.exceptionInfo.intValue = id
+            spanEv.exceptionInfo.stringValue.CopyFrom(value)
+
+
+        nextEv = spanEv.nextEvent
+        msgEv = nextEv.messageEvent
+
+        if 'dst' in stackMap:
+            msgEv.destinationId = stackMap['dst']
+
+        if 'nsid' in stackMap:
+            msgEv.nextSpanId = int(stackMap['nsid'])
+
+        if 'server' in stackMap:
+            msgEv.endPoint = stackMap['server']
+
+        if 'S' in stackMap:
+            spanEv.startElapsed = int(stackMap['S'])
+
+        if 'E' in stackMap:
+            spanEv.endElapsed = int(stackMap['E'])
+
+        if 'stp' in stackMap:
+            spanEv.serviceType = int(stackMap['stp'])
+        else:
+            spanEv.serviceType = PHP_METHOD_CALL
+
+        if 'clues' in stackMap:
+            for annotation in stackMap['clues']:  # list
+                id, value = annotation.split(':', 1)
+                if value and value[0] == '[':  ## value is a In
+                    pass
+                else:  ## value is a string
+                    ann = PAnnotation(key=int(id), value =PAnnotationValue(stringValue=value))
+                    spanEv.annotation.append(ann)
+
+        return spanEv
+
+    def attach_span_event(self, tSpan, span_event):
+        tSpan.spanEvent.append(span_event)
+
+    def set_sequenceid(self, span_ev, id):
+        span_ev.sequence = id
+
+    def set_depth(self, span_ev, depth):
+        span_ev.depth = depth

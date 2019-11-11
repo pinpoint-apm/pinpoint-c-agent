@@ -50,7 +50,6 @@ class ThriftAgentImplement(PinpointAgent):
         self.tcpLayer = StreamClientLayer(self.tcpHost, self.handlerResponse, self.collectorTcpHello)
 
         self.spanLayer = DgramLayer(self.spanHost,None)
-        self.sequenceId = 0
         self.packetRoute = {
             PacketType.APPLICATION_SEND : self.handle_default,
             PacketType.APPLICATION_TRACE_SEND : self.handle_default,
@@ -149,7 +148,6 @@ class ThriftAgentImplement(PinpointAgent):
         '''
         ### must reset to zero
 
-        self.sequenceId = 0
         tSpan = self.span_factory.make_span(stack)
         body = CollectorPro.obj2bin(tSpan,SPAN)
         # packet = Packet(PacketType.HEADLESS, len(body), body)

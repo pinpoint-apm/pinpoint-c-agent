@@ -89,7 +89,7 @@ class GrpcClient(object):
         elif activity == grpc.ChannelConnectivity.IDLE:
             self.channel_set_idle()
 
-        TCLogger.debug("channel state change %s",activity)
+        TCLogger.debug("channel state change %s dst:%s",activity,self.address)
 
     def channel_set_ready(self):
         raise NotImplemented()

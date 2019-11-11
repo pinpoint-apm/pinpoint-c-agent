@@ -154,3 +154,6 @@ class ThriftSpanFactory(SpanFactory):
 
     def set_sequenceid(self,span_ev,id):
         span_ev.sequence = id
+
+    def set_depth(self,span_ev,depth):
+        span_ev.depth = depth

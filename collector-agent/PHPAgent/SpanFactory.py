@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 11/6/19
+from Span_pb2 import PSpanMessage
+
 
 class SpanFactory(object):
     def __init__(self,agent):
@@ -20,13 +22,13 @@ class SpanFactory(object):
         self.sequenceid = 0
         span = self.create_span(stackMap)
         self.make_span_ev(span,stackMap)
-
         return span
 
-    def make_span_ev(self, span, stackMap, depth= 0):
+    def make_span_ev(self, span, stackMap, depth=0):
         span_ev = self.create_span_event(stackMap)
         self.set_sequenceid(span_ev,self.sequenceid)
         self.sequenceid += 1
+        self.set_depth(span_ev,depth)
         self.attach_span_event(span,span_ev)
 
         if 'calls' in stackMap:
@@ -34,4 +36,7 @@ class SpanFactory(object):
                 self.make_span_ev(span, called, depth + 1)
 
     def set_sequenceid(self,span_ev,id):
+        raise NotImplemented
+
+    def set_depth(self,span_ev,depth):
         raise NotImplemented
