@@ -7,9 +7,9 @@
 import time
 import logging
 from unittest import TestCase
-from CollectorAgent.AgentClient import AgentClient
+from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.MetaClient import MetaClient
-from CollectorAgent.SpanClient import SpanClient
+from CollectorAgent.GrpcSpan import GrpcSpan
 from Span_pb2 import PTransactionId, PSpan, PSpanMessage
 
 
@@ -29,7 +29,7 @@ class TestGRPCRoutine(TestCase):
         self.agent_meta = [('agentid', 'test-id'),
                       ('applicationname', 'test-name'),
                       ('starttime', starttime)]
-        self.agent = AgentClient('dev-1230', '10.10.12.23', '2345', 4569, 'dev-pinpoint:9991', self.agent_meta)
+        self.agent = GrpcAgent('dev-1230', '10.10.12.23', '2345', 4569, 'dev-pinpoint:9991', self.agent_meta)
 
     def _generate_span(self):
 
@@ -47,7 +47,7 @@ class TestGRPCRoutine(TestCase):
         return msg
 
     def test_sendspan(self):
-        spanclient = SpanClient(self._generate_span,'dev-pinpoint:9993',self.agent_meta,10)
+        spanclient = GrpcSpan(self._generate_span, 'dev-pinpoint:9993', self.agent_meta, 10)
         time.sleep(5)
 
     def test_metaData(self):

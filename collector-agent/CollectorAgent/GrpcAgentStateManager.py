@@ -26,7 +26,7 @@ from Events import DgramLayer, TrainLayer
 
 
 
-class AgentStateManager(object):
+class GrpcAgentStateManager(object):
     def __init__(self, agentId,startTimeStamp,host):
         self.state=TAgentStat()
         self.cup_load=TCpuLoad()
