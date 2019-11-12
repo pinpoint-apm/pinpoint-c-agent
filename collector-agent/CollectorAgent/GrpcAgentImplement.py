@@ -3,7 +3,7 @@
 # Created by eeliu at 10/16/19
 from CollectorAgent.AgentClient import AgentClient
 from CollectorAgent.MetaClient import MetaClient
-from CollectorAgent.PBSpanFactory import PBSpanFactory
+from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
 from CollectorAgent.SpanClient import SpanClient
 from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
@@ -40,7 +40,7 @@ class GrpcAgentImplement(PinpointAgent):
         self.span_client = SpanClient(self._generate_span, self.span_addr, self.agent_meta, self.max_pending_sz)
 
         self.sequenceId = 0
-        self.span_factory = PBSpanFactory(self)
+        self.span_factory = GrpcSpanFactory(self)
 
     def start(self):
         pass

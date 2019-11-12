@@ -43,7 +43,8 @@ class Server(object):
         gevent.signal(signal.SIGQUIT, _stop_event.set)
         gevent.signal(signal.SIGTERM, _stop_event.set)
         gevent.signal(signal.SIGINT, _stop_event.set)
-        _stop_event.wait()
+        while True:
+            gevent.sleep(10)
         self.app_management.stop_all()
         self.php_agent.stop()
         TCLogger.warning("collector agent exit with SIGNAL")

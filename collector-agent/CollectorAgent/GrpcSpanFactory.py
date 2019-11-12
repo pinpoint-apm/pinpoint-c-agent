@@ -11,7 +11,7 @@ from PinpointAgent.Type import API_WEB_REQUEST, PHP, PHP_METHOD_CALL, PROXY_HTTP
 from Span_pb2 import PSpan, PTransactionId, PAcceptEvent, PParentInfo, PSpanEvent, PNextEvent, PMessageEvent
 
 
-class PBSpanFactory(SpanFactory):
+class GrpcSpanFactory(SpanFactory):
     def create_span(self, stackMap):
         tSpan = PSpan()
         tSpan.apiId =self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST)
@@ -25,6 +25,8 @@ class PBSpanFactory(SpanFactory):
 
         if 'psid' in stackMap:
             tSpan.parentSpanId = int(stackMap['psid'])
+        else:
+            tSpan.parentSpanId =  -1
 
         if 'tid' in stackMap:
             agentId, startTime, id = stackMap['tid'].split('^')
@@ -151,8 +153,6 @@ class PBSpanFactory(SpanFactory):
 
     def set_sequenceid(self, span_ev, id):
         span_ev.sequence = id
-        TCLogger.debug("id %d", id)
 
     def set_depth(self, span_ev, depth):
         span_ev.depth = depth
-        TCLogger.debug("span_ev %s",span_ev)

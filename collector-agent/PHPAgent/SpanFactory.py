@@ -20,14 +20,15 @@ class SpanFactory(object):
         raise NotImplemented
 
     def make_span(self,stackMap):
-        self.sequenceid = 1
+        self.sequenceid = 0
         span = self.create_span(stackMap)
         if 'calls' in stackMap:
             for called in stackMap['calls']:
                 self.make_span_ev(span,called)
+        TCLogger.debug("send span:%s",span)
         return span
 
-    def make_span_ev(self, span, stackMap, depth=0):
+    def make_span_ev(self, span, stackMap, depth=1):
         span_ev = self.create_span_event(stackMap)
         self.set_sequenceid(span_ev,self.sequenceid)
         self.sequenceid += 1
