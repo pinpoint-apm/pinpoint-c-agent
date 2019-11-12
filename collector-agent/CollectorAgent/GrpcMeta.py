@@ -7,7 +7,7 @@ from Common.Logger import TCLogger
 from Span_pb2 import PSqlMetaData, PApiMetaData, PStringMetaData
 
 
-class MetaClient(GrpcClient):
+class GrpcMeta(GrpcClient):
     def __init__(self,address,meta=None):
         super().__init__(address, meta,-1)
         self.meta_stub=Service_pb2_grpc.MetadataStub(self.channel)

@@ -8,7 +8,7 @@ import time
 import logging
 from unittest import TestCase
 from CollectorAgent.GrpcAgent import GrpcAgent
-from CollectorAgent.MetaClient import MetaClient
+from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
 from Span_pb2 import PTransactionId, PSpan, PSpanMessage
 
@@ -54,7 +54,7 @@ class TestGRPCRoutine(TestCase):
         apis=(['aa',10,0],['ada',12,0],['aa',31,2],['aaf',11,3])
         strings = ('aaaaaaaaaaaa','bbbbbbbbbbb','cccccccc')
         sqls=('ssss','bbbbb','ssssssss')
-        meta_client = MetaClient('dev-pinpoint:9991',self.agent_meta)
+        meta_client = GrpcMeta('dev-pinpoint:9991', self.agent_meta)
         id = 0
         for api in apis:
             id = meta_client.update_api_meta(*api)
