@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 10/16/19
 from CollectorAgent.GrpcAgent import GrpcAgent
-from CollectorAgent.MetaClient import MetaClient
+from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
 from CollectorAgent.GrpcSpan import GrpcSpan
 from Common.AgentHost import AgentHost
@@ -36,7 +36,7 @@ class GrpcAgentImplement(PinpointAgent):
         import os
         self.agentHost = AgentHost()
         self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(), self.agent_addr, self.agent_meta)
-        self.meta_client = MetaClient(self.agent_addr, self.agent_meta)
+        self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
         self.span_client = GrpcSpan(self._generate_span, self.span_addr, self.agent_meta, self.max_pending_sz)
 
         self.sequenceId = 0
