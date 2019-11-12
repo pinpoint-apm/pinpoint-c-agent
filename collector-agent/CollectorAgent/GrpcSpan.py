@@ -7,7 +7,7 @@ from Common.Logger import TCLogger
 from Span_pb2 import PSpan
 
 
-class SpanClient(GrpcClient):
+class GrpcSpan(GrpcClient):
     def __init__(self,span_callback_fn,address,meta=None,maxPending=-1):
         super().__init__(address, meta, maxPending)
 

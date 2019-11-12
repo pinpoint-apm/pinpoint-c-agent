@@ -12,7 +12,7 @@ from Common.Logger import TCLogger
 from PinpointAgent.Type import PHP
 from Stat_pb2 import PAgentInfo, PPing
 
-class AgentClient(GrpcClient):
+class GrpcAgent(GrpcClient):
     PINGID=0
     def __init__(self,hostname,ip,ports,pid,address,meta=None,maxPending=-1,ping_timeout=10):
         super().__init__(address,meta,maxPending)
@@ -22,9 +22,9 @@ class AgentClient(GrpcClient):
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
                                serviceType=PHP)
-        self.pingid = AgentClient.PINGID
-        AgentClient.PINGID += 1
-        self.ping_meta = meta.append(('socketid', str(AgentClient.PINGID)))
+        self.pingid = GrpcAgent.PINGID
+        GrpcAgent.PINGID += 1
+        self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
         self.ping_timeout = ping_timeout
 
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 10/16/19
-from CollectorAgent.AgentClient import AgentClient
+from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.MetaClient import MetaClient
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
-from CollectorAgent.SpanClient import SpanClient
+from CollectorAgent.GrpcSpan import GrpcSpan
 from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
@@ -35,9 +35,9 @@ class GrpcAgentImplement(PinpointAgent):
 
         import os
         self.agentHost = AgentHost()
-        self.agent_client = AgentClient(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(), self.agent_addr, self.agent_meta)
+        self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(), self.agent_addr, self.agent_meta)
         self.meta_client = MetaClient(self.agent_addr, self.agent_meta)
-        self.span_client = SpanClient(self._generate_span, self.span_addr, self.agent_meta, self.max_pending_sz)
+        self.span_client = GrpcSpan(self._generate_span, self.span_addr, self.agent_meta, self.max_pending_sz)
 
         self.sequenceId = 0
         self.span_factory = GrpcSpanFactory(self)

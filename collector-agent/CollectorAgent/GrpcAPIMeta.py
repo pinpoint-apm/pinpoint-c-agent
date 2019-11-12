@@ -24,13 +24,13 @@ from Common.Logger import TCLogger
 from Proto.Trift.Trace.ttypes import TApiMetaData, TStringMetaData
 
 
-class APIMeta(object):
+class GrpcAPIMeta(object):
     API_META_INDEX = 1
     def __init__(self,name=None,line = -1,type = API_UNDEFINED,agentStartTime = -1,agentId = -1,agentName='Default name'):
         assert name is not None
         self.name = name
-        self.apiId = APIMeta.API_META_INDEX
-        APIMeta.API_META_INDEX += 1
+        self.apiId = GrpcAPIMeta.API_META_INDEX
+        GrpcAPIMeta.API_META_INDEX += 1
         self.type = type
         self.agentStartTime = agentStartTime
         self.agentId = agentId
@@ -42,7 +42,7 @@ class APIMeta(object):
                                apiId = self.apiId,
                                type= self.type,
                                apiInfo=self.name)
-        TCLogger.debug("generator APIMeta:%s", apiMeta)
+        TCLogger.debug("generator GrpcAPIMeta:%s", apiMeta)
         body   = CollectorPro.obj2bin(apiMeta, API_META_DATA)
         packet = Packet(PacketType.APPLICATION_REQUEST,CollectorPro.getCurReqCount() ,len(body),body)
         return packet

@@ -29,8 +29,8 @@ from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode
 from Events import *
 from CollectorAgent.TCGenerator import *
-from CollectorAgent.APIMeta import *
-from CollectorAgent.AgentStateManager import AgentStateManager
+from CollectorAgent.GrpcAPIMeta import *
+from CollectorAgent.GrpcAgentStateManager import GrpcAgentStateManager
 
 
 class ThriftAgentImplement(PinpointAgent):
@@ -82,7 +82,7 @@ class ThriftAgentImplement(PinpointAgent):
             pid=os.getpid()
         )
 
-        self.agentState = AgentStateManager(self.app_id, self.startTimeStamp,self.statHost)
+        self.agentState = GrpcAgentStateManager(self.app_id, self.startTimeStamp, self.statHost)
         self.postponed_queue = []
         self.scanLocalInfo()
         self.api_metas = {}
@@ -113,9 +113,9 @@ class ThriftAgentImplement(PinpointAgent):
         if name in self.api_metas:
             return self.api_metas[name]
         else:
-            meta = APIMeta(name=name, type=api_type,
-                           agentStartTime=self.startTimeStamp, agentId=self.app_id,
-                           agentName=self.app_name)
+            meta = GrpcAPIMeta(name=name, type=api_type,
+                               agentStartTime=self.startTimeStamp, agentId=self.app_id,
+                               agentName=self.app_name)
             self.sendMsgToCollector(meta.toPacket().getSerializedData())
             self.api_metas[name] = meta
             return meta
@@ -123,7 +123,7 @@ class ThriftAgentImplement(PinpointAgent):
     def sendMeta(self, meta):
         '''
 
-        :param APIMeta meta:
+        :param GrpcAPIMeta meta:
         :return:
         '''
         TCLogger.debug("meta: %s", meta.name)
