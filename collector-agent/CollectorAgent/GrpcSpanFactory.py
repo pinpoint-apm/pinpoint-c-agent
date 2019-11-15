@@ -3,12 +3,12 @@
 # Created by eeliu at 11/7/19
 from google.protobuf.wrappers_pb2 import StringValue
 
-from Annotation_pb2 import PIntStringValue, PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
+from Annotation_pb2 import PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
 from CollectorAgent.TCGenerator import ThriftProtocolUtil
 from Common.Logger import TCLogger
 from PHPAgent.SpanFactory import SpanFactory
 from PinpointAgent.Type import API_WEB_REQUEST, PHP, PHP_METHOD_CALL, PROXY_HTTP_HEADER
-from Span_pb2 import PSpan, PTransactionId, PAcceptEvent, PParentInfo, PSpanEvent, PNextEvent, PMessageEvent
+from Span_pb2 import PSpan, PSpanEvent
 
 
 class GrpcSpanFactory(SpanFactory):
@@ -64,6 +64,7 @@ class GrpcSpanFactory(SpanFactory):
             parent_info.acceptorHost = stackMap['Ah']
 
         if 'ERR' in stackMap:
+            tSpan.err = 1
             id = self.agent.updateStringMeta('ERR')
             value = StringValue(value=stackMap['ERR']['msg'])
             tSpan.exceptionInfo.intValue = id
@@ -109,7 +110,7 @@ class GrpcSpanFactory(SpanFactory):
 
         if 'EXP' in stackMap:
             id = self.agent.updateStringMeta('EXP')
-            value = StringValue(value=stackMap['EXP']['msg'])
+            value = StringValue(value=stackMap['EXP'])
             spanEv.exceptionInfo.intValue = id
             spanEv.exceptionInfo.stringValue.CopyFrom(value)
 

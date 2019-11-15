@@ -39,12 +39,9 @@ class Server(object):
         self.php_agent.start()
 
     def run(self):
-        _stop_event = Event()
-        gevent.signal(signal.SIGQUIT, _stop_event.set)
-        gevent.signal(signal.SIGTERM, _stop_event.set)
-        gevent.signal(signal.SIGINT, _stop_event.set)
         while True:
             gevent.sleep(10)
+        # break by a signal
         self.app_management.stop_all()
         self.php_agent.stop()
         TCLogger.warning("collector agent exit with SIGNAL")
