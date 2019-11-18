@@ -15,7 +15,6 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import time
 
 AGENT_VERSION = '1.8.0-RC1'
 
@@ -44,14 +43,8 @@ class CollectorAgentConf(object):
 
         self.ApplicationName = config.get('Collector',
                                      'ApplicationName')
-
-        # self._newSharedObject();
         self.version = AGENT_VERSION
         self.config = config
-        self.startTimestamp = int(time.time()*1000)
-
-
-
 
     def getSpanHost(self):
         return ( self.CollectorSpanIp,self.CollectorSpanPort)
@@ -61,12 +54,6 @@ class CollectorAgentConf(object):
 
     def getTcpHost(self):
         return ( self.CollectorTcpIp, self.CollectorTcpPort)
-
-    # def _newSharedObject(self):
-    #     with open(self.sharedObjectAddress, "w") as f:
-    #         # f.write(b"Hello Python!\n")
-    #         f.truncate(1024)
-    #         f.close()
 
     def clean(self):
         pass

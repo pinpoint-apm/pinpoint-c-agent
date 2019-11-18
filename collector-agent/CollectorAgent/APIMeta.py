@@ -16,10 +16,13 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from TCollectorAgent.TPackets import *
-from Common.Trace.ttypes import TApiMetaData, TStringMetaData
-from TCollectorAgent.Type import *
+from CollectorAgent.Protocol import CollectorPro
+from CollectorAgent.TPackets import Packet
+from PinpointAgent.Type import PacketType, STRING_META_DATA, API_META_DATA, API_UNDEFINED
+
 from Common.Logger import TCLogger
+from Proto.Trift.Trace.ttypes import TApiMetaData, TStringMetaData
+
 
 class APIMeta(object):
     API_META_INDEX = 1
@@ -79,49 +82,29 @@ class StringMetaData(object):
 
 
 
-class InterceptManager(object):
-    def __init__(self, collector_cb, ac):
-        '''
+# class InterceptManager(object):
+#     def __init__(self, collector_cb, ac):
+#         '''
+#
+#         :param tcpLayer:
+#         :param CollectorAgentConf ac:
+#         '''
+#         self.collector_cb   = collector_cb
+#         self.api_metas = {}
+#         self.string_metas = {}
+#         self.startTimeStamp = ac.startTimestamp
+#         self.ac = ac
+#
+#     def sendMeta(self, meta):
+#         '''
+#
+#         :param APIMeta meta:
+#         :return:
+#         '''
+#         TCLogger.debug("meta: %s", meta.name)
+#         self.collector_cb(meta.toPacket().getSerializedData())
 
-        :param tcpLayer:
-        :param CollectorAgentConf ac:
-        '''
-        self.collector_cb   = collector_cb
-        self.api_metas = {}
-        self.string_metas = {}
-        self.startTimeStamp = ac.startTimestamp
-        self.ac = ac
 
-    def sendMeta(self, meta):
-        '''
-
-        :param APIMeta meta:
-        :return:
-        '''
-        TCLogger.debug("meta: %s", meta.name)
-        self.collector_cb(meta.toPacket().getSerializedData())
-
-    def updateStringMeta(self,name):
-
-        if name in self.string_metas:
-            return self.string_metas[name]
-        else:
-
-            meta = StringMetaData(agentStartTime =self.startTimeStamp, agentId=self.ac.AgentID,name=name)
-            self.sendMeta(meta)
-            self.string_metas[name] = meta
-            return meta
-
-    def updateApiMeta(self, name, api_type=API_DEFAULT):
-
-        if name in self.api_metas:
-            return self.api_metas[name]
-        else:
-            meta = APIMeta(name=name, type = api_type,
-                                agentStartTime =self.startTimeStamp, agentId=self.ac.AgentID, agentName=self.ac.ApplicationName)
-            self.sendMeta(meta)
-            self.api_metas[name] = meta
-            return meta
 
 
 # interceptManger = InterceptManager()

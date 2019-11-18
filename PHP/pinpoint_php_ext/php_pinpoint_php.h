@@ -49,6 +49,7 @@ extern zend_module_entry pinpoint_php_module_entry;
 #define LOG_SIZE 4096
 #define IN_MSG_BUF_SIZE 4096
 #define NAMING_SIZE 128
+#define PHP 1500
 #define SOBJ_ADDRESS "/dev/shm/pinpoint-php.shm"
 
 typedef enum{

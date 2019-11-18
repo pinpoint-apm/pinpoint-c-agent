@@ -23,7 +23,7 @@ class AccessRemote
         echo \curl_exec($ch);
 
         curl_close($ch);
-        $this->callExample();
+//        $this->callExample();
     }
 
     private function callExample()

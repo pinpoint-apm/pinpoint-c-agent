@@ -15,20 +15,20 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
-
+from PinpointAgent.Type import PHP
 
 
 class PinpointAgent(object):
+    def __init__(self,app_id,app_name,serviceType=PHP):
+        self.app_id =app_id
+        self.app_name = app_name
+        self.service_type = serviceType
 
+    def start(self):
+        raise NotImplementedError()
 
-    def handlePAConnected(self,id,data):
-        pass
+    def sendSpan(self):
+        raise NotImplementedError()
 
-
-    def handlePADisconnected(self,id,data):
-        pass
-
-
-    def handlePACallStack(self,id,data):
-        pass
+    def stop(self):
+        raise NotImplementedError()

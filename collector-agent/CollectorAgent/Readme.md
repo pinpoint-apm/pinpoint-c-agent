@@ -23,7 +23,9 @@ stp|serviceType
 NP|NginxProxy header
 AP|ApacheProxy header
 Ah|acceptorHost
-
+appname|applicationName
+appid|agentId
+FT|front type(PHP)
 
 ## NextSpan
 

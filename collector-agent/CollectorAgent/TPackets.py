@@ -17,10 +17,8 @@
 # -*- coding: UTF-8 -*-
 
 
-from TCollectorAgent.Protocol import *
-from TCollectorAgent.Type import *
-
-
+from CollectorAgent.Protocol import *
+from PinpointAgent.Type import ControlMessageProtocolConstant, PacketType, AgentSocketCode
 
 
 class Packet(object):

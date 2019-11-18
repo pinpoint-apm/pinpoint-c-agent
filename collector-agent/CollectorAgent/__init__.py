@@ -16,6 +16,12 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from PinpointAgent.PinpointAgent import PinpointAgent
-from .AppManagement import AppManagement
-__all__=['PinpointAgent','AppManagement']
+from __future__ import absolute_import
+
+from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
+from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from CollectorAgent.Protocol import CollectorPro
+__all__= ['CollectorAgentConf', 'ThriftAgentImplement', 'CollectorPro']
+
+
+

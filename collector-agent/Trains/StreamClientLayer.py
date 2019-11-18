@@ -32,7 +32,7 @@ class StreamClientLayer(TrainLayer):
     def __init__(self,remote,recv_msg_cb,hello_cb,auto_recover=True,timeout= 5):
         '''
 
-        :param list remote:
+        :param tuple remote:
         :param  recv_msg_cb:
         :param hello_cb:
         :param auto_recover:
