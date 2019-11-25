@@ -122,6 +122,14 @@ Pinpoint Version | PHP| Python|GCC
 - Higher performance 
 - Easy to Use and Maintain
 
+## Contact Us
+* Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
+* Chinese Community:
+
+QQ Group: 897594820 | DING Group
+:---:| :---:
+![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+
 ## F & Q
 
 ### 1. How to regenerate all AOP files?
