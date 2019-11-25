@@ -124,14 +124,11 @@ Pinpoint Version | PHP| Python|GCC
 
 ## Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
+* Chinese Community:
 
-* QQ Group: 897594820
-
- ![QQ Group](images/NAVERPinpoint.png)
-
-* DING Group: 
-
-![DING Group](images/NaverPinpoint交流群-DING.jpg)
+QQ Group: 897594820 | DING Group
+:---:| :---:
+![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 ## F & Q
 
