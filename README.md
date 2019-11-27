@@ -99,15 +99,15 @@ pinpoint| 1.8.0-RC1
 ### Distributed Tracking system
 ![php_agent_example](images/php_agent_example.png)
 ### Call Stack
-![php_agent_example_detail](images/php_agent_example_detail.png)
-![php_agent_example_pdo](images/callstack-pdo.png)
-![php_agent_example_memcached](images/callstack-memcached.png)
+
+![php_agent_example_detail](images/php_agent_example_detail.png) | ![php_agent_example_memcached](images/callstack-memcached.png)
+--- | ---
+![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
 ### TODO
 
-- [x] DB,memcache plugins ......
+- [x] DB, redis,memcache plugins ......
 - [x] workerman,php-swoole plugins 
-- [ ] redis
 
 ## Compatibility
 
@@ -124,14 +124,11 @@ Pinpoint Version | PHP| Python|GCC
 
 ## Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
+* Chinese Community:
 
-* QQ Group: 897594820
-
- ![QQ Group](images/NAVERPinpoint.png)
-
-* DING Group: 
-
-![DING Group](images/NaverPinpoint交流群-DING.jpg)
+QQ Group: 897594820 | DING Group
+:---:| :---:
+![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 ## F & Q
 
