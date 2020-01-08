@@ -500,6 +500,7 @@ PHP_MINIT_FUNCTION(pinpoint_php)
     zend_error_cb = apm_error_cb;
 
     PPG(agent_info).start_time = get_current_msec_stamp();
+    checking_and_init();
 
     return SUCCESS;
 }
