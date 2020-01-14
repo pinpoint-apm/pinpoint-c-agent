@@ -26,7 +26,7 @@ def _create_logger(name):
 TCLogger = _create_logger("TC")
 PALogger = _create_logger("PA")
 
-def set_logger_file(fullpath,format=logging.Formatter('[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')):
+def set_logger_file(fullpath,format=logging.Formatter('[%(asctime)s] [%(process)d] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')):
     fileHandler = logging.FileHandler(fullpath+'/collector.agent.log')
     fileHandler.setFormatter(format)
     TCLogger.addHandler(fileHandler)
@@ -39,7 +39,7 @@ def set_logger_level(level):
     TCLogger.setLevel(level)
     PALogger.setLevel(level)
 
-def logger_enable_console(format=logging.Formatter('[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')):
+def logger_enable_console(format=logging.Formatter('[%(asctime)s] [%(process)d] [%(levelname)s] [%(filename)s:%(lineno)s] %(message)s')):
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(format)
     TCLogger.addHandler(streamHandler)

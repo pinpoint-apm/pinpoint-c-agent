@@ -55,8 +55,11 @@ class AppManagement(object):
 
     def handle_front_agent_data(self,client,type,body):
         content = body.decode('utf-8')
-        stack = json.loads(content)
-
+        try:
+            stack = json.loads(content)
+        except Exception as e:
+            TCLogger.error("json is crash")
+            return
         if 'appid' not in stack:
             appid = self.default_appid
         else:

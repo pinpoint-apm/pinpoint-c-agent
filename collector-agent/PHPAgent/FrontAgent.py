@@ -37,30 +37,42 @@ class FrontAgent(object):
         '''
         self.address =ac.Address
 
-        if os.path.exists(self.address):
-            os.remove(self.address)
-        self.listen_socket =  gsocket.socket(gsocket.AF_UNIX, gsocket.SOCK_STREAM)
-        self.listen_socket.bind(self.address)
-        self.listen_socket.listen(256)
+        self.listen_socket = self._bindSocket(self.address)
         self.server = StreamServerLayer(self.listen_socket, self._recvData, self._phpClientSayHello)
         self.msgHandleCallback = msgCallback
         self.hello_cb = []
 
+    def _bindSocket(self,address):
+        if address[0] =='/': # treat as unix socket
+            if os.path.exists(address):
+                os.remove(address)
+            listen_socket = gsocket.socket(gsocket.AF_UNIX, gsocket.SOCK_STREAM)
+            listen_socket.bind(address)
+            listen_socket.listen(256)
+            return listen_socket
+        elif '@' in address: # treat as tcp port
+            ip,port = address.split('@')
+            listen_socket = gsocket.socket(gsocket.AF_INET, gsocket.SOCK_STREAM)
+            listen_socket.bind((ip,int(port)))
+            listen_socket.listen(256)
+            return listen_socket
+
     def _recvData(self, client, buf, bsz):
-        p = 0
+        used = 0
 
         ###
         if bsz < FrontAgent.HEADERSIZE:
             return bsz
 
-        while p < bsz:
-            type, len = struct.unpack('!ii', buf[p:p + FrontAgent.HEADERSIZE].tobytes())
-            p += FrontAgent.HEADERSIZE
-            if p+len > bsz:
-                return p - FrontAgent.HEADERSIZE
-            body = buf[p:p + len].tobytes()
+        while used < bsz:
+            type, len = struct.unpack('!ii', buf[used:used + FrontAgent.HEADERSIZE].tobytes())
+            if used + len + FrontAgent.HEADERSIZE > bsz:
+                # should return the rest data
+                return bsz - used
+            used += FrontAgent.HEADERSIZE
+            body = buf[used:used + len].tobytes()
             self.msgHandleCallback(client, type, body)
-            p+= len
+            used+= len
 
         return 0
 

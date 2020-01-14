@@ -24,7 +24,6 @@ from gevent import Timeout
 from gevent import socket as asy_socket
 from gevent.event import Event  ## write signal
 
-from Common import *
 from Common.Logger import TCLogger
 from Events.TrainsLayer import *
 
