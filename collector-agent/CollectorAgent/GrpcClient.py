@@ -52,7 +52,7 @@ class _ClientCallDetails(
     pass
 
 class GrpcClient(object):
-    def __init__(self,address,meta=None,maxPending=-1):
+    def __init__(self,address,meta=None,maxPending=-1,try_reconnect=True):
         self.address = address
         self.meta = None
         self.max_pending_size = maxPending
@@ -64,8 +64,9 @@ class GrpcClient(object):
             intercept_channel = grpc.intercept_channel(channel,
                                                    self._interceptor_add_header(meta))
             channel = intercept_channel
+
         self.channel = channel
-        self.channel.subscribe(self._channel_state_change)
+        self.channel.subscribe(self._channel_state_change,try_reconnect)
 
 
     def _interceptor_add_header(self,header):
@@ -88,8 +89,7 @@ class GrpcClient(object):
             self.channel_set_ready()
         elif activity == grpc.ChannelConnectivity.IDLE:
             self.channel_set_idle()
-
-        TCLogger.debug("channel state change %s dst:%s",activity,self.address)
+        # TCLogger.debug("channel state change %s dst:%s",activity,self.address)
 
     def channel_set_ready(self):
         raise NotImplemented()

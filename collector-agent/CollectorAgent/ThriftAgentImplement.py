@@ -154,7 +154,7 @@ class ThriftAgentImplement(PinpointAgent):
         self.spanLayer.sendData(body)
         # self.spanLayer.sendData(packet.getSerializedData())
         TCLogger.debug("send TSpan:%s",tSpan)
-
+        return True
     def scanLocalInfo(self):
         ah = AgentHost()
         self.agentInfo.hostname = ah.hostname

@@ -63,7 +63,7 @@ class StreamServerLayer(object):
                     return 0
                 TCLogger.warning("peer error:%s ", error)
                 return -1
-            return recv_total
+            return recv_total+self.rest_data_sz
 
         def close(self):
             self.socket.close()
@@ -112,13 +112,13 @@ class StreamServerLayer(object):
             sock = self.listen
             # client_socket
             client_socket, address = sock.accept()
+            client_socket.setblocking(False)
             # sock = gsocket(_socket = client_socket)
         except asy_socket.error as error:
             TCLogger.warning("accept:%s",error)
+            return
 
-        client_socket.setblocking(False)
         TCLogger.info("new connect fd:%s ",client_socket.fileno())
-
         client_in_event= self.loop.io(client_socket.fileno(), 1)
         client_out_event =  self.loop.io(client_socket.fileno(), 2)
 

@@ -19,8 +19,7 @@ import os,sys
 proto_class = os.getcwd()+'/Proto/grpc'
 sys.path.append(proto_class)
 
-from gevent.event import Event
-import gevent,signal
+import gevent
 
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from Common.Config import CAConfig

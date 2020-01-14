@@ -77,9 +77,9 @@ class GrpcMeta(GrpcClient):
 
     def channel_set_ready(self):
         self.is_ok = True
-        self._register_all_meta()
 
     def channel_set_idle(self):
+        self._register_all_meta()
         self.is_ok = True
 
     def channel_set_error(self):
