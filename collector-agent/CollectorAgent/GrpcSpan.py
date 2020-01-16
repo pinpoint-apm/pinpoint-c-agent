@@ -12,8 +12,8 @@ from Span_pb2 import PSpan
 
 
 class GrpcSpan(GrpcClient):
-    def __init__(self,address,meta=None,maxPending=-1,timeout=10,max_span_sender = 10):
-        super().__init__(address, meta, maxPending)
+    def __init__(self,address,meta=None):
+        super().__init__(address, meta)
 
         # self.is_ok = True
         self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
@@ -33,18 +33,13 @@ class GrpcSpan(GrpcClient):
         self.is_ok = False
 
     def startSender(self,queue):
-        # while True:
-        #     span = queue.get()
-        #     TCLogger.debug("log_span_transit_count:%d rest:%d", self.log_span_transit_count, queue.qsize())
-        #     self.log_span_transit_count += 1
-
-
 
         # def get_span():
         #     while True:
         #         # yield PSpan()
         #         # TCLogger.debug("log_span_transit_count:%d ",self.log_span_transit_count)
         #         # self.log_span_transit_count+=1
+        #         TCLogger.debug("try to get")
         #         span = queue.get()
         #         self.log_span_transit_count+=1
         #         TCLogger.debug("log_span_transit_count:%d rest:%d",self.log_span_transit_count,queue.qsize())
@@ -62,20 +57,20 @@ class GrpcSpan(GrpcClient):
         #         traceback.print_exc()
         #         time.sleep(10)
 
-
+        #
         spans = []
-
+        #
         def get_N_span(queue,N):
             try:
                 while N >0:
-                    spans.append(queue.get(block=False))
+                    spans.append(queue.get(timeout=2))
                     N -= 1
             except Empty as e:
                 TCLogger.debug("get span from queue timeout")
-
+            # queue.task_done()
         while True:
             try:
-                get_N_span(queue,10240)
+                get_N_span(queue,1024)
                 TCLogger.warn("get %s spans %d",len(spans),queue.qsize())
                 response = self.span_stub.SendSpan(iter(spans))
                 TCLogger.warn("log_span_transit_count %d span %s",len(spans),response)
