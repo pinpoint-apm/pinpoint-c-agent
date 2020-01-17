@@ -21,7 +21,7 @@ class GrpcAgentImplement(PinpointAgent):
     class SpanSender(object):
         def __init__(self,span_addr,agent_meta):
             self.span_addr, self.agent_meta = (span_addr,agent_meta)
-            self.span_queue = Queue(500)
+            self.span_queue = Queue(5000)
             self.sender_process = Process(target=self.spanSenderMain, args=(self.span_queue,))
             self.sender_process.name = "span sender process"
 
@@ -34,9 +34,9 @@ class GrpcAgentImplement(PinpointAgent):
 
             try:
                 self.span_queue.put(spanMesg,False)
-                # TCLogger.debug("inqueue size:%d", self.span_queue.qsize())
+                TCLogger.debug("inqueue size:%d", self.span_queue.qsize())
             except Full as e:
-                # TCLogger.error("send span failed: with queue is FUll%s", e)
+                TCLogger.error("send span failed: with queue is FUll%s", e)
                 return False
             except Exception as e:
                 TCLogger.error("send span failed: %s",e)
@@ -73,7 +73,7 @@ class GrpcAgentImplement(PinpointAgent):
 
         import os
         self.agentHost = AgentHost()
-        self.max_span_sender_size = 5
+        self.max_span_sender_size = 2
         self.span_sender_list = []
         self.sender_index= 0
         self._startSpanSender()
@@ -90,14 +90,10 @@ class GrpcAgentImplement(PinpointAgent):
 
     def _sendSpan(self,spanMesg):
 
-        # for span_sender in self.span_sender_list:
-        #     if span_sender.sender(spanMesg):
-        #         return True
-
         max_checking = len(self.span_sender_list)
 
         while self.span_sender_list[self.sender_index].sender(spanMesg) == False:
-            TCLogger.debug("index %d is busy",self.sender_index)
+            TCLogger.debug("sender index %d is busy",self.sender_index)
             self.sender_index += 1
             if self.sender_index >= len(self.span_sender_list):
                 self.sender_index = 0
@@ -105,8 +101,6 @@ class GrpcAgentImplement(PinpointAgent):
             if max_checking == 0:
                 return False
 
-
-        TCLogger.debug(" use index:%d",self.sender_index)
         self.sender_index += 1
         if self.sender_index >= len(self.span_sender_list):
             self.sender_index = 0

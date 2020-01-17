@@ -33,52 +33,27 @@ class GrpcSpan(GrpcClient):
         self.is_ok = False
 
     def startSender(self,queue):
-
-        # def get_span():
-        #     while True:
-        #         # yield PSpan()
-        #         # TCLogger.debug("log_span_transit_count:%d ",self.log_span_transit_count)
-        #         # self.log_span_transit_count+=1
-        #         TCLogger.debug("try to get")
-        #         span = queue.get()
-        #         self.log_span_transit_count+=1
-        #         TCLogger.debug("log_span_transit_count:%d rest:%d",self.log_span_transit_count,queue.qsize())
-        #         if span is not None:
-        #             yield span
-        #         else:
-        #             TCLogger.error("why span queue return None")
-        #
-        # while True:
-        #     try:
-        #         response = self.span_stub.SendSpan(get_span())
-        #         TCLogger.warn("Send %d span %s",response)
-        #     except Exception as e:
-        #         import traceback
-        #         traceback.print_exc()
-        #         time.sleep(10)
-
-        #
         spans = []
-        #
         def get_N_span(queue,N):
+            i = 0
             try:
-                while N >0:
+                while N > i:
                     spans.append(queue.get(timeout=2))
-                    N -= 1
+                    i+=1
             except Empty as e:
                 TCLogger.debug("get span from queue timeout")
-            # queue.task_done()
+            return True if i>0 else False
+
         while True:
             try:
-                get_N_span(queue,1024)
-                TCLogger.warn("get %s spans %d",len(spans),queue.qsize())
-                response = self.span_stub.SendSpan(iter(spans))
-                TCLogger.warn("log_span_transit_count %d span %s",len(spans),response)
-                spans.clear()
+                if not get_N_span(queue,10240):
+                    continue
+                self.span_stub.SendSpan(iter(spans))
             except Exception as e:
-                import traceback
-                traceback.print_exc()
+                TCLogger.error("span channel, can't work:exception:%s",e)
                 time.sleep(10)
+            finally:
+                spans.clear()
 
 
 
