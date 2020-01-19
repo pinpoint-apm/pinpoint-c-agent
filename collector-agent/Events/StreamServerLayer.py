@@ -140,7 +140,6 @@ class StreamServerLayer(object):
         :param self.Client client:
         :return:
         '''
-        TCLogger.debug("client:%d read event",client.socket.fileno())
         while True:
             len = client.recv(self.in_msg_cb)
             if len > 0:## read again

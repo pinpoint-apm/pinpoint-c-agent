@@ -3,14 +3,13 @@
 # Created by eeliu at 10/16/19
 from queue import Full
 
-
+from setproctitle import setproctitle
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
 from CollectorAgent.GrpcSpan import GrpcSpan
 from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
-from Events.util import try_to_recycle_the_event_hub
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, SUPPORT_GRPC, API_DEFAULT
 from Span_pb2 import PSpanMessage
@@ -19,12 +18,13 @@ from multiprocessing import Process,Queue
 class GrpcAgentImplement(PinpointAgent):
 
     class SpanSender(object):
-        def __init__(self,span_addr,agent_meta):
-            self.span_addr, self.agent_meta = (span_addr,agent_meta)
+        def __init__(self,span_addr,appid,appname,starttime):
+            self.agent_meta = [('starttime',str(starttime) ),('agentid', appid),('applicationname', appname)]
+            self.agent_id = appid
+            self.agent_name = appname
+            self.span_addr = span_addr
             self.span_queue = Queue(5000)
             self.sender_process = Process(target=self.spanSenderMain, args=(self.span_queue,))
-            self.sender_process.name = "span sender process"
-
             TCLogger.info("Successfully create a Span Sender")
 
         def start(self):
@@ -34,13 +34,12 @@ class GrpcAgentImplement(PinpointAgent):
 
             try:
                 self.span_queue.put(spanMesg,False)
-                TCLogger.debug("inqueue size:%d", self.span_queue.qsize())
             except Full as e:
                 TCLogger.error("send span failed: with queue is FUll%s", e)
                 return False
             except Exception as e:
                 TCLogger.error("send span failed: %s",e)
-                return False;
+                return False
             return True
 
         def stopSelf(self):
@@ -48,7 +47,7 @@ class GrpcAgentImplement(PinpointAgent):
             self.sender_process.join()
 
         def spanSenderMain(self,queue):
-
+            setproctitle("python run.py [%s-%s] spanSender" % ( self.agent_id, self.agent_name))
             span_client = GrpcSpan(self.span_addr, self.agent_meta)
             span_client.startSender(queue)
 
@@ -62,9 +61,7 @@ class GrpcAgentImplement(PinpointAgent):
                                ('applicationname',app_name)]
         self.startTimeStamp = ac.startTimestamp
 
-        self.app_name = app_name
         self.max_pending_sz = ac.max_pending_size
-        self.app_id = app_id
         self.write_queue_ofs = 0
         self.span_buff=([],[])
         self.agent_addr = ac.CollectorAgentIp+':' + str(ac.CollectorAgentPort)
@@ -107,9 +104,9 @@ class GrpcAgentImplement(PinpointAgent):
 
         return True
 
-    def sendSpan(self, stack):
+    def sendSpan(self, stack,body):
         pSpan = self.span_factory.make_span(stack)
-        spanMesg = PSpanMessage(span = pSpan)
+        spanMesg = PSpanMessage(span=pSpan)
         if self._sendSpan(spanMesg):
             return True
         else:
@@ -122,10 +119,9 @@ class GrpcAgentImplement(PinpointAgent):
         return True
 
     def _startSpanSender(self):
-        spanSender = GrpcAgentImplement.SpanSender(self.span_addr, self.agent_meta)
+        spanSender = GrpcAgentImplement.SpanSender(self.span_addr, self.app_id,self.app_name,self.startTimeStamp)
         spanSender.start()
         self.span_sender_list.append(spanSender)
-
 
 
     def stop(self):

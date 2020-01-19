@@ -7,8 +7,8 @@ import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 import time
+import  traceback
 
-from Span_pb2 import PSpan
 
 
 class GrpcSpan(GrpcClient):
@@ -38,19 +38,21 @@ class GrpcSpan(GrpcClient):
             i = 0
             try:
                 while N > i:
-                    spans.append(queue.get(timeout=2))
+                    spans.append(queue.get(timeout=0.005))
                     i+=1
             except Empty as e:
-                TCLogger.debug("get span from queue timeout")
+                pass
+                # TCLogger.debug("get span from queue timeout")
             return True if i>0 else False
 
         while True:
             try:
-                if not get_N_span(queue,10240):
+                if not get_N_span(queue,1024):
                     continue
                 self.span_stub.SendSpan(iter(spans))
             except Exception as e:
                 TCLogger.error("span channel, can't work:exception:%s",e)
+                traceback.print_exc();
                 time.sleep(10)
             finally:
                 spans.clear()
