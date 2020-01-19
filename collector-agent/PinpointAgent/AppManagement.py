@@ -72,7 +72,7 @@ class AppManagement(object):
 
         ft = stack['FT']
         app = self.find_app(appid,appname,ft)
-        app.sendSpan(stack)
+        app.sendSpan(stack,body)
 
     def tell_whoami(self):
         return {
