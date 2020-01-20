@@ -15,13 +15,7 @@
 #-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-# import json
 import os
-# import struct
-# import time
-#
-# import gevent
-
 from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage
 from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
 from Common.AgentHost import AgentHost

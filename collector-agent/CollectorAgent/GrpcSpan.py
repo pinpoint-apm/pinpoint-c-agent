@@ -52,69 +52,7 @@ class GrpcSpan(GrpcClient):
                 self.span_stub.SendSpan(iter(spans))
             except Exception as e:
                 TCLogger.error("span channel, can't work:exception:%s",e)
-                traceback.print_exc();
+                traceback.print_exc()
                 time.sleep(10)
             finally:
                 spans.clear()
-
-
-
-
-    #
-    # def sendSpan(self, spanMesg):
-    #     if self.is_ok:
-    #         if self.queue.qsize() > self.max_pending_size:
-    #             # TCLogger.warning("span channel is busy. Drop span count =%d", self.droped_span_count)
-    #             # self.droped_span_count+=1
-    #
-    #             # return False
-    #             self.startSpan()
-    #
-    #         self.queue.put(spanMesg)
-    #         TCLogger.debug("span channel is OK,msg:%d", self.queue.qsize())
-    #         return True
-    #     elif self.span_channel_wait == True:
-    #         return False
-    #     else:
-    #         # Channel is not available,try to wait and try again
-    #         TCLogger.info("span channel is crash, sleep:%sS and try to reconnect", self.span_recover_time_out)
-    #         self.timer = self.loop.timer(self.span_recover_time_out)
-    #         self.timer.start(self.startSpan)
-    #         self.span_channel_wait = True
-    #         return False
-    #
-    #
-    # def _spanResponse(self, result):
-    #     TCLogger.debug("send span is over. As %s",result)
-    #     self.is_ok = False
-    #     self.span_channel_wait = False
-    #
-    # def _getSpan(self):
-    #     TCLogger.debug("stream get span, self id: %d",threading.get_ident())
-    #     while True:
-    #         span = self._pullSpanQueue()
-    #         try:
-    #             if span is not None:
-    #                 self.span_count+=1
-    #                 TCLogger.debug("send span count:%d",self.span_count)
-    #                 yield span
-    #             else:
-    #                 TCLogger.error("get span failed, checking the _generate_span")
-    #                 break
-    #         except Exception as e:
-    #             TCLogger.error("get_span catch %s",e)
-    #
-    # def _pullSpanQueue(self):
-    #     span = self.queue.get()
-    #     return span
-    #
-    # def startSpan(self):
-    #
-    #     # self.future = self.span_stub.SendSpan.future(self._getSpan())
-    #     # self.is_ok = True
-    #     # self.future.add_done_callback(self._spanResponse)
-    #     TCLogger.debug("start span address: %s",self.address)
-    #     thread = threading.Thread(target=self._getSpan,args={})
-    #     thread.setName("span thread")
-    #     thread.start()
-    #     self.span_threads.append(thread)
