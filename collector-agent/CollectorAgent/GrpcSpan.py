@@ -28,7 +28,7 @@ from Common.Logger import TCLogger
 
 
 class GrpcSpan(GrpcClient):
-    def __init__(self, address, meta=None):
+    def __init__(self, address, meta):
         super().__init__(address, meta)
 
         # self.is_ok = True

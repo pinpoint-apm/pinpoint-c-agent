@@ -62,12 +62,12 @@ pinpoint| 1.8.0-RC1
         ```ini
         [Collector]
         # collectorhost and specific port
-        CollectorSpanIp=10.10.23.45
-        CollectorSpanPort=9905
-        CollectorStatIp=10.10.23.45
-        CollectorStatPort=9906
-        CollectorTcpIp=10.10.23.45
-        CollectorTcpPort=9907
+        collector.grpc.agent.ip=collectorHost
+        collector.grpc.agent.port=9991
+        collector.grpc.stat.ip=collectorHost
+        collector.grpc.stat.port=9992
+        collector.grpc.span.ip=collectorHost
+        collector.grpc.span.port=9993
         [Common]
         # your web server (nginx&apache) port
         Web_Port=8001   

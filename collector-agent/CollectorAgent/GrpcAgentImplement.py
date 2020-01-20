@@ -37,12 +37,13 @@ from Span_pb2 import PSpanMessage
 
 class GrpcAgentImplement(PinpointAgent):
     class SpanSender(object):
-        def __init__(self, span_addr, appid, appname, starttime):
+        def __init__(self, span_addr, appid, appname, starttime,max_pending_sz):
             self.agent_meta = [('starttime', str(starttime)), ('agentid', appid), ('applicationname', appname)]
             self.agent_id = appid
             self.agent_name = appname
             self.span_addr = span_addr
-            self.span_queue = Queue(5000)
+            self.max_pending_sz =max_pending_sz
+            self.span_queue = Queue(self.max_pending_sz)
             self.sender_process = Process(target=self.spanSenderMain, args=(self.span_queue,))
             TCLogger.info("Successfully create a Span Sender")
 
@@ -54,7 +55,7 @@ class GrpcAgentImplement(PinpointAgent):
             try:
                 self.span_queue.put(spanMesg, False)
             except Full as e:
-                TCLogger.error("send span failed: with queue is FUll%s", e)
+                TCLogger.error("send span failed: with queue is FUll. Queue size:%d", e,self.span_queue.maxsize)
                 return False
             except Exception as e:
                 TCLogger.error("send span failed: %s", e)
@@ -137,7 +138,7 @@ class GrpcAgentImplement(PinpointAgent):
         return True
 
     def _startSpanSender(self):
-        spanSender = GrpcAgentImplement.SpanSender(self.span_addr, self.app_id, self.app_name, self.startTimeStamp)
+        spanSender = GrpcAgentImplement.SpanSender(self.span_addr, self.app_id, self.app_name, self.startTimeStamp,self.max_pending_sz)
         spanSender.start()
         self.span_sender_list.append(spanSender)
 

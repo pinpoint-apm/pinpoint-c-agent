@@ -61,7 +61,7 @@ class CollectorAgentConf(object):
             self.CollectorAgentPort = config.getint('Collector',
                                                     'collector.grpc.agent.port')
             self.max_pending_size = config.getint('Collector',
-                                                  'collector.grpc.discardpolicy.maxpendingthreshold')
+                                                  'collector.grpc.discardpolicy.maxpendingthreshold',fallback=10000)
             self.collector_type = SUPPORT_GRPC
             self.collector_implement = GrpcAgentImplement
         else:

@@ -36,8 +36,6 @@ class Packet(object):
         if body is not None:
             self.buf += body
 
-        # TCLogger.debug("current type:%d  totalLen:%d", hType, len(self.buf))
-
     def getSerializedData(self):
         return self.buf
 
