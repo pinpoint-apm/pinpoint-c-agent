@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
-
-
-
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -23,15 +17,7 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-
-
-
-
-
 # Created by eeliu at 11/6/19
-from Common.Logger import TCLogger
-from Span_pb2 import PSpanMessage
 
 
 class SpanFactory(object):

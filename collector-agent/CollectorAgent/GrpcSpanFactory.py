@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -19,9 +17,8 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-
 # Created by eeliu at 11/7/19
+
 
 from google.protobuf.wrappers_pb2 import StringValue
 
@@ -36,7 +33,7 @@ from Span_pb2 import PSpan, PSpanEvent
 class GrpcSpanFactory(SpanFactory):
     def create_span(self, stackMap):
         tSpan = PSpan()
-        tSpan.apiId =self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST)
+        tSpan.apiId = self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST)
         tSpan.version = 1
         if 'stp' in stackMap:
             tSpan.serviceType = int(stackMap['stp'])
@@ -48,13 +45,13 @@ class GrpcSpanFactory(SpanFactory):
         if 'psid' in stackMap:
             tSpan.parentSpanId = int(stackMap['psid'])
         else:
-            tSpan.parentSpanId =  -1
+            tSpan.parentSpanId = -1
 
         if 'tid' in stackMap:
             agentId, startTime, id = stackMap['tid'].split('^')
             tSpan.transactionId.agentId = agentId
             tSpan.transactionId.agentStartTime = int(startTime)
-            tSpan.transactionId.sequence =  int(id)
+            tSpan.transactionId.sequence = int(id)
 
         if 'sid' in stackMap:
             tSpan.spanId = int(stackMap['sid'])
@@ -74,7 +71,7 @@ class GrpcSpanFactory(SpanFactory):
         if 'client' in stackMap:
             accept.remoteAddr = stackMap['client']
 
-        parent_info =  accept.parentInfo
+        parent_info = accept.parentInfo
 
         if 'pname' in stackMap:
             parent_info.parentApplicationName = stackMap['pname']
@@ -95,7 +92,7 @@ class GrpcSpanFactory(SpanFactory):
         if 'clues' in stackMap:
             for annotation in stackMap['clues']:  # list
                 id, value = annotation.split(':', 1)
-                ann = PAnnotation(key=int(id),value=PAnnotationValue(stringValue=value))
+                ann = PAnnotation(key=int(id), value=PAnnotationValue(stringValue=value))
                 tSpan.annotation.append(ann)
 
         try:
@@ -136,7 +133,6 @@ class GrpcSpanFactory(SpanFactory):
             spanEv.exceptionInfo.intValue = id
             spanEv.exceptionInfo.stringValue.CopyFrom(value)
 
-
         nextEv = spanEv.nextEvent
         msgEv = nextEv.messageEvent
 
@@ -166,7 +162,7 @@ class GrpcSpanFactory(SpanFactory):
                 if value and value[0] == '[':  ## value is a In
                     pass
                 else:  ## value is a string
-                    ann = PAnnotation(key=int(id), value =PAnnotationValue(stringValue=value))
+                    ann = PAnnotation(key=int(id), value=PAnnotationValue(stringValue=value))
                     spanEv.annotation.append(ann)
 
         return spanEv

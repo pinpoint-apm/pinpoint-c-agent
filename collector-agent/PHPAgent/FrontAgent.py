@@ -2,6 +2,7 @@
 # coding:utf-8
 
 
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -24,9 +25,9 @@ import struct
 from gevent import socket as gsocket
 
 from Common.Logger import TCLogger
-from PHPAgent.Type import RESPONSE_AGENT_INFO
-from PHPAgent.PHPAgentConf import PHPAgentConf
 from Events import StreamServerLayer
+from PHPAgent.PHPAgentConf import PHPAgentConf
+from PHPAgent.Type import RESPONSE_AGENT_INFO
 
 
 class FrontAgent(object):

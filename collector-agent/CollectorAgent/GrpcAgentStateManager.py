@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -20,30 +19,28 @@
 import psutil
 
 from CollectorAgent.Protocol import CollectorPro
-from PinpointAgent.Type import AGENT_STAT_BATCH
 from Common.Logger import TCLogger
-from Proto.Trift.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
-
 from Events import DgramLayer, TrainLayer
-
+from PinpointAgent.Type import AGENT_STAT_BATCH
+from Proto.Trift.Pinpoint.ttypes import TAgentStat, TCpuLoad, TAgentStatBatch
 
 
 class GrpcAgentStateManager(object):
-    def __init__(self, agentId,startTimeStamp,host):
-        self.state=TAgentStat()
-        self.cup_load=TCpuLoad()
+    def __init__(self, agentId, startTimeStamp, host):
+        self.state = TAgentStat()
+        self.cup_load = TCpuLoad()
         self.state.agentId = agentId
         self.state.startTimestamp = startTimeStamp
         self.stateBatch = TAgentStatBatch()
         self.stateBatch.agentId = agentId
         self.stateBatch.startTimestamp = startTimeStamp
-        self.stateBatch.agentStats  = []
+        self.stateBatch.agentStats = []
         self.remote = host
 
         self.trans_layer = DgramLayer(host, None)
         self.trans_layer.start()
 
-        TrainLayer.registerTimers(self.sendState,20)
+        TrainLayer.registerTimers(self.sendState, 20)
         TCLogger.debug("register state timer")
 
     def _upDateCurState(self):
@@ -54,10 +51,8 @@ class GrpcAgentStateManager(object):
 
         self.stateBatch.agentStats.append(self.state)
 
-    def sendState(self,layer):
+    def sendState(self, layer):
         self._upDateCurState()
         body = CollectorPro.obj2bin(self.stateBatch, AGENT_STAT_BATCH)
-        TCLogger.debug("send state:%s",self.stateBatch)
+        TCLogger.debug("send state:%s", self.stateBatch)
         self.trans_layer.sendData(body)
-
-

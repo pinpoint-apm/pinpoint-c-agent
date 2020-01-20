@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-
-
-
-
-
-
+# -*- coding: UTF-8 -*-# Created by eeliu at 10/21/19
 
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
@@ -22,15 +16,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-
-
-
-
-
-
-
-# Created by eeliu at 10/21/19
-
 class GTimer(object):
     @staticmethod
     def registerTimers(callback,interval,args=None):

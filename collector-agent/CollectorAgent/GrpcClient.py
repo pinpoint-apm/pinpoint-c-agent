@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
-
-
-
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -23,25 +17,19 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-
-
-
-
-
 # Created by eeliu at 10/18/19
+
 import collections
+
 import grpc
 
-
 # copy from grpc example
-from CollectorAgent.Grpc import CH_NOT_READY, CH_READY
 from Common.Logger import TCLogger
 
 
 class _GenericClientInterceptor(
-        grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor,
-        grpc.StreamUnaryClientInterceptor, grpc.StreamStreamClientInterceptor):
+    grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor,
+    grpc.StreamUnaryClientInterceptor, grpc.StreamStreamClientInterceptor):
 
     def __init__(self, interceptor_function):
         self._fn = interceptor_function
@@ -73,15 +61,17 @@ class _GenericClientInterceptor(
         response_it = continuation(new_details, new_request_iterator)
         return postprocess(response_it) if postprocess else response_it
 
+
 class _ClientCallDetails(
-        collections.namedtuple(
-            '_ClientCallDetails',
-            ('method', 'timeout', 'metadata', 'credentials')),
-        grpc.ClientCallDetails):
+    collections.namedtuple(
+        '_ClientCallDetails',
+        ('method', 'timeout', 'metadata', 'credentials')),
+    grpc.ClientCallDetails):
     pass
 
+
 class GrpcClient(object):
-    def __init__(self,address,meta=None,maxPending=-1,try_reconnect=True):
+    def __init__(self, address, meta=None, maxPending=-1, try_reconnect=True):
         self.address = address
         self.meta = None
         self.max_pending_size = maxPending
@@ -91,14 +81,13 @@ class GrpcClient(object):
         if meta is not None:
             self.meta = meta
             intercept_channel = grpc.intercept_channel(channel,
-                                                   self._interceptor_add_header(meta))
+                                                       self._interceptor_add_header(meta))
             channel = intercept_channel
 
         self.channel = channel
-        self.channel.subscribe(self._channel_state_change,try_reconnect)
+        self.channel.subscribe(self._channel_state_change, try_reconnect)
 
-
-    def _interceptor_add_header(self,header):
+    def _interceptor_add_header(self, header):
         def intercept_call(client_call_details, request_iterator, request_streaming,
                            response_streaming):
             metadata = []
@@ -109,16 +98,17 @@ class GrpcClient(object):
                 client_call_details.method, client_call_details.timeout, metadata,
                 client_call_details.credentials)
             return client_call_details, request_iterator, None
+
         return _GenericClientInterceptor(intercept_call)
 
     def _channel_state_change(self, activity):
         if activity == grpc.ChannelConnectivity.TRANSIENT_FAILURE:
             self.channel_set_error()
-        elif activity ==  grpc.ChannelConnectivity.READY:
+        elif activity == grpc.ChannelConnectivity.READY:
             self.channel_set_ready()
         elif activity == grpc.ChannelConnectivity.IDLE:
             self.channel_set_idle()
-        TCLogger.debug("channel state change %s dst:%s",activity,self.address)
+        TCLogger.debug("channel state change %s dst:%s", activity, self.address)
 
     def channel_set_ready(self):
         raise NotImplemented()
@@ -131,4 +121,3 @@ class GrpcClient(object):
 
     def stop(self):
         self.channel.close()
-

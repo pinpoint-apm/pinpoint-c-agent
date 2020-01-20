@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
-
-
-
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -23,12 +17,6 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-
-
-
-
-
 # Created by eeliu at 11/7/19
 from CollectorAgent.Protocol import TransactionId
 from CollectorAgent.TCGenerator import ThriftProtocolUtil
@@ -40,7 +28,7 @@ from Proto.Trift.Trace.ttypes import TSpan, TIntStringValue, TAnnotation, TAnnot
 
 
 class ThriftSpanFactory(SpanFactory):
-    def create_span(self,stackMap):
+    def create_span(self, stackMap):
         tSpan = TSpan()
         tSpan.apiId = self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST).apiId
         tSpan.agentStartTime = self.agent.startTimeStamp
@@ -136,7 +124,7 @@ class ThriftSpanFactory(SpanFactory):
 
         return tSpan
 
-    def create_span_event(self,stackMap):
+    def create_span_event(self, stackMap):
         assert 'name' in stackMap
         spanEv = TSpanEvent()
 
@@ -178,11 +166,11 @@ class ThriftSpanFactory(SpanFactory):
 
         return spanEv
 
-    def attach_span_event(self,tSpan,span_event):
+    def attach_span_event(self, tSpan, span_event):
         tSpan.spanEventList.append(span_event)
 
-    def set_sequenceid(self,span_ev,id):
+    def set_sequenceid(self, span_ev, id):
         span_ev.sequence = id
 
-    def set_depth(self,span_ev,depth):
+    def set_depth(self, span_ev, depth):
         span_ev.depth = depth

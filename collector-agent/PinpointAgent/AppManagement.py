@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
-
-
-
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -23,18 +17,11 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-
-
-
-
-
 # Created by eeliu at 9/4/19
 import json
 
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from Common.Logger import TCLogger
-
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP
 
