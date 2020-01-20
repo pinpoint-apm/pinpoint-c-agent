@@ -21,7 +21,7 @@ import os
 
 from CollectorAgent.GrpcAPIMeta import *
 from CollectorAgent.GrpcAgentStateManager import GrpcAgentStateManager
-from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage
+from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage, ChannelBufferV2, TAgentInfo
 from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
 from Common.AgentHost import AgentHost
 from Events import *
@@ -182,7 +182,7 @@ class ThriftAgentImplement(PinpointAgent):
         #
         # # register TagentInfo
         TrainLayer.registerTimers(self.__sendAgentInfo, 0, tcp_layer)
-        TCLogger.debug(" send agentInfo ")
+        TCLogger.debug("send agentInfo ")
 
         # check the postponed
 
@@ -257,7 +257,6 @@ class ThriftAgentImplement(PinpointAgent):
     def __sendPing(self, tcp_layer):
         ping_data = self.__getPingPacket().getSerializedData()
         tcp_layer.sendData(ping_data)
-        # TCLogger.debug("send ping len:%d", len(ping_data))
 
     def __sendAgentInfo(self, tcp_layer):
         agent_data = self.__getTAgentInfoPacket().getSerializedData()

@@ -67,7 +67,7 @@ class GrpcAgent(GrpcClient):
             try:
                 self.stub.RequestAgentInfo(self.agentinfo, wait_for_ready=True)
             except Exception as e:
-                TCLogger.warn("pinpoint collector is not available")
+                TCLogger.warn("[%s] pinpoint collector is not available. Try it again",self.agentinfo)
                 continue
 
             iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
@@ -75,7 +75,7 @@ class GrpcAgent(GrpcClient):
                 for response in iter_response:
                     TCLogger.debug('get ping response %s', response)
             except Exception as e:
-                TCLogger.error("ping response abort with exception %s", e)
+                TCLogger.error("[%s] ping response abort with exception %s", e,self.agentinfo)
                 time.sleep(self.timeout)
 
     def reponseAgentInfoCallback(self, future):
@@ -91,7 +91,7 @@ class GrpcAgent(GrpcClient):
     def _pingPPing(self):
         while self.is_ok:
             ping = PPing()
-            TCLogger.debug("%s send ping %d", self, threading.get_ident())
+            TCLogger.debug("%s send ping", self)
             yield ping
             time.sleep(self.timeout)
 

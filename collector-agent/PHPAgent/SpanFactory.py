@@ -40,7 +40,6 @@ class SpanFactory(object):
         if 'calls' in stackMap:
             for called in stackMap['calls']:
                 self.make_span_ev(span,called)
-        # TCLogger.debug("send span:%s",span)
         return span
 
     def make_span_ev(self, span, stackMap, depth=1):
@@ -49,7 +48,6 @@ class SpanFactory(object):
         self.sequenceid += 1
         self.set_depth(span_ev,depth)
         self.attach_span_event(span,span_ev)
-        # TCLogger.debug(span_ev)
         if 'calls' in stackMap:
             for called in stackMap['calls']:
                 self.make_span_ev(span, called, depth + 1)
