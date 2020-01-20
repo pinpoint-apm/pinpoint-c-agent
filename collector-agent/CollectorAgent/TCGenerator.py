@@ -2,9 +2,6 @@
 # -*- coding: UTF-8 -*-
 
 
-
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -20,9 +17,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-
-
-
 
 
 # keyWord ={
@@ -56,15 +50,12 @@
 # }
 
 # from Intercept import interceptManger
-from Common.Logger import TCLogger
-from CollectorAgent.Protocol import *
-from Proto.Trift.Trace.ttypes import TAnnotation, TAnnotationValue, TIntStringValue,TLongIntIntByteByteStringValue
 
 
 class TCGenerator(object):
 
     @staticmethod
-    def fetchIfExist(jMap,name):
+    def fetchIfExist(jMap, name):
         '''
 
         :param dict jMap:
@@ -75,9 +66,8 @@ class TCGenerator(object):
             return jMap[name]
         return None
 
-
     @staticmethod
-    def __transactionIDHelper(interManger,id):
+    def __transactionIDHelper(interManger, id):
         '''
 
         :param InterceptManager interManger:
@@ -99,7 +89,7 @@ class ThriftProtocolUtil(object):
         '''
         ret = {}
         for item in str.split():
-            key,value = item.split(sep='=')
+            key, value = item.split(sep='=')
             ret[key] = value
         return ret
 
@@ -111,6 +101,4 @@ class ThriftProtocolUtil(object):
         :return:
         '''
         sec, ms = time.split(sep='.')
-        return int(sec)*1000+int(ms)
-
-
+        return int(sec) * 1000 + int(ms)

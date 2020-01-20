@@ -20,7 +20,6 @@
 from gevent import get_hub
 from gevent import socket as asy_socket
 
-from Common import *
 from Common.Logger import TCLogger
 
 

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -19,29 +17,29 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-
 # Created by eeliu at 10/21/19
-from grpc import Future
 
-import Service_pb2_grpc
 import threading
 import time
+
+import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 from PinpointAgent.Type import PHP
 from Stat_pb2 import PAgentInfo, PPing
 
+
 class GrpcAgent(GrpcClient):
-    PINGID=0
-    def __init__(self,hostname,ip,ports,pid,address,meta=None,maxPending=-1,timeout=10):
-        super().__init__(address,meta,maxPending)
+    PINGID = 0
+
+    def __init__(self, hostname, ip, ports, pid, address, meta=None, maxPending=-1, timeout=10):
+        super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
         self.pid = pid
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
-                               serviceType=PHP)
+                                    serviceType=PHP)
         self.pingid = GrpcAgent.PINGID
         GrpcAgent.PINGID += 1
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
@@ -50,21 +48,19 @@ class GrpcAgent(GrpcClient):
         self.is_ok = False
 
     def channel_set_ready(self):
-        self.is_ok =True
+        self.is_ok = True
 
     def channel_set_idle(self):
         # self._register_agent()
-        self.is_ok =False
+        self.is_ok = False
 
     def channel_set_error(self):
-        self.is_ok =False
-
+        self.is_ok = False
 
     def _register(self):
         # start a thread to handle register
         self.agent_thread = threading.Thread(target=self._registerAgent)
         self.agent_thread.start()
-
 
     def _registerAgent(self):
         while True:
@@ -84,21 +80,20 @@ class GrpcAgent(GrpcClient):
 
     def reponseAgentInfoCallback(self, future):
         if future.exception():
-            TCLogger.error("agent catch exception %s.",future.exception())
+            TCLogger.error("agent catch exception %s.", future.exception())
             return
 
         if future.result():
-            TCLogger.debug("agent register done:%s",future.result())
+            TCLogger.debug("agent register done:%s", future.result())
             self.is_ok = True
             self._startPingThread()
 
     def _pingPPing(self):
         while self.is_ok:
             ping = PPing()
-            TCLogger.debug("%s send ping %d",self,threading.get_ident())
+            TCLogger.debug("%s send ping %d", self, threading.get_ident())
             yield ping
             time.sleep(self.timeout)
-
 
     def _startPingThread(self):
         # create ping stub
@@ -109,10 +104,10 @@ class GrpcAgent(GrpcClient):
     def _pingResponse(self, response_iter):
         try:
             for response in response_iter:
-                TCLogger.debug('get ping response %s',response)
+                TCLogger.debug('get ping response %s', response)
         except Exception as e:
-            TCLogger.error("ping response abort with exception %s",e)
+            TCLogger.error("ping response abort with exception %s", e)
             self._registerAgent()
 
     def __str__(self):
-        return 'agentclient: hostname:%s ip:%s  pid:%d address:%s'%(self.hostname,self.ip,self.pid,self.address)
+        return 'agentclient: hostname:%s ip:%s  pid:%d address:%s' % (self.hostname, self.ip, self.pid, self.address)
