@@ -534,7 +534,7 @@ PHP_RINIT_FUNCTION(pinpoint_php)
 {
 
 #if defined(COMPILE_DL_PINPIOINT_PHP) && defined(ZTS)
-    ZEND_TSRMLS_CACHE_UPDATE();2
+    ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
     if(PPG(root) == NULL){
