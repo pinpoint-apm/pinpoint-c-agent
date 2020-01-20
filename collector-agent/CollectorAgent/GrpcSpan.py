@@ -64,6 +64,7 @@ class GrpcSpan(GrpcClient):
         while True:
             try:
                 if not get_N_span(queue, 1024):
+                    time.sleep(2)
                     continue
                 self.span_stub.SendSpan(iter(spans))
             except Exception as e:
