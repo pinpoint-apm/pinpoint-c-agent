@@ -82,7 +82,7 @@ pinpoint| 1.8.0-RC1
     5. export COLLECTOR_CONFIG=/full path of collector.conf/
     6. run  collector-agent
         ```
-        $ python run.py (or nohup python run.py&)
+        $ ./run.sh
         ```
    
 > Try the aop example
