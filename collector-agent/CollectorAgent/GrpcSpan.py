@@ -33,10 +33,8 @@ class GrpcSpan(GrpcClient):
 
         # self.is_ok = True
         self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
-        self.span_count = 0
+        self.is_running = True
         self.is_ok = False
-        self.droped_span_count = 0
-        self.log_span_transit_count = 0
 
     def channel_set_ready(self):
         self.is_ok = True
@@ -46,6 +44,11 @@ class GrpcSpan(GrpcClient):
 
     def channel_set_error(self):
         self.is_ok = False
+
+    def stop(self):
+        super().stop()
+        self.is_running = False
+
 
     def startSender(self, queue):
         spans = []
@@ -58,10 +61,9 @@ class GrpcSpan(GrpcClient):
                     i += 1
             except Empty as e:
                 pass
-                # TCLogger.debug("get span from queue timeout")
             return True if i > 0 else False
 
-        while True:
+        while self.is_running:
             try:
                 if not get_N_span(queue, 1024):
                     time.sleep(2)

@@ -73,7 +73,7 @@ class GrpcAgent(GrpcClient):
             iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
             try:
                 for response in iter_response:
-                    TCLogger.debug('get ping response %s', response)
+                    TCLogger.debug('get ping response:%s agentinfo:%s', response,self.meta)
             except Exception as e:
                 TCLogger.error("[%s] ping response abort with exception %s", e,self.agentinfo)
                 time.sleep(self.timeout)
