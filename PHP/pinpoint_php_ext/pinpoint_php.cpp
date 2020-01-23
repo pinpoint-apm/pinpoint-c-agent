@@ -515,14 +515,13 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint_php)
     UNREGISTER_INI_ENTRIES();
     */
 
-#if 0
-    no needs to call when module shutdown
+
     if(PPG(root)){
         delete (Json::Value *)PPG(root);
+        PPG(root) = NULL;
     }
 
     reset_remote();
-#endif
 
     return SUCCESS;
 }
