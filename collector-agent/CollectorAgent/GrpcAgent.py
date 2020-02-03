@@ -45,13 +45,13 @@ class GrpcAgent(GrpcClient):
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
         self.timeout = timeout
         self._register()
+        self.task_running = False
         self.is_ok = False
 
     def channel_set_ready(self):
         self.is_ok = True
 
     def channel_set_idle(self):
-        # self._register_agent()
         self.is_ok = False
 
     def channel_set_error(self):
@@ -63,7 +63,8 @@ class GrpcAgent(GrpcClient):
         self.agent_thread.start()
 
     def _registerAgent(self):
-        while True:
+        self.task_running = True
+        while self.task_running:
             try:
                 self.stub.RequestAgentInfo(self.agentinfo, wait_for_ready=True)
             except Exception as e:
@@ -78,36 +79,18 @@ class GrpcAgent(GrpcClient):
                 TCLogger.error("[%s] ping response abort with exception %s", e,self.agentinfo)
                 time.sleep(self.timeout)
 
-    def reponseAgentInfoCallback(self, future):
-        if future.exception():
-            TCLogger.error("agent catch exception %s.", future.exception())
-            return
-
-        if future.result():
-            TCLogger.debug("agent register done:%s", future.result())
-            self.is_ok = True
-            self._startPingThread()
-
     def _pingPPing(self):
-        while self.is_ok:
+        while self.is_ok and self.task_running:
             ping = PPing()
             TCLogger.debug("%s send ping", self)
             yield ping
             time.sleep(self.timeout)
 
-    def _startPingThread(self):
-        # create ping stub
-        iter_reponse = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
-        self.ping_reponse_task = threading.Thread(target=self._pingResponse, args=(iter_reponse,))
-        self.ping_reponse_task.start()
-
-    def _pingResponse(self, response_iter):
-        try:
-            for response in response_iter:
-                TCLogger.debug('get ping response %s', response)
-        except Exception as e:
-            TCLogger.error("ping response abort with exception %s", e)
-            self._registerAgent()
-
     def __str__(self):
         return 'agentclient: hostname:%s ip:%s  pid:%d address:%s' % (self.hostname, self.ip, self.pid, self.address)
+
+    def stop(self):
+        if self.task_running:
+            self.task_running = False
+        self.agent_thread.join()
+        print("agent thread exit")

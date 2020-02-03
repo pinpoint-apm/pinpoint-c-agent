@@ -34,6 +34,7 @@ class AppManagement(object):
         self.default_appname = self.collector_conf.ApplicationName
         self.app_map = {}
         self.default_app = None
+        self.recv_count = 0
         self.create_default_implement(service_type)
 
     def create_default_implement(self,service_type):
@@ -89,6 +90,7 @@ class AppManagement(object):
         ft = stack['FT']
         app = self.find_app(appid,appname,ft)
         app.sendSpan(stack,body)
+        self.recv_count+=1
 
     def tell_whoami(self):
         return {
