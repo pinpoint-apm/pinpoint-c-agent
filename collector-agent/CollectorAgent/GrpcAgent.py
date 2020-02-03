@@ -58,7 +58,6 @@ class GrpcAgent(GrpcClient):
         self.is_ok = False
 
     def _register(self):
-        # start a thread to handle register
         self.agent_thread = threading.Thread(target=self._registerAgent)
         self.agent_thread.start()
 

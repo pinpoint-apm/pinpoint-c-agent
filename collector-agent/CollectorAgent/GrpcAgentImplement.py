@@ -22,8 +22,6 @@
 from threading import Thread
 from queue import Full,Queue
 
-from setproctitle import setproctitle
-
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
