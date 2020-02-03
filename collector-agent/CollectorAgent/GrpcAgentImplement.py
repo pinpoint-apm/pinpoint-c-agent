@@ -45,6 +45,7 @@ class GrpcAgentImplement(PinpointAgent):
             self.max_pending_sz =max_pending_sz
             self.span_queue = Queue(self.max_pending_sz)
             self.span_client = GrpcSpan(self.span_addr, self.agent_meta)
+            self.dropped_span_count=0
             TCLogger.info("Successfully create a Span Sender")
 
         def start(self):
@@ -56,7 +57,7 @@ class GrpcAgentImplement(PinpointAgent):
             try:
                 self.span_queue.put(spanMesg, False)
             except Full as e:
-                TCLogger.error("send span failed: with queue is FUll. Queue size:%d", self.span_queue.qsize())
+                self.dropped_span_count+=1
                 return False
             except Exception as e:
                 TCLogger.error("send span failed: %s", e)
@@ -66,6 +67,7 @@ class GrpcAgentImplement(PinpointAgent):
         def stopSelf(self):
             self.span_client.stop()
             self.sender_thread.join()
+            TCLogger.info("grpc agent dropped %d",self.dropped_span_count)
 
         def spanSenderMain(self, queue):
             self.span_client = GrpcSpan(self.span_addr, self.agent_meta)
