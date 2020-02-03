@@ -34,6 +34,7 @@ class GrpcSpan(GrpcClient):
         # self.is_ok = True
         self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
         self.is_running = True
+        self.send_span_count = 0
         self.is_ok = False
 
     def channel_set_ready(self):
@@ -48,6 +49,7 @@ class GrpcSpan(GrpcClient):
     def stop(self):
         super().stop()
         self.is_running = False
+        TCLogger.info("send %d to pinpoint collector",self.send_span_count)
 
 
     def startSender(self, queue):
@@ -68,6 +70,7 @@ class GrpcSpan(GrpcClient):
                 if not get_N_span(queue, 10240):
                     time.sleep(2)
                     continue
+                self.send_span_count+=len(spans)
                 self.span_stub.SendSpan(iter(spans))
             except Exception as e:
                 TCLogger.error("span channel, can't work:exception:%s", e)
