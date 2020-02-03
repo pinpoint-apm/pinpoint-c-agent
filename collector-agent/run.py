@@ -46,7 +46,10 @@ class Server(object):
 
     def run(self):
         while True:
-            gevent.sleep(10)
+            try:
+                gevent.sleep(10)
+            except:
+                break
         # break by a signal
         self.app_management.stop_all()
         self.php_agent.stop()
