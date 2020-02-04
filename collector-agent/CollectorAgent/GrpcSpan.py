@@ -21,7 +21,7 @@
 import time
 import traceback
 from queue import Empty
-
+from threading import Condition,Thread
 import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
@@ -30,12 +30,13 @@ from Common.Logger import TCLogger
 class GrpcSpan(GrpcClient):
     def __init__(self, address, meta):
         super().__init__(address, meta)
-
-        # self.is_ok = True
         self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
-        self.is_running = True
+        self.exit_cv = Condition()
         self.send_span_count = 0
         self.is_ok = False
+        self.task_thead = Thread(target=self.startSender)
+        self.task_running = False
+        self.queue = None
 
     def channel_set_ready(self):
         self.is_ok = True
@@ -47,15 +48,21 @@ class GrpcSpan(GrpcClient):
         self.is_ok = False
 
     def stop(self):
-        super().stop()
-        self.is_running = False
+        self.task_running = False
+        with self.exit_cv:
+            self.exit_cv.notify_all()
+        self.task_thead.join()
         TCLogger.info("send %d to pinpoint collector",self.send_span_count)
 
+    def start(self,queue):
+        self.queue = queue
+        self.task_thead.start()
 
-    def startSender(self, queue):
+    def startSender(self):
+        self.task_running = True
+
         spans = []
-
-        def get_N_span(queue, N):
+        def get_maxN_span(queue, N):
             i = 0
             try:
                 while N > i:
@@ -65,16 +72,17 @@ class GrpcSpan(GrpcClient):
                 pass
             return True if i > 0 else False
 
-        while self.is_running:
+        while self.task_running:
             try:
-                if not get_N_span(queue, 10240):
-                    time.sleep(2)
+                if not get_maxN_span(self.queue, 10240):
+                    with self.exit_cv:
+                        if self.exit_cv.wait(5):
+                            break
                     continue
                 self.send_span_count+=len(spans)
                 self.span_stub.SendSpan(iter(spans))
             except Exception as e:
                 TCLogger.error("span channel, can't work:exception:%s", e)
                 traceback.print_exc()
-                time.sleep(10)
             finally:
                 spans.clear()
