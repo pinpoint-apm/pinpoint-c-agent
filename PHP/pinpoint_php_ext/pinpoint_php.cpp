@@ -521,7 +521,7 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint_php)
         PPG(root) = NULL;
     }
 
-    reset_remote();
+    reset_remote(&PPG(t_layer));
 
     return SUCCESS;
 }
