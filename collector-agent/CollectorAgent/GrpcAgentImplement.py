@@ -49,8 +49,8 @@ class GrpcAgentImplement(PinpointAgent):
             TCLogger.info("Successfully create a Span Sender")
 
         def start(self):
-            self.sender_thread = Thread(target=self.spanSenderMain, args=(self.span_queue,))
-            self.sender_thread.start()
+            self.span_client.start(self.span_queue)
+
 
         def sendSpan(self, spanMesg):
 
@@ -66,12 +66,7 @@ class GrpcAgentImplement(PinpointAgent):
 
         def stopSelf(self):
             self.span_client.stop()
-            self.sender_thread.join()
             TCLogger.info("grpc agent dropped %d",self.dropped_span_count)
-
-        def spanSenderMain(self, queue):
-            self.span_client = GrpcSpan(self.span_addr, self.agent_meta)
-            self.span_client.startSender(queue)
 
     def __init__(self, ac, app_id, app_name, serviceType=PHP):
 
@@ -109,9 +104,12 @@ class GrpcAgentImplement(PinpointAgent):
         return True
 
     def sendSpan(self, stack, body):
-        pSpan = self.span_factory.make_span(stack)
-        spanMesg = PSpanMessage(span=pSpan)
-
+        try:
+            pSpan = self.span_factory.make_span(stack)
+            spanMesg = PSpanMessage(span=pSpan)
+        except Exception as e:
+            TCLogger.warn(" interrupted by %s",e)
+            return False
         if self._sendSpan(spanMesg):
             return True
 
@@ -131,6 +129,7 @@ class GrpcAgentImplement(PinpointAgent):
 
 
     def stop(self):
+        self.agent_client.stop()
         for sender in self.span_sender_list:
             sender.stopSelf()
 
