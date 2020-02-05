@@ -52,6 +52,7 @@ class GrpcSpan(GrpcClient):
         with self.exit_cv:
             self.exit_cv.notify_all()
         self.task_thead.join()
+        super().stop()
         TCLogger.info("send %d to pinpoint collector",self.send_span_count)
 
     def start(self,queue):
