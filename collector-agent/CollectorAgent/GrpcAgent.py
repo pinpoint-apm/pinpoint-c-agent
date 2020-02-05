@@ -46,8 +46,6 @@ class GrpcAgent(GrpcClient):
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
                                     serviceType=PHP)
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
-        self._register()
-        self.exiting = False
         self.task_running = False
 
     def channel_set_ready(self):
@@ -59,7 +57,7 @@ class GrpcAgent(GrpcClient):
     def channel_set_error(self):
         self.is_ok = False
 
-    def _register(self):
+    def start(self):
         # start a thread to handle register
         self.agent_thread = threading.Thread(target=self._registerAgent)
         self.agent_thread.start()
@@ -68,20 +66,24 @@ class GrpcAgent(GrpcClient):
         self.task_running  = True
         while self.task_running:
             try:
-                self.stub.RequestAgentInfo(self.agentinfo, wait_for_ready=True)
+                TCLogger.debug("sending agentinfo %s",self.agentinfo)
+                self.stub.RequestAgentInfo(self.agentinfo)
             except Exception as e:
-                TCLogger.warn("[%s] pinpoint collector is not available. Try it again",self.agentinfo)
+                TCLogger.warn(" pinpoint collector is not available. Try it again [%s] ",self.agentinfo)
                 continue
             finally:
                 with self.exit_cv:
                     if self.exit_cv.wait(self.timeout):
                         break
+
             iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
             try:
                 for response in iter_response:
                     TCLogger.debug('get ping response:%s agentinfo:%s', response,self.meta)
             except Exception as e:
-                TCLogger.error("[%s] ping response abort with exception %s", e,self.agentinfo)
+                TCLogger.error("ping response abort with exception: [%s]  %s",self.agentinfo, e)
+        
+        TCLogger.debug('agent thread exit: %s',self.task_running)
   
                 
     def _pingPPing(self):
@@ -92,7 +94,6 @@ class GrpcAgent(GrpcClient):
             with self.exit_cv:
                 if self.exit_cv.wait(self.timeout):
                     TCLogger.debug("generate ping exit")
-                    self.exiting = True
                     break
                 
 
@@ -105,4 +106,5 @@ class GrpcAgent(GrpcClient):
         with self.exit_cv:
             self.exit_cv.notify_all()
         self.agent_thread.join()
+        super().stop()
         TCLogger.debug("agent thread exit")

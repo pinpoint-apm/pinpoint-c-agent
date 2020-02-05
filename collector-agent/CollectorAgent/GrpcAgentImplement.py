@@ -93,6 +93,8 @@ class GrpcAgentImplement(PinpointAgent):
                                       self.agent_addr, self.agent_meta)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
 
+        self.agent_client.start()
+        self.meta_client.start()
         self.span_factory = GrpcSpanFactory(self)
 
     def start(self):
@@ -130,6 +132,7 @@ class GrpcAgentImplement(PinpointAgent):
 
     def stop(self):
         self.agent_client.stop()
+        self.meta_client.stop()
         for sender in self.span_sender_list:
             sender.stopSelf()
 

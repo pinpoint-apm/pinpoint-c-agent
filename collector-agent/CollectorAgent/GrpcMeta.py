@@ -112,3 +112,5 @@ class GrpcMeta(GrpcClient):
         # string
         for key, value in self.string_table.items():
             self._send_string_meta(value[1])
+    def start(self):
+        pass

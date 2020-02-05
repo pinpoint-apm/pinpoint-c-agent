@@ -121,3 +121,6 @@ class GrpcClient(object):
 
     def stop(self):
         self.channel.close()
+
+    def start(self):
+        raise NotImplemented()
