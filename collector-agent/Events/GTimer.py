@@ -16,10 +16,32 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
+from gevent import get_hub
 class GTimer(object):
-    @staticmethod
-    def registerTimers(callback,interval,args=None):
-        from gevent import get_hub
-        loop = get_hub().loop
-        time = loop.timer(0, interval)
-        time.start(callback,args)
+    def __init__(self,only_once = True):
+        self.loop = get_hub().loop
+        self.timer = None
+        self.callback = None
+        self.only_once = only_once
+        self.started = False
+
+    def _timerCallback(self,*args):
+        self.callback(*args)
+        if self.only_once :
+            self.timer.stop()
+            self.started = False
+
+    def start(self, callback, interval, *args):
+        if self.started:
+            return
+
+        self.started = True
+        self.timer = self.loop.timer(0, interval)
+        self.callback = callback
+        self.timer.start(self._timerCallback,*args)
+
+    def stop(self):
+        if not self.only_once and self.timer:
+            self.timer.stop()
+            self.started = False
+
