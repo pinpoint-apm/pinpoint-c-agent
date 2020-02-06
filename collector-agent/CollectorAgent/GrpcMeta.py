@@ -22,7 +22,7 @@ import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 from Span_pb2 import PSqlMetaData, PApiMetaData, PStringMetaData
-
+from Events.GTimer import GTimer
 
 class GrpcMeta(GrpcClient):
     def __init__(self, address, meta=None):
@@ -33,6 +33,7 @@ class GrpcMeta(GrpcClient):
         self.sql_table = {}
         self.api_table = {}
         self.string_table = {}
+        self.recover_timer = GTimer()
 
     def _send_sql_meta(self, meta):
         assert isinstance(meta, PSqlMetaData)
@@ -49,6 +50,19 @@ class GrpcMeta(GrpcClient):
         future = self.meta_stub.RequestStringMetaData.future(meta)
         future.add_done_callback(self._response)
 
+    def _channelCheck(fun):
+        def update(self, *args):
+            if not self.is_ok:
+                self.recover_timer.start(self._register_all_meta, 10)
+            result = fun(self, *args)
+            return result
+        return update
+
+    def registerAllMeta(self):
+        if not self.is_ok:
+            self.recover_timer.start(self._register_all_meta, 10)
+
+    @_channelCheck
     def update_api_meta(self, apiInfo, line, type):
         row_str = ("%s-%d-%d" % (apiInfo, line, type))
         if row_str in self.api_table:
@@ -61,7 +75,7 @@ class GrpcMeta(GrpcClient):
             self.id += 1
             TCLogger.debug("register api meta id:%d -> api:[%s]", id, row_str)
             return id
-
+    @_channelCheck
     def update_string_meta(self, value):
         if value in self.string_table:
             return self.string_table[value][0]
@@ -74,6 +88,7 @@ class GrpcMeta(GrpcClient):
             TCLogger.debug("register string meta id:%d -> value:[%s]", id, value)
             return id
 
+    @_channelCheck
     def update_sql_meta(self, sql):
         if sql in self.sql_table:
             return self.sql_table[sql][0]
@@ -86,23 +101,29 @@ class GrpcMeta(GrpcClient):
             TCLogger.debug("register sql meta id:%d -> sql:[%s]", id, sql)
             return id
 
+
     def _response(self, future):
         if future.exception():
             TCLogger.warning("register meta failed %s", future.exception)
+            self.is_ok = False
             return
         TCLogger.debug(future.result())
+        self.is_ok = True
 
     def channel_set_ready(self):
-        self.is_ok = True
+        pass
+        # self.is_ok = True
 
     def channel_set_idle(self):
-        self._register_all_meta()
-        self.is_ok = True
+        pass
+        # self.is_ok = False
 
     def channel_set_error(self):
-        self.is_ok = False
+        pass
+        # self.is_ok = False
 
     def _register_all_meta(self):
+        TCLogger.info("register all meta data")
         # register sql
         for key, value in self.sql_table.items():
             self._send_sql_meta(value[1])
@@ -112,5 +133,6 @@ class GrpcMeta(GrpcClient):
         # string
         for key, value in self.string_table.items():
             self._send_string_meta(value[1])
+
     def start(self):
         pass
