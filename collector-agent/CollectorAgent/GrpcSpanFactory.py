@@ -31,7 +31,7 @@ from Span_pb2 import PSpan, PSpanEvent
 
 
 class GrpcSpanFactory(SpanFactory):
-    def create_span(self, stackMap):
+    def createSpan(self, stackMap):
         tSpan = PSpan()
         tSpan.apiId = self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST)
         tSpan.version = 1
@@ -122,7 +122,7 @@ class GrpcSpanFactory(SpanFactory):
 
         return tSpan
 
-    def create_span_event(self, stackMap):
+    def createSpanEvent(self, stackMap):
         assert 'name' in stackMap
         spanEv = PSpanEvent()
         spanEv.apiId = self.agent.updateApiMeta(stackMap['name'])
@@ -167,11 +167,11 @@ class GrpcSpanFactory(SpanFactory):
 
         return spanEv
 
-    def attach_span_event(self, tSpan, span_event):
+    def attachSpanEvent(self, tSpan, span_event):
         tSpan.spanEvent.append(span_event)
 
-    def set_sequenceid(self, span_ev, id):
+    def setSequenceid(self, span_ev, id):
         span_ev.sequence = id
 
-    def set_depth(self, span_ev, depth):
+    def setDepth(self, span_ev, depth):
         span_ev.depth = depth

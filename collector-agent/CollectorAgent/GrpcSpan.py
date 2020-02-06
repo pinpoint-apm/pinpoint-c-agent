@@ -38,13 +38,13 @@ class GrpcSpan(GrpcClient):
         self.task_running = False
         self.queue = None
 
-    def channel_set_ready(self):
+    def channelSetReady(self):
         self.is_ok = True
 
-    def channel_set_idle(self):
+    def channelSetIdle(self):
         self.is_ok = False
 
-    def channel_set_error(self):
+    def channelSetError(self):
         self.is_ok = False
 
     def stop(self):

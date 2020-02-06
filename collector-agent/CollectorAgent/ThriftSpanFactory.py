@@ -28,7 +28,7 @@ from Proto.Trift.Trace.ttypes import TSpan, TIntStringValue, TAnnotation, TAnnot
 
 
 class ThriftSpanFactory(SpanFactory):
-    def create_span(self, stackMap):
+    def createSpan(self, stackMap):
         tSpan = TSpan()
         tSpan.apiId = self.agent.updateApiMeta(stackMap['name'], API_WEB_REQUEST).apiId
         tSpan.agentStartTime = self.agent.startTimeStamp
@@ -124,7 +124,7 @@ class ThriftSpanFactory(SpanFactory):
 
         return tSpan
 
-    def create_span_event(self, stackMap):
+    def createSpanEvent(self, stackMap):
         assert 'name' in stackMap
         spanEv = TSpanEvent()
 
@@ -166,11 +166,11 @@ class ThriftSpanFactory(SpanFactory):
 
         return spanEv
 
-    def attach_span_event(self, tSpan, span_event):
+    def attachSpanEvent(self, tSpan, span_event):
         tSpan.spanEventList.append(span_event)
 
-    def set_sequenceid(self, span_ev, id):
+    def setSequenceid(self, span_ev, id):
         span_ev.sequence = id
 
-    def set_depth(self, span_ev, depth):
+    def setDepth(self, span_ev, depth):
         span_ev.depth = depth

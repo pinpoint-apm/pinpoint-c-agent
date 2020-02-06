@@ -17,7 +17,6 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-import os,sys
 # !/usr/bin/env python
 # -*- coding: UTF-8 -*-
 import os
@@ -40,8 +39,8 @@ class Server(object):
         self.collector_conf = CollectorAgentConf(CAConfig)
         self.app_management = AppManagement(self.collector_conf)
         self.pac = PHPAgentConf(CAConfig)
-        self.php_agent = FrontAgent(self.pac, self.app_management.handle_front_agent_data)
-        self.php_agent.registerPHPAgentHello(self.app_management.tell_whoami)
+        self.php_agent = FrontAgent(self.pac, self.app_management.handleFrontAgentData)
+        self.php_agent.registerPHPAgentHello(self.app_management.tellMeWho)
         self.php_agent.start()
 
     def run(self):
@@ -51,7 +50,7 @@ class Server(object):
             except:
                 break
         # break by a signal
-        self.app_management.stop_all()
+        self.app_management.stopAll()
         self.php_agent.stop()
         TCLogger.warning("collector agent exit with SIGNAL")
 

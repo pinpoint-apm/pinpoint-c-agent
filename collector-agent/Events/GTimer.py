@@ -36,7 +36,7 @@ class GTimer(object):
             return
 
         self.started = True
-        self.timer = self.loop.timer(0, interval)
+        self.timer = self.loop.timer(interval,interval)
         self.callback = callback
         self.timer.start(self._timerCallback,*args)
 
