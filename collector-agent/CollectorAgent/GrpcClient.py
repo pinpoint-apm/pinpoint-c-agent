@@ -81,13 +81,13 @@ class GrpcClient(object):
         if meta is not None:
             self.meta = meta
             intercept_channel = grpc.intercept_channel(channel,
-                                                       self._interceptor_add_header(meta))
+                                                       self._interceptorAddHeader(meta))
             channel = intercept_channel
 
         self.channel = channel
-        self.channel.subscribe(self._channel_state_change, try_reconnect)
+        self.channel.subscribe(self._channelStateChange, try_reconnect)
 
-    def _interceptor_add_header(self, header):
+    def _interceptorAddHeader(self, header):
         def intercept_call(client_call_details, request_iterator, request_streaming,
                            response_streaming):
             metadata = []
@@ -101,22 +101,22 @@ class GrpcClient(object):
 
         return _GenericClientInterceptor(intercept_call)
 
-    def _channel_state_change(self, activity):
+    def _channelStateChange(self, activity):
         if activity == grpc.ChannelConnectivity.TRANSIENT_FAILURE:
-            self.channel_set_error()
+            self.channelSetError()
         elif activity == grpc.ChannelConnectivity.READY:
-            self.channel_set_ready()
+            self.channelSetReady()
         elif activity == grpc.ChannelConnectivity.IDLE:
-            self.channel_set_idle()
+            self.channelSetIdle()
         TCLogger.debug("channel state change %s dst:%s", activity, self.address)
 
-    def channel_set_ready(self):
+    def channelSetReady(self):
         raise NotImplemented()
 
-    def channel_set_idle(self):
+    def channelSetIdle(self):
         raise NotImplemented()
 
-    def channel_set_error(self):
+    def channelSetError(self):
         raise NotImplemented()
 
     def stop(self):

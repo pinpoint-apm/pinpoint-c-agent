@@ -141,7 +141,7 @@ class ThriftAgentImplement(PinpointAgent):
         '''
         ### must reset to zero
 
-        tSpan = self.span_factory.make_span(stack)
+        tSpan = self.span_factory.makeSpan(stack)
         body = CollectorPro.obj2bin(tSpan, SPAN)
         # packet = Packet(PacketType.HEADLESS, len(body), body)
         self.spanLayer.sendData(body)

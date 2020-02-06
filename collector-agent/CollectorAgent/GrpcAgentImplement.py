@@ -107,7 +107,7 @@ class GrpcAgentImplement(PinpointAgent):
 
     def sendSpan(self, stack, body):
         try:
-            pSpan = self.span_factory.make_span(stack)
+            pSpan = self.span_factory.makeSpan(stack)
             spanMesg = PSpanMessage(span=pSpan)
         except Exception as e:
             TCLogger.warn(" interrupted by %s",e)
@@ -137,7 +137,7 @@ class GrpcAgentImplement(PinpointAgent):
             sender.stopSelf()
 
     def updateApiMeta(self, name, type=API_DEFAULT):
-        return self.meta_client.update_api_meta(name, -1, type)
+        return self.meta_client.updateApiMeta(name, -1, type)
 
     def updateStringMeta(self, name):
-        return self.meta_client.update_string_meta(name)
+        return self.meta_client.updateStringMeta(name)

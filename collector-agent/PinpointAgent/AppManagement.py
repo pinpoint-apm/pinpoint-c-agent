@@ -35,16 +35,16 @@ class AppManagement(object):
         self.app_map = {}
         self.default_app = None
         self.recv_count = 0
-        self.create_default_implement(service_type)
+        self.createDefaultImplement(service_type)
 
-    def create_default_implement(self,service_type):
+    def createDefaultImplement(self, service_type):
 
         self.default_app = self.collector_conf.collector_implement(self.collector_conf, self.default_appid, self.default_appname, service_type)
 
         self.default_app.start()
         self.app_map[self.default_appid] = self.default_app
 
-    def find_app(self, app_id, app_name,service_type):
+    def findApp(self, app_id, app_name, service_type):
         if app_id in self.app_map:
             app = self.app_map[app_id]
             ## check app_name
@@ -64,14 +64,14 @@ class AppManagement(object):
 
         return app
 
-    def stop_all(self):
+    def stopAll(self):
         for app_id,instance in self.app_map.items():
             assert(isinstance(instance,PinpointAgent))
             TCLogger.info("application is stopping [%s]",app_id)
             instance.stop()
         TCLogger.info("recieved %d span from php-fpm",self.recv_count)
 
-    def handle_front_agent_data(self,client,type,body):
+    def handleFrontAgentData(self, client, type, body):
         content = body.decode('utf-8')
         try:
             stack = json.loads(content)
@@ -89,11 +89,11 @@ class AppManagement(object):
             appname = stack['appname']
 
         ft = stack['FT']
-        app = self.find_app(appid,appname,ft)
+        app = self.findApp(appid, appname, ft)
         app.sendSpan(stack,body)
         self.recv_count+=1
 
-    def tell_whoami(self):
+    def tellMeWho(self):
         return {
             "time": str(self.collector_conf.startTimestamp),
             "id": self.default_appid,

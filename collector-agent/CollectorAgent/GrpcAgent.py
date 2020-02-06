@@ -48,13 +48,13 @@ class GrpcAgent(GrpcClient):
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
         self.task_running = False
 
-    def channel_set_ready(self):
+    def channelSetReady(self):
         self.is_ok = True
 
-    def channel_set_idle(self):
+    def channelSetIdle(self):
         self.is_ok = False
 
-    def channel_set_error(self):
+    def channelSetError(self):
         self.is_ok = False
 
     def start(self):

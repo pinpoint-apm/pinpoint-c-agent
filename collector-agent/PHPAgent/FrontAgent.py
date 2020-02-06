@@ -42,7 +42,7 @@ class FrontAgent(object):
         self.listen_socket = self._bindSocket(self.address)
         self.server = StreamServerLayer(self.listen_socket, self._recvData, self._phpClientSayHello)
         self.msgHandleCallback = msgCallback
-        self.hello_cb = []
+        self.hello_callback = []
 
     def _bindSocket(self,address):
         if address[0] =='/': # treat as unix socket
@@ -79,11 +79,11 @@ class FrontAgent(object):
         return 0
 
     def registerPHPAgentHello(self,hello_cb):
-        self.hello_cb.append(hello_cb)
+        self.hello_callback.append(hello_cb)
 
     def _phpClientSayHello(self, client):
         response = {}
-        for cb in self.hello_cb:
+        for cb in self.hello_callback:
             data = cb()
             for key in data:
                 response[key] = data[key]
