@@ -1,5 +1,5 @@
 <?php
-// ref to https://github.com/swoole/swoole-src
+// origin from https://github.com/swoole/swoole-src
 //require_once __DIR__ . '/../vendor/autoload.php';
 
 define('AUTOLOAD_FILE_ALIAS',__DIR__.'/../vendor/autoload.php');

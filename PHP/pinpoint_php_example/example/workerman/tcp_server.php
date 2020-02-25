@@ -1,5 +1,5 @@
 <?php
-// ref to https://github.com/walkor/Workerman
+// orgin from https://github.com/walkor/Workerman
 //require_once __DIR__ . '/../vendor/autoload.php';
 
 define('AUTOLOAD_FILE_ALIAS',__DIR__.'/../vendor/autoload.php');

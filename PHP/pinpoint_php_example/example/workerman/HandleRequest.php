@@ -1,5 +1,4 @@
 <?php
-// ref to https://github.com/walkor/Workerman
 namespace example\workerman;
 use example\UserManagerment;
 
