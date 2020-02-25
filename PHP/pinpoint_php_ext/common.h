@@ -18,9 +18,10 @@
 
 #include <stdlib.h>
 
-//fix #129
+//fix #129 
+//origin from https://github.com/naver/pinpoint-c-agent/issues/157
 #ifndef uint
-#define uint unsigned int
+typedef unsigned int uint;
 #endif
 
 typedef struct list{
