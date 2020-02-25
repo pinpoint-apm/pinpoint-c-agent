@@ -96,6 +96,7 @@ static int connect_remote(TransLayer* t_layer,const char* statement);
 static int recv_msg_from_collector(TransLayer *t_layer);
 static int handle_msg_from_collector(const char* buf,size_t len);
 static void handle_agent_info(int type,const char* buf,size_t len);
+static void uninit_shared_obj();
 
 static void reset_remote(TransLayer* t_layer);
 static size_t trans_layer_pool(TransLayer* t_layer);
@@ -500,7 +501,8 @@ PHP_MINIT_FUNCTION(pinpoint_php)
     zend_error_cb = apm_error_cb;
 
     PPG(agent_info).start_time = get_current_msec_stamp();
-
+    uninit_shared_obj();
+    checking_and_init();
     return SUCCESS;
 }
 /* }}} */
@@ -513,14 +515,13 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint_php)
     UNREGISTER_INI_ENTRIES();
     */
 
-#if 0
-    no needs to call when module shutdown
+
     if(PPG(root)){
         delete (Json::Value *)PPG(root);
+        PPG(root) = NULL;
     }
 
-    reset_remote();
-#endif
+    reset_remote(&PPG(t_layer));
 
     return SUCCESS;
 }
@@ -893,7 +894,7 @@ inline void asy_send_msg_to_agent(TransLayer* t_layer,const std::string &data)
     // append to end
     if(insert_into_chunks(t_layer->chunks,data) != 0 )
     {
-        pp_trace("Send buffer is full. size:[%d]",data.length());
+        pp_trace("Send buffer is full. input size:[%d]",data.length());
         return ;
     }
 
@@ -916,6 +917,11 @@ uint64_t get_current_msec_stamp()
     struct timeval tv;
     gettimeofday(&tv,NULL);
     return tv.tv_sec*1000 + tv.tv_usec /1000;
+}
+
+void uninit_shared_obj()
+{
+    remove(PPG(shared_obj).address);
 }
 
 /**
