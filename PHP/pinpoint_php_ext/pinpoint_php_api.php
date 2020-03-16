@@ -13,10 +13,10 @@ function pinpoint_end_trace(){}
 
 /**
  * insert key,value into current span/spanevent
- * @param int $key
+ * @param string $key
  * @param string $value
  */
-function pinpoint_add_clue(int $key, string $value){}
+function pinpoint_add_clue(string $key, string $value){}
 
 /**
  * insert key,value into current span/spanevent annotation

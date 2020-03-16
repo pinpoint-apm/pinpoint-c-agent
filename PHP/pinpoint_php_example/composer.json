@@ -11,11 +11,13 @@
         "psr-4": {
             "app\\":"app/",
             "app1\\": "app1",
+            "example\\": "example",
             "Plugins\\": "Plugins/"
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "v0.1"
+        "eeliu/php_simple_aop": "v0.1",
+        "workerman/workerman":"v3.5.15"
     },
     "repositories": [
         {

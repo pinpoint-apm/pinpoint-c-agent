@@ -1,11 +1,11 @@
 ![Pinpoint](images/logo.png)
 
-[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=dev)](https://travis-ci.com/naver/pinpoint-c-agent)
+[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [v0.2.0](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [Lastest](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint PHP Agent
 
@@ -62,12 +62,14 @@ pinpoint| 1.8.0-RC1
         ```ini
         [Collector]
         # collectorhost and specific port
-        CollectorSpanIp=10.10.23.45
-        CollectorSpanPort=9905
-        CollectorStatIp=10.10.23.45
-        CollectorStatPort=9906
-        CollectorTcpIp=10.10.23.45
-        CollectorTcpPort=9907
+        AgentID=your_id
+        ApplicationName=your_name
+        collector.grpc.agent.ip=collectorHost
+        collector.grpc.agent.port=9991
+        collector.grpc.stat.ip=collectorHost
+        collector.grpc.stat.port=9992
+        collector.grpc.span.ip=collectorHost
+        collector.grpc.span.port=9993
         [Common]
         # your web server (nginx&apache) port
         Web_Port=8001   
@@ -82,7 +84,8 @@ pinpoint| 1.8.0-RC1
     5. export COLLECTOR_CONFIG=/full path of collector.conf/
     6. run  collector-agent
         ```
-        $ python run.py (or nohup python run.py&)
+        $ ./init_python_env.sh
+        $ python run.py
         ```
    
 > Try the aop example
@@ -99,11 +102,13 @@ pinpoint| 1.8.0-RC1
 ### Distributed Tracking system
 ![php_agent_example](images/php_agent_example.png)
 ### Call Stack
-![php_agent_example_detail](images/php_agent_example_detail.png)
+
+![php_agent_example_detail](images/php_agent_example_detail.png) | ![php_agent_example_memcached](images/callstack-memcached.png)
+--- | ---
+![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
+
 ### TODO
 
-- [ ] redis,DB,memcache plugins ......
-- [ ] workerman,php-swoole plugins 
 
 ## Compatibility
 
@@ -117,6 +122,15 @@ Pinpoint Version | PHP| Python|GCC
 - More Stability 
 - Higher performance 
 - Easy to Use and Maintain
+- Support GRPC
+
+## Contact Us
+* Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
+* Chinese Community:
+
+QQ Group: 897594820 | DING Group
+:---:| :---:
+![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 ## F & Q
 
@@ -167,7 +181,7 @@ This project is licensed under the Apache License, Version 2.0.
 See [LICENSE](LICENSE) for full license text.
 
 ```
-Copyright 2018 NAVER Corp.
+Copyright 2020 NAVER Corp.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
