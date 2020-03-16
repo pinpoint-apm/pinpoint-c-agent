@@ -17,7 +17,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-import os
+import os,struct
 
 from CollectorAgent.GrpcAPIMeta import *
 from CollectorAgent.GrpcAgentStateManager import GrpcAgentStateManager
@@ -26,7 +26,7 @@ from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
 from Common.AgentHost import AgentHost
 from Events import *
 from PinpointAgent.PinpointAgent import PinpointAgent
-from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode
+from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode,AGENT_INFO,SPAN
 
 
 class ThriftAgentImplement(PinpointAgent):
