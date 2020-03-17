@@ -1,25 +1,26 @@
-#-------------------------------------------------------------------------------
-# Copyright 2019 NAVER Corp
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License.  You may obtain a copy
-# of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations under
-# the License.
-#-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
+
+# ------------------------------------------------------------------------------
+#  Copyright  2020. NAVER Corp.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ------------------------------------------------------------------------------
 from gevent import get_hub
 from gevent import socket as asy_socket
 
-from Common import *
+from Common.Logger import TCLogger
 
 
 class StreamServerLayer(object):
@@ -62,7 +63,7 @@ class StreamServerLayer(object):
                     return 0
                 TCLogger.warning("peer error:%s ", error)
                 return -1
-            return recv_total
+            return recv_total+self.rest_data_sz
 
         def close(self):
             self.socket.close()
@@ -111,13 +112,13 @@ class StreamServerLayer(object):
             sock = self.listen
             # client_socket
             client_socket, address = sock.accept()
+            client_socket.setblocking(False)
             # sock = gsocket(_socket = client_socket)
         except asy_socket.error as error:
             TCLogger.warning("accept:%s",error)
+            return
 
-        client_socket.setblocking(False)
         TCLogger.info("new connect fd:%s ",client_socket.fileno())
-
         client_in_event= self.loop.io(client_socket.fileno(), 1)
         client_out_event =  self.loop.io(client_socket.fileno(), 2)
 
@@ -139,7 +140,6 @@ class StreamServerLayer(object):
         :param self.Client client:
         :return:
         '''
-        TCLogger.debug("client:%d read event",client.socket.fileno())
         while True:
             len = client.recv(self.in_msg_cb)
             if len > 0:## read again

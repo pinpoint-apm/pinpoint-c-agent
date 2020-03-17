@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-
+# -*- coding: UTF-8 -*-# Created by eeliu at 1/14/20
 
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
@@ -17,6 +16,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-class PHPAgentConf(object):
-    def __init__(self,config):
-        self.Address = config.get('Agent','Address')
+import gevent
+def try_to_recycle_the_event_hub():
+    gevent.reinit()
+    # loop = gevent.config.loop(default=True)
+    # loop.destory()
+    # gevent.joinall()
