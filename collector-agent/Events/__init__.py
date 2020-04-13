@@ -17,6 +17,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-class PHPAgentConf(object):
-    def __init__(self,config):
-        self.Address = config.get('Agent','Address')
+from Events.DgramLayer import DgramLayer
+from Events.StreamClientLayer import StreamClientLayer
+from Events.StreamServerLayer import StreamServerLayer
+from Events.TrainsLayer import TrainLayer
+
+__all__=['StreamClientLayer', 'DgramLayer','StreamServerLayer','TrainLayer']

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -17,6 +16,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-class PHPAgentConf(object):
-    def __init__(self,config):
-        self.Address = config.get('Agent','Address')
+
+# Created by eeliu at 10/21/19+
+
+
+# ready means channel is free to use
+CH_READY = 1
+# wait ....
+CH_NOT_READY = 0

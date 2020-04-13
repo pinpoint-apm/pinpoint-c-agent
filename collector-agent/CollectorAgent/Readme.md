@@ -62,3 +62,11 @@ FT|front type(PHP)
 > type = 0
 
 id,time,name
+
+### sequenceid depth
+
+sequenceid: 0 -> max
+depth: 1 -> max
+
+ 
+

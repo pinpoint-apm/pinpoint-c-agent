@@ -1,22 +1,22 @@
-#-------------------------------------------------------------------------------
-# Copyright 2019 NAVER Corp
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License.  You may obtain a copy
-# of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations under
-# the License.
-#-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import random
+
+# ------------------------------------------------------------------------------
+#  Copyright  2020. NAVER Corp.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ------------------------------------------------------------------------------
 import struct
 
 from thrift.protocol import TCompactProtocol
@@ -26,6 +26,7 @@ from PinpointAgent.Type import SIGNATURE, HEADER_VERSION, SPAN, AGENT_INFO, AGEN
     STRING_META_DATA, RESULT, TVERSION
 from Proto.Trift.Pinpoint.ttypes import TAgentInfo, TAgentStat, TAgentStatBatch
 from Proto.Trift.Trace.ttypes import TSpan, TApiMetaData, TResult, TStringMetaData
+
 
 class CollectorPro(object):
     # transactionId = 0
@@ -65,12 +66,13 @@ class CollectorPro(object):
         elif type == RESULT:
             return TResult()
         else:
-            raise Exception("type:%d not found",type)
+            raise Exception("type:%d not found", type)
 
     __ReqCount = 0
+
     @staticmethod
     def getCurReqCount():
-        CollectorPro.__ReqCount+= 1
+        CollectorPro.__ReqCount += 1
         return CollectorPro.__ReqCount
 
     @staticmethod
@@ -88,7 +90,6 @@ class CollectorPro(object):
     # @staticmethod
     # def tspan2Bin(obj,type):
 
-
     @staticmethod
     def bin2obj(val):
         '''
@@ -97,128 +98,130 @@ class CollectorPro(object):
         :return:
         '''
 
-        (signature,version,type) = struct.unpack('!BBh',val[0:4].tobytes() )
+        (signature, version, type) = struct.unpack('!BBh', val[0:4].tobytes())
         obj = CollectorPro.typeHelper(type)
         tmembuf = TTransport.TMemoryBuffer(val[4:].tobytes())
         tbinprot = TCompactProtocol.TCompactProtocol(tmembuf)
         obj.read(tbinprot)
-        return (type,obj)
+        return (type, obj)
+
 
 class ChannelBufferV2(object):
-    def __init__(self,buf=b''):
+    def __init__(self, buf=b''):
         self.buf = buf
         self.p = 0
         self.len = len(buf)
 
-    def putByte(self,b):
-        self.buf+=struct.pack('B',b)
+    def putByte(self, b):
+        self.buf += struct.pack('B', b)
 
     # def putStr(self,str):
     #     self.buf+=struct.pack('!i',len(str))
     #     self.buf+=str
 
-    def putI64(self,i64):
-        self.buf+=struct.pack('!q',i64)
+    def putI64(self, i64):
+        self.buf += struct.pack('!q', i64)
 
     def getBuf(self):
         return self.buf
 
     def readInt(self):
         assert self.len >= 4
-        b,=struct.unpack('!i',self.buf[self.p:self.p+4])
+        b, = struct.unpack('!i', self.buf[self.p:self.p + 4])
         self.p += 4
         self.len -= 4
         return b
 
-    def readStr(self,len):
+    def readStr(self, len):
         assert self.len >= len
-        str = self.buf[self.p:self.p+len]
+        str = self.buf[self.p:self.p + len]
         self.p += len
         self.len -= len
         return str
 
     def readI64(self):
         assert self.len >= 8
-        b,=struct.unpack('!q',self.buf[self.p:self.p+8])
+        b, = struct.unpack('!q', self.buf[self.p:self.p + 8])
         self.p += 8
         self.len -= 8
         return b
 
     def readDouble(self):
         assert self.len >= 8
-        b, = struct.unpack('!d', self.buf[self.p:self.p+8])
+        b, = struct.unpack('!d', self.buf[self.p:self.p + 8])
         self.p += 8
         self.len -= 8
         return b
 
     def readChar(self):
         assert self.len >= 1
-        b, = struct.unpack('c', self.buf[self.p:self.p+1])
+        b, = struct.unpack('c', self.buf[self.p:self.p + 1])
         self.p += 1
         self.len -= 1
         return b
 
     def peekChar(self):
         assert self.len >= 1
-        b, = struct.unpack('c', self.buf[self.p:self.p+1])
+        b, = struct.unpack('c', self.buf[self.p:self.p + 1])
         return b
 
     def readByte(self):
         assert self.len >= 1
-        b, = struct.unpack('B', self.buf[self.p:self.p+1])
+        b, = struct.unpack('B', self.buf[self.p:self.p + 1])
         self.p += 1
         self.len -= 1
         return b
+
 
 class AutoBuffer(object):
     def __init__(self):
         self.buf = b''
 
-    def putByte(self,b):
-        self.buf += struct.pack('B',b)
+    def putByte(self, b):
+        self.buf += struct.pack('B', b)
 
-    def putSVar(self,sLen):
-        value = (sLen <<1) ^(sLen >>31)
+    def putSVar(self, sLen):
+        value = (sLen << 1) ^ (sLen >> 31)
         self.putVar32(value)
 
-    def putVar32(self,v):
+    def putVar32(self, v):
         while True:
             if v & ~0x7F == 0:
                 self.putByte(v)
                 break
             else:
-                self.putByte( (v & 0x7F)| 0x80)
+                self.putByte((v & 0x7F) | 0x80)
                 v = (v >> 7)
 
-    def putPrefixedString(self,str):
+    def putPrefixedString(self, str):
         if str is None:
             self.putSVar(-1)
         else:
             self.putSVar(len(str))
             self.buf += str.encode()
 
-    def putVar64(self,v):
+    def putVar64(self, v):
         while True:
             if v & ~0x7f == 0:
-                self.buf += struct.pack('B',v)
+                self.buf += struct.pack('B', v)
                 break
             else:
-                self.buf += struct.pack('B',(v & 0x7f) | 0x80)
-                v = v>> 7
+                self.buf += struct.pack('B', (v & 0x7f) | 0x80)
+                v = v >> 7
+
 
 class TransactionId(object):
-    def __init__(self,encoded_str=None,agent_id=None,start_time=None,id=None):
-
+    def __init__(self, encoded_str=None, agent_id=None, start_time=None, id=None):
         if encoded_str is not None:
-            agentId ,startTime ,id = encoded_str.split('^')
+            agentId, startTime, id = encoded_str.split('^')
             self.startTime = int(startTime)
             self.id = int(id)
             self.agentId = agentId
             return
 
-        self.agentId =agent_id
+        self.agentId = agent_id
         self.startTime = start_time
-        self.id=id
+        self.id = id
 
     def getBytes(self):
         bBuf = AutoBuffer()
@@ -227,7 +230,6 @@ class TransactionId(object):
         bBuf.putVar64(self.startTime)
         bBuf.putVar64(self.id)
         return bBuf.buf
-
 
 
 if __name__ == '__main__':
@@ -240,7 +242,7 @@ if __name__ == '__main__':
     # setattr(span,test[1],'1234')
     # print(span)
 
-    tid = TransactionId(agent_id='test-agent',start_time=1560951035971,id=1)
+    tid = TransactionId(agent_id='test-agent', start_time=1560951035971, id=1)
     buf1 = tid.getBytes()
 
     tid = TransactionId(encoded_str='test-agent^1560951035971^1')

@@ -1,34 +1,34 @@
-#-------------------------------------------------------------------------------
-# Copyright 2019 NAVER Corp
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License.  You may obtain a copy
-# of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations under
-# the License.
-#-------------------------------------------------------------------------------
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
 
+# ------------------------------------------------------------------------------
+#  Copyright  2020. NAVER Corp.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ------------------------------------------------------------------------------
 from CollectorAgent.Protocol import *
 from PinpointAgent.Type import ControlMessageProtocolConstant, PacketType, AgentSocketCode
 
 
 class Packet(object):
-    
     TYPE_LENGTH = 2
-    def __init__(self, hType, hTypeEx1 = None, hTypeEx2= None, body =None):
-        self.buf = struct.pack( "!h",hType)
+
+    def __init__(self, hType, hTypeEx1=None, hTypeEx2=None, body=None):
+        self.buf = struct.pack("!h", hType)
 
         if hTypeEx1 is not None:
-            self.buf += struct.pack('!i',hTypeEx1)
+            self.buf += struct.pack('!i', hTypeEx1)
 
         if hTypeEx2 is not None:
             self.buf += struct.pack('!i', hTypeEx2)
@@ -36,15 +36,11 @@ class Packet(object):
         if body is not None:
             self.buf += body
 
-        # TCLogger.debug("current type:%d  totalLen:%d", hType, len(self.buf))
-
     def getSerializedData(self):
         return self.buf
 
-
-
     @staticmethod
-    def parseNetByteStream(view,size):
+    def parseNetByteStream(view, size):
         '''
         size must > 2
         return type and packet
@@ -59,53 +55,49 @@ class Packet(object):
         offset = 0
         while offset < size:
             ### parse type
-            type, = struct.unpack("!h",view[offset:offset+Packet.TYPE_LENGTH])
-            if type  not in PacketType.PTypeBytesLayOut:
-                raise Exception("type:%d not found",type)
+            type, = struct.unpack("!h", view[offset:offset + Packet.TYPE_LENGTH])
+            if type not in PacketType.PTypeBytesLayOut:
+                raise Exception("type:%d not found", type)
 
             ### parse type ->sub header
-            body_header_len,sub_header_len,sub_body_len_offset = PacketType.PTypeBytesLayOut[type]
-            if size - Packet.TYPE_LENGTH< body_header_len: ## not enough
+            body_header_len, sub_header_len, sub_body_len_offset = PacketType.PTypeBytesLayOut[type]
+            if size - Packet.TYPE_LENGTH < body_header_len:  ## not enough
                 # yield (Packet.READ_AGAIN,size - offset)
-                return ## stop iteration
+                return  ## stop iteration
             offset += 2
             header = 0
             ### get sub header
             if sub_header_len == 4:
-                header, = struct.unpack("!i",view[offset:offset+sub_header_len])
-                offset+= sub_header_len
+                header, = struct.unpack("!i", view[offset:offset + sub_header_len])
+                offset += sub_header_len
 
             ### parse body_length
             body_len = 0
             if sub_body_len_offset == 2:
-                body_len, =  struct.unpack("!h",view[offset:offset + sub_body_len_offset])
+                body_len, = struct.unpack("!h", view[offset:offset + sub_body_len_offset])
             elif sub_body_len_offset == 4:
-                body_len, =  struct.unpack("!i", view[offset:offset + sub_body_len_offset])
+                body_len, = struct.unpack("!i", view[offset:offset + sub_body_len_offset])
             elif sub_body_len_offset == 0:
-                yield (offset + sub_body_len_offset,type,header,None)
-                continue ## goto parse type
+                yield (offset + sub_body_len_offset, type, header, None)
+                continue  ## goto parse type
 
             offset += sub_body_len_offset
-            if size - offset < body_len: ## not enough
+            if size - offset < body_len:  ## not enough
                 # yield (Packet.READ_AGAIN, size - body_header_len - Packet.TYPE_LENGTH)
                 return  ## stop iteration
             else:
-                if body_len>0:
-                    yield (offset+body_len ,type,header,view[offset:offset+body_len])
+                if body_len > 0:
+                    yield (offset + body_len, type, header, view[offset:offset + body_len])
                 else:
-                    yield (offset , type, header, None)
+                    yield (offset, type, header, None)
                 offset += body_len
-
-
-            
 
 
 class HandShakeMessage:
     handShakeCount = 0
 
-
-    def __init__(self,socketId_i,hostName_s,supportServer_b,ip_s,agentId_s,
-                 applicationName_s,serviceType_i,pid_i,version_s,startTimestamp_i64):
+    def __init__(self, socketId_i, hostName_s, supportServer_b, ip_s, agentId_s,
+                 applicationName_s, serviceType_i, pid_i, version_s, startTimestamp_i64):
         cMbuf = ControlMessageEncoder()
 
         cMbuf.writeString('socketId')
@@ -139,7 +131,7 @@ class HandShakeMessage:
         cMbuf.writeInt64(startTimestamp_i64)
         cMbuf.endEncoder()
 
-        HandShakeMessage.handShakeCount+= 1
+        HandShakeMessage.handShakeCount += 1
 
         self.chBuf = cMbuf
 
@@ -148,7 +140,7 @@ class HandShakeMessage:
         return HandShakeMessage.handShakeCount
 
     @staticmethod
-    def getNextStateCode(code,subCode):
+    def getNextStateCode(code, subCode):
         SUCCESS = (0, 0, "Success.")
         SIMPLEX_COMMUNICATION = (0, 1, "Simplex Connection successfully established.")
         DUPLEX_COMMUNICATION = (0, 2, "Duplex Connection successfully established.")
@@ -159,12 +151,12 @@ class HandShakeMessage:
         # PROTOCOL_ERROR = (3, 0, "Illegal protocol error.")
         # UNKNOWN_ERROR = (4, 0, "Unknown Error.")
         # UNKNOWN_CODE = (-1, -1, "Unknown Code.")
-        states =(
-            (0, 0, "Success.",AgentSocketCode.RUN_SIMPLEX),
-            (0, 1, "Simplex Connection successfully established.",AgentSocketCode.RUN_SIMPLEX),
-            (0, 2, "Duplex Connection successfully established.",AgentSocketCode.RUN_DUPLEX),
-            (1, 1, "Already Simplex Connection established.",AgentSocketCode.RUN_SIMPLEX),
-            (1, 2, "Already Duplex Connection established.",AgentSocketCode.RUN_DUPLEX)
+        states = (
+            (0, 0, "Success.", AgentSocketCode.RUN_SIMPLEX),
+            (0, 1, "Simplex Connection successfully established.", AgentSocketCode.RUN_SIMPLEX),
+            (0, 2, "Duplex Connection successfully established.", AgentSocketCode.RUN_DUPLEX),
+            (1, 1, "Already Simplex Connection established.", AgentSocketCode.RUN_SIMPLEX),
+            (1, 2, "Already Duplex Connection established.", AgentSocketCode.RUN_DUPLEX)
         )
 
         for s in states:
@@ -172,12 +164,12 @@ class HandShakeMessage:
                 return s[3]
         raise Exception("state not register")
 
-
     def getDataLen(self):
         return len(self.chBuf.getRawData())
 
     def getBinData(self):
         return self.chBuf.getRawData()
+
 
 class ControlMessage(object):
     CONTROL_MESSAGE_UNKNOWN = -1
@@ -188,6 +180,7 @@ class ControlMessage(object):
     CONTROL_MESSAGE_STRING = 4
     CONTROL_MESSAGE_LIST = 5
     CONTROL_MESSAGE_MAP = 6
+
     def __init__(self):
         self.type = ControlMessage.CONTROL_MESSAGE_UNKNOWN
         self.data = None
@@ -200,8 +193,8 @@ class ControlMessageDecoder(object):
         shift = 0
         while True:
             b = cbv.readByte()
-            result |=(b & 0x7F) << shift
-            if b& 0x80 != 128:
+            result |= (b & 0x7F) << shift
+            if b & 0x80 != 128:
                 break
             shift += 7
         return result
@@ -247,7 +240,7 @@ class ControlMessageDecoder(object):
 
             while cbv.peekChar() != ControlMessageProtocolConstant.CONTROL_CHARACTER_LIST_END:
                 cmg.data.append(ControlMessageDecoder.decodingControlMessage(cbv))
-            cbv.readByte() ## drop the EOF
+            cbv.readByte()  ## drop the EOF
         elif type == ControlMessageProtocolConstant.CONTROL_CHARACTER_MAP_START:
             cmg.type = ControlMessage.CONTROL_MESSAGE_MAP
             cmg.data = {}
@@ -260,7 +253,6 @@ class ControlMessageDecoder(object):
         return cmg
 
 
-
 class ControlMessageEncoder(object):
     def __init__(self):
         self.tmp_buf = struct.pack('c', ControlMessageProtocolConstant.CONTROL_CHARACTER_MAP_START)
@@ -269,10 +261,10 @@ class ControlMessageEncoder(object):
     def writeChar(self, b):
         self.tmp_buf += struct.pack("c", b)
 
-    def writeByte(self,i8):
+    def writeByte(self, i8):
         self.tmp_buf += struct.pack("b", i8)
 
-    def writeInt(self,i):
+    def writeInt(self, i):
         self.tmp_buf += struct.pack("!ci", ControlMessageProtocolConstant.TYPE_CHARACTER_INT, i)
 
     def writeInt64(self, l64):
@@ -296,16 +288,14 @@ class ControlMessageEncoder(object):
         return self.__buf
 
 
-def test_yeild(buf,size):
-    i= 0
-    while i<size:
+def test_yeild(buf, size):
+    i = 0
+    while i < size:
         yield buf[i]
-        i+=1
+        i += 1
         print(i)
-        if i >=1:
+        if i >= 1:
             break
-
-
 
 
 if __name__ == '__main__':
@@ -320,9 +310,9 @@ if __name__ == '__main__':
     # print( f1.next())
     # print( f1.next())
 
-    a = bytearray(['1','2','3',"0"])
+    a = bytearray(['1', '2', '3', "0"])
     pa = memoryview(a)
     pa[2:4] = pa[0:2]
     print(a)
 
-    print(struct.pack('!hii',12,None,None))
+    print(struct.pack('!hii', 12, None, None))
