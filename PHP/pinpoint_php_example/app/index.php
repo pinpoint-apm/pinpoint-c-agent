@@ -5,15 +5,18 @@
  * Time: 2:29 PM
  */
 
-define('AUTOLOAD_FILE_ALIAS',__DIR__."/../vendor/autoload.php");
+require_once __DIR__."/../vendor/autoload.php";
+#################################################
 define('AOP_CACHE_DIR',__DIR__.'/../Cache/');
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
+define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\ClassMapInFile");
 define('APPLICATION_NAME','APP-2');
 define('APPLICATION_ID','app-2');
 
 require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+
+#################################################
 require_once __DIR__.'/Args.php';
-//require_once __DIR__."/../vendor/autoload.php";
 
 //require_once AUTOLOAD_FILE_ALIAS;
 use app\AppDate;
