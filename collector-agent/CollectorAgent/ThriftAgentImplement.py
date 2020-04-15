@@ -139,14 +139,13 @@ class ThriftAgentImplement(PinpointAgent):
         :param dict stack:
         :return:
         '''
-        ### must reset to zero
-
-        tSpan = self.span_factory.makeSpan(stack)
-        body = CollectorPro.obj2bin(tSpan, SPAN)
-        # packet = Packet(PacketType.HEADLESS, len(body), body)
-        self.spanLayer.sendData(body)
-        # self.spanLayer.sendData(packet.getSerializedData())
-        TCLogger.debug("send TSpan:%s", tSpan)
+        try:
+            tSpan = self.span_factory.makeSpan(stack)
+            body = CollectorPro.obj2bin(tSpan, SPAN)
+            self.spanLayer.sendData(body)
+            TCLogger.debug("send TSpan:%s", tSpan)
+        except Exception as e:
+            TCLogger.error("exception %s", e)
         return True
 
     def scanLocalInfo(self):
