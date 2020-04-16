@@ -479,7 +479,7 @@ static void php_pinpoint_php_init_globals(zend_pinpoint_php_globals *pinpoint_ph
     pinpoint_php_globals->t_layer.c_fd = -1;
     // this address should not expose to anyone
     strcpy(pinpoint_php_globals->shared_obj.address,SOBJ_ADDRESS);
-    pinpoint_php_globals->t_layer.chunks = new Chunks(1024*1024,1024);
+    pinpoint_php_globals->t_layer.chunks = new Chunks(1024*1024,1024*40);
     pinpoint_php_globals->call_stack     = new std::stack<TraceNode>();
     Json::FastWriter * writer  = new Json::FastWriter();
     writer->dropNullPlaceholders();
