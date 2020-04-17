@@ -15,7 +15,7 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "v0.1",
+        "eeliu/php_simple_aop": "0.2.3",
         "workerman/workerman":"v3.5.15"
     },
     "repositories": [
