@@ -24,10 +24,10 @@
     }
    ```
    > You could find some out of box plugins in [[pinpoint_php_example/Plugins/](https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins)].
-    When you add clue(clues), DO NOT assignment with large string,or string included some special characters(https://www.freeformatter.com/json-escape.html)
-3. Add "//@hook:app\User::adduser (which function you cared)" located right before ClassName(XXXPlugins),onBefore,onEnd or onException if you cared about it when called before&after&around,before,after or around.
+    When you add clue(clues), DO NOT assignment with large string or string included some special characters(https://www.freeformatter.com/json-escape.html)
+3. Add "//@hook:app\User::adduser (which function you cared)" located right before ClassName(XXXPlugins),onBefore,onEnd or onException if you care about it when calling before&after&around,before,after or around.
 
-4. Removed the "__class_index_table" file under AOP_CACHE_DIR.
+4. Remove the "__class_index_table" file under AOP_CACHE_DIR.
 
 5. Copy your plugins files into source tree/plugins_dir,and add this directory into composer.json{"autoload"}.
    
@@ -40,8 +40,8 @@
         },
     ```
     
-6. Update your autoload. $ composer update
-7. Enjoy the pinpoint-php-agent
+6. Update your autoload. $ composer update.
+7. Enjoy the pinpoint-php-agent.
 ## Protocol
 
 > Json -> Thrift
@@ -73,5 +73,5 @@
 
 https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins
 
-## API of Pinpiont_php_ext
+## API of Pinpoint_php_ext
 [Goto pinpoint_ext_api ☚](../pinpoint_php_ext/pinpoint_php_api.php)
