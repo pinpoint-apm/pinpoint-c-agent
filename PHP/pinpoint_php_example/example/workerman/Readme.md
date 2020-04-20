@@ -1,6 +1,6 @@
-## Steps for Writting Plugins For Workman framework
+## Steps for Writing Plugins For Workman framework
 
-### 1. Add a pre request plugins on the entry.
+### 1. Add a pre request plugin on the entry.
 
 ```  php 
 ///@hook:example\workerman\HandleRequest::onMessage

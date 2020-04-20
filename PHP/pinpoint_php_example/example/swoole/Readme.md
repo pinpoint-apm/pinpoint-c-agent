@@ -1,6 +1,6 @@
-## Steps for Writting Plugins For Swoole framework
+## Steps for Writing Plugins For Swoole framework
 
-### 1. Add a pre request plugins on the entry.
+### 1. Add a pre request plugin on the entry.
 
 ```  php 
 ///@hook:example\swoole\HandleRequest::onReceive

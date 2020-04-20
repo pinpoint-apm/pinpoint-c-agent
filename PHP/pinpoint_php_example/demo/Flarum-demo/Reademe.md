@@ -10,7 +10,7 @@
     }
 ```
 
-2. Copy Plugins into web root path and enable autoload
+2. Copy plugins into web root path and enable autoload
 
 ```
     "autoload": {

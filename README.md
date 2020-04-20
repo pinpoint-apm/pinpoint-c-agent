@@ -5,7 +5,7 @@
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [Lastest](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [the latest](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint PHP Agent
 
@@ -16,7 +16,7 @@ It is an agent written by C++, PHP, python language. And we hope to support othe
 [Click me ☚](PHP/Readme.md)
 
 ## Getting Started
-
+ 
 ### Requirement
 
 Dependency|Version
@@ -39,7 +39,7 @@ pinpoint| 1.8.0-RC1
    1. phpize        
    2. ./configure
    3. make 
-   4. make test # we commanded test the module is RIGHT
+   4. make test # We recommend you test whether the module is RIGHT.
    5. make install 
    6. Activation pinpoint module
    
@@ -90,7 +90,7 @@ pinpoint| 1.8.0-RC1
    
 > Try the aop example
 4. Goto PHP/pinpoint_php_example
-   1. Download composer.phar. [How To Use Composer?](https://getcomposer.org/doc/00-intro.md)
+   1. Download composer.phar. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
    3. Set $PWD/app/ as your web site root path
 
@@ -119,9 +119,9 @@ Pinpoint Version | PHP| Python|GCC
 ## Changes
 
 - Fully support ZTS
-- More Stability 
+- More stability 
 - Higher performance 
-- Easy to Use and Maintain
+- Easily use and maintain
 - Support GRPC
 
 ## Contact Us
@@ -138,14 +138,13 @@ QQ Group: 897594820 | DING Group
 
 Delete *__class_index_table* in Cache/
 
-### 2. Why not support automaticaly update AOP files?
+### 2. Why not support automatically update AOP files?
 
-We can DO but perfer not DO! Not found a good efficiency way to implement this.
-Watching the files status every time is a bad deal.
+We can DO but prefer not DO! Because we have not yet find an efficient way to implement this and monitoring these files status every time is a bad deal.
 
-### 3. How much performance loss when I use?
+### 3. How much performance does it lose when using?
 
-After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you taken. 
+After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitoring, the more you taking. 
 
 [Test Result ☚](PHP/Readme.md#performance-loss-under-stress-test)
 
@@ -155,13 +154,13 @@ After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @
 
 ### Known Issues
 
-#### 1. Exception or Error Message With A Wrong File Path.
+#### 1. Exception or error message with a wrong file path.
 
 https://github.com/naver/pinpoint-c-agent/issues/99
 
-#### 2. If I Do Not Use Composer/autoloader,Can I Use this Version ?
+#### 2. If I do not use composer/autoloader, can I use this version?
 
-Sorry, `php-simple-aop` not supported wrapping the user class (or internal class) without Composer/autoloader. By the way [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
+Sorry, `php-simple-aop` not support wrapping the user class (or internal class) without composer/autoloader. By the way, [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
 
 https://github.com/naver/pinpoint-c-agent/issues/103
 
@@ -169,11 +168,11 @@ https://github.com/naver/pinpoint-c-agent/issues/103
 
 https://www.php.net/supported-versions.php
 
-#### 4. Gernerator function not support.
+#### 4. Generator function not support.
 
 https://github.com/naver/pinpoint-c-agent/issues/100
 
-#### 5. Some built-in functions cant AOP
+#### 5. Some built-in functions can't AOP
 https://github.com/naver/pinpoint-c-agent/issues/102
 
 ## License
