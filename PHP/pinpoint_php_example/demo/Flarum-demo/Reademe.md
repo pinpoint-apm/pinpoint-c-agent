@@ -6,7 +6,7 @@
  
 ```
    "require": {
-        "eeliu/php_simple_aop": "dev-user-classmap"
+        "eeliu/php_simple_aop": "0.2.3"
     }
 ```
 
