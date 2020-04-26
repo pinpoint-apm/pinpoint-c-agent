@@ -17,8 +17,8 @@ class TestPDO
 
     public function connectDb()
     {echo "onbefore";
-    echo $dsn = 'mysql:host=localhost;port=3306';
-    try{  $this->con = new PDO($dsn, "","");}catch (Exception $e){echo "exp";}
+    echo $dsn = 'mysql:host=dev-mysql;port=3306;dbname=yii2basic';
+    try{  $this->con = new PDO($dsn, "root","root");}catch (Exception $e){echo $e;}
     finally{echo "end";}}
 
     public function getData1()
@@ -53,5 +53,24 @@ class TestPDO
     {
         $this->con->exec("INSERT INTO bones(skull) VALUES ('lucy')");
         print $this->con->errorCode();
+    }
+
+    public function testPODStatement()
+    {
+        $sql = "select code,name,population from country where code=:code";
+        $sth = $this->con->prepare($sql);
+        $code = 'CN';
+        $sth->bindParam(':code', $code, PDO::PARAM_STR,12);
+        $sth->execute();
+        
+        $sth->bindColumn(1, $name_out);
+        $sth->bindColumn(2, $code_out);
+        /*  通过列名绑定  */
+        // $sth->bindColumn('calories', $cals);
+
+        $result = $sth->fetchAll(PDO::FETCH_BOUND);
+        var_dump($code_out);
+        var_dump($name_out);
+        var_dump($result);
     }
 }

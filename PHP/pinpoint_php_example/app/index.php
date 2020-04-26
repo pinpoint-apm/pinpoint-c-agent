@@ -220,11 +220,12 @@ switch($type)
     case 'test_pdo':
         $pdo =  new TestPDO();
         $pdo->connectDb();
-        var_dump($pdo->getData1());
-        echo "<br>";
-        var_dump($pdo->getData2("select name from user;"));
-        echo "<br>";
-        var_dump($pdo->getData3("select * from user;"));
+        // var_dump($pdo->getData1());
+        // echo "<br>";
+        // var_dump($pdo->getData2("select name from user;"));
+        // echo "<br>";
+        // var_dump($pdo->getData3("select * from user;"));
+        $pdo->testPODStatement();
         break;
     case 'test_mysqli':
         $pdo =  new TestMysqli();
