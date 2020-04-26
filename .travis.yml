@@ -4,11 +4,12 @@ php:
 - 7.1
 - 7.2
 - 7.3
+- 7.4
 
 env:
 - ROOT=$PWD
 script:
-- set -x
 - cd $ROOT/PHP/pinpoint_php_ext/
 - phpize && ./configure && make
+# - make test TESTS=-m
 - make test
