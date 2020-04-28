@@ -62,6 +62,14 @@ pinpoint| 1.8.0-RC1+
         ```ini
         [Collector]
         # collectorhost and specific port
+        ### For thrift  pinpoint 1.8.0-RC1+
+        #CollectorSpanIp=collectorHost
+        #CollectorSpanPort=9905
+        #CollectorStatIp=collectorHost
+        #CollectorStatPort=9906
+        #CollectorTcpIp=collectorHost
+        #CollectorTcpPort=9907
+        ### For GRPC  pinpoint 2.0+
         AgentID=your_id
         ApplicationName=your_name
         collector.grpc.agent.ip=collectorHost

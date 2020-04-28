@@ -32,13 +32,14 @@ v0.2.x|✘|✘|✔|✔
 Framework|v0.1.x|v0.2.x
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|✔
-EasySwoole|✘|✘
+ThinkPHP|✔|✘
+YII|✔|✔
+Workerman|✘|✔
+EasySwoole|✘|✔
 
 > Note
 
-1. We are trying to support PHP asynchronous Framework. Such as Workerman and EasySwoole
-2. If your php application does not support composer(such as woredpress,phpwind etc), the only choice is v0.1.x.
+1. If your php application does not support composer(such as woredpress,phpwind etc), the only choice is v0.1.x.
 
 #### Stability
 
@@ -60,7 +61,10 @@ Functional|v0.1.x|v0.2.x
 
 
 
-#### Performance Loss Under Stress Test
+
+
+
+#### Performance Loss Under Stress Test 
 
 > Test Scene
 
@@ -83,6 +87,8 @@ phpmyadmin with pinpoint-php v0.2|398.26ms
 ```
 MTT: Mean RTT Time 
 ```
+
+> [ pinpoint-php on Flraum test result ](../DOC/PHP/User%20Manual.md#11-performance-result)
 
 > By the way, pinpoint is an APM system but not a performance enhancement system. The loss can't be avoided at present.
 

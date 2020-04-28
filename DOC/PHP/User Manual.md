@@ -31,6 +31,8 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 > TPS: Time per request 
 > TPR: Requests per second
 
+[How to use pinpoint-php into Flarum?](../../PHP/pinpoint_php_example/demo/Flarum-demo/Reademe.md)
+
 >  Call Tree
 
 ![CallTree](../images/Flarum-callstack.png)
@@ -38,7 +40,7 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 > Summary
 * Less than 5% loss, when Flarum add PHP Agent.
 
-If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. 
+If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](../../PHP/pinpoint_php_ext/pinpoint_php_api.php)
 
 ## 2 How to hook a object ?
 
