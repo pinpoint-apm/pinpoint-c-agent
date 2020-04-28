@@ -3,7 +3,7 @@
 
 [toc]
 
-## How does pinpoint-php agent work?
+### How does pinpoint-php agent work?
 
 Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_aop) as its aspect programming library, it helps converting origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
 
@@ -22,11 +22,16 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 
 ```
 
-### Performance Result
+## Performance Result
+
+![FlarumPerformanceTest](../images/FlarumPerformanceTest.png)
+
+* Call Tree
+
+![CallTree](../images/Flarum-callstack.png)
 
 > Summary
-
-`3%~5% loss, when 1% ~ 0.1% Function/method sample rate`
+* Less than 5% loss, when Flarum add PHP Agent.
 
 If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. 
 
@@ -77,3 +82,6 @@ $yellow = $sth->fetchAll();
 ```
 
 Replace $dbh->prepare return value with [Plugins\PDOStatement](../../PHP/pinpoint_php_example/Plugins/PDOStatement.php).
+
+
+#### Generator
