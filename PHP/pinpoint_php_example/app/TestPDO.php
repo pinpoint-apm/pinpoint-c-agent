@@ -17,8 +17,8 @@ class TestPDO
 
     public function connectDb()
     {echo "onbefore";
-    echo $dsn = 'mysql:host=dev-mysql;port=3306;dbname=yii2basic';
-    try{  $this->con = new PDO($dsn, "root","root");}catch (Exception $e){echo $e;}
+    echo $dsn = 'mysql:host=dev-mysql;port=3306;dbname=xxx';
+    try{  $this->con = new PDO($dsn, "","");}catch (Exception $e){echo $e;}
     finally{echo "end";}}
 
     public function getData1()
@@ -65,7 +65,6 @@ class TestPDO
         
         $sth->bindColumn(1, $name_out);
         $sth->bindColumn(2, $code_out);
-        /*  通过列名绑定  */
         // $sth->bindColumn('calories', $cals);
 
         $result = $sth->fetchAll(PDO::FETCH_BOUND);
