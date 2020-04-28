@@ -3,7 +3,7 @@
 
 [toc]
 
-## How does pinpoint-php agent work?
+## 1 How pinpoint-php agent works?
 
 Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_aop) as its aspect programming library, it helps converting origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
 
@@ -22,15 +22,25 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 
 ```
 
-### Performance Result
+## 1.1 Performance Result
+
+> TPS loss and TPR Loss
+
+![FlarumPerformanceTest](../images/FlarumPerformanceTest.png)
+
+> TPS: Time per request 
+> TPR: Requests per second
+
+>  Call Tree
+
+![CallTree](../images/Flarum-callstack.png)
 
 > Summary
-
-`3%~5% loss, when 1% ~ 0.1% Function/method sample rate`
+* Less than 5% loss, when Flarum add PHP Agent.
 
 If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. 
 
-## How to hook a object ?
+## 2 How to hook a object ?
 
 ```
 use A\a as a;
@@ -45,21 +55,39 @@ class Foo{
 
 > As foo returns a new object and this scenario can't be detected by php_simple_aop easily.
 
-### Use a decorator
+### 2.1 Use a decorator
 
 Replace the return object with a decorated object in onEnd(). There are some [magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to help "hacking" the object.
 
-[Click me ☚](../../PHP/pinpoint_php_example/Plugins/InstancePlugins.php)
+[ [How it works ☚]](../../PHP/pinpoint_php_example/Plugins/InstancePlugins.php)
 
 
-### Examples
+### 2.2 Examples
 
-####  Hook a generator.
+#### 2.2.1 Hook a generator.
 
 > https://github.com/naver/pinpoint-c-agent/issues/100
 
+``` php
+    ...
+    function generator($start, $limit, $step=1){
+        if($start > $limit){
+            throw new LogicException("start cannot bigger that limit.");
+        }
+        usleep(120000);
+        for($i = $start; $i<=$limit; $i += $step){
+            try{
+                yield $i;
+            }catch (Exception $exception){
+                echo $exception->getMessage();
+            }
+        }
+    }
+    ...
+```
+[ [Goto GeneratorPlugin ☚] ](../../PHP/pinpoint_php_example/Plugins/GeneratorPlugin.php)
 
-#### PDO::prepare return a PDOStatement
+#### 2.2.2 PDO::prepare return a PDOStatement
 
 ``` php
 Reference： https://www.php.net/manual/zh/pdo.prepare.php
@@ -77,3 +105,4 @@ $yellow = $sth->fetchAll();
 ```
 
 Replace $dbh->prepare return value with [Plugins\PDOStatement](../../PHP/pinpoint_php_example/Plugins/PDOStatement.php).
+
