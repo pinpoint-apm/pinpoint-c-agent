@@ -16,7 +16,6 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "dev-bug-warning-ref"
+        "eeliu/php_simple_aop": "v0.2.4"
     }
-
 }
