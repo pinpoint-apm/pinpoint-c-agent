@@ -1,7 +1,7 @@
 ##  v0.1.x VS v0.2.x
 
 
-> Why we refactor the pinpoint_c_agent (v0.1.x)
+> Why do we refactor the pinpoint_c_agent (v0.1.x)?
 
 1. Hard to support all php versions.
 2. Slow, v0.1.x version hooks all functions.
@@ -37,8 +37,8 @@ EasySwoole|✘|✘
 
 > Note
 
-1. We are trying to support PHP asynchronous Framework.Such as Workerman and EasySwoole
-2. If your php application does not support composer(such as woredpress,phpwind etc),the only choice is v0.1.x.
+1. We are trying to support PHP asynchronous Framework. Such as Workerman and EasySwoole
+2. If your php application does not support composer(such as woredpress,phpwind etc), the only choice is v0.1.x.
 
 #### Stability
 
@@ -84,7 +84,7 @@ phpmyadmin with pinpoint-php v0.2|398.26ms
 MTT: Mean RTT Time 
 ```
 
-> By the way,pinpoint is an APM system but not a performance enhancement system. The loss can't be avoided at present.
+> By the way, pinpoint is an APM system but not a performance enhancement system. The loss can't be avoided at present.
 
 
 ### Contributors's words

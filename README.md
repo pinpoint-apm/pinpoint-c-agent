@@ -41,7 +41,7 @@ pinpoint| 1.8.0-RC1+
    3. make 
    4. make test # We recommend you test whether the module is RIGHT.
    5. make install 
-   6. Activation pinpoint module
+   6. Activation pinpoint module # Add the following to the configuration file in php/lib/php.ini 
    
        >  php.ini 
         ```ini
@@ -76,7 +76,8 @@ pinpoint| 1.8.0-RC1+
         # debug in dev
         Log_Level=ERROR 
         # make sure LOG_DIR is exist
-        LOG_DIR=/your log dir/
+        # The real-time log of collector-agent can be checked under this path with the command " tail -f ".
+        LOG_DIR=/your log dir/ 
         [Agent]
         # the same as below "pinpoint_php.CollectorHost"
         Address=/tmp/collector-agent.sock
@@ -85,14 +86,14 @@ pinpoint| 1.8.0-RC1+
     6. run  collector-agent
         ```
         $ ./init_python_env.sh
-        $ python run.py
+        $ python run.py 
         ```
    
 > Try the aop example
 4. Goto PHP/pinpoint_php_example
    1. Download composer.phar. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
-   3. Set $PWD/app/ as your web site root path
+   3. Set $PWD/app/ as your web site root path # namely, set the path of nginx to the collector-agent path in configuration file conf/nginx.conf.
 
 ## 2 Overview
 
@@ -163,8 +164,7 @@ https://github.com/naver/pinpoint-c-agent/issues/103
 
 https://www.php.net/supported-versions.php
 
-#### ~7.4 Generator function not support.~ Already done!
-
+#### ~7.4 Generator function is not supported.~ Already done!
 https://github.com/naver/pinpoint-c-agent/issues/100
 
 #### 7.5 Some built-in functions can't AOP

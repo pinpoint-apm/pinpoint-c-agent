@@ -1,4 +1,4 @@
-﻿## The PHP frameworks pinpoint-c-agent supported
+﻿## The PHP frameworks that pinpoint-c-agent supports
 
 1. Yii (https://www.yiiframework.com/)
 2. laravel (https://laravel.com/)

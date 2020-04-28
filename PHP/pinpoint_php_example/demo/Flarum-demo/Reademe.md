@@ -29,7 +29,7 @@ define('AOP_CACHE_DIR',__DIR__.'/Cache/');
 define('PLUGINS_DIR',__DIR__.'/Plugins/');
 define('APPLICATION_NAME','Flarum');
 define('APPLICATION_ID','Flarum');
-// Support party loader
+// Support partly loader
 // define('USER_DEFINED_CLASS_MAP_IMPLEMENT','\Plugins\ClassMapInFile.php');
 require_once __DIR__. '/vendor/eeliu/php_simple_aop/auto_pinpointed.php';
 
