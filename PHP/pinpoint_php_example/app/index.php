@@ -5,15 +5,18 @@
  * Time: 2:29 PM
  */
 
-define('AUTOLOAD_FILE_ALIAS',__DIR__."/../vendor/autoload.php");
+require_once __DIR__."/../vendor/autoload.php";
+#################################################
 define('AOP_CACHE_DIR',__DIR__.'/../Cache/');
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
+define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\ClassMapInFile");
 define('APPLICATION_NAME','APP-2');
 define('APPLICATION_ID','app-2');
 
 require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+
+#################################################
 require_once __DIR__.'/Args.php';
-//require_once __DIR__."/../vendor/autoload.php";
 
 //require_once AUTOLOAD_FILE_ALIAS;
 use app\AppDate;
@@ -217,11 +220,12 @@ switch($type)
     case 'test_pdo':
         $pdo =  new TestPDO();
         $pdo->connectDb();
-        var_dump($pdo->getData1());
-        echo "<br>";
-        var_dump($pdo->getData2("select name from user;"));
-        echo "<br>";
-        var_dump($pdo->getData3("select * from user;"));
+        // var_dump($pdo->getData1());
+        // echo "<br>";
+        // var_dump($pdo->getData2("select name from user;"));
+        // echo "<br>";
+        // var_dump($pdo->getData3("select * from user;"));
+        $pdo->testPODStatement();
         break;
     case 'test_mysqli':
         $pdo =  new TestMysqli();

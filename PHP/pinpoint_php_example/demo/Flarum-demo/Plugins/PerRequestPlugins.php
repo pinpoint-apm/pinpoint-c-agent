@@ -17,11 +17,11 @@
 
 
 namespace Plugins;
-
 require_once "PluginsDefines.php";
 
 class PerRequestPlugins
 {
+    public static $_intance = null;
     public $tid = null;
     public $sid = null;
     public $psid = null;
@@ -31,11 +31,12 @@ class PerRequestPlugins
     public $app_name=null;
     public $app_id=null;
     private $curNextSpanId ='';
-
     private $isLimit =false;
 
-    public static $_intance = null;
-
+    public function traceLimit()
+    {
+        return $this->isLimit;
+    }
 
     public static function instance()
     {
@@ -143,6 +144,7 @@ class PerRequestPlugins
             $this->isLimit = pinpoint_tracelimit();
         }
 
+
         pinpoint_add_clue("tid",$this->tid);
         pinpoint_add_clue("sid",$this->sid);
 
@@ -176,11 +178,5 @@ class PerRequestPlugins
     {
         return  $this->app_id.'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
     }
-
-    public function traceLimit()
-    {
-        return $this->isLimit;
-    }
-
 
 }

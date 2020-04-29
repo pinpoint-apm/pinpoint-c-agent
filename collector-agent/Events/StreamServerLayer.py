@@ -30,7 +30,7 @@ class StreamServerLayer(object):
             self.socket = socket
             self._read_watcher = readEv
             self._write_watcher = writeEv
-            self.RECV_BUF_SIZE = 4096
+            self.RECV_BUF_SIZE = 409600
             self.recvBuf = bytearray(self.RECV_BUF_SIZE)
             self.pRBufStart = memoryview(self.recvBuf)
             self.rest_data_sz = 0

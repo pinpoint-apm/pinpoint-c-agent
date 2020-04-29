@@ -29,7 +29,7 @@ class GrpcMeta(GrpcClient):
         super().__init__(address, meta, -1)
         self.meta_stub = Service_pb2_grpc.MetadataStub(self.channel)
         self.must_snd_meta_now = False
-        self.id = 0
+        self.id = 1
         self.sql_table = {}
         self.api_table = {}
         self.string_table = {}

@@ -80,7 +80,7 @@ PHP_FUNCTION(pinpoint_drop_trace);
 PHP_FUNCTION(pinpoint_app_name);
 PHP_FUNCTION(pinpoint_app_id);
 PHP_FUNCTION(pinpoint_start_time);
-
+PHP_FUNCTION(pinpoint_get_func_ref_args);
 
 PHP_FUNCTION(pinpoint_test_main);
 
@@ -168,6 +168,7 @@ const zend_function_entry pinpoint_php_functions[] = {
         PHP_FE(pinpoint_app_id,NULL)
         PHP_FE(pinpoint_drop_trace,NULL)
         PHP_FE(pinpoint_start_time,NULL)
+        PHP_FE(pinpoint_get_func_ref_args,NULL)
         PHP_FE(pinpoint_tracelimit,arginfo_add_int)
         PHP_FE(pinpoint_add_clue,arginfo_add_key_value)
         PHP_FE(pinpoint_add_clues,arginfo_add_key_value)
@@ -241,6 +242,74 @@ PHP_FUNCTION(pinpoint_start_time)
 {
     RETURN_LONG(PPG(agent_info).start_time);
 }
+
+/**
+ * copy from php source zend_buildin_functions.c
+ *                          ZEND_FUNCTION(func_get_args)
+ * disable ZVAL_DEREF(p) make it works
+*/
+PHP_FUNCTION(pinpoint_get_func_ref_args)
+{
+  	zval *p, *q;
+	uint32_t arg_count, first_extra_arg;
+	uint32_t i, n;
+	zend_execute_data *ex = EX(prev_execute_data);
+
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+		zend_error(E_WARNING, "pinpoint_get_func_ref_args():  Called from the global scope - no function context");
+		RETURN_FALSE;
+	}
+
+	if (zend_forbid_dynamic_call("pinpoint_get_func_ref_args()") == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	arg_count = ZEND_CALL_NUM_ARGS(ex);
+
+	array_init_size(return_value, arg_count);
+	if (arg_count) {
+		first_extra_arg = ex->func->op_array.num_args;
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			i = 0;
+			n = 0;
+			p = ZEND_CALL_ARG(ex, 1);
+			if (arg_count > first_extra_arg) {
+				while (i < first_extra_arg) {
+					q = p;
+					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+//						ZVAL_DEREF(q);
+						if (Z_OPT_REFCOUNTED_P(q)) {
+							Z_ADDREF_P(q);
+						}
+						n++;
+					}
+					ZEND_HASH_FILL_ADD(q);
+					p++;
+					i++;
+				}
+				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+			}
+			while (i < arg_count) {
+				q = p;
+				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
+//					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) {
+						Z_ADDREF_P(q);
+					}
+					n++;
+				}
+				ZEND_HASH_FILL_ADD(q);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
+		Z_ARRVAL_P(return_value)->nNumOfElements = n;
+	}
+}
+
+
+
 
 PHP_FUNCTION(pinpoint_start_trace)
 {
@@ -479,7 +548,7 @@ static void php_pinpoint_php_init_globals(zend_pinpoint_php_globals *pinpoint_ph
     pinpoint_php_globals->t_layer.c_fd = -1;
     // this address should not expose to anyone
     strcpy(pinpoint_php_globals->shared_obj.address,SOBJ_ADDRESS);
-    pinpoint_php_globals->t_layer.chunks = new Chunks(1024*1024,1024);
+    pinpoint_php_globals->t_layer.chunks = new Chunks(1024*1024,1024*40);
     pinpoint_php_globals->call_stack     = new std::stack<TraceNode>();
     Json::FastWriter * writer  = new Json::FastWriter();
     writer->dropNullPlaceholders();

@@ -18,7 +18,7 @@
 
 namespace Plugins;
 use Plugins\Candy;
-
+use Plugins\PDOStatement;
 ///@hook:app\TestPDO::\PDO::query app\TestPDO::\PDO::prepare
 ///@hook:app\TestPDO::\PDO::__construct
 class PDOCommonPlugin extends Candy
@@ -36,8 +36,10 @@ class PDOCommonPlugin extends Candy
     }
     function onEnd(&$ret)
     {
-        echo "ret:";
-        var_dump($ret);
+        if(strpos($this->apId, "PDO::prepare")){
+            $origin_state = $ret;
+            $ret = new PDOStatement($origin_state);
+        }
     }
 
     function onException($e)
