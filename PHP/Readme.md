@@ -1,7 +1,7 @@
 ##  v0.1.x VS v0.2.x
 
 
-> Why we refactor the pinpoint_c_agent (v0.1.x)
+> Why do we refactor the pinpoint_c_agent (v0.1.x)?
 
 1. Hard to support all php versions.
 2. Slow, v0.1.x version hooks all functions.
@@ -32,13 +32,14 @@ v0.2.x|✘|✘|✔|✔
 Framework|v0.1.x|v0.2.x
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|✔
-EasySwoole|✘|✘
+ThinkPHP|✔|✘
+YII|✔|✔
+Workerman|✘|✔
+EasySwoole|✘|✔
 
 > Note
 
-1. We are trying to support PHP asynchrnous Framework.Such as Workerman and EasySwoole
-2. If your php application not support composer(such as woredpress,phpwind etc),the only choise is v0.1.x.
+1. If your php application does not support composer(such as woredpress,phpwind etc), the only choice is v0.1.x.
 
 #### Stability
 
@@ -49,18 +50,21 @@ EasySwoole|✘|✘
 
 ```
 ✔: Not block user's application.
-✘: Block user's application: php-fpm/apache should be restart
+✘: Block user's application: php-fpm/apache should be restart.
 ```
 
 Functional|v0.1.x|v0.2.x
 ----|-----|----
 1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/eeliu/php_simple_aop#how-to-reload-all-plugins)
 2.Update pinpoint collector|✘|✔
-3.Update pinpiont_php.so(pinpoint.so)|✘|✘
+3.Update pinpoint_php.so(pinpoint.so)|✘|✘
 
 
 
-#### Performance Loss Under Stress Test
+
+
+
+#### Performance Loss Under Stress Test 
 
 > Test Scene
 
@@ -84,11 +88,13 @@ phpmyadmin with pinpoint-php v0.2|398.26ms
 MTT: Mean RTT Time 
 ```
 
-> By the way,pinpoint is an APM system, not a performance enhancement system. Loss can't avoiding from now on.
+> [ pinpoint-php on Flraum test result ](../DOC/PHP/User%20Manual.md#11-performance-result)
+
+> By the way, pinpoint is an APM system but not a performance enhancement system. The loss can't be avoided at present.
 
 
 ### Contributors's words
 
-As composer is widedly used, v0.2.x is our long-time support version,
-v0.1.x could be obsoleted in future.
-While, we could fix some fatal error into v0.1.x.
+As composer is widely used, v0.2.x is our long-time support version,
+v0.1.x could be obsoleted in the future.
+But we could fix some fatal error into v0.1.x.

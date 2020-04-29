@@ -5,32 +5,32 @@
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [Lastest](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [the latest](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint PHP Agent
 
 It is an agent written by C++, PHP, python language. And we hope to support other languages by this agent. Until now, it supports PHP language.
 
-## The Difference Between v0.1.x And v0.2.x
+## 1 The Difference Between v0.1.x And v0.2.x
 
 [Click me ☚](PHP/Readme.md)
 
-## Getting Started
-
-### Requirement
+## 2 Getting Started
+ 
+### 2.1 Requirement
 
 Dependency|Version
 ---|----
 PHP| php 7+
 GCC| GCC 5+
-*inux|
-Python | Python 3
-pinpoint| 1.8.0-RC1
+*nux|
+Python | Python3
+pinpoint| 1.8.0-RC1+
 **Composer**| 
 
-### Installation
+### 2.2 Installation
 
-#### Steps
+#### 2.2.1 Steps
 1. git clone https://github.com/naver/pinpoint-c-agent.git
    
 > Build pinpoint-php-module
@@ -39,9 +39,9 @@ pinpoint| 1.8.0-RC1
    1. phpize        
    2. ./configure
    3. make 
-   4. make test # we commanded test the module is RIGHT
+   4. make test # We recommend you test whether the module is RIGHT.
    5. make install 
-   6. Activation pinpoint module
+   6. Activation pinpoint module # Add the following to the configuration file in php/lib/php.ini 
    
        >  php.ini 
         ```ini
@@ -62,6 +62,14 @@ pinpoint| 1.8.0-RC1
         ```ini
         [Collector]
         # collectorhost and specific port
+        ### For thrift  pinpoint 1.8.0-RC1+
+        #CollectorSpanIp=collectorHost
+        #CollectorSpanPort=9905
+        #CollectorStatIp=collectorHost
+        #CollectorStatPort=9906
+        #CollectorTcpIp=collectorHost
+        #CollectorTcpPort=9907
+        ### For GRPC  pinpoint 2.0+
         AgentID=your_id
         ApplicationName=your_name
         collector.grpc.agent.ip=collectorHost
@@ -76,7 +84,8 @@ pinpoint| 1.8.0-RC1
         # debug in dev
         Log_Level=ERROR 
         # make sure LOG_DIR is exist
-        LOG_DIR=/your log dir/
+        # The real-time log of collector-agent can be checked under this path with the command " tail -f ".
+        LOG_DIR=/your log dir/ 
         [Agent]
         # the same as below "pinpoint_php.CollectorHost"
         Address=/tmp/collector-agent.sock
@@ -85,46 +94,37 @@ pinpoint| 1.8.0-RC1
     6. run  collector-agent
         ```
         $ ./init_python_env.sh
-        $ python run.py
+        $ python run.py 
         ```
    
 > Try the aop example
 4. Goto PHP/pinpoint_php_example
-   1. Download composer.phar. [How To Use Composer?](https://getcomposer.org/doc/00-intro.md)
+   1. Download composer.phar. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
-   3. Set $PWD/app/ as your web site root path
+   3. Set $PWD/app/ as your web site root path # namely, set the path of nginx to the collector-agent path in configuration file conf/nginx.conf.
 
-## Overview
+## 2 Overview
 
-### Pinpoint-c-agent 
+### 2.1 Pinpoint-c-agent 
 ![How does it work](images/pinpoint_0.2.jpg)
 
-### Distributed Tracking system
+### 2.2 Distributed Tracking system
 ![php_agent_example](images/php_agent_example.png)
-### Call Stack
+### 2.3 Call Stack
 
 ![php_agent_example_detail](images/php_agent_example_detail.png) | ![php_agent_example_memcached](images/callstack-memcached.png)
 --- | ---
 ![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
-### TODO
-
-
-## Compatibility
+## 3 Compatibility
 
 Pinpoint Version | PHP| Python|GCC
 ---------------- | ----- | -----|---
 1.8.0-RC1 | PHP 7+ | Python3|GCC 5+
 
-## Changes
+[ [ Changes ☚] ](./Changes.md)
 
-- Fully support ZTS
-- More Stability 
-- Higher performance 
-- Easy to Use and Maintain
-- Support GRPC
-
-## Contact Us
+## 4 Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
 * Chinese Community:
 
@@ -132,48 +132,50 @@ QQ Group: 897594820 | DING Group
 :---:| :---:
 ![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
-## F & Q
+## 5 F & Q
 
-### 1. How to regenerate all AOP files?
+### 5.1 How to regenerate all AOP files?
 
 Delete *__class_index_table* in Cache/
 
-### 2. Why not support automaticaly update AOP files?
+### 5.2 Why not support automatically update AOP files?
 
-We can DO but perfer not DO! Not found a good efficiency way to implement this.
-Watching the files status every time is a bad deal.
+We can DO but prefer not DO! Because we have not yet find an efficient way to implement this and monitoring these files status every time is a bad deal.
 
-### 3. How much performance loss when I use?
+### 5.3 How much performance does it lose when using?
 
-After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you watching, the more you taken. 
+After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitoring, the more you taking. 
 
 [Test Result ☚](PHP/Readme.md#performance-loss-under-stress-test)
 
-### For the developer
+[FLarum Test Result ☚](DOC/PHP/User%20Manual.md#11-performance-result)
+
+### 6 For the developer
 
 [Plugins Tutorial ☚](PHP/pinpoint_php_example/Readme.md)
 
-### Known Issues
+[PHP user manual ☚](DOC/PHP/User%20Manual.md)
 
-#### 1. Exception or Error Message With A Wrong File Path.
+### 7 Known Issues
+
+#### 7.1 Exception or error message with a wrong file path.
 
 https://github.com/naver/pinpoint-c-agent/issues/99
 
-#### 2. If I Do Not Use Composer/autoloader,Can I Use this Version ?
+#### 7.2 If I do not use composer/autoloader, can I use this version?
 
-Sorry, `php-simple-aop` not supported wrapping the user class (or internal class) without Composer/autoloader. By the way [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
+Sorry, `php-simple-aop` not support wrapping the user class (or internal class) without composer/autoloader. By the way, [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
 
 https://github.com/naver/pinpoint-c-agent/issues/103
 
-#### 3. Why not support PHP5.x?
+#### 7.3 Why not support PHP5.x?
 
 https://www.php.net/supported-versions.php
 
-#### 4. Gernerator function not support.
-
+#### ~7.4 Generator function is not supported.~ Already done!
 https://github.com/naver/pinpoint-c-agent/issues/100
 
-#### 5. Some built-in functions cant AOP
+#### 7.5 Some built-in functions can't AOP
 https://github.com/naver/pinpoint-c-agent/issues/102
 
 ## License

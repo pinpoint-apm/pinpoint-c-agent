@@ -42,7 +42,11 @@ class DgramLayer(TrainLayer):
                 raise Exception("create DgramLayer failed")
 
     def sendData(self, data):
-        self.__socket.send(data)
+        try:
+            self.__socket.send(data)
+        except  asy_socket.error as e:
+            if not (e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK)):
+                TCLogger.warning("connect:%s error:%s" % (self.remote, str(e)))
 
     def stop(self):
         self.state = E_CLOSED

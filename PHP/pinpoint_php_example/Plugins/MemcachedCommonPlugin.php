@@ -19,7 +19,7 @@
 namespace Plugins;
 use Plugins\Candy;
 
-///@hook:app\TestMemcached::\memcached::addServer app\TestMemcached::\memcached::add app\TestMemcached::\memcached::get app\TestMemcached::\memcached::replace app\TestMemcached::\memcached::delete
+////@hook:app\TestMemcached::\memcached::addServer app\TestMemcached::\memcached::add app\TestMemcached::\memcached::get app\TestMemcached::\memcached::replace app\TestMemcached::\memcached::delete
 class MemcachedCommonPlugin extends Candy
 {
     function onBefore()

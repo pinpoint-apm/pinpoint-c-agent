@@ -1,10 +1,10 @@
 {
-    "name": "eeliu/apps",
+    "name": "eeliu/pinpoint-php-example",
     "minimum-stability": "dev",
     "authors": [
         {
             "name": "eeliu",
-            "email": "liumingyi@navercorp.com"
+            "email": "eeliu2009@gmail.com"
         }
     ],
     "autoload": {
@@ -16,13 +16,6 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "v0.1",
-        "workerman/workerman":"v3.5.15"
-    },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/eeliu/php_simple_aop.git"
-        }
-    ]
+        "eeliu/php_simple_aop": "v0.2.4"
+    }
 }

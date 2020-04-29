@@ -17,11 +17,11 @@
 
 
 namespace Plugins;
-
 require_once "PluginsDefines.php";
 
 class PerRequestPlugins
 {
+    public static $_intance = null;
     public $tid = null;
     public $sid = null;
     public $psid = null;
@@ -31,11 +31,12 @@ class PerRequestPlugins
     public $app_name=null;
     public $app_id=null;
     private $curNextSpanId ='';
-
     private $isLimit =false;
 
-    public static $_intance = null;
-
+    public function traceLimit()
+    {
+        return $this->isLimit;
+    }
 
     public static function instance()
     {
@@ -63,6 +64,7 @@ class PerRequestPlugins
         pinpoint_add_clue("name","PHP Request");
 
         if(defined('APPLICATION_NAME')){
+//            pinpoint_add_clue("appname",APPLICATION_NAME);
             $this->app_name = APPLICATION_NAME;
         }else{
             $this->app_name = pinpoint_app_name();
@@ -71,6 +73,7 @@ class PerRequestPlugins
         pinpoint_add_clue("appname",$this->app_name);
         if(defined('APPLICATION_ID'))
         {
+//            pinpoint_add_clue('appid',APPLICATION_ID);
             $this->app_id = APPLICATION_ID;
         }else{
             $this->app_id = pinpoint_app_id();
@@ -143,6 +146,7 @@ class PerRequestPlugins
             $this->isLimit = pinpoint_tracelimit();
         }
 
+
         pinpoint_add_clue("tid",$this->tid);
         pinpoint_add_clue("sid",$this->sid);
 
@@ -176,11 +180,5 @@ class PerRequestPlugins
     {
         return  $this->app_id.'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id());
     }
-
-    public function traceLimit()
-    {
-        return $this->isLimit;
-    }
-
 
 }
