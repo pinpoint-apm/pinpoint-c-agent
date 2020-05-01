@@ -22,7 +22,7 @@ It is an agent written by C++, PHP, python language. And we hope to support othe
 Dependency|Version
 ---|----
 PHP| php 7+
-GCC| GCC 5+
+GCC| GCC 4.7+
 *nux|
 Python | Python3
 pinpoint| 1.8.0-RC1+
