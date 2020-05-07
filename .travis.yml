@@ -1,15 +1,97 @@
-language: php
+os: linux
+language: python
 
-php:
-- 7.1
-- 7.2
-- 7.3
-- 7.4
+jobs:
+  include:
+    - name: "common"
+      env:
+        - ROOT=$PWD
+      script:
+        - cd common
+        - mkdir -p build
+        - cd build
+        - cmake -DWITH_TEST_CASE=1 -DCMAKE_BUILD_TYPE=Release .. 
+        - make 
+        - ./test/unittest
+        
+    - name: "php 7.4"
+      php: "7.4"
+      env:
+        - ROOT=$PWD
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
 
-env:
-- ROOT=$PWD
-script:
-- cd $ROOT/PHP/pinpoint_php_ext/
-- phpize && ./configure && make
-# - make test TESTS=-m
-- make test
+    - name: "php 7.3"
+      php: "7.3"
+      env:
+        - ROOT=$PWD
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
+    - name: "php 7.2"
+      php: "7.2"
+      env:
+        - ROOT=$PWD
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
+
+    - name: "php 7.1"
+      php: "7.1"
+      env:
+        - ROOT=$PWD
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
+
+    - name: "python 3.8"
+      python: "3.8"
+      env:
+        - ROOT=$PWD
+      script:
+        - cmake --version
+        - pip install -r requirements.txt 
+        - python setup.py install
+        - nosetests src/PY/test
+
+    - name: "python 3.6"
+      python: "3.6"
+      env:
+        - ROOT=$PWD
+      script:
+        - cmake --version
+        - pip install -r requirements.txt 
+        - python setup.py install
+        - nosetests src/PY/test
+    - name: "python 3.5"
+      python: "3.5"
+      env:
+        - ROOT=$PWD
+      script:
+        - cmake --version
+        - pip install -r requirements.txt 
+        - python setup.py install
+        - nosetests src/PY/test
+
+    - name: "python 3.7"
+      python: "3.7"
+      env:
+        - ROOT=$PWD
+      script:
+        - cmake --version
+        - pip install -r requirements.txt 
+        - python setup.py install
+        - nosetests src/PY/test
+
+notifications:
+  email:
+    eeliu2009@gmail.com

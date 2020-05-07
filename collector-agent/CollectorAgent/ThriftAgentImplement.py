@@ -19,8 +19,8 @@
 # ------------------------------------------------------------------------------
 import os,struct
 
-from CollectorAgent.GrpcAPIMeta import *
-from CollectorAgent.GrpcAgentStateManager import GrpcAgentStateManager
+from CollectorAgent.ThriftAPIMeta import *
+from CollectorAgent.ThriftAgentStateManager import ThriftAgentStateManager
 from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage, ChannelBufferV2, TAgentInfo
 from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
 from Common.AgentHost import AgentHost
@@ -42,7 +42,7 @@ class ThriftAgentImplement(PinpointAgent):
         self.spanHost = (ac.CollectorSpanIp, ac.CollectorSpanPort)
         TCLogger.debug(
             "CollectorTcp %s CollectorStat %s CollectorSpan %s" % (self.tcpHost, self.statHost, self.spanHost))
-
+        self.serviceType = serviceType
         self.tcpLayer = StreamClientLayer(self.tcpHost, self.handlerResponse, self.collectorTcpHello)
 
         self.spanLayer = DgramLayer(self.spanHost, None)
@@ -74,18 +74,18 @@ class ThriftAgentImplement(PinpointAgent):
             applicationName=app_name,
             agentVersion=ac.version,
             startTimestamp=self.startTimeStamp,
-            serviceType=self.service_type,
+            serviceType=self.serviceType,
             pid=os.getpid()
         )
 
-        self.agentState = GrpcAgentStateManager(self.app_id, self.startTimeStamp, self.statHost)
+        self.agentState = ThriftAgentStateManager(self.app_id, self.startTimeStamp, self.statHost)
         self.postponed_queue = []
         self.scanLocalInfo()
         self.api_metas = {}
         self.string_metas = {}
         self.span_factory = ThriftSpanFactory(self)
 
-    ## expose to other module
+    ## expose to other modules
     def sendMsgToCollector(self, msg):
         if self.socketCode == AgentSocketCode.NONE:  ## channel not ready
             TCLogger.debug("AgentState not ready,postpone size:%d", len(msg))
@@ -107,9 +107,9 @@ class ThriftAgentImplement(PinpointAgent):
         if name in self.api_metas:
             return self.api_metas[name]
         else:
-            meta = GrpcAPIMeta(name=name, type=api_type,
-                               agentStartTime=self.startTimeStamp, agentId=self.app_id,
-                               agentName=self.app_name)
+            meta = ThriftAPIMeta(name=name, type=api_type,
+                                 agentStartTime=self.startTimeStamp, agentId=self.app_id,
+                                 agentName=self.app_name)
             self.sendMsgToCollector(meta.toPacket().getSerializedData())
             self.api_metas[name] = meta
             return meta
@@ -117,7 +117,7 @@ class ThriftAgentImplement(PinpointAgent):
     def sendMeta(self, meta):
         '''
 
-        :param GrpcAPIMeta meta:
+        :param ThriftAPIMeta meta:
         :return:
         '''
         TCLogger.debug("meta: %s", meta.name)
@@ -280,7 +280,7 @@ class ThriftAgentImplement(PinpointAgent):
             self.agentInfo.ip,
             self.agentInfo.agentId,
             self.agentInfo.applicationName,
-            PHP,
+            self.serviceType,
             self.agentInfo.pid,
             self.agentInfo.agentVersion,
             self.startTimeStamp)

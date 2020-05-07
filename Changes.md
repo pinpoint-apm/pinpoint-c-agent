@@ -6,3 +6,7 @@
 - Add some out-of-box plugins for flraum [ (How to use pinpoint-php into Flarum?)](PHP/pinpoint_php_example/demo/Flarum-demo/Reademe.md)
 - Fix bug in reference parameters
 - Supporting the return type is object
+
+## v0.2.2
+
+- Support GRPC
