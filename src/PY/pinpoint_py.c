@@ -252,7 +252,7 @@ static PyObject *py_pinpoint_enable_utest(PyObject *self, PyObject *args)
         }
     }
 // disable logging callback
-    enable_trace_utest();
+    global_agent_info.inter_flag |= E_UTEST;
 
     return Py_BuildValue("O",Py_True);
 }

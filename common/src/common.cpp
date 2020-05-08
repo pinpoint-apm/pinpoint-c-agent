@@ -119,7 +119,7 @@ public:
         if( this->stack.size() == 1 ) // ancestor node
         {
             TraceNode& ancestor =  this->stack.top();
-            if(this->limit== E_TRACE_PASS)
+            if(this->limit== E_TRACE_PASS || (global_agent_info.inter_flag & E_UTEST) )
             {
                 uint64_t timestamp =  get_current_msec_stamp();
                 ancestor.node["E"] = this->fetal_error_time != 0?( this->fetal_error_time - ancestor.start_time) : timestamp - ancestor.start_time;
@@ -592,16 +592,6 @@ int64_t generate_unique_id()
         return 0;
     }
     return (int64_t)p_agent->generateUniqueId();
-}
-
-void enable_trace_utest()
-{
-    PerThreadAgent* p_agent = get_agent();
-    if(p_agent == NULL)
-    {
-        return ;
-    }
-    p_agent->setLimit(E_TRACE_PASS);
 }
 
 void catch_error(const char* msg,const char* error_filename,uint error_lineno)

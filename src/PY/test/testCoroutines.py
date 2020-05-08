@@ -12,10 +12,24 @@ class TestInCoroutines(TestCase):
         pinpointPy.enable_debug(None)
 
     def testCoroFlow(self):
+        
+
+        # def test_syn(name):
+
+            
+
+        # def fetch_var(name):
+        #     client_addr_var = contextvars.ContextVar('client_addr')
+        #     client_addr = client_addr_var.get()
+        #     assert client_addr == name
+
+        
+
         # client_addr_var = contextvars.ContextVar('client_addr')
+
         # async def unit(name):
-        #     client_addr_var.set(name)
         #     await asyncio.sleep(0.1)
+        #     client_addr_var.set(name)
         #     print(name)
         #     await asyncio.sleep(0.1)
         #     print(name)
@@ -25,6 +39,7 @@ class TestInCoroutines(TestCase):
         #     assert client_addr == name
 
         async def unit(name):
+            print(name)
             pinpointPy.start_trace()
             await asyncio.sleep(0.1)
             pinpointPy.end_trace()

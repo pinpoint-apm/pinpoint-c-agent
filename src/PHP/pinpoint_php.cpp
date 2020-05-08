@@ -511,7 +511,7 @@ PHP_MINIT_FUNCTION(pinpoint_php)
     global_agent_info.agent_type = 1500; // PHP
 
     if (PPG(utest_flag) == 1){
-        enable_trace_utest();
+        global_agent_info.inter_flag |= E_UTEST;
     }else{
         register_error_cb(pinpoint_log);
     }

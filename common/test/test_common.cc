@@ -15,7 +15,7 @@ void cc_log_error_cb(char*msg)
 TEST(common, trace)
 {
     register_error_cb(cc_log_error_cb);
-    enable_trace_utest();
+    global_agent_info.inter_flag |= E_UTEST;
     pinpoint_set_special_key("key1","1");
     EXPECT_EQ(pinpoint_start_trace(),1);
     pinpoint_set_special_key("key2","2");

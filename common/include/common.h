@@ -48,7 +48,8 @@ typedef enum{
 
 typedef enum{
     E_LOGGING=0x1,
-    E_DISABLE_GIL=0x2 // disable gil checking in python
+    E_DISABLE_GIL=0x2, // disable gil checking in python
+    E_UTEST = 0x4
 }AGENT_FLAG;
 
 
@@ -121,7 +122,6 @@ void pinpoint_drop_trace(void);
 const char* pinpoint_app_id(void);
 const char* pinpoint_app_name(void);
 uint64_t pinpoint_start_time(void);
-void enable_trace_utest(void);
 void catch_error(const char* msg,const char* error_filename,uint error_lineno);
 typedef void(*log_error_cb)(char*);
 void register_error_cb(log_error_cb error_cb);
