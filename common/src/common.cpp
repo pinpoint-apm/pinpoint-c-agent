@@ -21,6 +21,8 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <memory>
+
 #include "common.h"
 #include "TransLayer.h"
 #include "SharedObj.h"
@@ -389,7 +391,7 @@ static void thread_init(void);
 
 static TraceStoreLayer posix_store_layer;
 
-static std::stack<PerThreadAgent*> agentPool;
+static std::stack<std::shared_ptr<PerThreadAgent> > agentPool;
 static inline void lock_agent_pool()
 {
     pthread_mutex_lock(&thread_agent_pool_mutex);
@@ -466,7 +468,7 @@ void thread_init(void)
 
 void* create_or_reuse_agent(void)
 {
-    PerThreadAgent * agent = NULL;
+    PerThreadAgent* agent = NULL;
     lock_agent_pool();
     if(agentPool.empty())
     {
@@ -478,7 +480,8 @@ void* create_or_reuse_agent(void)
         }
     }else
     {
-        agent =agentPool.top();
+        std::shared_ptr<PerThreadAgent> s_agent = agentPool.top();
+        agent = s_agent.get();
         agentPool.pop();
         unlock_agent_pool();
         if(agent == NULL)
@@ -511,7 +514,7 @@ void give_back_agent(void *agent)
 {
     if(agent){
         lock_agent_pool();
-        agentPool.push(static_cast<PerThreadAgent*>(agent));
+        agentPool.push( std::shared_ptr<PerThreadAgent>(static_cast<PerThreadAgent*>(agent)));
         unlock_agent_pool();
     }
 }
