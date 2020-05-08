@@ -91,7 +91,7 @@ bool init_shared_obj()
     size_t length;
     fstat(fd,&_stat);
     length = _stat.st_size;
-
+    assert(length > 0);
     void* addr = mmap(NULL,length,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
     if(addr == (void*)-1)
     {
@@ -100,7 +100,6 @@ bool init_shared_obj()
         return false;
     }
     // start with zero
-    memset(addr,0,length);
     object.region = addr;
     object.length = length;
     close(fd);
