@@ -131,7 +131,7 @@ static PyObject *py_force_flush_span(PyObject *self, PyObject *args)
     {
         return NULL;
     }
-    if(global_agent_info.debug_report == 1)
+    if(global_agent_info.inter_flag & E_DISABLE_GIL)
     {
         pinpoint_force_flush_span(timeout);
     }
@@ -150,7 +150,7 @@ static PyObject *py_force_flush_span(PyObject *self, PyObject *args)
 static PyObject *py_pinpoint_start_trace(PyObject *self,CYTHON_UNUSED  PyObject *unused)
 {
     int ret = 0;
-    if(global_agent_info.debug_report == 1)
+    if(global_agent_info.inter_flag & E_DISABLE_GIL )
     {
         ret = pinpoint_start_trace();
     }else{
@@ -166,7 +166,7 @@ static PyObject *py_pinpoint_start_trace(PyObject *self,CYTHON_UNUSED  PyObject 
 static PyObject *py_pinpoint_end_trace(PyObject *self, CYTHON_UNUSED PyObject *unused)
 {
     int ret = 0;
-    if(global_agent_info.debug_report == 1)
+    if(global_agent_info.inter_flag & E_DISABLE_GIL)
     {
         ret = pinpoint_end_trace();
     }else
@@ -237,8 +237,8 @@ static void msg_log_error_cb(char* msg)
 
 static PyObject *py_pinpoint_enable_utest(PyObject *self, PyObject *args)
 {
-    // disable GIL 
-    global_agent_info.debug_report = 1;
+    global_agent_info.inter_flag |=E_LOGGING ;
+    global_agent_info.inter_flag |=E_DISABLE_GIL ;
 
     PyObject *temp;
     if (PyArg_ParseTuple(args, "O:callback", &temp)) 
@@ -280,15 +280,15 @@ bool set_collector_host(char* host)
 }
 
 
-static PyObject *py_set_collector(PyObject *self, PyObject *args, PyObject *keywds)
+static PyObject *py_set_agent(PyObject *self, PyObject *args, PyObject *keywds)
 {
     // PyObject* setting;
     bool ret = false;
-    static char *collector_list[] = {"collector_host", "trace_limit","enable_coroutines", NULL};
+    static char *kwlist[] = {"collector_host", "trace_limit","enable_coroutines", NULL};
     char* collector_host = "unix:/tmp/collector-agent.sock";
     long trace_limit = -1;
-    PyObject* enable_coro_obj = Py_False;
-    if(PyArg_ParseTupleAndKeywords(args,keywds,"s|l|O!",collector_list,&collector_host, &trace_limit,&PyBool_Type,&enable_coro_obj))
+    int enable_coro = 0;
+    if(PyArg_ParseTupleAndKeywords(args,keywds,"s|lp",kwlist,&collector_host, &trace_limit,&enable_coro))
     {
 
         global_agent_info.get_write_lock();
@@ -300,15 +300,17 @@ static PyObject *py_set_collector(PyObject *self, PyObject *args, PyObject *keyw
 
         global_agent_info.trace_limit = trace_limit;
 
-        if(PyObject_IsTrue(enable_coro_obj))
+        if(enable_coro)
         {
             // todo must hold GIL
-            pinpoint_reset_store_layer(&_coro_storage);
+            pinpoint_reset_store_layer(get_coro_store_layer());
+            global_agent_info.inter_flag |= E_DISABLE_GIL ;
         }
 
 
         pp_trace("collector_host:%s",collector_host);
         pp_trace("trace_limit:%ld",trace_limit);
+        pp_trace("enable_coro:%d",enable_coro);
 
 
 
@@ -364,7 +366,6 @@ END_OF_PARSE:
     }
     else
     {
-        PyErr_SetString(PyExc_TypeError, "parameters should be collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=100,enable_coroutines=False");
         return NULL;
     }
 }
@@ -378,6 +379,15 @@ static void free_pinpoint_module(void * module)
         free(g_collector_host);
     }
 
+    if(coro_local)
+    {
+        Py_DECREF(coro_local);
+    }
+
+    if(py_obj_msg_callback)
+    {
+        Py_DECREF(py_obj_msg_callback);
+    }
 }
 
 static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
@@ -399,10 +409,12 @@ static PyObject *Agent_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     if (self != NULL) {
         self->agent = NULL;
     }
+    pp_trace("Agent_new %p",self);
     return (PyObject*)self;
 }
 
 static void Agent_dealloc(PyAgentObj *self) {
+    pp_trace("Agent_dealloc %p",self);
     give_back_agent(self->agent);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
@@ -444,7 +456,7 @@ static PyMethodDef PinpointMethods[] = {
     {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "enable logging output(callback )"},
     {"force_flush_trace", py_force_flush_span, METH_VARARGS, "force flush span during timeout"},
     {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no) #This trace found an error"},
-    {"set_collector",(PyCFunction)py_set_collector, METH_VARARGS|METH_KEYWORDS, "def set_collector(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=100,enable_coroutines=False)"},
+    {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=100,enable_coroutines=False)"},
     { NULL, NULL, 0, NULL}
 };
 /* Module structure */
@@ -510,7 +522,7 @@ PyInit_pinpointPy(void) {
     
     global_agent_info.agent_type=1700;
     global_agent_info.co_host = "unix:/tmp/collector.sock";
-    global_agent_info.debug_report = 0;
+    global_agent_info.inter_flag = 0;
     global_agent_info.timeout_ms = 0;
     global_agent_info.trace_limit = -1;
     register_error_cb(NULL);
@@ -540,13 +552,14 @@ static void set_coro_local(void* agent)
     PyObject *pp_agent_obj = PyObject_CallObject((PyObject *) &Agent_Type,NULL);
     assert(pp_agent_obj);
     ((PyAgentObj*)pp_agent_obj)->agent = agent;
-    pp_trace("store agent:%p",agent);
+    pp_trace("new  agent obj:%p",pp_agent_obj);
     PyObject *tok = PyContextVar_Set(coro_local, pp_agent_obj);
     if(tok == NULL ){
         Py_DECREF(pp_agent_obj);
         return;
     }
     Py_DECREF(tok);
+    Py_DECREF(pp_agent_obj);
     pp_trace("set agent:%p success",agent);
 }
 
@@ -559,7 +572,9 @@ static void* get_coro_local(void)
     }
 
     if (pp_agent_obj != NULL) {
-            return ((PyAgentObj*)pp_agent_obj)->agent;
+        pp_trace("get_coro_local:%p",((PyAgentObj*)pp_agent_obj)->agent);
+        Py_DECREF(pp_agent_obj);
+        return ((PyAgentObj*)pp_agent_obj)->agent;
     }
     pp_trace("why agent is NULL");
     return NULL;

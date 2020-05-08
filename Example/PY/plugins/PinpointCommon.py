@@ -77,7 +77,7 @@ REDIS='8200'
 REDIS_REDISSON='8203'
 REDIS_REDISSON_INTERNAL='8204'
 MEMCACHED='8050'
-pinpointPy.set_collector(collector_host=COLLECTOR_HOST)
+pinpointPy.set_agent(collector_host=COLLECTOR_HOST)
 
 # def output(msg):
 #     print(msg)

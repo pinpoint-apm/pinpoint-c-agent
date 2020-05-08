@@ -23,7 +23,7 @@ static log_error_cb _error_cb;
  */
 void pp_trace(const char *format,...)
 {
-    if(global_agent_info.debug_report != 1)
+    if( (global_agent_info.inter_flag & E_LOGGING) == 0)
     {
         return ;
     }

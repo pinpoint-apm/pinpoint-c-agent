@@ -45,6 +45,13 @@ typedef enum{
     REQ_UPDATE_SPAN = 1
 }MSG_TYPE;
 
+
+typedef enum{
+    E_LOGGING=0x1,
+    E_DISABLE_GIL=0x2 // disable gil checking in python
+}AGENT_FLAG;
+
+
 #pragma pack (1)
 typedef  struct {
     uint type;
@@ -71,7 +78,7 @@ typedef struct pp_agent_s{
     uint  timeout_ms;  // always be 0
     long   trace_limit;  // change to long as python need long
     int   agent_type;
-    uint8_t debug_report;
+    uint8_t inter_flag;
     VOID_FUNC get_read_lock;
     VOID_FUNC get_write_lock;
     VOID_FUNC release_lock;

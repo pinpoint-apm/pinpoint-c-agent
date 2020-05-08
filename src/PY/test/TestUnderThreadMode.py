@@ -14,7 +14,7 @@ class TestUnderThreadMode(TestCase):
         pinpointPy.force_flush_trace(4)
 
     def _test_api_flow(self):
-        self.assertTrue(pinpointPy.set_collector(collector_host='unix:/tmp/unexist.sock'))
+        self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/unexist.sock'))
         # self.assertTrue(pinpointPy.enable_debug(None))
 
         while self.thread_running:
