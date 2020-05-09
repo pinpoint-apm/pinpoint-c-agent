@@ -390,8 +390,8 @@ static void _free_common_shared() __attribute__((destructor));
 static void thread_init(void);
 
 static TraceStoreLayer posix_store_layer;
+static std::stack<PerThreadAgent*> *agentPool;
 
-static std::stack<std::shared_ptr<PerThreadAgent> > agentPool;
 static inline void lock_agent_pool()
 {
     pthread_mutex_lock(&thread_agent_pool_mutex);
@@ -449,7 +449,10 @@ void _init_common_shared()
     posix_store_layer.get_cur_trace_cb = poxic_get_cur_trace;
     posix_store_layer.set_cur_trace_cb = poxic_set_cur_trace;
     _storelayer = &posix_store_layer;
+    agentPool = new std::stack<PerThreadAgent*>();
+    assert(agentPool);
 }
+
 
 void _free_common_shared()
 {
@@ -458,6 +461,15 @@ void _free_common_shared()
 
     /// reset store layer
     _storelayer  = NULL;
+
+    /// free memory in pool
+    while (!agentPool->empty())
+    {
+        PerThreadAgent* agent = agentPool->top();
+        delete agent;
+        agentPool->pop();
+    }
+    agentPool = NULL;
 }
 
 
@@ -470,25 +482,27 @@ void* create_or_reuse_agent(void)
 {
     PerThreadAgent* agent = NULL;
     lock_agent_pool();
-    if(agentPool.empty())
+    if(agentPool->empty())
     {
         unlock_agent_pool();
         try{
             agent = new PerThreadAgent(&global_agent_info);
+            pp_trace("create agent:%p",agent);
         }catch(...){
             return NULL;
         }
     }else
     {
-        std::shared_ptr<PerThreadAgent> s_agent = agentPool.top();
-        agent = s_agent.get();
-        agentPool.pop();
+        agent = agentPool->top();
+        agentPool->pop();
         unlock_agent_pool();
         if(agent == NULL)
         {
             pp_trace("Found an error:%s:%d",__FILE__,__LINE__);
+            assert(0);
             return NULL;
         }
+        pp_trace("reuse agent:%p",agent);
     }
 
     return agent;
@@ -514,7 +528,7 @@ void give_back_agent(void *agent)
 {
     if(agent){
         lock_agent_pool();
-        agentPool.push( std::shared_ptr<PerThreadAgent>(static_cast<PerThreadAgent*>(agent)));
+        agentPool->push(static_cast<PerThreadAgent*>(agent));
         unlock_agent_pool();
     }
 }

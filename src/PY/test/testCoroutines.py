@@ -7,55 +7,53 @@ import contextvars
 class TestInCoroutines(TestCase):
     @classmethod
     def setUpClass(cls):
-        pass
-        pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock",trace_limit=-1,enable_coroutines=True)
-        pinpointPy.enable_debug(None)
+        # pinpointPy.enable_debug(None)
+        pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock",enable_coroutines=True)
 
     def testCoroFlow(self):
-        
 
-        # def test_syn(name):
+        def decorator_pinpoint(func):
+            async def pinpoint_trace(*args, **kwargs):
+                start_size = pinpointPy.start_trace()
+                func_name = func.__name__
+                pinpointPy.add_clue('name',func_name)
+                pinpointPy.add_clues('sdf','3434')
+                ret = await func(*args, **kwargs)
+                pinpointPy.add_clue('sdf','3434')
+                end_size = pinpointPy.end_trace()
+                if func_name == 'unit':
+                    self.assertEqual(start_size,1)
+                    self.assertEqual(end_size,0)
+                elif func_name == 'unit2':
+                    self.assertEqual(start_size,2)
+                    self.assertEqual(end_size,1)
+                return ret
+            return pinpoint_trace
 
-            
+        @decorator_pinpoint
+        async def unit2(name):
+            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.1)
 
-        # def fetch_var(name):
-        #     client_addr_var = contextvars.ContextVar('client_addr')
-        #     client_addr = client_addr_var.get()
-        #     assert client_addr == name
-
-        
-
-        # client_addr_var = contextvars.ContextVar('client_addr')
-
-        # async def unit(name):
-        #     await asyncio.sleep(0.1)
-        #     client_addr_var.set(name)
-        #     print(name)
-        #     await asyncio.sleep(0.1)
-        #     print(name)
-        #     await asyncio.sleep(0.1)
-        #     print(name)
-        #     client_addr = client_addr_var.get()
-        #     assert client_addr == name
-
+        @decorator_pinpoint
         async def unit(name):
-            print(name)
-            pinpointPy.start_trace()
             await asyncio.sleep(0.1)
-            pinpointPy.end_trace()
-            print(name)
-            pinpointPy.start_trace()
             await asyncio.sleep(0.1)
-            print(name)
             await asyncio.sleep(0.1)
-            print(name)
-            pinpointPy.end_trace()
+            await unit2(name)
 
         async def main():
             task1 = asyncio.create_task(unit('a'))
             task2 = asyncio.create_task(unit('b'))
+            task3 = asyncio.create_task(unit('c'))
+            task4 = asyncio.create_task(unit('e'))
+            task5 = asyncio.create_task(unit('f'))
             await task1
             await task2
+            await task3
+            await task4
+            await task5
 
         asyncio.run(main())
 

@@ -10,8 +10,9 @@ def output(msg):
 class TestAgent(TestCase):
      
     def setUp(self) -> None:
+        # self.assertTrue(pinpointPy.enable_debug(output))
+        # self.assertTrue(pinpointPy.enable_debug(None))
         self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/collector-agent.sock'))
-        self.assertTrue(pinpointPy.enable_debug(output))
 
     def test_trace_life(self):
         self.assertEqual(pinpointPy.start_trace(),1)

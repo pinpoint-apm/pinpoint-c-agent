@@ -409,12 +409,10 @@ static PyObject *Agent_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     if (self != NULL) {
         self->agent = NULL;
     }
-    pp_trace("Agent_new %p",self);
     return (PyObject*)self;
 }
 
 static void Agent_dealloc(PyAgentObj *self) {
-    pp_trace("Agent_dealloc %p",self);
     give_back_agent(self->agent);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }

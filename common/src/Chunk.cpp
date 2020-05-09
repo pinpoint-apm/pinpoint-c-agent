@@ -163,7 +163,7 @@ Chunks::~Chunks()
 {
     while (!this->ready_list.empty())
     {
-        Chunk* c = *this->ready_list.begin();
+        Chunk* c = this->ready_list.front();
         free(c);
         ready_list.pop_front();
     }
