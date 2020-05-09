@@ -121,7 +121,7 @@ public:
         if( this->stack.size() == 1 ) // ancestor node
         {
             TraceNode& ancestor =  this->stack.top();
-            if(this->limit== E_TRACE_PASS || (global_agent_info.inter_flag & E_UTEST) )
+            if(this->limit== E_TRACE_PASS  )
             {
                 uint64_t timestamp =  get_current_msec_stamp();
                 ancestor.node["E"] = this->fetal_error_time != 0?( this->fetal_error_time - ancestor.start_time) : timestamp - ancestor.start_time;
@@ -135,6 +135,7 @@ public:
 
                 this->translayer.sendMsgToAgent(buf);
                 pp_trace("this span:(%s)",trace.c_str());
+                this->translayer.trans_layer_pool();
             }else if(this->limit== E_TRACE_BLOCK){
                 // do nothing
             }
@@ -142,7 +143,6 @@ public:
             }
             ancestor.node.clear();
             this->stack.pop();
-            this->translayer.trans_layer_pool();
             // after this, special keys are dropped
             this->special_keys.clear();
         }
@@ -307,7 +307,12 @@ private:
     {
         if(state == E_OFFLINE)
         {
-            this->limit = E_OFFLINE;
+            if(global_agent_info.inter_flag & E_UTEST){
+                this->limit = E_TRACE_PASS;
+            }
+            else{
+                this->limit = E_OFFLINE;
+            }
             this->_state->state |= E_OFFLINE;
         }
     }
@@ -487,7 +492,7 @@ void* create_or_reuse_agent(void)
         unlock_agent_pool();
         try{
             agent = new PerThreadAgent(&global_agent_info);
-            pp_trace("create agent:%p",agent);
+            // pp_trace("create agent:%p",agent);
         }catch(...){
             return NULL;
         }

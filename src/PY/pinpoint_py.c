@@ -21,10 +21,13 @@
 PPAgentT global_agent_info;
 static PyObject *py_obj_msg_callback;
 static char* g_collector_host;
+
+#if PY_VERSION_HEX >= 0x30701f0
 // for pinpoint_coro_local
 static TraceStoreLayer _coro_storage;
 static PyObject* coro_local;
 #define CORO_LOCAL_NAME "pinpoint_coro_local"
+#endif
 
 #ifndef CYTHON_UNUSED
 # if defined(__GNUC__)
@@ -279,7 +282,9 @@ bool set_collector_host(char* host)
     return false;
 }
 
-
+/**
+ * def set_agent(collector_host=, trace_limit=,enable_coroutines=)
+ */
 static PyObject *py_set_agent(PyObject *self, PyObject *args, PyObject *keywds)
 {
     // PyObject* setting;
@@ -300,17 +305,21 @@ static PyObject *py_set_agent(PyObject *self, PyObject *args, PyObject *keywds)
 
         global_agent_info.trace_limit = trace_limit;
 
+ #if PY_VERSION_HEX >= 0x30701f0
         if(enable_coro)
         {
+
             // todo must hold GIL
             pinpoint_reset_store_layer(get_coro_store_layer());
             global_agent_info.inter_flag |= E_DISABLE_GIL ;
-        }
+            
 
+        }
+        pp_trace("enable_coro:%d",enable_coro);
+#endif
 
         pp_trace("collector_host:%s",collector_host);
         pp_trace("trace_limit:%ld",trace_limit);
-        pp_trace("enable_coro:%d",enable_coro);
 
 
 
@@ -378,12 +387,12 @@ static void free_pinpoint_module(void * module)
     {
         free(g_collector_host);
     }
-
+#if PY_VERSION_HEX >= 0x30701f0
     if(coro_local)
     {
         Py_DECREF(coro_local);
     }
-
+#endif
     if(py_obj_msg_callback)
     {
         Py_DECREF(py_obj_msg_callback);
@@ -544,7 +553,7 @@ PyInit_pinpointPy(void) {
     }
     return m;
 }
-
+#if PY_VERSION_HEX >= 0x30701f0
 static void set_coro_local(void* agent)
 {
     PyObject *pp_agent_obj = PyObject_CallObject((PyObject *) &Agent_Type,NULL);
@@ -591,3 +600,4 @@ TraceStoreLayer* get_coro_store_layer(void)
 
     return &_coro_storage;
 }
+#endif

@@ -3,6 +3,7 @@
 *.o
 *.result
 *.a
+*.la
 test/pinpoint_unittest
 simulate/collector/test_checker
 simulate/collector/test_collector

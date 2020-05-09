@@ -506,7 +506,7 @@ PHP_MINIT_FUNCTION(pinpoint_php)
     zend_error_cb = apm_error_cb;
     // global_agent_info.
     global_agent_info.co_host =  PPG(co_host);
-    global_agent_info.debug_report = PPG(debug_report);
+    global_agent_info.inter_flag = PPG(debug_report);
     global_agent_info.trace_limit =PPG(tracelimit);
     global_agent_info.agent_type = 1500; // PHP
 

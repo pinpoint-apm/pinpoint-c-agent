@@ -2,7 +2,7 @@
 import unittest
 import pinpointPy
 import asyncio
-import contextvars
+import sys
 
 class TestInCoroutines(TestCase):
     @classmethod
@@ -10,6 +10,7 @@ class TestInCoroutines(TestCase):
         # pinpointPy.enable_debug(None)
         pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock",enable_coroutines=True)
 
+    @unittest.skipIf(hex(sys.hexversion) <'0x30701f0', "python versin must 3.7.1+")
     def testCoroFlow(self):
 
         def decorator_pinpoint(func):
