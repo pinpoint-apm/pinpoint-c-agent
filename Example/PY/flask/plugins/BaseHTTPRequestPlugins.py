@@ -42,6 +42,7 @@ class BaseHTTPRequestPlugins(Candy):
         pinpointPy.add_clue('name', 'BaseHTTPRequest request')
         pinpointPy.add_clue('uri',insBaseHttp.path)
         pinpointPy.add_clue('client',insBaseHttp.client_address[0])
+        
         pinpointPy.add_clue('server',insBaseHttp.headers.get('Host'))
         pinpointPy.add_clue('stp',PYTHON)
 
