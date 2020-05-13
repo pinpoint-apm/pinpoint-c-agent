@@ -18,17 +18,25 @@ from plugins.PinpointCommon import *
 import pinpointPy
 import threading
 
-class PinpointCommonPlugin(Candy):
+class PyMysqlPlugin(Candy):
+
+    def __init__(self,class_name,module_name):
+        super().__init__(class_name,module_name)
+        self.dst = ''
 
     def onBefore(self,*args, **kwargs):
         args, kwargs = super().onBefore(*args, **kwargs)
         ###############################################################
         pinpointPy.add_clue(FuncName,self.getFuncUniqueName())
-        pinpointPy.add_clue(ServerType,PYTHON_METHOD_CALL)
+        pinpointPy.add_clue(ServerType, MYSQL)
         arg = self.get_arg(*args, **kwargs)
         pinpointPy.add_clues(PY_ARGS, arg)
         ###############################################################
         # print( threading.currentThread().ident)
+        if self.func_name == 'Connect':
+            # self.dst = kwargs['host'] + ":" + kwargs['db']
+            self.dst = 'Mysql' + ":" + kwargs['db']
+        pinpointPy.add_clue("dst", self.dst)
         return args,kwargs
 
     def onEnd(self,ret):
@@ -48,8 +56,8 @@ class PinpointCommonPlugin(Candy):
         for i in args:
             args_tmp["arg["+str(j)+"]"] = (str(i))
             j += 1
-
+        # print(str(args_tmp))
         for k in kwargs:
             args_tmp[k] = kwargs[k]
-
+        # print(str(args_tmp))
         return str(args_tmp)

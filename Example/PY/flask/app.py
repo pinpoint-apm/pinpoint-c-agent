@@ -301,7 +301,7 @@ def test_arguments_form():
     for i in l1:
         l2.append(test_args.test_args1(i))
     f.close()
-    h1 = "<br>".join(l2)
+    h1 = "<br>".join('%s' %str(id) for id in l2)
     h2 = test_args.test_args2("Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
     return '''<h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2)
@@ -317,7 +317,7 @@ def test_returns_form():
     for i in l1:
         l2.append(str(type(test_returns.test_returns1(i)))[8:-2])
     f.close()
-    h1 = "<br>".join(l2)
+    h1 = "<br>".join('%s' %str(id) for id in l2)
     h2 = test_returns.test_returns2("Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
     return '''<h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2)
@@ -329,7 +329,7 @@ def test_mysql_form():
     mysql.con_db()
     h1 = mysql.db_select("select * from user;")
     mysql.db_close()
-    return "<br>".join(h1)
+    return "<br>".join('%s' %str(id) for id in h1)
 
 
 @app.route('/test_redis', methods=['GET'])
@@ -338,12 +338,12 @@ def test_redis_form():
     mysql.con_db()
     h1 = mysql.db_select("select * from user;")
     mysql.db_close()
-    return "<br>".join(h1)
+    return "<br>".join('%s' %str(id) for id in h1)
 
 
-@app.route('/call_remote', methods=['POST'])
+@app.route('/call_remote', methods=['GET'])
 def call_remote_form():
-    remote = request.form['remote']
+    remote = request.args['remote']
     h1 = requests.get(remote)
     return h1.content
 

@@ -1,0 +1,10 @@
+requests==2.23.0
+pymysql===0.9.3
+sqlparse===3.0.1
+asgiref===3.2.7
+pytz===2020.1
+certifi===2020.4.5.1
+idna===2.9
+urllib3===1.25.9
+chardet===3.0.4
+PyMySQL===0.9.3
