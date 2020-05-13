@@ -1,7 +1,6 @@
 
 from django.utils.deprecation import MiddlewareMixin
 
-from django.middleware.common import CommonMiddleware
 from plugins.BaseDjangoRequestPlugins import BaseDjangoRequestPlugins
 
 class MyMiddleware(MiddlewareMixin):
@@ -10,7 +9,6 @@ class MyMiddleware(MiddlewareMixin):
         super().__init__(self.get_response)
         self.request_plugin = BaseDjangoRequestPlugins("Django Web App", __name__)
 
-    # @BaseDjangoRequestPlugins("Django Web App", __name__)
     def process_request(self,request):
         print("*****MyMiddleware request******")
         self.request_plugin.onBefore(self,request)
