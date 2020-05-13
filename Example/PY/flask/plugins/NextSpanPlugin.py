@@ -24,11 +24,17 @@ class NextSpanPlugin(Candy):
 
     def __init__(self,class_name,module_name):
         super().__init__(class_name,module_name)
+        self.nsid = ''
 
     def handleHttpHeader(self, url, headers):
 
         self.url = url
-        headers[SAMPLED] = pinpointPy.get_special_key(SAMPLED)
+        # headers[SAMPLED] = pinpointPy.get_special_key(SAMPLED)
+        if pinpointPy.check_tracelimit():
+            headers[SAMPLED] = 's0'
+            return
+        else:
+            headers[SAMPLED] = 's1'
         headers[PINPOINT_PAPPTYPE] = '1700'
         headers[PINPOINT_PAPPNAME] = APP_NAME
         headers['Pinpoint-Flags'] = "0"
@@ -57,7 +63,7 @@ class NextSpanPlugin(Candy):
         ###############################################################
         pinpointPy.add_clue("dst", self.getHostFromURL(self.url))
         pinpointPy.add_clue("stp", PYTHON_REMOTE_METHOD)
-        pinpointPy.add_clue('nsid', self.nsid)
+        pinpointPy.add_clue('nsid', self.get_nsid())
         pinpointPy.add_clues(HTTP_URL, self.url)
         pinpointPy.add_clues(HTTP_STATUS_CODE, str(ret.status_code))
         pinpointPy.add_clues(PY_RETURN,str(ret))
@@ -85,3 +91,6 @@ class NextSpanPlugin(Candy):
     def getHostFromURL(self, url):
         returl = urlparse(url)
         return returl.netloc + returl.path
+
+    def get_nsid(self):
+        return self.nsid

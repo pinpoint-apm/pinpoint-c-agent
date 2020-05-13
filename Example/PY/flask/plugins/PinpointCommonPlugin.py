@@ -16,6 +16,7 @@
 
 from plugins.PinpointCommon import *
 import pinpointPy
+import threading
 
 class PinpointCommonPlugin(Candy):
 

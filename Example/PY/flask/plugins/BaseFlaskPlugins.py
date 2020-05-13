@@ -21,7 +21,6 @@
 
 import pinpointPy
 from plugins.PinpointCommon import *
-from plugins.pp_requests import *
 
 from flask import Flask,Request
 import threading

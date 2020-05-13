@@ -2,11 +2,11 @@ import requests
 from plugins.NextSpanPlugin import NextSpanPlugin
 
 
-nextSpanHookSet = [
-    ('requests','post'),
-    ('requests','get')
+HookSet = [
+    ('requests','post', requests, requests.post),
+    ('requests','get', requests, requests.get)
 ]
 
-for hook in nextSpanHookSet:
-    new_request_post = NextSpanPlugin(hook[0], '')
-    setattr(requests,hook[1], new_request_post(requests.post))
+for hook in HookSet:
+    new_requests = NextSpanPlugin(hook[0], '')
+    setattr(hook[2],hook[1], new_requests(hook[3]))

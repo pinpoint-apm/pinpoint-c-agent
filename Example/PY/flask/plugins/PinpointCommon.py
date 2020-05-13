@@ -24,6 +24,7 @@ import random
 PYTHON = '1700'
 PYTHON_METHOD_CALL='1701'
 PYTHON_REMOTE_METHOD = '9900'
+MYSQL = '2101'
 
 ###############################################################
 
@@ -48,9 +49,12 @@ PINPOINT_PAPPTYPE ='Pinpoint-Papptype'
 PINPOINT_HOST = 'Pinpoint-Host'
 
 NGINX_PROXY = 'Pinpoint-ProxyNginx'
-APACHE_PROXY = 'HTTP_PINPOINT_PROXYAPACHE'
+HTTP_NGINX_PROXY = 'HTTP_Pinpoint-ProxyNginx'
+APACHE_PROXY = 'PINPOINT_PROXYAPACHE'
+HTTP_APACHE_PROXY = 'HTTP_PINPOINT_PROXYAPACHE'
 
 SAMPLED = 'Pinpoint-Sampled'
+HTTPD_SAMPLED = 'HTTP_PINPOINT_SAMPLED'
 ServerType='stp'
 FuncName='name'
 PY_ARGS= '-1'
@@ -77,12 +81,13 @@ REDIS='8200'
 REDIS_REDISSON='8203'
 REDIS_REDISSON_INTERNAL='8204'
 MEMCACHED='8050'
-pinpointPy.set_agent(collector_host=COLLECTOR_HOST)
+pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
+# pinpointPy.set_agent(collector_host='Tcp:10.34.130.152:6666',trace_limit=-1)
 
 # def output(msg):
 #     print(msg)
 #
-# pinpointPy.enable_debug(None)
+pinpointPy.enable_debug(None)
 
 class Candy(object):
     def __init__(self,class_name,module_name):
@@ -106,7 +111,6 @@ class Candy(object):
             ret = None
             # print("start", self.func_name)
             args, kwargs = self.onBefore(*args, **kwargs)
-            # print(kwargs)
             try:
                 ret = func(*args, **kwargs)
                 return ret
