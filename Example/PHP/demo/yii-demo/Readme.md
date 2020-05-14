@@ -51,10 +51,6 @@
 ![server-stack](images/yii-call-stack.png)
 
 
-##  Introduction of "web/index.php"
-
-Goto [web/index.php](web/index.php)
-
 ## References
-1. How to install yii? [ click me ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
+1. How to install django? [ click me ☚ ](https://docs.djangoproject.com/zh-hans/3.0/intro/install/#install-django)
 2. What's php_simple_aop? [ click me ☚ ](https://github.com/eeliu/php_simple_aop)

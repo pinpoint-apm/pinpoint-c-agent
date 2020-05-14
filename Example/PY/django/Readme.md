@@ -1,4 +1,4 @@
-﻿# Integration pinpoint into Django.
+﻿# Integration Pinpoint Into Django.
 
 
 ## Integration pinpoint
@@ -8,14 +8,15 @@
     >setting.py
 
     ```
+    .....
     MIDDLEWARE = [
         '/path to MyMiddleware/ MyMiddleware.MyMiddleware',
         ......
     ]
     ```
-2. cp plugins(Both plugins in ```plugin``` and ```django/plugins```) to your root
+2. Copy plugins(Both ```plugin``` and ```django/plugins```) to your root. Plugins in ```plugin``` and ```django/plugins``` are some examples, you can also write your own plugin according to these examples.
 
-3. Hook the function you want to monitor.
+3. Hook the function you cared.
 
      > Example: django/test_recursion.py
      Hook the function ```fact``` by add ```@PinpointCommonPlugin('', __name__)``` just before it.
@@ -27,9 +28,7 @@
     
     @PinpointCommonPlugin('', __name__)
     def fact(n):
-        if n==1:
-            return 1
-        return n * fact(n - 1)
+        ......
     ```
 
 ## Demo 
@@ -45,5 +44,5 @@
 
 
 ## References
-1. How to install yii? [ click me ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
+1. How to install django? [ click me ☚ ](https://docs.djangoproject.com/zh-hans/3.0/intro/install/#install-django)
 2. What's php_simple_aop? [ click me ☚ ](https://github.com/eeliu/php_simple_aop)
