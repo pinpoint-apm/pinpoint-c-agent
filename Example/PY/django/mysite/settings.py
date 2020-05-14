@@ -41,7 +41,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'TestDemo.MyMiddleware.MyMiddleware',
+    'TestDemo.PinPointMiddleWare.PinPointMiddleWare',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

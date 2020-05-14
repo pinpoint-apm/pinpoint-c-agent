@@ -20,9 +20,30 @@ Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequest
     def getAgent(self,headers):
 ```
 
+## The Library pinpoint-py Supports.
 
+1. [PyMysql](./plugins/PyMysql)
+2. [requests](./plugins/requests)
 
-## The Python Frameworks pinpoint-c-agent Supports
+#### How To Use
+> Example: Refer to [PyMysql/__init__.py](./plugins/PyMysql/__init__.py)
+
+> Steps
+
+1. Add the function you care into ```HookSet``` in ```plugins/PyMysql/__init__.py```:
+    ```python
+    HookSet = [
+        ('pymysql', 'connect', pymysql, pymysql.connect),
+        ('Cursor','execute', Cursor, Cursor.execute),
+        ('Cursor','fetchall', Cursor, Cursor.fetchall)
+    ]
+    ```
+2. Import it in ```plugin/__init__.py```
+```python
+from plugins.PyMysql import *
+```
+
+## The Python Frameworks pinpoint-py Supports
 
 Follow the Readme.md under each framework to enable the plugins.
 

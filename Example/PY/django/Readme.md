@@ -3,14 +3,14 @@
 
 ## Integration pinpoint
 
-> Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](DOC/PY/Readme.md))
-1. Copy [MyMiddleware.py](TestDemo/MyMiddleware.py) to your project. Add ```MyMiddleware``` into ```MIDDLEWARE``` in Django's setting file.
+> Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](../../../DOC/PY/Readme.md))
+1. Copy [PinPointMiddleWare.py](TestDemo/PinPointMiddleWare.py) to your project. Add ```PinPointMiddleWare``` into ```MIDDLEWARE``` in Django's setting file.
     >setting.py
 
     ```
     .....
     MIDDLEWARE = [
-        '/path to MyMiddleware/ MyMiddleware.MyMiddleware',
+        '/path to PinPointMiddleWare/ PinPointMiddleWare.MyMiddleware',
         ......
     ]
     ```
@@ -42,7 +42,3 @@
 
 ![server-stack](images/Django-recursion-calltree.png)
 
-
-## References
-1. How to install django? [ click me ☚ ](https://docs.djangoproject.com/zh-hans/3.0/intro/install/#install-django)
-2. What's php_simple_aop? [ click me ☚ ](https://github.com/eeliu/php_simple_aop)

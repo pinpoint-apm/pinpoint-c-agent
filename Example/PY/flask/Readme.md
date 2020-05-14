@@ -3,14 +3,14 @@
 
 ## Integration pinpoint
 
-> Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](DOC/PY/Readme.md))
-1. Copy [MyMiddleware.py](./MyMidWare.py) to your project. Add MyMidWare to your application.
+> Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](../../../DOC/PY/Readme.md))
+1. Copy [PinPointMiddleWare.py](PinPointMiddleWare.py) to your project. Add PinPointMiddleWare to your application.
 
     ```
     app = Flask(__name__)
     
-    from MyMidWare import MyMidWare
-    app.wsgi_app = MyMidWare(app,app.wsgi_app)
+    from PinPointMiddleWare import PinPointMiddleWare
+    app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
     ......
     ```
 2. Copy plugins(Both ```plugin``` and ```flask/plugins```) to your root. Plugins in ```plugin``` and ```flask/plugins``` are some examples, you can also write your own plugin according to these examples.
@@ -30,6 +30,3 @@
         ......
     ```
 
-## References
-1. How to install flask? [ click me ☚ ](https://flask.palletsprojects.com/en/1.1.x/installation/#install-flask)
-2. What's php_simple_aop? [ click me ☚ ](https://github.com/eeliu/php_simple_aop)
