@@ -1,7 +1,5 @@
-import asyncio
 import tornado.ioloop
 import tornado.web
-import tornado.httpclient
 import tornado.gen as gen
 from plugins.TornadoHTTPRequestPlugins import TornadoHTTPRequestPlugins
 from plugins.PinpointCommonPlugin import PinpointCommonPlugin
@@ -10,12 +8,7 @@ from plugins.PinpointCommonPlugin import PinpointCommonPlugin
 class MainHandler(tornado.web.RequestHandler):
     @TornadoHTTPRequestPlugins('tornado.web.RequestHandler', __name__)
     async def get(self):
-        # await self.get_1()
-        # await self.get_2()
-        task1 = asyncio.create_task(self.get_1())
-        task2 = asyncio.create_task(self.get_2())
-        await task1
-        await task2
+        await self.get_1()
         self.write("Hello, world")
 
     @PinpointCommonPlugin('',__name__)
@@ -26,17 +19,6 @@ class MainHandler(tornado.web.RequestHandler):
         else:
             t-=1
             await self.get_1(t)
-
-    @PinpointCommonPlugin('',__name__)
-    async def get_2(self):
-        http_client = tornado.httpclient.AsyncHTTPClient()
-        try:
-            response = await http_client.fetch("http://www.google.com")
-        except Exception as e:
-            print("Error: %s" % e)
-        else:
-            self.write(response.body)
-
 
 def make_app():
     return tornado.web.Application([
