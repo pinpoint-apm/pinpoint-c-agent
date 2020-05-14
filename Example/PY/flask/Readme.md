@@ -1,48 +1,32 @@
-﻿## Getting Started
-
-### Requirement
-
-Dependency|Version
----|----
-PYTHON | 3.5+
-GCC| GCC 5+
-cmake| 3.0+
-*inux|
-pinpoint| 1.8.0-RC1(thrift) <br> 2.0+(GRPC)
-
-### Installation
-#### install python virtual environment 
-
-https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
-
-#### Install pinpoint-py module
-
-```
-$ cd PY/pinpoint-py-module
-$ sh setup_all_in_one.sh
-$ python setup.py install
-```
-#### integration pinpoint into your project
-
-> Steps
-
-1. Binding the preRequestPlugins
-
-``` python
-    @BaseHTTPRequestPlugins('SimpleWebServer',__name__)
-    def do_GET(self):
-```
-
-2. Binding the function/method you care
-
-```
-    @PinpointCommonPlugin('SimpleWebServer',__name__)
-    def getAgent(self,headers):
-```
+﻿# Integration Pinpoint Into Flask.
 
 
+## Integration pinpoint
 
-### TODO
+> Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](../../../DOC/PY/Readme.md))
+1. Copy [PinPointMiddleWare.py](PinPointMiddleWare.py) to your project. Add PinPointMiddleWare to your application.
 
+    ```
+    app = Flask(__name__)
+    
+    from PinPointMiddleWare import PinPointMiddleWare
+    app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
+    ......
+    ```
+2. Copy plugins(Both ```plugin``` and ```flask/plugins```) to your root. Plugins in ```plugin``` and ```flask/plugins``` are some examples, you can also write your own plugin according to these examples.
 
-pip install --extra-index-url https://test.pypi.org/simple/ pinpointPy
+3. Hook the function you cared.
+
+     > Example: flask/test_recursion.py
+     Hook the function ```fact``` by add ```@PinpointCommonPlugin('', __name__)``` just before it.
+    
+    
+    ```
+    from plugins.PinpointCommonPlugin import PinpointCommonPlugin
+    
+    
+    @PinpointCommonPlugin('', __name__)
+    def fact(n):
+        ......
+    ```
+
