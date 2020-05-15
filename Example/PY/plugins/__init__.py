@@ -14,5 +14,7 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-from plugins.PyMysql import *
-from plugins.requests import *
+from .PyMysql import *
+from .requests import *
+from .PinpointCommon import *
+from .PinpointCommonPlugin import PinpointCommonPlugin

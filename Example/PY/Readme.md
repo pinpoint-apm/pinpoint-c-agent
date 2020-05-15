@@ -26,7 +26,7 @@ Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequest
 2. [requests](./plugins/requests)
 
 #### How To Use
-> Example: Refer to [PyMysql/__init__.py](./plugins/PyMysql/__init__.py)
+> Example: Refer to [PyMysql/\_\_init\_\_.py](./plugins/PyMysql/__init__.py)
 
 > Steps
 
@@ -39,9 +39,9 @@ Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequest
     ]
     ```
 2. Import it in ```plugin/__init__.py```
-```python
-from plugins.PyMysql import *
-```
+    ```python
+    from plugins.PyMysql import *
+    ```
 
 ## The Python Frameworks pinpoint-py Supports
 

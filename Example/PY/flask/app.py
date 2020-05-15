@@ -26,7 +26,7 @@ from datetime import datetime
 import functools
 import requests
 
-from plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
 
 import test_function
@@ -56,8 +56,8 @@ from DBControl import DBContrl
 
 app = Flask(__name__)
 
-from MyMidWare import MyMidWare
-app.wsgi_app = MyMidWare(app,app.wsgi_app)
+from pinpoint.PinPointMiddleWare import PinPointMiddleWare
+app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
 
 
 @app.route('/', methods=['GET', 'POST'])

@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 
-from plugins.PinpointCommon import *
+from .plugins import *
 
 import traceback
 import pinpointPy
