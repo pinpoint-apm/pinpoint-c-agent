@@ -14,7 +14,7 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-from plugins.PinpointCommon import *
+from .PinpointCommon import *
 import pinpointPy
 import threading
 

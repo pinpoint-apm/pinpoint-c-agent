@@ -30,9 +30,8 @@ from TestDemo.test_exception import UserDefineException
 from TestDemo import test_args
 from TestDemo import test_returns
 from TestDemo.DBControl import DBContrl
+from TestDemo.RedisControl import RedisControl
 
-
-from plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
 GREETING = "Hello World!"
 
@@ -247,7 +246,7 @@ def test_arguments(request):
     for i in l1:
         l2.append(test_args.test_args1(i))
     f.close()
-    h1 = "<br>".join('%s' %str(id) for id in l2)
+    h1 = "<br>".join(l2)
     h2 = test_args.test_args2("Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
     return HttpResponse('''<h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2))
@@ -262,26 +261,26 @@ def test_returns_func(request):
     for i in l1:
         l2.append(str(type(test_returns.test_returns1(i)))[8:-2])
     f.close()
-    h1 = "<br>".join('%s' %str(id) for id in l2)
+    h1 = "<br>".join(l2)
     h2 = test_returns.test_returns2("Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
     return HttpResponse('''<h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2))
 
 
 def test_mysql(request):
-    mysql = DBContrl("localhost", "", "", "DjangoTest")
+    mysql = DBContrl("localhost", "root", "root", "DjangoTest")
     mysql.con_db()
     h1 = mysql.db_select("select * from polls_question;")
     mysql.db_close()
     return HttpResponse("<br>".join('%s' %str(id) for id in h1))
 
 
-def test_redis(request):
-    mysql = DBContrl("localhost", "root", "root", "DBTest")
-    mysql.con_db()
-    h1 = mysql.db_select("select * from user;")
-    mysql.db_close()
-    return HttpResponse("<br>".join(h1))
+def test_redis():
+    r = RedisControl("localhost", "6379")
+    r.connection()
+    h1 = r.set("name","Evy")
+    r.delete("name")
+    return HttpResponse(h1)
 
 
 def call_remote(request):

@@ -20,7 +20,7 @@
 
 
 import pinpointPy
-from plugins.PinpointCommon import *
+from .plugins import *
 
 from flask import Flask,Request
 import threading
