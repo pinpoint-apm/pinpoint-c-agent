@@ -30,6 +30,7 @@ from TestDemo.test_exception import UserDefineException
 from TestDemo import test_args
 from TestDemo import test_returns
 from TestDemo.DBControl import DBContrl
+from TestDemo.RedisControl import RedisControl
 
 
 GREETING = "Hello World!"
@@ -272,6 +273,14 @@ def test_mysql(request):
     h1 = mysql.db_select("select * from polls_question;")
     mysql.db_close()
     return HttpResponse("<br>".join('%s' %str(id) for id in h1))
+
+
+def test_redis():
+    r = RedisControl("localhost", "6379")
+    r.connection()
+    h1 = r.set("name","Evy")
+    r.delete("name")
+    return HttpResponse(h1)
 
 
 def call_remote(request):

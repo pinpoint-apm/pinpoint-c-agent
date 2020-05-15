@@ -32,6 +32,6 @@ urlpatterns = [
     path('test_arguments/', views.test_arguments, name='test_arguments'),
     path('test_returns/', views.test_returns_func, name='test_returns'),
     path('test_mysql/', views.test_mysql, name='test_mysql'),
-#    path('test_redis/', views.test_redis, name='test_redis'),
+    path('test_redis/', views.test_redis, name='test_redis'),
     path('call_remote/', views.call_remote, name='call_remote'),
 ]
