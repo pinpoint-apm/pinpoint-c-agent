@@ -16,7 +16,7 @@
 
 import pymysql
 from pymysql.cursors import Cursor
-from plugins.PyMysqlPlugin import PyMysqlPlugin
+from ..PyMysqlPlugin import PyMysqlPlugin
 
 HookSet = [
     ('pymysql', 'connect', pymysql, pymysql.connect),

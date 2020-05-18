@@ -3,7 +3,7 @@
 
 
 import abc
-from plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
 
 class AllFle(metaclass=abc.ABCMeta):

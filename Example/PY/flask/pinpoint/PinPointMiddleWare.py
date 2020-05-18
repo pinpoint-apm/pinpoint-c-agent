@@ -17,7 +17,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from plugins.BaseFlaskPlugins import BaseFlaskPlugins
+from .BaseFlaskPlugins import BaseFlaskPlugins
 # import pinpointPy
 class PinPointMiddleWare():
 

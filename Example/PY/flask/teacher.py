@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from person import Person
-from plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
 
 class Teacher(Person):

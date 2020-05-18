@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import functools
-from plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
 
 def log(text):

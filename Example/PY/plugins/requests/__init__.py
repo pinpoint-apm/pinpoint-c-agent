@@ -15,7 +15,7 @@
 # ------------------------------------------------------------------------------
 
 import requests
-from plugins.NextSpanPlugin import NextSpanPlugin
+from ..NextSpanPlugin import NextSpanPlugin
 
 
 HookSet = [

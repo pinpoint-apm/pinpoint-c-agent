@@ -26,7 +26,7 @@ from datetime import datetime
 import functools
 import requests
 
-from plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
 
 import test_function
@@ -51,13 +51,14 @@ from test_exception import UserDefineException
 import test_args
 import test_returns
 from DBControl import DBContrl
+from RedisControl import RedisControl
 
 
 
 app = Flask(__name__)
 
-from MyMidWare import MyMidWare
-app.wsgi_app = MyMidWare(app,app.wsgi_app)
+from pinpoint.PinPointMiddleWare import PinPointMiddleWare
+app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -334,11 +335,11 @@ def test_mysql_form():
 
 @app.route('/test_redis', methods=['GET'])
 def test_redis_form():
-    mysql = DBContrl("localhost", "root", "root", "DBTest")
-    mysql.con_db()
-    h1 = mysql.db_select("select * from user;")
-    mysql.db_close()
-    return "<br>".join('%s' %str(id) for id in h1)
+    r = RedisControl("localhost", "6379")
+    r.connection()
+    h1 = r.set("name","Evy")
+    r.delete("name")
+    return '''<h3>%s</h3>''' % h1
 
 
 @app.route('/call_remote', methods=['GET'])

@@ -15,7 +15,7 @@
 # ------------------------------------------------------------------------------
 
 
-from plugins.PinpointCommon import *
+from .PinpointCommon import *
 import pinpointPy
 from  urllib.parse import urlparse
 
