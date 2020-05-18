@@ -1,8 +1,8 @@
-﻿## Getting Started
+## 入门指南
 
-### Requirement
+### 要求
 
-Dependency| Version
+依赖| 版本
 ---|----
 python |python 3.5+
 python async|python 3.7.1+
@@ -11,23 +11,23 @@ cmake| 3.0+
 *inux| 
 pinpoint| 1.8.0-RC1(thrift) <br> 2.0+(GRPC)
 
-### Installation
+### 安装步骤
 
-#### Build pinpointPy module
+#### 搭建 pinpointPy 模块
 
-1. Install python virtual environment,refer to 
+1. 安装python虚拟环境，请参考
 https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
-2. Come back to the root directory, install pinpointPy (Python virtual environment is recommended).
+2. 回到根目录下，安装 pinpointPy（建议在Python虚拟环境下执行）
 ```shell
 $ python setup.py install
 ```
-#### Build Collector-agent
-1. Goto collector-agent
+#### 搭建 Collector-agent
+1. 在 collector-agent 目录下，执行以下命令：
 2. python3 -m venv env
 3. source env/bin/activate
 4. pip3 install -r requirements.txt
-5. Change configuration file in conf/collector.conf
+5. 根据以下内容更改 conf/collector.conf 中的配置文件
 
     ```ini
     [Collector]
@@ -35,7 +35,7 @@ $ python setup.py install
     ApplicationName=dev-app
  
     # pinpoint-collector host and specific port
-    ### For thrift pinpoint 1.8.0-RC1+
+    ### 要使用thrift协议，pinpoint的版本需要在 1.8.0-RC1 以上
     #CollectorSpanIp=collectorHost
     #CollectorSpanPort=9905
     #CollectorStatIp=collectorHost
@@ -43,7 +43,7 @@ $ python setup.py install
     #CollectorTcpIp=collectorHost
     #CollectorTcpPort=9907
  
-    ### For GRPC pinpoint 2.0+
+    ### 要使用grpc协议，pinpoint的版本需要在 2.0 以上
     AgentID=your_id
     ApplicationName=your_name
     collector.grpc.agent.ip=collectorHost
@@ -58,23 +58,23 @@ $ python setup.py install
     Web_Port=8001   
     # debug in dev
     Log_Level=ERROR 
-    # make sure LOG_DIR is exist
-    # The real-time log of collector-agent can be checked under this path with the command " tail -f ".
+    # 确保 LOG_DIR 是存在的
+    # 可以使用“tail -f”命令在此路径下查看collector-agent的实时日志
     LOG_DIR=/your log dir/ 
     [Agent]
     # the same as below "pinpoint_php.CollectorHost"
     Address=/tmp/collector-agent.sock
     ```
 6. export COLLECTOR_CONFIG=/full path of collector.conf/
-7. run collector-agent
+7. collector-agent的启动命令如下所示：
     ```
     $ ./init_python_env.sh
     $ python run.py 
     ```
 
-### [How To Use]
-[Click me ☚](../../Example/PY/Readme.md)
+### [如何使用]
+[请点击 ☚](../../Example/PY/Readme.md)
 
 
-## Changes
+## 变化
 

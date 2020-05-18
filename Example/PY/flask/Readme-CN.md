@@ -1,10 +1,10 @@
-﻿# Integrating Pinpoint Into Flask
+# 将pinpoint集成到Flask中
 
 
-## Integrating pinpoint
+## 集成Pinpoint
 
-> Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](../../../DOC/PY/Readme.md))
-1. Copy ```pinpoint``` directory to your project root. Add PinPointMiddleWare to your application.
+> 确保安装了pinpointPy模块。([如何安装pinpointPy模块](../../../DOC/PY/Readme.md))
+1. 将```pinpoint``` 目录复制到您项目的根目录， 将 PinPointMiddleWare 添加到您的应用程序中。
 
     ```
     app = Flask(__name__)
@@ -13,9 +13,9 @@
     app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
     ......
     ```
-2. Copy [plugins](../plugins) to the ```pinpoint``` directory . Plugins in ```plugin``` are some examples, you can also write your own plugin according to these examples.
+2. 将[插件](../plugins)复制到```pinpoint``` 目录。 ```plugin``` 里的插件是一些示例，您也可以根据这些例子编写您自己的插件。
 
-3. Hook the function you cared.
+3.Hook 您所关心的函数。
 
      > Example: flask/test_recursion.py
      Hook the function ```fact``` by add ```@PinpointCommonPlugin('', __name__)``` just before it.
