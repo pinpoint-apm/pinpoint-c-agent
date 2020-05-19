@@ -32,7 +32,7 @@ Pinpoint php agent将php_simple_aop作为它的方面编程库，它有助于将
 
 >TPR: requests per second（每秒的请求数量）
 
-[如何在Flarum中使用pinpoint-php ?](/Example/PHP/demo/Flarum-demo/Reademe.md)
+[如何在Flarum中使用pinpoint-php ?](/Example/PHP/demo/Flarum-demo/Readme-CN.md)
 
 >  调用栈
 
