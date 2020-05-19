@@ -32,7 +32,7 @@ from Stat_pb2 import PAgentInfo, PPing
 class GrpcAgent(GrpcClient):
     PINGID = 0
 
-    def __init__(self, hostname, ip, ports, pid, address, meta=None, maxPending=-1, timeout=10):
+    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP,meta=None, maxPending=-1, timeout=10):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
@@ -44,7 +44,7 @@ class GrpcAgent(GrpcClient):
         self.exit_cv  = threading.Condition()
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
-                                    serviceType=PHP)
+                                    serviceType=server_type)
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
         self.task_running = False
 

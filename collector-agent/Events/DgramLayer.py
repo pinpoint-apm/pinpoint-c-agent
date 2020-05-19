@@ -45,7 +45,9 @@ class DgramLayer(TrainLayer):
         try:
             self.__socket.send(data)
         except  asy_socket.error as e:
-            if not (e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK)):
+            if e.errno in (errno.EINPROGRESS, errno.EWOULDBLOCK):
+                pass
+            else:
                 TCLogger.warning("connect:%s error:%s" % (self.remote, str(e)))
 
     def stop(self):

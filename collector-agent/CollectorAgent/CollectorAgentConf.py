@@ -18,6 +18,7 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 import time
+from PinpointAgent.Type import PHP
 
 from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
@@ -42,6 +43,7 @@ class CollectorAgentConf(object):
         self.CollectorAgentPort = ''
         self.max_pending_size = ''
         self.collector_type = -1
+
         self.collector_implement = None
         self.startTimestamp = int(time.time() * 1000)
         self.config = config
@@ -85,6 +87,7 @@ class CollectorAgentConf(object):
         self.ApplicationName = config.get('Collector',
                                           'ApplicationName')
         self.version = AGENT_VERSION
+        self.server_type = config.getint('Collector', 'ServerType', fallback=PHP)
 
         log_dir = config.get('Common', 'LOG_DIR', fallback=None)
         log_level = config.get('Common', 'Log_Level', fallback='DEBUG')

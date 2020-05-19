@@ -22,8 +22,6 @@
 from threading import Thread
 from queue import Full,Queue
 
-from setproctitle import setproctitle
-
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
@@ -36,6 +34,7 @@ from Span_pb2 import PSpanMessage
 
 
 class GrpcAgentImplement(PinpointAgent):
+
     class SpanSender(object):
         def __init__(self, span_addr, appid, appname, starttime,max_pending_sz):
             self.agent_meta = [('starttime', str(starttime)), ('agentid', appid), ('applicationname', appname)]
@@ -68,7 +67,7 @@ class GrpcAgentImplement(PinpointAgent):
             self.span_client.stop()
             TCLogger.info("grpc agent dropped %d",self.dropped_span_count)
 
-    def __init__(self, ac, app_id, app_name, serviceType=PHP):
+    def __init__(self, ac, app_id, app_name, serviceType):
 
         assert ac.collector_type == SUPPORT_GRPC
         super().__init__(app_id, app_name)
@@ -76,7 +75,7 @@ class GrpcAgentImplement(PinpointAgent):
                            ('agentid', app_id),
                            ('applicationname', app_name)]
         self.startTimeStamp = ac.startTimestamp
-
+        self.service_type = serviceType
         self.max_pending_sz = ac.max_pending_size
         self.agent_addr = ac.CollectorAgentIp + ':' + str(ac.CollectorAgentPort)
         self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorSpanPort)
@@ -90,7 +89,7 @@ class GrpcAgentImplement(PinpointAgent):
         self._startSpanSender()
 
         self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(),
-                                      self.agent_addr, self.agent_meta)
+                                      self.agent_addr, self.service_type,self.agent_meta)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
 
         self.agent_client.start()
@@ -103,6 +102,7 @@ class GrpcAgentImplement(PinpointAgent):
     def _sendSpan(self, spanMsg):
 
         self.span_sender_list[0].sendSpan(spanMsg)
+        TCLogger.debug(spanMsg)
         return True
 
     def sendSpan(self, stack, body):
@@ -110,7 +110,7 @@ class GrpcAgentImplement(PinpointAgent):
             pSpan = self.span_factory.makeSpan(stack)
             spanMesg = PSpanMessage(span=pSpan)
         except Exception as e:
-            TCLogger.warn(" interrupted by %s",e)
+            TCLogger.warn("interrupted by %s",e)
             return False
         if self._sendSpan(spanMesg):
             return True
