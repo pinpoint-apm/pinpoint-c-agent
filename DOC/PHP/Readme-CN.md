@@ -125,9 +125,9 @@ Pinpoint 版本 | PHP 版本| Python 版本|GCC 版本
 
 ### 对于开发人员
 
-[插件编写指南 ☚](../../Example/PHP/Readme.md)
+[插件编写指南 ☚](../../Example/PHP/Readme-CN.md)
 
-[PHP用户手册 ☚](./User%20Manual.md)
+[PHP用户手册 ☚](./User%20Manual-CN.md)
 
 ### 已知问题
 

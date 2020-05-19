@@ -73,7 +73,7 @@ $ python setup.py install
     ```
 
 ### [如何使用]
-[请点击 ☚](../../Example/PY/Readme.md)
+[请点击 ☚](../../Example/PY/Readme-CN.md)
 
 
 ## 变化
