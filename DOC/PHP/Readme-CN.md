@@ -119,9 +119,9 @@ Pinpoint 版本 | PHP 版本| Python 版本|GCC 版本
 
 在完全测试之后，AOP代码可以在我们的环境(E5-2660 v4 @ 2.00GHz)中至少消耗1ms。但监测的功能/方法越多，损耗的性能也就越多。
 
-[测试结果 ☚](./Readme.md#performance-loss-under-stress-test)
+[测试结果 ☚](./Readme-CN.md#压力测试下的性能损失)
 
-[FLarum的测试结果 ☚](./User%20Manual.md#1.1-performance-result)
+[FLarum的测试结果 ☚](./User%20Manual-CN.md#1.1-性能测试结果)
 
 ### 对于开发人员
 
@@ -240,7 +240,7 @@ phpmyadmin with pinpoint-php v0.2|398.26ms
 ```
 MTT: Mean RTT Time 
 ```
-> [ pinpoint-php on Flraum 测试结果 ](./User%20Manual.md#1.1-performance-result)
+> [ pinpoint-php on Flraum 测试结果 ](./User%20Manual-CN.md#1.1-性能测试结果)
 
 > 顺便提一下，Pinpoint是一个APM系统，但不是一个性能增强系统。目前这种损失是无法避免的
 
