@@ -63,7 +63,10 @@ $ python setup.py install
     LOG_DIR=/your log dir/ 
     [Agent]
     # the same as below "pinpoint_php.CollectorHost"
+    # sock address
     Address=/tmp/collector-agent.sock
+    # or TCP address
+    #Address=ip@port
     ```
 6. export COLLECTOR_CONFIG=/full path of collector.conf/
 7. collector-agent的启动命令如下所示：
