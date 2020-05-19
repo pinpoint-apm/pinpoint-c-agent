@@ -1,6 +1,6 @@
 # How to Use Pinpoint？
 
-## Example Of A Simple Http Server
+## Example of A Simple Http Server
 
 Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequestPlugins](./simple-http-server/plugins/BaseHTTPRequestPlugins.py)
 
@@ -25,7 +25,7 @@ Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequest
 1. [PyMysql](./plugins/PyMysql)
 2. [requests](./plugins/requests)
 
-#### How To Use
+#### How to Use
 > Example: Refer to [PyMysql/\_\_init\_\_.py](./plugins/PyMysql/__init__.py)
 
 > Steps

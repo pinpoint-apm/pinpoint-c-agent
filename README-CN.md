@@ -12,11 +12,11 @@ Agent由c++、PHP、python语言编写，我们希望后续能支持其他语言
 
 ## 如何在PHP中使用？
 
- [请点击 ☚](DOC/PHP/Readme.md)
+ [请点击 ☚](DOC/PHP/Readme-CN.md)
 
 ## 如何在PYTHON3中使用？
 
-[请点击 ☚](DOC/PHP/Readme.md)
+[请点击 ☚](DOC/PY/Readme-CN.md)
 
 ## Pinpoint Common Agent 概况
 
