@@ -1,11 +1,11 @@
-﻿
-> Contents
+
+> 内容
 
 [toc]
 
-## 1 How does pinpoint-php agent work?
+## 1 pinpoint-php agent是如何工作的?
 
-Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_aop) as its aspect programming library, and it helps to convert origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
+Pinpoint php agent将php_simple_aop作为它的方面编程库，它有助于将origin class.php转换为proxied_class.php，其中包括plugins.php和origin.php，而不影响origin class.php的任何函数。
 
 ``` php
 +--------------+                    +-----------------------+
@@ -22,27 +22,28 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 
 ```
 
-## 1.1 Performance Result
+## 1.1 性能测试结果
 
-> TPS loss and TPR Loss
+> TPS 损耗 和 TPR 损耗
 
 ![FlarumPerformanceTest](../images/FlarumPerformanceTest.png)
 
-> TPS: time per request 
-> TPR: requests per second
+> TPS: time per request（每个请求的响应时间）
 
-[How to use pinpoint-php into Flarum?](/Example/PHP/demo/Flarum-demo/Reademe.md)
+>TPR: requests per second（每秒的请求数量）
 
->  Call Tree
+[如何在Flarum中使用pinpoint-php ?](/Example/PHP/demo/Flarum-demo/Reademe.md)
+
+>  调用栈
 
 ![CallTree](../images/Flarum-callstack.png)
 
-> Summary
-* Less than 5% loss, when Flarum adds PHP Agent.
+> 总结
+* 当Flarum添加PHP Agent时，损失小于5%。
 
-If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
+如果您特别在意性能损耗问题，可以直接调用由C&C++编写的pinpoint-php agent模块API。 [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
 
-## 2 How to hook a object ?
+## 2 如何hook a object?
 
 ```
 use A\a as a;
@@ -55,18 +56,18 @@ class Foo{
 
 ```
 
-> As foo returns a new object and this scenario can't be detected by php_simple_aop easily.
+> 当foo返回一个新对象时，php_simple_aop很难检测到这个场景。
 
-### 2.1 Use a decorator
+### 2.1 使用一个装饰器
 
-Replace the return object with a decorated object in onEnd(). There are some [magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to help "hacking" the object.
+用onEnd()中的修饰对象替换返回对象。这里有一些[魔术方法](https://www.php.net/manual/en/language.oop5.magic.php)可以帮助“破解”对象。 
 
-[ [How it works ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
+[ [如何运作 ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
 
 
-### 2.2 Examples
+### 2.2 示例
 
-#### 2.2.1 Hook a generator.
+#### 2.2.1 Hook a generator
 
 > https://github.com/naver/pinpoint-c-agent/issues/100
 
@@ -87,9 +88,9 @@ Replace the return object with a decorated object in onEnd(). There are some [ma
     }
     ...
 ```
-[ [Goto GeneratorPlugin ☚] ](../../Example/PHP/Plugins/GeneratorPlugin.php)
+[ [跳转到 GeneratorPlugin ☚] ](../../Example/PHP/Plugins/GeneratorPlugin.php)
 
-#### 2.2.2 PDO::prepare return a PDOStatement
+#### 2.2.2 PDO::prepare方法返回了一个PDOStatement类
 
 ``` php
 Reference： https://www.php.net/manual/zh/pdo.prepare.php
@@ -106,5 +107,4 @@ $yellow = $sth->fetchAll();
 
 ```
 
-Replace $dbh->prepare return value with [Plugins\PDOStatement](../../Example/PHP/Plugins/PDOStatement.php).
-
+用[Plugins\PDOStatement](../../Example/PHP/Plugins/PDOStatement.php)替换$dbh->prepare方法的返回值

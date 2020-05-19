@@ -275,7 +275,7 @@ def test_mysql(request):
     return HttpResponse("<br>".join('%s' %str(id) for id in h1))
 
 
-def test_redis():
+def test_redis(request):
     r = RedisControl("localhost", "6379")
     r.connection()
     h1 = r.set("name","Evy")

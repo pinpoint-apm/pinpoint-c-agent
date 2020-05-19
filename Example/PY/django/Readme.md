@@ -1,7 +1,7 @@
-﻿# Integration Pinpoint Into Django.
+﻿# Integrating Pinpoint Into Django
 
 
-## Integration pinpoint
+## Integrating pinpoint
 
 > Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](../../../DOC/PY/Readme.md))
 1. Copy ```pinpoint``` directory to your project root. Add ```PinPointMiddleWare``` into ```MIDDLEWARE``` in Django's setting file.
@@ -14,7 +14,7 @@
         ......
     ]
     ```
-2. Copy plugins to the ```pinpoint``` directory. Plugins in ```plugin``` are some examples, you can also write your own plugin according to these examples.
+2. Copy [plugins](../plugins) to the ```pinpoint``` directory. Plugins in ```plugin``` are some examples, you can also write your own plugin according to these examples.
 
 3. Hook the function you cared.
 

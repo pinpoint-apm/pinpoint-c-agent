@@ -5,7 +5,7 @@
 **Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [Lastest](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [the Latest](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint Common Agent
 
@@ -23,7 +23,7 @@ It is an agent written by C++, PHP, python languages. And we hope to support oth
 ## Overview Pinpoint Common Agent
 
 ### Pinpoint-c-agent 
-![How does it work](images/pinpoint_0.2.jpg)
+![How does it work](images/pinpoint_0.2.png)
 
 ### Distributed Tracking system
 ![php_agent_example](images/php_agent_example.png)

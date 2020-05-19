@@ -1,36 +1,36 @@
-# How to Use Pinpoint？
+# 如何使用pinpoint？
 
-## Example Of A Simple Http Server
+## 一个简单的 Http Server 的例子
 
-Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequestPlugins](./simple-http-server/plugins/BaseHTTPRequestPlugins.py)
+请参考 [http-server](./simple-http-server/http-server.py) 和 [BaseHTTPRequestPlugins](./simple-http-server/plugins/BaseHTTPRequestPlugins.py)
 
-> Steps
+> 步骤
 
-1. Use preRequestPlugins(BaseHTTPRequestPlugins) to bind the requests handler function.
+1. 用 preRequestPlugins(BaseHTTPRequestPlugins) 来绑定处理器函数上的请求。
 
 ```python
     @BaseHTTPRequestPlugins(/whatever name you like(such as project name)/, /the function name/)
     def do_GET(self):
 ```
 
-2. Use PinpointCommonPlugin to bind the user-defined function/method you care.
+2. 用 PinpointCommonPlugin 来绑定您所关心的用户自定义的函数/方法。
 
 ```python
     @PinpointCommonPlugin(/the class name/, /the function name/)
     def getAgent(self,headers):
 ```
 
-## The Library pinpoint-py Supports.
+## pinpoint-py支持的库
 
 1. [PyMysql](./plugins/PyMysql)
 2. [requests](./plugins/requests)
 
-#### How To Use
-> Example: Refer to [PyMysql/\_\_init\_\_.py](./plugins/PyMysql/__init__.py)
+#### 如何使用
+> 示例: 请参考 [PyMysql/\_\_init\_\_.py](./plugins/PyMysql/__init__.py)
 
-> Steps
+> 步骤
 
-1. Add the function you care into ```HookSet``` in ```plugins/PyMysql/__init__.py```:
+1. 在```plugins/PyMysql/__init__.py```中，将您所关心的函数添加到```HookSet``` :
     ```python
     HookSet = [
         ('pymysql', 'connect', pymysql, pymysql.connect),
@@ -38,14 +38,14 @@ Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequest
         ('Cursor','fetchall', Cursor, Cursor.fetchall)
     ]
     ```
-2. Import it in ```plugin/__init__.py```
+2. 将它导入到 ```plugin/__init__.py```中
     ```python
     from plugins.PyMysql import *
     ```
 
-## The Python Frameworks pinpoint-py Supports
+## pinpoint-py 支持的Python框架
 
-Follow the Readme.md under each framework to enable the plugins.
+遵照Readme.md，在每个框架下启用插件。
 
 1. [Django](./django) (https://www.djangoproject.com/) 
 2. [Flask](./flask) (https://github.com/pallets/flask) 

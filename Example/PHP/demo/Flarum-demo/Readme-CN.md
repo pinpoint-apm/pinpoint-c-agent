@@ -1,8 +1,8 @@
-﻿## How to use?
+## 如何使用?
 
-### Steps
+### 步骤
 
-1. Include php_simple_aop into composer.json
+1. 在composer.json中包含php_simple_aop
  
 ```
    "require": {
@@ -10,7 +10,7 @@
     }
 ```
 
-2. Copy plugins into web root path and enable autoload
+2. 将插件复制到web根路径并启用自动加载
 
 ```
     "autoload": {
@@ -21,7 +21,7 @@
     }
 ```
 
-3. Insert pinpoint header into site.php
+3. 在site.php中插入pinpoint header
 
 ``` php
 #####################################################################################
@@ -36,9 +36,9 @@ require_once __DIR__. '/vendor/eeliu/php_simple_aop/auto_pinpointed.php';
 #####################################################################################
 ```
 
-## Output
+## 输出
 
-### CallStack
+### 调用栈
 ![CallStack](images/Flarum_callstack.png)
 
 ### ServerMap

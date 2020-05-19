@@ -2,50 +2,48 @@
 
 [![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-**Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
+*请访问我们的[官方网站](http://naver.github.io/pinpoint/)，了解更多关于Pinpoint的信息和[最新版本](https://naver.github.io/pinpoint/news.html)*。
 
-
-The current stable version is [Lastest](https://github.com/naver/pinpoint-c-agent/releases).
+目前稳定的版本是[最新版](https://github.com/naver/pinpoint-c-agent/releases)。
 
 # Pinpoint Common Agent
 
-It is an agent written by C++, PHP, python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_** and **_PYTHON_**.
+Agent由c++、PHP、python语言编写，我们希望后续能支持其他语言。目前为止，它支持 **_PHP_** 和 **_PYTHON_**。
 
-## How to use in PHP
+## 如何在PHP中使用？
 
-[Click me ☚](DOC/PHP/Readme.md)
+ [请点击 ☚](DOC/PHP/Readme.md)
 
-## How to use in PYTHON3
+## 如何在PYTHON3中使用？
 
-[Click me ☚](DOC/PY/Readme.md)
+[请点击 ☚](DOC/PHP/Readme.md)
 
-
-## Overview Pinpoint Common Agent
+## Pinpoint Common Agent 概况
 
 ### Pinpoint-c-agent 
-![How does it work](images/pinpoint_0.2.jpg)
+![How does it work](images/pinpoint_0.2.png)
 
-### Distributed Tracking system
+###分布式跟踪系统
 ![php_agent_example](images/php_agent_example.png)
 
-### Call Stack
+### 调用栈
 
 ![php_agent_example_detail](images/php_agent_example_detail.png) | ![php_agent_example_memcached](images/callstack-memcached.png)
 --- | ---
 ![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
-## Contact Us
-* Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
-* Chinese Community:
+## 联系我们
+* 提交[问题](https://github.com/naver/pinpoint-c-agent/issues)
+* 中国社区：
 
 QQ Group: 897594820 | DING Group
 :---:| :---:
 ![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 
-## License
-This project is licensed under the Apache License, Version 2.0.
-See [LICENSE](LICENSE) for full license text.
+## 许可证
+此项目是在Apache许可证2.0版本下授权的。
+请点击[许可证](LICENSE)获取完整的许可证文本。
 
 ```
 Copyright 2020 NAVER Corp.
