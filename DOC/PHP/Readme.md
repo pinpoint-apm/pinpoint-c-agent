@@ -29,8 +29,9 @@ pinpoint| 1.8.0-RC1
        >  php.ini 
         ```ini
         extension=pinpoint_php.so
-        # unix:(unix sock address) or TCP address
+        # unix:(unix sock address)
         pinpoint_php.CollectorHost=unix:/tmp/collector-agent.sock
+        # or TCP address
         #pinpoint_php.CollectorHost=Tcp:ip:port
         pinpoint_php.SendSpanTimeOutMs=0 # 0 is recommanded
         # request should be captured duing 1 second. < 0 means no limited
@@ -72,8 +73,9 @@ pinpoint| 1.8.0-RC1
         LOG_DIR=/your log dir/ 
         [Agent]
         # the same as below "pinpoint_php.CollectorHost"
-        sock or TCP address
+        # sock address
         Address=/tmp/collector-agent.sock
+        # or TCP address
         #Address=ip@port
         ```
     5. export COLLECTOR_CONFIG=/full path of collector.conf/
