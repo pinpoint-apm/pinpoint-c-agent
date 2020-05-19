@@ -60,7 +60,7 @@ class Foo{
 
 ### 2.1 使用一个装饰器
 
-用onEnd()中的修饰对象替换返回对象。这里有一些[神奇的方法](https://www.php.net/manual/en/language.oop5.magic.php)可以帮助“破解”对象。 
+用onEnd()中的修饰对象替换返回对象。这里有一些[魔术方法](https://www.php.net/manual/en/language.oop5.magic.php)可以帮助“破解”对象。 
 
 [ [如何运作 ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
 

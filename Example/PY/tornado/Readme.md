@@ -4,7 +4,7 @@
 ## Integrating pinpoint
 
 > Make sure pinpointPy module has been installed. ([How to Install pinpointPy module](../../../DOC/PY/Readme.md))
-1. Copy [plugins](tornado/plugins) to your root. Plugins in tornado/plugins are some examples, you can also write your own plugin according to these examples.
+1. Copy [plugins](../tornado/plugins) to your root. Plugins in tornado/plugins are some examples, you can also write your own plugin according to these examples.
 
 2. Use preRequestPlugins(TornadoHTTPRequestPlugins) to bind the requests handler function.
     ```python
