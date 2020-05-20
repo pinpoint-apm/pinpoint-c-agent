@@ -82,7 +82,7 @@ REDIS_REDISSON='8203'
 REDIS_REDISSON_INTERNAL='8204'
 MEMCACHED='8050'
 pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
-# pinpointPy.set_agent(collector_host='Tcp:10.34.130.152:6666',trace_limit=-1)
+# pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
 
 # def output(msg):
 #     print(msg)

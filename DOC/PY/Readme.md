@@ -9,7 +9,7 @@ python async|python 3.7.1+
 gcc|gcc 4.7+
 cmake| 3.0+
 *inux| 
-pinpoint| 1.8.0-RC1(thrift) <br> 2.0+(GRPC)
+pinpoint| 2.0+(GRPC)
 
 ### Installation
 
@@ -63,7 +63,10 @@ $ python setup.py install
     LOG_DIR=/your log dir/ 
     [Agent]
     # the same as below "pinpoint_php.CollectorHost"
+    # sock address
     Address=/tmp/collector-agent.sock
+    # or TCP address
+    #Address=ip@port
     ```
 6. export COLLECTOR_CONFIG=/full path of collector.conf/
 7. run collector-agent
@@ -78,3 +81,20 @@ $ python setup.py install
 
 ## Changes
 
+
+## Performance Test Result
+
+### Case: flask/test_mysql
+
+-|TPR(ms)|RPS(#/sec)
+----|-----|----
+pinpoint-py|4.487|445.73|
+-|4.498 |444.69
+-|4.526 |441.88
+pure|4.440|450.44
+-|4.479|446.51
+-|4.425|451.96
+Result|+0.05ms|-1%
+
+> TPR:Time per request         
+> RPS:Requests per second

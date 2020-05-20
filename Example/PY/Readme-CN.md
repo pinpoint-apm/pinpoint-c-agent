@@ -1,5 +1,20 @@
 # 如何使用pinpoint？
 
+## PinpointPy 与 Collector-agent 的连接
+支持 sock 和 tcp 连接, 可以在 [PinpointCommon.py](plugins/PinpointCommon.py) 中配置。
+
+请确保 PinpointPy 和 Collector-agent 使用的同样的连接。
+> sock
+
+```
+pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
+```
+> TCP
+
+```
+pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
+```
+
 ## 一个简单的 Http Server 的例子
 
 请参考 [http-server](./simple-http-server/http-server.py) 和 [BaseHTTPRequestPlugins](./simple-http-server/plugins/BaseHTTPRequestPlugins.py)

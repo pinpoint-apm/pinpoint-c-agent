@@ -1,5 +1,20 @@
 # How to Use Pinpoint？
 
+## PinpointPy connect to Collector-agent
+Both sock and tcp supports, you could config in [PinpointCommon.py](plugins/PinpointCommon.py)
+
+Please make sure PinpointPy use the same with Collector-agent.
+> sock
+
+```
+pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
+```
+> TCP
+
+```
+pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
+```
+
 ## Example of A Simple Http Server
 
 Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequestPlugins](./simple-http-server/plugins/BaseHTTPRequestPlugins.py)
