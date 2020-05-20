@@ -9,7 +9,7 @@ python async|python 3.7.1+
 gcc|gcc 4.7+
 cmake| 3.0+
 *inux| 
-pinpoint| 1.8.0-RC1(thrift) <br> 2.0+(GRPC)
+pinpoint| 2.0+(GRPC)
 
 ### 安装步骤
 
