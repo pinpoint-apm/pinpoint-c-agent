@@ -23,11 +23,11 @@ import json
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
-from PinpointAgent.Type import PHP
+
 
 
 class AppManagement(object):
-    def __init__(self,collector_conf,service_type=PHP):
+    def __init__(self,collector_conf):
         assert isinstance(collector_conf,CollectorAgentConf)
         self.collector_conf = collector_conf
         self.default_appid = self.collector_conf.AgentID
@@ -35,7 +35,7 @@ class AppManagement(object):
         self.app_map = {}
         self.default_app = None
         self.recv_count = 0
-        self.createDefaultImplement(service_type)
+        self.createDefaultImplement(collector_conf.server_type)
 
     def createDefaultImplement(self, service_type):
 
@@ -54,14 +54,10 @@ class AppManagement(object):
             ## check service_type
 
         else:
-            if service_type == PHP:
-                TCLogger.info("collector-agent try to create a new application agent.[%s@%s]",app_id,app_name)
-                app = self.collector_conf.collector_implement(self.collector_conf, app_id, app_name)
-                app.start()
-                self.app_map[app_id] = app
-            else:
-                raise NotImplementedError("service_type:%d not support",service_type)
-
+            TCLogger.info("collector-agent try to create a new application agent.[%s@%s@%d]",app_id,app_name,service_type)
+            app = self.collector_conf.collector_implement(self.collector_conf, app_id, app_name,service_type)
+            app.start()
+            self.app_map[app_id] = app
         return app
 
     def stopAll(self):
@@ -74,6 +70,7 @@ class AppManagement(object):
     def handleFrontAgentData(self, client, type, body):
         content = body.decode('utf-8')
         try:
+            TCLogger.debug(content)
             stack = json.loads(content)
         except Exception as e:
             TCLogger.error("json is crash")

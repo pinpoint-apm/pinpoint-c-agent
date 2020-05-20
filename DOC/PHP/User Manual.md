@@ -3,9 +3,9 @@
 
 [toc]
 
-## 1 How pinpoint-php agent works?
+## 1 How does pinpoint-php agent work?
 
-Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_aop) as its aspect programming library, it helps converting origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
+Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_aop) as its aspect programming library, and it helps to convert origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
 
 ``` php
 +--------------+                    +-----------------------+
@@ -28,19 +28,19 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 
 ![FlarumPerformanceTest](../images/FlarumPerformanceTest.png)
 
-> TPS: Time per request 
-> TPR: Requests per second
+> TPS: time per request 
+> TPR: requests per second
 
-[How to use pinpoint-php into Flarum?](../../PHP/pinpoint_php_example/demo/Flarum-demo/Reademe.md)
+[How to use pinpoint-php into Flarum?](/Example/PHP/demo/Flarum-demo/Reademe.md)
 
 >  Call Tree
 
 ![CallTree](../images/Flarum-callstack.png)
 
 > Summary
-* Less than 5% loss, when Flarum add PHP Agent.
+* Less than 5% loss, when Flarum adds PHP Agent.
 
-If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](../../PHP/pinpoint_php_ext/pinpoint_php_api.php)
+If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
 
 ## 2 How to hook a object ?
 
@@ -61,7 +61,7 @@ class Foo{
 
 Replace the return object with a decorated object in onEnd(). There are some [magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to help "hacking" the object.
 
-[ [How it works ☚]](../../PHP/pinpoint_php_example/Plugins/InstancePlugins.php)
+[ [How it works ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
 
 
 ### 2.2 Examples
@@ -87,7 +87,7 @@ Replace the return object with a decorated object in onEnd(). There are some [ma
     }
     ...
 ```
-[ [Goto GeneratorPlugin ☚] ](../../PHP/pinpoint_php_example/Plugins/GeneratorPlugin.php)
+[ [Goto GeneratorPlugin ☚] ](../../Example/PHP/Plugins/GeneratorPlugin.php)
 
 #### 2.2.2 PDO::prepare return a PDOStatement
 
@@ -106,5 +106,5 @@ $yellow = $sth->fetchAll();
 
 ```
 
-Replace $dbh->prepare return value with [Plugins\PDOStatement](../../PHP/pinpoint_php_example/Plugins/PDOStatement.php).
+Replace $dbh->prepare return value with [Plugins\PDOStatement](../../Example/PHP/Plugins/PDOStatement.php).
 

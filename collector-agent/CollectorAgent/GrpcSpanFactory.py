@@ -159,11 +159,8 @@ class GrpcSpanFactory(SpanFactory):
         if 'clues' in stackMap:
             for annotation in stackMap['clues']:  # list
                 id, value = annotation.split(':', 1)
-                if value and value[0] == '[':  ## value is a In
-                    pass
-                else:  ## value is a string
-                    ann = PAnnotation(key=int(id), value=PAnnotationValue(stringValue=value))
-                    spanEv.annotation.append(ann)
+                ann = PAnnotation(key=int(id), value=PAnnotationValue(stringValue=value))
+                spanEv.annotation.append(ann)
 
         return spanEv
 

@@ -69,7 +69,7 @@ class GrpcMeta(GrpcClient):
             self.api_table[row_str] = [id, meta]
             self._sendApiMeta(meta)
             self.id += 1
-            TCLogger.debug("register api meta id:%d -> api:[%s]", id, row_str)
+            TCLogger.debug("register api meta id:%d -> api:[%s] meta:%s", id, row_str, meta)
             return id
             
     @_channelCheck
