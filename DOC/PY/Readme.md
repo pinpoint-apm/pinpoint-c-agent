@@ -81,3 +81,20 @@ $ python setup.py install
 
 ## Changes
 
+
+## Performance Test Result
+
+### Case: flask/test_mysql
+
+-|TPR(ms)|RPS(#/sec)
+----|-----|----
+pinpoint-py|4.487|445.73|
+- |4.498 |444.69
+- |4.526 |441.88
+pure|4.440|450.44
+-|4.479|446.51
+-|4.425|451.96
+Result|+0.05ms|-1%
+
+> TPR:Time per request         
+> RPS:Requests per second
