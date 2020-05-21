@@ -6,29 +6,6 @@ import time
 from plugins.BaseHTTPRequestPlugins import BaseHTTPRequestPlugins
 from plugins.PinpointCommonPlugin import PinpointCommonPlugin
 
-import test_function
-from app1 import user_function
-import person, student, teacher, doctor
-import test_recursion
-import test_generatior
-import test_higher_order
-import test_return
-import test_lambda
-import test_decorator
-import test_partial
-import test_band
-from test_band import BandClass
-import test_mixin
-import test_special
-import test_private
-import test_abstract
-from test_static_class_method import Method
-import test_exception
-from test_exception import UserDefineException
-import test_args
-import test_returns
-from DBControl import DBContrl
-
 class SimpleWebServer(BaseHTTPRequestHandler):
     @PinpointCommonPlugin('SimpleWebServer',__name__)
     def getAgent(self,headers):
@@ -41,35 +18,6 @@ class SimpleWebServer(BaseHTTPRequestHandler):
 
     @BaseHTTPRequestPlugins('SimpleWebServer',__name__)
     def do_GET(self):
-        # print(self.headers)
-        # self.getAgent(self.headers)
-
-        #Call user-defined function.
-        # h = test_function.test_func1("hello", "world")
-
-        #Call user-defined function.
-        # instance = test_function.TestUserFunc1("Evy", "99")
-        # h = instance.test_func2()
-
-        #Call user-defined function in a package.
-        # h = user_function.test_func3("hello", "world")
-
-        #Call user-defined function in a package.
-        # instance = user_function.TestUserFunc2("Evy", "99")
-        # h = instance.test_func4()
-
-        #Call inherit function
-        # instance = student.Student()
-        # s = instance.eat()
-        # instance = teacher.Teacher()
-        # t = instance.eat()
-        # instance = doctor.Doctor()
-        # d1 = instance.eat()
-        # d2 = instance.other()
-        # h = '''<h3>%s</h3>
-        #       <h3>%s</h3>
-        #       <h3>%s But %s</h3>''' % (s, t, d1, d2)
-
         #Call Higher-order
         @PinpointCommonPlugin('', __name__)
         def f(x):

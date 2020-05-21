@@ -32,9 +32,9 @@ class BaseHTTPRequestPlugins(Candy):
         self.isLimit = False
 
     def onBefore(self,*args, **kwargs):
+        args, kwargs = super().onBefore(*args, **kwargs)
         pinpointPy.add_clue('appname',APP_NAME)
         pinpointPy.add_clue('appid', APP_ID)
-        args, kwargs = super().onBefore(*args, **kwargs)
         ###############################################################
         print("------------------- call before -----------------------")
         insBaseHttp = args[0]
