@@ -24,6 +24,7 @@ from queue import Full,Queue
 
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
+# from CollectorAgent.GrpcProfilerCmd import GrpcProfilerCmd
 from CollectorAgent.GrpcSpan import GrpcSpan
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
 from Common.AgentHost import AgentHost
@@ -89,8 +90,9 @@ class GrpcAgentImplement(PinpointAgent):
         self._startSpanSender()
 
         self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(),
-                                      self.agent_addr, self.service_type,self.agent_meta)
+                                      self.agent_addr, self.service_type,self.agent_meta,self.getReqStat)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
+
 
         self.agent_client.start()
         self.meta_client.start()
@@ -106,6 +108,7 @@ class GrpcAgentImplement(PinpointAgent):
         return True
 
     def sendSpan(self, stack, body):
+        super().sendSpan(stack,body)
         try:
             pSpan = self.span_factory.makeSpan(stack)
             spanMesg = PSpanMessage(span=pSpan)

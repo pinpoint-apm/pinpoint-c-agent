@@ -135,6 +135,7 @@ class ThriftAgentImplement(PinpointAgent):
             return meta
 
     def sendSpan(self, stack, body):
+        super().sendSpan(stack, body)
         '''
         :param dict stack:
         :return:
