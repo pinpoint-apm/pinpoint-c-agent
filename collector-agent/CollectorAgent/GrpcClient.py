@@ -87,6 +87,9 @@ class GrpcClient(object):
         self.channel = channel
         self.channel.subscribe(self._channelStateChange, try_reconnect)
 
+
+
+
     def _interceptorAddHeader(self, header):
         def intercept_call(client_call_details, request_iterator, request_streaming,
                            response_streaming):
