@@ -24,9 +24,9 @@ from queue import Full,Queue
 
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
-# from CollectorAgent.GrpcProfilerCmd import GrpcProfilerCmd
 from CollectorAgent.GrpcSpan import GrpcSpan
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
+from CollectorAgent.GrpcStat import GrpcStat
 from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
@@ -79,7 +79,7 @@ class GrpcAgentImplement(PinpointAgent):
         self.service_type = serviceType
         self.max_pending_sz = ac.max_pending_size
         self.agent_addr = ac.CollectorAgentIp + ':' + str(ac.CollectorAgentPort)
-        self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorSpanPort)
+        self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorStatPort)
         self.span_addr = ac.CollectorSpanIp + ':' + str(ac.CollectorSpanPort)
 
         import os
@@ -92,10 +92,11 @@ class GrpcAgentImplement(PinpointAgent):
         self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(),
                                       self.agent_addr, self.service_type,self.agent_meta,self.getReqStat)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
-
+        self.stat_client = GrpcStat(self.stat_addr,self.agent_meta,self.getIntervalStat)
 
         self.agent_client.start()
         self.meta_client.start()
+        self.stat_client.start()
         self.span_factory = GrpcSpanFactory(self)
 
     def start(self):
@@ -136,6 +137,7 @@ class GrpcAgentImplement(PinpointAgent):
     def stop(self):
         self.agent_client.stop()
         self.meta_client.stop()
+        self.stat_client.stop()
         for sender in self.span_sender_list:
             sender.stopSelf()
 

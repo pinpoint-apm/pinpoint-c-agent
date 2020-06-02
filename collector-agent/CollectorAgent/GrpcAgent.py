@@ -29,13 +29,13 @@ from PinpointAgent.Type import PHP
 from Stat_pb2 import PAgentInfo, PPing
 import queue
 from Proto.grpc.Cmd_pb2 import PCmdMessage, PCmdServiceHandshake, PCommandType, PING, PCmdRequest, \
-    PCmdActiveThreadCountRes, PCmdStreamResponse
+    PCmdActiveThreadCountRes, PCmdStreamResponse, PCmdActiveThreadLightDumpRes
 import grpc
 
 class GrpcAgent(GrpcClient):
     PINGID = 0
 
-    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP,meta=None,get_req_stat=None, maxPending=-1, timeout=10):
+    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP,meta=None,get_req_stat=None,get_interval_stat=None,maxPending=-1, timeout=10):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
@@ -157,7 +157,14 @@ class GrpcAgent(GrpcClient):
                 pass
             elif msg.HasField('commandActiveThreadDump'):
                 pass
+
             elif msg.HasField('commandActiveThreadLightDump'):
+                lightDumpRes =  PCmdActiveThreadLightDumpRes()
+                lightDumpRes.commonResponse.responseId = msg.requestId
+                lightDumpRes.type='java'
+                lightDumpRes.subType = 'oracle'
+                lightDumpRes.version = '1.8.105'
+                self.cmd_sub.CommandActiveThreadLightDump(lightDumpRes)
                 pass
             else:
                 TCLogger.warn("msg type not support:%s",msg)
