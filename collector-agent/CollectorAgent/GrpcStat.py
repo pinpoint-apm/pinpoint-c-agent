@@ -39,7 +39,7 @@ class GrpcStat(GrpcClient):
         stat = PAgentStat(responseTime=responseTime)
         stat.timestamp = int(round(time.time()*1000))
         stat.collectInterval = STAT_INTERVAL
-        stat.cpuLoad.systemCpuLoad =psutil.getloadavg()[0]
+        stat.cpuLoad.systemCpuLoad =psutil.cpu_percent()*0.01
         return stat
 
     def _generator_PstatMessage(self):
