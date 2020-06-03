@@ -17,16 +17,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-import os,struct
+import os
+import struct
 
+from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage, ChannelBufferV2, TAgentInfo
 from CollectorAgent.ThriftAPIMeta import *
 from CollectorAgent.ThriftAgentStateManager import ThriftAgentStateManager
-from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandShakeMessage, ChannelBufferV2, TAgentInfo
 from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
 from Common.AgentHost import AgentHost
 from Events import *
 from PinpointAgent.PinpointAgent import PinpointAgent
-from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode,AGENT_INFO,SPAN
+from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode, AGENT_INFO, SPAN
 
 
 class ThriftAgentImplement(PinpointAgent):
@@ -134,12 +135,12 @@ class ThriftAgentImplement(PinpointAgent):
             self.string_metas[name] = meta
             return meta
 
+    def asynSendSpan(self, stack, body):
+        self.sendSpan(stack, body)
+
     def sendSpan(self, stack, body):
         super().sendSpan(stack, body)
-        '''
-        :param dict stack:
-        :return:
-        '''
+
         try:
             tSpan = self.span_factory.makeSpan(stack)
             body = CollectorPro.obj2bin(tSpan, SPAN)

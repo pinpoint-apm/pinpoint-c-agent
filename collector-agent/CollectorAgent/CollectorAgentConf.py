@@ -18,11 +18,11 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 import time
-from PinpointAgent.Type import PHP
 
 from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
 from Common.Logger import set_logger_file, set_logger_level, logger_enable_console
+from PinpointAgent.Type import PHP
 from PinpointAgent.Type import SUPPORT_THRIFT, SUPPORT_GRPC
 
 AGENT_VERSION = '1.8.0-RC1'
@@ -82,10 +82,10 @@ class CollectorAgentConf(object):
             self.collector_type = SUPPORT_THRIFT
             self.collector_implement = ThriftAgentImplement
 
-        self.AgentID = config.get('Collector',
-                                  'AgentID')
-        self.ApplicationName = config.get('Collector',
-                                          'ApplicationName')
+        # self.AgentID = config.get('Collector',
+        #                           'AgentID')
+        # self.ApplicationName = config.get('Collector',
+        #                                   'ApplicationName')
         self.version = AGENT_VERSION
         self.server_type = config.getint('Collector', 'ServerType', fallback=PHP)
 

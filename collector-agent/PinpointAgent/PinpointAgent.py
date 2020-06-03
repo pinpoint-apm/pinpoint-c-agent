@@ -17,9 +17,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
+
 from CollectorAgent.ReqStat import ReqStat
 from PinpointAgent.Type import PHP
-import time
+
 
 class PinpointAgent(object):
     def __init__(self,app_id,app_name,serviceType=PHP):
@@ -29,6 +30,10 @@ class PinpointAgent(object):
         self.req_stat = ReqStat()
     def start(self):
         raise NotImplementedError()
+
+    def asynSendSpan(self, stack, body):
+        raise NotImplementedError()
+
 
     def sendSpan(self,stack,body):
         exp =int(stack['E'])
