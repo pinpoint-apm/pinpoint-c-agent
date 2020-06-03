@@ -92,6 +92,16 @@ jobs:
         - python setup.py install
         - nosetests src/PY/test
 
+    - name: "collector-agent"
+      python: "3.7"
+      env:
+        - ROOT=$PWD
+      script:
+        - cd collector-agent
+        - pip install -r requirements.txt
+        - sh init_python_env.sh
+        - nosetests Test/
+
 notifications:
   email:
     eeliu2009@gmail.com

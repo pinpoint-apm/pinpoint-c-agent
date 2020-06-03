@@ -1,33 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 11/7/19
-import json
-import time
+
+import os
+import sys
+
+proto_class = os.getcwd() + '/Proto/grpc'
+sys.path.append(proto_class)
+
+import unittest
 from unittest import TestCase
 
 import gevent
 
 from CollectorAgent.CollectorAgentConf import CollectorAgentConf
-from Common.Logger import TCLogger
 from PinpointAgent.AppManagement import AppManagement
 import os
 
-# class FakeCollectorAgentConf:
-#     def __init__(self):
-#         self.CollectorSpanIp ='dev-pinpoint'
-#         self.CollectorSpanPort =9996
-#         self.CollectorStatIp ='dev-pinpoint'
-#         self.CollectorStatPort =9995
-#         self.CollectorAgentIp ='dev-pinpoint'
-#         self.CollectorAgentPort =9994
-#         self.max_pending_size =-1
-#         self.collector_type = SUPPORT_THRIFT
-#         self.collector_implement = ThriftAgentImplement
-#         self.startTimestamp = int(time.time() * 1000)
-#         self.version = '1.8.0-RC1'
-#     def getWebPort(self):
-#         return '8080'
 
+@unittest.skip('thrift not fully test')
 class TestImplement(TestCase):
     def setUp(self) -> None:
         path = os.getcwd()

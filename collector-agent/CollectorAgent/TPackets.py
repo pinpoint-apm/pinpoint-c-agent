@@ -287,32 +287,3 @@ class ControlMessageEncoder(object):
     def getRawData(self):
         return self.__buf
 
-
-def test_yeild(buf, size):
-    i = 0
-    while i < size:
-        yield buf[i]
-        i += 1
-        print(i)
-        if i >= 1:
-            break
-
-
-if __name__ == '__main__':
-    # s = struct.pack("2i13si6s2i", 33, 13, "www.baidu.com", 6, "¶¬¼¾", 0, 0)
-    # p = Packet(1,1234,len(s),s)
-    # print(p.getSerializedData())
-    #
-    # buf = ChannelBufferV2()
-    # buf.writeString("hello")
-    # f1 = test_yeild("abcd3",5)
-    #
-    # print( f1.next())
-    # print( f1.next())
-
-    a = bytearray(['1', '2', '3', "0"])
-    pa = memoryview(a)
-    pa[2:4] = pa[0:2]
-    print(a)
-
-    print(struct.pack('!hii', 12, None, None))
