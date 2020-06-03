@@ -1,21 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 6/1/20
+import psutil
+import threading
+import time
+
 from CollectorAgent.GrpcClient import GrpcClient
+from Common.Logger import TCLogger
 from PinpointAgent.Type import STAT_INTERVAL
 from Proto.grpc.Service_pb2_grpc import StatStub
-import threading,time,psutil
-from Common.Logger import TCLogger
 from Proto.grpc.Stat_pb2 import PStatMessage, PAgentStat, PResponseTime
 
 
 class GrpcStat(GrpcClient):
-    def __init__(self,address,meta,get_inter_stat_cb):
+    def __init__(self, address, meta, get_inter_stat_cb, timeout=5):
         super().__init__(address, meta, -1)
         self.meta_stub = StatStub(self.channel)
         self.stat_thread = None
         self.exit_cv = threading.Condition()
-        self.timeout = 5
+        self.timeout = timeout
         assert get_inter_stat_cb
         self.get_inter_stat_cb = get_inter_stat_cb
         self.task_running = False
@@ -47,7 +50,7 @@ class GrpcStat(GrpcClient):
             ps = PStatMessage(agentStat=self._generAgentStat())
             TCLogger.debug(ps)
             yield ps
-            time.sleep(5)
+            time.sleep(STAT_INTERVAL)
 
     def _stat_thread_main(self):
         self.task_running = True
