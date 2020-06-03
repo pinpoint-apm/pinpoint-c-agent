@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 6/2/20
 
-import  time
+import time
 
 from PinpointAgent.Type import STAT_INTERVAL
 
@@ -22,9 +22,11 @@ class ReqStat(object):
             last_time = int(time.time())
             if last_time >= self.last_time + STAT_INTERVAL+1:
                 self.reset()
-            self.times +=1
-            self.max = req_time if req_time > self.max else self.max
-            self.total += req_time
+            if req_time > 0:
+                self.times += 1
+                self.total += req_time
+                self.max = req_time if req_time > self.max else self.max
+
             self.last_time = last_time
 
         def getInterStat(self):
