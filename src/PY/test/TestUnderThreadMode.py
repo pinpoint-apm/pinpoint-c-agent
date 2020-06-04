@@ -27,6 +27,7 @@ class TestUnderThreadMode(TestCase):
             self.assertEqual(pinpointPy.end_trace(),0)
             value = pinpointPy.get_special_key('sid')
             self.assertFalse(value)
+            pinpointPy.mark_as_error("fghjk","fghjkl",234234)
 
 
     def test_thead_safe(self):
