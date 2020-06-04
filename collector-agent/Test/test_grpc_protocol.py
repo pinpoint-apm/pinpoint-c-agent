@@ -90,9 +90,9 @@ class TestGRPCRoutine(TestCase):
 
     def test_sendspan(self):
 
-        spanclient = GrpcSpan('localhost:9993', self.agent_meta)
         queue = Queue()
-        spanclient.start(queue)
+        spanclient = GrpcSpan('localhost:9993', self.agent_meta, queue)
+        spanclient.start()
         i = 100
         while i > 0:
             queue.put(self._generate_span())
