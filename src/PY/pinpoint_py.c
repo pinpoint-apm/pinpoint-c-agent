@@ -401,10 +401,10 @@ static void free_pinpoint_module(void * module)
 
 static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
 {
-    char * msg;
-    char * file_name;
-    uint line_no;
-    if(PyArg_ParseTuple(args,"ssl",&msg,&file_name,&line_no))
+    char * msg = NULL;
+    char * file_name= NULL;
+    uint line_no= 0;
+    if(PyArg_ParseTuple(args,"ssi",&msg,&file_name,&line_no))
     {
         catch_error(msg,file_name,line_no);
     }
