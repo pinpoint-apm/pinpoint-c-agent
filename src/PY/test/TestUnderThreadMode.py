@@ -7,7 +7,7 @@ import pinpointPy
 
 class TestUnderThreadMode(TestCase):
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.thread_running = True
 
     def tearDown(self):
