@@ -34,6 +34,13 @@ It is an agent written by C++, PHP, python languages. And we hope to support oth
 --- | ---
 ![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
+### Changes
+
+### 2020-06-12
+
+- Support php5.5 php5.6
+- Collector-agent: support real time chart.
+
 ## Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
 * Chinese Community:
