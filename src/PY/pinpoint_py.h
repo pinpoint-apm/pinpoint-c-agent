@@ -13,13 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
+#ifndef Py_PINPOINT_PY_H
+#define Py_PINPOINT_PY_H
+
 #include "common.h"
-#define SubObjName "agent"
 
-typedef struct py_agent_obj {
-    PyObject_HEAD
-    void *agent; //the agent trace unit for every coroutines
-} PyAgentObj;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-TraceStoreLayer* get_coro_store_layer(void);
+#ifdef __cplusplus
+}
+#endif
+
+#endif
