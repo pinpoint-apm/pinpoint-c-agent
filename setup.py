@@ -25,7 +25,7 @@ class CommonBuild(build_ext):
         super().run()
 
 setup(name='pinpointPy',
-      version="0.0.1.2", 
+      version="0.0.1.3", 
       author="The pinpoint Authors", 
       author_email='eeliu2009@gmail.com',
       license='Apache License 2.0',
