@@ -4,11 +4,11 @@
 
 Dependency|Version
 ---|----
-PHP| php 7+
-GCC| GCC 5+
+PHP| php `7+` ,`5+`
+GCC| GCC `4.7+`
 *inux|
-Python | Python 3
-pinpoint| 1.8.0-RC1
+Python | `Python 3`
+pinpoint| `1.8.0+`, `2.0+`
 **Composer**| 
 
 ### Installation
@@ -96,12 +96,6 @@ pinpoint| 1.8.0-RC1
 ### TODO
 
 
-## Compatibility
-
-Pinpoint Version | PHP| Python|GCC
----------------- | ----- | -----|---
-1.8.0-RC1 | PHP 7+ | Python3|GCC 5+
-
 ## Changes 
 
 - Fully support ZTS
@@ -122,11 +116,13 @@ We can DO but prefer not DO! Because we have not yet find an efficient way to im
 
 ### 3. How much performance does it lose when using?
 
-After full test, the AOP code could consume at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitoring, the more you taking.
+After full test, the AOP code could cost at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitoring, the more you taking.
 
-[Test Result ☚](./Readme.md#performance-loss-under-stress-test)
+#### Performance Test Result
 
-[FLarum Test Result ☚](./User%20Manual.md#1.1-performance-result)
+##### 3.1 [Test Result ☚](./Readme.md#performance-loss-under-stress-test)
+
+##### 3.2 [Flarum Test Result ☚](./User%20Manual.md#1.1-performance-result)
 
 ### For the developer
 
@@ -146,7 +142,7 @@ Sorry, `php-simple-aop` does not support wrapping the user class (or internal cl
 
 https://github.com/naver/pinpoint-c-agent/issues/103
 
-#### 3. Why not support PHP5.x?
+#### 3. ~Why not support PHP5.x.~ Already done!
 
 https://www.php.net/supported-versions.php
 
@@ -160,7 +156,7 @@ https://github.com/naver/pinpoint-c-agent/issues/102
 
 ## The Difference Between v0.1.x And v0.2.x
 
-##  v0.1.x VS. v0.2.x
+##  v0.1.x VS. v0.2+
 
 > Why do we refactor the pinpoint_c_agent (v0.1.x)?
 
@@ -175,7 +171,7 @@ https://github.com/naver/pinpoint-c-agent/issues/102
 > AOP base on zend_excuted_hook
 
 ![How does it work](../../images/principle_v0.1.x.png)
-#### v0.2.x
+#### v0.2+
 
 > AOP base on classloader (like java-classloaders)
 
@@ -186,11 +182,11 @@ https://github.com/naver/pinpoint-c-agent/issues/102
 Agent version|PHP5.5.x|PHP5.6.x|PHP7.x |php-zts
 ----|-----|----|-----|---
 v0.1.x|✔|✔|✔|✘
-v0.2.x|✘|✘|✔|✔
+v0.2.x|✔|✔|✔|✔
 
 #### PHP Framework
 
-Framework|v0.1.x|v0.2.x
+Framework|v0.1.x|v0.2+
 ----|-----|----|
 Laravel|✔|✔
 ThinkPHP|✔|✘
@@ -204,7 +200,7 @@ EasySwoole|✘|✔
 
 #### Stability
 
-`v0.2.x > v0.1.x`
+`v0.2+ > v0.1.x`
 
 
 #### Maintainability(Dynamically)
@@ -252,4 +248,4 @@ MTT: Mean RTT Time
 
 ### Contributors' words
 
-As composer is widely used, v0.2.x is our long-time support version, v0.1.x could be obsoleted in the future. But we could fix some fatal error into v0.1.x.
+As composer is widely used, v0.2+ is our long-time support version, v0.1.x could be obsoleted in the future. But we could fix some fatal error into v0.1.x.
