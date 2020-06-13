@@ -52,7 +52,7 @@ class StreamServerLayer(object):
         def _recvFromPeer(self):
             recv_buf = self.pRBufStart[self.rest_data_sz:]
             recv_total = self.rest_data_sz
-            assert recv_total < self.RECV_BUF_SIZE
+            assert recv_total < self.RECV_BUF_SIZE,"recv_total:%d self.RECV_BUF_SIZE:%d"%(recv_total,self.RECV_BUF_SIZE)
             try:
                 recv_total = self.socket.recv_into(recv_buf, self.RECV_BUF_SIZE - recv_total)
                 if recv_total == 0:
