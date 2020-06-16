@@ -78,7 +78,13 @@ public:
 //        this->start_time =(uint64_t*)((char*)fetch_shared_obj_addr() + START_TIME_OFFSET );
 
         this->_state = (SharedState*)fetch_shared_obj_addr();
-        this->limit   = (this->_state->state & E_OFFLINE) ? (E_OFFLINE) : (E_TRACE_PASS);
+        if(global_agent_info.inter_flag & E_UTEST)
+        {
+            this->limit = E_TRACE_PASS;
+        }else{
+            this->limit   = (this->_state->state & E_OFFLINE) ? (E_OFFLINE) : (E_TRACE_PASS);
+        }
+
         this->app_name = "collector_blocking";
         this->app_id = "collector_blocking";
         json_writer.dropNullPlaceholders();

@@ -45,6 +45,17 @@
 #include "common.h"
 #include <iostream>
 
+#ifdef COMPILE_DL_PINPOINT_PHP
+#ifdef ZTS
+	#if PHP_VERSION_ID > 70000
+		ZEND_TSRMLS_CACHE_DEFINE()
+	#else
+		#include "TSRM.h"
+	#endif
+#endif
+ZEND_GET_MODULE(pinpoint_php)
+#endif
+
 PHP_FUNCTION(pinpoint_start_trace);
 PHP_FUNCTION(pinpoint_end_trace);
 PHP_FUNCTION(pinpoint_add_clue);
@@ -61,6 +72,7 @@ PHP_FUNCTION(pinpoint_get_func_ref_args);
 ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
 
 PPAgentT global_agent_info;
+
 static void pinpoint_log(char *msg);
 
 /* {{{ PHP_INI
@@ -136,12 +148,7 @@ zend_module_entry pinpoint_php_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_PINPOINT_PHP
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-ZEND_GET_MODULE(pinpoint_php)
-#endif
+
 
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
@@ -198,8 +205,6 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
     {
        return;
     }
-
-
 
     catch_error(msg,error_filename,error_lineno);
     pp_trace("apm_error_cb called");
@@ -408,7 +413,7 @@ static void php_pinpoint_php_init_globals(zend_pinpoint_php_globals *pinpoint_ph
 /* {{{ PHP_MINIT_FUNCTION
  */
 
-PHP_MINIT_FUNCTION(pinpoint_php)
+PHP_MINIT_FUNCTION(pinpoint_php )
 {
     ZEND_INIT_MODULE_GLOBALS(pinpoint_php,php_pinpoint_php_init_globals, NULL);
     REGISTER_INI_ENTRIES();
@@ -485,9 +490,10 @@ PHP_MINFO_FUNCTION(pinpoint_php)
 void pinpoint_log(char *msg)
 {
 
-#if PHP_VERSION_ID >= 70000
+#if PHP_VERSION_ID >= 70100
     php_log_err_with_severity( msg, LOG_DEBUG);
 #else
-    php_log_err(msg);
+    TSRMLS_FETCH();
+    php_log_err(msg TSRMLS_CC);
 #endif
 }

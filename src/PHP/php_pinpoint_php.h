@@ -38,10 +38,8 @@ extern zend_module_entry pinpoint_php_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint_php)
-//    uint  w_timeout_ms;
     char*  co_host; // tcp:ip:port should support dns
     zend_bool   utest_flag;
-//    zend_bool   limit;
     zend_bool    debug_report;
     int   tracelimit;
 ZEND_END_MODULE_GLOBALS(pinpoint_php)
@@ -54,8 +52,10 @@ extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php);
 #define PPG(v) (pinpoint_php_globals.v)
 #endif
 
+#if PHP_VERSION_ID > 70000
 #if defined(ZTS) && defined(COMPILE_DL_PINPOINT_PHP)
 ZEND_TSRMLS_CACHE_EXTERN()
+#endif
 #endif
 
 PHP_MINIT_FUNCTION(pinpoint_php);

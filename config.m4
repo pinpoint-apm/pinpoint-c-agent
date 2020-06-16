@@ -19,7 +19,7 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   echo "------Build common libraries------------"
   mkdir -p PHP_EXT_SRCDIR()/build
   cd build 
-  cmake PHP_EXT_SRCDIR()/common
+  cmake PHP_EXT_SRCDIR()/common -DCMAKE_BUILD_TYPE=Release
   make
   cd PHP_EXT_SRCDIR()
   PINPOINT_COMMON_LIB=PHP_EXT_SRCDIR()/common/lib
