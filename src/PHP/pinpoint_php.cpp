@@ -45,6 +45,17 @@
 #include "common.h"
 #include <iostream>
 
+#ifdef COMPILE_DL_PINPOINT_PHP
+#ifdef ZTS
+    #if PHP_VERSION_ID > 70000
+        ZEND_TSRMLS_CACHE_DEFINE()
+    #else
+        #include "TSRM.h"
+    #endif
+#endif
+ZEND_GET_MODULE(pinpoint_php)
+#endif
+
 PHP_FUNCTION(pinpoint_start_trace);
 PHP_FUNCTION(pinpoint_end_trace);
 PHP_FUNCTION(pinpoint_add_clue);
@@ -136,12 +147,7 @@ zend_module_entry pinpoint_php_module_entry = {
 };
 /* }}} */
 
-#ifdef COMPILE_DL_PINPOINT_PHP
-#ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE()
-#endif
-ZEND_GET_MODULE(pinpoint_php)
-#endif
+
 
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 

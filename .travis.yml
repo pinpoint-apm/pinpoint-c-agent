@@ -1,9 +1,8 @@
 os: linux
-language: python
 
-jobs:
+matrix:
   include:
-    - name: "common"
+    - language: c++
       env:
         - ROOT=$PWD
       script:
@@ -14,7 +13,7 @@ jobs:
         - make 
         - ./test/unittest
         
-    - name: "php 7.4"
+    - language: php
       php: "7.4"
       env:
         - ROOT=$PWD
@@ -24,7 +23,7 @@ jobs:
         - make
         - make test TESTS=src/PHP/tests/
 
-    - name: "php 7.3"
+    - language: php
       php: "7.3"
       env:
         - ROOT=$PWD
@@ -33,7 +32,7 @@ jobs:
         - ./configure
         - make
         - make test TESTS=src/PHP/tests/
-    - name: "php 7.2"
+    - language: php
       php: "7.2"
       env:
         - ROOT=$PWD
@@ -43,7 +42,7 @@ jobs:
         - make
         - make test TESTS=src/PHP/tests/
 
-    - name: "php 7.1"
+    - language: php
       php: "7.1"
       env:
         - ROOT=$PWD
@@ -52,8 +51,8 @@ jobs:
         - ./configure
         - make
         - make test TESTS=src/PHP/tests/
-    
-    - name: "php 7.0"
+
+    - language: php
       php: "7.0"
       env:
         - ROOT=$PWD
@@ -63,7 +62,7 @@ jobs:
         - make
         - make test TESTS=src/PHP/tests/
 
-    - name: "php 5.6"
+    - language: php
       php: "5.6"
       env:
         - ROOT=$PWD
@@ -71,9 +70,10 @@ jobs:
         - phpize
         - ./configure
         - make
-        - make test TESTS=src/PHP/tests/
+        - make test TESTS=src/PHP/tests5/    
 
-    - name: "python 3.8"
+
+    - language: python
       python: "3.8"
       env:
         - ROOT=$PWD
@@ -83,7 +83,7 @@ jobs:
         - python setup.py install
         - nosetests src/PY/test
 
-    - name: "python 3.6"
+    - language: python
       python: "3.6"
       env:
         - ROOT=$PWD
@@ -93,7 +93,7 @@ jobs:
         - python setup.py install
         - nosetests src/PY/test
         
-    - name: "python 3.5"
+    - language: python
       python: "3.5"
       env:
         - ROOT=$PWD
@@ -103,7 +103,7 @@ jobs:
         - python setup.py install
         - nosetests src/PY/test
 
-    - name: "python 3.7"
+    - language: python
       python: "3.7"
       env:
         - ROOT=$PWD
@@ -113,7 +113,7 @@ jobs:
         - python setup.py install
         - nosetests src/PY/test
 
-    - name: "python 2.7"
+    - language: python
       python: "2.7"
       env:
         - ROOT=$PWD
@@ -124,7 +124,7 @@ jobs:
         - nosetests src/PY/test --ignore-files="TestCoroutines.*"
 
 
-    - name: "collector-agent"
+    - language: python
       python: "3.7"
       env:
         - ROOT=$PWD
