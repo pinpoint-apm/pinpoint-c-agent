@@ -1,6 +1,6 @@
 os: linux
 
-jobs:
+matrix:
   include:
     - language: c++
       env:
@@ -13,7 +13,8 @@ jobs:
         - make 
         - ./test/unittest
         
-    - php: "7.4"
+    - language: php
+      php: "7.4"
       env:
         - ROOT=$PWD
       script:
@@ -22,7 +23,8 @@ jobs:
         - make
         - make test TESTS=src/PHP/tests/
 
-    - php: "7.3"
+    - language: php
+      php: "7.3"
       env:
         - ROOT=$PWD
       script:
