@@ -491,9 +491,10 @@ PHP_MINFO_FUNCTION(pinpoint_php)
 void pinpoint_log(char *msg)
 {
 
-#if PHP_VERSION_ID >= 70000
+#if PHP_VERSION_ID >= 70100
     php_log_err_with_severity( msg, LOG_DEBUG);
 #else
-    php_log_err(msg);
+    TSRMLS_FETCH();
+    php_log_err(msg TSRMLS_CC);
 #endif
 }
