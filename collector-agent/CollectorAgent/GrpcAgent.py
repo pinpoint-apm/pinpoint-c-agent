@@ -143,10 +143,11 @@ class GrpcAgent(GrpcClient):
                 i+=1
                 yield threadCountRes
                 time.sleep(1)
-
-        stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
-        TCLogger.debug("send req state requestId: %d done",requestId)
-
+        try:
+            stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
+            TCLogger.debug("send req state requestId: %d done",requestId)
+        except Exception as e:
+            TCLogger.error("CommandStreamActiveThreadCount, catch exception %s",e)
     def _handleCmd(self,msg,cmdIter):
         try:
             if msg.HasField('commandEcho'):
@@ -154,7 +155,6 @@ class GrpcAgent(GrpcClient):
             elif msg.HasField('commandActiveThreadCount'):
                 self.thread_count = threading.Thread(target=self._send_thread_count,args=(msg.requestId,))
                 self.thread_count.start()
-                pass
             elif msg.HasField('commandActiveThreadDump'):
                 pass
 
@@ -165,7 +165,6 @@ class GrpcAgent(GrpcClient):
                 lightDumpRes.subType = 'oracle'
                 lightDumpRes.version = '1.8.105'
                 self.cmd_sub.CommandActiveThreadLightDump(lightDumpRes)
-                pass
             else:
                 TCLogger.warn("msg type not support:%s",msg)
         except Exception as e:
