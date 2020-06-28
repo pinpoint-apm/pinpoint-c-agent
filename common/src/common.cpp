@@ -286,6 +286,11 @@ BLOCK:
         return __sync_fetch_and_add(&this->_state->uid,1);
     }
 
+    void resetUniqueId()
+    {
+        this->_state->uid = 0;
+    }
+
     inline uint64_t getStartTime() const
     {
         return this->_state->starttime;
@@ -614,6 +619,16 @@ int64_t generate_unique_id()
         return 0;
     }
     return (int64_t)p_agent->generateUniqueId();
+}
+
+void reset_unique_id()
+{
+    PerThreadAgent* p_agent = get_agent();
+    if(p_agent == NULL)
+    {
+        return ;
+    }
+    p_agent->resetUniqueId();
 }
 
 void catch_error(const char* msg,const char* error_filename,uint error_lineno)

@@ -126,7 +126,7 @@ void catch_error(const char* msg,const char* error_filename,uint error_lineno);
 typedef void(*log_error_cb)(char*);
 void register_error_cb(log_error_cb error_cb);
 void pp_trace(const char *format,...);
-
+void reset_unique_id();
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Inner API
 void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
