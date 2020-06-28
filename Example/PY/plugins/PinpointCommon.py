@@ -32,7 +32,7 @@ MYSQL = '2101'
 APP_ID ='python-app-id' # application id
 APP_NAME ='python-app-name' # application name 
 COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
-
+ENABLE_PINPOINT=True
 ###############################################################
 HTTP_PINPOINT_PSPANID = 'HTTP_PINPOINT_PSPANID'
 HTTP_PINPOINT_SPANID = 'HTTP_PINPOINT_SPANID'
@@ -108,18 +108,23 @@ class Candy(object):
     def __call__(self, func):
         self.func_name=func.__name__
         def pinpointTrace(*args, **kwargs):
-            ret = None
-            # print("start", self.func_name)
-            args, kwargs = self.onBefore(*args, **kwargs)
-            try:
+            if ENABLE_PINPOINT:
+                ret = None
+                # print("start", self.func_name)
+                args, kwargs = self.onBefore(*args, **kwargs)
+                try:
+                    ret = func(*args, **kwargs)
+                    return ret
+                except Exception as e:
+                    self.onException(e)
+                    raise e
+                finally:
+                    # print("end", self.func_name)
+                    self.onEnd(ret)
+            else:
+                # do nothing
                 ret = func(*args, **kwargs)
                 return ret
-            except Exception as e:
-                self.onException(e)
-                raise e
-            finally:
-                # print("end", self.func_name)
-                self.onEnd(ret)
 
         return pinpointTrace
 
