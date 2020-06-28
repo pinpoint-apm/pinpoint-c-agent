@@ -17,30 +17,39 @@
 
 /**
  * User: eeliu
- * Date: 3/29/19
- * Time: 3:40 PM
+ * Date: 1/4/19
+ * Time: 3:23 PM
  */
 
 namespace Plugins;
-use Plugins\Candy;
+require_once "PluginsDefines.php";
 
-/// @hook:app\TestRedis::\Redis::get app\TestRedis::\Redis::keys app\TestRedis::\Redis::del app\TestRedis::\Redis::set app\TestRedis::\Redis::connect
-class RedisCommonPlugin extends Candy
+abstract class Candy
 {
-    function onBefore()
+    protected $apId;
+    protected $who;
+    protected $args;
+    protected $ret=null;
+
+    public function __construct($apId,$who,&...$args)
     {
-        pinpoint_add_clue("stp",REDIS);
-        pinpoint_add_clue("dst", "RedisHost");
-//        pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
-    }
-    function onEnd(&$ret)
-    {
-        echo "ret:";
-        pinpoint_add_clues(PHP_RETURN, print_r($ret,true));
+        /// todo start_this_aspect_trace
+        $this->apId = $apId;
+        $this->who =  $who;
+        $this->args = &$args;
+
+        pinpoint_start_trace();
+        pinpoint_add_clue(INTERCEPTER_NAME,$apId);
     }
 
-    function onException($e)
+    public function __destruct()
     {
-        pinpoint_add_clue("EXP",$e->getMessage());
+        pinpoint_end_trace();
     }
+
+    abstract function onBefore();
+
+    abstract function onEnd(&$ret);
+
+    abstract function onException($e);
 }

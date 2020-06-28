@@ -37,7 +37,6 @@ class MemcachedCommonPlugin extends Candy
     }
     function onEnd(&$ret)
     {
-        echo "ret:";
         pinpoint_add_clues(PHP_RETURN, print_r($ret,true));
     }
 
