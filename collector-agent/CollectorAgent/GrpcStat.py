@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 6/1/20
-import psutil
 import threading
 import time
+
+import psutil
 
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
@@ -46,11 +47,14 @@ class GrpcStat(GrpcClient):
         return stat
 
     def _generator_PstatMessage(self):
-        while self.task_running:
-            ps = PStatMessage(agentStat=self._generAgentStat())
-            TCLogger.debug(ps)
-            yield ps
-            time.sleep(STAT_INTERVAL)
+        try:
+            while self.task_running:
+                ps = PStatMessage(agentStat=self._generAgentStat())
+                TCLogger.debug(ps)
+                yield ps
+                time.sleep(STAT_INTERVAL)
+        except Exception as e:
+            TCLogger.warning("_generator_PstatMessage catch %s", e)
 
     def _stat_thread_main(self):
         self.task_running = True

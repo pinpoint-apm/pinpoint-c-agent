@@ -19,18 +19,20 @@
 
 # Created by eeliu at 10/21/19
 
+import queue
 import threading
 import time
 
 import Service_pb2_grpc
+import grpc
+from Stat_pb2 import PAgentInfo, PPing
+
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 from PinpointAgent.Type import PHP
-from Stat_pb2 import PAgentInfo, PPing
-import queue
-from Proto.grpc.Cmd_pb2 import PCmdMessage, PCmdServiceHandshake, PCommandType, PING, PCmdRequest, \
-    PCmdActiveThreadCountRes, PCmdStreamResponse, PCmdActiveThreadLightDumpRes
-import grpc
+from Proto.grpc.Cmd_pb2 import PCmdMessage, PCmdServiceHandshake, PCommandType, PCmdActiveThreadCountRes, \
+    PCmdStreamResponse, PCmdActiveThreadLightDumpRes
+
 
 class GrpcAgent(GrpcClient):
     PINGID = 0
@@ -93,10 +95,10 @@ class GrpcAgent(GrpcClient):
             self._response_queue.put(start_msg)
 
          def __next__(self):
-            response =  self._response_queue.get()
-            if response :
+             response = self._response_queue.get()
+             if response:
                 return response
-            else:
+             else:
                 TCLogger.info("HandStreamIterator stopped")
                 return
          def add_response(self,message):
@@ -132,17 +134,20 @@ class GrpcAgent(GrpcClient):
         def generator_cmd():
             i = 0
             while True:
-                cmd_response = PCmdStreamResponse(responseId=requestId,sequenceId=i)
-                cmd_response.message.value = 'hello'
-                threadCountRes = PCmdActiveThreadCountRes(commonStreamResponse=cmd_response)
-                threadCountRes.histogramSchemaType = 2
-                for stat in self.get_req_stat():
-                    threadCountRes.activeThreadCount.append(stat)
-
-                threadCountRes.timeStamp = int(time.time())
-                i+=1
-                yield threadCountRes
-                time.sleep(1)
+                try:
+                    cmd_response = PCmdStreamResponse(responseId=requestId, sequenceId=i)
+                    cmd_response.message.value = 'hello'
+                    threadCountRes = PCmdActiveThreadCountRes(commonStreamResponse=cmd_response)
+                    threadCountRes.histogramSchemaType = 2
+                    for stat in self.get_req_stat():
+                        threadCountRes.activeThreadCount.append(stat)
+                    threadCountRes.timeStamp = int(time.time())
+                    i += 1
+                    yield threadCountRes
+                    time.sleep(1)
+                except Exception as e:
+                    TCLogger.warning("catch exception %s", e)
+                    break
         try:
             stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
             TCLogger.debug("send req state requestId: %d done",requestId)

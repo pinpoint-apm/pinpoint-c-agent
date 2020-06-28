@@ -23,8 +23,6 @@ import os
 from multiprocessing import Process, Queue as MPQueue
 from queue import Full, Queue
 
-from Span_pb2 import PSpanMessage
-
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
@@ -34,6 +32,7 @@ from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import SUPPORT_GRPC, API_DEFAULT
+from Proto.grpc.Span_pb2 import PSpanMessage
 
 
 class GrpcAgentImplement(PinpointAgent):
