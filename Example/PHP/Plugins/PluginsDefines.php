@@ -38,7 +38,7 @@ define("PHP","1500");
 define("MYSQL","2101");
 define("REDIS","8200");
 define("MONGODB","2650");
-define("MONGODB_EXE_QUERY","2650");
+define("MONGODB_EXE_QUERY","2651");
 define("REDIS_REDISSON","8203");
 define("REDIS_REDISSON_INTERNAL","8204");
 define("MEMCACHED","8050");

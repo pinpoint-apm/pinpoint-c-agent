@@ -1,10 +1,12 @@
 ## Steps
 
-1. Insert pinpoint-php agent header below `require dirname(__DIR__) . '/vendor/autoload.php';`
+1. Enable pinpoint-php agent header below `require dirname(__DIR__) . '/vendor/autoload.php';`
 
 ```php
 
 <?php
+
+
 
 use App\Kernel;
 use Symfony\Component\Dotenv\Dotenv;
