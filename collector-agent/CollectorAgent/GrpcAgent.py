@@ -67,27 +67,13 @@ class GrpcAgent(GrpcClient):
         self.is_ok = False
 
     def start(self):
-        # start a thread to handle register
+        self.task_running = True
+
         self.agent_thread = threading.Thread(target=self._registerAgent)
         self.agent_thread.start()
 
         self.cmd_thread = threading.Thread(target=self._handleCommand)
         self.cmd_thread.start()
-
-    # def _genCmdMesg(self):
-    #
-    #     ## send handshake
-    #     handshake = PCmdServiceHandshake()
-    #     handshake.supportCommandServiceKey.append(PCommandType.PING)
-    #     handshake.supportCommandServiceKey.append(PCommandType.PONG)
-    #     handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_COUNT)
-    #     handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_DUMP)
-    #     handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_LIGHT_DUMP)
-    #     cmd = PCmdMessage(handshakeMessage=handshake)
-    #     yield cmd
-
-        ## this can't be over
-        ## send ping
 
     class HandStreamIterator(object):
          def __init__(self,start_msg):
@@ -116,16 +102,22 @@ class GrpcAgent(GrpcClient):
         handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_LIGHT_DUMP)
         cmd = PCmdMessage(handshakeMessage=handshake)
 
-        self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
-        # while self.task_running:
-        msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
-        try:
-            for msg in msg_iter:
-                TCLogger.debug("command channel %s", msg)
-                self._handleCmd(msg, self.cmd_pipe)
-            TCLogger.debug('iter_response is over')
-        except Exception as e:
-            TCLogger.error("handleCommand channel  %s error", e)
+        while self.task_running:
+            self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
+            # while self.task_running:
+            msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
+            try:
+                for msg in msg_iter:
+                    TCLogger.debug("command channel %s", msg)
+                    self._handleCmd(msg, self.cmd_pipe)
+                TCLogger.debug('iter_response is over')
+
+            except Exception as e:
+                TCLogger.error("handleCommand channel  %s error", e)
+            finally:
+                with self.exit_cv:
+                    if self.exit_cv.wait(self.timeout):
+                        break
 
     def _send_thread_count(self,requestId):
         channel = grpc.insecure_channel(self.address)
@@ -144,10 +136,14 @@ class GrpcAgent(GrpcClient):
                     threadCountRes.timeStamp = int(time.time())
                     i += 1
                     yield threadCountRes
-                    time.sleep(1)
+
+                    with self.exit_cv:
+                        if self.exit_cv.wait(1):
+                            break
                 except Exception as e:
                     TCLogger.warning("catch exception %s", e)
                     break
+
         try:
             stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
             TCLogger.debug("send req state requestId: %d done",requestId)
@@ -177,7 +173,6 @@ class GrpcAgent(GrpcClient):
 
 
     def _registerAgent(self):
-        self.task_running  = True
         while self.task_running:
             try:
                 TCLogger.debug("sending agentinfo %s",self.agentinfo)
@@ -200,7 +195,7 @@ class GrpcAgent(GrpcClient):
 
 
     def _pingPPing(self):
-        while self.is_ok:
+        while self.task_running:
             ping = PPing()
             TCLogger.debug("%s send ping", self)
             yield ping
