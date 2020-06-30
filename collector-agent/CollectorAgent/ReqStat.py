@@ -31,7 +31,7 @@ class ReqStat(object):
 
         def getInterStat(self):
             last_time = int(time.time())
-            if last_time >= self.last_time + STAT_INTERVAL+1:
+            if last_time >= self.last_time + STAT_INTERVAL + 1 or self.times == 0:
                 return (0,0)
             else:
                 return (self.max,int(self.total/self.times))
