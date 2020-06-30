@@ -157,12 +157,8 @@ class ThriftSpanFactory(SpanFactory):
         if 'clues' in stackMap:
             for annotation in stackMap['clues']:  # list
                 id, value = annotation.split(':', 1)
-
-                if value and value[0] == '[':  ## value is a In
-                    pass
-                else:  ## value is a string
-                    ann = TAnnotation(int(id), TAnnotationValue(stringValue=value))
-                    spanEv.annotations.append(ann)
+                ann = TAnnotation(int(id), TAnnotationValue(stringValue=value))
+                spanEv.annotations.append(ann)
 
         return spanEv
 
