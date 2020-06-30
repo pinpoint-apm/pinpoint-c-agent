@@ -27,10 +27,10 @@ class PDOCommonPlugin extends Candy
     {
         pinpoint_add_clue("stp",MYSQL);
         if(strpos($this->apId, "PDO::__construct")){
-            $this->who->url = $this->get_host($this->args[0][0]);
-            pinpoint_add_clues(PHP_ARGS, sprintf("dsn:%s,username:%s,password:%s",$this->args[0][0], $this->args[0][1], $this->args[0][2]));
+            $this->who->url = $this->get_host($this->args[0]);
+            pinpoint_add_clues(PHP_ARGS, sprintf("dsn:%s,username:%s,password:%s",$this->args[0], $this->args[1], $this->args[2]));
         }else{
-            pinpoint_add_clues(PHP_ARGS, sprintf("sql:%s",$this->args[0][0]));
+            pinpoint_add_clues(PHP_ARGS, sprintf("sql:%s",print_r($this->args, true)));
         }
         pinpoint_add_clue("dst",$this->who->url);
     }

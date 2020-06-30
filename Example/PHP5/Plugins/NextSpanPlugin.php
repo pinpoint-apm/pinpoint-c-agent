@@ -47,7 +47,6 @@ class NextSpanPlugin extends Candy
         $headers[] ='Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid;
         $nsid = PerRequestPlugins::instance()->generateSpanID();
         $headers[] ='Pinpoint-Spanid:'.$nsid;
-	var_dump($headers);
     }
 
     /**
@@ -73,7 +72,6 @@ class NextSpanPlugin extends Candy
             'Pinpoint-Spanid:'.$nsid
             );
         \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
-	var_dump($header);
     }
 
 
@@ -88,9 +86,7 @@ class NextSpanPlugin extends Candy
             $ch = $argv[0];
 
             if($argv[1] == CURLOPT_HTTPHEADER){
-		var_dump($argv[2]);
                 $this->handleHttpHeader($ch,$argv[2]);
-		var_dump($argv[2]);
             }elseif ($argv[1] == CURLOPT_URL){
                 $this->handleUrl($ch,$argv[2]);
             }
