@@ -31,13 +31,12 @@ abstract class Candy
     protected $args;
     protected $ret=null;
 
-    public function __construct($apId,$who)
+    public function __construct($apId,$who,&$Args)
     {
         /// todo start_this_aspect_trace
         $this->apId = $apId;
         $this->who =  $who;
-        $args = \pinpoint_get_func_ref_args();
-        $this->args = array_slice($args,2,null,false);
+        $this->args = &$Args;
 
         pinpoint_start_trace();
         pinpoint_add_clue("name",$apId);

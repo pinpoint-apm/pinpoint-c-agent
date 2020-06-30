@@ -47,6 +47,7 @@ class NextSpanPlugin extends Candy
         $headers[] ='Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid;
         $nsid = PerRequestPlugins::instance()->generateSpanID();
         $headers[] ='Pinpoint-Spanid:'.$nsid;
+	var_dump($headers);
     }
 
     /**
@@ -72,6 +73,7 @@ class NextSpanPlugin extends Candy
             'Pinpoint-Spanid:'.$nsid
             );
         \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
+	var_dump($header);
     }
 
 
@@ -81,12 +83,14 @@ class NextSpanPlugin extends Candy
             return ;
         }
 
-        $argv = &$this->args[0];
+        $argv = &$this->args;
         if( isset($argv[1])){
             $ch = $argv[0];
 
             if($argv[1] == CURLOPT_HTTPHEADER){
+		var_dump($argv[2]);
                 $this->handleHttpHeader($ch,$argv[2]);
+		var_dump($argv[2]);
             }elseif ($argv[1] == CURLOPT_URL){
                 $this->handleUrl($ch,$argv[2]);
             }
@@ -99,7 +103,8 @@ class NextSpanPlugin extends Candy
     function onEnd(&$ret)
     {
         if($this->apId == 'curl_exec'){
-            $argv = &$this->args[0];
+            $argv = $this->args;
+		
             $ch = $argv[0];
             pinpoint_add_clue("dst",$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)));
             pinpoint_add_clue("stp",PINPOINT_PHP_REMOTE);
