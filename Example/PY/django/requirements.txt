@@ -8,5 +8,5 @@ idna===2.9
 urllib3===1.25.9
 chardet===3.0.4
 PyMySQL===0.9.3
-django===3.0.6
+django===3.0.7
 redis===3.5.2
