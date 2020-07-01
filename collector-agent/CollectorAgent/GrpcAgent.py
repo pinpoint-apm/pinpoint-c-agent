@@ -19,20 +19,25 @@
 
 # Created by eeliu at 10/21/19
 
+import queue
 import threading
 import time
 
 import Service_pb2_grpc
+import grpc
+from Stat_pb2 import PAgentInfo, PPing
+
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 from PinpointAgent.Type import PHP
-from Stat_pb2 import PAgentInfo, PPing
+from Proto.grpc.Cmd_pb2 import PCmdMessage, PCmdServiceHandshake, PCommandType, PCmdActiveThreadCountRes, \
+    PCmdStreamResponse, PCmdActiveThreadLightDumpRes
 
 
 class GrpcAgent(GrpcClient):
     PINGID = 0
 
-    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP,meta=None, maxPending=-1, timeout=10):
+    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP,meta=None,get_req_stat=None,get_interval_stat=None,maxPending=-1, timeout=10):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
@@ -43,10 +48,14 @@ class GrpcAgent(GrpcClient):
         GrpcAgent.PINGID += 1
         self.exit_cv  = threading.Condition()
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
+        self.cmd_sub = Service_pb2_grpc.ProfilerCommandServiceStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
                                     serviceType=server_type)
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
+        self.profile_meta = meta
         self.task_running = False
+        assert get_req_stat
+        self.get_req_stat = get_req_stat
 
     def channelSetReady(self):
         self.is_ok = True
@@ -58,12 +67,112 @@ class GrpcAgent(GrpcClient):
         self.is_ok = False
 
     def start(self):
-        # start a thread to handle register
+        self.task_running = True
+
         self.agent_thread = threading.Thread(target=self._registerAgent)
         self.agent_thread.start()
 
+        self.cmd_thread = threading.Thread(target=self._handleCommand)
+        self.cmd_thread.start()
+
+    class HandStreamIterator(object):
+         def __init__(self,start_msg):
+            self._response_queue = queue.Queue()
+            self._response_queue.put(start_msg)
+
+         def __next__(self):
+             response = self._response_queue.get()
+             if response:
+                return response
+             else:
+                TCLogger.info("HandStreamIterator stopped")
+                return
+         def add_response(self,message):
+             self._response_queue.put(message)
+
+         def stop(self):
+             self._response_queue.put(None)
+
+    def _handleCommand(self):
+        handshake = PCmdServiceHandshake()
+        handshake.supportCommandServiceKey.append(PCommandType.PING)
+        handshake.supportCommandServiceKey.append(PCommandType.PONG)
+        handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_COUNT)
+        handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_DUMP)
+        handshake.supportCommandServiceKey.append(PCommandType.ACTIVE_THREAD_LIGHT_DUMP)
+        cmd = PCmdMessage(handshakeMessage=handshake)
+
+        while self.task_running:
+            self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
+            # while self.task_running:
+            msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
+            try:
+                for msg in msg_iter:
+                    TCLogger.debug("command channel %s", msg)
+                    self._handleCmd(msg, self.cmd_pipe)
+                TCLogger.debug('iter_response is over')
+
+            except Exception as e:
+                TCLogger.error("handleCommand channel  %s error", e)
+            finally:
+                with self.exit_cv:
+                    if self.exit_cv.wait(self.timeout):
+                        break
+
+    def _send_thread_count(self,requestId):
+        channel = grpc.insecure_channel(self.address)
+        stub  = Service_pb2_grpc.ProfilerCommandServiceStub(channel)
+
+        def generator_cmd():
+            i = 0
+            while True:
+                try:
+                    cmd_response = PCmdStreamResponse(responseId=requestId, sequenceId=i)
+                    cmd_response.message.value = 'hello'
+                    threadCountRes = PCmdActiveThreadCountRes(commonStreamResponse=cmd_response)
+                    threadCountRes.histogramSchemaType = 2
+                    for stat in self.get_req_stat():
+                        threadCountRes.activeThreadCount.append(stat)
+                    threadCountRes.timeStamp = int(time.time())
+                    i += 1
+                    yield threadCountRes
+
+                    with self.exit_cv:
+                        if self.exit_cv.wait(1):
+                            break
+                except Exception as e:
+                    TCLogger.warning("catch exception %s", e)
+                    break
+
+        try:
+            stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
+            TCLogger.debug("send req state requestId: %d done",requestId)
+        except Exception as e:
+            TCLogger.error("CommandStreamActiveThreadCount, catch exception %s",e)
+    def _handleCmd(self,msg,cmdIter):
+        try:
+            if msg.HasField('commandEcho'):
+                pass
+            elif msg.HasField('commandActiveThreadCount'):
+                self.thread_count = threading.Thread(target=self._send_thread_count,args=(msg.requestId,))
+                self.thread_count.start()
+            elif msg.HasField('commandActiveThreadDump'):
+                pass
+
+            elif msg.HasField('commandActiveThreadLightDump'):
+                lightDumpRes =  PCmdActiveThreadLightDumpRes()
+                lightDumpRes.commonResponse.responseId = msg.requestId
+                lightDumpRes.type='java'
+                lightDumpRes.subType = 'oracle'
+                lightDumpRes.version = '1.8.105'
+                self.cmd_sub.CommandActiveThreadLightDump(lightDumpRes)
+            else:
+                TCLogger.warn("msg type not support:%s",msg)
+        except Exception as e:
+            TCLogger.error(e)
+
+
     def _registerAgent(self):
-        self.task_running  = True
         while self.task_running:
             try:
                 TCLogger.debug("sending agentinfo %s",self.agentinfo)
@@ -75,19 +184,18 @@ class GrpcAgent(GrpcClient):
                 with self.exit_cv:
                     if self.exit_cv.wait(self.timeout):
                         break
-
             iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
             try:
                 for response in iter_response:
                     TCLogger.debug('get ping response:%s agentinfo:%s', response,self.meta)
             except Exception as e:
                 TCLogger.error("ping response abort with exception: [%s]  %s",self.agentinfo, e)
-        
+
         TCLogger.debug('agent thread exit: %s',self.task_running)
-  
-                
+
+
     def _pingPPing(self):
-        while self.is_ok:
+        while self.task_running:
             ping = PPing()
             TCLogger.debug("%s send ping", self)
             yield ping
@@ -95,7 +203,7 @@ class GrpcAgent(GrpcClient):
                 if self.exit_cv.wait(self.timeout):
                     TCLogger.debug("generate ping exit")
                     break
-                
+
 
     def __str__(self):
         return 'agentclient: hostname:%s ip:%s  pid:%d address:%s' % (self.hostname, self.ip, self.pid, self.address)
@@ -105,6 +213,8 @@ class GrpcAgent(GrpcClient):
         self.task_running = False
         with self.exit_cv:
             self.exit_cv.notify_all()
+        self.cmd_pipe.stop()
         self.agent_thread.join()
+        self.cmd_thread.join()
         super().stop()
         TCLogger.debug("agent thread exit")

@@ -18,24 +18,25 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 10/16/19
-
-from threading import Thread
-from queue import Full,Queue
+import json
+import os
+from multiprocessing import Process, Queue as MPQueue
+from queue import Full, Queue
 
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
+from CollectorAgent.GrpcStat import GrpcStat
 from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
-from PinpointAgent.Type import PHP, SUPPORT_GRPC, API_DEFAULT
-from Span_pb2 import PSpanMessage
+from PinpointAgent.Type import SUPPORT_GRPC, API_DEFAULT
+from Proto.grpc.Span_pb2 import PSpanMessage
 
 
 class GrpcAgentImplement(PinpointAgent):
-
-    class SpanSender(object):
+    class SpanHelper(object):
         def __init__(self, span_addr, appid, appname, starttime,max_pending_sz):
             self.agent_meta = [('starttime', str(starttime)), ('agentid', appid), ('applicationname', appname)]
             self.agent_id = appid
@@ -43,12 +44,11 @@ class GrpcAgentImplement(PinpointAgent):
             self.span_addr = span_addr
             self.max_pending_sz =max_pending_sz
             self.span_queue = Queue(self.max_pending_sz)
-            self.span_client = GrpcSpan(self.span_addr, self.agent_meta)
+            self.span_client = GrpcSpan(self.span_addr, self.agent_meta, self.span_queue)
             self.dropped_span_count=0
-            TCLogger.info("Successfully create a Span Sender")
 
         def start(self):
-            self.span_client.start(self.span_queue)
+            self.span_client.start()
 
 
         def sendSpan(self, spanMesg):
@@ -57,18 +57,18 @@ class GrpcAgentImplement(PinpointAgent):
                 self.span_queue.put(spanMesg, False)
             except Full as e:
                 self.dropped_span_count+=1
+                TCLogger.warning("span send queue is full")
                 return False
             except Exception as e:
                 TCLogger.error("send span failed: %s", e)
                 return False
             return True
 
-        def stopSelf(self):
+        def stop(self):
             self.span_client.stop()
             TCLogger.info("grpc agent dropped %d",self.dropped_span_count)
 
     def __init__(self, ac, app_id, app_name, serviceType):
-
         assert ac.collector_type == SUPPORT_GRPC
         super().__init__(app_id, app_name)
         self.agent_meta = [('starttime', str(ac.startTimestamp)),
@@ -78,63 +78,72 @@ class GrpcAgentImplement(PinpointAgent):
         self.service_type = serviceType
         self.max_pending_sz = ac.max_pending_size
         self.agent_addr = ac.CollectorAgentIp + ':' + str(ac.CollectorAgentPort)
-        self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorSpanPort)
+        self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorStatPort)
         self.span_addr = ac.CollectorSpanIp + ':' + str(ac.CollectorSpanPort)
-
-        import os
+        self.web_port = ac.getWebPort()
         self.agentHost = AgentHost()
         self.max_span_sender_size = 2
-        self.span_sender_list = []
         self.sender_index = 0
-        self._startSpanSender()
-
-        self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, ac.getWebPort(), os.getpid(),
-                                      self.agent_addr, self.service_type,self.agent_meta)
-        self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
-
-        self.agent_client.start()
-        self.meta_client.start()
-        self.span_factory = GrpcSpanFactory(self)
 
     def start(self):
-        pass
+        self.mpQueue = MPQueue()
+        self.process = Process(target=self.processMain)
+        self.process.start()
 
-    def _sendSpan(self, spanMsg):
+    def processMain(self):
+        self.span_helper = GrpcAgentImplement.SpanHelper(self.span_addr, self.app_id, self.app_name,
+                                                         self.startTimeStamp,
+                                                         self.max_pending_sz)
+        self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, self.web_port, os.getpid(),
+                                      self.agent_addr, self.service_type,self.agent_meta,self.getReqStat)
+        self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
+        self.stat_client = GrpcStat(self.stat_addr,self.agent_meta,self.getIntervalStat)
+        self.span_factory = GrpcSpanFactory(self)
+        self.agent_client.start()
+        self.meta_client.start()
+        self.stat_client.start()
+        self.span_helper.start()
 
-        self.span_sender_list[0].sendSpan(spanMsg)
-        TCLogger.debug(spanMsg)
-        return True
+        self.loopTheQueue()
 
-    def sendSpan(self, stack, body):
-        try:
-            pSpan = self.span_factory.makeSpan(stack)
-            spanMesg = PSpanMessage(span=pSpan)
-        except Exception as e:
-            TCLogger.warn("interrupted by %s",e)
-            return False
-        if self._sendSpan(spanMesg):
-            return True
+        self.stopProcessMain()
 
-        else:
-            if len(self.span_sender_list) < self.max_span_sender_size:
-                TCLogger.warn("try to create a new span_sender")
-                self._startSpanSender()
+    def loopTheQueue(self):
+        while True:
+            body = self.mpQueue.get()
+            if body == None:
+                TCLogger.info("agent: %s stopping", self.agent_meta)
+                break
             else:
-                TCLogger.warn("span_processes extend to max size")
+                content = body.decode('utf-8')
+                try:
+                    TCLogger.debug(content)
+                    stack = json.loads(content)
+                except Exception as e:
+                    TCLogger.error("json is crash")
+                    return
 
-        return True
+                super().sendSpan(stack, body)
+                try:
+                    pSpan = self.span_factory.makeSpan(stack)
+                    spanMesg = PSpanMessage(span=pSpan)
+                except Exception as e:
+                    TCLogger.warn("interrupted by %s", e)
+                    continue
+                self.span_helper.sendSpan(spanMesg)
 
-    def _startSpanSender(self):
-        spanSender = GrpcAgentImplement.SpanSender(self.span_addr, self.app_id, self.app_name, self.startTimeStamp,self.max_pending_sz)
-        spanSender.start()
-        self.span_sender_list.append(spanSender)
-
+    def asynSendSpan(self, stack, body):
+        self.mpQueue.put(body, 5)
 
     def stop(self):
+        self.mpQueue.put(None, 5)
+        self.process.join()
+
+    def stopProcessMain(self):
         self.agent_client.stop()
         self.meta_client.stop()
-        for sender in self.span_sender_list:
-            sender.stopSelf()
+        self.stat_client.stop()
+        self.span_helper.stop()
 
     def updateApiMeta(self, name, type=API_DEFAULT):
         return self.meta_client.updateApiMeta(name, -1, type)

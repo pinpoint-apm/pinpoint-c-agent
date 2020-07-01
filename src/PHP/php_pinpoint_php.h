@@ -54,8 +54,10 @@ extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php);
 #define PPG(v) (pinpoint_php_globals.v)
 #endif
 
+#if PHP_VERSION_ID > 70000
 #if defined(ZTS) && defined(COMPILE_DL_PINPOINT_PHP)
 ZEND_TSRMLS_CACHE_EXTERN()
+#endif
 #endif
 
 PHP_MINIT_FUNCTION(pinpoint_php);

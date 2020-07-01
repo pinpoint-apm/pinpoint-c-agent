@@ -18,25 +18,26 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 10/31/19
-import time
 import traceback
 from queue import Empty
-from threading import Condition,Thread
+from threading import Condition, Thread
+
 import Service_pb2_grpc
+
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 
 
 class GrpcSpan(GrpcClient):
-    def __init__(self, address, meta):
+    def __init__(self, address, meta, queue):
         super().__init__(address, meta)
         self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
         self.exit_cv = Condition()
         self.send_span_count = 0
         self.is_ok = False
-        self.task_thead = Thread(target=self.startSender)
+        self.task_thead = Thread(target=self.getAndSendSpan)
         self.task_running = False
-        self.queue = None
+        self.queue = queue
 
     def channelSetReady(self):
         self.is_ok = True
@@ -55,15 +56,15 @@ class GrpcSpan(GrpcClient):
         super().stop()
         TCLogger.info("send %d to pinpoint collector",self.send_span_count)
 
-    def start(self,queue):
-        self.queue = queue
+    def start(self):
         self.task_thead.start()
 
-    def startSender(self):
+    def getAndSendSpan(self):
         self.task_running = True
 
         spans = []
-        def get_maxN_span(queue, N):
+
+        def get_n_span(queue, N):
             i = 0
             try:
                 while N > i:
@@ -75,7 +76,7 @@ class GrpcSpan(GrpcClient):
 
         while self.task_running:
             try:
-                if not get_maxN_span(self.queue, 10240):
+                if not get_n_span(self.queue, 10240):
                     with self.exit_cv:
                         if self.exit_cv.wait(5):
                             break

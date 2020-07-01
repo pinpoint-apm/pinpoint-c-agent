@@ -171,7 +171,6 @@ public:
             child.ancestor_start_time = parent.ancestor_start_time;
             child.start_time = timestamp;
             this->stack.push(child);
-            this->fetal_error_time = 0; // reset fetal_error_time
         }else{ // ancestor
             this->translayer.trans_layer_pool();
             TraceNode ancestor(this->root);
@@ -180,6 +179,7 @@ public:
             ancestor.ancestor_start_time = timestamp;
             ancestor.start_time = timestamp;
             this->stack.push(ancestor);
+            this->fetal_error_time = 0; // reset fetal_error_time
         }
         return this->stack.size();
     }

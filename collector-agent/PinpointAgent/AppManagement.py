@@ -25,40 +25,40 @@ from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
 
 
-
 class AppManagement(object):
     def __init__(self,collector_conf):
         assert isinstance(collector_conf,CollectorAgentConf)
         self.collector_conf = collector_conf
-        self.default_appid = self.collector_conf.AgentID
-        self.default_appname = self.collector_conf.ApplicationName
+        # self.default_appid = self.collector_conf.AgentID
+        # self.default_appname = self.collector_conf.ApplicationName
         self.app_map = {}
         self.default_app = None
         self.recv_count = 0
-        self.createDefaultImplement(collector_conf.server_type)
 
-    def createDefaultImplement(self, service_type):
-
-        self.default_app = self.collector_conf.collector_implement(self.collector_conf, self.default_appid, self.default_appname, service_type)
-
-        self.default_app.start()
-        self.app_map[self.default_appid] = self.default_app
+    # self.createDefaultImplement(collector_conf.server_type)
+    # def createDefaultImplement(self, service_type):
+    #
+    #     self.default_app = self.collector_conf.collector_implement(self.collector_conf, self.default_appid, self.default_appname, service_type)
+    #
+    #     self.default_app.start()
+    #     self.app_map[self.default_appid] = self.default_app
 
     def findApp(self, app_id, app_name, service_type):
         if app_id in self.app_map:
             app = self.app_map[app_id]
             ## check app_name
             if app.app_name != app_name:
-                TCLogger.warning(" app_name can't change when using ")
-                app = self.default_app
+                TCLogger.warning(" app_name can't change when working ")
+                return None
             ## check service_type
-
+            else:
+                return app
         else:
             TCLogger.info("collector-agent try to create a new application agent.[%s@%s@%d]",app_id,app_name,service_type)
             app = self.collector_conf.collector_implement(self.collector_conf, app_id, app_name,service_type)
             app.start()
             self.app_map[app_id] = app
-        return app
+            return app
 
     def stopAll(self):
         for app_id,instance in self.app_map.items():
@@ -76,23 +76,30 @@ class AppManagement(object):
             TCLogger.error("json is crash")
             return
         if 'appid' not in stack:
-            appid = self.default_appid
+            TCLogger.warning(" drop %s, as no appid", content)
+            return
         else:
             appid = stack['appid']
 
         if 'appname' not in stack:
-            appname = self.default_appname
+            TCLogger.warning(" drop %s, as no appname", content)
+            return
         else:
             appname = stack['appname']
 
-        ft = stack['FT']
+        if 'FT' not in stack:
+            TCLogger.warning(" drop %s, as no FT", content)
+            return
+        else:
+            ft = stack['FT']
+
         app = self.findApp(appid, appname, ft)
-        app.sendSpan(stack,body)
+        app.asynSendSpan(stack, body)
         self.recv_count+=1
 
     def tellMeWho(self):
         return {
             "time": str(self.collector_conf.startTimestamp),
-            "id": self.default_appid,
-            "name": self.default_appname
+            "id": "no",
+            "name": "no"
         }
