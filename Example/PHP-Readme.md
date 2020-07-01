@@ -3,6 +3,11 @@
 ### Tutorial
 
 1. First, you need to know how to use [ php_simple_aop ☚](https://github.com/eeliu/php_simple_aop/blob/master/Readme.md) and how it works. 
+   PHP |php_simple_aop
+   ----|----
+   PHP5|v0.3.x (latest is v0.3.0-patch)
+   PHP7|v0.2.x (latest is v0.2.4)
+
 2. Write your own XXXPlugin.php class.
    
    ```php
@@ -23,8 +28,9 @@
         }
     }
    ```
-   > You could find some out of box plugins in [[pinpoint_php_example/Plugins/](https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins)].
+   > You could find some out of box plugins in [pinpoint_php_example/Plugins/](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP/Plugins)].
     When you add clue(clues), DO NOT assignment with large string or string included some special characters(https://www.freeformatter.com/json-escape.html)
+
 3. Add the function that you cares about such as "///@hook:app\User::adduser" before ClassName(XXXPlugins), onBefore, onEnd or onException. If you care about all cases, please call before&after&around function.
 
 4. Remove the "__class_index_table" file under AOP_CACHE_DIR.
@@ -71,7 +77,9 @@
 
 ## Example
 
-https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins
+[ For PHP7 ☚]((https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP))
+
+[ For PHP5 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP5)
 
 ## API of Pinpoint_php_ext
 [Goto pinpoint_ext_api ☚](../../src/PHP/pinpoint_php_api.php)

@@ -38,8 +38,8 @@ It is an agent written by C++, PHP, python languages. And we hope to support oth
 
 ### 2020-06-12
 
-- Support php5.5 php5.6
-- Collector-agent: support real time chart.
+- Support php5.5 php5.6 🎉🎉🎉
+- Collector-agent: support real time chart, system CPU Usage chart, response time chart. 🎉🎉🎉
 
 ## Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
