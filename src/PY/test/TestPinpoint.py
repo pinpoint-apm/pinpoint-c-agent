@@ -9,7 +9,7 @@ def output(msg):
 
 class TestAgent(TestCase):
      
-    def setUp(self) -> None:
+    def setUp(self):
         # self.assertTrue(pinpointPy.enable_debug(output))
         # self.assertTrue(pinpointPy.enable_debug(None))
         self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/collector-agent.sock'))

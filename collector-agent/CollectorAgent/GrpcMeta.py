@@ -18,11 +18,12 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 11/5/19
-import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
-from Span_pb2 import PSqlMetaData, PApiMetaData, PStringMetaData
 from Events.GTimer import GTimer
+from Proto.grpc import Service_pb2_grpc
+from Proto.grpc.Span_pb2 import PSqlMetaData, PApiMetaData, PStringMetaData
+
 
 class GrpcMeta(GrpcClient):
     def __init__(self, address, meta=None):

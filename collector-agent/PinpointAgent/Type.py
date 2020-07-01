@@ -1,5 +1,21 @@
 # encoding: utf-8
 
+# ------------------------------------------------------------------------------
+#  Copyright  2020. NAVER Corp.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# ------------------------------------------------------------------------------
+
 APPLICATION_SEND = 1
 APPLICATION_TRACE_SEND = 2
 APPLICATION_TRACE_SEND_ACK = 3
@@ -54,28 +70,16 @@ RESULT = 320
 TVERSION = 0
 PROXY_HTTP_HEADER = 300
 
-
-# ------------------------------------------------------------------------------
-#  Copyright  2020. NAVER Corp.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# ------------------------------------------------------------------------------
-
 #collector type
 SUPPORT_GRPC=1
 SUPPORT_THRIFT=2
 
 
+##### Some setting for internal use
+STAT_INTERVAL=5
+REQ_STAT_INTERVAL=1
+
+#####
 
 class AgentSocketCode(object):
     NONE = 1

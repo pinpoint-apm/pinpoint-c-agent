@@ -59,22 +59,23 @@ class FrontAgent(object):
             listen_socket.listen(256)
             return listen_socket
 
-    def _recvData(self, client, buf, bsz):
+    def _recvData(self, client, buf, buf_sz):
         used = 0
 
-        ###
-        if bsz < FrontAgent.HEADERSIZE:
-            return bsz
+        while used < buf_sz:
+            # needs a whole header
+            if used + FrontAgent.HEADERSIZE > buf_sz:
+                return buf_sz - used
 
-        while used < bsz:
-            type, len = struct.unpack('!ii', buf[used:used + FrontAgent.HEADERSIZE].tobytes())
-            if used + len + FrontAgent.HEADERSIZE > bsz:
-                # should return the rest data
-                return bsz - used
+            # needs a whole body
+            type, body_len = struct.unpack('!ii', buf[used:used + FrontAgent.HEADERSIZE].tobytes())
+            if used + body_len + FrontAgent.HEADERSIZE > buf_sz:
+                return buf_sz - used
+
             used += FrontAgent.HEADERSIZE
-            body = buf[used:used + len].tobytes()
+            body = buf[used:used + body_len].tobytes()
             self.msgHandleCallback(client, type, body)
-            used+= len
+            used += body_len
 
         return 0
 

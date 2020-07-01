@@ -2,17 +2,18 @@
 
 
 #!/usr/bin/env python
-from unittest import TestCase
-
-from CollectorAgent.TPackets import *
 
 
 # -*- coding: UTF-8 -*-
 
-from Span_pb2 import PAcceptEvent, PSpan, PSpanEvent
+
+import os
+import sys
 # !/usr/bin/env python
 from unittest import TestCase
 
+proto_class = os.getcwd() + '/Proto/grpc'
+sys.path.append(proto_class)
 from CollectorAgent.TPackets import *
 from Span_pb2 import PAcceptEvent, PSpan, PSpanEvent
 

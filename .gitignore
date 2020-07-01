@@ -30,3 +30,5 @@ env
 dist
 .deps
 temp
+vendor
+Cache

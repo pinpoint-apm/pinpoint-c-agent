@@ -24,6 +24,15 @@ static char* g_collector_host;
 
 #if PY_VERSION_HEX >= 0x30701f0
 // for pinpoint_coro_local
+#define SubObjName "agent"
+
+typedef struct py_agent_obj {
+    PyObject_HEAD
+    void *agent; //the agent trace unit for every coroutines
+} PyAgentObj;
+
+static TraceStoreLayer* get_coro_store_layer(void);
+
 static TraceStoreLayer _coro_storage;
 static PyObject* coro_local;
 #define CORO_LOCAL_NAME "pinpoint_coro_local"
@@ -194,21 +203,6 @@ static PyObject *py_pinpoint_drop_trace(PyObject *self, CYTHON_UNUSED PyObject *
     return Py_BuildValue("O",Py_True);
 }
 
-// static PyObject *py_pinpoint_app_id(PyObject *self, CYTHON_UNUSED PyObject *unused)
-// {
-//     const char* app_id = pinpoint_app_id();
-
-//     return Py_BuildValue("s",app_id);
-// }
-
-// static PyObject *py_pinpoint_app_name(PyObject *self, CYTHON_UNUSED PyObject *unused)
-// {
-//     const char* app_name = pinpoint_app_name();
-
-//     return Py_BuildValue("s",app_name);
-// }
-
-
 static PyObject *py_pinpoint_start_time(PyObject *self, CYTHON_UNUSED PyObject *unused)
 {
     uint64_t start_time = pinpoint_start_time();
@@ -331,47 +325,6 @@ END_OF_PARSE:
         }
         return NULL;
 
-//         PyObject* py_collector_host = Py_BuildValue("s","collector_host");
-//         PyObject* py_trace_limit = Py_BuildValue("s","trace_limit");
-//         global_agent_info.get_write_lock();
-
-//         if(PyDict_Contains(setting,py_collector_host) == 1)
-//         {
-//             PyObject* py_host = PyDict_GetItem(setting,py_collector_host);
-//             if(PyBytes_Check(py_host))
-//             {
-//                 char* host = strdup(PyBytes_AsString(py_host));
-//                 ret = set_collector_host(host);
-//                 free(host);
-//                 if( !ret )
-//                 {
-//                     goto END_OF_PARSE;
-//                 }
-//             }else{
-//                 PyErr_SetString(PyExc_TypeError, "collector_host must a string");
-//                 goto END_OF_PARSE;
-//             }
-//         }
-
-//         if(PyDict_Contains(setting,py_trace_limit) == 1)
-//         {
-//             PyObject* py_limit = PyDict_GetItem(setting,py_trace_limit);
-//             if(!PyLong_Check(py_limit))
-//             {
-//                 PyErr_SetString(PyExc_TypeError, "trace_limit must a long");
-//                 goto END_OF_PARSE;
-//             }
-//             global_agent_info.trace_limit = PyLong_AsLong(py_limit);
-//         }
-
-//  END_OF_PARSE:
-//         global_agent_info.release_lock();
-//         Py_DECREF(py_collector_host);
-//         Py_DECREF(py_trace_limit);
-//         if( ret == true ){
-//              return Py_BuildValue("O",Py_True);
-//         }
-//         return NULL;
     }
     else
     {
@@ -379,6 +332,42 @@ END_OF_PARSE:
     }
 }
 
+
+
+
+static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
+{
+    char * msg = NULL;
+    char * file_name= NULL;
+    uint line_no= 0;
+    if(PyArg_ParseTuple(args,"ssi",&msg,&file_name,&line_no))
+    {
+        catch_error(msg,file_name,line_no);
+    }
+
+    return Py_BuildValue("O",Py_True);
+}
+
+/* Module method table */
+static PyMethodDef PinpointMethods[] = {
+    {"start_trace", py_pinpoint_start_trace, METH_NOARGS, "def start_trace():# create a new trace and insert into trace chain"},
+    {"end_trace", py_pinpoint_end_trace, METH_NOARGS, "def end_trace():# end currently matched trace"},
+    {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
+    {"drop_trace", py_pinpoint_drop_trace, METH_NOARGS, "def drop_trace():# drop this trace"},
+    {"start_time", py_pinpoint_start_time, METH_NOARGS, "def start_time()->long"},
+    {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value)"},
+    {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value)"},
+    {"set_special_key", py_pinpoint_set_key, METH_VARARGS, "def set_special_key(string key,string value): # create a key-value pair that bases on current trace chain"},
+    {"get_special_key", py_pinpoint_get_key, METH_VARARGS, "def get_special_key(key)->string "},
+    {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "check_tracelimit(long timestamp): check trace whether is limit"},
+    {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "enable logging output(callback )"},
+    {"force_flush_trace", py_force_flush_span, METH_VARARGS, "force flush span during timeout"},
+    {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no) #This trace found an error"},
+    {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=100,enable_coroutines=False)"},
+    { NULL, NULL, 0, NULL}
+};
+
+#if PY_MAJOR_VERSION >2
 
 static void free_pinpoint_module(void * module)
 {
@@ -399,18 +388,23 @@ static void free_pinpoint_module(void * module)
     }
 }
 
-static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
-{
-    char * msg;
-    char * file_name;
-    uint line_no;
-    if(PyArg_ParseTuple(args,"ssl",&msg,&file_name,&line_no))
-    {
-        catch_error(msg,file_name,line_no);
-    }
+/* Module structure */
+static struct PyModuleDef pinpointPymodule = {
 
-    return Py_BuildValue("O",Py_True);
-}
+    PyModuleDef_HEAD_INIT,
+
+    "pinpointPy",           /* name of module */
+    "python agent for pinpoint platform",  /* Doc string (may be NULL) */
+    -1,                 /* Size of per-interpreter state or -1 */
+    PinpointMethods,       /* Method table */
+    NULL,
+    NULL,
+    NULL,
+    free_pinpoint_module /* free global variables*/
+};
+
+
+#if PY_VERSION_HEX >= 0x30701f0
 
 static PyObject *Agent_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     PyAgentObj *self;
@@ -425,59 +419,6 @@ static void Agent_dealloc(PyAgentObj *self) {
     give_back_agent(self->agent);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
-
-// static int set_raw(KeyObject *self, PyObject *value, void *closure) 
-// {
-//     if (value == NULL) {
-//         PyErr_SetString(PyExc_TypeError, "Cannot delete 'x'");
-//         return -1;
-//     }
-// }
-
-// static PyObject *get_raw(KeyObject *self, void *closure) 
-// {
-
-// }
-
-// static PyGetSetDef Agent_getsets[] = {
-//     {"raw", (getter)get_raw, (setter)set_raw, "raw", NULL},
-//     {NULL}  // Sentinel
-// };
-
-
-
-/* Module method table */
-static PyMethodDef PinpointMethods[] = {
-    {"start_trace", py_pinpoint_start_trace, METH_NOARGS, "def start_trace():# create a new trace and insert into trace chain"},
-    {"end_trace", py_pinpoint_end_trace, METH_NOARGS, "def end_trace():# end currently matched trace"},
-    {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
-    {"drop_trace", py_pinpoint_drop_trace, METH_NOARGS, "def drop_trace():# drop this trace"},
-    // {"app_id", py_pinpoint_app_id, METH_NOARGS, "def app_id()->string"},
-    // {"app_name", py_pinpoint_app_name, METH_NOARGS, "def app_name()->string"},
-    {"start_time", py_pinpoint_start_time, METH_NOARGS, "def start_time()->long"},
-    {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value)"},
-    {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value)"},
-    {"set_special_key", py_pinpoint_set_key, METH_VARARGS, "def set_special_key(string key,string value): # create a key-value pair that bases on current trace chain"},
-    {"get_special_key", py_pinpoint_get_key, METH_VARARGS, "def get_special_key(key)->string "},
-    {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "check_tracelimit(long timestamp): check trace whether is limit"},
-    {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "enable logging output(callback )"},
-    {"force_flush_trace", py_force_flush_span, METH_VARARGS, "force flush span during timeout"},
-    {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no) #This trace found an error"},
-    {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=100,enable_coroutines=False)"},
-    { NULL, NULL, 0, NULL}
-};
-/* Module structure */
-static struct PyModuleDef pinpointPymodule = {
-    PyModuleDef_HEAD_INIT,
-    "pinpointPy",           /* name of module */
-    "python agent for pinpoint platform",  /* Doc string (may be NULL) */
-    -1,                 /* Size of per-interpreter state or -1 */
-    PinpointMethods,       /* Method table */
-    NULL,
-    NULL,
-    NULL,
-    free_pinpoint_module /* free global variables*/
-};
 
 static PyTypeObject Agent_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
@@ -521,39 +462,6 @@ static PyTypeObject Agent_Type = {
     Agent_new,                   /* tp_new */
 };
 
-
-
-/* Module initialization function */
-PyMODINIT_FUNC
-PyInit_pinpointPy(void) {
-    
-    global_agent_info.agent_type=1700;
-    global_agent_info.co_host = "unix:/tmp/collector.sock";
-    global_agent_info.inter_flag = 0;
-    global_agent_info.timeout_ms = 0;
-    global_agent_info.trace_limit = -1;
-    register_error_cb(NULL);
-
-    // register Agent_Type
-
-    if (PyType_Ready(&Agent_Type) < 0)
-    {
-        return NULL;
-    }
-
-    PyObject* m = PyModule_Create(&pinpointPymodule);
-     if (m == NULL)
-        return NULL;
-    Py_INCREF(&Agent_Type);
-    if (PyModule_AddObject(m, SubObjName, (PyObject*)&Agent_Type) <0)
-    {
-        Py_DECREF(&Agent_Type);
-        Py_DECREF(m);
-        return NULL;
-    }
-    return m;
-}
-#if PY_VERSION_HEX >= 0x30701f0
 static void set_coro_local(void* agent)
 {
     PyObject *pp_agent_obj = PyObject_CallObject((PyObject *) &Agent_Type,NULL);
@@ -600,4 +508,72 @@ TraceStoreLayer* get_coro_store_layer(void)
 
     return &_coro_storage;
 }
+
+#endif
+
+
+
+
+
+/* Module initialization function */
+PyMODINIT_FUNC
+PyInit_pinpointPy(void) {
+    
+    global_agent_info.agent_type=1700;
+    global_agent_info.co_host = "unix:/tmp/collector.sock";
+    global_agent_info.inter_flag = 0;
+    global_agent_info.timeout_ms = 0;
+    global_agent_info.trace_limit = -1;
+    register_error_cb(NULL);
+
+
+
+    PyObject* m = PyModule_Create(&pinpointPymodule);
+     if (m == NULL)
+        return NULL;
+
+    // register Agent_Type
+#if PY_VERSION_HEX >= 0x30701f0
+    if (PyType_Ready(&Agent_Type) < 0)
+    {
+        return NULL;
+    }
+
+    Py_INCREF(&Agent_Type);
+    if (PyModule_AddObject(m, SubObjName, (PyObject*)&Agent_Type) <0)
+    {
+        Py_DECREF(&Agent_Type);
+        Py_DECREF(m);
+        return NULL;
+    }
+#endif
+
+    return m;
+}
+#else
+#define MODNAME "pinpointPy"
+
+PyDoc_STRVAR(pinpointPy__doc__,"python agent for pinpoint platform");
+
+PyMODINIT_FUNC
+initpinpointPy(void)
+{
+    PyObject *m;
+
+    m = Py_InitModule3(MODNAME,
+            PinpointMethods,
+            pinpointPy__doc__);
+    if (m == NULL)
+        return;
+
+    global_agent_info.agent_type=1700;
+    global_agent_info.co_host = "unix:/tmp/collector.sock";
+    global_agent_info.inter_flag = 0;
+    global_agent_info.timeout_ms = 0;
+    global_agent_info.trace_limit = -1;
+    register_error_cb(NULL);
+
+}
+
+
 #endif
