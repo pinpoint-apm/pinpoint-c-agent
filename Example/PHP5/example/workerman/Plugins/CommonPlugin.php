@@ -15,8 +15,8 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace example\workerman\Plugins;
-use example\workerman\Plugins\Candy;
+namespace Plugins;
+use Plugins\Candy;
 
 ///@hook:example\UserManagerment::checkUser example\UserManagerment::register example\UserManagerment::cacheUser
 class CommonPlugin extends Candy

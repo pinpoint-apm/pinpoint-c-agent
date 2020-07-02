@@ -9,13 +9,14 @@
     ],
     "autoload": {
         "psr-4": {
+            "Plugins\\": "workerman/Plugins",
             "example\\workerman\\": "workerman",
             "example\\swoole\\": "swoole",
             "example\\": "."
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "v0.3.0",
+        "eeliu/php_simple_aop": "v0.3.0-patch",
         "workerman/workerman":"v3.5.15"
     }
 }
