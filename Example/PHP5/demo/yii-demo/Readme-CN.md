@@ -1,4 +1,4 @@
-# php agent 支持Yii ! 
+# php agent 支持Yii !
 
 > 备注: php-agent 重写 Yii 框架的类加载器。因此，您应该遵循以下步骤。
 
@@ -50,6 +50,10 @@
 
 ![server-stack](images/yii-call-stack.png)
 
+
+## “web/index.php”的介绍
+
+跳转到 [web/index.php](web/index.php)
 
 ## 参考资料
 1. 如何安装 yii? [ 请点击 ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)

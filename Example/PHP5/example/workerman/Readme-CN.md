@@ -1,9 +1,9 @@
-## Steps for Writing Plugins for Swoole framework
+## 为Workman框架编写插件的步骤
 
-### 1. Add a pre request plugin on the entry.
+### 1. 在条目上添加一个pre请求插件。
 
 ```  php 
-///@hook:example\swoole\HandleRequest::onReceive
+///@hook:example\workerman\HandleRequest::onMessage
 class TcpServerPerRequestPlugin extends Candy
 {
  public function onBefore(){}
@@ -11,7 +11,7 @@ class TcpServerPerRequestPlugin extends Candy
 }
 ```
 
-### 2. Add common plugins on others. (the same as pinpoint_php_example/Plugins)
+### 2. 在其他插件上添加common plugins (和 pinpoint_php_example/Plugins一样)
 
 ``` php
 ///@hook:example\UserManagerment::checkUser example\UserManagerment::register example\UserManagerment::cacheUser

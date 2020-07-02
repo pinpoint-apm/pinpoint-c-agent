@@ -3,6 +3,12 @@
 ### 编写指南
  
 1. 首先，您需要知道如何使用[ php_simple_aop ☚](https://github.com/eeliu/php_simple_aop/blob/master/Readme.md) 以及它是怎样工作的。
+
+    PHP | php_simple_aop
+   ----|----
+   PHP5|v0.3.x (latest is v0.3.0-patch)
+   PHP7|v0.2.x (latest is v0.2.4)
+
 2. 编写自己的XXXPlugin.php class。
    
    ```php
@@ -70,7 +76,9 @@
 
 ## 示例
 
-https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins
+[ For PHP7 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP)
+
+[ For PHP5 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP5)
 
 ## API of Pinpoint_php_ext
-[Goto pinpoint_ext_api ☚](../../src/PHP/pinpoint_php_api.php)
+[Goto pinpoint_ext_api ☚](../src/PHP/pinpoint_php_api.php)

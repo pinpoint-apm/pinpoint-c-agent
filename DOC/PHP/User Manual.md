@@ -61,7 +61,7 @@ class Foo{
 
 Replace the return object with a decorated object in onEnd(). There are some [magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to help "hacking" the object.
 
-[ [How it works ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
+[ [How does it work? ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
 
 
 ### 2.2 Examples
