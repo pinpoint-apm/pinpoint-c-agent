@@ -32,6 +32,12 @@ Agent由c++、PHP、python语言编写，我们希望后续能支持其他语言
 --- | ---
 ![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
+### 实时跟踪图表
+
+ CPU | Response Time
+ --- | ---
+ ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
+
 ## 联系我们
 * 提交[问题](https://github.com/naver/pinpoint-c-agent/issues)
 * 中国社区：

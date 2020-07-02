@@ -15,10 +15,10 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace example\workerman\Plugins;
+namespace Plugins;
 
 use Workerman;
-use example\workerman\Plugins\Candy;
+use Plugins\Candy;
 use Workerman\Connection\TcpConnection;
 require_once "PluginsDefines.php";
 
