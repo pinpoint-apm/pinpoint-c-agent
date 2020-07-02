@@ -1,4 +1,4 @@
-## Steps for Writing Plugins For Workman framework
+## Steps for Writing Plugins for Workman framework
 
 ### 1. Add a pre request plugin on the entry.
 

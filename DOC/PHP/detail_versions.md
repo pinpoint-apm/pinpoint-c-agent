@@ -26,7 +26,7 @@
 Agent version|PHP5.5.x|PHP5.6.x|PHP7.x |php-zts
 ----|-----|----|-----|---
 v0.1.x|✔|✔|✔|✘
-v0.2.x|✔|✔|✔|✔
+v0.2.+|✔|✔|✔|✔
 
 #### PHP Framework
 
@@ -54,7 +54,7 @@ EasySwoole|✘|✔
 ✘: Block user's application: php-fpm/apache should be restart.
 ```
 
-Operation|v0.1.x|v0.2.x
+Operation|v0.1.x|v0.2.+
 ----|-----|----
 1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/eeliu/php_simple_aop#how-to-reload-all-plugins)
 2.Update pinpoint collector|✘|✔
