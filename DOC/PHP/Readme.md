@@ -87,14 +87,14 @@ pinpoint| `1.8.0+`, `2.0+`
    
 > Try the aop example
 
-4. Goto PHP/pinpoint_php_example (If you use PHP5,Goto PHP5/pinpoint_php_example)
+4. Goto Example/PHP (If you use PHP5, goto Example/PHP5)
    1. Download composer.phar. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
    2. php composer.phar install
-   3. Set $PWD/app/ as your web site root path # namely, set the path of nginx to the collector-agent path in configuration file conf/nginx.conf.
+   3. Set $PWD/app/ as your web site root path 
 
 
 
-### TODO
+## TODO
 
 
 ## 2 Changes 
@@ -107,26 +107,26 @@ pinpoint| `1.8.0+`, `2.0+`
 
 ## 3 F & Q
 
-### 1. How to regenerate all AOP files?
+### 3.1 How to regenerate all AOP files?
 
- Delete *__class_index_table* in Cache/
+Delete *__class_index_table* in Cache/
 
-### 2. Why not support automatically update AOP files?
+### 3.2 Why not support automatically update AOP files?
 
 We can DO but prefer not DO! Because we have not yet find an efficient way to implement this and monitoring these files status every time is a bad deal.
 
-### 3. How much performance does it lose when using?
+### 3.3 How much performance does it lose when using?
 
 After full test, the AOP code could cost at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitoring, the more you taking.
 
 ## 4 Performance Test Result
 
-##### 3.1 [Test Result ☚](./Readme.md#performance-loss-under-stress-test)
+### 4.1 [Test Result ☚](./Readme.md#performance-loss-under-stress-test)
 
-##### 3.2 [Flarum Test Result ☚](./User%20Manual.md#1.1-performance-result)
+### 4.2 [Flarum Test Result ☚](./User%20Manual.md#1.1-performance-result)
 
 
-##### 3.3 Performance Loss Under Stress Test
+### 4.3 Performance Loss Under Stress Test
 
 > Test Scene
 
@@ -149,39 +149,39 @@ phpmyadmin with pinpoint-php v0.2|398.26ms
 ```
 MTT: Mean RTT Time 
 ```
-> [ pinpoint-php on Flraum test result ](./User%20Manual.md#1.1-performance-result)
+> [ pinpoint-php on Flarum test result ](./User%20Manual.md#1.1-performance-result)
 
 > By the way, pinpoint is an APM system but not a performance enhancement system. The loss can't be avoided at present.
 
 
 ## 5  For the developer
 
-[Plugins Tutorial ☚](../../Example/PHP/Readme.md)
+[Plugins Tutorial ☚](../../Example/PHP-Readme-CN.md)
 
 [PHP user manual ☚](./User%20Manual.md)
 
 [v0.1 VS v0.2+](./detail_versions.md)
 
-### Known Issues
+##6 Known Issues
 
-#### 1. Exception or error message with a wrong file path.
+### 6.1 Exception or error message with a wrong file path.
 
 https://github.com/naver/pinpoint-c-agent/issues/99
 
-#### 2. If I do not use composer/autoloader, can I use this version?
+### 6.2 If I do not use composer/autoloader, can I use this version?
 
 Sorry, `php-simple-aop` does not support wrapping the user class (or internal class) without composer/autoloader. By the way, [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
 
 https://github.com/naver/pinpoint-c-agent/issues/103
 
-#### 3. ~Why not support PHP5.x.~ Already done!
+### 6.3 ~Why not support PHP5.x.~ Already done!
 
 https://www.php.net/supported-versions.php
 
-#### 4. ~7.4 Generator function is not supported.~ Already done!
+### 6.4 ~Generator function is not supported.~ Already done!
 
 https://github.com/naver/pinpoint-c-agent/issues/100
 
-#### 5. Some built-in functions can't AOP
+### 6.5 Some built-in functions can't AOP
 https://github.com/naver/pinpoint-c-agent/issues/102
 

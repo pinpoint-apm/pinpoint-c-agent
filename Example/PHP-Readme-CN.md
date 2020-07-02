@@ -76,7 +76,9 @@
 
 ## 示例
 
-https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins
+[ For PHP7 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP)
+
+[ For PHP5 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP5)
 
 ## API of Pinpoint_php_ext
-[Goto pinpoint_ext_api ☚](../../src/PHP/pinpoint_php_api.php)
+[Goto pinpoint_ext_api ☚](../src/PHP/pinpoint_php_api.php)
