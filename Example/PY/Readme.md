@@ -1,6 +1,6 @@
 # How to Use Pinpoint？
 
-## PinpointPy connect to Collector-agent
+## PinpointPy connect to Collector Agent
 Both sock and tcp supports, you could config in [PinpointCommon.py](plugins/PinpointCommon.py)
 
 Please make sure PinpointPy use the same with Collector-agent.

@@ -1,4 +1,4 @@
-﻿# Yii， php agent supported! 
+﻿# Yii, php agent supported! 
 
 > Note: php-agent rewrites the classloader of Yii framework. Therefore, you should follow below Steps.
 

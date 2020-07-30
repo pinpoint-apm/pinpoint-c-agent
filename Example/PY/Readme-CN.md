@@ -1,6 +1,6 @@
 # 如何使用pinpoint？
 
-## PinpointPy 与 Collector-agent 的连接
+## PinpointPy 与 Collector Agent 的连接
 支持 sock 和 tcp 连接, 可以在 [PinpointCommon.py](plugins/PinpointCommon.py) 中配置。
 
 请确保 PinpointPy 和 Collector-agent 使用的同样的连接。

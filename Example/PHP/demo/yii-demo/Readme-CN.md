@@ -1,4 +1,4 @@
-# Yii， php agent supported! 
+# Php agent 已经支持Yii !
 
 > 备注: php-agent 重写 Yii 框架的类加载器。因此，您应该遵循以下步骤。
 

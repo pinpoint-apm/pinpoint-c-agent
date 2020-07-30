@@ -1,6 +1,6 @@
 # v0.1.x 和 v0.2.+ 的区别
 
-##  v0.1.x VS. v0.2+
+##  v0.1.x VS. v0.2.+
 
 > 为什么要重构pinpoint_c_agent (0.1.x)？
 
@@ -30,7 +30,7 @@ v0.2.+|✔|✔|✔|✔
 
 #### PHP 框架
 
-框架|v0.1.x|v0.2+
+框架|v0.1.x|v0.2.+
 ----|-----|----|
 Laravel|✔|✔
 ThinkPHP|✔|todo
@@ -43,7 +43,7 @@ EasySwoole|✘|✔
 1. 如果您的php应用程序不支持composer(如woredpress、phpwind等)，那么就只能使用v0.1.x。
 #### 稳定性
 
-`v0.2+ > v0.1.x`
+`v0.2.+ > v0.1.x`
 
 
 #### 可维护性(动态地)
@@ -57,8 +57,33 @@ EasySwoole|✘|✔
 ----|-----|----
 1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/eeliu/php_simple_aop#how-to-reload-all-plugins)
 2.Update pinpoint collector|✘|✔
-3.Update pinpiont_php.so(pinpoint.so)|✘|✘
+3.Update pinpoint_php.so(pinpoint.so)|✘|✘
+#### 压力测试下的性能损失
 
+> 测试场景
+
+```
+测试对象: PHPMYAdmin
+网址: http://dev-mysql-phpmyadmin/db_structure.php?server=1&db=testDB
+插件数量: 4
+Hooked 次数: 30
+```
+
+> 测试结果
+
+案例|MTT
+---|----
+phpmyadmin without pinpoint|387.28ms
+phpmyadmin with pinpoint-php v0.1|511.46ms
+phpmyadmin with pinpoint-php v0.2|398.26ms
+
+
+```
+MTT: Mean RTT Time 
+```
+> [ pinpoint-php on Flraum 测试结果 ](./User%20Manual-CN.md#1.1-性能测试结果)
+
+> 顺便提一下，Pinpoint是一个APM系统，但不是一个性能增强系统。目前这种损失是无法避免的
 ### 编者的话
 
 由于人们广泛使用composer，v0.2+是我们长期支持的版本，v0.1.x在未来可能会被淘汰，但是我们可以修复v0.1.x中的一些致命错误。
