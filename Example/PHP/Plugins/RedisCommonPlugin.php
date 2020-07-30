@@ -24,7 +24,7 @@
 namespace Plugins;
 use Plugins\Candy;
 
-///@hook:app\TestRedis::\Redis::get app\TestRedis::\Redis::keys app\TestRedis::\Redis::del app\TestRedis::\Redis::set app\TestRedis::\Redis::connect
+/// @hook:app\TestRedis::\Redis::get app\TestRedis::\Redis::keys app\TestRedis::\Redis::del app\TestRedis::\Redis::set app\TestRedis::\Redis::connect
 class RedisCommonPlugin extends Candy
 {
     function onBefore()

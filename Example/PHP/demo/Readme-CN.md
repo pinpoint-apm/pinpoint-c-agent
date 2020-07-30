@@ -5,4 +5,4 @@
    
 ## 一些用于PHP应用程序的开箱即用插件
 
-1. [Flarum demo](./Flarum-demo/Reademe.md)
+1. [Flarum demo](Flarum-demo/Readme-CN.md)

@@ -27,7 +27,7 @@ define('PLUGINS_DIR',__DIR__.'/Plugins/');
 define('APPLICATION_NAME','Flarum');
 define('APPLICATION_ID','Flarum');
 
-require_once __DIR__. '/vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+require_once __DIR__. '/vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
 #####################################################################################
 

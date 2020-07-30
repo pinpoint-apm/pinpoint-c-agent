@@ -2,23 +2,22 @@
 
 [![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-**Visit [our official web site](http://naver.github.io/pinpoint/) for more information and [Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
+**Visit [our official website](http://naver.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
 
 The current stable version is [the Latest](https://github.com/naver/pinpoint-c-agent/releases).
 
 # Pinpoint Common Agent
 
-It is an agent written by C++, PHP, python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_** and **_PYTHON_**.
+It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_** and **_PYTHON_**.
 
-## How to use in PHP
+## PHP tutorial
 
-[Click me ☚](DOC/PHP/Readme.md)
+[ I use PHP !!! ☚](DOC/PHP/Readme.md)
 
-## How to use in PYTHON3
+## PYTHON tutorial
 
-[Click me ☚](DOC/PY/Readme.md)
-
+[I use PYTHON ☚](DOC/PY/Readme.md)
 
 ## Overview Pinpoint Common Agent
 
@@ -34,18 +33,12 @@ It is an agent written by C++, PHP, python languages. And we hope to support oth
 --- | ---
 ![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
-### Real Time Chart
-
- CPU | Response Time
- --- | ---
- ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
-
 ### Changes
 
 ### 2020-06-12
 
-- Support php5.5 php5.6 🎉🎉🎉
-- Collector-agent: support real time chart, system CPU Usage chart, response time chart. 🎉🎉🎉
+- Support php5.5 and php5.6
+- Collector Agent: support real time chart
 
 ## Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)

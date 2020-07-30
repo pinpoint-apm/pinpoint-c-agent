@@ -15,13 +15,7 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "v0.2.4",
+        "naver/pinpoint-php-aop": "v1.0.1",
         "workerman/workerman":"v3.5.15"
-    },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/eeliu/php_simple_aop.git"
-        }
-    ]
+    }
 }

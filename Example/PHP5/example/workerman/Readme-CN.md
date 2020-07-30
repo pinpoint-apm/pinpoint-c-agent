@@ -1,6 +1,6 @@
 ## 为Workman框架编写插件的步骤
 
-### 1. 在条目上添加一个pre请求插件。
+### 1. 在入口添加一个pre请求插件
 
 ```  php 
 ///@hook:example\workerman\HandleRequest::onMessage
@@ -11,7 +11,7 @@ class TcpServerPerRequestPlugin extends Candy
 }
 ```
 
-### 2. 在其他插件上添加common plugins (和 pinpoint_php_example/Plugins一样)
+### 2. 在其他插件上添加common plugins (和 Example/PHP/Plugins 一样)
 
 ``` php
 ///@hook:example\UserManagerment::checkUser example\UserManagerment::register example\UserManagerment::cacheUser

@@ -5,7 +5,7 @@
 
 ## 1 How does pinpoint-php agent work?
 
-Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_aop) as its aspect programming library, and it helps to convert origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
+Pinpoint-php agent employs [pinpoint-php-aop](https://github.com/naver/pinpoint-php-aop) as its aspect programming library, and it helps to convert origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
 
 ``` php
 +--------------+                    +-----------------------+
@@ -31,7 +31,7 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 > TPS: time per request 
 > TPR: requests per second
 
-[How to use pinpoint-php into Flarum?](/Example/PHP/demo/Flarum-demo/Reademe.md)
+[How to use pinpoint-php agent into Flarum?](/Example/PHP/demo/Flarum-demo/Readme.md)
 
 >  Call Tree
 
@@ -40,7 +40,7 @@ Pinpoint php agent employs [php_simple_aop](https://github.com/eeliu/php_simple_
 > Summary
 * Less than 5% loss, when Flarum adds PHP Agent.
 
-If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
+If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
 
 ## 2 How to hook a object ?
 
@@ -55,7 +55,7 @@ class Foo{
 
 ```
 
-> As foo returns a new object and this scenario can't be detected by php_simple_aop easily.
+> As foo returns a new object and this scenario can't be detected by pinpoint-php-aop easily.
 
 ### 2.1 Use a decorator
 

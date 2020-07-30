@@ -16,7 +16,7 @@
 #-------------------------------------------------------------------------------
 
 
-namespace  Plugins;
+namespace  example\workerman\Plugins;
 require_once "PluginsDefines.php";
 
 /////@hook:example\workerman\HandleRequest::onMessage
