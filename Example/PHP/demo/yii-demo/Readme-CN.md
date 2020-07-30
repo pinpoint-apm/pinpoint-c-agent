@@ -53,4 +53,4 @@
 
 ## 参考资料
 1. 如何安装 yii? [ 请点击 ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
-2. php_simple_aop是什么? [ 请点击☚ ](https://github.com/naver/php-simple-aop)
+2. php_simple_aop是什么? [ 请点击☚ ](https://github.com/naver/pinpoint-php-aop)

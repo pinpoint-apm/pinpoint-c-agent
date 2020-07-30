@@ -1,8 +1,3 @@
-
-> 内容
-
-[toc]
-
 ## 1 pinpoint-php agent是如何工作的?
 
 Pinpoint-php agent将[pinpoint-php-aop](https://github.com/naver/pinpoint-php-aop)作为它的方面编程库，它有助于将origin class.php转换为proxied_class.php，其中包括plugins.php和origin.php，而不影响origin class.php的任何函数。
