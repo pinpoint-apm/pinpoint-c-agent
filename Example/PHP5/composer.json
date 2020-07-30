@@ -1,5 +1,5 @@
 {
-    "name": "eeliu/pinpoint-php-example",
+    "name": "naver/pinpoint-php-example",
     "minimum-stability": "dev",
     "authors": [
         {
@@ -16,6 +16,6 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "v0.3.0-patch"
+        "naver/pinpoint-php-aop": "v0.3.2"
     }
 }

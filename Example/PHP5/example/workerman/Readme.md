@@ -1,4 +1,4 @@
-## Steps for Writing Plugins for Workman framework
+## Steps for Writing Plugins For Workman framework
 
 ### 1. Add a pre request plugin on the entry.
 
@@ -11,7 +11,7 @@ class TcpServerPerRequestPlugin extends Candy
 }
 ```
 
-### 2. Add common plugins on others. (the same as pinpoint_php_example/Plugins)
+### 2. Add common plugins on others. (the same as Example/PHP/Plugins)
 
 ``` php
 ///@hook:example\UserManagerment::checkUser example\UserManagerment::register example\UserManagerment::cacheUser

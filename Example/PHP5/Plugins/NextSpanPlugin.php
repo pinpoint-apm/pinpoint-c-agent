@@ -126,9 +126,9 @@ class NextSpanPlugin extends Candy
             $retUrl.=$urlAr['host'];
         }
 
-        if(isset($urlAr['path'])){
-            $retUrl.=$urlAr['path'];
-        }
+//        if(isset($urlAr['path'])){
+//            $retUrl.=$urlAr['path'];
+//        }
 
         if(isset($urlAr['port']))
         {

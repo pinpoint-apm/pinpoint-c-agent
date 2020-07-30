@@ -12,8 +12,8 @@ define('PLUGINS_DIR',__DIR__.'/../Plugins/');
 define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\ClassMapInFile");
 define('APPLICATION_NAME','APP-2');
 define('APPLICATION_ID','app-2');
-
-require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+//define("PINPOINT_ENV",'dev');
+require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
 #################################################
 require_once __DIR__.'/Args.php';
@@ -46,7 +46,8 @@ use app\TestPDO;
 use app\TestMysqli;
 use app\TestRedis;
 use app\TestMemcached;
-
+use app\TestMongo;
+use app\TestGuzzle;
 $type = null;
 if(isset($_GET["type"]))
 {
@@ -250,6 +251,14 @@ switch($type)
         $mc->mem_replace("cat", "Miao");
         $mc->mem_del("cat");
         break;
+    case 'test_mongodb':
+        $mo = new TestMongo('mongodb://mongo-dev:27017/');
+        $mo->testAll();
+        break;
+    case 'test_guzzle':
+        $guzzle = new TestGuzzle();
+        $guzzle->gotoV();
+        $guzzle->gotofoo();
     default:
         echo "not supported type $type";
 }

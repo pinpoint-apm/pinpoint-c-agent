@@ -3,7 +3,7 @@
 
 ## 集成Pinpoint
 
-> 确保安装了pinpointPy模块。([如何安装pinpointPy模块](../../../DOC/PY/Readme.md))
+> 确保安装了pinpointPy模块。([如何安装pinpointPy模块](../../../DOC/PY/Readme-CN.md))
 1. 将```pinpoint``` 目录复制到您项目的根目录， 在Django的设置文件中，将 ```PinPointMiddleWare``` 添加到 ```MIDDLEWARE``` 
 
     ```

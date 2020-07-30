@@ -15,11 +15,9 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -O2")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  -O2")
 
-option (WITH_TEST_CASE "Use provided math implementation" OFF)
+option (WITH_TEST_CASE "Enable Gtest" OFF)
 
-
-
-find_package(pcre)
+# find_package(pcre)
 
 add_subdirectory(json)
 add_subdirectory(src)

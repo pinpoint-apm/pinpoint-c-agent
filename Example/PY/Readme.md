@@ -17,7 +17,7 @@ pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
 
 ## Example of A Simple Http Server
 
-Refer to [http-server](./simple-http-server/http-server.py) and [BaseHTTPRequestPlugins](./simple-http-server/plugins/BaseHTTPRequestPlugins.py)
+Refer to [http-server](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/Example/PY/simple-http-server/http-server.py) and [BaseHTTPRequestPlugins](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/Example/PY/simple-http-server/plugins/BaseHTTPRequestPlugins.py)
 
 > Steps
 

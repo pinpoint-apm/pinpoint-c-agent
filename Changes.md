@@ -1,4 +1,9 @@
-﻿#Changes
+﻿# Changes
+
+## v0.3.2
+* [Python]python2.7 module support
+* [PHP] thinkphp6,Codeigniter4,Symfony framework demo
+* [PHP] Guzzle, MongoClient support
 
 ## v0.3.0-beta
 
@@ -12,8 +17,8 @@
 
 ## v0.2.3 
 
-- Support Yii framework classloader [(How to use pinpoint-php in Yii?)](Example/PHP/demo/yii-demo/Readme.md)
-- Add some out-of-box plugins for flarum [(How to use pinpoint-php in Flarum?)](Example/PHP/demo/Flarum-demo/Reademe.md)
+- Support Yii framework classloader [(How to use pinpoint-php agent into Yii?)](/Example/PHP/demo/yii-demo/Readme.md)
+- Add some out-of-box plugins for Flraum [ (How to use pinpoint-php agent into Flarum?)](/Example/PHP/demo/Flarum-demo/Readme.md)
 - Fix bug in reference parameters
 - Supporting the return type is object
 

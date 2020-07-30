@@ -1,11 +1,6 @@
-
-> 内容
-
-[toc]
-
 ## 1 pinpoint-php agent是如何工作的?
 
-Pinpoint php agent将php_simple_aop作为它的方面编程库，它有助于将origin class.php转换为proxied_class.php，其中包括plugins.php和origin.php，而不影响origin class.php的任何函数。
+Pinpoint-php agent将[pinpoint-php-aop](https://github.com/naver/pinpoint-php-aop)作为它的方面编程库，它有助于将origin class.php转换为proxied_class.php，其中包括plugins.php和origin.php，而不影响origin class.php的任何函数。
 
 ``` php
 +--------------+                    +-----------------------+
@@ -32,7 +27,7 @@ Pinpoint php agent将php_simple_aop作为它的方面编程库，它有助于将
 
 >TPR: requests per second（每秒的请求数量）
 
-[如何在Flarum中使用pinpoint-php ?](/Example/PHP/demo/Flarum-demo/Readme-CN.md)
+[如何在Flarum中使用pinpoint-php agent ?](/Example/PHP/demo/Flarum-demo/Readme-CN.md)
 
 >  调用栈
 
@@ -41,7 +36,7 @@ Pinpoint php agent将php_simple_aop作为它的方面编程库，它有助于将
 > 总结
 * 当Flarum添加PHP Agent时，损失小于5%。
 
-如果您特别在意性能损耗问题，可以直接调用由C&C++编写的pinpoint-php agent模块API。 [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
+如果您特别在意性能损耗问题，可以直接调用由C&C++编写的pinpoint-php agent模块API。 [(pinpoint-php api)](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
 
 ## 2 如何hook a object?
 
@@ -56,7 +51,7 @@ class Foo{
 
 ```
 
-> 当foo返回一个新对象时，php_simple_aop很难检测到这个场景。
+> 当foo返回一个新对象时，pinpoint-php-aop很难检测到这个场景。
 
 ### 2.1 使用一个装饰器
 

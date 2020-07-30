@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-*请访问我们的[官方网站](http://naver.github.io/pinpoint/)，了解更多关于Pinpoint的信息和[最新版本](https://naver.github.io/pinpoint/news.html)*。
+*请访问我们的[官方网站](http://naver.github.io/pinpoint/)，了解更多关于 Pinpoint 的信息和[最新版本](https://naver.github.io/pinpoint/news.html)*。
 
 目前稳定的版本是[最新版](https://github.com/naver/pinpoint-c-agent/releases)。
 

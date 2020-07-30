@@ -3,7 +3,7 @@
 ```  json
 
  "require": {
-        "eeliu/php_simple_aop": "dev-master"
+        "naver/pinpoint-php-agent": "v1.0.1"
     }
     
 ```

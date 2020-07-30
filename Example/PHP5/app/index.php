@@ -13,7 +13,7 @@ define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\ClassMapInFile");
 define('APPLICATION_NAME','APP-2');
 define('APPLICATION_ID','app-2');
 
-require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
 #################################################
 require_once __DIR__.'/Args.php';
