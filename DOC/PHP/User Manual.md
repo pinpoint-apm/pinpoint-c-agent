@@ -1,9 +1,4 @@
-﻿
-> Contents
-
-[toc]
-
-## 1 How does pinpoint-php agent work?
+﻿## 1 How does pinpoint-php agent work?
 
 Pinpoint-php agent employs [pinpoint-php-aop](https://github.com/naver/pinpoint-php-aop) as its aspect programming library, and it helps to convert origin class.php to proxied_class.php which includes plugins.php and origin.php without affecting any function of origin class.php.
 
