@@ -16,7 +16,7 @@
         }
     },
     "require": {
-        "eeliu/php_simple_aop": "dev-dev",
+        "naver/pinpoint-php-aop": "v1.0.1",
         "guzzlehttp/guzzle": "~6.0",
         "mongodb/mongodb":"~1.6.0"
     }

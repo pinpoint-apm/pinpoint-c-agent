@@ -1,6 +1,6 @@
-# php agent 支持Yii !
+# Php agent 已经支持Yii !
 
-> 备注: php-agent 重写 Yii 框架的类加载器。因此，您应该遵循以下步骤。
+> 注意: php-agent重写了Yii框架的类加载器。因此，您应该遵循以下步骤。
 
 
 ## 步骤
@@ -25,7 +25,7 @@
 ```
  "require": {
      ...
-     "eeliu/php_simple_aop": "v0.2.4"
+     "naver/pinpoint-php-aop": "v0.3.2"
      ...
  }
 
@@ -51,10 +51,10 @@
 ![server-stack](images/yii-call-stack.png)
 
 
-## “web/index.php”的介绍
+##  “web/index.php”的介绍
 
 跳转到 [web/index.php](web/index.php)
 
 ## 参考资料
-1. 如何安装 yii? [ 请点击 ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
-2. php_simple_aop是什么? [ 请点击☚ ](https://github.com/eeliu/php_simple_aop)
+1. 如何安装 yii? [请点击 ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
+2. pinpoint-php-aop是什么? [ 请点击 ☚ ](https://github.com/naver/pinpoint-php-aop)

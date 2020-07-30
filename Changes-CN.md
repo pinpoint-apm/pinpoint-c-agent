@@ -1,4 +1,9 @@
-#变化
+# 变化
+
+## v0.3.2
+* [Python] 支持python2.7 module 
+* [PHP] thinkphp6,Codeigniter4,Symfony framework demo
+* [PHP] 支持Guzzle, MongoClient 
 
 ## v0.3.0-beta
 
@@ -7,14 +12,14 @@
   - demo for flask
   - demo for tornado
   - demo for BaseHTTPRequestHandler
-- 更容易使用
-- 新增中文使用说明
+- 使用更加方便
+- 提供中文使用说明
 
 ## v0.2.3 
 
-- 支持Yii框架类加载器 [(如何在Yii中使用pinpoint-php ?)](Example/PHP/demo/yii-demo/Readme.md)
-- 为Flarum添加一些开箱即用的插件 [(如何在Flarum中使用pinpoint-php?)](Example/PHP/demo/Flarum-demo/Reademe.md)
-- 修复了参考参数的bug
+- 支持 Yii 框架类加载器 [(如何在Yii中使用pinpoint-php agent?)](Example/PHP/demo/yii-demo/Readme-CN.md)
+- 为 Flraum 添加一些开箱即用的插件 [ (如何在Flarum中使用pinpoint-php agent?)](Example/PHP/demo/Flarum-demo/Readme-CN.md)
+- 修正了引用参数的bug
 - 支持返回类型为object
 
 ## v0.2.2

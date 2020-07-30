@@ -2,13 +2,7 @@
 
 ### 编写指南
  
-1. 首先，您需要知道如何使用[ php_simple_aop ☚](https://github.com/eeliu/php_simple_aop/blob/master/Readme.md) 以及它是怎样工作的。
-
-    PHP | php_simple_aop
-   ----|----
-   PHP5|v0.3.x (latest is v0.3.0-patch)
-   PHP7|v0.2.x (latest is v0.2.4)
-
+1. 首先，您需要知道如何使用[ pinpoint-php-aop ☚](https://github.com/naver/pinpoint-php-aop) 以及它是怎样工作的。
 2. 编写自己的XXXPlugin.php class。
    
    ```php
@@ -29,7 +23,7 @@
         }
     }
    ```
-   > 您可以在[[pinpoint_php_example/ plugins /](https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins)]中找到一些开箱即用的插件。当您添加clue(clues)的时候，不要使用大字符串或是包含一些特殊字符的字符串赋值(https://www.freeformatter.com/json-escape.html)
+   > 您可以在[[Example/PHP/Plugins](../../Example/PHP/Plugins)]中找到一些开箱即用的插件。当您添加clue(clues)的时候，不要使用大字符串或是包含一些特殊字符的字符串赋值(https://www.freeformatter.com/json-escape.html)
 3. 在ClassName(XXXPlugins), onBefore, onEnd 或 onException前添加您所care的函数比如“///@hook:app\User::adduser”，如果您care所有情况的话，就调用before&after&around函数。
 
 4. 删除 AOP_CACHE_DIR 目录下的 “__class_index_table” 文件。
@@ -76,9 +70,7 @@
 
 ## 示例
 
-[ For PHP7 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP)
-
-[ For PHP5 ☚](https://github.com/naver/pinpoint-c-agent/tree/master/Example/PHP5)
+https://github.com/naver/pinpoint-c-agent/tree/master/PHP/pinpoint_php_example/Plugins
 
 ## API of Pinpoint_php_ext
-[Goto pinpoint_ext_api ☚](../src/PHP/pinpoint_php_api.php)
+[Goto pinpoint_ext_api ☚](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)

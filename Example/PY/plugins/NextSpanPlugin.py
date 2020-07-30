@@ -90,7 +90,7 @@ class NextSpanPlugin(Candy):
 
     def getHostFromURL(self, url):
         returl = urlparse(url)
-        return returl.netloc + returl.path
+        return returl.netloc
 
     def get_nsid(self):
         return self.nsid

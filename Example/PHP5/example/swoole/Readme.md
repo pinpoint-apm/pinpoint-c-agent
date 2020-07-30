@@ -11,7 +11,7 @@ class TcpServerPerRequestPlugin extends Candy
 }
 ```
 
-### 2. Add common plugins on others. (the same as pinpoint_php_example/Plugins)
+### 2. Add common plugins on others. (the same as Example/PHP/Plugins)
 
 ``` php
 ///@hook:example\UserManagerment::checkUser example\UserManagerment::register example\UserManagerment::cacheUser

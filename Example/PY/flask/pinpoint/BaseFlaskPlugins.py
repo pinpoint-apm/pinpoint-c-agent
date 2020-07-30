@@ -33,12 +33,12 @@ class BaseFlaskPlugins(Candy):
 
     def onBefore(self,*args, **kwargs):
         args, kwargs = super().onBefore(*args, **kwargs)
+        request = Request(args[1])
         pinpointPy.add_clue('appname',APP_NAME)
         pinpointPy.add_clue('appid', APP_ID)
         ###############################################################
         # print(threading.currentThread().ident)
         print("------------------- call before -----------------------")
-        request = Request(args[1])
         pinpointPy.add_clue('name', 'BaseFlaskrequest')
         pinpointPy.add_clue('uri', request.path)
         pinpointPy.add_clue('client',request.remote_addr)
@@ -131,5 +131,6 @@ class BaseFlaskPlugins(Candy):
         return ret
 
     def onException(self, e):
+        import traceback
         pinpointPy.mark_as_error(traceback.format_exc(),"",0)
         raise e

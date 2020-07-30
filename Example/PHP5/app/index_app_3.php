@@ -11,7 +11,7 @@ define('PLUGINS_DIR',__DIR__.'/../Plugins/');
 define('APPLICATION_NAME','APP-33');
 define('APPLICATION_ID','app-33');
 
-require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 require_once __DIR__.'/Args.php';
 //require_once __DIR__."/../vendor/autoload.php";
 

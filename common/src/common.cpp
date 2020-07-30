@@ -180,6 +180,7 @@ public:
             ancestor.start_time = timestamp;
             this->stack.push(ancestor);
             this->fetal_error_time = 0; // reset fetal_error_time
+            this->limit= E_TRACE_PASS; // reset limit to pass (agent will could be reuse)
         }
         return this->stack.size();
     }
@@ -228,12 +229,10 @@ public:
     {
         time_t ts = (timestamp != -1) ?(timestamp) :(time(NULL));
         
-        // disable this checking, make it working even offline
-        // if(this->limit == E_OFFLINE)
-        // {
-        //     pp_trace("collector-agent not available");
-        //     goto OFFLINE;
-        // }
+        if(this->limit == E_TRACE_BLOCK)
+        {
+            goto BLOCK;
+        }
 
         if(this->trace_limit < 0)
         {
@@ -255,7 +254,7 @@ public:
         {
             __sync_add_and_fetch(&this->_state->tick,1);
         }
-        this->limit = E_TRACE_PASS;
+        this->setLimit(E_TRACE_PASS,"checklimit pass");
         return false;
 BLOCK:
         pp_trace("This span dropped. trace_limit:%d limit:%d tick:%d",this->trace_limit,this->limit,this->_state->tick);
@@ -275,9 +274,9 @@ BLOCK:
         this->root["ERR"] = eMsg;
     }
 
-    inline void setLimit(E_ANGET_STATUS status )
+    inline void setLimit(E_ANGET_STATUS status,const char* reason)
     {
-        pp_trace("agent status changed: %d ->%d",this->limit ,status);
+        pp_trace("agent status changed: %d ->%d reason:%s",this->limit ,status,reason);
         this->limit = status;
     }
 
@@ -649,7 +648,7 @@ void pinpoint_drop_trace()
     {
         return ;
     }
-    p_agent->setLimit(E_TRACE_BLOCK); 
+    p_agent->setLimit(E_TRACE_BLOCK,"drop current trace"); 
 }
 
 uint64_t pinpoint_start_time()

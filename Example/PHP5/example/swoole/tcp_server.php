@@ -8,7 +8,7 @@ define('PLUGINS_DIR',__DIR__.'/Plugins/');
 //define('APPLICATION_NAME','152APP-4');
 //define('APPLICATION_ID','152-app-4');
 
-require_once __DIR__. '/../vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
 use example\swoole\HandleRequest;
 

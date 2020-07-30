@@ -15,7 +15,7 @@ define('APPLICATION_ID', 'symfony');
 //define('PINPOINT_ENV','dev');
 // Support party loader
 define('USER_DEFINED_CLASS_MAP_IMPLEMENT', '\Plugins\ClassMapInFile');
-require_once dirname(__DIR__) . '/vendor/eeliu/php_simple_aop/auto_pinpointed.php';
+require_once dirname(__DIR__) . '/vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 ########################################################################
 
 $app->run();
@@ -36,14 +36,14 @@ $app->run();
     }
 ```
 
-2.2 Enable `php_simple_aop` into your `require`
+2.2 Enable `pinpoint-php-aop` into your `require`
 
 ```json
     "require": {
         ...
-        "eeliu/php_simple_aop": "v0.2.4",
+        "naver/pinpoint-php-aop": "v1.0.1",
         ...
         }
 ```
 
-Note if php < 7, use `v0.3.0`
+Note: if php < 7, use `v0.3+`

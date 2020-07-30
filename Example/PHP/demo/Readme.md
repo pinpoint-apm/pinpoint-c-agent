@@ -5,5 +5,5 @@
    
 ## Some out-of-box plugins for PHP applications
 
-1. [Flarum demo](./Flarum-demo/Reademe.md)
+1. [Flarum demo](Flarum-demo/Readme.md)
 

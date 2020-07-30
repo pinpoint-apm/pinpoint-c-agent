@@ -35,7 +35,7 @@ class PyMysqlPlugin(Candy):
         # print( threading.currentThread().ident)
         if self.func_name == 'Connect':
             # self.dst = kwargs['host'] + ":" + kwargs['db']
-            self.dst = 'Mysql' + ":" + kwargs['db']
+            self.dst = kwargs['db']
         pinpointPy.add_clue("dst", self.dst)
         return args,kwargs
 

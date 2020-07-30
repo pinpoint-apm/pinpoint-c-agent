@@ -25,7 +25,7 @@
 ```
  "require": {
      ...
-     "eeliu/php_simple_aop": "v0.2.4"
+     "naver/pinpoint-php-agent": "v1.0.1"
      ...
  }
 
@@ -53,4 +53,4 @@
 
 ## References
 1. How to install yii? [ click me ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
-2. What's php_simple_aop? [ click me ☚ ](https://github.com/eeliu/php_simple_aop)
+2. What's pinpoint-php-agent? [ click me ☚ ](https://github.com/naver/pinpoint-php-aop)
