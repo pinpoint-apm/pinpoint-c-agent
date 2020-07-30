@@ -1,4 +1,4 @@
-## Steps for Writing Plugins for Swoole framework
+## Steps for Writing Plugins For Swoole framework
 
 ### 1. Add a pre request plugin on the entry.
 

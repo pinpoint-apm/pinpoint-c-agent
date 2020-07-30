@@ -32,7 +32,7 @@
 
 ```
 
-4. Make it work
+4. Make it works
    
 ``` shell
     $ composer install (or composer update )

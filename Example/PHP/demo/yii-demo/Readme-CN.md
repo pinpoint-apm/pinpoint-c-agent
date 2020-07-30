@@ -1,11 +1,11 @@
-# php agent 支持Yii ! 
+# Yii， php agent supported! 
 
 > 备注: php-agent 重写 Yii 框架的类加载器。因此，您应该遵循以下步骤。
 
 
 ## 步骤
 
-1. 请将 Yii 的 “web/index.php” 替换掉，使用我们的 “web/index.php”
+1. 请将 Yii 的 'web/index.php'替换掉，使用我们的 'web/index.php'
 2. 将插件复制到您的根目录并启用自动加载
 
  > composer.json
