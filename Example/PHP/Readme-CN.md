@@ -40,7 +40,7 @@
     ```
     
 6. 更新您的autoload. $ composer update。
-7. 现在，您可以使用pinpoint-php-agent了。
+7. 现在，您可以使用pinpoint-php-aop了。
 ## 协议
 
 > Json -> Thrift/GRPC
