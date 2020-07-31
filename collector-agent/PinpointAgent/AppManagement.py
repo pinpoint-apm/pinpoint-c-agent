@@ -65,7 +65,7 @@ class AppManagement(object):
             assert(isinstance(instance,PinpointAgent))
             TCLogger.info("application is stopping [%s]",app_id)
             instance.stop()
-        TCLogger.info("recieved %d span from php-fpm",self.recv_count)
+        TCLogger.info("recieved %d span from font", self.recv_count)
 
     def handleFrontAgentData(self, client, type, body):
         content = body.decode('utf-8')
