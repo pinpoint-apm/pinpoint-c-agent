@@ -3,7 +3,7 @@
 ```  json
 
  "require": {
-        "naver/pinpoint-php-agent": "v1.0.1"
+        "naver/pinpoint-php-aop": "v1.0.1"
     }
     
 ```

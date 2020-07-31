@@ -41,7 +41,7 @@
     ```
     
 6. Update your autoload. $ composer update.
-7. Enjoy the pinpoint-php-agent.
+7. Enjoy the pinpoint-php-aop.
 ## Protocol
 
 > Json -> Thrift/GRPC
