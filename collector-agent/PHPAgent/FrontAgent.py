@@ -55,6 +55,7 @@ class FrontAgent(object):
         elif '@' in address: # treat as tcp port
             ip,port = address.split('@')
             listen_socket = gsocket.socket(gsocket.AF_INET, gsocket.SOCK_STREAM)
+            listen_socket.setsockopt(gsocket.SOL_SOCKET, gsocket.SO_REUSEADDR, 1)
             listen_socket.bind((ip,int(port)))
             listen_socket.listen(256)
             return listen_socket

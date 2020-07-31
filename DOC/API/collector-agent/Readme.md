@@ -25,3 +25,4 @@ ptype|parentApplicationType|Parent application type
 Ah|acceptorHost|Acceptor host
 NP|NginxProxy header|Nginx proxy header
 AP|ApacheProxy header|Apache proxy header
+SQL|PSqlMetaData

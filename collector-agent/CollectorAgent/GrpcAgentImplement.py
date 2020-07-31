@@ -110,7 +110,10 @@ class GrpcAgentImplement(PinpointAgent):
 
     def loopTheQueue(self):
         while True:
-            body = self.mpQueue.get()
+            try:
+                body = self.mpQueue.get()
+            except KeyboardInterrupt:
+                break
             if body == None:
                 TCLogger.info("agent: %s stopping", self.agent_meta)
                 break
@@ -150,3 +153,6 @@ class GrpcAgentImplement(PinpointAgent):
 
     def updateStringMeta(self, name):
         return self.meta_client.updateStringMeta(name)
+
+    def updateSqlMeta(self, sql):
+        return self.meta_client.updateSqlMeta(sql)
