@@ -33,6 +33,12 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 --- | ---
 ![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
 
+### Real-time Tracking Chart
+
+ CPU | Response Time
+ --- | ---
+ ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
+ 
 ### Changes
 
 ### 2020-06-12

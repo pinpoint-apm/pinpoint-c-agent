@@ -53,4 +53,4 @@
 
 ## References
 1. How to install yii? [ click me ☚ ](https://www.yiiframework.com/doc/guide/2.0/en/start-installation)
-2. What's pinpoint-php-agent? [ click me ☚ ](https://github.com/naver/pinpoint-php-aop)
+2. What's pinpoint-php-aop? [ click me ☚ ](https://github.com/naver/pinpoint-php-aop)
