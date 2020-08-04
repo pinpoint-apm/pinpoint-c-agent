@@ -1,10 +1,12 @@
+env:
+  global:
+  - ROOT=$PWD
+  - REPORT_EXIT_STATUS=1
 os: linux
 
 matrix:
   include:
     - language: c++
-      env:
-        - ROOT=$PWD
       script:
         - cd common
         - mkdir -p build
@@ -15,8 +17,6 @@ matrix:
         
     - language: php
       php: "7.4"
-      env:
-        - ROOT=$PWD
       script:
         - phpize
         - ./configure
@@ -25,8 +25,6 @@ matrix:
 
     - language: php
       php: "7.3"
-      env:
-        - ROOT=$PWD
       script:
         - phpize
         - ./configure
@@ -34,8 +32,6 @@ matrix:
         - make test TESTS=src/PHP/tests/
     - language: php
       php: "7.2"
-      env:
-        - ROOT=$PWD
       script:
         - phpize
         - ./configure
@@ -44,8 +40,6 @@ matrix:
 
     - language: php
       php: "7.1"
-      env:
-        - ROOT=$PWD
       script:
         - phpize
         - ./configure
@@ -54,8 +48,6 @@ matrix:
 
     - language: php
       php: "7.0"
-      env:
-        - ROOT=$PWD
       script:
         - phpize
         - ./configure
@@ -64,19 +56,14 @@ matrix:
 
     - language: php
       php: "5.6"
-      env:
-        - ROOT=$PWD
       script:
         - phpize
         - ./configure
         - make
         - make test TESTS=src/PHP/tests5/    
 
-
     - language: python
       python: "3.8"
-      env:
-        - ROOT=$PWD
       script:
         - cmake --version
         - pip install -r requirements.txt 
@@ -85,8 +72,6 @@ matrix:
 
     - language: python
       python: "3.6"
-      env:
-        - ROOT=$PWD
       script:
         - cmake --version
         - pip install -r requirements.txt 
@@ -95,8 +80,6 @@ matrix:
         
     - language: python
       python: "3.5"
-      env:
-        - ROOT=$PWD
       script:
         - cmake --version
         - pip install -r requirements.txt 
@@ -105,8 +88,6 @@ matrix:
 
     - language: python
       python: "3.7"
-      env:
-        - ROOT=$PWD
       script:
         - cmake --version
         - pip install -r requirements.txt 
@@ -115,8 +96,6 @@ matrix:
 
     - language: python
       python: "2.7"
-      env:
-        - ROOT=$PWD
       script:
         - cmake --version
         - pip install -r requirements.txt 
@@ -126,8 +105,6 @@ matrix:
 
     - language: python
       python: "3.7"
-      env:
-        - ROOT=$PWD
       script:
         - cd collector-agent
         - pip install -r requirements.txt
