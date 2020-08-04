@@ -1,6 +1,7 @@
 .vscode
 .idea
 *.o
+*.lo
 *.result
 *.a
 *.la

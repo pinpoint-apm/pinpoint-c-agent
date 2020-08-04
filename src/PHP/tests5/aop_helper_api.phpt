@@ -112,6 +112,8 @@ array(4) {
   int(4)
 }
 string(12) "hello php!!!"
+[pinpoint] [%s] [%s]catch an Error
+[pinpoint] [%s] [%s]apm_error_cb called
 
 Warning: pinpoint_get_func_ref_args():  Called from the global scope - no function context in %s on line 18
 bool(false)
