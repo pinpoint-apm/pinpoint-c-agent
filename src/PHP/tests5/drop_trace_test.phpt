@@ -18,7 +18,7 @@ pinpoint_end_trace();
 [pinpoint] [%s] [%s]pinpoint_start start
 [pinpoint] [%s] [%s]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%s] [%s]connect:(/unexist_file.sock) failed as (No such file or directory)
-[pinpoint] [%s] [%s]agent status changed: 2 ->4
+[pinpoint] [%s] [%s]agent status changed: 2 ->4 reason:drop current trace
 [pinpoint] [%s] [%s]key:args value:a,$b
 [pinpoint] [%s] [%s]key:ret value:a,$b
 [pinpoint] [%s] [%s]pinpoint_end_trace Done!
