@@ -38,12 +38,6 @@ Agent由c++、PHP、python语言编写，我们希望后续能支持其他语言
  --- | ---
  ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
 
-### 变化
-
-### 2020-06-12
-
-- 支持 php5.5 和 php5.6
-- Collector Agent: 支持实时图表
 
 ## 联系我们
 * 提交[问题](https://github.com/naver/pinpoint-c-agent/issues)
