@@ -1,34 +1,51 @@
 <?php
+/**
+ * Copyright 2020 NAVER Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 namespace Plugins;
 
 use Plugins\Candy;
 
-///@hook:GuzzleHttp\Client::request
+
+
+/**
+ *@hook:GuzzleHttp\ClientTrait::get
+ *@hook:GuzzleHttp\ClientTrait::post
+ *@hook:GuzzleHttp\ClientTrait::patch
+ */
 class GuzzlePlugin extends Candy
 {
-    ///@hook:GuzzleHttp\Psr7\Request::__construct
     function onBefore()
     {
-//        echo 'GuzzleHttp\Psr7\Request';
-        if(strpos($this->apId, "Request::__construct") !== false){
-            pinpoint_add_clue(DESTINATION,$this->getHostFromURL($this->args[1]));
-            pinpoint_add_clues(HTTP_URL,$this->args[1]);
-            pinpoint_add_clue(SERVER_TYPE,PINPOINT_PHP_REMOTE);
+        pinpoint_add_clue(DESTINATION,$this->getHostFromURL($this->args[0]));
+        pinpoint_add_clues(HTTP_URL,$this->args[0]);
+        pinpoint_add_clue(SERVER_TYPE,PINPOINT_PHP_REMOTE);
 
-            $n_headers =[] ;
-            if( !empty($this->args[2]))
-            {
-                $n_headers = $this->args[2];
-            }
-
-            $n_headers = array_merge($n_headers,$this->getNextSpanHeaders($this->args[1]));
-            $this->args[2] = $n_headers;
+        $n_headers =[] ;
+        if( is_array($this->args[1]) && array_key_exists('headers',$this->args[1]))
+        {
+            $n_headers = $this->args[1]['headers'];
         }
+        $n_headers = array_merge($n_headers,$this->getNextSpanHeaders($this->args[0]));
+        $this->args[1]['headers'] = $n_headers;
     }
 
     function onEnd(&$ret)
     {
+//        $ret->getStatusCode();
         pinpoint_add_clues(HTTP_STATUS_CODE,(string)($ret->getStatusCode()));
     }
 
@@ -46,14 +63,15 @@ class GuzzlePlugin extends Candy
             $retUrl.=$urlAr['host'];
         }
 
-//        if(isset($urlAr['path'])){
-//            $retUrl.=$urlAr['path'];
-//        }
-
         if(isset($urlAr['port']))
         {
             $retUrl .= ":".$urlAr['port'];
         }
+
+//        if(isset($urlAr['path'])){
+//            $retUrl.=$urlAr['path'];
+//        }
+//
         return $retUrl;
     }
 
