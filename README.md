@@ -39,13 +39,6 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
  --- | ---
  ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
  
-### Changes
-
-### 2020-06-12
-
-- Support php5.5 and php5.6
-- Collector Agent: support real time chart
-
 ## Contact Us
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
 * Chinese Community:
