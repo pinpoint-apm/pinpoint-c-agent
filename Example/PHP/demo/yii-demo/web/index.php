@@ -36,7 +36,6 @@ function pinpoint_user_class_loader_hook()
 pinpoint_user_class_loader_hook();
 
 
-$config = require __DIR__ . '/../config/web.php';
 $app = new yii\web\Application($config);
 require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
