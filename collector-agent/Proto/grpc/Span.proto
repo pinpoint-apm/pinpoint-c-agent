@@ -116,7 +116,7 @@ message PSpanChunk {
     repeated PSpanEvent spanEvent = 5;
 
     int32 applicationServiceType = 6;
-
+    // start time
     int64 keyTime = 7;
 
     PLocalAsyncId localAsyncId = 8;
