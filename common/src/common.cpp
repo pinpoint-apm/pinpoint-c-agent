@@ -27,7 +27,7 @@
 #include "TransLayer.h"
 #include "SharedObj.h"
 #include "json/json.h"
-
+#include "TraceNode.h"
 
 static inline uint64_t get_current_msec_stamp();
 
@@ -42,19 +42,6 @@ typedef struct _SharedState{
     int64_t state;
 }SharedState;
 
-
-class TraceNode
-{
-public:
-    TraceNode(Json::Value& node):
-        node(node)
-    {
-        ancestor_start_time = start_time = 0;
-    }
-    Json::Value &node;
-    uint64_t ancestor_start_time;
-    uint64_t start_time;
-};
 
 typedef std::stack<TraceNode> Stack;
 class PerThreadAgent{

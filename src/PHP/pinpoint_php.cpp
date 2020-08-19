@@ -205,8 +205,6 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
        return;
     }
 
-
-
     catch_error(msg,error_filename,error_lineno);
     pp_trace("apm_error_cb called");
     efree(msg);
