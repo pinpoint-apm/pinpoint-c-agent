@@ -27,7 +27,7 @@
 #include "TransLayer.h"
 #include "SharedObj.h"
 #include "json/json.h"
-#include "TraceNode.h"
+//#include "TraceNode.h"
 
 static inline uint64_t get_current_msec_stamp();
 
@@ -42,6 +42,18 @@ typedef struct _SharedState{
     int64_t state;
 }SharedState;
 
+class TraceNode
+{
+public:
+    TraceNode(Json::Value& node):
+        node(node)
+    {
+        ancestor_start_time = start_time = 0;
+    }
+    Json::Value &node;
+    uint64_t ancestor_start_time;
+    uint64_t start_time;
+};
 
 typedef std::stack<TraceNode> Stack;
 class PerThreadAgent{
@@ -53,17 +65,6 @@ public:
     json_writer()
     {
         this->fetal_error_time = 0;
-
-//        /**
-//         * Max [ 0 ~ pagesize ]
-//         * |  uid   | timestamp | triger  |
-//         *   [0~7]      [8~15]    [16~23]
-//         */
-//        this->uid = (int64_t*)((char*)fetch_shared_obj_addr() + UNIQUE_ID_OFFSET);
-//        this->triger_timestamp = (int64_t*)((char*)fetch_shared_obj_addr() + TRACE_LIMIT_OFFSET);
-//        this->tick_tick  =  (int64_t*)((char*)fetch_shared_obj_addr() + TRIGER_OFFSET );
-//        this->start_time =(uint64_t*)((char*)fetch_shared_obj_addr() + START_TIME_OFFSET );
-
         this->_state = (SharedState*)fetch_shared_obj_addr();
         this->limit   = (this->_state->state & E_OFFLINE) ? (E_OFFLINE) : (E_TRACE_PASS);
         this->app_name = "collector_blocking";
