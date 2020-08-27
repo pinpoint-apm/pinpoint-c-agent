@@ -24,26 +24,29 @@
 
 namespace NodePool{
 
-#define UINT32_MAX (0xfffffff)
-std::atomic<uint32_t> TraceNode::_Global_ID = 0;
-static std::atomic<uint32_t> _Start_ID=0;
-static std::atomic<uint32_t> _MAX_ID=UINT32_MAX;
 
-uint32_t TraceNode::getID()
+TraceNode::TraceNode(NodeID id)
 {
-    TraceNode::_Global_ID.compare_exchange_week(_MAX_ID,_Start_ID);
-    TraceNode::_Global_ID++;
-    return  TraceNode::_Global_ID;
-}
-
-TraceNode::TraceNode()
-{
-    this->id = this->getID();
+    this->id = id;
+    this->resetRelative();
 }
 
 TraceNode::~TraceNode()
 {
 
+}
+
+void TraceNode::clear()
+{
+    // empty the json value 
+    if(!this->_value.empty())  this->_value.clear();
+
+    this->resetRelative();
+}
+
+void TraceNode::init(NodeID& id)
+{
+    this->id = id;
 }
 
 }
