@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #ifdef __linux__
 #define likely(x)        __builtin_expect(!!(x), 1)
