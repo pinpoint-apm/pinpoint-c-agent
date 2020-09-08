@@ -43,9 +43,9 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 * Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
 * Chinese Community:
 
-QQ Group: 897594820 | DING Group
-:---:| :---:
-![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+QQ Group1: 897594820 | QQ Group2: 812507584 | DING Group
+:---:| :---: | :---:
+![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 
 ## License
