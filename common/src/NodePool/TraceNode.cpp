@@ -41,6 +41,8 @@ void TraceNode::clear()
     // empty the json value 
     if(!this->_value.empty())  this->_value.clear();
 
+    if(!this->_context.empty()) this->_context.clear();
+    
     this->resetRelative();
 }
 

@@ -63,9 +63,6 @@ void print_tree(TraceNode &node,int indent)
     }
 }
 
-
-
-
 Json::Value& collect_tree_info(TraceNode &node)
 {
 
@@ -152,36 +149,6 @@ TEST(node, node_tree)
         currentId = end_trace(currentId);
     currentId = end_trace(currentId);
 
-
-        // currentId = start_trace(currentId);
-        //     currentId = start_trace(currentId);
-        //     currentId = end_trace(currentId);
-
-        //     currentId = start_trace(currentId);
-        //         currentId = start_trace(currentId);
-        //         currentId = end_trace(currentId);
-        //         currentId = start_trace(currentId);
-        //         currentId = end_trace(currentId);
-        //         currentId = start_trace(currentId);
-        //             currentId = start_trace(currentId);
-        //                 currentId = start_trace(currentId);
-        //                     currentId = start_trace(currentId);
-        //                     currentId = end_trace(currentId);
-        //                 currentId = end_trace(currentId);
-        //             currentId = end_trace(currentId);
-        //         currentId = end_trace(currentId);
-        //         currentId = start_trace(currentId);
-        //             currentId = start_trace(currentId);
-        //                 currentId = start_trace(currentId);
-        //                 currentId = end_trace(currentId);
-        //             currentId = end_trace(currentId);
-        //         currentId = end_trace(currentId);
-        //     currentId = end_trace(currentId);
-        //     currentId = start_trace(currentId);
-        //     currentId = end_trace(currentId);
-        // currentId = end_trace(currentId);
-
-    
 
     TraceNode& current = g_pool.refNodeById(currentId);
 
