@@ -24,9 +24,11 @@
 #define COMMON_SRC_TRACENODE_H_
 #include "common.h"
 #include "json/json.h"
+#include "Context/ContextType.h"
 #include <atomic>
+#include <map>
 #include <iostream>
-
+using Context::ContextType;
 namespace NodePool{
 
  typedef uint32_t NodeID;
@@ -99,32 +101,8 @@ namespace NodePool{
 class TraceNode
 {
 
-/**
-+---------------------------------+
-|               +------+          |
-|            +  | Node | <---+    |
-|      sub   |  +------+     |    |
-|            | ^             |    |
-|            v |             |    |
-|        +---+-++        +---+--+ |
-|        | Node | +--->  | Node | |
-|        +--^--^+        +------+ |
-|           |  |   next           |
-|         + |  |                  |
-|   sub   | |  |                  |
-|         v |  |                  |
-|           |  |                  |
-|    +------+  +-----+------+     |
-|    | Node | +-->   | Node |     |
-|    +------+        +------+     |
-|             next                |
-|                                 |
-+---------------------------------+
-**/
-
-// c-style tree node
-
 public: 
+    // c-style tree node
     TraceNode* next;
     TraceNode* children;
     TraceNode* parent;
@@ -169,6 +147,11 @@ public:
         return this->id;
     }
 
+    ContextType& getContextByKey(const std::string& key)
+    {
+        return this->_context.at(key);
+    }
+
 public:
 
     bool operator==(TraceNode const& _node) const
@@ -201,6 +184,7 @@ private:
 private:
     NodeID id;
     Json::Value _value;
+    std::map<std::string,ContextType>  _context;
 };
 }
 #endif /* COMMON_SRC_TRACENODE_H_ */

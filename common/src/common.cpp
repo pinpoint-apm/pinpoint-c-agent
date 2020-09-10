@@ -27,7 +27,9 @@
 #include "TransLayer.h"
 #include "SharedObj.h"
 #include "json/json.h"
-//#include "TraceNode.h"
+#include "NodePool/PoolManager.h"
+
+using NodePool::TraceNode;
 
 static inline uint64_t get_current_msec_stamp();
 
@@ -42,23 +44,13 @@ typedef struct _SharedState{
     int64_t state;
 }SharedState;
 
-class TraceNode
-{
-public:
-    TraceNode(Json::Value& node):
-        node(node)
-    {
-        ancestor_start_time = start_time = 0;
-    }
-    Json::Value &node;
-    uint64_t ancestor_start_time;
-    uint64_t start_time;
-};
 
 typedef std::stack<TraceNode> Stack;
-class PerThreadAgent{
+
+
+class SpanAgent{
 public:
-    PerThreadAgent(PPAgentT* agent):
+    SpanAgent(PPAgentT* agent):
     timeout_ms(agent->timeout_ms),
     trace_limit(agent->trace_limit),
     translayer(TransLayer(agent,agent->timeout_ms)),
@@ -73,13 +65,13 @@ public:
         json_writer.omitEndingLineFeed();
         using namespace std::placeholders;
         this->translayer.registerPeerMsgCallback(
-                std::bind(&PerThreadAgent::_handleMsgFromCollector,this,_1,_2,_3),
-                std::bind(&PerThreadAgent::_handleTransLayerState,this,_1)
+                std::bind(&SpanAgent::_handleMsgFromCollector,this,_1,_2,_3),
+                std::bind(&SpanAgent::_handleTransLayerState,this,_1)
         );
 
     }
 
-    ~PerThreadAgent()
+    ~SpanAgent()
     {
 
     }
@@ -387,7 +379,7 @@ static void _free_common_shared() __attribute__((destructor));
 static void thread_init(void);
 
 static TraceStoreLayer posix_store_layer;
-static std::stack<PerThreadAgent*> *agentPool;
+static std::stack<SpanAgent*> *agentPool;
 
 static inline void lock_agent_pool()
 {
@@ -446,7 +438,7 @@ void _init_common_shared()
     posix_store_layer.get_cur_trace_cb = poxic_get_cur_trace;
     posix_store_layer.set_cur_trace_cb = poxic_set_cur_trace;
     _storelayer = &posix_store_layer;
-    agentPool = new std::stack<PerThreadAgent*>();
+    agentPool = new std::stack<SpanAgent*>();
     assert(agentPool);
 }
 
@@ -462,7 +454,7 @@ void _free_common_shared()
     /// free memory in pool
     while (!agentPool->empty())
     {
-        PerThreadAgent* agent = agentPool->top();
+        SpanAgent* agent = agentPool->top();
         delete agent;
         agentPool->pop();
     }
@@ -477,13 +469,13 @@ void thread_init(void)
 
 void* create_or_reuse_agent(void)
 {
-    PerThreadAgent* agent = NULL;
+    SpanAgent* agent = NULL;
     lock_agent_pool();
     if(agentPool->empty())
     {
         unlock_agent_pool();
         try{
-            agent = new PerThreadAgent(&global_agent_info);
+            agent = new SpanAgent(&global_agent_info);
             // pp_trace("create agent:%p",agent);
         }catch(...){
             return NULL;
@@ -506,18 +498,18 @@ void* create_or_reuse_agent(void)
 }
 
 
-static PerThreadAgent* get_agent()
+static SpanAgent* get_agent()
 {
     void* spec = _storelayer->get_cur_trace_cb(); //pthread_getspecific(key);
     if( unlikely(spec == NULL) )
     {
         // create a new agent or fetch one from poll
-        PerThreadAgent* agent = static_cast<PerThreadAgent*>(create_or_reuse_agent());
+        SpanAgent* agent = static_cast<SpanAgent*>(create_or_reuse_agent());
         _storelayer->set_cur_trace_cb(agent); //  pthread_setspecific(key,agent);
         return agent;
     }else
     {
-        return static_cast<PerThreadAgent*>(spec);
+        return static_cast<SpanAgent*>(spec);
     }
 }
 
@@ -525,7 +517,7 @@ void give_back_agent(void *agent)
 {
     if(agent){
         lock_agent_pool();
-        agentPool->push(static_cast<PerThreadAgent*>(agent));
+        agentPool->push(static_cast<SpanAgent*>(agent));
         unlock_agent_pool();
     }
 }
@@ -537,7 +529,7 @@ void give_back_agent(void *agent)
 
 int32_t pinpoint_start_trace()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return 0;
@@ -548,7 +540,7 @@ int32_t pinpoint_start_trace()
 
 int32_t pinpoint_end_trace()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return 0;
@@ -565,7 +557,7 @@ inline uint64_t get_current_msec_stamp()
 
 void pinpoint_add_clue(const  char* key,const  char* value)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
@@ -575,7 +567,7 @@ void pinpoint_add_clue(const  char* key,const  char* value)
 
 void pinpoint_add_clues(const  char* key, const char* value)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
@@ -589,7 +581,7 @@ void pinpoint_add_clues(const  char* key, const char* value)
  */
 bool check_tracelimit(int64_t timestamp)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return false;
@@ -600,7 +592,7 @@ bool check_tracelimit(int64_t timestamp)
 
 int64_t generate_unique_id()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return 0;
@@ -610,7 +602,7 @@ int64_t generate_unique_id()
 
 void reset_unique_id()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
@@ -620,7 +612,7 @@ void reset_unique_id()
 
 void catch_error(const char* msg,const char* error_filename,uint error_lineno)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
@@ -631,7 +623,7 @@ void catch_error(const char* msg,const char* error_filename,uint error_lineno)
 
 void pinpoint_drop_trace()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
@@ -641,7 +633,7 @@ void pinpoint_drop_trace()
 
 uint64_t pinpoint_start_time()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return 0;
@@ -651,7 +643,7 @@ uint64_t pinpoint_start_time()
 
 const char* pinpoint_app_id()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return "agent-not-found";
@@ -661,7 +653,7 @@ const char* pinpoint_app_id()
 
 const char* pinpoint_app_name()
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return "agent-not-found";
@@ -672,7 +664,7 @@ const char* pinpoint_app_name()
 
 void pinpoint_set_special_key(const char* key,const char* value)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
@@ -682,7 +674,7 @@ void pinpoint_set_special_key(const char* key,const char* value)
 
 const char* pinpoint_get_special_key(const char* key)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return NULL;
@@ -692,7 +684,7 @@ const char* pinpoint_get_special_key(const char* key)
 
 void pinpoint_force_flush_span(uint32_t timeout)
 {
-    PerThreadAgent* p_agent = get_agent();
+    SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
     {
         return ;
