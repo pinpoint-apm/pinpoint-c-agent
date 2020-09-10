@@ -43,9 +43,9 @@ Agent由c++、PHP、python语言编写，我们希望后续能支持其他语言
 * 提交[问题](https://github.com/naver/pinpoint-c-agent/issues)
 * 中国社区：
 
-QQ Group: 897594820 | DING Group
-:---:| :---:
-![QQ Group](images/NAVERPinpoint.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+QQ Group1: 897594820 | QQ Group2: 812507584 | DING Group
+:---:| :---: | :---:
+![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 
 ## 许可证
