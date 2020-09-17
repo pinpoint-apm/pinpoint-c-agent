@@ -17,7 +17,7 @@
  * TraceNode.h
  *
  *  Created on: Aug 19, 2020
- *      Author: test
+ *      Author: eeliu
  */
 
 #ifndef COMMON_SRC_TRACENODE_H_

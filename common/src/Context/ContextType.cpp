@@ -14,41 +14,14 @@
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
 /*
- * TraceNode.cpp
+ * ContextType.cpp
  *
- *  Created on: Aug 19, 2020
+ *  Created on: Aug 27, 2020
  *      Author: eeliu
  */
 
-#include "TraceNode.h"
+#include "ContextType.h"
 
-namespace NodePool{
+namespace Context {
 
-
-TraceNode::TraceNode(NodeID id)
-{
-    this->id = id;
-    this->resetRelative();
-}
-
-TraceNode::~TraceNode()
-{
-
-}
-
-void TraceNode::clear()
-{
-    // empty the json value 
-    if(!this->_value.empty())  this->_value.clear();
-
-    if(!this->_context.empty()) this->_context.clear();
-    
-    this->resetRelative();
-}
-
-void TraceNode::init(NodeID& id)
-{
-    this->id = id;
-}
-
-}
+} /* namespace Context */
