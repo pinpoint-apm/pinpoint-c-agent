@@ -23,7 +23,7 @@ TEST(poolManger, get_and_give_back)
     EXPECT_EQ(p,&_node);
     EXPECT_EQ(ref_new_node,_node);
     EXPECT_NE(id,_node.getId());
-    pool.refNodeById(1024);
+    // pool.refNodeById(1024);
     EXPECT_THROW(pool.refNodeById(1024),std::out_of_range);
 }
 
