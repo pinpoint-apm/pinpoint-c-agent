@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "Chunk.h"
+#include "Cache/Chunk.h"
 #include "json/json.h"
 using namespace testing;
-
+using Cache::Chunks;
 
 static int checkData(const void* buf,uint length,void* dst)
 {
