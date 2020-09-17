@@ -30,11 +30,6 @@
 
 #endif
 
-//fix #129
-#ifndef uint
-#define uint unsigned int
-#endif
-
 #define MAX_VEC 512
 #define LOG_SIZE 4096
 #define IN_MSG_BUF_SIZE 4096
@@ -56,8 +51,8 @@ typedef enum{
 
 #pragma pack (1)
 typedef  struct {
-    uint type;
-    uint length;
+    uint32_t type;
+    uint32_t length;
 }Header;
 #pragma pack ()
 
@@ -77,13 +72,13 @@ typedef struct trace_store_layer{
 typedef void (*VOID_FUNC)(void);
 typedef struct pp_agent_s{
     const char* co_host; // tcp:ip:port should support dns
-    uint  timeout_ms;  // always be 0
-    long   trace_limit;  // change to long as python need long
-    int   agent_type;
-    uint8_t inter_flag;
-    VOID_FUNC get_read_lock;
-    VOID_FUNC get_write_lock;
-    VOID_FUNC release_lock;
+    uint32_t    timeout_ms;  // always be 0
+    long        trace_limit;  // change to long as python need long
+    int         agent_type;
+    uint8_t     inter_flag;
+    VOID_FUNC   get_read_lock;
+    VOID_FUNC   get_write_lock;
+    VOID_FUNC   release_lock;
 }PPAgentT;
 
 enum E_ANGET_STATUS{
@@ -188,7 +183,7 @@ uint64_t pinpoint_start_time(void);
  * @param error_filename
  * @param error_lineno
  */
-void catch_error(const char* msg,const char* error_filename,uint error_lineno);
+void catch_error(const char* msg,const char* error_filename,uint32_t error_lineno);
 typedef void(*log_error_cb)(char*);
 void register_error_cb(log_error_cb error_cb);
 void pp_trace(const char *format,...);

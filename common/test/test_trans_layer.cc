@@ -2,12 +2,16 @@
 #include <errno.h>
 #include<functional>
 #include<iostream>
+#include <string>
 #include <gtest/gtest.h>
 
-#include "TransLayer.h"
+#include "ConnectionPool/SpanConnectionPool.h"
 #include "json/json.h"
 
 using namespace testing;
+using ConnectionPool::TransLayer;
+using ConnectionPool::SpanConnectionPool;
+using ConnectionPool::TransConnection;
 
 #define unix_socket  "./pinpoint_test.sock"
 bool run = true;
@@ -84,8 +88,8 @@ TEST(translayer, unix_socket_layer)
         fack_server();
         exit(0);
     }
-
-    TransLayer layer(&global_agent_info,10);
+    std::string remote = global_agent_info.co_host;
+    TransLayer layer(remote,10);
     using namespace std::placeholders;
     layer.registerPeerMsgCallback(std::bind(handle_agent_info,_1,_2,_3),NULL);
     while(run){
@@ -116,6 +120,22 @@ TEST(translayer, stream_socket_layer)
 
     fd = TransLayer::connect_stream_remote("-.217.175.68:-80");
     EXPECT_EQ(fd,-1);
+
+}
+
+TEST(ConnectionPool, API)
+{
+    std::string remote = global_agent_info.co_host;
+    SpanConnectionPool _pool(remote.c_str(),10);
+
+    // SpanConnectionPool _pool1 = _pool;
+    // (void)_pool1;
+
+    TransConnection _conn = _pool.getConnection();
+
+    EXPECT_EQ(_conn->connect_stream_remote("-.217.175.68:-80"),-1);
+
+    _pool.giveBackConnection(_conn);
 
 }
 

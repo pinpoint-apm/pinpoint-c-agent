@@ -24,11 +24,12 @@
 #include <memory>
 
 #include "common.h"
-#include "TransLayer.h"
-#include "SharedObj.h"
-#include "json/json.h"
-#include "NodePool/PoolManager.h"
-
+//#include "TransLayer.h"
+//#include "SharedObj.h"
+//#include "json/json.h"
+//#include "NodePool/PoolManager.h"
+#include "Cache/SafeSharedState.h"
+#if 0
 using NodePool::TraceNode;
 
 static inline uint64_t get_current_msec_stamp();
@@ -36,13 +37,7 @@ static inline uint64_t get_current_msec_stamp();
 const static char* CLUSE="clues";
 static TraceStoreLayer* _storelayer;
 
-typedef struct _SharedState{
-    int64_t uid;
-    int64_t timestamp;
-    int64_t tick;
-    uint64_t starttime;
-    int64_t state;
-}SharedState;
+
 
 
 typedef std::stack<TraceNode> Stack;
@@ -590,15 +585,7 @@ bool check_tracelimit(int64_t timestamp)
     return p_agent->checkTraceLimit(timestamp);
 }
 
-int64_t generate_unique_id()
-{
-    SpanAgent* p_agent = get_agent();
-    if(p_agent == NULL)
-    {
-        return 0;
-    }
-    return (int64_t)p_agent->generateUniqueId();
-}
+
 
 void reset_unique_id()
 {
@@ -662,7 +649,7 @@ const char* pinpoint_app_name()
 }
 
 
-void pinpoint_set_special_key(const char* key,const char* value)
+void /h(const char* key,const char* value)
 {
     SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
@@ -698,4 +685,17 @@ void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer)
     _storelayer = storeLayer;
 }
 
+#endif
 
+int64_t generate_unique_id()
+{
+    using Cache::SafeSharedState;
+
+    return SafeSharedState::instance().generateUniqueId();
+}
+
+void reset_unique_id(void)
+{
+    using Cache::SafeSharedState;
+    return SafeSharedState::instance().resetUniqueId();
+}
