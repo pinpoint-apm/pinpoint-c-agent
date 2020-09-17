@@ -32,4 +32,4 @@ dist
 .deps
 temp
 vendor
-Cache
+Example/*/Cache/*

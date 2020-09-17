@@ -3,7 +3,6 @@ env:
   - ROOT=$PWD
   - REPORT_EXIT_STATUS=1
 os: linux
-sudo: true
 addons:
   - valgrind
   - lcov
