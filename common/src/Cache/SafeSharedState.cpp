@@ -23,5 +23,29 @@
 #include "SafeSharedState.h"
 
 namespace Cache {
-
+bool SafeSharedState::checkTraceLimit(int64_t timestamp)
+{
+    time_t ts = (timestamp != -1) ?(timestamp) :(std::time(NULL));
+    
+    if( this->_global_state->timestamp != ts )
+    {
+        this->_global_state->timestamp = ts;
+        this->_global_state->tick = 0 ;
+        __sync_synchronize();
+    }
+    else if(this->_global_state->tick >= this->_global_state->maxtracelimit)
+    {
+        goto BLOCK;
+    }else if(this->isReady()){
+        goto BLOCK;
+    }else
+    {
+        __sync_add_and_fetch(&this->_global_state->tick,1);
+    }
+    return false;
+BLOCK:
+    pp_trace("This span dropped. max_trace_limit:%d current_tick:%d offLine:%d",this->_global_state->maxtracelimit,
+        this->_global_state->tick,this->isReady()?(1):(0));
+    return true;
+}
 } /* namespace Cache */

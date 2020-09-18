@@ -26,8 +26,9 @@
 #include <stack>
 #include <memory>
 #include <mutex>
+#include <atomic>  
+
 #include "TransLayer.h"
-#include "Util/Trace.h"
 
 namespace ConnectionPool {
 
@@ -37,25 +38,38 @@ class SpanConnectionPool
 {
 public:
     SpanConnectionPool(const char* co_host,uint32_t w_timeout_ms);
+    //for delay initialization
+    SpanConnectionPool(){
+        this->timeout_ms = 0;
+        this->con_counter = 0;
+    };
+
+    void initPool(const char* co_host,uint32_t w_timeout_ms)
+    {
+        this->co_host = co_host;
+        this->timeout_ms = w_timeout_ms;
+        this->_cPool.push(this->createTrans());
+    }
+
     virtual ~SpanConnectionPool(){}
 
-    TransConnection getConnection()
+    TransConnection get()
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
-        ADDTRACE();
         if(this->_cPool.empty())
         {
             return TransConnection(new TransLayer(this->co_host,this->timeout_ms));
         }else{
             TransConnection _con = std::move(_cPool.top());
+            _cPool.pop();
+            assert(_con);
             return _con;
         }
     }
 
-    void giveBackConnection(TransConnection& con)
+    void free(TransConnection& con)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
-        ADDTRACE();
         this->_cPool.push(std::move(con));
     }
 
@@ -68,9 +82,9 @@ private:
     void _handle_agent_info(int type,const char* buf,size_t len);
 
     TransConnection createTrans();
-    void _handleTransLayerState(int state);
+    // void _handleTransLayerState(int state);
 private:
-    const std::string co_host;
+    std::string co_host;
     uint32_t timeout_ms;
     uint32_t con_counter;
     std::stack<TransConnection> _cPool;

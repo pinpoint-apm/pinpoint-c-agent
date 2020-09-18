@@ -38,25 +38,32 @@ class ContextType
 public:
     ContextType(){}
     virtual ~ContextType(){}
-    
-    virtual ctype typeIs(){
-        throw std::logic_error(" toString not yet implemented.");
-    }
-    virtual std::string toString(){
-        throw std::logic_error(" toString not yet implemented.");
-    }
+
+    virtual ctype typeIs() { throw std::logic_error("not implementation");}
+    virtual std::string& asStringValue()  { throw std::logic_error("not implementation");}
 };
 
 
 class StringContextType: public ContextType{
 public:
-    virtual ctype typeIs() {
-        return "string";
+    StringContextType(std::string&& value):
+    _value(std::move(value))
+    {
     }
 
-    virtual std::string toString() const
+    virtual ctype typeIs() 
+    {
+        return "String";
+    }
+
+    virtual std::string& asStringValue()
     {
         return this->_value;
+    }
+
+    virtual ~StringContextType()
+    {
+
     }
 
 private:

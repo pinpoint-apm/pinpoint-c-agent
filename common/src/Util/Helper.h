@@ -20,41 +20,67 @@
  *      Author: eeliu
  */
 
-#ifndef COMMON_SRC_UTIL_TRACE_H_
-#define COMMON_SRC_UTIL_TRACE_H_
+#ifndef COMMON_SRC_UTIL_HELPER_H_
+#define COMMON_SRC_UTIL_HELPER_H_
 
 #include <stdint.h>
 #include <chrono>
 #include <ratio>
 #include <ctime>
+#include <iostream>
+#include <string.h>
+
+#include "json/json.h"
+#include "json/writer.h"
+
+
 #include "common.h"
+#include "NodePool/TraceNode.h"
+#include "ConnectionPool/SpanConnectionPool.h"
+
+namespace Helper{
+
 using std::chrono::steady_clock;
 using std::chrono::duration;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
-namespace Trace{
-
+using std::chrono::system_clock;
+using std::chrono::time_point_cast;
+using std::chrono::time_point;
+using NodePool::TraceNode;
+using ConnectionPool::TransConnection;
 typedef struct scope_time_trace
 {
     steady_clock::time_point _start_time;
-    std::string func;
+    std::string _funcName;
     scope_time_trace(const char* cfunc)
     {
         _start_time =  steady_clock::now();
-        func = cfunc;
+        _funcName = cfunc;
     }
     ~scope_time_trace()
     {
         milliseconds elapsed = duration_cast<milliseconds>(steady_clock::now() - _start_time);
-        pp_trace(" [%s] it's take [%ld] miliseconds",func.c_str(),elapsed.count());
+        pp_trace(" [%s] it's take [%ld] miliseconds",_funcName.c_str(),elapsed.count());
     }
 }STT;
+
+
+uint64_t get_current_msec_stamp();
+
+std::string node_tree_to_string(Json::Value &value);
+
+Json::Value merge_node_tree(TraceNode& root);
+
+TransConnection getConnecton();
+
+void freeConnection(TransConnection& );
 
 }
 
 #ifndef NDEBUG
 
-#define ADDTRACE()  Trace::STT __stt__(__func__)
+#define ADDTRACE()  Helper::STT __stt__(__func__)
 #else
 
 #define ADDTRACE()
@@ -62,4 +88,4 @@ typedef struct scope_time_trace
 #endif
 
 
-#endif /* COMMON_SRC_UTIL_TRACE_H_ */
+#endif /* COMMON_SRC_UTIL_HELPER_H_ */
