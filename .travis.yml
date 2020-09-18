@@ -3,9 +3,6 @@ env:
   - ROOT=$PWD
   - REPORT_EXIT_STATUS=1
 os: linux
-addons:
-  - valgrind
-  - lcov
 
 matrix:
   include:
@@ -16,7 +13,7 @@ matrix:
         - cd build
         - cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
         - make 
-        - ./test/unittest
+        - ./bin/unittest
         
     # - language: php
     #   php: "7.4"

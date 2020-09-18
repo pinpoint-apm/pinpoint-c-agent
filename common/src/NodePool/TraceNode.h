@@ -28,10 +28,8 @@
 #include <atomic>
 #include <map>
 #include <iostream>
-using Context::ContextType;
-namespace NodePool{
 
- typedef uint32_t NodeID;
+namespace NodePool{
 
 //class NodeID{
 //public:
@@ -93,41 +91,39 @@ namespace NodePool{
 //};
 //
 
+using Context::ContextType;
+using Context::StringContextType;
 
-/*
- * @author eeliu
- * Aug 19, 2020 4:33:36 PM
- */
+typedef std::shared_ptr<ContextType> PContextType;
 class TraceNode
 {
 
 public: 
     // c-style tree node
-    TraceNode* next;
-    TraceNode* children;
-    TraceNode* parent;
-    
+    TraceNode* p_brother_node; // equal next node
+    TraceNode* p_child_head;   // subtree
+    TraceNode* p_parent_node;  // parent
+    TraceNode* p_root_node;    // highway to root node
+
+    uint64_t start_time;
+    uint64_t fetal_error_time;
+    uint64_t limit;
+
 public:
-    inline void addChild(TraceNode& node)
+    void addChild(TraceNode& child);
+
+    inline bool isRoot() const
     {
-        if(this->children)  node.next = this->children;
-
-        this->children = &node;
-        node.parent = this;
+        return (this->p_root_node  == this);
     }
-
-    // inline bool isRoot() const
-    // {
-    //     return !(this->parent || this->next);
-    // }
 
     inline bool isLeaf() const
     {
-        return !(this->children);
+        return !(this->p_child_head);
     }
 
 public:
-    TraceNode(NodeID id);
+    TraceNode(NodeID id = 0);
 
     virtual ~TraceNode();
 
@@ -136,10 +132,13 @@ public:
         return this->_value;
     }
 
-    void reset(NodeID id)
+    TraceNode& reset(NodeID id)
     {
-        this->clear();
-        this->init(id);
+        this->clearAttach();
+        this->initId(id);
+        this->resetStatus();
+        this->resetRelative();
+        return *this;
     }
 
     NodeID getId() const
@@ -147,9 +146,17 @@ public:
         return this->id;
     }
 
-    ContextType& getContextByKey(const std::string& key)
+    PContextType& getContextByKey(const char* key)
     {
         return this->_context.at(key);
+    }
+
+    void setStrContext(const char* key,const char* buf)
+    {
+        PContextType context(new StringContextType(buf));
+        this->_context[key] = context;
+        // std::string& value =  this->_context[key]->asStringValue();
+        // pp_trace("value %s",value.c_str());
     }
 
 public:
@@ -171,20 +178,30 @@ public:
 
 private:
 
-    void clear();
+    void clearAttach();
 
-    void init(NodeID& id);
+    void initId(NodeID& id);
 
     inline void resetRelative(){
-        this->next = nullptr;
-        this->children = nullptr;
-        this->parent = nullptr;
+        this->p_brother_node = nullptr;
+        this->p_child_head = nullptr;
+        this->p_parent_node = this;
+        this->p_root_node = this;
+    }
+
+    inline void resetStatus()
+    {
+        this->fetal_error_time = 0;
+        this->start_time = 0;
+        this->limit  = 0;
     }
 
 private:
+    //note: logic_id  = physical_id + 1
     NodeID id;
     Json::Value _value;
-    std::map<std::string,ContextType>  _context;
+
+    std::map<std::string,PContextType>  _context;
 };
 }
 #endif /* COMMON_SRC_TRACENODE_H_ */

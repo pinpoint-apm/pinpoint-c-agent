@@ -92,8 +92,6 @@ int TransLayer::connect_unix_remote(const char* remote)
         goto ERROR;
     }
 
-
-
     u_sock.sun_family = AF_UNIX;
     strncpy(u_sock.sun_path,remote,sizeof(u_sock.sun_path) -1);
 
@@ -196,6 +194,24 @@ ERROR:
     connect_remote(this->co_host.c_str());
     return -1;
 }
+
+void TransLayer::sendMsgToAgent(const std::string &data)
+{
+    Header header;
+    header.length  = htonl(data.size());
+    header.type    = htonl(REQ_UPDATE_SPAN);
+
+    if(this->chunks.checkCapacity(sizeof(header)+data.size()) == false){
+        pp_trace("Send buffer is full. size:[%d]",data.size()+sizeof(header));
+        return ;
+    }
+    //copy header
+    this->chunks.copyDataIntoChunks((const char* )&header,sizeof(header));
+    //copy body
+    this->chunks.copyDataIntoChunks(data.data(),data.size());
+    this->_state |=  S_WRITING;
+}
+
 
 const char* TransLayer::UNIX_SOCKET="unix:";
 const char* TransLayer::TCP_SOCKET="tcp:";
