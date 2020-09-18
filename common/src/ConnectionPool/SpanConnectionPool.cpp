@@ -21,8 +21,11 @@
  */
 
 #include "SpanConnectionPool.h"
+#include "Cache/SafeSharedState.h"
+#include <sstream> 
 
 namespace ConnectionPool {
+using Cache::SafeSharedState;
 
 SpanConnectionPool::SpanConnectionPool(const char* co_host,uint32_t w_timeout_ms):
         co_host(co_host),
@@ -37,27 +40,31 @@ TransConnection SpanConnectionPool::createTrans()
 {
     TransConnection _connect( new TransLayer(this->co_host,this->timeout_ms));
     using namespace std::placeholders;
+    // _connect->registerPeerMsgCallback(
+    //     std::bind(&SpanConnectionPool::_handleMsgFromCollector,this,_1,_2,_3),
+    //     std::bind(&SpanConnectionPool::_handleTransLayerState,this,_1));
+
     _connect->registerPeerMsgCallback(
         std::bind(&SpanConnectionPool::_handleMsgFromCollector,this,_1,_2,_3),
-        std::bind(&SpanConnectionPool::_handleTransLayerState,this,_1));
+        nullptr);
+    this->con_counter++;
+
     return _connect;
 }
 
-
-void SpanConnectionPool::_handleTransLayerState(int state)
-{
-    
-    // if(state == E_OFFLINE)
-    // {
-    //     if(global_agent_info.inter_flag & E_UTEST){
-    //         this->limit = E_TRACE_PASS;
-    //     }
-    //     else{
-    //         this->limit = E_OFFLINE;
-    //     }
-    //     this->_state->state |= E_OFFLINE;
-    // }
-}
+//@obsoleted
+// void SpanConnectionPool::_handleTransLayerState(int state)
+// {
+//     if(state == E_OFFLINE)
+//     {
+//         if(global_agent_info.inter_flag & E_UTEST){
+//             SafeSharedState::instance().markONLine();
+//         }
+//         else{
+//             SafeSharedState::instance().markOFFLine();
+//         }
+//     }
+// }
 
 
 
@@ -79,29 +86,25 @@ void SpanConnectionPool::_handleMsgFromCollector(int type,const char* buf,size_t
 void SpanConnectionPool::_handle_agent_info(int type,const char* buf,size_t len)
 {
     Json::Value  root;
-    Json::Reader reader;
-    int ret = reader.parse(buf,buf+len,root);
-    if(!ret)
+
+    Json::CharReaderBuilder builder;
+    builder["collectComments"] = false;
+
+    std::istringstream inss(std::string(buf,len));
+    JSONCPP_STRING errs;
+    bool ok = parseFromStream(builder, inss, &root, &errs);
+
+    if(ok)
     {
-        return ;
+        // pp_trace("collector-agent say:%s",root.toStyledString().c_str());
+
+        if(root.isMember("time")){
+            SafeSharedState::instance().updateStartTime(atoll(root["time"].asCString()));
+        }
+        
+    }else{
+        pp_trace("Recieve invalid msg: %.*s from Collector-agent, reason: %s",len,buf,errs.c_str());
     }
-
-    // if(root.isMember("time")){
-    //     this->_state->starttime= atoll(root["time"].asCString());
-    // }
-
-    // if(root.isMember("id")){
-    //     this->app_id      =  root["id"].asString();
-    // }
-
-    // if(root.isMember("name")){
-    //     this->app_name    = root["name"].asString();
-    // }
-
-    // this->limit= E_TRACE_PASS;
-    // this->_state->state |= E_TRACE_PASS;
-    // pp_trace("starttime:%ld appid:%s appname:%s",this->_state->starttime,this->app_id.c_str(),this->app_name.c_str());
-    
 
 }
 

@@ -19,11 +19,12 @@
  *  Created on: Aug 19, 2020
  *      Author: eeliu
  */
-
-#include "PoolManager.h"
-#include "common.h"
 #include <utility>
 
+#include "PoolManager.h"
+
+#include "../Util/Helper.h"
+#include "common.h"
 #ifndef UINT32_MAX
 #define UINT32_MAX (0xfffffff)
 #endif
@@ -45,90 +46,66 @@ uint32_t generateNid()
     return ++_Global_ID;
 }
 
-void PoolManager::giveBack(TraceNode& node)
+void PoolManager::freeNode(TraceNode& node)
 {
-    this->giveBack(node.getId());
+    this->freeNode(node.getId());
 }
 
-void PoolManager::giveBack(NodeID id)
+void PoolManager::freeNode(NodeID id)
 {
+    id--;
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    std::set<NodeID>::iterator it = this->_aliveNodeSet.find(id);
+    if(it ==  this->_aliveNodeSet.end()){
+        pp_trace("%ld not alive !!!",id);
+        #ifndef NDEBUG
+            throw std::runtime_error("input is invalid");
+        #endif
+        return ;
+    }
+    this->_aliveNodeSet.erase(it);
+    
+    this->_freeNodeList.push(id);
+}
+
+TraceNode& PoolManager::getNodeById(NodeID id)
+{
+    id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
 
     if(!this->nodeIsAlive(id))
-    {
-        pp_trace("node id:[%d] is not alive,please check the id life-cycle ",id);
-        return ;
-    }
+        throw std::out_of_range("id is not alive");
 
-#ifdef COMMON_DEBUG
-    {
-        std::list<NodeID>::iterator it = this->_freeNode.begin();
-
-        for(;it!= this->_freeNode.end();it++)
-        {
-            assert(*it != id );
-        }
-    }
-#endif
-    NodeIter it = this->nodePool.find(id);
-    if(it!=this->nodePool.end() ){
-        NodeID nid = generateNid();
-        // update Node with nid
-        it->second.reset(nid);
-        // move to _node
-        const TraceNode& _node = std::move(it->second);
-        // erase key -> value
-        this->nodePool.erase(it);
-        // insert a nid with new _node
-        this->nodePool.insert({nid,std::move(_node)});
-        this->_freeNode.push_front(nid);
-    }
-    else{
-        pp_trace("[error] %u not find in pool",id);
-    }
+    return this->nodeIndexVec[id/CELL_SIZE][id%CELL_SIZE];
 }
 
-TraceNode& PoolManager::refNodeById(NodeID id)
+TraceNode& PoolManager::getNode()
 {
-      std::lock_guard<std::mutex> _safe(this->_lock);
+    std::lock_guard<std::mutex> _safe(this->_lock);
 
-      if(!this->nodeIsAlive(id))
-          throw std::out_of_range("id is not alive");
-
-      NodeIter iter =   this->nodePool.find(id);
-
-      if( iter ==  this->nodePool.end())   throw std::out_of_range("node id not found in pool");
-
-      return iter->second;
+    if(this->_freeNodeList.empty()){
+        this->expandOnce();
+    }
+    // as it holds a _lock, so no more _freeNodeList is empty
+    NodeID id = this->_freeNodeList.top();
+    this->_freeNodeList.pop();
+    this->_aliveNodeSet.insert(id);
+    return this->nodeIndexVec[id/CELL_SIZE][id%CELL_SIZE].reset(id+1);
 }
 
- TraceNode& PoolManager::getFreeNode()
- {
-     std::lock_guard<std::mutex> _safe(this->_lock);
+void PoolManager::expandOnce()
+{        
+    ADDTRACE();
+    pp_trace("Node pool expanding self! Old size:%ld",this->nodeIndexVec.size()*CELL_SIZE);
+    this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
 
-     if(!this->_freeNode.empty()){ //use free node
-        NodeID id = this->_freeNode.front();
-        this->_freeNode.pop_front();
-
-        NodeIter it = this->nodePool.find(id);
-        if(it!=this->nodePool.end()){
-            this->_aliveNode.insert(id);
-            return it->second;
-        }
-        // throw std::invalid_argument(id);
-     } else { // create a new node 
-        NodeID id = generateNid();
-        TraceNode node(id);
-        this->nodePool.insert({id,node});
-        this->_aliveNode.insert(id);
-        NodeIter it =  this->nodePool.find(id);
-        if(it!= this->nodePool.end()){
-            return it->second;
-        }
-     }
-
-     throw std::runtime_error("node pool locates node failed");
- }
+    for( NodeID id = this->maxId ; id < (this->maxId + CELL_SIZE) ;id++)
+    {
+        this->_freeNodeList.push(id);
+    }
+    this->maxId += CELL_SIZE;
+    pp_trace("Node pool expanding is done! news size:%ld",this->nodeIndexVec.size()*CELL_SIZE);
+}
 
 
 }

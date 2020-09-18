@@ -22,7 +22,7 @@
 #include "Chunk.h"
 namespace Cache{
     
-int Chunks::copyDataIntoReadyList(const void* data, uint length)
+int Chunks::copyDataIntoReadyList(const void* data, uint32_t length)
 {
     if (ready_list.empty())
     {
@@ -31,7 +31,7 @@ int Chunks::copyDataIntoReadyList(const void* data, uint length)
     Chunk* e = ready_list.back();
 
     char* e_buf_start = &e->data[e->r_ofs];
-    uint in_max_len = e->block_size - e->r_ofs;
+    uint32_t in_max_len = e->block_size - e->r_ofs;
     if (e)
     {
         if (in_max_len >= length)
@@ -50,7 +50,7 @@ int Chunks::copyDataIntoReadyList(const void* data, uint length)
     return length;
 }
 
-int Chunks::copyDataIntoFreeList(const void*data, uint length)
+int Chunks::copyDataIntoFreeList(const void*data, uint32_t length)
 {
     if (this->free_list.empty())
     {
@@ -65,7 +65,7 @@ int Chunks::copyDataIntoFreeList(const void*data, uint length)
         Chunk* free = *iter;
         iter++;
         char* f_buf_start = &free->data[free->r_ofs];
-        uint in_max_len = free->block_size - free->r_ofs;
+        uint32_t in_max_len = free->block_size - free->r_ofs;
         if (in_max_len >= length)
         {
             memcpy(f_buf_start, data, length);
@@ -90,14 +90,14 @@ int Chunks::copyDataIntoFreeList(const void*data, uint length)
     return length;
 }
 
-uint Chunks::ck_ceil_to_k(uint i)
+uint32_t Chunks::ck_ceil_to_k(uint32_t i)
 {
     if (i < threshold)
     {
         return threshold;
     }
 
-    uint k = 0x80000000;
+    uint32_t k = 0x80000000;
     while (k && !(k & i))
     {
         k >>= 1;
@@ -105,7 +105,7 @@ uint Chunks::ck_ceil_to_k(uint i)
     return k << 1;
 }
 
-int Chunks::copyDataIntoNewChunk(const void* data, uint length)
+int Chunks::copyDataIntoNewChunk(const void* data, uint32_t length)
 {
     int block_size = ck_ceil_to_k(sizeof(Chunk) + length);
 
@@ -147,17 +147,18 @@ void Chunks::checkWaterLevel()
 }
 
 
-uint Chunks::getAllocSize() const
+uint32_t Chunks::getAllocSize() const
 {
-   return  ck_alloc_size;
+   return  this->ck_alloc_size;
 }
 
-Chunks::Chunks(uint max_size, uint resident_size) :
+Chunks::Chunks(uint32_t max_size, uint32_t resident_size) :
          c_resident_size(resident_size),c_max_size(max_size),threshold(1024)
 {
     this->ck_alloc_size = 0;
     this->ck_free_list_size = 0;
-
+    if(max_size < resident_size)
+        throw std::invalid_argument("chunks: max_size must bigger then resident_size");
 }
 
 Chunks::~Chunks()
@@ -178,21 +179,21 @@ Chunks::~Chunks()
     this->ck_free_list_size = 0;
 }
 
-bool Chunks::useExistChunk(uint length)
+bool Chunks::useExistChunk(uint32_t length) const
 {
     Chunk * c = nullptr;
     if(!this->ready_list.empty())
     {
         c = this->ready_list.back();
-        uint avilable = c->block_size - c->r_ofs ;
-        if (avilable <= length){
-            return true;
+        uint32_t avilable = c->block_size - c->r_ofs ;
+        if (avilable < length){
+            return false;
         }else{
             length -= avilable;
         }
     }
 
-    if(this->ck_free_list_size >length)
+    if(this->ck_free_list_size >=length)
     {
         return true;
     }
@@ -201,12 +202,8 @@ bool Chunks::useExistChunk(uint length)
 }
 
 
-int Chunks::copyDataIntoChunks(const void*data, uint length)
+int Chunks::copyDataIntoChunks(const void*data, uint32_t length)
 {
-    if(this->ck_alloc_size > this->c_max_size && this->useExistChunk(length)){
-        return length;
-    }
-
     const char* p_in = (const char*) data;
     int ret = 0;
 
@@ -226,17 +223,17 @@ int Chunks::copyDataIntoChunks(const void*data, uint length)
     p_in += (length - ret);
     length = ret;
 
-    if ((ret = copyDataIntoNewChunk(p_in, length)) == 0)
+    if ((ret = copyDataIntoNewChunk(p_in, length)) == -1)
     {
-        goto DONE;
+        // exhausting memory
+        return -1;
     }
-    return length;
+
 DONE:
     return 0;
-
 }
 
-int Chunks::drainOutWithPipe(std::function<int(const char*, uint)> in_pipe_cb)
+int Chunks::drainOutWithPipe(std::function<int(const char*, uint32_t)> in_pipe_cb)
 {
     if (this->ready_list.empty())
     {
@@ -248,7 +245,7 @@ int Chunks::drainOutWithPipe(std::function<int(const char*, uint)> in_pipe_cb)
     {
         Chunk* cur = *iter;
         char* cur_buf = &cur->data[cur->l_ofs];
-        uint cur_size = cur->r_ofs - cur->l_ofs;
+        uint32_t cur_size = cur->r_ofs - cur->l_ofs;
         //  ret is used size
         int ret = in_pipe_cb(cur_buf, cur_size);
         if (ret <= 0)
@@ -266,7 +263,7 @@ int Chunks::drainOutWithPipe(std::function<int(const char*, uint)> in_pipe_cb)
         }
         else if (ret < (int)cur_size)
         {
-            cur->l_ofs += (uint)ret;
+            cur->l_ofs += (uint32_t)ret;
         }
     }
     this->checkWaterLevel();

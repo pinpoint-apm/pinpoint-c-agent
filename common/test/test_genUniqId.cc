@@ -38,6 +38,6 @@ TEST(common,unique_id)
         exit(EXIT_FAILURE);
     }
     int64_t id = generate_unique_id();
-    EXPECT_EQ(id, TIMES*2+1);
+    EXPECT_EQ(id, TIMES*2);
     // reset the shm
 }

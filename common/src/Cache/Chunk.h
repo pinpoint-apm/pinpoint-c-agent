@@ -31,14 +31,17 @@
 
 namespace Cache{
     
+/// Readme:
+/// 1. not thread safe
+/// 2. check the capacity before copy data  
 class Chunks
 {
 
     typedef struct chunk_
     {
-        uint block_size;
-        uint l_ofs; // The continuous buffer left offset in data ***(l_ofs)--------------(r_ofs)*****
-        uint r_ofs; // The continuous buffer right offset in data
+        uint32_t block_size;
+        uint32_t l_ofs; // The continuous buffer left offset in data ***(l_ofs)--------------(r_ofs)*****
+        uint32_t r_ofs; // The continuous buffer right offset in data
         char data[0];
     } Chunk;
 
@@ -48,51 +51,63 @@ class Chunks
 private:
 
     CkIter iter;
-    CKList ready_list;  //ready list,start
-    CKList free_list;  //free_list start
+    CKList ready_list;  //Wait to send
+    CKList free_list;  //already send, can be reuse
 
-    const uint c_resident_size;
-    const uint c_max_size;    // if  ck_alloc_size > c_max_size buffer is full
-    uint threshold;
+    const uint32_t c_resident_size;
+    const uint32_t c_max_size;    // if  ck_alloc_size > c_max_size buffer is full
+    uint32_t threshold;
 
-    uint ck_alloc_size;
-    uint ck_free_list_size;
+    uint32_t ck_alloc_size;
+    uint32_t ck_free_list_size;
 
 private:
 
-    uint ck_ceil_to_k(uint i);
+    uint32_t ck_ceil_to_k(uint32_t i);
     /**
      *
      * @param data
      * @param length
      * @return rest size of data
      */
-    int copyDataIntoReadyList(const void* data, uint length);
+    int copyDataIntoReadyList(const void* data, uint32_t length);
 
-    int copyDataIntoFreeList(const void*data, uint length);
+    int copyDataIntoFreeList(const void*data, uint32_t length);
 
-    int copyDataIntoNewChunk(const void* data, uint length);
+    int copyDataIntoNewChunk(const void* data, uint32_t length);
 
     void reduceFreeList();
 
     void checkWaterLevel();
-
-    bool useExistChunk(uint length);
+    // try to use the ready and free list
+    bool useExistChunk(uint32_t length) const;
 
 public:
 
-    uint getAllocSize() const;
+    uint32_t getAllocSize() const;
 
-    Chunks(uint max_size, uint resident_size);
+    Chunks(uint32_t max_size, uint32_t resident_size);
 
     virtual ~Chunks();
+
+    int copyDataIntoChunks(const void*data, uint32_t length);
+
     /**
-     * 0 means true
-     * length failed
-     * */
-    int copyDataIntoChunks(const void*data, uint length);
-    
-    int drainOutWithPipe(std::function<int(const char*, uint)> in_pipe_cb);
+     * If you want use the chunk safety, check capacity before use it.
+     * @param length
+     * @return true: chunk can hold length data
+     *              false: length is too large according to max_size
+     */
+    inline bool checkCapacity(uint32_t length) const 
+    {
+        // exist chunk is full and the thredhold is reached
+        if( this->useExistChunk(length) == false && this->ck_alloc_size+ length > this->c_max_size  ){
+           return false;
+        }    
+        return true;
+    }
+
+    int drainOutWithPipe(std::function<int(const char*, uint32_t)> in_pipe_cb);
 
     void resetChunks();
 

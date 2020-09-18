@@ -34,7 +34,6 @@
 #define LOG_SIZE 4096
 #define IN_MSG_BUF_SIZE 4096
 #define NAMING_SIZE 128
-#define PHP 1500
 
 typedef enum{
     RESPONSE_AGENT_INFO = 0,
@@ -48,6 +47,7 @@ typedef enum{
     E_UTEST = 0x4
 }AGENT_FLAG;
 
+typedef uint32_t NodeID;
 
 #pragma pack (1)
 typedef  struct {
@@ -81,11 +81,12 @@ typedef struct pp_agent_s{
     VOID_FUNC   release_lock;
 }PPAgentT;
 
-enum E_ANGET_STATUS{
+typedef enum {
     E_OFFLINE = 0x1,
     E_TRACE_PASS =0x2,
-    E_TRACE_BLOCK =0x4
-};
+    E_TRACE_BLOCK =0x4,
+    E_READY = 0x8
+}E_ANGET_STATUS;
 
 /**
  *pinpoint_start_trace
@@ -109,48 +110,53 @@ extern PPAgentT global_agent_info;
  * start a trace (span). if current span is empty, create a span or else create a spanevent
  * @return
  */
-int32_t pinpoint_start_trace(void);
+NodeID pinpoint_start_trace(NodeID);
 /**
  * the same as pinpoint_start_trace. BUT, end a span or a spanevent
  * @return
  */
-int32_t pinpoint_end_trace(void);
+NodeID pinpoint_end_trace(NodeID);
 /**
  * pinpoint_add_clues, append a value into span[key]
  * @param key must be a string
  * @param value key must be a string
  */
-void pinpoint_add_clues(const  char* key,const  char* value);
+void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value);
 /**
  * pinpoint_add_clues, add  a key-value into span. span[key]=value
  * @param key must be a string
  * @param value key must be a string
  */
-void pinpoint_add_clue(const  char* key,const  char* value);
+void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value);
 /**
  *  add a key value into current trace. IF the trace is end, all data(key-value) will be free
  * @param key
  * @param value
  */
-void pinpoint_set_special_key(const char* key,const char* value);
+void pinpoint_set_context_key(NodeID _id,const char* key,const char* value);
 /**
  * get the corresponding value with key(in current trace)
  * @param key
  * @return
  */
-const char* pinpoint_get_special_key(const char* key);
+const char* pinpoint_get_context_key(NodeID _id,const char* key);
 /**
  * if tracelimit enable, check current trace state,
  * @param timestamp
- * @return true, sampled or else, not sampled
+ * @return 0, sampled or else, not sampled
  */
-bool check_tracelimit(int64_t timestamp);
+int check_tracelimit(int64_t);
+
+
+int mark_current_trace_status(NodeID _id,int status);
+
 /**
  * try to send current span with timeout
  * NOTE: if timeout, current span dropped
  * @param timeout
  */
-void pinpoint_force_flush_span(uint32_t timeout);
+// void pinpoint_force_flush_span(uint32_t timeout);
+
 /**
  * get an unique auto-increment id
  * NOTE: implement by shared memory, only valid in current host.
@@ -160,17 +166,8 @@ int64_t generate_unique_id(void);
 /**
  * drop current trace
  */
-void pinpoint_drop_trace(void);
-/**
- * @deprecated
- * @return
- */
-const char* pinpoint_app_id(void);
-/**
- * @deprecated
- * @return
- */
-const char* pinpoint_app_name(void);
+void pinpoint_drop_trace(NodeID _id);
+
 /**
  * get the start time of collector-agent.Use to generate transactionID
  * @return
@@ -184,8 +181,8 @@ uint64_t pinpoint_start_time(void);
  * @param error_lineno
  */
 void catch_error(const char* msg,const char* error_filename,uint32_t error_lineno);
-typedef void(*log_error_cb)(char*);
-void register_error_cb(log_error_cb error_cb);
+typedef void(*log_msg_cb)(char*);
+void register_error_cb(log_msg_cb error_cb);
 void pp_trace(const char *format,...);
 /**
  * NOTE: only for testcase
@@ -193,16 +190,6 @@ void pp_trace(const char *format,...);
 void reset_unique_id(void);
 
 void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
-/**
- * get or create a span object from agent-pool
- */
-void* create_or_reuse_agent(void);
-
-/**
- * give back current agent to agent-pool
- * @param agent
- */
-void give_back_agent(void *agent);
 
 #ifdef __cplusplus 
 }

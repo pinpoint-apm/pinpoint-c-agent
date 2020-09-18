@@ -25,45 +25,58 @@
 #include "common.h"
 #include "TraceNode.h"
 #include <iostream>
-#include <map>
+#include <vector>
 #include <set>
 #include <list>
 #include <mutex>
 
 namespace NodePool{
 
-typedef  std::map<NodeID,TraceNode>::iterator NodeIter ;
-
 class PoolManager
 {
 
 public:
-    TraceNode& refNodeById(NodeID id);
-    void giveBack(NodeID id);
-    void giveBack(TraceNode&);
-    TraceNode& getFreeNode();
 
-    uint32_t poolNodeCount() 
+    TraceNode& getNodeById(NodeID id);
+
+    void freeNode(NodeID id);
+
+    void freeNode(TraceNode&);
+
+    TraceNode& getNode();
+
+    uint32_t totoalNodesCount() 
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
-        return this->nodePool.size();
+        return nodeIndexVec.size()*CELL_SIZE;
     }
 
-    PoolManager(){}
+    uint32_t freeNodesCount() 
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+        return this->_freeNodeList.size();
+    }
+
+    PoolManager():maxId(0){
+        this->expandOnce();
+    }
     virtual ~PoolManager(){}
     
 private:
     inline bool nodeIsAlive(NodeID id)
     {
-        return this->_aliveNode.find(id) !=  this->_aliveNode.end();
+        return this->_aliveNodeSet.find(id) !=  this->_aliveNodeSet.end();
     }
 
+    void expandOnce();
 
 private:
-    std::map<NodeID,TraceNode> nodePool;
-    std::set<uint32_t> _aliveNode;
-    std::list<uint32_t> _freeNode;
     std::mutex _lock;
+    std::set<NodeID> _aliveNodeSet;
+    NodeID maxId;
+    std::stack<NodeID> _freeNodeList;
+    static const int CELL_SIZE = 128;
+    std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
 };
 
 

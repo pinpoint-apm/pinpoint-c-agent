@@ -51,51 +51,36 @@ public:
     void free()
     {
         detach_shared_obj();
-        this->_global_state = NULL;
+        this->_global_state = nullptr;
     }
 
-    bool isOFFLine()
+    bool isReady()
     {
-        return (this->_global_state->state & E_OFFLINE);
-    }
-
-
-    void markOFFline()
-    {
-        this->_global_state->state |= E_OFFLINE;
-    }
-
-    void markONLine()
-    {
-        this->_global_state->state &= ~E_OFFLINE;
-    }
-
-    bool checkTraceLimit(int64_t timestamp)
-    {
-        time_t ts = (timestamp != -1) ?(timestamp) :(std::time(NULL));
-        
-        if( this->_global_state->timestamp != ts )
-        {
-            this->_global_state->timestamp = ts;
-            this->_global_state->tick = 0 ;
-            __sync_synchronize();
-        }
-        else if(this->_global_state->tick >= this->_global_state->maxtracelimit)
-        {
-            goto BLOCK;
-        }else
-        {
-            __sync_add_and_fetch(&this->_global_state->tick,1);
+        if( this->_global_state != nullptr &&
+          (this->_global_state->state & E_READY)){
+            return true ;
         }
         return false;
-BLOCK:
-        pp_trace("This span dropped. max_trace_limit:%d current_tick:%d",this->_global_state->maxtracelimit,this->_global_state->tick);
-        return true;
     }
+
+
+    // void markOFFLine()
+    // {
+    //     this->_global_state->state |= E_OFFLINE;
+    // }
+
+    // void markONLine()
+    // {
+    //     this->_global_state->state &= ~E_OFFLINE;
+    // }
+
+    bool checkTraceLimit(int64_t timestamp);
 
     void updateStartTime(std::time_t startTime)
     {
+        pp_trace("collector-agent starttime:%ld",startTime);
         this->_global_state->starttime = startTime;
+        this->_global_state->state |=  E_READY;
     }
 
     std::time_t getStartTime()
@@ -106,7 +91,7 @@ BLOCK:
 
     uint64_t generateUniqueId()
     {
-        return __sync_add_and_fetch(&this->_global_state->uid,1);
+        return __sync_fetch_and_add(&this->_global_state->uid,1);
     }
 
     void resetUniqueId()
@@ -123,7 +108,8 @@ private:
     }
 
     ~SafeSharedState(){
-        
+        this->_global_state = nullptr;
+        detach_shared_obj();
     }
     
     SharedState * _global_state;
