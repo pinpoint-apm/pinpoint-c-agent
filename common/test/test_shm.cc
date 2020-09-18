@@ -9,8 +9,9 @@ using namespace testing;
 using namespace std;
 
 
+// A duplicated testcase
 #if 0
-#ifdef __linux__
+// #ifdef __linux__
 
 
 TEST(shm, create_and_use_the_shared_mem)
@@ -42,7 +43,5 @@ TEST(shm, create_and_use_the_shared_mem)
     
     waitpid(pid,NULL,0);
     detach_shared_obj();
-    shm_unlink("pinpoint-php.shm");
 }
-#endif
 #endif

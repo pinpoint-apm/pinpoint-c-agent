@@ -75,16 +75,17 @@ public:
 
     size_t trans_layer_pool(uint32_t timeout = 0);
     
-    void sendMsgToAgent(const std::string &data)
-    {
-        uint32_t len = data.size();
-        if ( this->chunks.copyDataIntoChunks(data.data(),len) != 0)// _state must be writing
-        {
-            pp_trace("Send buffer is full. size:[%d]",len);
-            return ;
-        }
-        this->_state |=  S_WRITING;
-    }
+    void sendMsgToAgent(const std::string &data);
+
+    // void sendMsgToAgent(const char* pbuf,uint32_t len)
+    // {
+    //     if ( this->chunks.copyDataIntoChunks(pbuf,len) != 0)
+    //     {
+    //         pp_trace("Send buffer is full. size:[%d]",len);
+    //         return ;
+    //     }
+    //     this->_state |=  S_WRITING;
+    // }
 
     /**
      * retry in three times

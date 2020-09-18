@@ -28,7 +28,9 @@ namespace NodePool{
 TraceNode::TraceNode(NodeID id)
 {
     this->id = id;
+    this->p_root_node = this;
     this->resetRelative();
+    this->resetStatus();
 }
 
 TraceNode::~TraceNode()
@@ -36,7 +38,7 @@ TraceNode::~TraceNode()
 
 }
 
-void TraceNode::clear()
+void TraceNode::clearAttach()
 {
     // empty the json value 
     if(!this->_value.empty())  this->_value.clear();
@@ -46,9 +48,19 @@ void TraceNode::clear()
     this->resetRelative();
 }
 
-void TraceNode::init(NodeID& id)
+void TraceNode::initId(NodeID& id)
 {
     this->id = id;
+}
+
+void TraceNode::addChild(TraceNode& child)
+{
+    if(this->p_child_head)  child.p_brother_node = this->p_child_head;
+
+    this->p_child_head = &child;
+    child.p_parent_node = this;
+    // pass the root to every child
+    child.p_root_node = this->p_root_node;
 }
 
 }

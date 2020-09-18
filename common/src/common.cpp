@@ -24,17 +24,27 @@
 #include <memory>
 
 #include "common.h"
-//#include "TransLayer.h"
-//#include "SharedObj.h"
-//#include "json/json.h"
-//#include "NodePool/PoolManager.h"
+
 #include "Cache/SafeSharedState.h"
+#include "NodePool/PoolManager.h"
+#include "Util/Helper.h"
+#include "ConnectionPool/SpanConnectionPool.h"
+
+using NodePool::TraceNode;
+using NodePool::PoolManager;
+using NodePool::PContextType;
+using ConnectionPool::TransConnection;
+using Cache::SafeSharedState;
+using Helper::get_current_msec_stamp;
+static NodePool::PoolManager g_node_pool;
+const static char* CLUSE="clues";
+
 #if 0
 using NodePool::TraceNode;
 
 static inline uint64_t get_current_msec_stamp();
 
-const static char* CLUSE="clues";
+
 static TraceStoreLayer* _storelayer;
 
 
@@ -140,7 +150,7 @@ public:
         if(!this->stack.empty()) // child
         {
             TraceNode& parent = this->stack.top();
-            uint node_length = parent.node["calls"].size();
+            uint32_t node_length = parent.node["calls"].size();
             TraceNode child(parent.node["calls"][node_length]);
             child.node["S"] = timestamp - parent.ancestor_start_time;
             child.ancestor_start_time = parent.ancestor_start_time;
@@ -160,7 +170,7 @@ public:
         return this->stack.size();
     }
 
-    inline uint getStackSize()
+    inline uint32_t getStackSize()
     {
         return this->stack.size();
     }
@@ -239,7 +249,7 @@ BLOCK:
 
     }
 
-    void catchFetalError(const char* msg,const char* error_filename,uint error_lineno)
+    void catchFetalError(const char* msg,const char* error_filename,uint32_t error_lineno)
     {
         this->fetal_error_time = get_current_msec_stamp();
         Json::Value eMsg;
@@ -343,7 +353,7 @@ private:
 
 private:
     // const char**co_host; // tcp:ip:port should support dns
-    uint  timeout_ms;
+    uint32_t  timeout_ms;
     uint64_t  limit;
     const int   trace_limit;
     uint64_t   fetal_error_time;
@@ -597,7 +607,7 @@ void reset_unique_id()
     p_agent->resetUniqueId();
 }
 
-void catch_error(const char* msg,const char* error_filename,uint error_lineno)
+void catch_error(const char* msg,const char* error_filename,uint32_t error_lineno)
 {
     SpanAgent* p_agent = get_agent();
     if(p_agent == NULL)
@@ -687,15 +697,291 @@ void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer)
 
 #endif
 
+static NodeID do_start_trace(NodeID& _id)
+{
+    uint64_t time_in_ms = Helper::get_current_msec_stamp();
+    if(_id == 0)  // it's a root node
+    {
+        TraceNode&  node =  g_node_pool.getNode();
+        node["S"] = time_in_ms;
+        node["FT"] = global_agent_info.agent_type;
+        node.start_time = time_in_ms;
+        return node.getId();
+    }else 
+    {
+        TraceNode&  parent = g_node_pool.getNodeById(_id);
+        TraceNode&  child  = g_node_pool.getNode();
+        parent.addChild(child);
+        child.start_time = time_in_ms;
+        return child.getId();
+    }
+}
+
+// root must be the trace root
+// if not, your nodes must be leaked !!!
+static void free_nodes_tree(TraceNode* root)
+{
+    if(root == nullptr) return ;
+
+    TraceNode * p_child = root->p_child_head;
+    while (p_child) // free all children
+    {
+        // keep the next child
+        TraceNode * p_bro = p_child->p_brother_node;
+        // free current child tree
+        free_nodes_tree(p_child);
+        // go on
+        p_child = p_bro;
+    }
+    // free self
+    g_node_pool.freeNode(*root);
+}
+
+static void flush_to_agent(std::string&& buffer)
+{
+    TransConnection trans = Helper::getConnecton();
+    trans->sendMsgToAgent(buffer);
+    trans->trans_layer_pool();
+
+    Helper::freeConnection(trans);
+}
+
+static NodeID do_end_trace(NodeID& _id)
+{
+    TraceNode&  node = g_node_pool.getNodeById(_id);
+    if(node.isRoot())
+    {
+        /// this trace is end. Try to send current trace
+        if( node.limit == E_TRACE_PASS ){
+            uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
+                                (Helper::get_current_msec_stamp()):
+                                (node.p_root_node->fetal_error_time);
+            node["E"] = end_time - node.start_time;
+            Json::Value trace = Helper::merge_node_tree(node);
+            std::string spanStr = Helper::node_tree_to_string(trace);
+            pp_trace("this span:(%s)",spanStr.c_str());
+            flush_to_agent(std::move(spanStr));
+
+        }else if( node.limit == E_TRACE_BLOCK ){
+            
+        }
+        /// this span is done, reset the trace node tree
+        free_nodes_tree(&node);
+        
+        return 0;
+    }else
+    {
+        uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
+                                (Helper::get_current_msec_stamp()):
+                                (node.p_root_node->fetal_error_time);
+        node["E"] = end_time - node.start_time;
+        return node.p_parent_node->getId();
+    }
+}
+
+NodeID pinpoint_start_trace(NodeID _id)
+{
+    try
+    {
+        return do_start_trace(_id);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" start_trace#%ld failed with %s",_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" start_trace#%ld failed with %s",_id,ex.what());
+    }catch(...)
+    {
+        pp_trace(" start_trace#%ld failed with unkonw reason",_id);
+    }
+    return 0;
+}
+
+NodeID pinpoint_end_trace(NodeID _id)
+{
+    try
+    {
+        return do_end_trace(_id);
+    }catch(const std::out_of_range&){
+        pp_trace(" %d not found",_id);
+        return 0;
+    }
+}
+
+void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value);
+void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value);
+void pinpoint_set_context(NodeID _id,const char* key,const char* value);
+const char* pinpoint_get_context(NodeID _id,const char* key);
+void pinpoint_drop_trace(NodeID _id);
+
+
+bool update_tick(int64_t timestamp);
+uint64_t pinpoint_start_time(void)
+{
+    return (uint64_t)SafeSharedState::instance().getStartTime();
+}
+void catch_error(const char* msg,const char* error_filename,uint32_t error_lineno);
+void register_error_cb(log_msg_cb error_cb);
+
 int64_t generate_unique_id()
 {
-    using Cache::SafeSharedState;
-
     return SafeSharedState::instance().generateUniqueId();
 }
 
 void reset_unique_id(void)
 {
-    using Cache::SafeSharedState;
+
     return SafeSharedState::instance().resetUniqueId();
+}
+
+bool do_mark_current_trace_status(NodeID& _id,E_ANGET_STATUS status) 
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+
+    if(node.p_root_node){
+        TraceNode* root = node.p_root_node;
+        pp_trace("change current status, before:%d,now:%d",root->limit,status);
+        root->limit = status;
+        return true;
+    }
+    else{
+        pp_trace(": %d node no root node",_id);
+        return false;
+    }
+}
+
+int mark_current_trace_status(NodeID _id,int status)
+{
+    try
+    {
+        return do_mark_current_trace_status(_id,(E_ANGET_STATUS)status)?(0):(1);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(...)
+    {
+        pp_trace(" %s#%ld failed with unkonw reason",__func__,_id);
+    }
+    return 1;
+}
+
+
+int check_tracelimit(int64_t timestamp)
+{
+    return SafeSharedState::instance().checkTraceLimit(timestamp)?(1):(0);
+}
+
+static void do_add_clue(NodeID _id,const  char* key,const  char* value)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    node[key]=value;
+    pp_trace("key:%s value:%s",key,value);
+}
+
+static void do_add_clues(NodeID _id,const  char* key,const  char* value)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    std::string cvalue ="";
+    cvalue+=key;
+    cvalue+=':';
+    cvalue+=value;
+    node[CLUSE].append(cvalue);
+    pp_trace("add clues:%s:%s",key,value);
+}
+
+void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value)
+{
+    try
+    {
+        do_add_clue(_id,key,value);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(...)
+    {
+        pp_trace(" %s#%ld failed with unkonw reason",__func__,_id);
+    }
+}
+
+void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value)
+{
+    try
+    {
+        do_add_clues(_id,key,value);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(...)
+    {
+        pp_trace(" %s#%ld failed with unkonw reason",__func__,_id);
+    }
+}
+
+static inline void do_set_context_key(NodeID _id,const char* key,const char* value)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    node.setStrContext(key,value);
+}
+
+static const char* do_get_context_key(NodeID _id,const char* key)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    PContextType& pValue = node.getContextByKey(key);
+    return pValue->asStringValue().c_str();
+}
+
+void pinpoint_set_context_key(NodeID _id,const char* key,const char* value)
+{
+    try
+    {
+        do_set_context_key(_id,key,value);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with out_of_range. %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with runtime_error. %s",__func__,_id,ex.what());
+    }catch(const std::exception&ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+}
+
+const char* pinpoint_get_context_key(NodeID _id,const char* key)
+{
+    try
+    {
+        return do_get_context_key(_id,key);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(const std::exception&ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    return nullptr;
 }
