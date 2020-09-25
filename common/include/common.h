@@ -107,6 +107,15 @@ extern "C"{
 extern PPAgentT global_agent_info;
 
 /**
+ * @brief 
+ * 
+ * @return NodeID 
+ */
+NodeID pinpoint_get_per_thread_id();
+
+void pinpoint_update_per_thread_id(NodeID id);
+
+/**
  * start a trace (span). if current span is empty, create a span or else create a spanevent
  * @return
  */
@@ -116,6 +125,15 @@ NodeID pinpoint_start_trace(NodeID);
  * @return
  */
 NodeID pinpoint_end_trace(NodeID);
+
+
+/**
+ *  force end current trace, only called when callstack leaked
+ * @return int 0 : means oK
+ *             -1: exception found, check the log
+ */
+int pinpoint_force_end_trace(NodeID);
+
 /**
  * pinpoint_add_clues, append a value into span[key]
  * @param key must be a string
@@ -180,7 +198,7 @@ uint64_t pinpoint_start_time(void);
  * @param error_filename
  * @param error_lineno
  */
-void catch_error(const char* msg,const char* error_filename,uint32_t error_lineno);
+void catch_error(NodeID _id,const char* msg,const char* error_filename,uint32_t error_lineno);
 typedef void(*log_msg_cb)(char*);
 void register_error_cb(log_msg_cb error_cb);
 void pp_trace(const char *format,...);

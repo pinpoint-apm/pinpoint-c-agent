@@ -22,6 +22,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <thread>
 
 #include "common.h"
 
@@ -38,7 +39,8 @@ using Cache::SafeSharedState;
 using Helper::get_current_msec_stamp;
 static NodePool::PoolManager g_node_pool;
 const static char* CLUSE="clues";
-
+static NodeID do_end_trace(NodeID&);
+static NodeID do_end_trace(TraceNode&);
 #if 0
 using NodePool::TraceNode;
 
@@ -697,6 +699,21 @@ void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer)
 
 #endif
 
+
+
+static thread_local NodeID __tls_id = 0;
+
+NodeID pinpoint_get_per_thread_id()
+{
+    return __tls_id;
+}
+
+void pinpoint_update_per_thread_id(NodeID id)
+{
+    __tls_id = id;
+}
+
+
 static NodeID do_start_trace(NodeID& _id)
 {
     uint64_t time_in_ms = Helper::get_current_msec_stamp();
@@ -712,6 +729,7 @@ static NodeID do_start_trace(NodeID& _id)
         TraceNode&  parent = g_node_pool.getNodeById(_id);
         TraceNode&  child  = g_node_pool.getNode();
         parent.addChild(child);
+        child["S"] = time_in_ms - child.p_root_node->start_time;
         child.start_time = time_in_ms;
         return child.getId();
     }
@@ -746,9 +764,8 @@ static void flush_to_agent(std::string&& buffer)
     Helper::freeConnection(trans);
 }
 
-static NodeID do_end_trace(NodeID& _id)
+NodeID do_end_trace(TraceNode& node)
 {
-    TraceNode&  node = g_node_pool.getNodeById(_id);
     if(node.isRoot())
     {
         /// this trace is end. Try to send current trace
@@ -763,11 +780,12 @@ static NodeID do_end_trace(NodeID& _id)
             flush_to_agent(std::move(spanStr));
 
         }else if( node.limit == E_TRACE_BLOCK ){
-            
+            pp_trace("current#%ld span dropped,due to TRACE_BLOCK",node.getId());
+        }else{
+            pp_trace("current#%ld span dropped,due to limit=%d",node.getId(),node.limit);
         }
         /// this span is done, reset the trace node tree
         free_nodes_tree(&node);
-        
         return 0;
     }else
     {
@@ -779,10 +797,19 @@ static NodeID do_end_trace(NodeID& _id)
     }
 }
 
+
+
+NodeID do_end_trace(NodeID& _id)
+{
+    TraceNode&  node = g_node_pool.getNodeById(_id);
+    return do_end_trace(node);
+}
+
 NodeID pinpoint_start_trace(NodeID _id)
 {
     try
     {
+        pp_trace("#%ld pinpoint_start start",_id);
         return do_start_trace(_id);
     }
     catch(const std::out_of_range& ex)
@@ -799,30 +826,51 @@ NodeID pinpoint_start_trace(NodeID _id)
     return 0;
 }
 
+static NodeID do_force_end_trace(NodeID &id)
+{   
+    TraceNode&  node = g_node_pool.getNodeById(id);
+    TraceNode* root = node.p_root_node;
+    return do_end_trace(*root);
+}
+
+int pinpoint_force_end_trace(NodeID id)
+{
+    try
+    {   
+        int ret = do_force_end_trace(id);
+        pp_trace("#%ld pinpoint_end_trace Done!",ret);
+        return ret;
+    }catch(const std::out_of_range&){
+        pp_trace("#%ld not found",id);
+    }catch(const std::exception &ex){
+        pp_trace("#%ld end trace failed. %s",id,ex.what());
+    }
+    return -1;
+}
+
+
 NodeID pinpoint_end_trace(NodeID _id)
 {
     try
-    {
-        return do_end_trace(_id);
+    {   
+        NodeID ret = do_end_trace(_id);
+        pp_trace("#%ld pinpoint_end_trace Done!",_id);
+        return ret;
     }catch(const std::out_of_range&){
-        pp_trace(" %d not found",_id);
+        pp_trace("#%ld not found",_id);
+        return 0;
+    }catch(const std::exception &ex){
+        pp_trace("#%ld end trace failed. %s",_id,ex.what());
         return 0;
     }
 }
 
-void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value);
-void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value);
-void pinpoint_set_context(NodeID _id,const char* key,const char* value);
-const char* pinpoint_get_context(NodeID _id,const char* key);
-void pinpoint_drop_trace(NodeID _id);
-
-
-bool update_tick(int64_t timestamp);
 uint64_t pinpoint_start_time(void)
 {
     return (uint64_t)SafeSharedState::instance().getStartTime();
 }
-void catch_error(const char* msg,const char* error_filename,uint32_t error_lineno);
+
+
 void register_error_cb(log_msg_cb error_cb);
 
 int64_t generate_unique_id()
@@ -842,7 +890,7 @@ bool do_mark_current_trace_status(NodeID& _id,E_ANGET_STATUS status)
 
     if(node.p_root_node){
         TraceNode* root = node.p_root_node;
-        pp_trace("change current status, before:%d,now:%d",root->limit,status);
+        pp_trace("change current#%ld status, before:%d,now:%d",root->getId(),root->limit,status);
         root->limit = status;
         return true;
     }
@@ -882,7 +930,7 @@ static void do_add_clue(NodeID _id,const  char* key,const  char* value)
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
     node[key]=value;
-    pp_trace("key:%s value:%s",key,value);
+    pp_trace("#%ld add clue key:%s value:%s",_id,key,value);
 }
 
 static void do_add_clues(NodeID _id,const  char* key,const  char* value)
@@ -893,14 +941,14 @@ static void do_add_clues(NodeID _id,const  char* key,const  char* value)
     cvalue+=':';
     cvalue+=value;
     node[CLUSE].append(cvalue);
-    pp_trace("add clues:%s:%s",key,value);
+    pp_trace("#%ld add clues:%s:%s",_id,key,value);
 }
 
 void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value)
 {
     try
     {
-        do_add_clue(_id,key,value);
+        do_add_clues(_id,key,value);
     }
     catch(const std::out_of_range& ex)
     {
@@ -919,7 +967,7 @@ void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value)
 {
     try
     {
-        do_add_clues(_id,key,value);
+        do_add_clue(_id,key,value);
     }
     catch(const std::out_of_range& ex)
     {
@@ -984,4 +1032,36 @@ const char* pinpoint_get_context_key(NodeID _id,const char* key)
         pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
     }
     return nullptr;
+}
+
+void do_catch_error(NodeID _id,const char* msg,const char* error_filename,uint32_t error_lineno)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    TraceNode* root = node.p_root_node;
+    if(root == nullptr) throw std::runtime_error("traceNode tree is crash");
+    Json::Value eMsg;
+    eMsg["msg"] = msg;
+    eMsg["file"] = error_filename;
+    eMsg["line"] = error_lineno;
+    (*root)["ERR"] = eMsg;
+}
+
+
+void catch_error(NodeID _id,const char* msg,const char* error_filename,uint32_t error_lineno)
+{
+    try
+    {
+        do_catch_error(_id,msg,error_filename,error_lineno);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(const std::exception& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
 }
