@@ -15,52 +15,52 @@ matrix:
         - make 
         - ./bin/unittest
         
-    # - language: php
-    #   php: "7.4"
-    #   script:
-    #     - phpize
-    #     - ./configure
-    #     - make
-    #     - make test TESTS=src/PHP/tests/
+    - language: php
+      php: "7.4"
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
 
-    # - language: php
-    #   php: "7.3"
-    #   script:
-    #     - phpize
-    #     - ./configure
-    #     - make
-    #     - make test TESTS=src/PHP/tests/
-    # - language: php
-    #   php: "7.2"
-    #   script:
-    #     - phpize
-    #     - ./configure
-    #     - make
-    #     - make test TESTS=src/PHP/tests/
+    - language: php
+      php: "7.3"
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
+    - language: php
+      php: "7.2"
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
 
-    # - language: php
-    #   php: "7.1"
-    #   script:
-    #     - phpize
-    #     - ./configure
-    #     - make
-    #     - make test TESTS=src/PHP/tests/
+    - language: php
+      php: "7.1"
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
 
-    # - language: php
-    #   php: "7.0"
-    #   script:
-    #     - phpize
-    #     - ./configure
-    #     - make
-    #     - make test TESTS=src/PHP/tests/
+    - language: php
+      php: "7.0"
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests/
 
-    # - language: php
-    #   php: "5.6"
-    #   script:
-    #     - phpize
-    #     - ./configure
-    #     - make
-    #     - make test TESTS=src/PHP/tests5/    
+    - language: php
+      php: "5.6"
+      script:
+        - phpize
+        - ./configure
+        - make
+        - make test TESTS=src/PHP/tests5/    
 
     # - language: python
     #   python: "3.8"
