@@ -19,8 +19,5 @@ if(pinpoint_tracelimit() || pinpoint_tracelimit() ||pinpoint_tracelimit() || pin
     echo "pinpoint_tracelimit failed";
 }
 --EXPECTF--
-[pinpoint] [%d] [%d]agent status changed: 2 ->2 reason:checklimit pass
-[pinpoint] [%d] [%d]agent status changed: 2 ->2 reason:checklimit pass
-[pinpoint] [%d] [%d]agent status changed: 2 ->2 reason:checklimit pass
-[pinpoint] [%d] [%d]This span dropped. trace_limit:2 limit:2 tick:2
+[pinpoint] [%d] [%d]This span dropped. max_trace_limit:0 current_tick:0 offLine:0
 pass
