@@ -2,6 +2,8 @@
 #include <pcre.h>
 #include <locale.h>
 #include <regex.h>
+#include <thread>
+#include <chrono>
 #include "common.h"
 
 using namespace testing;
@@ -97,7 +99,7 @@ TEST(common,start_end_trace)
     id = pinpoint_start_trace(id);
 
     mark_current_trace_status(id,E_TRACE_PASS);
-
+    catch_error(id,"sdfasfas","fsafdsfasd",234);
     id = pinpoint_end_trace(id);
 
     id = pinpoint_end_trace(id);
@@ -137,15 +139,57 @@ TEST(common,error_checking)
 }
 
 
-// TEST(common, fetch_id_name)
-// {
-//     const char* app_name = pinpoint_app_name();
-//     const char* app_id = pinpoint_app_id();
-//     EXPECT_STREQ(app_name,"collector_blocking");
-//     EXPECT_STREQ(app_id,"collector_blocking");
-//     EXPECT_TRUE(pinpoint_start_time()==0);
-// }
+static void test_per_thread_id_odd()
+{
+    NodeID  id = pinpoint_get_per_thread_id();
+    EXPECT_EQ(id,0);
+    id = 1;
+    for(int i =1;i<10000;i++)
+    {
+        id +=2;
+        pinpoint_update_per_thread_id(id);
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        EXPECT_EQ(pinpoint_get_per_thread_id(),i*2+1);
+    }
 
+}
+
+static void test_per_thread_id_even()
+{
+    NodeID  id = pinpoint_get_per_thread_id();
+    EXPECT_EQ(id,0);
+
+    for(int i =1;i<10000;i++)
+    {
+        id +=2;
+        pinpoint_update_per_thread_id(id);
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        EXPECT_EQ(pinpoint_get_per_thread_id(),i*2);
+    }
+}
+
+TEST(common,per_threadid)
+{
+    std::thread f1(test_per_thread_id_odd);
+    std::thread f2(test_per_thread_id_even);
+    f1.join();
+    f2.join();
+}
+
+TEST(common,force_end_trace)
+{
+    NodeID id = pinpoint_start_trace(0);
+    id = pinpoint_end_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_end_trace(id);
+    id = pinpoint_end_trace(id);
+    EXPECT_NE(id,0);
+    id = pinpoint_force_end_trace(id);
+    EXPECT_EQ(id,0);
+}
 
 
 // int mymatch(char *buf)
