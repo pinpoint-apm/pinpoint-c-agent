@@ -53,85 +53,83 @@ echo pinpoint_end_trace()."\n";
 
 ?>
 --EXPECTF--
-[pinpoint] [%d] [%d]pinpoint_start start
-[pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
-[pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
-1
-[pinpoint] [%d] [%d]key:name value:ouput_234
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]pinpoint_start start
-2
-[pinpoint] [%d] [%d]key:name value:Foo
-[pinpoint] [%d] [%d]add clues:1:234,3432
-[pinpoint] [%d] [%d]add clues:2:234
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
-1
-[pinpoint] [%d] [%d]key:args value:a,$b
-[pinpoint] [%d] [%d]key:ret value:a,$b
+[pinpoint] [%d] [%d]#0 pinpoint_start start
+128
+[pinpoint] [%d] [%d]#128 add clue key:name value:ouput_234
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+127
+[pinpoint] [%d] [%d]#127 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#127 add clues:1:234,3432
+[pinpoint] [%d] [%d]#127 add clues:2:234
+[pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+126
+[pinpoint] [%d] [%d]#126 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#126 add clues:1:234,3432
+[pinpoint] [%d] [%d]#126 add clues:2:234
+[pinpoint] [%d] [%d]#126 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+125
+[pinpoint] [%d] [%d]#125 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#125 add clues:1:234,3432
+[pinpoint] [%d] [%d]#125 add clues:2:234
+[pinpoint] [%d] [%d]#125 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+124
+[pinpoint] [%d] [%d]#124 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#124 add clues:1:234,3432
+[pinpoint] [%d] [%d]#124 add clues:2:234
+[pinpoint] [%d] [%d]#124 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+123
+[pinpoint] [%d] [%d]#123 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#123 add clues:1:234,3432
+[pinpoint] [%d] [%d]#123 add clues:2:234
+[pinpoint] [%d] [%d]#123 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+122
+[pinpoint] [%d] [%d]#122 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#122 add clues:1:234,3432
+[pinpoint] [%d] [%d]#122 add clues:2:234
+[pinpoint] [%d] [%d]#122 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+121
+[pinpoint] [%d] [%d]#121 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#121 add clues:1:234,3432
+[pinpoint] [%d] [%d]#121 add clues:2:234
+[pinpoint] [%d] [%d]#121 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+120
+[pinpoint] [%d] [%d]#120 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#120 add clues:1:234,3432
+[pinpoint] [%d] [%d]#120 add clues:2:234
+[pinpoint] [%d] [%d]#120 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+119
+[pinpoint] [%d] [%d]#119 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#119 add clues:1:234,3432
+[pinpoint] [%d] [%d]#119 add clues:2:234
+[pinpoint] [%d] [%d]#119 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 pinpoint_start start
+118
+[pinpoint] [%d] [%d]#118 add clue key:name value:Foo
+[pinpoint] [%d] [%d]#118 add clues:1:234,3432
+[pinpoint] [%d] [%d]#118 add clues:2:234
+[pinpoint] [%d] [%d]#118 pinpoint_end_trace Done!
+128
+[pinpoint] [%d] [%d]#128 add clue key:args value:a,$b
+[pinpoint] [%d] [%d]#128 add clue key:ret value:a,$b
 [pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d,"args":"a,$b","calls":[{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{"E":%d,"S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"}],"name":"ouput_234","ret":"a,$b"})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
+[pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
 0

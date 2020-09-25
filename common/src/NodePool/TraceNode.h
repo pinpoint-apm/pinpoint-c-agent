@@ -193,7 +193,7 @@ private:
     {
         this->fetal_error_time = 0;
         this->start_time = 0;
-        this->limit  = 0;
+        this->limit  = E_TRACE_PASS;
     }
 
 private:

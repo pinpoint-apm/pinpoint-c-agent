@@ -15,10 +15,9 @@ pinpoint_add_clue("args",'a,$b');
 pinpoint_add_clue("ret",'a,$b');
 pinpoint_end_trace();
 --EXPECTF--
-[pinpoint] [%d] [%d]pinpoint_start start
-[pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
-[pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
-[pinpoint] [%d] [%d]agent status changed: 2 ->4 reason:drop current trace
-[pinpoint] [%d] [%d]key:args value:a,$b
-[pinpoint] [%d] [%d]key:ret value:a,$b
-[pinpoint] [%d] [%d]pinpoint_end_trace Done!
+[pinpoint] [%d] [%d]#0 pinpoint_start start
+[pinpoint] [%d] [%d]change current#128 status, before:2,now:4
+[pinpoint] [%d] [%d]#128 add clue key:args value:a,$b
+[pinpoint] [%d] [%d]#128 add clue key:ret value:a,$b
+[pinpoint] [%d] [%d]current#128 span dropped,due to TRACE_BLOCK
+[pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
