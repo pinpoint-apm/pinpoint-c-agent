@@ -826,20 +826,21 @@ NodeID pinpoint_start_trace(NodeID _id)
     return 0;
 }
 
+#if 0
 static NodeID do_force_end_trace(NodeID &id)
 {   
-    TraceNode&  node = g_node_pool.getNodeById(id);
-    TraceNode* root = node.p_root_node;
-    return do_end_trace(*root);
+
 }
+#endif
 
 int pinpoint_force_end_trace(NodeID id)
 {
     try
     {   
-        int ret = do_force_end_trace(id);
-        pp_trace("#%ld pinpoint_end_trace Done!",ret);
-        return ret;
+        while(id != 0){
+            id = pinpoint_end_trace(id);
+        }
+        return 0;
     }catch(const std::out_of_range&){
         pp_trace("#%ld not found",id);
     }catch(const std::exception &ex){
