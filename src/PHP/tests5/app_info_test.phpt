@@ -9,12 +9,8 @@ pinpoint_php.UnitTest=true
 pinpoint_php.DebugReport=true
 --FILE--
 <?php 
-var_dump(pinpoint_app_name());
-var_dump(pinpoint_app_id());
 var_dump(pinpoint_start_time());
-var_dump(pinpoint_app_id().'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id()));
+var_dump("APP".'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id()));
 --EXPECTF--
-string(18) "collector_blocking"
-string(18) "collector_blocking"
 int(%d)
-string(%d) "collector_blocking^%d^%d"
+string(%d) "APP^%d^%d"
