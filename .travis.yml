@@ -20,6 +20,7 @@ matrix:
       script:
         - phpize
         - ./configure
+        - ls build/lib
         - make
         - make test TESTS=src/PHP/tests/
 
