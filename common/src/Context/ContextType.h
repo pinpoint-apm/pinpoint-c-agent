@@ -41,6 +41,7 @@ public:
 
     virtual ctype typeIs() { throw std::logic_error("not implementation");}
     virtual std::string& asStringValue()  { throw std::logic_error("not implementation");}
+    virtual long asLongValue() { throw std::logic_error("not implementation"); }
 };
 
 
@@ -68,6 +69,28 @@ public:
 
 private:
     std::string _value;
+};
+
+
+class LongContextType: public ContextType
+{
+public:
+    LongContextType(long l):
+    l(l)
+    {}
+
+    virtual ctype typeIs() 
+    {
+        return "Long";
+    }
+
+    virtual long asLongValue()
+    {
+        return this->l;
+    }
+
+private:
+    long l;
 };
 
 } /* namespace Context */

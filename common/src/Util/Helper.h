@@ -76,6 +76,8 @@ TransConnection getConnecton();
 
 void freeConnection(TransConnection& );
 
+Json::Value merge_children(TraceNode& node);
+
 }
 
 #ifndef NDEBUG

@@ -177,7 +177,7 @@ TEST(node, node_tree)
     // std::string stdBody  = writer.write(oRoot); //Trace::node_tree_to_string(oRoot);
     std::string stdBody = Helper::node_tree_to_string(oRoot);
     free_nodes_tree(&current);
-    const char* span = "{\"calls\":[{\"calls\":[{\"calls\":[{\"calls\":[{\"calls\":[{\"name\":\"104\"}],\"name\":\"105\"}],\"name\":\"106\"},{\"calls\":[{\"calls\":[{\"calls\":[{\"name\":\"107\"}],\"name\":\"108\"}],\"name\":\"109\"}],\"name\":\"110\"},{\"name\":\"111\"},{\"name\":\"112\"}],\"name\":\"113\"},{\"name\":\"114\"}],\"name\":\"115\"},{\"calls\":[{\"calls\":[{\"calls\":[{\"calls\":[{\"name\":\"116\"}],\"name\":\"117\"}],\"name\":\"118\"},{\"calls\":[{\"calls\":[{\"calls\":[{\"name\":\"119\"}],\"name\":\"120\"}],\"name\":\"121\"}],\"name\":\"122\"},{\"name\":\"123\"},{\"name\":\"124\"}],\"name\":\"125\"},{\"name\":\"126\"}],\"name\":\"127\"}],\"name\":\"128\"}";
+    const char* span = "{\"calls\":[{\"calls\":[{\"name\":\"126\"},{\"calls\":[{\"name\":\"124\"},{\"name\":\"123\"},{\"calls\":[{\"calls\":[{\"calls\":[{\"name\":\"119\"}],\"name\":\"120\"}],\"name\":\"121\"}],\"name\":\"122\"},{\"calls\":[{\"calls\":[{\"name\":\"116\"}],\"name\":\"117\"}],\"name\":\"118\"}],\"name\":\"125\"}],\"name\":\"127\"},{\"calls\":[{\"name\":\"114\"},{\"calls\":[{\"name\":\"112\"},{\"name\":\"111\"},{\"calls\":[{\"calls\":[{\"calls\":[{\"name\":\"107\"}],\"name\":\"108\"}],\"name\":\"109\"}],\"name\":\"110\"},{\"calls\":[{\"calls\":[{\"name\":\"104\"}],\"name\":\"105\"}],\"name\":\"106\"}],\"name\":\"113\"}],\"name\":\"115\"}],\"name\":\"128\"}";
     EXPECT_STREQ(span,stdBody.c_str());
     EXPECT_EQ(g_pool.totoalNodesCount(),128);
     EXPECT_EQ(g_pool.freeNodesCount(),128);
@@ -185,3 +185,26 @@ TEST(node, node_tree)
 }
 
 #pragma GCC diagnostic pop
+
+
+TEST(node,merge_children)
+{
+    currentId = start_trace(0);
+
+        currentId = start_trace(currentId);
+        
+        currentId = end_trace(currentId);
+        currentId = start_trace(currentId);
+        currentId = end_trace(currentId);
+    currentId = end_trace(currentId);
+
+    TraceNode& current = g_pool.getNodeById(currentId);
+
+    Json::Value oRoot =  Helper::merge_node_tree(current);
+    // std::string stdBody  = writer.write(oRoot); //Trace::node_tree_to_string(oRoot);
+    std::string stdBody = Helper::node_tree_to_string(oRoot);
+    free_nodes_tree(&current);
+    std::cout<<stdBody;
+    EXPECT_STREQ(stdBody.c_str(),"{\"calls\":[{\"name\":\"127\"},{\"name\":\"126\"}],\"name\":\"128\"}");
+
+}

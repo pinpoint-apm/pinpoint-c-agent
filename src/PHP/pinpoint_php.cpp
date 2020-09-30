@@ -39,6 +39,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+//#include "php_var.h"
 #include "ext/standard/info.h"
 
 #include "php_pinpoint_php.h"
@@ -63,11 +64,10 @@ PHP_FUNCTION(pinpoint_add_clues);
 PHP_FUNCTION(pinpoint_unique_id);
 PHP_FUNCTION(pinpoint_tracelimit);
 PHP_FUNCTION(pinpoint_drop_trace);
-//
-//PHP_FUNCTION(pinpoint_app_name);
-//PHP_FUNCTION(pinpoint_app_id);
 PHP_FUNCTION(pinpoint_start_time);
-//PHP_FUNCTION(pinpoint_get_func_ref_args);
+PHP_FUNCTION(pinpoint_set_context);
+PHP_FUNCTION(pinpoint_get_context);
+PHP_FUNCTION(pinpoint_get_func_ref_args);
 
 ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
 
@@ -112,6 +112,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_add_id, 0, 0, 1)
     ZEND_ARG_INFO(0, nodeid)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_add_id_value, 0, 0, 1)
+    ZEND_ARG_INFO(0, key)
+    ZEND_ARG_INFO(0, nodeid)
+ZEND_END_ARG_INFO()
+
 /* {{{ pinpioint_php_functions[]
  *
  * Every user visible function must have an entry in pinpioint_php_functions[].
@@ -120,8 +125,11 @@ const zend_function_entry pinpoint_php_functions[] = {
         PHP_FE(pinpoint_start_trace,arginfo_add_id)
         PHP_FE(pinpoint_end_trace,arginfo_add_id)
         PHP_FE(pinpoint_unique_id,NULL)
+        PHP_FE(pinpoint_get_func_ref_args,NULL)
         PHP_FE(pinpoint_drop_trace,arginfo_add_id)
         PHP_FE(pinpoint_start_time,NULL)
+        PHP_FE(pinpoint_set_context,arginfo_add_id_key_value)
+        PHP_FE(pinpoint_get_context,arginfo_add_id_value)
         PHP_FE(pinpoint_tracelimit,arginfo_add_int)
         PHP_FE(pinpoint_add_clue,arginfo_add_id_key_value)
         PHP_FE(pinpoint_add_clues,arginfo_add_id_key_value)
@@ -172,6 +180,99 @@ PHP_FUNCTION(pinpoint_drop_trace)
     }
     mark_current_trace_status(id,E_TRACE_BLOCK);
     RETURN_TRUE;
+}
+
+
+PHP_FUNCTION(pinpoint_set_context)
+{
+    long _id = -1;
+    std::string key;
+    zval* zvalue;
+#if PHP_VERSION_ID < 70000
+    char* zkey = NULL;
+    int zkey_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &zkey, &zkey_len,&zvalue,&_id) == FAILURE)
+    {
+      zend_error(E_ERROR,"key/value required");
+      return ;
+    }
+    key = std::string(zkey,zkey_len);
+
+#else
+    zend_string* zkey;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|l", &zkey ,&zvalue,&_id) == FAILURE)
+    {
+        zend_error(E_ERROR,"key/value required");
+        return ;
+    }
+    key = std::string(zkey->val,zkey->len);
+#endif
+
+    if(_id == -1){
+        _id = pinpoint_get_per_thread_id();;
+    }
+
+    switch(Z_TYPE_P(zvalue)){
+        // case IS_LONG:
+        //     pinpoint_set_context_long(_id,key.c_str(),Z_LVAL_P(zvalue));
+//             break;
+        case IS_STRING:
+            {
+                std::string value(Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue));
+                pinpoint_set_context_key(_id,key.c_str(),value.c_str());
+            }
+            break;
+        default:
+            zend_error(E_WARNING,"value only support string");
+            return ;
+    }
+    RETURN_TRUE;
+}
+
+
+
+PHP_FUNCTION(pinpoint_get_context)
+{
+    long _id = -1;
+    std::string key;
+#if PHP_VERSION_ID < 70000
+    char* zkey = NULL;
+    int zkey_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &zkey, &zkey_len,&_id) == FAILURE)
+    {
+      zend_error(E_ERROR,"key/value required");
+      return ;
+    }
+    key = std::string(zkey,zkey_len);
+
+#else
+    zend_string* zkey;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &zkey,&_id) == FAILURE)
+    {
+        zend_error(E_ERROR,"key/value required");
+        return ;
+    }
+    key = std::string(zkey->val,zkey->len);
+#endif
+
+    if(_id == -1){
+        _id = pinpoint_get_per_thread_id();
+    }
+
+    const char* value = pinpoint_get_context_key(_id,key.c_str());
+    if(value){
+#if PHP_VERSION_ID < 70000
+        RETURN_STRING(value,1);
+#else
+        RETURN_STRING(value);
+#endif
+
+    }else{
+        RETURN_FALSE;
+    }
+
 }
 
 
@@ -312,7 +413,6 @@ PHP_FUNCTION(pinpoint_add_clues)
 }
 
 /**
- * @deprecated
  * copy from php source zend_buildin_functions.c
  *                          ZEND_FUNCTION(func_get_args)
  * disable ZVAL_DEREF(p) make it works
@@ -412,7 +512,7 @@ PHP_FUNCTION(pinpoint_tracelimit)
     zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp);
     timestamp = (timestamp == -1)?(time(NULL)):(timestamp);
 
-    if(check_tracelimit(timestamp))
+    if(check_tracelimit(timestamp) == 1)
     {
         RETURN_TRUE
     }else{

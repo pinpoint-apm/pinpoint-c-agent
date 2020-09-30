@@ -15,7 +15,7 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Plugins;
+namespace Plugins\Common;
 
 
 class InstancePlugins
@@ -35,7 +35,7 @@ class InstancePlugins
     protected function onBefore()
     {
         pinpoint_start_trace();
-        pinpoint_add_clue("name",$this->_name);
+        pinpoint_add_clue(INTERCEPTER_NAME,$this->_name);
     }
     protected function onEnd(&$ret)
     {
@@ -44,7 +44,7 @@ class InstancePlugins
 
     protected function onException($e)
     {
-        pinpoint_add_clue("EXP",$e->getMessage());
+        pinpoint_add_clue(ADD_EXCEPTION,$e->getMessage());
     }
 
     public function __call($name, $arguments)
@@ -99,7 +99,7 @@ class InstancePlugins
         $this->_instance->__wakeup();
     }
 
-    public function __toString()
+    public function __toString():string
     {
         return $this->_instance->__toString();
     }

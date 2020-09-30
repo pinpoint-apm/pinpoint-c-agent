@@ -43,13 +43,13 @@ class Foo{
         var_dump(\pinpoint_get_func_ref_args()); 
     }
 
-    public function foo(string $a,int $b,array $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
+    public function foo( $a, $b,array $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
     {
        $input = \pinpoint_get_func_ref_args();
        var_dump($input);
     }
 
-    public static function static_foo(string $a,int $b,array $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
+    public static function static_foo( $a, $b,array $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
     {
        $var =  \pinpoint_get_func_ref_args();
        var_dump($var);
@@ -169,7 +169,7 @@ array(1) {
 }
 array(1) {
   [0]=>
-  string(14) "hello eeliu-01"
+  string(6) "hello "
 }
 
 test pinpoint_get_func_ref_args call in call_user_func_array 

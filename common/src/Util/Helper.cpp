@@ -43,21 +43,30 @@ std::string node_tree_to_string(Json::Value &value)
     return std::move(_writer.write(value));
 }
 
+/**
+ * @brief  as p_brother_node is a reverser list
+ * 
+ * @param parents 
+ * @param head 
+ */
+static void reverse_node_list(Json::Value& parents,TraceNode* head)
+{
+    if(head == nullptr) return ;
+        
+    if(head->p_brother_node){
+        reverse_node_list(parents,head->p_brother_node);
+    }
+    parents.append(merge_children(*head));
+}
 
-static Json::Value merge_children(TraceNode& node)
+Json::Value merge_children(TraceNode& node)
 {
     Json::Value& value = node.getValue();
 
     if(! node.isLeaf())
     {
         TraceNode * pstart = node.p_child_head;
-        while (pstart)
-        {
-            /* code */
-            value["calls"].append(merge_children(*pstart));
-            pstart = pstart->p_brother_node;
-        }
-
+        reverse_node_list(value["calls"],pstart);
     }
 
     return std::move(value);  

@@ -158,6 +158,19 @@ void pinpoint_set_context_key(NodeID _id,const char* key,const char* value);
  * @return
  */
 const char* pinpoint_get_context_key(NodeID _id,const char* key);
+
+
+void pinpoint_set_context_long(NodeID _id,const char* key,long);
+
+/**
+ * @brief the value is a long type
+ * 
+ * @param _id  node id
+ * @param key  string
+ * @return int 1: failed
+ *              0: success
+ */
+int pinpoint_get_context_long(NodeID _id,const char* key,long*);
 /**
  * if tracelimit enable, check current trace state,
  * @param timestamp
