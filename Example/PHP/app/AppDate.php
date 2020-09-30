@@ -7,7 +7,7 @@ namespace app;
 class AppDate
 {
     static function outputDate(){
-        echo date("Y/m/d")."<br>";
+        echo date("l dS \of F Y h:i:s A")."<br>";
         echo getenv('REMOTE_ADDR')."<br>";
         echo getenv('HTTP_HOST')."<br>";
         echo getenv('HTTP_X_FORWARDED_FOR')."<br>";

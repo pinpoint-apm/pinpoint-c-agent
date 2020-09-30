@@ -1,34 +1,36 @@
 <?php
 
-namespace Plugins;
+namespace Plugins\AutoGen\GuzzleHttp;
 
-use Plugins\Candy;
+use Plugins\Common\Candy;
 
-///@hook:GuzzleHttp\Client::request
+
+
+/**
+ *@hook:GuzzleHttp\ClientTrait::get
+ *@hook:GuzzleHttp\ClientTrait::post
+ *@hook:GuzzleHttp\ClientTrait::patch
+ */
 class GuzzlePlugin extends Candy
 {
-    ///@hook:GuzzleHttp\Psr7\Request::__construct
     function onBefore()
     {
-//        echo 'GuzzleHttp\Psr7\Request';
-        if(strpos($this->apId, "Request::__construct") !== false){
-            pinpoint_add_clue(DESTINATION,$this->getHostFromURL($this->args[1]));
-            pinpoint_add_clues(HTTP_URL,$this->args[1]);
-            pinpoint_add_clue(SERVER_TYPE,PINPOINT_PHP_REMOTE);
+        pinpoint_add_clue(DESTINATION,$this->getHostFromURL($this->args[0]));
+        pinpoint_add_clues(HTTP_URL,$this->args[0]);
+        pinpoint_add_clue(SERVER_TYPE,PINPOINT_PHP_REMOTE);
 
-            $n_headers =[] ;
-            if( !empty($this->args[2]))
-            {
-                $n_headers = $this->args[2];
-            }
-
-            $n_headers = array_merge($n_headers,$this->getNextSpanHeaders($this->args[1]));
-            $this->args[2] = $n_headers;
+        $n_headers =[] ;
+        if( is_array($this->args[1]) && array_key_exists('headers',$this->args[1]))
+        {
+            $n_headers = $this->args[1]['headers'];
         }
+        $n_headers = array_merge($n_headers,$this->getNextSpanHeaders($this->args[0]));
+        $this->args[1]['headers'] = $n_headers;
     }
 
     function onEnd(&$ret)
     {
+//        $ret->getStatusCode();
         pinpoint_add_clues(HTTP_STATUS_CODE,(string)($ret->getStatusCode()));
     }
 
@@ -46,14 +48,15 @@ class GuzzlePlugin extends Candy
             $retUrl.=$urlAr['host'];
         }
 
-//        if(isset($urlAr['path'])){
-//            $retUrl.=$urlAr['path'];
-//        }
-
         if(isset($urlAr['port']))
         {
             $retUrl .= ":".$urlAr['port'];
         }
+
+//        if(isset($urlAr['path'])){
+//            $retUrl.=$urlAr['path'];
+//        }
+//
         return $retUrl;
     }
 

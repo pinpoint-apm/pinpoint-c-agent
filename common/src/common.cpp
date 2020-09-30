@@ -986,13 +986,13 @@ void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value)
 static inline void do_set_context_key(NodeID _id,const char* key,const char* value)
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
-    node.setStrContext(key,value);
+    node.p_root_node->setStrContext(key,value);
 }
 
 static const char* do_get_context_key(NodeID _id,const char* key)
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
-    PContextType& pValue = node.getContextByKey(key);
+    PContextType& pValue = node.p_root_node->getContextByKey(key);
     return pValue->asStringValue().c_str();
 }
 
@@ -1013,6 +1013,60 @@ void pinpoint_set_context_key(NodeID _id,const char* key,const char* value)
     {
         pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
     }
+}
+
+static void do_set_long_key(NodeID _id,const char* key,long l)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    node.p_root_node->setLongContext(key,l);
+}
+
+void pinpoint_set_context_long(NodeID _id,const char* key,long l)
+{
+    try
+    {
+        do_set_long_key(_id,key,l);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(const std::exception&ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+}
+
+static int do_get_long_key(NodeID _id,const char* key,long* l)
+{
+    TraceNode& node = g_node_pool.getNodeById(_id);
+    PContextType& pValue = node.p_root_node->getContextByKey(key);
+    *l = pValue->asLongValue();
+    return 0;
+}
+
+int pinpoint_get_context_long(NodeID _id,const char* key,long* l)
+{
+    try
+    {
+        do_get_long_key(_id,key,l);
+        return 0;
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }catch(const std::exception&ex)
+    {
+        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+    }
+    return 1;
 }
 
 const char* pinpoint_get_context_key(NodeID _id,const char* key)

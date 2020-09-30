@@ -93,6 +93,7 @@ namespace NodePool{
 
 using Context::ContextType;
 using Context::StringContextType;
+using Context::LongContextType;
 
 typedef std::shared_ptr<ContextType> PContextType;
 class TraceNode
@@ -157,6 +158,12 @@ public:
         this->_context[key] = context;
         // std::string& value =  this->_context[key]->asStringValue();
         // pp_trace("value %s",value.c_str());
+    }
+
+    void setLongContext(const char* key,long l)
+    {
+        PContextType context(new LongContextType(l));
+        this->_context[key] = context;
     }
 
 public:

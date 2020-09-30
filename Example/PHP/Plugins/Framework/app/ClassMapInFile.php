@@ -15,9 +15,9 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Plugins;
+namespace Plugins\Framework\app;
 use pinpoint\Common\AopClassMap;
-
+use Plugins\PerRequestPlugins;
 class ClassMapInFile extends AopClassMap
 {
     private $mustHoldClasses = ['app\AccessRemote'=>null,'app\Proxied_AccessRemote'=>null,'Plugins\PerRequestPlugins'=>null];
@@ -41,22 +41,6 @@ class ClassMapInFile extends AopClassMap
             }
         }
         return $file;
-
-//        if(!PerRequestPlugins::instance()->traceLimit())
-//        {
-//            return parent::findFile($classFullName);
-//        }
-//
-//        if (array_key_exists($classFullName ,$this->mustHoldClasses) == 1)
-//        {
-//            if(PerRequestPlugins::instance()->traceLimit() && )
-//
-//            return parent::findFile($classFullName);
-//        }else {
-//            echo "reject".$classFullName.'<br>';
-//            return null;
-//        }
     }
 
 }
-require __DIR__ . '/PerRequestPlugins.php';
