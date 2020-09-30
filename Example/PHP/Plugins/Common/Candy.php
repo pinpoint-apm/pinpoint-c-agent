@@ -15,21 +15,41 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Plugins;
-use Plugins\Candy;
+/**
+ * User: eeliu
+ * Date: 1/4/19
+ * Time: 3:23 PM
+ */
 
-class FooTestPlugin extends Candy
+namespace Plugins\Common;
+require_once "PluginsDefines.php";
+
+abstract class Candy
 {
-    ///@hook:app\Foo::foo_p1
-    public function onBefore(){
-        echo " call onBefore ".__METHOD__."\n";
+    protected $apId;
+    protected $who;
+    protected $args;
+    protected $ret=null;
+
+    public function __construct($apId,$who,&...$args)
+    {
+        /// todo start_this_aspect_trace
+        $this->apId = $apId;
+        $this->who =  $who;
+        $this->args = &$args;
+
+        pinpoint_start_trace();
+        pinpoint_add_clue(INTERCEPTER_NAME,$apId);
     }
 
-    public function onEnd(&$ret){
-        throw new \Exception("shouldn't call");
+    public function __destruct()
+    {
+        pinpoint_end_trace();
     }
 
-    public function onException($e){
-        throw new \Exception("shouldn't call");
-    }
+    abstract function onBefore();
+
+    abstract function onEnd(&$ret);
+
+    abstract function onException($e);
 }

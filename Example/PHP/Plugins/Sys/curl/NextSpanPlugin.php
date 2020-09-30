@@ -15,20 +15,13 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Plugins;
+namespace Plugins\Sys\curl;
 
-use Plugins\Candy;
+use Plugins\Common\Candy;
 use Plugins\PerRequestPlugins;
 
-///@hook:app\AccessRemote::\curl_setopt
-///@hook:app\AccessRemote::\curl_exec
-///@hook:app\AccessRemote::\curl_close
 class NextSpanPlugin extends Candy
 {
-    /**
-     * hook CURLOPT_HTTPHEADER
-     * @param $ch
-     */
     private function handleHttpHeader($ch,&$headers)
     {
         if(PerRequestPlugins::instance()->traceLimit()){
@@ -50,7 +43,7 @@ class NextSpanPlugin extends Candy
     }
 
     /**
-     * Fix the bug when user not set  CURLOPT_URL.
+     * Fix the bug when user not set  CURLOPT_HTTPHEADER.
      * @param $ch
      */
     private function handleUrl($ch,$url)
@@ -107,8 +100,6 @@ class NextSpanPlugin extends Candy
             pinpoint_add_clues(HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
             pinpoint_add_clues(HTTP_STATUS_CODE,curl_getinfo($ch,CURLINFO_HTTP_CODE));
 
-            //todo http io , while curl not support get the time usage
-            //pinpoint_add_clues(HTTP_IO,sprintf("11:[%d,%d,%d,%d]",);
         }
     }
 

@@ -15,23 +15,22 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Plugins;
-use Plugins\Candy;
-use Plugins\Generator;
+namespace Plugins\Common;
 
-///@hook:app\TestGenerator::generator
-class GeneratorPlugin extends Candy
+class CommonPlugin extends Candy
 {
+    ///@hook:app\DBcontrol::connectDb
     public function onBefore(){
         pinpoint_add_clue("stp",PHP_METHOD);
         pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
     }
+
+    ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
     public function onEnd(&$ret){
-        if (isset($ret)){
-            $origin_state = $ret;
-            $ret = new Generator($origin_state);
-        }
+        pinpoint_add_clues(PHP_RETURN,print_r($ret,true));
     }
+
+    ///@hook:app\DBcontrol::getData2
     public function onException($e){
         pinpoint_add_clue("EXP",$e->getMessage());
     }

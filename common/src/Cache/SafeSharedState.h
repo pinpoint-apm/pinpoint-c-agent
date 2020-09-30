@@ -64,16 +64,6 @@ public:
     }
 
 
-    // void markOFFLine()
-    // {
-    //     this->_global_state->state |= E_OFFLINE;
-    // }
-
-    // void markONLine()
-    // {
-    //     this->_global_state->state &= ~E_OFFLINE;
-    // }
-
     bool checkTraceLimit(int64_t timestamp);
 
     void updateStartTime(std::time_t startTime)
@@ -102,10 +92,7 @@ public:
 
 private:
 
-    SafeSharedState()
-    {
-        this->_global_state = (SharedState*)fetch_shared_obj_addr();
-    }
+    SafeSharedState();
 
     ~SafeSharedState(){
         this->_global_state = nullptr;

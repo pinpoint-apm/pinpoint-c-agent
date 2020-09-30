@@ -27,13 +27,18 @@ bool SafeSharedState::checkTraceLimit(int64_t timestamp)
 {
     time_t ts = (timestamp != -1) ?(timestamp) :(std::time(NULL));
     
+    if(global_agent_info.trace_limit == -1)
+    {
+        return false;
+    }
+
     if( this->_global_state->timestamp != ts )
     {
         this->_global_state->timestamp = ts;
         this->_global_state->tick = 0 ;
         __sync_synchronize();
     }
-    else if(this->_global_state->tick >= this->_global_state->maxtracelimit)
+    else if(this->_global_state->tick >= global_agent_info.trace_limit)
     {
         goto BLOCK;
     }else if(this->isReady()){
@@ -44,8 +49,15 @@ bool SafeSharedState::checkTraceLimit(int64_t timestamp)
     }
     return false;
 BLOCK:
-    pp_trace("This span dropped. max_trace_limit:%d current_tick:%d offLine:%d",this->_global_state->maxtracelimit,
+    pp_trace("This span dropped. max_trace_limit:%d current_tick:%d offLine:%d",global_agent_info.trace_limit,
         this->_global_state->tick,this->isReady()?(1):(0));
     return true;
 }
+
+
+SafeSharedState::SafeSharedState()
+{
+    this->_global_state = (SharedState*)fetch_shared_obj_addr();
+}
+
 } /* namespace Cache */
