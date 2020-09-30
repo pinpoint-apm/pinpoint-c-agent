@@ -125,6 +125,11 @@ TEST(common,context_check)
     str.clear();
     EXPECT_STREQ(pinpoint_get_context_key(id,"adfadf23"),"fadfaffadf35486we32");
     EXPECT_STREQ(pinpoint_get_context_key(id,"adfadf"),"fadfaffadf");
+
+    pinpoint_set_context_long(id,"1024",1024);
+    long value ;
+    EXPECT_EQ(pinpoint_get_context_long(id,"1024",&value),0);
+    EXPECT_EQ(value,1024);
     pinpoint_end_trace(id);
 }
 

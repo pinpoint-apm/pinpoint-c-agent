@@ -16,6 +16,7 @@
 #-------------------------------------------------------------------------------
 
 
+
 define('PHP_ARGS',-1);
 define('PHP_RETURN',14);
 define('PROXY_HTTP_HEADER',300);
@@ -37,16 +38,15 @@ define("PHP_METHOD","1501");
 define("PHP","1500");
 define("MYSQL","2101");
 define("REDIS","8200");
-define("MONGODB","2650");
-define("MONGODB_EXE_QUERY","2651");
 define("REDIS_REDISSON","8203");
 define("REDIS_REDISSON_INTERNAL","8204");
 define("MEMCACHED","8050");
 define("PINPOINT_PHP_REMOTE",9700);
 define("NGINX_PROXY","Pinpoint-ProxyNginx");
 define("APACHE_PROXY","HTTP_PINPOINT_PROXYAPACHE");
-define("SAMPLED","Pinpoint-Sampled");
+define("SAMPLED","HTTP_PINPOINT_SAMPLED");
+define("SERVER_TYPE","stp");
+define("NEXT_SPAN_ID",'nsid');
 define("DESTINATION","dst");
 define("INTERCEPTER_NAME","name");
-define("SERVER_TYPE","stp");
-define("EXCEPTION","EXP");
+define("ADD_EXCEPTION","EXP");
