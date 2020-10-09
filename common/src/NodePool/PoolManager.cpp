@@ -55,15 +55,14 @@ void PoolManager::freeNode(NodeID id)
 {
     id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
-    std::set<NodeID>::iterator it = this->_aliveNodeSet.find(id);
-    if(it ==  this->_aliveNodeSet.end()){
+    if(this->_aliveNodeSet[id] == false){
         pp_trace("%ld not alive !!!",id);
         #ifndef NDEBUG
             throw std::runtime_error("input is invalid");
         #endif
         return ;
     }
-    this->_aliveNodeSet.erase(it);
+    this->_aliveNodeSet[id] = false;
     
     this->_freeNodeList.push(id);
 }
@@ -89,7 +88,7 @@ TraceNode& PoolManager::getNode()
     // as it holds a _lock, so no more _freeNodeList is empty
     NodeID id = this->_freeNodeList.top();
     this->_freeNodeList.pop();
-    this->_aliveNodeSet.insert(id);
+    this->_aliveNodeSet[id] = true;
     return this->nodeIndexVec[id/CELL_SIZE][id%CELL_SIZE].reset(id+1);
 }
 
@@ -97,14 +96,17 @@ void PoolManager::expandOnce()
 {        
     ADDTRACE();
     pp_trace("Node pool expanding self! Old size:%ld",this->nodeIndexVec.size()*CELL_SIZE);
+    // append new nodes into nodeIndexVec
     this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
-
+    // append new bitflag into aliveNodeSet
+    this->_aliveNodeSet.insert(this->_aliveNodeSet.end(),this->_emptyAliveSet.begin(),this->_emptyAliveSet.end());
     for( NodeID id = this->maxId ; id < (this->maxId + CELL_SIZE) ;id++)
     {
         this->_freeNodeList.push(id);
     }
     this->maxId += CELL_SIZE;
     pp_trace("Node pool expanding is done! news size:%ld",this->nodeIndexVec.size()*CELL_SIZE);
+    assert(this->nodeIndexVec.size()*CELL_SIZE ==this->_aliveNodeSet.size());
 }
 
 
