@@ -58,6 +58,12 @@ public:
     }
 
     PoolManager():maxId(0){
+        this->_emptyAliveSet.reserve(CELL_SIZE);
+        for(int i =0;i<CELL_SIZE;i++)
+        {
+            this->_emptyAliveSet.push_back(false);
+        }
+
         this->expandOnce();
     }
     virtual ~PoolManager(){}
@@ -65,14 +71,17 @@ public:
 private:
     inline bool nodeIsAlive(NodeID id)
     {
-        return this->_aliveNodeSet.find(id) !=  this->_aliveNodeSet.end();
+
+        return this->_aliveNodeSet[id];
     }
 
     void expandOnce();
 
 private:
     std::mutex _lock;
-    std::set<NodeID> _aliveNodeSet;
+    // std::set<NodeID> _aliveNodeSet;
+    std::vector<bool> _aliveNodeSet;
+    std::vector<bool> _emptyAliveSet;
     NodeID maxId;
     std::stack<NodeID> _freeNodeList;
     static const int CELL_SIZE = 128;
