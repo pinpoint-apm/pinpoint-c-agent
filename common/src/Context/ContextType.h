@@ -52,12 +52,12 @@ public:
     {
     }
 
-    virtual ctype typeIs() 
+    virtual ctype typeIs() override
     {
         return "String";
     }
 
-    virtual std::string& asStringValue()
+    virtual std::string& asStringValue() override
     {
         return this->_value;
     }
@@ -79,12 +79,12 @@ public:
     l(l)
     {}
 
-    virtual ctype typeIs() 
+    virtual ctype typeIs() override
     {
         return "Long";
     }
 
-    virtual long asLongValue()
+    virtual long asLongValue() override
     {
         return this->l;
     }
