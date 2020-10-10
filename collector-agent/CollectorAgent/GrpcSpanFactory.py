@@ -162,12 +162,12 @@ class GrpcSpanFactory(SpanFactory):
                 id, value = annotation.split(':', 1)
                 ann = PAnnotation(key=int(id), value=PAnnotationValue(stringValue=value))
                 spanEv.annotation.append(ann)
-            # todo SQL not support cache bindValue
-            if 'SQL' in stackMap:
-                id = self.agent.updateSqlMeta(stackMap['SQL'])
-                sqlValue = PIntStringStringValue(intValue=id)
-                ann = PAnnotation(key=SQL_ID, value=PAnnotationValue(intStringStringValue=sqlValue))
-                spanEv.annotation.append(ann)
+        # todo SQL not support cache bindValue
+        if 'SQL' in stackMap:
+            id = self.agent.updateSqlMeta(stackMap['SQL'])
+            sqlValue = PIntStringStringValue(intValue=id)
+            ann = PAnnotation(key=SQL_ID, value=PAnnotationValue(intStringStringValue=sqlValue))
+            spanEv.annotation.append(ann)
 
         return spanEv
 
