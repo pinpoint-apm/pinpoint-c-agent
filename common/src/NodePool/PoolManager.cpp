@@ -69,6 +69,10 @@ void PoolManager::freeNode(NodeID id)
 
 TraceNode& PoolManager::getNodeById(NodeID id)
 {
+    if(id == 0){
+        throw std::out_of_range("id should not be 0");
+    }
+
     id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
 
