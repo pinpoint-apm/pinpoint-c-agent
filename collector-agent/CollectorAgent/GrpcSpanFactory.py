@@ -90,6 +90,13 @@ class GrpcSpanFactory(SpanFactory):
             tSpan.exceptionInfo.intValue = id
             tSpan.exceptionInfo.stringValue.CopyFrom(value)
 
+        if 'EXP' in stackMap:
+            id = self.agent.updateStringMeta('EXP')
+            value = StringValue(value=stackMap['EXP'])
+            tSpan.exceptionInfo.intValue = id
+            tSpan.exceptionInfo.stringValue.CopyFrom(value)
+
+
         if 'clues' in stackMap:
             for annotation in stackMap['clues']:  # list
                 id, value = annotation.split(':', 1)
