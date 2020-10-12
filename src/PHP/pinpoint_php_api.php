@@ -1,5 +1,5 @@
 <?php
-
+define("PINPOINT_ROOT_LOC",1);
 /**
  * start trace,if callstack is empty, creat a span. Otherwise, create a span event
  */
