@@ -86,8 +86,15 @@ typedef enum {
     E_TRACE_PASS =0x2,
     E_TRACE_BLOCK =0x4,
     E_READY = 0x8
-}E_ANGET_STATUS;
+}E_AGENT_STATUS;
 
+/**
+ * @brief at present only root checking
+ */
+typedef enum {
+    E_CURRENT_LOC=0x0,
+    E_ROOT_LOC=0x1
+}E_NODE_LOC;
 /**
  *pinpoint_start_trace
  *pinpoint_end_trace
@@ -139,13 +146,13 @@ int pinpoint_force_end_trace(NodeID);
  * @param key must be a string
  * @param value key must be a string
  */
-void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value);
+void pinpoint_add_clues(NodeID _id,const char* key,const  char* value,E_NODE_LOC flag);
 /**
  * pinpoint_add_clues, add  a key-value into span. span[key]=value
  * @param key must be a string
  * @param value key must be a string
  */
-void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value);
+void pinpoint_add_clue(NodeID _id,const char* key,const  char* value,E_NODE_LOC flag);
 /**
  *  add a key value into current trace. IF the trace is end, all data(key-value) will be free
  * @param key
