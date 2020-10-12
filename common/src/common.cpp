@@ -261,7 +261,7 @@ BLOCK:
         this->root["ERR"] = eMsg;
     }
 
-    inline void setLimit(E_ANGET_STATUS status,const char* reason)
+    inline void setLimit(E_AGENT_STATUS status,const char* reason)
     {
         pp_trace("agent status changed: %d ->%d reason:%s",this->limit ,status,reason);
         this->limit = status;
@@ -885,7 +885,7 @@ void reset_unique_id(void)
     return SafeSharedState::instance().resetUniqueId();
 }
 
-bool do_mark_current_trace_status(NodeID& _id,E_ANGET_STATUS status) 
+bool do_mark_current_trace_status(NodeID& _id,E_AGENT_STATUS status) 
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
 
@@ -905,7 +905,7 @@ int mark_current_trace_status(NodeID _id,int status)
 {
     try
     {
-        return do_mark_current_trace_status(_id,(E_ANGET_STATUS)status)?(0):(1);
+        return do_mark_current_trace_status(_id,(E_AGENT_STATUS)status)?(0):(1);
     }
     catch(const std::out_of_range& ex)
     {
@@ -927,16 +927,28 @@ int check_tracelimit(int64_t timestamp)
     return SafeSharedState::instance().checkTraceLimit(timestamp)?(1):(0);
 }
 
-static void do_add_clue(NodeID _id,const  char* key,const  char* value)
+static inline TraceNode& parse_flag(NodeID _id,E_NODE_LOC flag)
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
+    if(flag == E_ROOT_LOC){
+        assert(node.p_root_node);
+        return *node.p_root_node;
+    }else{
+        return node;
+    }
+}
+
+
+static void do_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
+{
+    TraceNode& node = parse_flag(_id,flag);
     node[key]=value;
     pp_trace("#%ld add clue key:%s value:%s",_id,key,value);
 }
 
-static void do_add_clues(NodeID _id,const  char* key,const  char* value)
+static void do_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
+    TraceNode& node = parse_flag(_id,flag);
     std::string cvalue ="";
     cvalue+=key;
     cvalue+=':';
@@ -945,11 +957,11 @@ static void do_add_clues(NodeID _id,const  char* key,const  char* value)
     pp_trace("#%ld add clues:%s:%s",_id,key,value);
 }
 
-void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value)
+void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
 {
     try
     {
-        do_add_clues(_id,key,value);
+        do_add_clues(_id,key,value,flag);
     }
     catch(const std::out_of_range& ex)
     {
@@ -964,11 +976,11 @@ void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value)
     }
 }
 
-void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value)
+void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
 {
     try
     {
-        do_add_clue(_id,key,value);
+        do_add_clue(_id,key,value,flag);
     }
     catch(const std::out_of_range& ex)
     {

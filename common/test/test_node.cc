@@ -125,6 +125,7 @@ TEST(node, node_tree)
                                 currentId = end_trace(currentId);
                             currentId = end_trace(currentId);
                         currentId = end_trace(currentId);
+                        // pinpoint_add_clue(currentId,"global","test",E_ROOT_LOC);
                     currentId = end_trace(currentId);
 
                     currentId = start_trace(currentId);
