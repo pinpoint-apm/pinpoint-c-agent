@@ -37,6 +37,12 @@ typedef std::unique_ptr<TransLayer> TransConnection;
 class SpanConnectionPool
 {
 public:
+    SpanConnectionPool(SpanConnectionPool&) =delete;
+    SpanConnectionPool& operator=(const SpanConnectionPool&) =delete;
+    SpanConnectionPool(SpanConnectionPool&&) =delete;
+    SpanConnectionPool& operator=(SpanConnectionPool&&) =delete;
+
+public:
     SpanConnectionPool(const char* co_host,uint32_t w_timeout_ms);
     //for delay initialization
     SpanConnectionPool(){
@@ -73,9 +79,6 @@ public:
         this->_cPool.push(std::move(con));
     }
 
-    SpanConnectionPool(const SpanConnectionPool&) = delete;
-    SpanConnectionPool& operator=(const SpanConnectionPool&) = delete;
-    SpanConnectionPool& operator=(SpanConnectionPool&&) = delete;
 private:
     void _handleMsgFromCollector(int type,const char* buf,size_t len);
     
