@@ -1,0 +1,13 @@
+{
+
+    "autoload": {
+        "psr-4": {
+
+            "Plugins\\":"Plugins/"
+        }
+    },
+    "require": {
+
+        "pinpoint-apm/pinpoint-php-aop": "dev-test_np_hack"
+    }
+}
