@@ -11,12 +11,11 @@
         "psr-4": {
             "app\\":"app/",
             "app1\\": "app1",
-            "example\\": "example",
             "Plugins\\": "Plugins/"
         }
     },
     "require": {
-        "naver/pinpoint-php-aop": "dev-test_np_hack",
+        "pinpoint-apm/pinpoint-php-aop": "dev-test_np_hack",
         "guzzlehttp/guzzle": "~6.0",
         "mongodb/mongodb":"~1.6.0"
     }
