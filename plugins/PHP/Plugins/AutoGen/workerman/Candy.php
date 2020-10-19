@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 10/15/20
- * Time: 11:31 AM
- */
 
 namespace Plugins\AutoGen\workerman;
 
