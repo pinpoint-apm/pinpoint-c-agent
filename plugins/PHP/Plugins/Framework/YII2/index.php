@@ -9,19 +9,18 @@ require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php';
 
 $config = require __DIR__ . '/../config/web.php';
 ///////////////Setting of pinpoint php////////////////////
-//Cached class
 define('AOP_CACHE_DIR',__DIR__.'/../Cache/');
-// where to load pinpoint plugins
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
-
-define('APPLICATION_NAME','APP-yii');
-define('APPLICATION_ID','app-yii');
-//define('PINPOINT_USE_CACHE','YES');
+define('APPLICATION_NAME','your-name');
+define('APPLICATION_ID','your-name');
+define('PINPOINT_USE_CACHE','YES');
+define('PP_REQ_PLUGINS', '\Plugins\Framework\YII2\Yii2ReqPlugins');
 // 
 /**
  * unregister Yii class loader
  * wrapper with PinpointYiiClassLoader
  */
+
 function pinpoint_user_class_loader_hook()
 {
     $loaders = spl_autoload_functions();
@@ -36,7 +35,7 @@ function pinpoint_user_class_loader_hook()
 
 pinpoint_user_class_loader_hook();
 
-
+/////////////////////////////////////////////////////////
 $app = new yii\web\Application($config);
 require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
 
