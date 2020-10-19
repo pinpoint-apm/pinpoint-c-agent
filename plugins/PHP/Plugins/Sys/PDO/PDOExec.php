@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 8/17/20
- * Time: 3:57 PM
- */
 
 namespace Plugins\Sys\PDO;
 
