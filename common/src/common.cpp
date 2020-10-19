@@ -965,14 +965,14 @@ void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_LO
     }
     catch(const std::out_of_range& ex)
     {
-        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%ld failed.Reason %s,paremters:%s:%s",__func__,_id,ex.what(),key,value);
     }
     catch(const std::runtime_error& ex)
     {
-        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%ld failed.Reason %s,paremters:%s:%s",__func__,_id,ex.what(),key,value);
     }catch(...)
     {
-        pp_trace(" %s#%ld failed with unkonw reason",__func__,_id);
+        pp_trace(" %s#%ld failed.Reason: unknown reason,paremters:%s:%s",__func__,_id,key,value);
     }
 }
 
@@ -984,14 +984,14 @@ void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LOC
     }
     catch(const std::out_of_range& ex)
     {
-        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%ld failed. Reason: %s,paremters:%s:%s",__func__,_id,ex.what(),key,value);
     }
     catch(const std::runtime_error& ex)
     {
-        pp_trace(" %s#%ld failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%ld failed. Reason: %s,paremters:%s:%s",__func__,_id,ex.what(),key,value);
     }catch(...)
     {
-        pp_trace(" %s#%ld failed with unkonw reason",__func__,_id);
+        pp_trace(" %s#%ld failed. Reason: unknow reason,paremters:%s:%s",__func__,_id,key,value);
     }
 }
 
