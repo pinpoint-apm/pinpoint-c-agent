@@ -9,12 +9,12 @@ class PDOExec extends Candy
 
     function onBefore()
     {
-        pinpoint_add_clues(PHP_ARGS, sprintf("sql:%s",$this->args[0][0]));
+        pinpoint_add_clues(PP_PHP_ARGS, sprintf("sql:%s",$this->args[0][0]));
     }
 
     function onEnd(&$ret)
     {
-        pinpoint_add_clues(PHP_RETURN,"$ret");
+        pinpoint_add_clues(PP_PHP_RETURN,"$ret");
     }
 
     function onException($e)

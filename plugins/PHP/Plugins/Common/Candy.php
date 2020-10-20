@@ -38,7 +38,7 @@ abstract class Candy
         $this->who =  $who;
         $this->args = &$args;
         pinpoint_start_trace();
-        pinpoint_add_clue(INTERCEPTER_NAME,$apId);
+        pinpoint_add_clue(PP_INTERCEPTER_NAME,$apId);
     }
 
     public function __destruct()

@@ -35,7 +35,7 @@ class InstancePlugins
     protected function onBefore()
     {
         pinpoint_start_trace();
-        pinpoint_add_clue(INTERCEPTER_NAME,$this->_name);
+        pinpoint_add_clue(PP_INTERCEPTER_NAME,$this->_name);
     }
     protected function onEnd(&$ret)
     {
