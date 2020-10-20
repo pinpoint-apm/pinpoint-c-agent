@@ -37,7 +37,7 @@ class ProfilerPDOStatement extends \PDOStatement
     {
 
         pinpoint_start_trace();
-        pinpoint_add_clue(INTERCEPTER_NAME,$this->name);
+        pinpoint_add_clue(PP_INTERCEPTER_NAME,$this->name);
 
     }
 
@@ -48,7 +48,7 @@ class ProfilerPDOStatement extends \PDOStatement
 
     protected function onException($e)
     {
-        pinpoint_add_clue(ADD_EXCEPTION,$e->getMessage());
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
     }
 
 

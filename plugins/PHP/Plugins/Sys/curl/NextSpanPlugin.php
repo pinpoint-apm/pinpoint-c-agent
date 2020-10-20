@@ -84,7 +84,7 @@ class NextSpanPlugin extends Candy
                 $this->handleUrl($ch,$argv[2]);
             }
 
-            pinpoint_add_clues(PHP_ARGS,"...");
+            pinpoint_add_clues(PP_PHP_ARGS,"...");
 
         }
     }

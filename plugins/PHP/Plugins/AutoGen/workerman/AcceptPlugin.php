@@ -7,7 +7,7 @@
  */
 
 namespace Plugins\AutoGen\workerman;
-require_once __DIR__."/../../__init__.php";
+require_once __DIR__ . "/../../__init__.php";
 use Plugins\Util\Trace;
 
 /**
@@ -88,7 +88,7 @@ class AcceptPlugin
         pinpoint_add_clue("client",$connection->getRemoteIp(),$id);
         pinpoint_add_clue("server",$header['host'],$id);
         pinpoint_add_clue("stp", PHP,$id);
-        pinpoint_add_clue(INTERCEPTER_NAME, "workerman-http",$id);
+        pinpoint_add_clue(PP_INTERCEPTER_NAME, "workerman-http",$id);
         $this->app_name = APPLICATION_NAME;
         pinpoint_add_clue("appname", $this->app_name,$id);
         pinpoint_set_context("appname",$this->app_name,$id);
