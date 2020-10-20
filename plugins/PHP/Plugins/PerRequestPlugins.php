@@ -61,7 +61,7 @@ class PerRequestPlugins
         pinpoint_add_clue("client", $_SERVER["REMOTE_ADDR"]);
         pinpoint_add_clue("server", $_SERVER["HTTP_HOST"]);
         pinpoint_add_clue("stp", PHP);
-        pinpoint_add_clue(INTERCEPTER_NAME, "PHP Request");
+        pinpoint_add_clue(PP_INTERCEPTER_NAME, "PHP Request");
 
         if (defined('APPLICATION_NAME')) {
             if($_SERVER["HTTP_HOST"] == "php.backend.com"){

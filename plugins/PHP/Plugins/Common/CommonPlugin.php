@@ -27,7 +27,7 @@ class CommonPlugin extends Candy
 
     ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
     public function onEnd(&$ret){
-        pinpoint_add_clues(PHP_RETURN,print_r($ret,true));
+        pinpoint_add_clues(PP_PHP_RETURN,print_r($ret,true));
     }
 
     ///@hook:app\DBcontrol::getData2

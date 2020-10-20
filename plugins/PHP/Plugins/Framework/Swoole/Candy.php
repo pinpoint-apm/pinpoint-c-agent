@@ -39,7 +39,7 @@ abstract class Candy
         $this->args = &$args;
         $this->id = pinpoint_start_trace(IDContext::get());
         IDContext::set($this->id);
-        pinpoint_add_clue(INTERCEPTER_NAME,$apId,$this->id);
+        pinpoint_add_clue(PP_INTERCEPTER_NAME,$apId,$this->id);
     }
 
     public function __destruct()
