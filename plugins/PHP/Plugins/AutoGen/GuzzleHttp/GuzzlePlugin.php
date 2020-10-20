@@ -17,7 +17,7 @@ class GuzzlePlugin extends Candy
     {
         pinpoint_add_clue(DESTINATION,$this->getHostFromURL($this->args[0]));
         pinpoint_add_clues(HTTP_URL,$this->args[0]);
-        pinpoint_add_clue(SERVER_TYPE,PINPOINT_PHP_REMOTE);
+        pinpoint_add_clue(PP_SERVER_TYPE,PINPOINT_PHP_REMOTE);
 
         $n_headers =[] ;
         if( is_array($this->args[1]) && array_key_exists('headers',$this->args[1]))

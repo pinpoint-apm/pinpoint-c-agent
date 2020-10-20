@@ -3,8 +3,8 @@ namespace Plugins\Framework\Swoole\Http;
 
 use Plugins\Framework\Swoole\IDContext;
 use Plugins\Util\Trace;
-require_once __DIR__."/../../../__init__.php";
-require_once __DIR__."/../../../Common/PluginsDefines.php";
+require_once __DIR__ . "/../../../__init__.php";
+require_once __DIR__ . "/../../../Common/PluginsDefines.php";
 
 class PerReqPlugin
 {
@@ -39,7 +39,7 @@ class PerReqPlugin
         pinpoint_add_clue("client",$request->server['remote_addr'],$id);
         pinpoint_add_clue("server",$header['host'],$id);
         pinpoint_add_clue("stp", PHP,$id);
-        pinpoint_add_clue(INTERCEPTER_NAME, "swoole-http-server",$id);
+        pinpoint_add_clue(PP_INTERCEPTER_NAME, "swoole-http-server",$id);
         $this->app_name = APPLICATION_NAME;
         pinpoint_add_clue("appname", $this->app_name,$id);
         pinpoint_set_context("appname",$this->app_name,$id);

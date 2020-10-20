@@ -16,8 +16,8 @@
 #-------------------------------------------------------------------------------
 
 
-namespace Plugins\Framework\YII2;
-require_once __DIR__."/../../__init__.php";
+namespace Plugins\Framework\yii2;
+require_once __DIR__ . "/../../__init__.php";
 
 class Yii2ReqPlugins
 {

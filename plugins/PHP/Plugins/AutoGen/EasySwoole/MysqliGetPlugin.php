@@ -17,7 +17,7 @@ class MysqliGetPlugin extends Candy
         $config = $ins_mysqli->getConfig();
         $host = $config->getHost();
         $port = $config->getPort();
-        pinpoint_add_clue(SERVER_TYPE,MYSQL,$this->id);
+        pinpoint_add_clue(PP_SERVER_TYPE,MYSQL,$this->id);
         pinpoint_add_clue(DESTINATION,"$host,$port",$this->id);
 
     }

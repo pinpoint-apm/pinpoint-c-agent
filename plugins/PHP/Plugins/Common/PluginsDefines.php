@@ -18,7 +18,7 @@
 
 
 define('PP_PHP_ARGS',-1);
-define('PHP_RETURN',14);
+define('PP_PHP_RETURN',14);
 define('PROXY_HTTP_HEADER',300);
 define('SQL_ID' ,20);
 define("SQL",  21);
@@ -49,6 +49,6 @@ define("SAMPLED","HTTP_PINPOINT_SAMPLED");
 define("PP_SERVER_TYPE","stp");
 define("PP_NEXT_SPAN_ID",'nsid');
 define("PP_DESTINATION","dst");
-define("INTERCEPTER_NAME","name");
+define("PP_INTERCEPTER_NAME","name");
 define("PP_ADD_EXCEPTION","EXP");
-define("PINPOINT_ROOT_LOC",1);
+define("PP_ROOT_LOC",1);
