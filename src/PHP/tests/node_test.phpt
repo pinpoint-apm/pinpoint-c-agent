@@ -27,10 +27,10 @@ pinpoint_end_trace($unexist_node);
 --EXPECTF--
 [pinpoint] [%d] [%d]#1024 pinpoint_start start
 [pinpoint] [%d] [%d] start_trace#1024 failed with id is not alive
-[pinpoint] [%d] [%d] pinpoint_add_clue#1024 failed. Reason: id is not alive,paremters:adf:fdfd
-[pinpoint] [%d] [%d] pinpoint_add_clue#1024 failed. Reason: id is not alive,paremters:adf:fdfd
-[pinpoint] [%d] [%d] pinpoint_set_context_key#1024 failed with out_of_range. id is not alive
-[pinpoint] [%d] [%d] pinpoint_add_clues#1024 failed.Reason id is not alive,paremters:32:fdfd
-[pinpoint] [%d] [%d] pinpoint_add_clues#1024 failed.Reason id is not alive,paremters:32:fdfd
-[pinpoint] [%d] [%d] pinpoint_get_context_key#1024 failed with id is not alive
+[pinpoint] [%d] [%d] pinpoint_add_clue#1024 failed. Reason: id is not alive,parameters:adf:fdfd
+[pinpoint] [%d] [%d] pinpoint_add_clue#1024 failed. Reason: id is not alive,parameters:adf:fdfd
+[pinpoint] [%d] [%d] pinpoint_set_context_key#1024 failed with out_of_range. id is not alive,parameters:b:b
+[pinpoint] [%d] [%d] pinpoint_add_clues#1024 failed.Reason id is not alive,parameters:32:fdfd
+[pinpoint] [%d] [%d] pinpoint_add_clues#1024 failed.Reason id is not alive,parameters:32:fdfd
+[pinpoint] [%d] [%d] pinpoint_get_context_key#1024 failed with id is not alive, parameters:b
 [pinpoint] [%d] [%d]#1024 not found
