@@ -439,20 +439,20 @@ static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
 
 /* Module method table */
 static PyMethodDef PinpointMethods[] = {
-    {"start_trace", py_pinpoint_start_trace, METH_VARARGS, "def start_trace():# create a new trace and insert into trace chain"},
-    {"end_trace", py_pinpoint_end_trace, METH_VARARGS, "def end_trace():# end currently matched trace"},
+    {"start_trace", py_pinpoint_start_trace, METH_VARARGS, "def start_trace(int id=-1):# create a new trace and insert into trace chain"},
+    {"end_trace", py_pinpoint_end_trace, METH_VARARGS, "def end_trace(int id=-1):# end currently matched trace"},
     {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
-    {"drop_trace", py_pinpoint_drop_trace, METH_VARARGS, "def drop_trace():# drop this trace"},
+    {"drop_trace", py_pinpoint_drop_trace, METH_VARARGS, "def drop_trace(int id=-1):# drop this trace"},
     {"start_time", py_pinpoint_start_time, METH_NOARGS, "def start_time()->long"},
-    {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value)"},
-    {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value)"},
-    {"set_special_key", py_pinpoint_context_key, METH_VARARGS, "def set_special_key(string key,string value): # create a key-value pair that bases on current trace chain"},
-    {"get_special_key", py_pinpoint_get_key, METH_VARARGS, "def get_special_key(key)->string "},
-    {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "check_tracelimit(long timestamp): check trace whether is limit"},
-    {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "enable logging output(callback )"},
-    {"force_flush_trace", py_force_flush_span, METH_VARARGS, "force flush span during timeout"},
-    {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no) #This trace found an error"},
-    {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=100)"},
+    {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value,int id=-1)"},
+    {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value,int id=-1)"},
+    {"set_context_key", py_pinpoint_context_key, METH_VARARGS, "def set_context_key(string key,string value,int id=-1): # create a key-value pair that bases on current trace chain"},
+    {"get_context_key", py_pinpoint_get_key, METH_VARARGS, "def get_context_key(key,int id=-1)->string "},
+    {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "def check_tracelimit(long timestamp=-1): #check trace whether is limit"},
+    {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "def enable_debug(callback):#enable logging output(callback )"},
+    {"force_flush_trace", py_force_flush_span, METH_VARARGS, "def force_flush_trace(int id=-1): #force flush span during timeout"},
+    {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no,int id=-1): #This trace found an error"},
+    {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=-1): # set pinpint collector information"},
     { NULL, NULL, 0, NULL}
 };
 
