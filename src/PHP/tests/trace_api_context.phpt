@@ -47,9 +47,9 @@ pinpoint_end_trace($id);
 string(1) "a"
 string(1) "b"
 string(1) "c"
-[pinpoint] [%d] [%d] pinpoint_get_context_key#128 failed with map::at
+[pinpoint] [%d] [%d] pinpoint_get_context_key#128 failed with map::at, parameters:not exsit
 bool(false)
-[pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d})
+[pinpoint] [%d] [%d]this span:({"E":0,"FT":1500,"S":%d})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
@@ -58,10 +58,10 @@ bool(false)
 string(1) "c"
 string(1) "b"
 string(1) "a"
-[pinpoint] [%d] [%d] pinpoint_get_context_key#127 failed with map::at
+[pinpoint] [%d] [%d] pinpoint_get_context_key#127 failed with map::at, parameters:not exsit
 bool(false)
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d,"calls":[{"E":%d,"S":%d}]})
+[pinpoint] [%d] [%d]this span:({"E":0,"FT":1500,"S":%d,"calls":[{"E":0,"S":0}]})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
