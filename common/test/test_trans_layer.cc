@@ -89,7 +89,7 @@ TEST(translayer, unix_socket_layer)
     using namespace std::placeholders;
     layer.registerPeerMsgCallback(std::bind(handle_agent_info,_1,_2,_3),NULL);
     while(run){
-        layer.trans_layer_pool();
+        layer.trans_layer_pool(3);
     }
     std::string data="msg-1918";
     layer.sendMsgToAgent(data);
