@@ -18,89 +18,34 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-import pinpointPy
 import random
 import asyncio
+from ..settings import *
+from  ..plugins.common.PinpointDefine import *
+import pinpointPy
+import contextvars
 
-PYTHON = '1700'
-PYTHON_METHOD_CALL='1701'
-PYTHON_REMOTE_METHOD = '9900'
-
-###############################################################
-
-# user should set below before use
-APP_ID ='python-app-id' # application id
-APP_NAME ='python-app-name' # application name 
-COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
-
-pinpointPy.set_agent(collector_host=COLLECTOR_HOST,enable_coroutines=True)
-
-## disable `enable_debug` if you not care it
-# def output(msg):
-#     print(msg)
-#
-
-# pinpointPy.enable_debug(None)
-
-###############################################################
-HTTP_PINPOINT_PSPANID = 'HTTP_PINPOINT_PSPANID'
-HTTP_PINPOINT_SPANID = 'HTTP_PINPOINT_SPANID'
-HTTP_PINPOINT_TRACEID = 'HTTP_PINPOINT_TRACEID'
-HTTP_PINPOINT_PAPPNAME = 'HTTP_PINPOINT_PAPPNAME'
-HTTP_PINPOINT_PAPPTYPE = 'HTTP_PINPOINT_PAPPTYPE'
-HTTP_PINPOINT_HOST = 'HTTP_PINPOINT_HOST'
-
-PINPOINT_PSPANID = 'Pinpoint-Pspanid'
-PINPOINT_SPANID = 'Pinpoint-Spanid'
-PINPOINT_TRACEID = 'Pinpoint-Traceid'
-PINPOINT_PAPPNAME ='Pinpoint-Pappname'
-PINPOINT_PAPPTYPE ='Pinpoint-Papptype'
-PINPOINT_HOST = 'Pinpoint-Host'
-
-NGINX_PROXY = 'Pinpoint-ProxyNginx'
-APACHE_PROXY = 'HTTP_PINPOINT_PROXYAPACHE'
-
-SAMPLED = 'Pinpoint-Sampled'
-ServerType='stp'
-FuncName='name'
-PY_ARGS= '-1'
-PY_RETURN='14'
-PROXY_HTTP_HEADER=300
-SQL_ID = 20
-SQL=21
-SQL_METADATA=22
-SQL_PARAM=  23
-SQL_BINDVALUE=24
-STRING_ID=30
-HTTP_URL='40'
-HTTP_PARAM='41'
-HTTP_PARAM_ENTITY='42'
-HTTP_COOKIE='45'
-HTTP_STATUS_CODE='46'
-HTTP_INTERNAL_DISPLAY=48
-HTTP_IO=49
-MESSAGE_QUEUE_URI=100
-
-
-MYSQL='2101'
-REDIS='8200'
-REDIS_REDISSON='8203'
-REDIS_REDISSON_INTERNAL='8204'
-MEMCACHED='8050'
+pinpointId = contextvars.ContextVar('_pinpoint_id_')
+pinpointId.set(0)
 
 
 class AsyCandy(object):
+
     def __init__(self,class_name,module_name):
         self.class_name = class_name
         self.module_name = module_name
-
+        self.node_id = 0
 
     def onBefore(self,*args, **kwargs):
-        pinpointPy.start_trace()
+        id = pinpointId.get()
+        newid = pinpointPy.start_trace(id)
+        pinpointId.set(newid)
+        self.node_id = newid
         return (args,kwargs)
 
     def onEnd(self,ret):
-        pinpointPy.end_trace()
+        newid = pinpointPy.end_trace(self.node_id)
+        pinpointId.set(newid)
 
     def onException(self,e):
         raise NotImplementedError()

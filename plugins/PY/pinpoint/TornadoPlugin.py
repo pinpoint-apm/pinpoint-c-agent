@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+# Created by eeliu at 10/22/20
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -14,7 +18,5 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-from .PyMysql import *
-from .requests import *
-from .PinpointCommon import *
-from .PinpointCommonPlugin import PinpointCommonPlugin
+from .tornado import HTTPRequestPlugins
+from .tornado import CommonPlugin
