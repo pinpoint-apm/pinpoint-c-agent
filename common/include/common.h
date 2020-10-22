@@ -118,7 +118,7 @@ extern PPAgentT global_agent_info;
  * 
  * @return NodeID 
  */
-NodeID pinpoint_get_per_thread_id();
+NodeID pinpoint_get_per_thread_id(void);
 
 void pinpoint_update_per_thread_id(NodeID id);
 
