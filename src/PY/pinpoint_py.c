@@ -26,26 +26,26 @@ static char* g_collector_host;
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
-static void _init_common_shared() __attribute__((constructor));
-static void _free_common_shared() __attribute__((destructor));
+static void _init_common_shared(void) __attribute__((constructor));
+static void _free_common_shared(void) __attribute__((destructor));
 static pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
-static void _get_read_lock()
+static void _get_read_lock(void)
 {
     pthread_rwlock_rdlock(&rwlock);
 }
 
-static void _release_lock()
+static void _release_lock(void)
 {
     pthread_rwlock_unlock(&rwlock);
 }
 
-static void _get_write_lock()
+static void _get_write_lock(void)
 {
     pthread_rwlock_wrlock(&rwlock);
 }
 
-void _init_common_shared()
+void _init_common_shared(void)
 {
     pthread_rwlock_init(&rwlock,NULL);
     global_agent_info.get_read_lock  = _get_read_lock;
@@ -53,7 +53,7 @@ void _init_common_shared()
     global_agent_info.release_lock   = _release_lock;
 }
 
-void _free_common_shared()
+void _free_common_shared(void)
 {
     pthread_rwlock_destroy(&rwlock);
 }
@@ -202,7 +202,7 @@ static PyObject *py_force_flush_span(PyObject *self, PyObject *args)
 }
 
 
-static inline long  startTraceWithPerThreadId()
+static inline long  startTraceWithPerThreadId(void)
 {
     uint32_t id = pinpoint_start_trace(pinpoint_get_per_thread_id());
     pinpoint_update_per_thread_id(id);
@@ -240,7 +240,7 @@ static PyObject *py_pinpoint_start_trace(PyObject *self,PyObject *args)
     return Py_BuildValue("i", ret);
 }
 
-static inline long endTraceWithPerThreadId()
+static inline long endTraceWithPerThreadId(void)
 {
     uint32_t cid = pinpoint_get_per_thread_id();
     uint32_t id = pinpoint_end_trace(cid);
@@ -444,8 +444,8 @@ static PyMethodDef PinpointMethods[] = {
     {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
     {"drop_trace", py_pinpoint_drop_trace, METH_VARARGS, "def drop_trace(int id=-1):# drop this trace"},
     {"start_time", py_pinpoint_start_time, METH_NOARGS, "def start_time()->long"},
-    {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value,int id=-1)"},
-    {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value,int id=-1)"},
+    {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value,int id=-1,int loc=0)"},
+    {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value,int id=-1,int loc=0)"},
     {"set_context_key", py_pinpoint_context_key, METH_VARARGS, "def set_context_key(string key,string value,int id=-1): # create a key-value pair that bases on current trace chain"},
     {"get_context_key", py_pinpoint_get_key, METH_VARARGS, "def get_context_key(key,int id=-1)->string "},
     {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "def check_tracelimit(long timestamp=-1): #check trace whether is limit"},
