@@ -15,10 +15,10 @@ class TestAgent(TestCase):
         self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/collector-agent.sock'))
 
     def test_trace_life(self):
-        self.assertEqual(pinpointPy.start_trace(),1)
-        self.assertEqual(pinpointPy.start_trace(),2)
-        self.assertEqual(pinpointPy.start_trace(),3)
-        self.assertEqual(pinpointPy.start_trace(),4)
+        pinpointPy.start_trace()
+        pinpointPy.start_trace()
+        pinpointPy.start_trace()
+        pinpointPy.start_trace()
         pinpointPy.add_clue("key","value")
         pinpointPy.add_clue("key","value3")
 
@@ -26,10 +26,10 @@ class TestAgent(TestCase):
         pinpointPy.add_clues("key","values")
         pinpointPy.add_clues("key","values")
 
-        self.assertEqual(pinpointPy.end_trace(),3)
-        self.assertEqual(pinpointPy.end_trace(),2)
-        self.assertEqual(pinpointPy.end_trace(),1)
-        self.assertEqual(pinpointPy.end_trace(),0)
+        pinpointPy.end_trace()
+        pinpointPy.end_trace()
+        pinpointPy.end_trace()
+        pinpointPy.end_trace()
 
     def test_set_collector_host(self):
         self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/collector1.sock'))
