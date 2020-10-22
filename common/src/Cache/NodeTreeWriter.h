@@ -38,20 +38,19 @@ public:
     {
         builder["commentStyle"] = "None";
         builder["indentation"] = "";
-        // std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-        this->writer = std::move(std::unique_ptr<Json::StreamWriter>(builder.newStreamWriter()));
     }
     
     std::string write(Json::Value& value)
     {
-       Json::OStringStream sout;
-       this->writer->write(value, &sout);
-       return sout.str();
+        Json::OStringStream out;
+        std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+        writer->write(value, &out);
+        return out.str();
     }
 
 private:
     Json::StreamWriterBuilder builder;
-    std::unique_ptr<Json::StreamWriter> writer;
+    
 };
 
 } /* namespace Cache */
