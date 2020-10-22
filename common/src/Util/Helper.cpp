@@ -79,7 +79,7 @@ Json::Value merge_node_tree(TraceNode& root)
 
 
 
-TransConnection getConnecton()
+TransConnection getConnection()
 {
     
     std::call_once (_pool_init_flag,

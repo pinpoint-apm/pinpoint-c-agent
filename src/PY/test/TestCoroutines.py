@@ -2,33 +2,32 @@
 import unittest
 import pinpointPy
 import asyncio
+import contextvars
 import sys
 
+pinpointId = contextvars.ContextVar('pinpoint_id')
+pinpointId.set(0)
 class TestInCoroutines(TestCase):
     @classmethod
     def setUpClass(cls):
         # pinpointPy.enable_debug(None)
-        pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock",enable_coroutines=True)
+        pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock")
+        
 
-    @unittest.skipIf(hex(sys.hexversion) <'0x30701f0', "python versin must 3.7.1+")
+
+    @unittest.skipIf(hex(sys.hexversion) <'0x30701f0', "python version must 3.7.1+")
     def testCoroFlow(self):
-
         def decorator_pinpoint(func):
             async def pinpoint_trace(*args, **kwargs):
-                start_size = pinpointPy.start_trace()
+                id = pinpointId.get()
+                id = pinpointPy.start_trace(id)
+                pinpointId.set(id)
                 func_name = func.__name__
-                pinpointPy.add_clue('name',func_name)
-                pinpointPy.add_clues('sdf','3434')
+                pinpointPy.add_clue('name',func_name,id,0)
+                pinpointPy.add_clues('start','3434',id)
                 ret = await func(*args, **kwargs)
-                pinpointPy.add_clue('sdf','3434')
-                end_size = pinpointPy.end_trace()
-                if func_name == 'unit':
-                    self.assertEqual(start_size,1)
-                    self.assertEqual(end_size,0)
-                elif func_name == 'unit2':
-                    self.assertEqual(start_size,2)
-                    self.assertEqual(end_size,1)
-                return ret
+                pinpointPy.add_clue('end','3434',id)
+                id = pinpointPy.end_trace(id)
             return pinpoint_trace
 
         @decorator_pinpoint

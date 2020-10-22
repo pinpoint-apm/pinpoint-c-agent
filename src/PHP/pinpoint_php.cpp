@@ -600,7 +600,7 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint_php)
 {
     NodeID _id = pinpoint_get_per_thread_id();
     if(_id != 0){
-        pinpoint_force_end_trace(_id);
+        pinpoint_force_end_trace(_id,300);
         pinpoint_update_per_thread_id(0);
     }
 

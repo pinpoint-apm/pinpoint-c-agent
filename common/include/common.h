@@ -139,7 +139,7 @@ NodeID pinpoint_end_trace(NodeID);
  * @return int 0 : means oK
  *             -1: exception found, check the log
  */
-int pinpoint_force_end_trace(NodeID);
+int pinpoint_force_end_trace(NodeID,int32_t timeout);
 
 /**
  * pinpoint_add_clues, append a value into span[key]
@@ -185,15 +185,19 @@ int pinpoint_get_context_long(NodeID _id,const char* key,long*);
  */
 int check_tracelimit(int64_t);
 
-
-int mark_current_trace_status(NodeID _id,int status);
-
 /**
- * try to send current span with timeout
- * NOTE: if timeout, current span dropped
- * @param timeout
+ * @brief setting current trace status
+       typedef enum {
+             E_OFFLINE = 0x1,
+            E_TRACE_PASS =0x2,
+            E_TRACE_BLOCK =0x4,
+            E_READY = 0x8
+        }E_AGENT_STATUS;
+ * @param _id 
+ * @param status 
+ * @return int 
  */
-// void pinpoint_force_flush_span(uint32_t timeout);
+int mark_current_trace_status(NodeID _id,int status);
 
 /**
  * get an unique auto-increment id
@@ -201,10 +205,6 @@ int mark_current_trace_status(NodeID _id,int status);
  * @return
  */
 int64_t generate_unique_id(void);
-/**
- * drop current trace
- */
-void pinpoint_drop_trace(NodeID _id);
 
 /**
  * get the start time of collector-agent.Use to generate transactionID

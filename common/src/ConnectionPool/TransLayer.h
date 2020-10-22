@@ -72,8 +72,8 @@ public:
         }
 
     }
-
-    size_t trans_layer_pool(uint32_t timeout = 0);
+    
+    size_t trans_layer_pool(uint32_t);
     
     void sendMsgToAgent(const std::string &data);
 
