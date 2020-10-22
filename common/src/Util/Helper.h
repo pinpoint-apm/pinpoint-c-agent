@@ -72,7 +72,7 @@ std::string node_tree_to_string(Json::Value &value);
 
 Json::Value merge_node_tree(TraceNode& root);
 
-TransConnection getConnecton();
+TransConnection getConnection();
 
 void freeConnection(TransConnection& );
 

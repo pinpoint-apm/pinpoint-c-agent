@@ -1,13 +1,13 @@
 <?php
 define("PINPOINT_ROOT_LOC",1);
 /**
- * start trace,if callstack is empty, creat a span. Otherwise, create a span event
+ * start trace,if callstack is empty, create a span. Otherwise, create a span event
  */
 function pinpoint_start_trace(){}
 
 /**
  * pop a trace.
- * @return current stacksize
+ * @return current stack size
  */
 function pinpoint_end_trace(){}
 
@@ -17,6 +17,20 @@ function pinpoint_end_trace(){}
  * @param string $value
  */
 function pinpoint_add_clue(string $key, string $value){}
+
+/**
+ * insert key,value into current trace context
+ * @param string $key
+ * @param string $value
+ */
+function pinpoint_set_context(string $key, string $value){}
+
+/**
+ * get key-value from current trace
+ * @param string $key
+ * @return string value
+ */
+function pinpoint_get_context(string $key){}
 
 /**
  * insert key,value into current span/spanevent annotation
@@ -43,16 +57,6 @@ function pinpoint_tracelimit(int $timestamp=null){}
 function pinpoint_drop_trace(){}
 
 /**
- * Get appName
- */
-function pinpoint_app_name(){}
-
-/**
- *Get appID
- */
-function pinpoint_app_id(){}
-
-/**
- * @return collector-agent starttime
+ * @return collector-agent start time
  */
 function pinpoint_start_time(){}

@@ -196,7 +196,7 @@ TEST(common,force_end_trace)
     id = pinpoint_end_trace(id);
     id = pinpoint_end_trace(id);
     EXPECT_NE(id,0);
-    id = pinpoint_force_end_trace(id);
+    id = pinpoint_force_end_trace(id,300);
     EXPECT_EQ(id,0);
 }
 

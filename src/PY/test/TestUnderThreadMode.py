@@ -18,16 +18,16 @@ class TestUnderThreadMode(TestCase):
         # self.assertTrue(pinpointPy.enable_debug(None))
 
         while self.thread_running:
-            self.assertEqual(pinpointPy.start_trace(),1)
+            pinpointPy.start_trace()
             pinpointPy.set_special_key('sid','12345678')
             pinpointPy.add_clue("key","value3")
             pinpointPy.add_clues("key","value3")
             value = pinpointPy.get_special_key('sid')
             self.assertEqual(value,'12345678')
-            self.assertEqual(pinpointPy.end_trace(),0)
+            pinpointPy.mark_as_error("fghjk","fghjkl",234234)
+            pinpointPy.end_trace()
             value = pinpointPy.get_special_key('sid')
             self.assertFalse(value)
-            pinpointPy.mark_as_error("fghjk","fghjkl",234234)
 
 
     def test_thead_safe(self):

@@ -4,14 +4,14 @@ import os,subprocess,sys
 
 if sys.version_info[0] == 3:
     class CommonBuild(build_ext):
-            
+        build_temp = 'build'
         def build_common(self):
-            if not os.path.exists(self.build_temp):
-                os.makedirs(self.build_temp)
+            if not os.path.exists(CommonBuild.build_temp):
+                os.makedirs(CommonBuild.build_temp)
 
             comm_path = os.path.abspath('common')
-            subprocess.check_call(['cmake','-DCMAKE_BUILD_TYPE=Release',comm_path],cwd=self.build_temp)
-            subprocess.check_call(['cmake', '--build', '.'], cwd=self.build_temp)
+            subprocess.check_call(['cmake','-DCMAKE_BUILD_TYPE=Debug',comm_path],cwd=CommonBuild.build_temp)
+            subprocess.check_call(['cmake', '--build', '.'], cwd=CommonBuild.build_temp)
 
         def run(self):
             try:
@@ -19,7 +19,6 @@ if sys.version_info[0] == 3:
             except OSError:
                 raise RuntimeError("CMake must be installed to build the following extensions: " +
                                     ", ".join(e.name for e in self.extensions))
-            self.build_temp = 'build'
             self.build_common()
             super().run()
 
@@ -27,14 +26,14 @@ if sys.version_info[0] == 3:
 
 else:
     class CommonBuild(build_ext,object):
-            
+        build_temp = 'build'
         def build_common(self):
-            if not os.path.exists(self.build_temp):
-                os.makedirs(self.build_temp)
+            if not os.path.exists(CommonBuild.build_temp):
+                os.makedirs(CommonBuild.build_temp)
 
             comm_path = os.path.abspath('common')
-            subprocess.check_call(['cmake','-DCMAKE_BUILD_TYPE=Release',comm_path],cwd=self.build_temp)
-            subprocess.check_call(['cmake', '--build', '.'], cwd=self.build_temp)
+            subprocess.check_call(['cmake','-DCMAKE_BUILD_TYPE=Debug',comm_path],cwd=CommonBuild.build_temp)
+            subprocess.check_call(['cmake', '--build', '.'], cwd=CommonBuild.build_temp)
 
         def run(self):
             try:
@@ -42,7 +41,6 @@ else:
             except OSError:
                 raise RuntimeError("CMake must be installed to build the following extensions: " +
                                     ", ".join(e.name for e in self.extensions))
-            self.build_temp = 'build'
             self.build_common()
             super(CommonBuild,self).run()
 
@@ -57,10 +55,10 @@ setup(name='pinpointPy',
         Extension('pinpointPy',
           ['src/PY/pinpoint_py.c'],
           include_dirs = ['common/include'],
-          library_dirs = ['common/lib'],
+          library_dirs = [pinpointBuild.build_temp+"/lib"],
           libraries = ['pinpoint_common','jsoncpp', 'rt', 'stdc++']
           )
         ],
 
-      cmdclass={'build_ext': CommonBuild}
+      cmdclass={'build_ext': pinpointBuild}
 )
