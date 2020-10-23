@@ -1,5 +1,6 @@
 <?php
-namespace Plugins\Sys\curl;
+namespace Plugins\Framework\Swoole\curl;
+use Plugins\Sys\curl\CurlUtil;
 
 static $chArr= [];
 
@@ -9,7 +10,6 @@ function curl_init($url = null)
     global $chArr;
     if($url){
         $chArr[strval($ch)] = ['url'=>$url];
-
     }else{
         $chArr[strval($ch)] = [];
     }
@@ -28,19 +28,15 @@ function curl_setopt($ch, $option, $value)
 
     return \curl_setopt($ch, $option, $value);
 }
+
 function curl_setopt_array($ch, array $options)
 {
-    $args = \pinpoint_get_func_ref_args();
-    $commPlugins_curl_setopt_array_var = new NextSpanPlugin('curl_setopt_array', null, $args);
-    try {
-        $commPlugins_curl_setopt_array_var->onBefore();
-        $commPlugins_curl_setopt_array_ret = call_user_func_array('curl_setopt_array', $args);
-        $commPlugins_curl_setopt_array_var->onEnd($commPlugins_curl_setopt_array_ret);
-        return $commPlugins_curl_setopt_array_ret;
-    } catch (\Exception $e) {
-        $commPlugins_curl_setopt_array_var->onException($e);
-        throw $e;
-    }
+
+    $url = $options[CURLOPT_URL];
+    CurlUtil::appendPinpointHeader($url,$options[CURLOPT_HTTPHEADER]);
+    $ret =  \curl_setopt_array($ch,$options);
+    return $ret;
+
 }
 function curl_exec($ch)
 {

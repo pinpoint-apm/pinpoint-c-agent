@@ -3,8 +3,7 @@ namespace Plugins\Framework\Swoole\Http;
 
 use Plugins\Framework\Swoole\IDContext;
 use Plugins\Util\Trace;
-require_once __DIR__ . "/../../../__init__.php";
-require_once __DIR__ . "/../../../Common/PluginsDefines.php";
+require_once __DIR__."/../../../__init__.php";
 
 class PerReqPlugin
 {
@@ -90,16 +89,18 @@ class PerReqPlugin
         if (isset($header[APACHE_PROXY]) || array_key_exists(APACHE_PROXY, $header)) {
             pinpoint_add_clue("AP", $header[APACHE_PROXY],$id);
         }
-
+        pinpoint_set_context("Pinpoint-Sampled","s1",$id);
         if (isset($header[SAMPLED]) || array_key_exists(SAMPLED, $header)) {
             if ($header[SAMPLED] == "s0") {
                 //drop this request. collector could not receive any thing
                 pinpoint_drop_trace($id);
+                pinpoint_set_context("Pinpoint-Sampled","s0",$id);
             }
 
         } else {
             if(pinpoint_tracelimit())
             {
+                pinpoint_set_context("Pinpoint-Sampled","s0",$id);
                 pinpoint_drop_trace($id);
             }
         }
@@ -107,7 +108,10 @@ class PerReqPlugin
         pinpoint_add_clue("tid", $this->tid,$id);
         pinpoint_set_context('tid', $this->tid,$id);
         pinpoint_add_clue("sid", $this->sid,$id);
-        pinpoint_set_context('sid', $this->tid,$id);
+        pinpoint_set_context('sid', (string)$this->sid,$id);
+
+        pinpoint_set_context((string)HTTP_STATUS_CODE,'200',$id);
+
     }
 
 
@@ -118,7 +122,10 @@ class PerReqPlugin
 
     protected function onEnd(&$ret)
     {
-        pinpoint_end_trace(IDContext::get());
+        $id = IDContext::get();
+        $code = pinpoint_get_context((string)HTTP_STATUS_CODE,$id);
+        pinpoint_add_clues(HTTP_STATUS_CODE,$code,$id,PINPOINT_ROOT_LOC);
+        pinpoint_end_trace($id);
         print("PerReqPlugin call onEnd ".IDContext::get()."\r\n\r\n");
     }
 
