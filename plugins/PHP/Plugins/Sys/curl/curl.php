@@ -1,17 +1,32 @@
 <?php
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 namespace Plugins\Sys\curl;
 
-static $chArr= [];
+static $curlChAr= [];
 
 function curl_init($url = null)
 {
     $ch = \curl_init($url);
-    global $chArr;
+    global $curlChAr;
     if($url){
-        $chArr[strval($ch)] = ['url'=>$url];
+        $curlChAr[strval($ch)] = ['url'=>$url];
 
     }else{
-        $chArr[strval($ch)] = [];
+        $curlChAr[strval($ch)] = [];
     }
     return $ch;
 }
@@ -23,44 +38,47 @@ function curl_setopt($ch, $option, $value)
     {
         CurlUtil::appendPinpointHeader($value);
     }elseif ($option == CURLOPT_URL ){
-        CurlUtil::appendPinpointHeader($value);
+        global $curlChAr;
+        $curlChAr[strval($ch)] = ['url'=>$value];
     }
 
     return \curl_setopt($ch, $option, $value);
 }
+
 function curl_setopt_array($ch, array $options)
 {
     $args = \pinpoint_get_func_ref_args();
-    $commPlugins_curl_setopt_array_var = new NextSpanPlugin('curl_setopt_array', null, $args);
+    $plugin = new NextSpanPlugin('curl_setopt_array', null, $args);
     try {
-        $commPlugins_curl_setopt_array_var->onBefore();
-        $commPlugins_curl_setopt_array_ret = call_user_func_array('curl_setopt_array', $args);
-        $commPlugins_curl_setopt_array_var->onEnd($commPlugins_curl_setopt_array_ret);
-        return $commPlugins_curl_setopt_array_ret;
+        $plugin->onBefore();
+        $ret = call_user_func_array('curl_setopt_array', $args);
+        $plugin->onEnd($ret);
+        return $ret;
     } catch (\Exception $e) {
-        $commPlugins_curl_setopt_array_var->onException($e);
+        $plugin->onException($e);
         throw $e;
     }
 }
+
 function curl_exec($ch)
 {
     $args = \pinpoint_get_func_ref_args();
-    $commPlugins_curl_exec_var = new NextSpanPlugin('curl_exec', null, $args);
+    $plugin = new NextSpanPlugin('curl_exec', null, $args);
     try {
-        $commPlugins_curl_exec_var->onBefore();
-        $commPlugins_curl_exec_ret = call_user_func_array('curl_exec', $args);
-        $commPlugins_curl_exec_var->onEnd($commPlugins_curl_exec_ret);
-        return $commPlugins_curl_exec_ret;
+        $plugin->onBefore();
+        $ret = call_user_func_array('curl_exec', $args);
+        $plugin->onEnd($ret);
+        return $ret;
     } catch (\Exception $e) {
-        $commPlugins_curl_exec_var->onException($e);
+        $plugin->onException($e);
         throw $e;
     }
 }
 
 function curl_close($ch)
 {
-    global $chArr;
-    unset($chArr[strval($ch)] );
+    global $curlChAr;
+    unset($curlChAr[strval($ch)] );
     \curl_close($ch);
 }
 
