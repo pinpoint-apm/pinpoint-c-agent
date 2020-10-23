@@ -44,7 +44,7 @@ class InstancePlugins
 
     protected function onException($e)
     {
-        pinpoint_add_clue(ADD_EXCEPTION,$e->getMessage());
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
     }
 
     public function __call($name, $arguments)

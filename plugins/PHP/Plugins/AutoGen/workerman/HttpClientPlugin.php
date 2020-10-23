@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 10/16/20
- * Time: 11:17 AM
- */
 
 namespace Plugins\AutoGen\workerman;
 
@@ -34,7 +28,7 @@ class HttpClientPlugin extends Candy
 
     private function handleHttpHeader($url,&$headers)
     {
-        if(pinpoint_get_context("Pinpoint-Sampled",$this->pinpoint_id) == 's0'){
+        if(pinpoint_get_context("Pinpoint-Sampled",$this->pinpoint_id) == PP_NOT_SAMPLED){
             $headers[] = 'Pinpoint-Sampled:s0';
             return ;
         }
@@ -45,8 +39,8 @@ class HttpClientPlugin extends Candy
 
         $headers[] = 'Pinpoint-Host:'.$url;
 
-        $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context("tid",$this->pinpoint_id) ;
-        $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context("sid",$this->pinpoint_id);
+        $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID,$this->pinpoint_id) ;
+        $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID,$this->pinpoint_id);
 
         $headers[] ='Pinpoint-Spanid:'.$this->nsid;
     }
@@ -85,16 +79,16 @@ class HttpClientPlugin extends Candy
         echo $this->pinpoint_id." startRequest \n";
         pinpoint_add_clue(PP_DESTINATION,$this->getHostFromUrl($this->url),$this->pinpoint_id);
         pinpoint_add_clues(PP_PHP_ARGS,$this->url,$this->pinpoint_id);
-        pinpoint_add_clue(PP_SERVER_TYPE,PINPOINT_PHP_REMOTE,$this->pinpoint_id);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE,$this->pinpoint_id);
         pinpoint_add_clue(PP_NEXT_SPAN_ID,$this->nsid,$this->pinpoint_id);
-        pinpoint_add_clues(HTTP_URL,$this->url,$this->pinpoint_id);
+        pinpoint_add_clues(PP_HTTP_URL,$this->url,$this->pinpoint_id);
     }
 
 
     protected function onError($exception)
     {
         pinpoint_add_clue(PP_ADD_EXCEPTION,$exception,$this->pinpoint_id);
-        pinpoint_add_clues(HTTP_STATUS_CODE,0,$this->pinpoint_id);
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,0,$this->pinpoint_id);
         pinpoint_end_trace($this->pinpoint_id);
         echo $this->pinpoint_id." onError \n";
     }
@@ -102,7 +96,7 @@ class HttpClientPlugin extends Candy
     protected function endRequest($reponse)
     {
         $status_code = $reponse->getStatusCode();
-        pinpoint_add_clues(HTTP_STATUS_CODE,$status_code,$this->pinpoint_id);
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,$status_code,$this->pinpoint_id);
         pinpoint_end_trace($this->pinpoint_id);
         echo $this->pinpoint_id." endRequest \n";
     }

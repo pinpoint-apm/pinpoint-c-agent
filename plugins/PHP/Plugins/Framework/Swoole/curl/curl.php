@@ -21,9 +21,10 @@ function curl_setopt($ch, $option, $value)
 {
     if($option == CURLOPT_HTTPHEADER)
     {
-        CurlUtil::appendPinpointHeader($value);
+        CurlUtil::curlPinpointHeader($ch,$value);
     }elseif ($option == CURLOPT_URL ){
-        CurlUtil::appendPinpointHeader($value);
+        global $chArr;
+        $chArr[strval($ch)] = ['url'=>$value];
     }
 
     return \curl_setopt($ch, $option, $value);
