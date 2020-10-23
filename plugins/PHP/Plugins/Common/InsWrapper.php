@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 10/10/20
- * Time: 5:41 PM
- */
 
 namespace Plugins\Common;
 

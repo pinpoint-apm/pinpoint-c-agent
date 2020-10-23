@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 10/15/20
- * Time: 10:56 AM
- */
 
 namespace Plugins\AutoGen\workerman;
 use Workerman\MySQL\Connection as MysqlConnection;
@@ -19,12 +13,12 @@ class MysqlPlugin extends Candy
     {
         $query = $this->args[0];
 //        $parameters = $this->args[1];
-        pinpoint_add_clue(PP_SERVER_TYPE,MYSQL,$this->pinpoint_id);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL,$this->pinpoint_id);
         assert($this->who instanceof MysqlConnection);
         $setting = $this->getSetting($this->who);
         $dst = $setting['host'].":".$setting['port'];
         pinpoint_add_clue(PP_DESTINATION,$dst,$this->pinpoint_id);
-        pinpoint_add_clue(SQL_FORMAT,$query,$this->pinpoint_id);
+        pinpoint_add_clue(PP_SQL_FORMAT,$query,$this->pinpoint_id);
 
     }
 
