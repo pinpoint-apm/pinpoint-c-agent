@@ -104,53 +104,53 @@ class AcceptPlugin
         pinpoint_add_clue(PP_APP_ID, $this->app_id,$id);
         pinpoint_set_context(PP_APP_NAME, $this->app_id,$id);
 
-        if (isset($header['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID", $header)) {
-            $this->psid = $header['HTTP_PINPOINT_PSPANID'];
+        if (isset($header[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID, $header)) {
+            $this->psid = $header[PP_HEADER_PSPANID];
             pinpoint_add_clue(PP_PARENT_SPAN_ID, $this->psid,$id);
             pinpoint_set_context(PP_PARENT_SPAN_ID, $this->psid,$id);
             echo "psid: $this->psid \n";
         }
 
-        if (isset($header['HTTP_PINPOINT_SPANID']) || array_key_exists("HTTP_PINPOINT_SPANID", $header)) {
-            $this->sid = $header['HTTP_PINPOINT_SPANID'];
+        if (isset($header[PP_HEADER_SPANID]) || array_key_exists(PP_HEADER_SPANID, $header)) {
+            $this->sid = $header[PP_HEADER_SPANID];
             echo "sid: $this->sid \n";
         } else {
             $this->sid = Trace::generateSpanID();
         }
 
-        if (isset($header['HTTP_PINPOINT_TRACEID']) || array_key_exists("HTTP_PINPOINT_TRACEID", $header)) {
-            $this->tid = $header['HTTP_PINPOINT_TRACEID'];
+        if (isset($header[PP_HEADER_TRACEID]) || array_key_exists(PP_HEADER_TRACEID, $header)) {
+            $this->tid = $header[PP_HEADER_TRACEID];
         } else {
             $this->tid = $this->generateTransactionID();
         }
 
-        if (isset($header['HTTP_PINPOINT_PAPPNAME']) || array_key_exists("HTTP_PINPOINT_PAPPNAME", $header)) {
-            $this->pname = $header['HTTP_PINPOINT_PAPPNAME'];
+        if (isset($header[PP_HEADER_PAPPNAME]) || array_key_exists(PP_HEADER_PAPPNAME, $header)) {
+            $this->pname = $header[PP_HEADER_PAPPNAME];
 
             pinpoint_add_clue(PP_PARENT_NAME, $this->pname,$id);
             echo "pname: $this->pname";
         }
 
-        if (isset($header['HTTP_PINPOINT_PAPPTYPE']) || array_key_exists("HTTP_PINPOINT_PAPPTYPE", $header)) {
-            $this->ptype = $header['HTTP_PINPOINT_PAPPTYPE'];
+        if (isset($header[PP_HEADER_PAPPTYPE]) || array_key_exists(PP_HEADER_PAPPTYPE, $header)) {
+            $this->ptype = $header[PP_HEADER_PAPPTYPE];
             pinpoint_add_clue(PP_PARENT_TYPE, $this->ptype,$id);
         }
 
-        if (isset($header['HTTP_PINPOINT_HOST']) || array_key_exists("HTTP_PINPOINT_HOST", $header)) {
-            $this->ah = $header['HTTP_PINPOINT_HOST'];
+        if (isset($header[PP_HEADER_PINPOINT_HOST]) || array_key_exists(PP_HEADER_PINPOINT_HOST, $header)) {
+            $this->ah = $header[PP_HEADER_PINPOINT_HOST];
             pinpoint_add_clue(PP_PARENT_HOST, $this->ah,$id);
         }
-        if (isset($header[PP_NGINX_PROXY]) || array_key_exists(PP_NGINX_PROXY, $header)) {
-            pinpoint_add_clue(PP_NGINX_PROXY, $header[PP_NGINX_PROXY],$id);
+        if (isset($header[PP_HEADER_NGINX_PROXY]) || array_key_exists(PP_HEADER_NGINX_PROXY, $header)) {
+            pinpoint_add_clue(PP_NGINX_PROXY, $header[PP_HEADER_NGINX_PROXY],$id);
         }
 
-        if (isset($header[PP_APACHE_PROXY]) || array_key_exists(PP_APACHE_PROXY, $header)) {
-            pinpoint_add_clue(PP_APACHE_PROXY, $header[PP_APACHE_PROXY],$id);
+        if (isset($header[PP_HEADER_APACHE_PROXY]) || array_key_exists(PP_HEADER_APACHE_PROXY, $header)) {
+            pinpoint_add_clue(PP_APACHE_PROXY, $header[PP_HEADER_APACHE_PROXY],$id);
         }
 
         pinpoint_set_context("Pinpoint-Sampled",PP_SAMPLED,$id);
-        if (isset($header[PP_SAMPLED]) || array_key_exists(PP_SAMPLED, $header)) {
-            if ($header[PP_SAMPLED] == PP_NOT_SAMPLED) {
+        if (isset($header[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $header)) {
+            if ($header[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED) {
                 //drop this request. collector could not receive any thing
                 pinpoint_drop_trace($id);
                 pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED,$id);
