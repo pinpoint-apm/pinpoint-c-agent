@@ -88,54 +88,54 @@ class PerRequestPlugins
 
         pinpoint_add_clue(PP_APP_ID, $this->app_id);
 
-        if (isset($_SERVER['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID", $_SERVER)) {
-            $this->psid = $_SERVER['HTTP_PINPOINT_PSPANID'];
+        if (isset($_SERVER[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID, $_SERVER)) {
+            $this->psid = $_SERVER[PP_HEADER_PSPANID];
             pinpoint_add_clue(PP_PARENT_SPAN_ID, $this->psid);
             echo "psid: $this->psid \n";
         }
 
-        if (isset($_SERVER['HTTP_PINPOINT_SPANID']) || array_key_exists("HTTP_PINPOINT_SPANID", $_SERVER)) {
-            $this->sid = $_SERVER['HTTP_PINPOINT_SPANID'];
+        if (isset($_SERVER[PP_HEADER_SPANID]) || array_key_exists(PP_HEADER_SPANID, $_SERVER)) {
+            $this->sid = $_SERVER[PP_HEADER_SPANID];
             echo "sid: $this->sid \n";
         } else {
             $this->sid = $this->generateSpanID();
         }
 
-        if (isset($_SERVER['HTTP_PINPOINT_TRACEID']) || array_key_exists("HTTP_PINPOINT_TRACEID", $_SERVER)) {
-            $this->tid = $_SERVER['HTTP_PINPOINT_TRACEID'];
+        if (isset($_SERVER[PP_HEADER_TRACEID]) || array_key_exists(PP_HEADER_TRACEID, $_SERVER)) {
+            $this->tid = $_SERVER[PP_HEADER_TRACEID];
             echo "tid: $this->tid\n";
         } else {
             $this->tid = $this->generateTransactionID();
         }
 
-        if (isset($_SERVER['HTTP_PINPOINT_PAPPNAME']) || array_key_exists("HTTP_PINPOINT_PAPPNAME", $_SERVER)) {
-            $this->pname = $_SERVER['HTTP_PINPOINT_PAPPNAME'];
+        if (isset($_SERVER[PP_HEADER_PAPPNAME]) || array_key_exists(PP_HEADER_PAPPNAME, $_SERVER)) {
+            $this->pname = $_SERVER[PP_HEADER_PAPPNAME];
 
             pinpoint_add_clue(PP_PARENT_NAME, $this->pname);
             echo "pname: $this->pname";
         }
 
-        if (isset($_SERVER['HTTP_PINPOINT_PAPPTYPE']) || array_key_exists("HTTP_PINPOINT_PAPPTYPE", $_SERVER)) {
-            $this->ptype = $_SERVER['HTTP_PINPOINT_PAPPTYPE'];
+        if (isset($_SERVER[PP_HEADER_PAPPTYPE]) || array_key_exists(PP_HEADER_PAPPTYPE, $_SERVER)) {
+            $this->ptype = $_SERVER[PP_HEADER_PAPPTYPE];
             pinpoint_add_clue(PP_PARENT_TYPE, $this->ptype);
             echo "ptype: $this->pname";
         }
 
-        if (isset($_SERVER['HTTP_PINPOINT_HOST']) || array_key_exists("HTTP_PINPOINT_HOST", $_SERVER)) {
-            $this->ah = $_SERVER['HTTP_PINPOINT_HOST'];
+        if (isset($_SERVER[PP_HEADER_PINPOINT_HOST]) || array_key_exists(PP_HEADER_PINPOINT_HOST, $_SERVER)) {
+            $this->ah = $_SERVER[PP_HEADER_PINPOINT_HOST];
             pinpoint_add_clue(PP_PARENT_HOST, $this->ah);
             echo "Ah: $this->ah";
         }
-        if (isset($_SERVER[PP_NGINX_PROXY]) || array_key_exists(PP_NGINX_PROXY, $_SERVER)) {
-            pinpoint_add_clue(PP_NGINX_PROXY, $_SERVER[PP_NGINX_PROXY]);
+        if (isset($_SERVER[PP_HEADER_NGINX_PROXY]) || array_key_exists(PP_HEADER_NGINX_PROXY, $_SERVER)) {
+            pinpoint_add_clue(PP_NGINX_PROXY, $_SERVER[PP_HEADER_NGINX_PROXY]);
         }
 
-        if (isset($_SERVER[PP_APACHE_PROXY]) || array_key_exists(PP_APACHE_PROXY, $_SERVER)) {
-            pinpoint_add_clue(PP_APACHE_PROXY, $_SERVER[PP_APACHE_PROXY]);
+        if (isset($_SERVER[PP_HEADER_APACHE_PROXY]) || array_key_exists(PP_HEADER_APACHE_PROXY, $_SERVER)) {
+            pinpoint_add_clue(PP_APACHE_PROXY, $_SERVER[PP_HEADER_APACHE_PROXY]);
         }
 
-        if (isset($_SERVER[PP_SAMPLED]) || array_key_exists(PP_SAMPLED, $_SERVER)) {
-            if ($_SERVER[PP_SAMPLED] == PP_NOT_SAMPLED) {
+        if (isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) {
+            if ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED) {
                 $this->isLimit = true;
                 //drop this request. collector could not receive any thing
                 pinpoint_drop_trace();

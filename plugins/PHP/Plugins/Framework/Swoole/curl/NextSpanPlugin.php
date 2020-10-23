@@ -25,7 +25,7 @@ class NextSpanPlugin extends Candy
 
     function onBefore()
     {
-        pinpoint_add_clues(PHP_ARGS,"...",$this->id);
+        pinpoint_add_clues(PP_PHP_ARGS,"...",$this->id);
     }
 
     function onEnd(&$ret)

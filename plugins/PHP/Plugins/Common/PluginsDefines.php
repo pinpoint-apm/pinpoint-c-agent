@@ -15,10 +15,6 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-
-
-
-
 define('PP_PHP_ARGS',-1);
 define('PP_PHP_RETURN',14);
 define('PP_PROXY_HTTP_HEADER',300);
@@ -40,14 +36,22 @@ define("PP_MESSAGE_QUEUE_URI ",100);
 define("PP_PHP_METHOD","1501");
 define("PP_PHP","1500");
 define("PP_MYSQL","2101");
-define("PP_MYSQL","8200");
+define("PP_REDIS","8200");
 define("PP_REDIS_REDISSON","8203");
 define("PP_REDIS_REDISSON_INTERNAL","8204");
 define("PP_MEMCACHED","8050");
 define("PP_PHP_REMOTE",9700);
-define("PP_NGINX_PROXY","Pinpoint-ProxyNginx");
-define("PP_APACHE_PROXY","HTTP_PINPOINT_PROXYAPACHE");
-define("PP_SAMPLED","HTTP_PINPOINT_SAMPLED");
+
+define("PP_HEADER_NGINX_PROXY","Pinpoint-ProxyNginx");
+define("PP_HEADER_APACHE_PROXY","HTTP_PINPOINT_PROXYAPACHE");
+define("PP_HEADER_SAMPLED","HTTP_PINPOINT_SAMPLED");
+define("PP_HEADER_PINPOINT_HOST","HTTP_PINPOINT_HOST");
+define("PP_HEADER_PAPPTYPE","HTTP_PINPOINT_PAPPTYPE");
+define("PP_HEADER_PAPPNAME","HTTP_PINPOINT_PAPPNAME");
+define("PP_HEADER_TRACEID","HTTP_PINPOINT_TRACEID");
+define("PP_HEADER_SPANID","HTTP_PINPOINT_SPANID");
+define("PP_HEADER_PSPANID","HTTP_PINPOINT_PSPANID");
+
 define("PP_SERVER_TYPE","stp");
 define("PP_NEXT_SPAN_ID",'nsid');
 define("PP_DESTINATION","dst");
