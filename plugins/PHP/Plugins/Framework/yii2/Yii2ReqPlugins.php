@@ -57,11 +57,11 @@ class Yii2ReqPlugins
         $this->initTrace();
 
         pinpoint_start_trace();
-        pinpoint_add_clue("uri",$_SERVER['REQUEST_URI']);
-        pinpoint_add_clue("client",$_SERVER["REMOTE_ADDR"]);
-        pinpoint_add_clue("server",$_SERVER["HTTP_HOST"]);
-        pinpoint_add_clue("stp",PHP);
-        pinpoint_add_clue("name","PHP Request");
+        pinpoint_add_clue(PP_REQ_URI,$_SERVER['REQUEST_URI']);
+        pinpoint_add_clue(PP_REQ_CLIENT,$_SERVER["REMOTE_ADDR"]);
+        pinpoint_add_clue(PP_REQ_SERVER,$_SERVER["HTTP_HOST"]);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP);
+        pinpoint_add_clue("name","PP_PHP Request");
 
         if(defined('APPLICATION_NAME')){
             $this->app_name = APPLICATION_NAME;
@@ -69,7 +69,7 @@ class Yii2ReqPlugins
             $this->app_name = pinpoint_app_name();
         }
 
-        pinpoint_add_clue("appname",$this->app_name);
+        pinpoint_add_clue(PP_APP_NAME,$this->app_name);
         if(defined('APPLICATION_ID'))
         {
             $this->app_id = APPLICATION_ID;
@@ -77,12 +77,12 @@ class Yii2ReqPlugins
             $this->app_id = pinpoint_app_id();
         }
 
-        pinpoint_add_clue('appid',$this->app_id);
+        pinpoint_add_clue(PP_APP_ID,$this->app_id);
 
         if(isset($_SERVER['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID",$_SERVER))
         {
             $this->psid = $_SERVER['HTTP_PINPOINT_PSPANID'];
-            pinpoint_add_clue("psid",$this->psid);
+            pinpoint_add_clue(PP_PARENT_SPAN_ID,$this->psid);
             echo "psid: $this->psid \n";
         }
 
@@ -106,36 +106,36 @@ class Yii2ReqPlugins
         {
             $this->pname = $_SERVER['HTTP_PINPOINT_PAPPNAME'];
 
-            pinpoint_add_clue('pname',$this->pname);
+            pinpoint_add_clue(PP_PARENT_NAME,$this->pname);
             echo "pname: $this->pname";
         }
 
         if(isset($_SERVER['HTTP_PINPOINT_PAPPTYPE']) || array_key_exists("HTTP_PINPOINT_PAPPTYPE",$_SERVER))
         {
             $this->ptype = $_SERVER['HTTP_PINPOINT_PAPPTYPE'];
-            pinpoint_add_clue('ptype',$this->ptype);
+            pinpoint_add_clue(PP_PARENT_TYPE,$this->ptype);
             echo "ptype: $this->pname";
         }
 
         if(isset($_SERVER['HTTP_PINPOINT_HOST']) || array_key_exists("HTTP_PINPOINT_HOST",$_SERVER))
         {
             $this->ah = $_SERVER['HTTP_PINPOINT_HOST'];
-            pinpoint_add_clue('Ah',$this->ah);
+            pinpoint_add_clue(PP_PARENT_HOST,$this->ah);
             echo "Ah: $this->ah";
         }
-        if(isset($_SERVER[NGINX_PROXY]) ||array_key_exists(NGINX_PROXY,$_SERVER))
+        if(isset($_SERVER[PP_NGINX_PROXY]) ||array_key_exists(PP_NGINX_PROXY,$_SERVER))
         {
-            pinpoint_add_clue("NP",$_SERVER[NGINX_PROXY]);
+            pinpoint_add_clue(PP_NGINX_PROXY,$_SERVER[PP_NGINX_PROXY]);
         }
 
-        if(isset($_SERVER[APACHE_PROXY]) ||array_key_exists(APACHE_PROXY,$_SERVER))
+        if(isset($_SERVER[PP_APACHE_PROXY]) ||array_key_exists(PP_APACHE_PROXY,$_SERVER))
         {
-            pinpoint_add_clue("AP",$_SERVER[APACHE_PROXY]);
+            pinpoint_add_clue(PP_APACHE_PROXY,$_SERVER[PP_APACHE_PROXY]);
         }
 
-        if(isset($_SERVER[SAMPLED]) || array_key_exists(SAMPLED,$_SERVER))
+        if(isset($_SERVER[PP_SAMPLED]) || array_key_exists(PP_SAMPLED,$_SERVER))
         {
-            if ($_SERVER[SAMPLED] == "s0"){
+            if ($_SERVER[PP_SAMPLED] == PP_NOT_SAMPLED){
                 $this->isLimit = true;
                 //drop this request. collector could not receive any thing
                 pinpoint_drop_trace();
@@ -145,15 +145,15 @@ class Yii2ReqPlugins
         }
 
 
-        pinpoint_add_clue("tid",$this->tid);
-        pinpoint_add_clue("sid",$this->sid);
+        pinpoint_add_clue(PP_TRANSCATION_ID,$this->tid);
+        pinpoint_add_clue(PP_SPAN_ID,$this->sid);
 
     }
     public function __destruct()
     {
         // reset limit
         $this->isLimit = false;
-        pinpoint_add_clues(HTTP_STATUS_CODE,http_response_code());
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,http_response_code());
         pinpoint_end_trace();
     }
 

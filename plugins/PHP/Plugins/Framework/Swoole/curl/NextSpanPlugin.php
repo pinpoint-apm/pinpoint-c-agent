@@ -33,10 +33,10 @@ class NextSpanPlugin extends Candy
         if($this->apId == 'curl_exec'){
             $argv = &$this->args[0];
             $ch = $argv[0];
-            pinpoint_add_clue("dst",$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)),$this->id);
-            pinpoint_add_clue("stp",PINPOINT_PHP_REMOTE,$this->id);
-            pinpoint_add_clue('nsid',pinpoint_get_context('nsid',$this->id),$this->id);
-            pinpoint_add_clues(HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),$this->id);
+            pinpoint_add_clue(PP_DESTINATION,$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)),$this->id);
+            pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE,$this->id);
+            pinpoint_add_clue(PP_NEXT_SPAN_ID,pinpoint_get_context(PP_NEXT_SPAN_ID,$this->id),$this->id);
+            pinpoint_add_clues(PP_HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),$this->id);
 
         }
     }

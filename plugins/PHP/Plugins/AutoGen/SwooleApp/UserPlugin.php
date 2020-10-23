@@ -25,7 +25,7 @@ use Plugins\Framework\Swoole\Candy;
 class UserPlugin extends Candy
 {
     public function onBefore(){
-        pinpoint_add_clue("stp",PHP_METHOD,$this->id);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_METHOD,$this->id);
         pinpoint_add_clues(PHP_ARGS,print_r($this->args, true),$this->id);
     }
 
@@ -34,6 +34,6 @@ class UserPlugin extends Candy
     }
 
     public function onException($e){
-        pinpoint_add_clue("EXP",$e->getMessage(),$this->id);
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage(),$this->id);
     }
 }

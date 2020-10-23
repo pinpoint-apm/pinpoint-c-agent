@@ -15,9 +15,9 @@ class GuzzlePlugin extends Candy
 {
     function onBefore()
     {
-        pinpoint_add_clue(DESTINATION,$this->getHostFromURL($this->args[0]));
-        pinpoint_add_clues(HTTP_URL,$this->args[0]);
-        pinpoint_add_clue(PP_SERVER_TYPE,PINPOINT_PHP_REMOTE);
+        pinpoint_add_clue(PP_DESTINATION,$this->getHostFromURL($this->args[0]));
+        pinpoint_add_clues(PP_HTTP_URL,$this->args[0]);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE);
 
         $n_headers =[] ;
         if( is_array($this->args[1]) && array_key_exists('headers',$this->args[1]))
@@ -31,12 +31,12 @@ class GuzzlePlugin extends Candy
     function onEnd(&$ret)
     {
 //        $ret->getStatusCode();
-        pinpoint_add_clues(HTTP_STATUS_CODE,(string)($ret->getStatusCode()));
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,(string)($ret->getStatusCode()));
     }
 
     function onException($e)
     {
-        pinpoint_add_clue(EXCEPTION,$e->getMessage());
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
     }
 
     protected function getHostFromURL(string $url)
@@ -64,13 +64,13 @@ class GuzzlePlugin extends Candy
     {
 
         if(pinpoint_tracelimit()){
-            $headers['Pinpoint-Sampled'] = 's0';
+            $headers['Pinpoint-Sampled'] = PP_NOT_SAMPLED;
             return $headers;
         }
 
         $nsid = PerRequestPlugins::instance()->generateSpanID();
         $header = array(
-            'Pinpoint-Sampled' =>'s1',
+            'Pinpoint-Sampled' =>PP_SAMPLED,
             'Pinpoint-Flags'=>0,
             'Pinpoint-Papptype'=>1500,
             'Pinpoint-Pappname'=>PerRequestPlugins::instance()->app_name,

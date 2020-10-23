@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 10/10/20
- * Time: 6:33 PM
- */
 
 namespace Plugins\AutoGen\EasySwoole;
 
@@ -19,7 +13,7 @@ class ResponsePlugin
     {
         $id = IDContext::get();
         $code = $args[0];
-        pinpoint_set_context((string)HTTP_STATUS_CODE,(string)$code,$id);
+        pinpoint_set_context((string)PP_HTTP_STATUS_CODE,(string)$code,$id);
         if($code !== 200){
             pinpoint_add_clue(PP_ADD_EXCEPTION,"http response not 200. status=[$code]",$id,PP_ROOT_LOC);
         }
