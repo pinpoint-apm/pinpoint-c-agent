@@ -1,17 +1,31 @@
 <?php
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 namespace Plugins\Framework\Swoole\curl;
-use Plugins\Sys\curl\CurlUtil;
 
 static $chArr= [];
 
 function curl_init($url = null)
 {
     $ch = \curl_init($url);
-    global $chArr;
+    global $curlChAr;
     if($url){
-        $chArr[strval($ch)] = ['url'=>$url];
+        $curlChAr[strval($ch)] = ['url'=>$url];
     }else{
-        $chArr[strval($ch)] = [];
+        $curlChAr[strval($ch)] = [];
     }
     return $ch;
 }
@@ -23,8 +37,8 @@ function curl_setopt($ch, $option, $value)
     {
         CurlUtil::curlPinpointHeader($ch,$value);
     }elseif ($option == CURLOPT_URL ){
-        global $chArr;
-        $chArr[strval($ch)] = ['url'=>$value];
+        global $curlChAr;
+        $curlChAr[strval($ch)] = ['url'=>$value];
     }
 
     return \curl_setopt($ch, $option, $value);
@@ -56,8 +70,8 @@ function curl_exec($ch)
 
 function curl_close($ch)
 {
-    global $chArr;
-    unset($chArr[strval($ch)] );
+    global $curlChAr;
+    unset($curlChAr[strval($ch)] );
     \curl_close($ch);
 }
 
