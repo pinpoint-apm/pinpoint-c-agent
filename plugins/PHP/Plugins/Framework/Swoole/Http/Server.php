@@ -2,6 +2,7 @@
 
 namespace Plugins\Framework\Swoole\Http;
 use Swoole\Http\Server as SServer;
+require_once __DIR__."/../__init__.php";
 
 class Server extends SServer
 {
@@ -12,6 +13,9 @@ class Server extends SServer
             case 'request':
                 $callback = new PerReqPlugin($callback);
                 break;
+//            case 'receive':
+//                $callback = new PerReqPlugin($callback);
+//                break;
         }
         parent::on($event,$callback);
 

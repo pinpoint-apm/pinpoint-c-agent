@@ -15,23 +15,25 @@
 # the License.
 #-------------------------------------------------------------------------------
 
-namespace Plugins\Common;
+namespace Plugins\AutoGen\SwooleApp;
+use Plugins\Framework\Swoole\Candy;
 
-class CommonPlugin extends Candy
+/**
+ * @hook:app\HttpServer::doSomething app\HttpServer::doSomething1 app\HttpServer::doSomething2
+ * @hook:app\HttpServer::doAny
+ */
+class UserPlugin extends Candy
 {
-    ///@hook:app\DBcontrol::connectDb
     public function onBefore(){
-        pinpoint_add_clue("stp",PHP_METHOD);
-        pinpoint_add_clues(PP_PHP_ARGS,print_r($this->args,true));
+        pinpoint_add_clue("stp",PHP_METHOD,$this->id);
+        pinpoint_add_clues(PHP_ARGS,print_r($this->args, true),$this->id);
     }
 
-    ///@hook:app\DBcontrol::getData1 app\DBcontrol::\array_push
     public function onEnd(&$ret){
-        pinpoint_add_clues(PP_PHP_RETURN,print_r($ret,true));
+        pinpoint_add_clues(PHP_RETURN,print_r($this->args, true),$this->id);
     }
 
-    ///@hook:app\DBcontrol::getData2
     public function onException($e){
-        pinpoint_add_clue(ADD_EXCEPTION,$e->getMessage());
+        pinpoint_add_clue("EXP",$e->getMessage(),$this->id);
     }
 }
