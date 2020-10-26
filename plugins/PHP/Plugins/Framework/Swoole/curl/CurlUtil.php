@@ -14,19 +14,16 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-
-
-
 namespace Plugins\Sys\curl;
 
-use Plugins\Common\Candy;
-use Plugins\PerRequestPlugins;
+use Plugins\Framework\Swoole\IDContext;
+use Plugins\Util\Trace;
 
-class NextSpanPlugin extends Candy
+class CurlUtil
 {
-    private function handleHttpHeader($ch,&$headers)
+    public static function appendPinpointHeader($url, &$headers)
     {
-        if(PerRequestPlugins::instance()->traceLimit()){
+        if(pinpoint_get_context('Pinpoint-Sampled', IDContext::get())==PP_NOT_SAMPLED){
             $headers[] = 'Pinpoint-Sampled:s0';
             return ;
         }
@@ -34,21 +31,41 @@ class NextSpanPlugin extends Candy
         $headers[] ='Pinpoint-Sampled:s1';
         $headers[] ='Pinpoint-Flags:0';
         $headers[] ='Pinpoint-Papptype:1500';
-        $headers[] ='Pinpoint-Pappname:'.PerRequestPlugins::instance()->app_name;
+        $headers[] ='Pinpoint-Pappname:'.APPLICATION_NAME;
 
-        $headers[] = 'Pinpoint-Host:'.$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
+        $headers[] = 'Pinpoint-Host:'.static::getHostFromURL($url);
 
-        $headers[] ='Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid;
-        $headers[] ='Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid;
-        $nsid = PerRequestPlugins::instance()->generateSpanID();
+        $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID, IDContext::get());
+        $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID, IDContext::get());
+        $nsid = Trace::generateSpanID();
         $headers[] ='Pinpoint-Spanid:'.$nsid;
+        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid, IDContext::get());
     }
 
-    /**
-     * Fix the bug when user not set  CURLOPT_HTTPHEADER.
-     * @param $ch
-     */
-    private function handleUrl($ch,$url)
+    public static function appendPinpointHeaderInKeyValue($url, &$headers)
+    {
+        if(pinpoint_get_context('Pinpoint-Sampled', IDContext::get())==PP_NOT_SAMPLED){
+            $headers['Pinpoint-Sampled'] =PP_NOT_SAMPLED;
+            return ;
+        }
+
+        $headers['Pinpoint-Sampled'] =PP_SAMPLED;
+        $headers['Pinpoint-Flags'] ='0';
+        $headers['Pinpoint-Papptype'] ='1500';
+        $headers['Pinpoint-Pappname'] = APPLICATION_NAME;
+
+        $headers['Pinpoint-Host'] = static::getHostFromURL($url);
+
+        $headers['Pinpoint-Traceid'] = pinpoint_get_context(PP_TRANSCATION_ID, IDContext::get());
+        $headers['Pinpoint-Pspanid'] = pinpoint_get_context(PP_SPAN_ID, IDContext::get());
+        $nsid = Trace::generateSpanID();
+        $headers['Pinpoint-Spanid'] = $nsid;
+        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid, IDContext::get());
+    }
+
+
+
+    public static function addPinpointHeader($ch,$url)
     {
         if(PerRequestPlugins::instance()->traceLimit()){
             \curl_setopt($ch,CURLOPT_HTTPHEADER,array("Pinpoint-Sampled:s0"));
@@ -61,55 +78,15 @@ class NextSpanPlugin extends Candy
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
             'Pinpoint-Pappname:'.PerRequestPlugins::instance()->app_name,
-            'Pinpoint-Host:'.$this->getHostFromURL($url),
+            'Pinpoint-Host:'.static::getHostFromURL($url),
             'Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid,
             'Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid,
             'Pinpoint-Spanid:'.$nsid
-            );
+        );
         \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
     }
 
-
-    function onBefore()
-    {
-        if($this->apId !== 'curl_setopt'){
-            return ;
-        }
-
-        $argv = &$this->args[0];
-        if( isset($argv[1])){
-            $ch = $argv[0];
-
-            if($argv[1] == CURLOPT_HTTPHEADER){
-                $this->handleHttpHeader($ch,$argv[2]);
-            }elseif ($argv[1] == CURLOPT_URL){
-                $this->handleUrl($ch,$argv[2]);
-            }
-
-            pinpoint_add_clues(PP_PHP_ARGS,"...");
-
-        }
-    }
-
-    function onEnd(&$ret)
-    {
-        if($this->apId == 'curl_exec'){
-            $argv = &$this->args[0];
-            $ch = $argv[0];
-            pinpoint_add_clue(PP_DESTINATION,$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)));
-            pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE);
-            pinpoint_add_clue(PP_NEXT_SPAN_ID,PerRequestPlugins::instance()->getCurNextSpanId());
-            pinpoint_add_clues(PP_HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL));
-            pinpoint_add_clues(PP_HTTP_STATUS_CODE,curl_getinfo($ch,CURLINFO_HTTP_CODE));
-
-        }
-    }
-
-    function onException($e)
-    {
-
-    }
-    function getHostFromURL(string $url)
+    public static function getHostFromURL(string $url)
     {
         $urlAr   = parse_url($url);
         $retUrl = '';
@@ -118,10 +95,6 @@ class NextSpanPlugin extends Candy
             $retUrl.=$urlAr['host'];
         }
 
-//        if(isset($urlAr['path'])){
-//            $retUrl.=$urlAr['path'];
-//        }
-
         if(isset($urlAr['port']))
         {
             $retUrl .= ":".$urlAr['port'];
@@ -129,4 +102,5 @@ class NextSpanPlugin extends Candy
 
         return $retUrl;
     }
+
 }

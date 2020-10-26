@@ -1,5 +1,19 @@
 <?php
-
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 namespace Plugins\AutoGen\EasySwoole;
 use Plugins\Framework\Swoole\Candy;
 
@@ -17,14 +31,14 @@ class MysqliGetPlugin extends Candy
         $config = $ins_mysqli->getConfig();
         $host = $config->getHost();
         $port = $config->getPort();
-        pinpoint_add_clue(PP_SERVER_TYPE,MYSQL,$this->id);
-        pinpoint_add_clue(DESTINATION,"$host,$port",$this->id);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL,$this->id);
+        pinpoint_add_clue(PP_DESTINATION,"$host,$port",$this->id);
 
     }
 
     function onEnd(&$ret)
     {
-        pinpoint_add_clue(SQL_FORMAT,$this->who->getLastQuery(),$this->id);
+        pinpoint_add_clue(PP_SQL_FORMAT,$this->who->getLastQuery(),$this->id);
     }
 
     function onException($e)

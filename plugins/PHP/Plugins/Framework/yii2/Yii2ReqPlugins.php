@@ -1,19 +1,21 @@
 <?php
-#-------------------------------------------------------------------------------
-# Copyright 2019 NAVER Corp
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License.  You may obtain a copy
-# of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations under
-# the License.
-#-------------------------------------------------------------------------------
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
+
+
 
 
 namespace Plugins\Framework\yii2;
@@ -57,11 +59,11 @@ class Yii2ReqPlugins
         $this->initTrace();
 
         pinpoint_start_trace();
-        pinpoint_add_clue("uri",$_SERVER['REQUEST_URI']);
-        pinpoint_add_clue("client",$_SERVER["REMOTE_ADDR"]);
-        pinpoint_add_clue("server",$_SERVER["HTTP_HOST"]);
-        pinpoint_add_clue("stp",PHP);
-        pinpoint_add_clue("name","PHP Request");
+        pinpoint_add_clue(PP_REQ_URI,$_SERVER['REQUEST_URI']);
+        pinpoint_add_clue(PP_REQ_CLIENT,$_SERVER["REMOTE_ADDR"]);
+        pinpoint_add_clue(PP_REQ_SERVER,$_SERVER["HTTP_HOST"]);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP);
+        pinpoint_add_clue("name","PP_PHP Request");
 
         if(defined('APPLICATION_NAME')){
             $this->app_name = APPLICATION_NAME;
@@ -69,7 +71,7 @@ class Yii2ReqPlugins
             $this->app_name = pinpoint_app_name();
         }
 
-        pinpoint_add_clue("appname",$this->app_name);
+        pinpoint_add_clue(PP_APP_NAME,$this->app_name);
         if(defined('APPLICATION_ID'))
         {
             $this->app_id = APPLICATION_ID;
@@ -77,65 +79,65 @@ class Yii2ReqPlugins
             $this->app_id = pinpoint_app_id();
         }
 
-        pinpoint_add_clue('appid',$this->app_id);
+        pinpoint_add_clue(PP_APP_ID,$this->app_id);
 
-        if(isset($_SERVER['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID",$_SERVER))
+        if(isset($_SERVER[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID,$_SERVER))
         {
-            $this->psid = $_SERVER['HTTP_PINPOINT_PSPANID'];
-            pinpoint_add_clue("psid",$this->psid);
+            $this->psid = $_SERVER[PP_HEADER_PSPANID];
+            pinpoint_add_clue(PP_PARENT_SPAN_ID,$this->psid);
             echo "psid: $this->psid \n";
         }
 
-        if(isset($_SERVER['HTTP_PINPOINT_SPANID']) || array_key_exists("HTTP_PINPOINT_SPANID",$_SERVER))
+        if(isset($_SERVER[PP_HEADER_SPANID]) || array_key_exists(PP_HEADER_SPANID,$_SERVER))
         {
-            $this->sid = $_SERVER['HTTP_PINPOINT_SPANID'];
+            $this->sid = $_SERVER[PP_HEADER_SPANID];
             echo "sid: $this->sid \n";
         }else{
             $this->sid = $this->generateSpanID();
         }
 
-        if(isset($_SERVER['HTTP_PINPOINT_TRACEID']) || array_key_exists("HTTP_PINPOINT_TRACEID",$_SERVER))
+        if(isset($_SERVER[PP_HEADER_TRACEID]) || array_key_exists(PP_HEADER_TRACEID,$_SERVER))
         {
-            $this->tid = $_SERVER['HTTP_PINPOINT_TRACEID'];
+            $this->tid = $_SERVER[PP_HEADER_TRACEID];
             echo "tid: $this->tid\n";
         }else{
             $this->tid = $this->generateTransactionID();
         }
 
-        if(isset($_SERVER['HTTP_PINPOINT_PAPPNAME']) || array_key_exists("HTTP_PINPOINT_PAPPNAME",$_SERVER))
+        if(isset($_SERVER[PP_HEADER_PAPPNAME]) || array_key_exists(PP_HEADER_PAPPNAME,$_SERVER))
         {
-            $this->pname = $_SERVER['HTTP_PINPOINT_PAPPNAME'];
+            $this->pname = $_SERVER[PP_HEADER_PAPPNAME];
 
-            pinpoint_add_clue('pname',$this->pname);
+            pinpoint_add_clue(PP_PARENT_NAME,$this->pname);
             echo "pname: $this->pname";
         }
 
-        if(isset($_SERVER['HTTP_PINPOINT_PAPPTYPE']) || array_key_exists("HTTP_PINPOINT_PAPPTYPE",$_SERVER))
+        if(isset($_SERVER[PP_HEADER_PAPPTYPE]) || array_key_exists(PP_HEADER_PAPPTYPE,$_SERVER))
         {
-            $this->ptype = $_SERVER['HTTP_PINPOINT_PAPPTYPE'];
-            pinpoint_add_clue('ptype',$this->ptype);
+            $this->ptype = $_SERVER[PP_HEADER_PAPPTYPE];
+            pinpoint_add_clue(PP_PARENT_TYPE,$this->ptype);
             echo "ptype: $this->pname";
         }
 
-        if(isset($_SERVER['HTTP_PINPOINT_HOST']) || array_key_exists("HTTP_PINPOINT_HOST",$_SERVER))
+        if(isset($_SERVER[PP_HEADER_PINPOINT_HOST]) || array_key_exists(PP_HEADER_PINPOINT_HOST,$_SERVER))
         {
-            $this->ah = $_SERVER['HTTP_PINPOINT_HOST'];
-            pinpoint_add_clue('Ah',$this->ah);
+            $this->ah = $_SERVER[PP_HEADER_PINPOINT_HOST];
+            pinpoint_add_clue(PP_PARENT_HOST,$this->ah);
             echo "Ah: $this->ah";
         }
-        if(isset($_SERVER[NGINX_PROXY]) ||array_key_exists(NGINX_PROXY,$_SERVER))
+        if(isset($_SERVER[PP_HEADER_NGINX_PROXY]) ||array_key_exists(PP_HEADER_NGINX_PROXY,$_SERVER))
         {
-            pinpoint_add_clue("NP",$_SERVER[NGINX_PROXY]);
+            pinpoint_add_clue(PP_NGINX_PROXY,$_SERVER[PP_HEADER_NGINX_PROXY]);
         }
 
-        if(isset($_SERVER[APACHE_PROXY]) ||array_key_exists(APACHE_PROXY,$_SERVER))
+        if(isset($_SERVER[PP_HEADER_APACHE_PROXY]) ||array_key_exists(PP_HEADER_APACHE_PROXY,$_SERVER))
         {
-            pinpoint_add_clue("AP",$_SERVER[APACHE_PROXY]);
+            pinpoint_add_clue(PP_APACHE_PROXY,$_SERVER[PP_HEADER_APACHE_PROXY]);
         }
 
-        if(isset($_SERVER[SAMPLED]) || array_key_exists(SAMPLED,$_SERVER))
+        if(isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED,$_SERVER))
         {
-            if ($_SERVER[SAMPLED] == "s0"){
+            if ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED){
                 $this->isLimit = true;
                 //drop this request. collector could not receive any thing
                 pinpoint_drop_trace();
@@ -145,15 +147,15 @@ class Yii2ReqPlugins
         }
 
 
-        pinpoint_add_clue("tid",$this->tid);
-        pinpoint_add_clue("sid",$this->sid);
+        pinpoint_add_clue(PP_TRANSCATION_ID,$this->tid);
+        pinpoint_add_clue(PP_SPAN_ID,$this->sid);
 
     }
     public function __destruct()
     {
         // reset limit
         $this->isLimit = false;
-        pinpoint_add_clues(HTTP_STATUS_CODE,http_response_code());
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,http_response_code());
         pinpoint_end_trace();
     }
 

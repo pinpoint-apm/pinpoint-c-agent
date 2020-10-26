@@ -1,11 +1,19 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: eeliu
- * Date: 10/16/20
- * Time: 11:17 AM
- */
-
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 namespace Plugins\AutoGen\workerman;
 
 use Plugins\Util\Trace;
@@ -34,7 +42,7 @@ class HttpClientPlugin extends Candy
 
     private function handleHttpHeader($url,&$headers)
     {
-        if(pinpoint_get_context("Pinpoint-Sampled",$this->pinpoint_id) == 's0'){
+        if(pinpoint_get_context("Pinpoint-Sampled",$this->pinpoint_id) == PP_NOT_SAMPLED){
             $headers[] = 'Pinpoint-Sampled:s0';
             return ;
         }
@@ -45,8 +53,8 @@ class HttpClientPlugin extends Candy
 
         $headers[] = 'Pinpoint-Host:'.$url;
 
-        $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context("tid",$this->pinpoint_id) ;
-        $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context("sid",$this->pinpoint_id);
+        $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID,$this->pinpoint_id) ;
+        $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID,$this->pinpoint_id);
 
         $headers[] ='Pinpoint-Spanid:'.$this->nsid;
     }
@@ -85,16 +93,16 @@ class HttpClientPlugin extends Candy
         echo $this->pinpoint_id." startRequest \n";
         pinpoint_add_clue(PP_DESTINATION,$this->getHostFromUrl($this->url),$this->pinpoint_id);
         pinpoint_add_clues(PP_PHP_ARGS,$this->url,$this->pinpoint_id);
-        pinpoint_add_clue(PP_SERVER_TYPE,PINPOINT_PHP_REMOTE,$this->pinpoint_id);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE,$this->pinpoint_id);
         pinpoint_add_clue(PP_NEXT_SPAN_ID,$this->nsid,$this->pinpoint_id);
-        pinpoint_add_clues(HTTP_URL,$this->url,$this->pinpoint_id);
+        pinpoint_add_clues(PP_HTTP_URL,$this->url,$this->pinpoint_id);
     }
 
 
     protected function onError($exception)
     {
         pinpoint_add_clue(PP_ADD_EXCEPTION,$exception,$this->pinpoint_id);
-        pinpoint_add_clues(HTTP_STATUS_CODE,0,$this->pinpoint_id);
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,0,$this->pinpoint_id);
         pinpoint_end_trace($this->pinpoint_id);
         echo $this->pinpoint_id." onError \n";
     }
@@ -102,7 +110,7 @@ class HttpClientPlugin extends Candy
     protected function endRequest($reponse)
     {
         $status_code = $reponse->getStatusCode();
-        pinpoint_add_clues(HTTP_STATUS_CODE,$status_code,$this->pinpoint_id);
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,$status_code,$this->pinpoint_id);
         pinpoint_end_trace($this->pinpoint_id);
         echo $this->pinpoint_id." endRequest \n";
     }

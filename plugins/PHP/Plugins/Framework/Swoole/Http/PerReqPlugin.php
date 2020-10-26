@@ -1,4 +1,19 @@
 <?php
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 namespace Plugins\Framework\Swoole\Http;
 
 use Plugins\Framework\Swoole\IDContext;
@@ -31,86 +46,82 @@ class PerReqPlugin
     {
         $id = pinpoint_start_trace(0);
         IDContext::set($id);
-        print("PerReqPlugin call onBefore ".IDContext::get()."\n");
         $request =$this->request;
         $header = &$request->header;
-        pinpoint_add_clue("uri",$request->server['request_uri'],$id);
-        pinpoint_add_clue("client",$request->server['remote_addr'],$id);
-        pinpoint_add_clue("server",$header['host'],$id);
-        pinpoint_add_clue("stp", PHP,$id);
+        pinpoint_add_clue(PP_REQ_URI,$request->server['request_uri'],$id);
+        pinpoint_add_clue(PP_REQ_CLIENT,$request->server['remote_addr'],$id);
+        pinpoint_add_clue(PP_REQ_SERVER,$header['host'],$id);
+        pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP,$id);
         pinpoint_add_clue(PP_INTERCEPTER_NAME, "swoole-http-server",$id);
         $this->app_name = APPLICATION_NAME;
-        pinpoint_add_clue("appname", $this->app_name,$id);
-        pinpoint_set_context("appname",$this->app_name,$id);
+        pinpoint_add_clue(PP_APP_NAME, $this->app_name,$id);
+        pinpoint_set_context(PP_APP_NAME,$this->app_name,$id);
         $this->app_id = APPLICATION_ID;
-        pinpoint_add_clue('appid', $this->app_id,$id);
-        pinpoint_set_context('appname', $this->app_id,$id);
+        pinpoint_add_clue(PP_APP_ID, $this->app_id,$id);
+        pinpoint_set_context(PP_APP_NAME, $this->app_id,$id);
 
-        if (isset($header['HTTP_PINPOINT_PSPANID']) || array_key_exists("HTTP_PINPOINT_PSPANID", $header)) {
-            $this->psid = $header['HTTP_PINPOINT_PSPANID'];
-            pinpoint_add_clue("psid", $this->psid,$id);
-            pinpoint_set_context('psid', $this->psid,$id);
-            echo "psid: $this->psid \n";
+        if (isset($header[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID, $header)) {
+            $this->psid = $header[PP_HEADER_PSPANID];
+            pinpoint_add_clue(PP_PARENT_SPAN_ID, $this->psid,$id);
+            pinpoint_set_context(PP_PARENT_SPAN_ID, $this->psid,$id);
         }
 
-        if (isset($header['HTTP_PINPOINT_SPANID']) || array_key_exists("HTTP_PINPOINT_SPANID", $header)) {
-            $this->sid = $header['HTTP_PINPOINT_SPANID'];
-            echo "sid: $this->sid \n";
+        if (isset($header[PP_HEADER_SPANID]) || array_key_exists(PP_HEADER_SPANID, $header)) {
+            $this->sid = $header[PP_HEADER_SPANID];
         } else {
             $this->sid = Trace::generateSpanID();
         }
 
-        if (isset($header['HTTP_PINPOINT_TRACEID']) || array_key_exists("HTTP_PINPOINT_TRACEID", $header)) {
-            $this->tid = $header['HTTP_PINPOINT_TRACEID'];
+        if (isset($header[PP_HEADER_TRACEID]) || array_key_exists(PP_HEADER_TRACEID, $header)) {
+            $this->tid = $header[PP_HEADER_TRACEID];
         } else {
             $this->tid = $this->generateTransactionID();
         }
 
-        if (isset($header['HTTP_PINPOINT_PAPPNAME']) || array_key_exists("HTTP_PINPOINT_PAPPNAME", $header)) {
-            $this->pname = $header['HTTP_PINPOINT_PAPPNAME'];
+        if (isset($header[PP_HEADER_PAPPNAME]) || array_key_exists(PP_HEADER_PAPPNAME, $header)) {
+            $this->pname = $header[PP_HEADER_PAPPNAME];
 
-            pinpoint_add_clue('pname', $this->pname,$id);
-            echo "pname: $this->pname";
-        }
-
-        if (isset($header['HTTP_PINPOINT_PAPPTYPE']) || array_key_exists("HTTP_PINPOINT_PAPPTYPE", $header)) {
-            $this->ptype = $header['HTTP_PINPOINT_PAPPTYPE'];
-            pinpoint_add_clue('ptype', $this->ptype,$id);
+            pinpoint_add_clue(PP_PARENT_NAME, $this->pname,$id);
         }
 
-        if (isset($header['HTTP_PINPOINT_HOST']) || array_key_exists("HTTP_PINPOINT_HOST", $header)) {
-            $this->ah = $header['HTTP_PINPOINT_HOST'];
-            pinpoint_add_clue('Ah', $this->ah,$id);
-        }
-        if (isset($header[NGINX_PROXY]) || array_key_exists(NGINX_PROXY, $header)) {
-            pinpoint_add_clue("NP", $header[NGINX_PROXY],$id);
+        if (isset($header[PP_HEADER_PAPPTYPE]) || array_key_exists(PP_HEADER_PAPPTYPE, $header)) {
+            $this->ptype = $header[PP_HEADER_PAPPTYPE];
+            pinpoint_add_clue(PP_PARENT_TYPE, $this->ptype,$id);
         }
 
-        if (isset($header[APACHE_PROXY]) || array_key_exists(APACHE_PROXY, $header)) {
-            pinpoint_add_clue("AP", $header[APACHE_PROXY],$id);
+        if (isset($header[PP_HEADER_PINPOINT_HOST]) || array_key_exists(PP_HEADER_PINPOINT_HOST, $header)) {
+            $this->ah = $header[PP_HEADER_PINPOINT_HOST];
+            pinpoint_add_clue(PP_PARENT_HOST, $this->ah,$id);
         }
-        pinpoint_set_context("Pinpoint-Sampled","s1",$id);
-        if (isset($header[SAMPLED]) || array_key_exists(SAMPLED, $header)) {
-            if ($header[SAMPLED] == "s0") {
+        if (isset($header[PP_HEADER_NGINX_PROXY]) || array_key_exists(PP_HEADER_NGINX_PROXY, $header)) {
+            pinpoint_add_clue(PP_NGINX_PROXY, $header[PP_HEADER_NGINX_PROXY],$id);
+        }
+
+        if (isset($header[PP_HEADER_APACHE_PROXY]) || array_key_exists(PP_HEADER_APACHE_PROXY, $header)) {
+            pinpoint_add_clue(PP_APACHE_PROXY, $header[PP_HEADER_APACHE_PROXY],$id);
+        }
+        pinpoint_set_context("Pinpoint-Sampled",PP_SAMPLED,$id);
+        if (isset($header[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $header)) {
+            if ($header[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED) {
                 //drop this request. collector could not receive any thing
                 pinpoint_drop_trace($id);
-                pinpoint_set_context("Pinpoint-Sampled","s0",$id);
+                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED,$id);
             }
 
         } else {
             if(pinpoint_tracelimit())
             {
-                pinpoint_set_context("Pinpoint-Sampled","s0",$id);
+                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED,$id);
                 pinpoint_drop_trace($id);
             }
         }
 
-        pinpoint_add_clue("tid", $this->tid,$id);
-        pinpoint_set_context('tid', $this->tid,$id);
-        pinpoint_add_clue("sid", $this->sid,$id);
-        pinpoint_set_context('sid', (string)$this->sid,$id);
+        pinpoint_add_clue(PP_TRANSCATION_ID, $this->tid,$id);
+        pinpoint_set_context(PP_TRANSCATION_ID, $this->tid,$id);
+        pinpoint_add_clue(PP_SPAN_ID, $this->sid,$id);
+        pinpoint_set_context(PP_SPAN_ID, (string)$this->sid,$id);
 
-        pinpoint_set_context((string)HTTP_STATUS_CODE,'200',$id);
+        pinpoint_set_context((string)PP_HTTP_STATUS_CODE,'200',$id);
 
     }
 
@@ -123,10 +134,9 @@ class PerReqPlugin
     protected function onEnd(&$ret)
     {
         $id = IDContext::get();
-        $code = pinpoint_get_context((string)HTTP_STATUS_CODE,$id);
-        pinpoint_add_clues(HTTP_STATUS_CODE,$code,$id,PINPOINT_ROOT_LOC);
+        $code = pinpoint_get_context((string)PP_HTTP_STATUS_CODE,$id);
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,$code,$id,PP_ROOT_LOC);
         pinpoint_end_trace($id);
-        print("PerReqPlugin call onEnd ".IDContext::get()."\r\n\r\n");
     }
 
     public function __invoke(&...$args)
@@ -135,7 +145,6 @@ class PerReqPlugin
         $this->reponse = &$args[1];
         $this->onBefore();
         try{
-//            $ret = call_user_func_array($this->_callback,[&$this->request,new Response($this->reponse)]);
             $ret = call_user_func_array($this->_callback,[&$this->request,&$this->reponse]);
             $this->onEnd($ret);
             return $ret;

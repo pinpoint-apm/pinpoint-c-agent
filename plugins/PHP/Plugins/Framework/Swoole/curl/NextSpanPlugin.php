@@ -1,19 +1,19 @@
 <?php
-#-------------------------------------------------------------------------------
-# Copyright 2019 NAVER Corp
-# 
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not
-# use this file except in compliance with the License.  You may obtain a copy
-# of the License at
-# 
-#   http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-# License for the specific language governing permissions and limitations under
-# the License.
-#-------------------------------------------------------------------------------
+/******************************************************************************
+ * Copyright 2020 NAVER Corp.                                                 *
+ *                                                                            *
+ * Licensed under the Apache License, Version 2.0 (the "License");            *
+ * you may not use this file except in compliance with the License.           *
+ * You may obtain a copy of the License at                                    *
+ *                                                                            *
+ *     http://www.apache.org/licenses/LICENSE-2.0                             *
+ *                                                                            *
+ * Unless required by applicable law or agreed to in writing, software        *
+ * distributed under the License is distributed on an "AS IS" BASIS,          *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   *
+ * See the License for the specific language governing permissions and        *
+ * limitations under the License.                                             *
+ ******************************************************************************/
 
 namespace Plugins\Framework\Swoole\curl;
 
@@ -25,7 +25,7 @@ class NextSpanPlugin extends Candy
 
     function onBefore()
     {
-        pinpoint_add_clues(PHP_ARGS,"...",$this->id);
+        pinpoint_add_clues(PP_PHP_ARGS,"...",$this->id);
     }
 
     function onEnd(&$ret)
@@ -33,10 +33,10 @@ class NextSpanPlugin extends Candy
         if($this->apId == 'curl_exec'){
             $argv = &$this->args[0];
             $ch = $argv[0];
-            pinpoint_add_clue("dst",$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)),$this->id);
-            pinpoint_add_clue("stp",PINPOINT_PHP_REMOTE,$this->id);
-            pinpoint_add_clue('nsid',pinpoint_get_context('nsid',$this->id),$this->id);
-            pinpoint_add_clues(HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),$this->id);
+            pinpoint_add_clue(PP_DESTINATION,$this->getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)),$this->id);
+            pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE,$this->id);
+            pinpoint_add_clue(PP_NEXT_SPAN_ID,pinpoint_get_context(PP_NEXT_SPAN_ID,$this->id),$this->id);
+            pinpoint_add_clues(PP_HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),$this->id);
 
         }
     }
