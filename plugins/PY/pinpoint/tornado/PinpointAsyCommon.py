@@ -38,14 +38,14 @@ class AsyCandy(object):
 
     def onBefore(self,*args, **kwargs):
         id = pinpointId.get()
-        newid = pinpointPy.start_trace(id)
-        pinpointId.set(newid)
-        self.node_id = newid
+        new_id = pinpointPy.start_trace(id)
+        pinpointId.set(new_id)
+        self.node_id = new_id
         return (args,kwargs)
 
     def onEnd(self,ret):
-        newid = pinpointPy.end_trace(self.node_id)
-        pinpointId.set(newid)
+        new_id = pinpointPy.end_trace(self.node_id)
+        pinpointId.set(new_id)
 
     def onException(self,e):
         raise NotImplementedError()
