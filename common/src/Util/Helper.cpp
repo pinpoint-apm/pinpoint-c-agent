@@ -40,7 +40,7 @@ uint64_t get_current_msec_stamp()
 
 std::string node_tree_to_string(Json::Value &value)
 {
-    return std::move(_writer.write(value));
+    return _writer.write(value);
 }
 
 /**
@@ -69,12 +69,12 @@ Json::Value merge_children(TraceNode& node)
         reverse_node_list(value["calls"],pstart);
     }
 
-    return std::move(value);  
+    return value;
 }
 
 Json::Value merge_node_tree(TraceNode& root)
 {
-    return std::move(merge_children(root));
+    return merge_children(root);
 }
 
 
