@@ -14,25 +14,43 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Plugins\Sys\PDO;
 
-use Plugins\Common\Candy;
+namespace Plugins\Framework\Swoole\curl;
 
-class PDOExec extends Candy
+use Plugins\Framework\Swoole\Candy;
+use Plugins\Sys\curl\CurlUtil;
+
+class CurlExecPlugin extends Candy
 {
+    public $nsid = null;
 
     function onBefore()
     {
-        pinpoint_add_clues(PP_PHP_ARGS, sprintf("%s",$this->args[0][0]));
     }
 
-    function onEnd(&$ret)
+    function onEnd(&$url)
     {
-        pinpoint_add_clues(PP_PHP_RETURN,"$ret");
+//        $argv = &$this->args[0];
+//        $ch = $argv[0];
+//        pinpoint_add_clue(PP_DESTINATION,CurlUtil::getHostFromURL(curl_getinfo($ch,CURLINFO_EFFECTIVE_URL)),$this->id);
+//        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE,$this->id);
+//        pinpoint_add_clue(PP_NEXT_SPAN_ID,pinpoint_get_context(PP_NEXT_SPAN_ID,$this->id),$this->id);
+//        pinpoint_add_clues(PP_HTTP_URL,curl_getinfo($ch,CURLINFO_EFFECTIVE_URL),$this->id);
+
+        pinpoint_add_clue(PP_DESTINATION,CurlUtil::getHostFromURL($url),$this->id);
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE,$this->id);
+        pinpoint_add_clue(PP_NEXT_SPAN_ID,pinpoint_get_context(PP_NEXT_SPAN_ID,$this->id),$this->id);
+        pinpoint_add_clues(PP_HTTP_URL,$url,$this->id);
+        $code = curl_getinfo($this->args[0],CURLINFO_HTTP_CODE);
+        if($code == 404){
+            pinpoint_add_clue(PP_ADD_EXCEPTION," 404 file not found",$this->id);
+        }
+        pinpoint_add_clues(PP_HTTP_STATUS_CODE,$code,$this->id);
+
     }
 
     function onException($e)
     {
-        // TODO: Implement onException() method.
+
     }
 }

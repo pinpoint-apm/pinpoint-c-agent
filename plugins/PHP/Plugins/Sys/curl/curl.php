@@ -17,16 +17,17 @@
 namespace Plugins\Sys\curl;
 
 static $curlChAr= [];
-
+const CH_URL="url";
+const CH_HEADRR="header";
 function curl_init($url = null)
 {
     $ch = \curl_init($url);
     global $curlChAr;
     if($url){
-        $curlChAr[strval($ch)] = ['url'=>$url];
-
+        $curlChAr[strval($ch)] = [CH_URL=>$url,CH_HEADRR=>[]];
     }else{
-        $curlChAr[strval($ch)] = [];
+        $curlChAr[strval($ch)] = [CH_URL=>"",
+            CH_HEADRR=>[]];
     }
     return $ch;
 }
@@ -36,10 +37,12 @@ function curl_setopt($ch, $option, $value)
 {
     if($option == CURLOPT_HTTPHEADER)
     {
-        CurlUtil::appendPinpointHeader($value);
+        global $curlChAr;
+        $curlChAr[strval($ch)][CH_HEADRR] = $value;
+
     }elseif ($option == CURLOPT_URL ){
         global $curlChAr;
-        $curlChAr[strval($ch)] = ['url'=>$value];
+        $curlChAr[strval($ch)][CH_URL]=$value;
     }
 
     return \curl_setopt($ch, $option, $value);
@@ -47,27 +50,41 @@ function curl_setopt($ch, $option, $value)
 
 function curl_setopt_array($ch, array $options)
 {
-    $args = \pinpoint_get_func_ref_args();
-    $plugin = new NextSpanPlugin('curl_setopt_array', null, $args);
-    try {
-        $plugin->onBefore();
-        $ret = call_user_func_array('curl_setopt_array', $args);
-        $plugin->onEnd($ret);
-        return $ret;
-    } catch (\Exception $e) {
-        $plugin->onException($e);
-        throw $e;
+    global $curlChAr;
+    if(isset($options[CURLOPT_URL]))
+    {
+
+        $curlChAr[strval($ch)][CH_URL] = $options[CURLOPT_URL];
     }
+
+    if(isset($options[CURLOPT_HTTPHEADER]))
+    {
+
+        $curlChAr[strval($ch)][CH_HEADRR] = $options[CURLOPT_HTTPHEADER];
+    }
+
+    return \curl_setopt_array($ch,$options);
 }
+
+
+function set_pinpoint_header($ch,$url,$userHeader)
+{
+    $ppHeader = CurlUtil::getPinpointHeader($url);
+    $header= array_merge($userHeader,$ppHeader);
+    \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
+}
+
 
 function curl_exec($ch)
 {
-    $args = \pinpoint_get_func_ref_args();
-    $plugin = new NextSpanPlugin('curl_exec', null, $args);
+    global $curlChAr;
+    $chAr= $curlChAr[strval($ch)];
+    $plugin = new CurlExecPlugin('curl_exec', null, $ch);
     try {
         $plugin->onBefore();
-        $ret = call_user_func_array('curl_exec', $args);
-        $plugin->onEnd($ret);
+        set_pinpoint_header($ch,$chAr[CH_URL],$chAr[CH_HEADRR]);
+        $ret= \curl_exec($ch);
+        $plugin->onEnd($chAr[CH_URL]);
         return $ret;
     } catch (\Exception $e) {
         $plugin->onException($e);

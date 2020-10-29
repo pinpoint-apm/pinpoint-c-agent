@@ -17,7 +17,7 @@
 namespace Plugins\AutoGen\GuzzleHttp;
 
 use Plugins\Common\Candy;
-
+use Plugins\Sys\curl\CurlUtil;
 
 
 /**
@@ -29,7 +29,7 @@ class GuzzlePlugin extends Candy
 {
     function onBefore()
     {
-        pinpoint_add_clue(PP_DESTINATION,$this->getHostFromURL($this->args[0]));
+        pinpoint_add_clue(PP_DESTINATION,CurlUtil::getHostFromURL($this->args[0]));
         pinpoint_add_clues(PP_HTTP_URL,$this->args[0]);
         pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_REMOTE);
 
@@ -38,7 +38,7 @@ class GuzzlePlugin extends Candy
         {
             $n_headers = $this->args[1]['headers'];
         }
-        $n_headers = array_merge($n_headers,$this->getNextSpanHeaders($this->args[0]));
+        $n_headers = array_merge($n_headers,CurlUtil::getPinpointHeader($this->args[0]));
         $this->args[1]['headers'] = $n_headers;
     }
 
@@ -53,48 +53,5 @@ class GuzzlePlugin extends Candy
         pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
     }
 
-    protected function getHostFromURL(string $url)
-    {
-        $urlAr   = parse_url($url);
-        $retUrl = '';
-        if(isset($urlAr['host']))
-        {
-            $retUrl.=$urlAr['host'];
-        }
-
-        if(isset($urlAr['port']))
-        {
-            $retUrl .= ":".$urlAr['port'];
-        }
-
-//        if(isset($urlAr['path'])){
-//            $retUrl.=$urlAr['path'];
-//        }
-//
-        return $retUrl;
-    }
-
-    protected function getNextSpanHeaders($host)
-    {
-
-        if(pinpoint_tracelimit()){
-            $headers['Pinpoint-Sampled'] = PP_NOT_SAMPLED;
-            return $headers;
-        }
-
-        $nsid = PerRequestPlugins::instance()->generateSpanID();
-        $header = array(
-            'Pinpoint-Sampled' =>PP_SAMPLED,
-            'Pinpoint-Flags'=>0,
-            'Pinpoint-Papptype'=>1500,
-            'Pinpoint-Pappname'=>PerRequestPlugins::instance()->app_name,
-            'Pinpoint-Host' =>$this->getHostFromURL($host),
-            'Pinpoint-Traceid' =>PerRequestPlugins::instance()->tid,
-            'Pinpoint-Pspanid'=>PerRequestPlugins::instance()->sid,
-            'Pinpoint-Spanid'=>$nsid
-            );
-
-        return $header;
-    }
 
 }

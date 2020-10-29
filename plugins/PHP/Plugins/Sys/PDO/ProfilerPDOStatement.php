@@ -37,10 +37,8 @@ class ProfilerPDOStatement extends \PDOStatement
 
     protected function onBefore()
     {
-
         pinpoint_start_trace();
         pinpoint_add_clue(PP_INTERCEPTER_NAME,$this->name);
-
     }
 
     protected function onEnd(&$ret)

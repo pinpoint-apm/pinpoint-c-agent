@@ -15,9 +15,6 @@
  * limitations under the License.                                             *
  ******************************************************************************/
 
-
-
-
 namespace Plugins;
 
 require_once "__init__.php";
@@ -49,61 +46,37 @@ class PerRequestPlugins
         return self::$_intance;
     }
 
-    private function initTrace()
-    {
-        while (pinpoint_end_trace() > 0);
-    }
-
     private function __construct()
     {
-        $this->initTrace();
 
         pinpoint_start_trace();
+
         pinpoint_add_clue(PP_REQ_URI, $_SERVER['REQUEST_URI']);
         pinpoint_add_clue(PP_REQ_CLIENT, $_SERVER["REMOTE_ADDR"]);
         pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP);
-        pinpoint_add_clue(PP_INTERCEPTER_NAME, "PP_PHP Request");
+        pinpoint_add_clue(PP_INTERCEPTER_NAME, "PHP Request");
 
-        if (defined('APPLICATION_NAME')) {
-            if($_SERVER["HTTP_HOST"] == "php.backend.com"){
-                $this->app_name = APPLICATION_NAME.'01';
-            }else{
-                $this->app_name = APPLICATION_NAME;
-            }
-        } else {
-            $this->app_name = pinpoint_app_name();
-        }
 
+        $this->app_name = APPLICATION_NAME;
         pinpoint_add_clue(PP_APP_NAME, $this->app_name);
-        if (defined('APPLICATION_ID')) {
-            if($_SERVER["HTTP_HOST"] == "php.backend.com"){
-                $this->app_id = APPLICATION_ID.'01';
-            }else{
-                $this->app_id = APPLICATION_ID;
-            }
-        } else {
-            $this->app_id = pinpoint_app_id();
-        }
 
+        $this->app_id = APPLICATION_ID;
         pinpoint_add_clue(PP_APP_ID, $this->app_id);
 
         if (isset($_SERVER[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID, $_SERVER)) {
             $this->psid = $_SERVER[PP_HEADER_PSPANID];
             pinpoint_add_clue(PP_PARENT_SPAN_ID, $this->psid);
-            echo "psid: $this->psid \n";
         }
 
         if (isset($_SERVER[PP_HEADER_SPANID]) || array_key_exists(PP_HEADER_SPANID, $_SERVER)) {
             $this->sid = $_SERVER[PP_HEADER_SPANID];
-            echo "sid: $this->sid \n";
         } else {
             $this->sid = $this->generateSpanID();
         }
 
         if (isset($_SERVER[PP_HEADER_TRACEID]) || array_key_exists(PP_HEADER_TRACEID, $_SERVER)) {
             $this->tid = $_SERVER[PP_HEADER_TRACEID];
-            echo "tid: $this->tid\n";
         } else {
             $this->tid = $this->generateTransactionID();
         }
@@ -112,19 +85,16 @@ class PerRequestPlugins
             $this->pname = $_SERVER[PP_HEADER_PAPPNAME];
 
             pinpoint_add_clue(PP_PARENT_NAME, $this->pname);
-            echo "pname: $this->pname";
         }
 
         if (isset($_SERVER[PP_HEADER_PAPPTYPE]) || array_key_exists(PP_HEADER_PAPPTYPE, $_SERVER)) {
             $this->ptype = $_SERVER[PP_HEADER_PAPPTYPE];
             pinpoint_add_clue(PP_PARENT_TYPE, $this->ptype);
-            echo "ptype: $this->pname";
         }
 
         if (isset($_SERVER[PP_HEADER_PINPOINT_HOST]) || array_key_exists(PP_HEADER_PINPOINT_HOST, $_SERVER)) {
             $this->ah = $_SERVER[PP_HEADER_PINPOINT_HOST];
             pinpoint_add_clue(PP_PARENT_HOST, $this->ah);
-            echo "Ah: $this->ah";
         }
         if (isset($_SERVER[PP_HEADER_NGINX_PROXY]) || array_key_exists(PP_HEADER_NGINX_PROXY, $_SERVER)) {
             pinpoint_add_clue(PP_NGINX_PROXY, $_SERVER[PP_HEADER_NGINX_PROXY]);
@@ -134,20 +104,26 @@ class PerRequestPlugins
             pinpoint_add_clue(PP_APACHE_PROXY, $_SERVER[PP_HEADER_APACHE_PROXY]);
         }
 
+        pinpoint_set_context("Pinpoint-Sampled",PP_SAMPLED);
         if (isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) {
             if ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED) {
                 $this->isLimit = true;
                 //drop this request. collector could not receive any thing
+                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
                 pinpoint_drop_trace();
             }
         } else {
-            $this->isLimit = pinpoint_tracelimit();
-            echo $this->isLimit;
+            if(pinpoint_tracelimit()){
+                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
+                pinpoint_drop_trace();
+            }
         }
-
 
         pinpoint_add_clue(PP_TRANSCATION_ID, $this->tid);
         pinpoint_add_clue(PP_SPAN_ID, $this->sid);
+        pinpoint_set_context(PP_TRANSCATION_ID, $this->tid);
+        pinpoint_set_context(PP_SPAN_ID, (string)$this->sid);
+
     }
     public function __destruct()
     {
