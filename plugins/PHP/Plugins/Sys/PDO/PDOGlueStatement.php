@@ -26,7 +26,7 @@ class PDOGlueStatement extends Candy
         // todo stp, should follow the dsn
         $dbInfo = $this->parseDb($this->who->dsn);
         pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clues(PP_PHP_ARGS, sprintf("sql:%s",$this->args[0]));
+        pinpoint_add_clue(PP_SQL_FORMAT, sprintf("%s",$this->args[0]));
         pinpoint_add_clue(PP_DESTINATION,$dbInfo['host']);
     }
     function onEnd(&$ret)
