@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Plugins\Sys\curl;
+namespace Plugins\Framework\Swoole\curl;
 
 use Plugins\Framework\Swoole\IDContext;
 use Plugins\Util\Trace;
-
+use Plugins\Sys\curl\CurlUtil as URLUtils;
 class CurlUtil
 {
+    /*
     public static function appendPinpointHeader($url, &$headers)
     {
         if(pinpoint_get_context('Pinpoint-Sampled', IDContext::get())==PP_NOT_SAMPLED){
@@ -33,7 +34,7 @@ class CurlUtil
         $headers[] ='Pinpoint-Papptype:1500';
         $headers[] ='Pinpoint-Pappname:'.APPLICATION_NAME;
 
-        $headers[] = 'Pinpoint-Host:'.static::getHostFromURL($url);
+        $headers[] = 'Pinpoint-Host:'.URLUtils::getHostFromURL($url);
 
         $headers[] ='Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID, IDContext::get());
         $headers[] ='Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID, IDContext::get());
@@ -54,7 +55,7 @@ class CurlUtil
         $headers['Pinpoint-Papptype'] ='1500';
         $headers['Pinpoint-Pappname'] = APPLICATION_NAME;
 
-        $headers['Pinpoint-Host'] = static::getHostFromURL($url);
+        $headers['Pinpoint-Host'] = URLUtils::getHostFromURL($url);
 
         $headers['Pinpoint-Traceid'] = pinpoint_get_context(PP_TRANSCATION_ID, IDContext::get());
         $headers['Pinpoint-Pspanid'] = pinpoint_get_context(PP_SPAN_ID, IDContext::get());
@@ -62,45 +63,28 @@ class CurlUtil
         $headers['Pinpoint-Spanid'] = $nsid;
         pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid, IDContext::get());
     }
+*/
 
-
-
-    public static function addPinpointHeader($ch,$url)
+    public static function getPinpointHeader($url)
     {
-        if(PerRequestPlugins::instance()->traceLimit()){
-            \curl_setopt($ch,CURLOPT_HTTPHEADER,array("Pinpoint-Sampled:s0"));
-            return ;
+        if(pinpoint_get_context('Pinpoint-Sampled',IDContext::get())==PP_NOT_SAMPLED){
+            return ["Pinpoint-Sampled:s0"];
         }
 
-        $nsid = PerRequestPlugins::instance()->generateSpanID();
-        $header = array(
+        $nsid = Trace::generateSpanID();
+        $header = [
             'Pinpoint-Sampled:s1',
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
-            'Pinpoint-Pappname:'.PerRequestPlugins::instance()->app_name,
-            'Pinpoint-Host:'.static::getHostFromURL($url),
-            'Pinpoint-Traceid:'.PerRequestPlugins::instance()->tid,
-            'Pinpoint-Pspanid:'.PerRequestPlugins::instance()->sid,
+            'Pinpoint-Pappname:'.APPLICATION_NAME,
+            'Pinpoint-Host:'.URLUtils::getHostFromURL($url),
+            'Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID,IDContext::get()),
+            'Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID,IDContext::get()),
             'Pinpoint-Spanid:'.$nsid
-        );
-        \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
+        ];
+        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid,IDContext::get());
+        return $header;
     }
 
-    public static function getHostFromURL(string $url)
-    {
-        $urlAr   = parse_url($url);
-        $retUrl = '';
-        if(isset($urlAr['host']))
-        {
-            $retUrl.=$urlAr['host'];
-        }
-
-        if(isset($urlAr['port']))
-        {
-            $retUrl .= ":".$urlAr['port'];
-        }
-
-        return $retUrl;
-    }
 
 }

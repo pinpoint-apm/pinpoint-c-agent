@@ -6,6 +6,6 @@
     },
     "require": {
 
-        "naver/pinpoint-php-aop": "v2.0.0"
+        "pinpoint-apm/pinpoint-php-aop": "v2.0.0"
     }
 }

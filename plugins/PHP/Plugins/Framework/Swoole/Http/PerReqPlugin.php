@@ -53,12 +53,10 @@ class PerReqPlugin
         pinpoint_add_clue(PP_REQ_SERVER,$header['host'],$id);
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP,$id);
         pinpoint_add_clue(PP_INTERCEPTER_NAME, "swoole-http-server",$id);
-        $this->app_name = APPLICATION_NAME;
-        pinpoint_add_clue(PP_APP_NAME, $this->app_name,$id);
+        pinpoint_add_clue(PP_APP_NAME, APPLICATION_NAME,$id);
         pinpoint_set_context(PP_APP_NAME,$this->app_name,$id);
-        $this->app_id = APPLICATION_ID;
-        pinpoint_add_clue(PP_APP_ID, $this->app_id,$id);
-        pinpoint_set_context(PP_APP_NAME, $this->app_id,$id);
+        pinpoint_add_clue(PP_APP_ID, APPLICATION_ID,$id);
+        pinpoint_set_context(PP_APP_ID, $this->app_id,$id);
 
         if (isset($header[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID, $header)) {
             $this->psid = $header[PP_HEADER_PSPANID];
