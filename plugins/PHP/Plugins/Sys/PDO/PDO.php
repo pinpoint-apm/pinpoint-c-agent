@@ -25,7 +25,7 @@ class PDO extends \PDO
         parent::__construct($dsn, $username, $passwd, $options);
     }
 
-    public function query($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
+    private function doPDOQuery($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
     {
         $var = new PDOGlueStatement("PDO::query",$this,$statement,$mode,$arg3,$ctorargs);
         try{
@@ -39,6 +39,12 @@ class PDO extends \PDO
         }
 
     }
+
+    public function query()
+    {
+        return $this->doPDOQuery(...\pinpoint_get_func_ref_args());
+    }
+
 
     public function exec($statement)
     {
