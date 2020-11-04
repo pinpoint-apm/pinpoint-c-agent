@@ -14,46 +14,25 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+namespace Plugins\Sys\mysqli;
 
 
+use Plugins\Common\Candy;
 
-/**pinpoint_start_trace
- * User: eeliu
- * Date: 1/4/19
- * Time: 3:23 PM
- */
-
-namespace Plugins\Common;
-require_once "PluginsDefines.php";
-
-abstract class Candy
+class MysqliQueryPlugin extends Candy
 {
-    protected $apId;
-    protected $who;
-    protected $args;
-    protected $ret=null;
 
-    public function __construct($apId,$who,&...$args)
+    function onBefore()
     {
-        /// todo start_this_aspect_trace
-        $this->apId = $apId;
-        $this->who =  $who;
-        $this->args = &$args;
-        pinpoint_start_trace();
-        pinpoint_add_clue(PP_INTERCEPTER_NAME,$apId);
+        $myqli = $this->who;
+        $query = $this->args[0];
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
+        pinpoint_add_clues(PP_PHP_ARGS,$query);
+        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
     }
 
-    public function __destruct()
+    function onEnd(&$ret)
     {
-        pinpoint_end_trace();
-    }
 
-    abstract function onBefore();
-
-    abstract function onEnd(&$ret);
-
-    public function onException($e)
-    {
-        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
     }
 }
