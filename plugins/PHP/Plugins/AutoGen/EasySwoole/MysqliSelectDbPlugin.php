@@ -26,7 +26,7 @@ class MysqliSelectDbPlugin extends Candy
 
     function onBefore()
     {
-        pinpoint_add_clue(PP_PHP_ARGS,$this->args[0],$this->id);
+        pinpoint_add_clues(PP_PHP_ARGS,$this->args[0],$this->id);
     }
 
     function onEnd(&$ret)
