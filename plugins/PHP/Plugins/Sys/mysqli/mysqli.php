@@ -14,46 +14,42 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+namespace Plugins\Sys\mysqli;
 
-
-
-/**pinpoint_start_trace
- * User: eeliu
- * Date: 1/4/19
- * Time: 3:23 PM
- */
-
-namespace Plugins\Common;
-require_once "PluginsDefines.php";
-
-abstract class Candy
+class Mysqli extends \mysqli
 {
-    protected $apId;
-    protected $who;
-    protected $args;
-    protected $ret=null;
-
-    public function __construct($apId,$who,&...$args)
+    public function prepare ($query)
     {
-        /// todo start_this_aspect_trace
-        $this->apId = $apId;
-        $this->who =  $who;
-        $this->args = &$args;
-        pinpoint_start_trace();
-        pinpoint_add_clue(PP_INTERCEPTER_NAME,$apId);
+        $plugin = new MysqliPreparePlugin("Mysqli::prepare",$this,...$query);
+        try{
+            $plugin->onBefore();
+            $ret = parent::prepare($query);
+            $plugin->onEnd($ret);
+            return $ret;
+
+        }catch (\Exception $e)
+        {
+            $plugin->onException($e);
+        }
     }
 
-    public function __destruct()
+    public function query ($query, $resultmode = MYSQLI_STORE_RESULT)
     {
-        pinpoint_end_trace();
+        $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
+        try{
+            $plugin->onBefore();
+            $ret = parent::query($query,$resultmode);
+            $plugin->onEnd($ret);
+            return $ret;
+//            return  new ProfilerMysqliResult($ret);
+
+        }catch (\Exception $e)
+        {
+            $plugin->onException($e);
+        }
     }
+}
 
-    abstract function onBefore();
-
-    abstract function onEnd(&$ret);
-
-    public function onException($e)
-    {
-        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
-    }
+function mysqli_init() {
+    return new Mysqli();
 }
