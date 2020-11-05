@@ -14,24 +14,22 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Plugins\Sys\mysqli;
-
+namespace Plugins\Sys\Memcached;
 
 use Plugins\Common\Candy;
 
-class MysqliPreparePlugin extends Candy
+class MemGetPlugin extends Candy
 {
+
     function onBefore()
     {
-        $myqli = $this->who;
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
-        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
+        $key =  $this->args[0];
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MEMCACHED);
+        pinpoint_add_clues(PP_PHP_ARGS,"$key");
     }
 
     function onEnd(&$ret)
     {
-        $origin = $ret;
-        $ret = new ProfilerMysqli_Stmt($origin);
+
     }
 }
