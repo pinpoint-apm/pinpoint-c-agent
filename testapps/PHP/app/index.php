@@ -9,16 +9,16 @@ require_once __DIR__."/../vendor/autoload.php";
 #################################################
 define('AOP_CACHE_DIR',__DIR__.'/../Cache/');
 define('PLUGINS_DIR',__DIR__.'/../Plugins/');
-define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\ClassMapInFile");
+define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\Framework\app\ClassMapInFile");
 define('APPLICATION_NAME','APP-2');
 define('APPLICATION_ID','app-2');
-//define("PINPOINT_ENV",'dev');
-require_once __DIR__. '/../vendor/naver/pinpoint-php-aop/auto_pinpointed.php';
+define('PINPOINT_USE_CACHE','NO');
+define('PP_REQ_PLUGINS', '\Plugins\PerRequestPlugins');
+require_once __DIR__. '/../vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
 
 #################################################
 require_once __DIR__.'/Args.php';
 
-//require_once AUTOLOAD_FILE_ALIAS;
 use app\AppDate;
 use app\AopFunction;
 use app\TestError;
@@ -247,7 +247,7 @@ switch($type)
         $mc = new TestMemcached();
         $mc->mem_connect();
         $mc->mem_add("cat", "HuaMer");
-        $mc->mem_get("cat");
+        echo $mc->mem_get("cat");
         $mc->mem_replace("cat", "Miao");
         $mc->mem_del("cat");
         break;

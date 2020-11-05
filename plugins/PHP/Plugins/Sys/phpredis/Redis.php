@@ -14,42 +14,64 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Plugins\Sys\mysqli;
 
-class Mysqli extends \mysqli
+/*
+ * User: eeliu
+ * Date: 11/5/20
+ * Time: 4:17 PM
+ */
+
+namespace Plugins\Sys\phpredis;
+
+
+class Redis extends \Redis
 {
-    public function prepare ($query)
+    public function connect( $host, $port = 6379, $timeout = 0.0, $reserved = null, $retry_interval = 0 )
     {
-        $plugin = new MysqliPreparePlugin("Mysqli::prepare",$this,$query);
+        $p = new ConnectPlugin("Redis::".__FUNCTION__,$this,$host, $port, $timeout, $reserved, $retry_interval);
         try{
-            $plugin->onBefore();
-            $ret = parent::prepare($query);
-            $plugin->onEnd($ret);
-            return $ret;
-
+            $p->onBefore();
+            $r = parent::connect($host, $port, $timeout, $reserved, $retry_interval);
+            $p->onEnd($r);
+            return $r;
         }catch (\Exception $e)
         {
-            $plugin->onException($e);
+            $p->onException($e);
+            throw $e;
+        }
+
+    }
+
+    public function get( $key )
+    {
+        $p = new GetPlugin("Redis::".__FUNCTION__,$this,$key);
+        try{
+            $p->onBefore();
+            $r = parent::get($key);
+            $p->onEnd($r);
+            return $r;
+        }catch (\Exception $e)
+        {
+            $p->onException($e);
+            throw $e;
         }
     }
 
-    public function query ($query, $resultmode = MYSQLI_STORE_RESULT)
+    public function set($key, $value, $timeout = null)
     {
-        $plugin = new MysqliQueryPlugin("Mysqli::query",$this,$query, $resultmode);
-        try{
-            $plugin->onBefore();
-            $ret = parent::query($query,$resultmode);
-            $plugin->onEnd($ret);
-            return $ret;
-//            return  new ProfilerMysqliResult($ret);
 
+        $p = new SetPlugin("Redis::".__FUNCTION__,$this,$key, $value, $timeout);
+        try{
+            $p->onBefore();
+            $r = parent::set($key, $value, $timeout);
+            $p->onEnd($r);
+            return $r;
         }catch (\Exception $e)
         {
-            $plugin->onException($e);
+            $p->onException($e);
+            throw $e;
         }
-    }
-}
 
-function mysqli_init() {
-    return new Mysqli();
+    }
+
 }

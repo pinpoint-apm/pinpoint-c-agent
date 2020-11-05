@@ -10,8 +10,6 @@ class AccessRemote
     {
         $ch = \curl_init();
 
-        $ch = call_user_func('curl_init');
-
         \curl_setopt($ch, CURLOPT_URL, $url);
 
         $headers = array(

@@ -3,7 +3,7 @@
 
 namespace app;
 
-use \Redis;
+use Redis;
 
 
 class TestRedis
@@ -12,7 +12,7 @@ class TestRedis
 
     public function connect_redis(){
         $this->rd = new Redis();
-        $this->rd->connect('localhost', 6379);
+        $this->rd->connect('dev-redis', 6379);
         echo $this->rd->ping();
     }
 

@@ -20,14 +20,15 @@ class PDO extends \PDO
 {
     public $dsn;
 
-    public function __construct ($dsn, $username, $passwd, $options) {
+    public function __construct ($dsn, $username=null, $passwd=null, $options=[])
+    {
         $this->dsn = $dsn;
         parent::__construct($dsn, $username, $passwd, $options);
     }
 
     private function doPDOQuery($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
     {
-        $var = new PDOGlueStatement("PDO::query",$this,$statement,$mode,$arg3,$ctorargs);
+        $var = new PreparePlugin("PDO::query",$this,$statement,$mode,$arg3,$ctorargs);
         try{
             $var->onBefore();
             $ret = parent::query($statement,$statement,$mode,$arg3,$ctorargs);
@@ -63,7 +64,7 @@ class PDO extends \PDO
 
     public function prepare($statement,  $driver_options = array())
     {
-        $var = new PDOGlueStatement("PDO::prepare",$this,$statement,$driver_options);
+        $var = new PreparePlugin("PDO::prepare",$this,$statement,$driver_options);
         try{
             $var->onBefore();
             $ret = parent::prepare($statement,$driver_options);

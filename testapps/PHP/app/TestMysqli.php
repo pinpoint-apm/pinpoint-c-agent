@@ -6,8 +6,7 @@
  */
 
 namespace app;
-use Exception;
-use \mysqli;
+use mysqli;
 
 
 
@@ -16,19 +15,17 @@ class TestMysqli
     private $con;
 
     public function connectDb()
-    {echo "onbefore";
-    echo $dsn = 'localhost:3306';
-    try{
-        $this->con = new mysqli($dsn, "","", "");
-        if(mysqli_connect_error()){
+    {
+        $dsn = 'dev-mysql:3306';
+        $this->con = new mysqli($dsn, "root", "root", "pinpoint");
+
+        if (mysqli_connect_error()) {
             echo mysqli_connect_error();
         }
-    }catch (Exception $e){echo "exp";}
-    finally{echo "end";}}
+    }
 
     public function getData1()
     {
-        $ret = array();
         $sql = 'show databases;';
         foreach ($this->con->query($sql) as $row) {
             $ret[] = $row;
@@ -38,11 +35,15 @@ class TestMysqli
 
     public function getData2($a)
     {
-        $ret = array();
-        $sql = 'illegal sql';
-        $ret = $this->con->query($a);
-        $data = $ret->fetch_all();
-        return $data;
+        $sql = "select number,name,email from puser where user_id=?";
+
+        $stmt = $this->con->prepare($sql);
+        $id = 1;
+        $stmt->bind_param("i",$id);
+        $stmt->execute();
+        $stmt->bind_result($number,$name,$email);
+        $stmt->fetch();
+        return [$number,$name,$email];
     }
 
 }

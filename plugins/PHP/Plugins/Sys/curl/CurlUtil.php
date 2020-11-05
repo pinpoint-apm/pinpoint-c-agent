@@ -78,20 +78,19 @@ class CurlUtil
         $urlAr   = parse_url($url);
         $retUrl = '';
 
-        if(isset($urlAr['port'])) // an optional setting 
-        {
-            $retUrl .= ":".$urlAr['port'];
-        }
-
         if(isset($urlAr['host'])) // got the host and return
         {
             $retUrl.=$urlAr['host'];
-            return $retUrl;
         }
 
         if(isset($urlAr['path']))
         {
             $retUrl.= $urlAr['path'];
+        }
+
+        if(isset($urlAr['port'])) // an optional setting
+        {
+            $retUrl .= ":".$urlAr['port'];
         }
 
         return $retUrl;
