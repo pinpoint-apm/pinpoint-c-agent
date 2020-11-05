@@ -14,24 +14,28 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+
+/*
+ * User: eeliu
+ * Date: 11/5/20
+ * Time: 5:39 PM
+ */
+
 namespace Plugins\Sys\mysqli;
 
 
 use Plugins\Common\Candy;
 
-class MysqliPreparePlugin extends Candy
+class StmtExecutePlugin extends Candy
 {
+
     function onBefore()
     {
-        $myqli = $this->who;
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
-        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
+        // TODO: Implement onBefore() method.
     }
 
     function onEnd(&$ret)
     {
-        $origin = $ret;
-        $ret = new ProfilerMysqli_Stmt($origin);
+        // TODO: Implement onEnd() method.
     }
 }

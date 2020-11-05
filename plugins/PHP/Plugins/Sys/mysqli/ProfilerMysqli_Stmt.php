@@ -14,24 +14,56 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
+
+/*
+ * User: eeliu
+ * Date: 11/5/20
+ * Time: 5:32 PM
+ */
+
 namespace Plugins\Sys\mysqli;
 
 
-use Plugins\Common\Candy;
-
-class MysqliPreparePlugin extends Candy
+class ProfilerMysqli_Stmt
 {
-    function onBefore()
+    protected $_instance;
+    public function __construct(&$instance)
     {
-        $myqli = $this->who;
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
-        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
+        $this->_instance = &$instance;
     }
 
-    function onEnd(&$ret)
+    public function __call($name, $arguments)
     {
-        $origin = $ret;
-        $ret = new ProfilerMysqli_Stmt($origin);
+        return call_user_func_array([&$this->_instance,$name],$arguments);
     }
+
+    public function bind_param ($types, &$var1, &...$_)
+    {
+        $param = \pinpoint_get_func_ref_args();
+        return call_user_func_array([$this->_instance,'bind_param'],$param);
+
+    }
+
+    public function bind_result (&$var1, &...$_)
+    {
+        $param = \pinpoint_get_func_ref_args();
+        return call_user_func_array([$this->_instance,'bind_result'],$param);
+    }
+
+    public function execute()
+    {
+        $plugin = new StmtExecutePlugin("Stmt::execute",$this);
+        try{
+            $plugin->onBefore();
+            $ret =  call_user_func_array([$this->_instance,'execute'],[]);
+            $plugin->onEnd($ret);
+            return $ret;
+
+        }catch (\Exception $e)
+        {
+            $plugin->onException($e);
+        }
+    }
+
+
 }

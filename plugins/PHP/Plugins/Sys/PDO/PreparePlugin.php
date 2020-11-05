@@ -14,24 +14,43 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Plugins\Sys\mysqli;
-
+namespace Plugins\Sys\PDO;
 
 use Plugins\Common\Candy;
 
-class MysqliPreparePlugin extends Candy
+class PreparePlugin extends Candy
+
 {
     function onBefore()
     {
-        $myqli = $this->who;
+        // todo stp, should follow the dsn
+        $dbInfo = $this->parseDb($this->who->dsn);
         pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
         pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
-        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
+        pinpoint_add_clue(PP_DESTINATION,$dbInfo['host']);
     }
-
     function onEnd(&$ret)
     {
         $origin = $ret;
-        $ret = new ProfilerMysqli_Stmt($origin);
+        $ret = new ProfilerPDOStatement($origin);
+    }
+
+    function onException($e)
+    {
+        pinpoint_add_clue(PP_ADD_EXCEPTION,$e->getMessage());
+    }
+
+    function parseDb($dsn){
+
+        $db_url =  parse_url($dsn);
+        parse_str(str_replace(';','&',$db_url['path']),$dbInfo);
+
+        if($db_url['scheme'] == 'sqlite'){ // treat sqllite as mysql
+            $dbInfo['host'] = 'localhost-sqlite';
+        }
+
+        $dbInfo['scheme']= $db_url['scheme'];
+
+        return $dbInfo;
     }
 }

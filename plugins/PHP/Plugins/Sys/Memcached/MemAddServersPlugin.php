@@ -14,24 +14,33 @@
  * See the License for the specific language governing permissions and        *
  * limitations under the License.                                             *
  ******************************************************************************/
-namespace Plugins\Sys\mysqli;
 
+/*
+ * User: eeliu
+ * Date: 11/5/20
+ * Time: 3:09 PM
+ */
 
+namespace Plugins\Sys\Memcached;
 use Plugins\Common\Candy;
 
-class MysqliPreparePlugin extends Candy
+class MemAddServersPlugin extends Candy
 {
+
     function onBefore()
     {
-        $myqli = $this->who;
-        pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clue(PP_SQL_FORMAT, $this->args[0]);
-        pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
+        $servers = $this->args[0];
+        $url ='';
+        foreach ($servers as $server)
+        {
+            $url.= sprintf("%s:%d ",$server[0],$server[1]);
+        }
+        pinpoint_add_clue(PP_SERVER_TYPE,PP_MEMCACHED);
+        pinpoint_add_clue(PP_DESTINATION,$url);
     }
 
     function onEnd(&$ret)
     {
-        $origin = $ret;
-        $ret = new ProfilerMysqli_Stmt($origin);
+        // TODO: Implement onEnd() method.
     }
 }

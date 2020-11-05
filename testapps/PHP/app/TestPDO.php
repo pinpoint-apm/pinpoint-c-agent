@@ -16,10 +16,10 @@ class TestPDO
     private $con;
 
     public function connectDb()
-    {echo "onbefore";
-    echo $dsn = 'mysql:host=dev-mysql;port=3306;dbname=xxx';
-    try{  $this->con = new PDO($dsn, "","");}catch (Exception $e){echo $e;}
-    finally{echo "end";}}
+    {
+        $dsn = 'mysql:host=dev-mysql;port=3306;dbname=pinpoint';
+        $this->con = new PDO($dsn, "root","root");
+    }
 
     public function getData1()
     {
@@ -33,7 +33,7 @@ class TestPDO
 
     public function getData2($a)
     {
-        $this->con->query("use DBTest;");
+        $this->con->query("use pinpoint;");
 //        $ret = array();
         $sql = 'illegal sql';
         $ret = $this->con->query($a);
@@ -43,7 +43,7 @@ class TestPDO
 
     public function getData3($a)
     {
-        $this->con->query("use DBTest;");
+        $this->con->query("use pinpoint;");
         $sth = $this->con->prepare($a);
         $ret = $sth->execute();
         return $ret;
@@ -57,15 +57,14 @@ class TestPDO
 
     public function testPODStatement()
     {
-        $sql = "select code,name,population from country where code=:code";
+        $sql = "select number,name,email from puser where user_id=:user_id";
         $sth = $this->con->prepare($sql);
-        $code = 'CN';
-        $sth->bindParam(':code', $code, PDO::PARAM_STR,12);
+        $code = '1';
+        $sth->bindParam(':user_id', $code, PDO::PARAM_STR,12);
         $sth->execute();
         
         $sth->bindColumn(1, $name_out);
         $sth->bindColumn(2, $code_out);
-        // $sth->bindColumn('calories', $cals);
 
         $result = $sth->fetchAll(PDO::FETCH_BOUND);
         var_dump($code_out);

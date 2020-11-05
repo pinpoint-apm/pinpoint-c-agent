@@ -25,9 +25,8 @@ class MysqliQueryPlugin extends Candy
     function onBefore()
     {
         $myqli = $this->who;
-        $query = $this->args[0];
         pinpoint_add_clue(PP_SERVER_TYPE,PP_MYSQL);
-        pinpoint_add_clues(PP_PHP_ARGS,$query);
+        pinpoint_add_clue(PP_SQL_FORMAT,$this->args[0]);
         pinpoint_add_clue(PP_DESTINATION,$myqli->host_info);
     }
 
