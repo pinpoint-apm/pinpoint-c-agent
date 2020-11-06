@@ -15,7 +15,7 @@
         }
     },
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "v2.0.0.0",
+        "pinpoint-apm/pinpoint-php-aop": "dev-v2.0.0-release",
         "guzzlehttp/guzzle": "~6.0",
         "mongodb/mongodb":"~1.6.0"
     }
