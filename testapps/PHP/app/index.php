@@ -259,6 +259,11 @@ switch($type)
         $guzzle = new TestGuzzle();
         $guzzle->gotoV();
         $guzzle->gotofoo();
+        break;
+    case  'test_kafka':
+        $test = new \app\TestKafka();
+        $test->test();
+        break;
     default:
         echo "not supported type $type";
 }
