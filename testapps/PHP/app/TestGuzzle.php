@@ -2,7 +2,11 @@
 
 namespace app;
 use GuzzleHttp\Client;
-
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
+/**
+ *  copy the sample code from https://guzzle-cn.readthedocs.io/
+ */
 class TestGuzzle
 {
     private $client = null;
@@ -26,6 +30,20 @@ class TestGuzzle
     {
         $response = $this->client->request('GET', 'foo',['query'=>['foo'=>'bar']]);
         return $response->getStatusCode();
+    }
+
+    public function testAsync()
+    {
+        $promise  = $this->client->requestAsync('GET', 'foo',['query'=>['foo'=>'bar']]);
+        $promise->then(
+            function (ResponseInterface $res) {
+                echo $res->getStatusCode() . "\n";
+            },
+            function (RequestException $e) {
+                echo $e->getMessage() . "\n";
+                echo $e->getRequest()->getMethod();
+            }
+        );
     }
 
 
