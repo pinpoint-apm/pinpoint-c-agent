@@ -4,4 +4,6 @@
 from .PinpointCommon import *
 from .PinpointDefine import *
 from .Span import *
-from .Interceptor import Interceptor
+from .Interceptor import *
+from .WSGIPlugin import *
+from .Utils import *

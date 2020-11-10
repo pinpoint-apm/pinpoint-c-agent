@@ -21,9 +21,8 @@
 import pinpointPy
 
 class Candy(object):
-    def __init__(self,class_name,module_name):
-        self.class_name = class_name
-        self.module_name = module_name
+    def __init__(self,name):
+        self.name = name
 
 
     def onBefore(self,*args, **kwargs):
@@ -54,14 +53,11 @@ class Candy(object):
         return pinpointTrace
 
     def getFuncUniqueName(self):
-        if self.class_name:
-            return '%s\%s.%s' % (self.module_name, self.class_name, self.func_name)
-        else:
-            return '%s\%s' % (self.module_name, self.func_name)
+        return self.name
 
 if __name__ == '__main__':
 
-    @Candy('main',__name__)
+    @Candy('main')
     def run():
         print("run")
 

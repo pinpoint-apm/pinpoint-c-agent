@@ -7,8 +7,8 @@ import pinpointPy
 
 class UrlOpenPlugin(Candy):
 
-    def __init__(self,class_name,module_name):
-        super().__init__(class_name,module_name)
+    def __init__(self, name):
+        super().__init__(name)
         self.dst = ''
         self.url =''
     def onBefore(self,*args, **kwargs):
@@ -16,9 +16,9 @@ class UrlOpenPlugin(Candy):
         self.url = args[0]
         generatePinpointHeader(self.url,kwargs['headers'])
         ###############################################################
-        pinpointPy.add_clue(FuncName,self.getFuncUniqueName())
-        pinpointPy.add_clue(ServerType,PYTHON_METHOD_CALL)
-        pinpointPy.add_clues(PY_ARGS, self.url)
+        pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE,PYTHON_METHOD_CALL)
+        pinpointPy.add_clues(PP_ARGS, self.url)
         ###############################################################
 
         return args,kwargs
@@ -27,9 +27,9 @@ class UrlOpenPlugin(Candy):
         ###############################################################
         pinpointPy.add_clue("dst", urlparse(self.url)['netloc'])
         pinpointPy.add_clue("stp", PYTHON_REMOTE_METHOD)
-        pinpointPy.add_clue('nsid', pinpointPy.get_context_key('nsid'))
-        pinpointPy.add_clues(HTTP_URL, self.url)
-        pinpointPy.add_clues(HTTP_STATUS_CODE, str(ret.status_code))
+        pinpointPy.add_clue(PP_NEXT_SPAN_ID, pinpointPy.get_context_key(PP_NEXT_SPAN_ID))
+        pinpointPy.add_clues(PP_HTTP_URL, self.url)
+        pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(ret.status_code))
         pinpointPy.add_clues(PY_RETURN, str(ret))
         ###############################################################
         super().onEnd(ret)
