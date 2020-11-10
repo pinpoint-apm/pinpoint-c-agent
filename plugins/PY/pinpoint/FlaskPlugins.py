@@ -29,102 +29,102 @@ from .settings import *
 
 
 class BaseFlaskPlugins(Candy):
-    def __init__(self,class_name,module_name):
-        super().__init__(class_name,module_name)
+    def __init__(self, name):
+        super().__init__(name)
         self.isLimit = False
 
     def onBefore(self,*args, **kwargs):
         args, kwargs = super().onBefore(*args, **kwargs)
         request = Request(args[1])
-        pinpointPy.add_clue('appname',APP_NAME)
-        pinpointPy.add_clue('appid', APP_ID)
+        pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
+        pinpointPy.add_clue(PP_APP_ID, APP_ID)
         ###############################################################
         # print("------------------- call before -----------------------")
-        pinpointPy.add_clue('name', 'BaseFlaskrequest')
-        pinpointPy.add_clue('uri', request.path)
-        pinpointPy.add_clue('client',request.remote_addr)
-        pinpointPy.add_clue('server', request.host)
-        pinpointPy.add_clue('stp', PYTHON)
+        pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'BaseFlaskrequest')
+        pinpointPy.add_clue(PP_REQ_URI, request.path)
+        pinpointPy.add_clue(PP_REQ_CLIENT,request.remote_addr)
+        pinpointPy.add_clue(PP_REQ_SERVER, request.host)
+        pinpointPy.add_clue(PP_SERVER_TYPE, PYTHON)
 
         # nginx add http
-        if HTTP_PINPOINT_PSPANID in request.headers:
-            pinpointPy.add_clue('psid', request.headers[HTTP_PINPOINT_PSPANID])
-            print("PINPOINT_PSPANID:", request.headers[HTTP_PINPOINT_PSPANID])
+        if PP_HTTP_PINPOINT_PSPANID in request.headers:
+            pinpointPy.add_clue(PP_PARENT_SPAN_ID, request.headers[PP_HTTP_PINPOINT_PSPANID])
+            print("PINPOINT_PSPANID:", request.headers[PP_HTTP_PINPOINT_PSPANID])
 
-        if HTTP_PINPOINT_SPANID in request.headers:
-            self.sid = request.headers[HTTP_PINPOINT_SPANID]
-        elif PINPOINT_SPANID in request.headers:
-            self.sid = request.headers[PINPOINT_SPANID]
+        if PP_HTTP_PINPOINT_SPANID in request.headers:
+            self.sid = request.headers[PP_HTTP_PINPOINT_SPANID]
+        elif PP_HEADER_PINPOINT_SPANID in request.headers:
+            self.sid = request.headers[PP_HEADER_PINPOINT_SPANID]
         else:
-            self.sid = self.generateSid()
-        pinpointPy.set_context_key('sid',self.sid)
+            self.sid = generateSid()
+        pinpointPy.set_context_key(PP_SPAN_ID,self.sid)
 
 
-        if HTTP_PINPOINT_TRACEID in request.headers:
-            self.tid = request.headers[HTTP_PINPOINT_TRACEID]
-        elif PINPOINT_TRACEID in request.headers:
-            self.tid = request.headers[PINPOINT_TRACEID]
+        if PP_HTTP_PINPOINT_TRACEID in request.headers:
+            self.tid = request.headers[PP_HTTP_PINPOINT_TRACEID]
+        elif PP_HEADER_PINPOINT_TRACEID in request.headers:
+            self.tid = request.headers[PP_HEADER_PINPOINT_TRACEID]
         else:
-            self.tid = self.generateTid()
-        pinpointPy.set_context_key('tid',self.tid)
+            self.tid = generateTid()
+        pinpointPy.set_context_key(PP_TRANSCATION_ID,self.tid)
 
-        if HTTP_PINPOINT_PAPPNAME in request.headers:
-            self.pname = request.headers[HTTP_PINPOINT_PAPPNAME]
-            pinpointPy.set_context_key('pname',self.pname)
-            pinpointPy.add_clue('pname',self.pname)
+        if PP_HTTP_PINPOINT_PAPPNAME in request.headers:
+            self.pname = request.headers[PP_HTTP_PINPOINT_PAPPNAME]
+            pinpointPy.set_context_key(PP_PARENT_NAME,self.pname)
+            pinpointPy.add_clue(PP_PARENT_NAME,self.pname)
 
-        if HTTP_PINPOINT_PAPPTYPE in request.headers:
-            self.ptype = request.headers[HTTP_PINPOINT_PAPPTYPE]
-            pinpointPy.set_context_key('ptype',self.ptype)
-            pinpointPy.add_clue('ptype',self.ptype)
+        if PP_HTTP_PINPOINT_PAPPTYPE in request.headers:
+            self.ptype = request.headers[PP_HTTP_PINPOINT_PAPPTYPE]
+            pinpointPy.set_context_key(PP_PARENT_TYPE,self.ptype)
+            pinpointPy.add_clue(PP_PARENT_TYPE,self.ptype)
 
-        if HTTP_PINPOINT_HOST in request.headers:
-            self.Ah = request.headers[HTTP_PINPOINT_HOST]
-            pinpointPy.set_context_key('Ah',self.Ah)
-            pinpointPy.add_clue('Ah',self.Ah)
+        if PP_HTTP_PINPOINT_HOST in request.headers:
+            self.Ah = request.headers[PP_HTTP_PINPOINT_HOST]
+            pinpointPy.set_context_key(PP_PARENT_HOST,self.Ah)
+            pinpointPy.add_clue(PP_PARENT_HOST,self.Ah)
 
         # Not nginx, no http
-        if PINPOINT_PSPANID in request.headers:
-            pinpointPy.add_clue('psid', request.headers[PINPOINT_PSPANID])
-            print("PINPOINT_PSPANID:", request.headers[PINPOINT_PSPANID])
+        if PP_HEADER_PINPOINT_PSPANID in request.headers:
+            pinpointPy.add_clue(PP_PARENT_SPAN_ID, request.headers[PP_HEADER_PINPOINT_PSPANID])
+            # print("PINPOINT_PSPANID:", request.headers[PP_HEADER_PINPOINT_PSPANID])
 
-        if PINPOINT_PAPPNAME in request.headers:
-            self.pname = request.headers[PINPOINT_PAPPNAME]
-            pinpointPy.set_context_key('pname', self.pname)
-            pinpointPy.add_clue('pname', self.pname)
+        if PP_HEADER_PINPOINT_PAPPNAME in request.headers:
+            self.pname = request.headers[PP_HEADER_PINPOINT_PAPPNAME]
+            pinpointPy.set_context_key(PP_PARENT_NAME, self.pname)
+            pinpointPy.add_clue(PP_PARENT_NAME, self.pname)
 
-        if PINPOINT_PAPPTYPE in request.headers:
-            self.ptype = request.headers[PINPOINT_PAPPTYPE]
-            pinpointPy.set_context_key('ptype', self.ptype)
-            pinpointPy.add_clue('ptype', self.ptype)
+        if PP_HEADER_PINPOINT_PAPPTYPE in request.headers:
+            self.ptype = request.headers[PP_HEADER_PINPOINT_PAPPTYPE]
+            pinpointPy.set_context_key(PP_PARENT_TYPE, self.ptype)
+            pinpointPy.add_clue(PP_PARENT_TYPE, self.ptype)
 
-        if PINPOINT_HOST in request.headers:
-            self.Ah = request.headers[PINPOINT_HOST]
-            pinpointPy.set_context_key('Ah', self.Ah)
-            pinpointPy.add_clue('Ah', self.Ah)
+        if PP_HEADER_PINPOINT_HOST in request.headers:
+            self.Ah = request.headers[PP_HEADER_PINPOINT_HOST]
+            pinpointPy.set_context_key(PP_PARENT_HOST, self.Ah)
+            pinpointPy.add_clue(PP_PARENT_HOST, self.Ah)
         
-        if NGINX_PROXY in request.headers:
-            pinpointPy.add_clue('NP',request.headers[NGINX_PROXY])
+        if PP_NGINX_PROXY in request.headers:
+            pinpointPy.add_clue(PP_NGINX_PROXY, request.headers[PP_NGINX_PROXY])
         
-        if APACHE_PROXY in request.headers:
-            pinpointPy.add_clue('AP',request.headers[APACHE_PROXY])
+        if PP_APACHE_PROXY in request.headers:
+            pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY])
 
-        if SAMPLED in request.headers:
-            if request.headers[SAMPLED] == 's0':
+        if PP_HTTP_SAMPLED in request.headers:
+            if request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
                 self.isLimit = True
                 pinpointPy.drop_trace()
         else:
             pinpointPy.check_tracelimit()
             # print(self.isLimit)
-        pinpointPy.add_clue('tid',self.tid)
-        pinpointPy.add_clue('sid',self.sid)
+        pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid)
+        pinpointPy.add_clue(PP_SPAN_ID,self.sid)
         ###############################################################
         return args, kwargs
 
     def onEnd(self,ret):
         ###############################################################
 
-        # print("------------------- call end -----------------------")
+
 
         ###############################################################
         super().onEnd(ret)

@@ -18,25 +18,28 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-from ..PinpointDefine import *
+
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from urllib.parse import urlparse
 import pinpointPy
 
+from pinpoint.plugins import *
+
+
 @event.listens_for(Engine, "before_cursor_execute")
 def before_cursor_execute(conn, cursor, statement,
                         parameters, context, executemany):
     pinpointPy.start_trace()
-    pinpointPy.add_clue(FuncName, 'before_cursor_execute')
-    pinpointPy.add_clue(SQL_STR,statement)
-    pinpointPy.add_clues(PY_ARGS, 'user not cared')
+    pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'before_cursor_execute')
+    pinpointPy.add_clue(PP_SQL_FORMAT,statement)
+    pinpointPy.add_clues(PP_ARGS, 'user not cared')
     DBUrl = urlparse(str(conn.engine.url))
     if 'mysql'  in DBUrl.scheme:
-        pinpointPy.add_clue(ServerType, MYSQL)
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
     #todo add more mssql/oracle
 
-    pinpointPy.add_clue(DESTINATION,DBUrl.hostname)
+    pinpointPy.add_clue(PP_DESTINATION,DBUrl.hostname)
     # print(conn)
     # print(cursor)
     # print(statement)

@@ -19,7 +19,7 @@
 # ------------------------------------------------------------------------------
 
 
-from .plugins import *
+from pinpoint.plugins import *
 
 import traceback
 import pinpointPy
@@ -31,22 +31,21 @@ class BaseDjangoRequestPlugins(Candy):
 
     def onBefore(self,*args, **kwargs):
         args, kwargs = super().onBefore(*args, **kwargs)
-        pinpointPy.add_clue('appname',APP_NAME)
-        pinpointPy.add_clue('appid', APP_ID)
+        pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
+        pinpointPy.add_clue(PP_APP_ID, APP_ID)
         ###############################################################
-        print("------------------- call before -----------------------")
         request = args[1]
         # assert isinstance(request,BaseHTTPRequestHandler)
-        pinpointPy.add_clue('name', 'BaseDjangoRequest request')
-        pinpointPy.add_clue('uri',request.path)
+        pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'BaseDjangoRequest request')
+        pinpointPy.add_clue(PP_REQ_URI,request.path)
         # print(request.META)
-        pinpointPy.add_clue('client',request.META['REMOTE_ADDR'])
-        pinpointPy.add_clue('server',request.get_host())
-        pinpointPy.add_clue('stp',PYTHON)
+        pinpointPy.add_clue(PP_REQ_CLIENT,request.META['REMOTE_ADDR'])
+        pinpointPy.add_clue(PP_REQ_SERVER,request.get_host())
+        pinpointPy.add_clue(PP_SERVER_TYPE,PYTHON)
 
         # nginx add http
         if HTTP_PINPOINT_PSPANID in request.META:
-            pinpointPy.add_clue('psid', request.META[HTTP_PINPOINT_PSPANID])
+            pinpointPy.add_clue(PP_PARENT_SPAN_ID, request.META[HTTP_PINPOINT_PSPANID])
             print("PINPOINT_PSPANID:", request.META[HTTP_PINPOINT_PSPANID])
 
         if HTTP_PINPOINT_SPANID in request.META:
@@ -54,8 +53,8 @@ class BaseDjangoRequestPlugins(Candy):
         elif PINPOINT_SPANID in request.META:
             self.sid = request.META[PINPOINT_SPANID]
         else:
-            self.sid = self.generateSid()
-        pinpointPy.set_special_key('sid',self.sid)
+            self.sid = generateSid()
+        pinpointPy.set_special_key(PP_SPAN_ID,self.sid)
 
 
         if HTTP_PINPOINT_TRACEID in request.META:
@@ -63,88 +62,88 @@ class BaseDjangoRequestPlugins(Candy):
         elif PINPOINT_TRACEID in request.META:
             self.tid = request.META[PINPOINT_TRACEID]
         else:
-            self.tid = self.generateTid()
-        pinpointPy.set_special_key('tid',self.tid)
+            self.tid = generateTid()
+        pinpointPy.set_special_key(PP_TRANSCATION_ID,self.tid)
 
         if HTTP_PINPOINT_PAPPNAME in request.META:
             self.pname = request.META[HTTP_PINPOINT_PAPPNAME]
-            pinpointPy.set_special_key('pname',self.pname)
-            pinpointPy.add_clue('pname',self.pname)
+            pinpointPy.set_special_key(PP_PARENT_NAME,self.pname)
+            pinpointPy.add_clue(PP_PARENT_NAME,self.pname)
 
         if HTTP_PINPOINT_PAPPTYPE in request.META:
             self.ptype = request.META[HTTP_PINPOINT_PAPPTYPE]
-            pinpointPy.set_special_key('ptype',self.ptype)
-            pinpointPy.add_clue('ptype',self.ptype)
+            pinpointPy.set_special_key(PP_PARENT_TYPE,self.ptype)
+            pinpointPy.add_clue(PP_PARENT_TYPE,self.ptype)
 
         if HTTP_PINPOINT_HOST in request.META:
             self.Ah = request.META[HTTP_PINPOINT_HOST]
-            pinpointPy.set_special_key('Ah',self.Ah)
-            pinpointPy.add_clue('Ah',self.Ah)
+            pinpointPy.set_special_key(PP_PARENT_HOST,self.Ah)
+            pinpointPy.add_clue(PP_PARENT_HOST,self.Ah)
 
         # Not nginx, no http
         if PINPOINT_PSPANID in request.META:
-            pinpointPy.add_clue('psid', request.META[PINPOINT_PSPANID])
+            pinpointPy.add_clue(PP_PARENT_SPAN_ID, request.META[PINPOINT_PSPANID])
             print("PINPOINT_PSPANID:", request.META[PINPOINT_PSPANID])
 
         if PINPOINT_PAPPNAME in request.META:
             self.pname = request.META[PINPOINT_PAPPNAME]
-            pinpointPy.set_special_key('pname', self.pname)
-            pinpointPy.add_clue('pname', self.pname)
+            pinpointPy.set_special_key(PP_PARENT_NAME, self.pname)
+            pinpointPy.add_clue(PP_PARENT_NAME, self.pname)
 
         if PINPOINT_PAPPTYPE in request.META:
             self.ptype = request.META[PINPOINT_PAPPTYPE]
-            pinpointPy.set_special_key('ptype', self.ptype)
-            pinpointPy.add_clue('ptype', self.ptype)
+            pinpointPy.set_special_key(PP_PARENT_TYPE, self.ptype)
+            pinpointPy.add_clue(PP_PARENT_TYPE, self.ptype)
 
         if PINPOINT_HOST in request.META:
             self.Ah = request.META[PINPOINT_HOST]
-            pinpointPy.set_special_key('Ah', self.Ah)
-            pinpointPy.add_clue('Ah', self.Ah)
+            pinpointPy.set_special_key(PP_PARENT_HOST, self.Ah)
+            pinpointPy.add_clue(PP_PARENT_HOST, self.Ah)
 
         if NGINX_PROXY in request.META:
-            pinpointPy.add_clue('NP',request.META[NGINX_PROXY])
+            pinpointPy.add_clue(PP_NGINX_PROXY,request.META[NGINX_PROXY])
         elif HTTP_NGINX_PROXY in request.META:
-            pinpointPy.add_clue('NP',request.META[HTTP_NGINX_PROXY])
+            pinpointPy.add_clue(PP_NGINX_PROXY,request.META[HTTP_NGINX_PROXY])
         
         if APACHE_PROXY in request.META:
-            pinpointPy.add_clue('AP',request.META[APACHE_PROXY])
+            pinpointPy.add_clue(PP_APACHE_PROXY,request.META[APACHE_PROXY])
         elif HTTP_APACHE_PROXY in request.META:
-            pinpointPy.add_clue('AP',request.META[HTTP_APACHE_PROXY])
+            pinpointPy.add_clue(PP_APACHE_PROXY,request.META[HTTP_APACHE_PROXY])
 
-        if SAMPLED in request.META :
-            sampled = request.META[SAMPLED]
+        if PP_HTTP_SAMPLED in request.META :
+            sampled = request.META[PP_HTTP_SAMPLED]
         elif HTTPD_SAMPLED in request.META :
             sampled = request.META[HTTPD_SAMPLED]
         else:
-            sampled = 's0' if pinpointPy.check_tracelimit() else 's1'
+            sampled = PP_NOT_SAMPLED if pinpointPy.check_tracelimit() else PP_SAMPLED
 
-        # sampled = 's0' if pinpointPy.check_tracelimit() else 's1'
+        # sampled = PP_NOT_SAMPLED if pinpointPy.check_tracelimit() else PP_SAMPLED
 
-        if sampled == 's0':
+        if sampled == PP_NOT_SAMPLED:
             self.isLimit = True
             pinpointPy.drop_trace()
-            pinpointPy.set_special_key(SAMPLED,'s0')
+            pinpointPy.set_special_key(PP_HTTP_SAMPLED,PP_NOT_SAMPLED)
         else:
             self.isLimit = False
-            pinpointPy.set_special_key(SAMPLED, 's1')
+            pinpointPy.set_special_key(PP_HTTP_SAMPLED, PP_SAMPLED)
 
 
-        # if (SAMPLED in request.META and request.META[SAMPLED] == 's0') or \
-        #         (HTTPD_SAMPLED in request.META and request.META[HTTPD_SAMPLED] == 's0'):
+        # if (PP_HTTP_SAMPLED in request.META and request.META[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED) or \
+        #         (HTTPD_SAMPLED in request.META and request.META[HTTPD_SAMPLED] == PP_NOT_SAMPLED):
         #     self.isLimit = True
         #     pinpointPy.drop_trace()
-        #     pinpointPy.set_special_key(SAMPLED,'s0')
+        #     pinpointPy.set_special_key(PP_HTTP_SAMPLED,PP_NOT_SAMPLED)
         # else:
         #     if pinpointPy.check_tracelimit():
         #         self.isLimit = True
         #         pinpointPy.drop_trace()
-        #         pinpointPy.set_special_key(SAMPLED, 's0')
+        #         pinpointPy.set_special_key(PP_HTTP_SAMPLED, PP_NOT_SAMPLED)
         #     else:
         #         self.isLimit = False
-        #         pinpointPy.set_special_key(SAMPLED, 's1')
+        #         pinpointPy.set_special_key(PP_HTTP_SAMPLED, PP_SAMPLED)
 
-        pinpointPy.add_clue('tid',self.tid)
-        pinpointPy.add_clue('sid',self.sid)
+        pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid)
+        pinpointPy.add_clue(PP_SPAN_ID,self.sid)
         ###############################################################
         return args, kwargs
 

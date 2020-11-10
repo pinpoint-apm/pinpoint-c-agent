@@ -15,10 +15,10 @@ class PyRedisPlugins(Candy):
     def onBefore(self,*args, **kwargs):
         args, kwargs = super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(FuncName,self.getFuncUniqueName())
-        pinpointPy.add_clue(ServerType, REDIS)
+        pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE, REDIS)
         arg = self.get_arg(*args, **kwargs)
-        pinpointPy.add_clues(PY_ARGS, arg)
+        pinpointPy.add_clues(PP_ARGS, arg)
         ###############################################################
         if self.func_name == 'Redis':
             if 'host' in kwargs:
