@@ -23,10 +23,10 @@ class CommonPlugin(AsyCandy):
     def onBefore(self,*args, **kwargs):
         args, kwargs = super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(FuncName,self.getFuncUniqueName(),self.node_id)
-        pinpointPy.add_clue(ServerType,PYTHON_METHOD_CALL,self.node_id)
+        pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName(),self.node_id)
+        pinpointPy.add_clue(PP_SERVER_TYPE,PYTHON_METHOD_CALL,self.node_id)
         arg = self.get_arg(*args, **kwargs)
-        pinpointPy.add_clues(PY_ARGS, arg,self.node_id)
+        pinpointPy.add_clues(PP_ARGS, arg,self.node_id)
         ###############################################################
         # print( threading.currentThread().ident)
         return args,kwargs
