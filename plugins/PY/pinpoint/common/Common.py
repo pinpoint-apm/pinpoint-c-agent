@@ -18,45 +18,29 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-import random
-import asyncio
-from ..settings import *
-from  ..plugins.common.PinpointDefine import *
 import pinpointPy
-import contextvars
 
-pinpointId = contextvars.ContextVar('_pinpoint_id_')
-pinpointId.set(0)
+class Candy(object):
+    def __init__(self,name):
+        self.name = name
 
-
-class AsyCandy(object):
-
-    def __init__(self,class_name,module_name):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.node_id = 0
 
     def onBefore(self,*args, **kwargs):
-        id = pinpointId.get()
-        new_id = pinpointPy.start_trace(id)
-        pinpointId.set(new_id)
-        self.node_id = new_id
-        return (args,kwargs)
+        pinpointPy.start_trace()
 
     def onEnd(self,ret):
-        new_id = pinpointPy.end_trace(self.node_id)
-        pinpointId.set(new_id)
+        pinpointPy.end_trace()
 
     def onException(self,e):
         raise NotImplementedError()
 
     def __call__(self, func):
         self.func_name=func.__name__
-        async def pinpointTrace(*args, **kwargs):
+        def pinpointTrace(*args, **kwargs):
             ret = None
             self.onBefore(*args, **kwargs)
             try:
-                ret = await func(*args, **kwargs)
+                ret = func(*args, **kwargs)
                 return ret
             except Exception as e:
                 self.onException(e)
@@ -67,27 +51,15 @@ class AsyCandy(object):
 
         return pinpointTrace
 
-    def generateTid(self):
-        return ('%s^%s^%s') % (APP_ID,str(pinpointPy.start_time()), str(pinpointPy.unique_id()))
-
-    def generateSid(self):
-        return str(random.randint(0,2147483647))
-
     def getFuncUniqueName(self):
-        if self.class_name:
-            return '%s\%s.%s'%(self.module_name,self.class_name,self.func_name)
-        else:
-            return '%s\%s'%(self.module_name,self.func_name)
+        return self.name
 
 if __name__ == '__main__':
 
-    @AsyCandy('main',__name__)
-    async def run(i):
-        if i == 0:
-            return
+    @Candy('main')
+    def run():
         print("run")
-        await asyncio.sleep(0.1)
-        await run(i-1)
 
-    asyncio.run(run(2))
-    asyncio.run(run(2))
+    run()
+
+    run()

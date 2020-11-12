@@ -17,7 +17,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-from .PinpointAsyCommon import *
+from .AsyCommon import *
 
 import pinpointPy
 import tornado.web
@@ -28,7 +28,7 @@ class HTTPRequestPlugins(AsyCandy):
         self.isLimit = False
 
     def onBefore(self,*args, **kwargs):
-        args, kwargs = super().onBefore(*args, **kwargs)
+        super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME,self.node_id)
         pinpointPy.add_clue(PP_APP_ID, APP_ID,self.node_id)
         ###############################################################
