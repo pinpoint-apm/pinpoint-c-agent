@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+# Created by eeliu at 7/31/20
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.
 #
@@ -14,23 +18,7 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-
-from app import app
-
-from pinpoint.FlaskPlugins import BaseFlaskPlugins
-
-
-class PinPointMiddleWare():
-
-    def __init__(self, app,wsgi_app):
-        self.app = app
-        self.wsgi_app = wsgi_app
-
-    @BaseFlaskPlugins("Flask Web App", __name__)
-    def __call__(self, environ, start_response):
-        return self.wsgi_app(environ, start_response)
-
-
-app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
+try:
+    from .sqlalchemyPlugin import *
+except ImportError:
+    pass

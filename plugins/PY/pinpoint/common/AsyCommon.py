@@ -18,34 +18,30 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-import random
 import asyncio
-from ..settings import *
-from  ..plugins.common.PinpointDefine import *
 import pinpointPy
 import contextvars
 
-pinpointId = contextvars.ContextVar('_pinpoint_id_')
-pinpointId.set(0)
-
+_Id_ = contextvars.ContextVar('_pinpoint_id_',default=0)
 
 class AsyCandy(object):
 
-    def __init__(self,class_name,module_name):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.node_id = 0
+    def __init__(self,name):
+        self.name = name
+        self.traceId = 0
 
     def onBefore(self,*args, **kwargs):
-        id = pinpointId.get()
-        new_id = pinpointPy.start_trace(id)
-        pinpointId.set(new_id)
-        self.node_id = new_id
+        global _Id_
+        id = _Id_.get()
+        traceId = pinpointPy.start_trace(id)
+        _Id_.set(traceId)
+        self.traceId = traceId
         return (args,kwargs)
 
     def onEnd(self,ret):
-        new_id = pinpointPy.end_trace(self.node_id)
-        pinpointId.set(new_id)
+        traceId = pinpointPy.end_trace(self.traceId)
+        global _Id_
+        _Id_.set(traceId)
 
     def onException(self,e):
         raise NotImplementedError()
@@ -62,26 +58,16 @@ class AsyCandy(object):
                 self.onException(e)
                 raise e
             finally:
-                # print("end", self.func_name)
                 self.onEnd(ret)
 
         return pinpointTrace
 
-    def generateTid(self):
-        return ('%s^%s^%s') % (APP_ID,str(pinpointPy.start_time()), str(pinpointPy.unique_id()))
-
-    def generateSid(self):
-        return str(random.randint(0,2147483647))
-
     def getFuncUniqueName(self):
-        if self.class_name:
-            return '%s\%s.%s'%(self.module_name,self.class_name,self.func_name)
-        else:
-            return '%s\%s'%(self.module_name,self.func_name)
+        return self.name
 
 if __name__ == '__main__':
 
-    @AsyCandy('main',__name__)
+    @AsyCandy('main')
     async def run(i):
         if i == 0:
             return

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-# Created by eeliu at 11/9/20
+# Created by eeliu at 11/12/20
 
-from pinpoint.common import *
 from .RequestPlugin import RequestPlugin
-
 def PinPointMiddleWare(application):
     def handler(environ,start_response):
         plugin = RequestPlugin("pyweb-request")
