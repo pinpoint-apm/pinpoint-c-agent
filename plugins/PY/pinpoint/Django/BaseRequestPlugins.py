@@ -19,12 +19,10 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpoint.plugins import *
-
 import traceback
 import pinpointPy
 
-class BaseDjangoRequestPlugins(Candy):
+class BaseRequestPlugins(Candy):
     def __init__(self,class_name,module_name):
         super().__init__(class_name,module_name)
         self.isLimit = False

@@ -14,32 +14,31 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-from .PinpointAsyCommon import *
+from .Common import *
+from .Defines import *
 import pinpointPy
 
-
-class CommonPlugin(AsyCandy):
+class PinpointCommonPlugin(Candy):
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName(),self.node_id)
-        pinpointPy.add_clue(PP_SERVER_TYPE,PP_METHOD_CALL,self.node_id)
+        pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_REMOTE_METHOD)
         arg = self.get_arg(*args, **kwargs)
-        pinpointPy.add_clues(PP_ARGS, arg,self.node_id)
+        pinpointPy.add_clues(PP_ARGS, arg)
         ###############################################################
-        # print( threading.currentThread().ident)
         return args,kwargs
 
     def onEnd(self,ret):
         ###############################################################
-        pinpointPy.add_clues(PP_RETURN,str(ret),self.node_id)
+        pinpointPy.add_clues(PP_RETURN,str(ret))
         ###############################################################
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
-        pinpointPy.add_clue('EXP',str(e),self.node_id)
+        pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}
