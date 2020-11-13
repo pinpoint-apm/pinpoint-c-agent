@@ -18,7 +18,9 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-try:
-    from .sqlalchemyPlugin import *
-except ImportError:
-    pass
+def monkey_patch():
+    try:
+        from .sqlalchemyPlugin import before_cursor_execute,after_cursor_execute
+    except ImportError:
+        pass
+__all__=['monkey_patch']

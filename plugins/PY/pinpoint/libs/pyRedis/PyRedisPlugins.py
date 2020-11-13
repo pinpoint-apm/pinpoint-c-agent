@@ -2,9 +2,11 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 8/20/20
 
-from ..PinpointCommon import *
-from ..PinpointDefine import *
+
 import pinpointPy
+
+from pinpoint.common import *
+
 
 class PyRedisPlugins(Candy):
 
@@ -16,7 +18,7 @@ class PyRedisPlugins(Candy):
         super().onBefore(*args, **kwargs)
         ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName())
-        pinpointPy.add_clue(PP_SERVER_TYPE, REDIS)
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_REDIS)
         arg = self.get_arg(*args, **kwargs)
         pinpointPy.add_clues(PP_ARGS, arg)
         ###############################################################

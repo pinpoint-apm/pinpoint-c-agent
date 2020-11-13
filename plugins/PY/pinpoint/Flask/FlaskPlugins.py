@@ -23,10 +23,11 @@ import pinpointPy
 
 from flask import Flask,Request
 
-from .Flask.PinPointMiddleWare import *
-from .libs import *
-from .settings import *
+from pinpoint.Flask.PinPointMiddleWare import *
+from pinpoint.libs import monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint()
 
+from pinpoint.settings import *
 
 class BaseFlaskPlugins(Candy):
     def __init__(self, name):

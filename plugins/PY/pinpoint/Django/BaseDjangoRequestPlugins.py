@@ -18,8 +18,8 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
-
-from pinpoint.plugins import *
+from pinpoint.libs import monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint()
 
 import traceback
 import pinpointPy

@@ -2,17 +2,20 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 8/20/20
 
-try:
-    import redis
+def monkey_patch():
+    from pinpoint.common import Interceptor
     from .PyRedisPlugins import PyRedisPlugins
-    HookSet = [
-        ('Redis', 'Redis', redis, redis.Redis),
-        ('Redis','execute_command', redis, redis.Redis.execute_command),
-    ]
+    try:
+        import redis
+        Interceptors = [
+            Interceptor(redis.Redis, 'Redis', PyRedisPlugins),
+            Interceptor(redis.Redis.execute_command, 'execute_command', PyRedisPlugins)
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-    for hook in HookSet:
-        new_Cursor = PyRedisPlugins(hook[0], '')
-        setattr(hook[2],hook[1], new_Cursor(hook[3]))
-except ImportError as e:
-    # do nothing
-    print(e)
+    except ImportError as e:
+        # do nothing
+        print(e)
+
+__all__=['monkey_patch']
