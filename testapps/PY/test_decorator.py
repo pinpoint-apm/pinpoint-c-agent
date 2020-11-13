@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import functools
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
 
 def log(text):
@@ -15,6 +15,6 @@ def log(text):
     return decorator
 
 @log('execute')
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin(__name__)
 def func_in_decorator(x):
     return x * x

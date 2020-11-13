@@ -18,14 +18,14 @@
 3. Hook 您所关心的函数。
 
      > Example: flask/test_recursion.py
-     Hook the function ```fact``` by add ```@PinpointCommonPlugin('', __name__)``` just before it.
+     Hook the function ```fact``` by add ```@PinpointCommonPlugin( __name__)``` just before it.
     
     
     ```
-    from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+    from pinpoint.common import PinpointCommonPlugin
     
     
-    @PinpointCommonPlugin('', __name__)
+    @PinpointCommonPlugin( __name__)
     def fact(n):
         ......
     ```

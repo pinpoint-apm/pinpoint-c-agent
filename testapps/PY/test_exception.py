@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
 
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin(__name__)
 def test_nameerror(arg):
     xxx(arg, 123)
     return "Call an undefined function."
@@ -13,7 +13,7 @@ def test_nameerror(arg):
 #     return "Test SyntaxError!"
 
 
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin( __name__)
 def test_ZeroDivisionError(arg):
     return 3/arg
 
@@ -28,7 +28,7 @@ class UserDefineException(Exception):
         return self.value
 
 
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin(__name__)
 def test_userexception(arg):
     if arg == "Evy":
         raise UserDefineException(arg)
@@ -36,7 +36,7 @@ def test_userexception(arg):
         return arg
 
 
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin(__name__)
 def test_exception_in_recursion(n):
     if n > 0:
         return n/test_exception_in_recursion(n-1)
