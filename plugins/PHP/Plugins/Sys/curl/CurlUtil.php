@@ -61,6 +61,28 @@ class CurlUtil
         return $header;
     }
 
+    // for GuzzleHttp header
+    public static function getPPHeader($url)
+    {
+        if(pinpoint_get_context('Pinpoint-Sampled')==PP_NOT_SAMPLED){
+            return ["Pinpoint-Sampled"=>"s0"];
+        }
+
+        $nsid = Trace::generateSpanID();
+        $header = [
+            'Pinpoint-Sampled'=>'s1',
+            'Pinpoint-Flags'=>'0',
+            'Pinpoint-Papptype'=>'1500',
+            'Pinpoint-Pappname'=>APPLICATION_NAME,
+            'Pinpoint-Host'=>static::getHostFromURL($url),
+            'Pinpoint-Traceid'=>pinpoint_get_context(PP_TRANSCATION_ID),
+            'Pinpoint-Pspanid'=>pinpoint_get_context(PP_SPAN_ID),
+            'Pinpoint-Spanid'=>$nsid
+        ];
+        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid);
+        return $header;
+    }
+
     /**
      *
      * url is very funny

@@ -28,10 +28,11 @@ class PDO extends \PDO
 
     private function doPDOQuery($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
     {
-        $var = new PreparePlugin("PDO::query",$this,$statement,$mode,$arg3,$ctorargs);
+        $args = \pinpoint_get_func_ref_args();
+        $var = new PreparePlugin("PDO::query",$this,...$args);
         try{
             $var->onBefore();
-            $ret = parent::query($statement,$statement,$mode,$arg3,$ctorargs);
+            $ret = parent::query(...$args);
             $var->onEnd($ret);
             return $ret;
         }catch (\Exception $e){
