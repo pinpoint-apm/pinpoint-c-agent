@@ -65,11 +65,20 @@ Example [pinpoint-in-bottle](https://github.com/eeliu/pinpoint-in-bottle)
 
 #### 1.6 aiohttp
 
+Todo....
+
 #### 1.7 web.py
 
 > Add pinpoint middleware
 
 > Example [py-web](https://github.com/eeliu/pinpoint-in-pyweb)
+
+
+#### 1.8 web2.py (syn)
+
+> Add pinpoint middleware
+
+> Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
 
 
 ### 2. Specify pinpoint option into settings.py

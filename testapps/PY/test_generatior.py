@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin( __name__)
 def fib(max):
     n, a, b = 0, 0, 1
     while n < max:
