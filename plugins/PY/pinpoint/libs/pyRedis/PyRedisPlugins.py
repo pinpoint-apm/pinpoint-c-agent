@@ -10,8 +10,8 @@ from pinpoint.common import *
 
 class PyRedisPlugins(Candy):
 
-    def __init__(self,class_name,module_name):
-        super().__init__(class_name,module_name)
+    def __init__(self,name):
+        super().__init__(name)
         self.dst = ''
 
     def onBefore(self,*args, **kwargs):

@@ -2,10 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 from person import Person
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
 
 class Student(Person):
-    @PinpointCommonPlugin("Student", __name__)
+    @PinpointCommonPlugin("Student"+ __name__)
     def eat(self):
         return "Student eating"

@@ -22,10 +22,10 @@
     
     
     ```
-    from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+    from pinpoint.common import PinpointCommonPlugin
     
     
-    @PinpointCommonPlugin('', __name__)
+    @PinpointCommonPlugin(__name__)
     def fact(n):
         ......
     ```

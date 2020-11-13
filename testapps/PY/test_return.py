@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
 
 def lazy_sum(*args):

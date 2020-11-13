@@ -17,7 +17,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from app import app
 
 from .FlaskPlugins import BaseFlaskPlugins
 
@@ -28,9 +27,7 @@ class PinPointMiddleWare():
         self.app = app
         self.wsgi_app = wsgi_app
 
-    @BaseFlaskPlugins("Flask Web App", __name__)
+    @BaseFlaskPlugins("Flask Web App")
     def __call__(self, environ, start_response):
         return self.wsgi_app(environ, start_response)
 
-
-app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)

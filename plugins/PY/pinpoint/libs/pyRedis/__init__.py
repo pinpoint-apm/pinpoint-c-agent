@@ -8,8 +8,8 @@ def monkey_patch():
     try:
         import redis
         Interceptors = [
-            Interceptor(redis.Redis, 'Redis', PyRedisPlugins),
-            Interceptor(redis.Redis.execute_command, 'execute_command', PyRedisPlugins)
+            Interceptor(redis, 'Redis', PyRedisPlugins),
+            Interceptor(redis.Redis, 'execute_command', PyRedisPlugins)
         ]
         for interceptor in Interceptors:
             interceptor.enable()

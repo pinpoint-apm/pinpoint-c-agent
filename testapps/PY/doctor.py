@@ -2,11 +2,11 @@
 # -*- coding: UTF-8 -*-
 
 from person import Person
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
 
 class Doctor(Person):
 
-    @PinpointCommonPlugin("Doctor", __name__)
+    @PinpointCommonPlugin("Doctor"+ __name__)
     def other(self):
         return "Doctor not eating!"

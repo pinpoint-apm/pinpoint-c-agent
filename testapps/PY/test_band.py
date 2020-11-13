@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
+from pinpoint.common import PinpointCommonPlugin
 
 
-@PinpointCommonPlugin('', __name__)
+@PinpointCommonPlugin(__name__)
 def band_func(self, x):
     self.x = x
     return self.x * self.x

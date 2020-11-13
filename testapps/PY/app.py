@@ -24,9 +24,6 @@ from datetime import datetime
 import functools
 import requests
 
-from pinpoint.plugins.PinpointCommonPlugin import PinpointCommonPlugin
-
-
 import test_function
 from app1 import user_function
 import person, student, teacher, doctor
@@ -38,6 +35,7 @@ import test_lambda
 import test_decorator
 import test_partial
 import test_band
+from pinpoint.Flask.PinPointMiddleWare import PinPointMiddleWare
 from test_band import BandClass
 import test_mixin
 import test_special
@@ -54,9 +52,7 @@ from RedisControl import RedisControl
 
 app = Flask(__name__)
 
-from pinpoint.PinPointMiddleWare import PinPointMiddleWare
 app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
-
 
 @app.route('/', methods=['GET', 'POST'])
 def home():

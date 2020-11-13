@@ -23,7 +23,8 @@ import pinpointPy
 
 from flask import Flask,Request
 
-from pinpoint.Flask.PinPointMiddleWare import *
+from pinpoint.common import *
+
 from pinpoint.libs import monkey_patch_for_pinpoint
 monkey_patch_for_pinpoint()
 
