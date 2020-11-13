@@ -4,7 +4,9 @@
 
 from bottle import response
 
-from ..libs import *
+from pinpoint.libs import monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint()
+
 import pinpointPy
 
 class RequestPlugin(WSGIPlugin):

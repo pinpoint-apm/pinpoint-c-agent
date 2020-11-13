@@ -19,7 +19,7 @@
 
 from app import app
 
-from pinpoint.FlaskPlugins import BaseFlaskPlugins
+from .FlaskPlugins import BaseFlaskPlugins
 
 
 class PinPointMiddleWare():

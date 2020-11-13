@@ -19,27 +19,22 @@ import pinpointPy
 
 class PyMysqlPlugin(Candy):
 
-    def __init__(self,class_name,module_name):
-        super().__init__(class_name,module_name)
-        self.dst = ''
+    def __init__(self,name):
+        super().__init__(name)
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName())
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
-        arg = self.get_arg(*args, **kwargs)
-        pinpointPy.add_clues(PP_ARGS, arg)
+        pinpointPy.add_clue(PP_SQL_FORMAT,  args[1])
         ###############################################################
-        if self.func_name == 'Connect':
-            self.dst = kwargs['db']
-        pinpointPy.add_clue(PP_DESTINATION, self.dst)
+        cursor = args[0]
+        dst = cursor.connection.get_host_info()
+        pinpointPy.add_clue(PP_DESTINATION, dst)
         return args,kwargs
 
     def onEnd(self,ret):
-        ###############################################################
-        pinpointPy.add_clues(PP_RETURN,str(ret))
-        ###############################################################
         super().onEnd(ret)
         return ret
 

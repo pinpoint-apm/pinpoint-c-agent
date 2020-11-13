@@ -13,21 +13,36 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
+from pinpoint.common import Interceptor
 
-try:
-    import pymysql
-    from pymysql.cursors import Cursor
-    from .PyMysqlPlugin import PyMysqlPlugin
 
-    HookSet = [
-        ('pymysql', 'connect', pymysql, pymysql.connect),
-        ('Cursor','execute', Cursor, Cursor.execute),
-        ('Cursor','fetchall', Cursor, Cursor.fetchall)
-    ]
+def monkey_patch():
+    try:
+        import pymysql
+        from pymysql.cursors import Cursor
+        from .PyMysqlPlugin import PyMysqlPlugin
 
-    for hook in HookSet:
-        new_Cursor = PyMysqlPlugin(hook[0], '')
-        setattr(hook[2],hook[1], new_Cursor(hook[3]))
-except ImportError as e:
-    # do nothing
-    print(e)
+        # HookSet = [
+        #     ('pymysql', 'connect', pymysql, pymysql.connect),
+        #     ('Cursor','execute', Cursor, Cursor.execute),
+        #     ('Cursor','fetchall', Cursor, Cursor.fetchall)
+        # ]
+        #
+        # for hook in HookSet:
+        #     new_Cursor = PyMysqlPlugin(hook[0], '')
+        #     setattr(hook[2],hook[1], new_Cursor(hook[3]))
+
+        Interceptors = [
+            # Interceptor(pymysql, 'connect', PyMysqlPlugin),
+            Interceptor(Cursor, 'execute', PyMysqlPlugin),
+            # Interceptor(Cursor, 'fetchall', PyMysqlPlugin)
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
+
+
+    except ImportError as e:
+        # do nothing
+        print(e)
+
+__all__=['monkey_patch']
