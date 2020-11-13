@@ -44,3 +44,4 @@ def before_cursor_execute(conn, cursor, statement,
 def after_cursor_execute(conn, cursor, statement,
                         parameters, context, executemany):
     pinpointPy.end_trace()
+

@@ -24,7 +24,6 @@ class Candy(object):
     def __init__(self,name):
         self.name = name
 
-
     def onBefore(self,*args, **kwargs):
         pinpointPy.start_trace()
 

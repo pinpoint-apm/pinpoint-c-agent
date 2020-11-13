@@ -16,7 +16,7 @@
 
 from django.utils.deprecation import MiddlewareMixin
 
-from .Django.BaseRequestPlugins import BaseRequestPlugins
+from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
 
 class DjangoMiddleWare(MiddlewareMixin):
     def __init__(self, get_response=None):

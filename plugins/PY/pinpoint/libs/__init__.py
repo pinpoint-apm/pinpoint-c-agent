@@ -13,8 +13,32 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-from .PyMysql import *
-from .requests import *
-from .sqlalchemy import *
-from .pyRedis import *
-from .urllib import *
+
+def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True,urllib=True,
+                            sqlalchemy=True,aioHttp=False):
+    if pymysql:
+        from .PyMysql import monkey_patch
+        monkey_patch()
+
+    if mongo:
+        from .pymongo import monkey_patch
+        monkey_patch()
+
+    if pyredis:
+        from .pyRedis import monkey_patch
+        monkey_patch()
+
+    if requests:
+        from .requests import monkey_patch
+        monkey_patch()
+
+    if sqlalchemy:
+        from .sqlalchemy import monkey_patch
+        monkey_patch()
+
+    if urllib:
+        from .urllib import monkey_patch
+        monkey_patch()
+
+
+__all__=['monkey_patch_for_pinpoint']

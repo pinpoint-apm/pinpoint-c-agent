@@ -13,32 +13,25 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-from pinpoint.common import Interceptor
-
-try:
-    import requests
-    from .NextSpanPlugin import NextSpanPlugin
 
 
-    # HookSet = [
-    #     ('requests','post', requests, requests.post),
-    #     ('requests','get', requests, requests.get),
-    #  ('requests','patch', requests, requests.patch)
-    # ]
-    #
-    # for hook in HookSet:
-    #     new_requests = NextSpanPlugin(hook[0], '')
-    #     setattr(hook[2],hook[1], new_requests(hook[3]))
+def monkey_patch():
+    from pinpoint.common import Interceptor
 
-    Interceptors = [
-        Interceptor(requests.post,'find', NextSpanPlugin),
-        Interceptor(requests.get, 'insert', NextSpanPlugin),
-        Interceptor(requests.patch, 'update', NextSpanPlugin),
-    ]
+    try:
+        import requests
+        from .NextSpanPlugin import NextSpanPlugin
 
-    for interceptor in Interceptors:
-        interceptor.enable()
+        Interceptors = [
+            Interceptor(requests.post,'find', NextSpanPlugin),
+            Interceptor(requests.get, 'insert', NextSpanPlugin),
+            Interceptor(requests.patch, 'update', NextSpanPlugin),
+        ]
 
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-except ImportError:
-    pass
+    except ImportError:
+        pass
+
+__all__=['monkey_patch']

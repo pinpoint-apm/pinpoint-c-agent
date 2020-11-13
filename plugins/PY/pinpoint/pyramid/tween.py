@@ -3,7 +3,8 @@
 # Created by eeliu at 11/12/20
 
 from .PyRequestPlugin import PyRequestPlugin
-from .LoaderLibs import *
+from pinpoint.libs import monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint()
 
 def pinpoint_tween(handler,registry):
 
