@@ -9,6 +9,9 @@ set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}   -g3 -O0 -DCOMMON_DEBUG")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNDEBUG  -O2")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -g3 -O0 -DCOMMON_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG  -O2")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 option (WITH_TEST_CASE "Enable Gtest" OFF)
 option (WITH_CODECOVERAGE "Enable CodeCoverage" OFF)
@@ -22,16 +25,9 @@ endif()
 include_directories("include"
                     "src"
                     "jsoncpp/include")
+                    
 link_directories(${CMAKE_BINARY_DIR}/lib)
 
-set(JSONCPP_WITH_TESTS OFF CACHE BOOL "enable X functionality" FORCE)
-set(JSONCPP_WITH_POST_BUILD_UNITTEST OFF CACHE BOOL "enable X functionality" FORCE)
-set(JSONCPP_WITH_EXAMPLE OFF CACHE BOOL "enable X functionality" FORCE)
-set(JSONCPP_WITH_CMAKE_PACKAGE OFF CACHE BOOL "enable X functionality" FORCE)
-set(JSONCPP_WITH_PKGCONFIG_SUPPORT OFF CACHE BOOL "enable X functionality" FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "enable X functionality" FORCE)
-set(BUILD_STATIC_LIBS ON CACHE BOOL "enable X functionality" FORCE)
-set(JSONCPP_WITH_EXAMPLE OFF CACHE BOOL "enable X functionality" FORCE)
 add_subdirectory(jsoncpp)
 add_subdirectory(src)
 
