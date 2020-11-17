@@ -174,7 +174,7 @@ TEST(node, node_tree)
 
     // print_tree(&current,0);
 
-    Json::Value oRoot =  Helper::merge_node_tree(current);
+    Json::Value& oRoot =  Helper::merge_node_tree(current);
     // std::string stdBody  = writer.write(oRoot); //Trace::node_tree_to_string(oRoot);
     std::string stdBody = Helper::node_tree_to_string(oRoot);
     free_nodes_tree(&current);
@@ -201,7 +201,7 @@ TEST(node,merge_children)
 
     TraceNode& current = g_pool.getNodeById(currentId);
 
-    Json::Value oRoot =  Helper::merge_node_tree(current);
+    Json::Value& oRoot =  Helper::merge_node_tree(current);
     // std::string stdBody  = writer.write(oRoot); //Trace::node_tree_to_string(oRoot);
     std::string stdBody = Helper::node_tree_to_string(oRoot);
     free_nodes_tree(&current);

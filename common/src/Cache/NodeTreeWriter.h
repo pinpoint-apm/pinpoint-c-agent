@@ -40,7 +40,7 @@ public:
         builder["indentation"] = "";
     }
     
-    std::string write(Json::Value& value)
+    std::string write(const Json::Value& value)
     {
         Json::OStringStream out;
         std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());

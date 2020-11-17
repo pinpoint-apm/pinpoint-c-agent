@@ -38,7 +38,7 @@ uint64_t get_current_msec_stamp()
 }
 
 
-std::string node_tree_to_string(Json::Value &value)
+std::string node_tree_to_string(const Json::Value &value)
 {
     return _writer.write(value);
 }
@@ -59,7 +59,7 @@ static void reverse_node_list(Json::Value& parents,TraceNode* head)
     parents.append(merge_children(*head));
 }
 
-Json::Value merge_children(TraceNode& node)
+Json::Value& merge_children(TraceNode& node)
 {
     Json::Value& value = node.getValue();
 
@@ -72,7 +72,7 @@ Json::Value merge_children(TraceNode& node)
     return value;
 }
 
-Json::Value merge_node_tree(TraceNode& root)
+Json::Value& merge_node_tree(TraceNode& root)
 {
     return merge_children(root);
 }
