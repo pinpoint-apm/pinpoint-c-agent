@@ -68,15 +68,15 @@ typedef struct scope_time_trace
 
 uint64_t get_current_msec_stamp();
 
-std::string node_tree_to_string(Json::Value &value);
+std::string node_tree_to_string(const Json::Value &value);
 
-Json::Value merge_node_tree(TraceNode& root);
+Json::Value& merge_node_tree(TraceNode& root);
 
 TransConnection getConnection();
 
 void freeConnection(TransConnection& );
 
-Json::Value merge_children(TraceNode& node);
+Json::Value& merge_children(TraceNode& node);
 
 }
 
