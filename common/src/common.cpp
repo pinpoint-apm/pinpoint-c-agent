@@ -120,7 +120,7 @@ NodeID do_end_trace(TraceNode& node)
                                 (Helper::get_current_msec_stamp()):
                                 (node.p_root_node->fetal_error_time);
             node["E"] = end_time - node.start_time;
-            Json::Value trace = Helper::merge_node_tree(node);
+            const Json::Value& trace = Helper::merge_node_tree(node);
             std::string spanStr = Helper::node_tree_to_string(trace);
             pp_trace("this span:(%s)",spanStr.c_str());
             flush_to_agent(std::move(spanStr));
