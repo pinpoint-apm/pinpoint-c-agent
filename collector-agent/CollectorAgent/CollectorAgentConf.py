@@ -87,7 +87,6 @@ class CollectorAgentConf(object):
         # self.ApplicationName = config.get('Collector',
         #                                   'ApplicationName')
         self.version = AGENT_VERSION
-        self.server_type = config.getint('Collector', 'ServerType', fallback=PHP)
 
         log_dir = config.get('Common', 'LOG_DIR', fallback=None)
         log_level = config.get('Common', 'Log_Level', fallback='DEBUG')
