@@ -1,0 +1,11 @@
+{
+	"autoload": {
+        "psr-4": {
+          "Plugins\\":"Plugins/"
+        }
+    },
+    "require": {
+
+        "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
+    }
+}

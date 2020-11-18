@@ -1,0 +1,24 @@
+{
+    "authors": [
+        {
+            "name": "jmz",
+            "email": "1125378902@qq.com"
+        }
+    ],
+	"autoload": {
+        "psr-4": {
+            "App\\": "App/",
+           "Plugins\\":"Plugins/"
+        }
+    },
+    "require": {
+        "easyswoole/easyswoole": "3.2.5",
+		"easyswoole/template": "^1.0",
+		"easyswoole/mysqli": "^1.1",
+		"easyswoole/verifycode": "^3.0",
+		"easyswoole/mysqli-pool": "^1.0",
+		"duncan3dc/blade": "^4.5",
+        "easyswoole/cache": "^1.1",
+        "pinpoint-apm/pinpoint-php-aop": "v2.0.0"
+    }
+}

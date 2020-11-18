@@ -1,5 +1,9 @@
 # 变化
 
+## v0.4.0-beta  异步监控API
+* [PHP] 添加一 ID 用来跟踪异步调用
+* [python] 同上
+
 ## v0.3.2
 * [Python] 支持python2.7 module 
 * [PHP] thinkphp6,Codeigniter4,Symfony framework demo

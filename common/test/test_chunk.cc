@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "Chunk.h"
+#include "Cache/Chunk.h"
 #include "json/json.h"
 using namespace testing;
-
+using Cache::Chunks;
 
 static int checkData(const void* buf,uint length,void* dst)
 {
@@ -46,14 +46,15 @@ TEST(chunk, all_in_one)
     chunks.copyDataIntoChunks(buf1,1024);
     chunks.copyDataIntoChunks(buf2,1024);
     chunks.copyDataIntoChunks(buf3,1024);
+    EXPECT_FALSE(chunks.checkCapacity(1025));
+
     chunks.copyDataIntoChunks(buf3,1024);
-    EXPECT_TRUE(chunks.getAllocSize() >= 1024*4);
-    chunks.copyDataIntoChunks(buf3,1024);
-    EXPECT_TRUE(chunks.copyDataIntoChunks(buf3,1024) == 1024 );
+    EXPECT_TRUE(chunks.copyDataIntoChunks(buf3,1024) == 0 );
 
     out.clear();
     out.append(buf1,1024);
     out.append(buf2,1024);
+    out.append(buf3,1024);
     out.append(buf3,1024);
     out.append(buf3,1024);
 

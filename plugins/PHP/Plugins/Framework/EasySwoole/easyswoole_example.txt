@@ -1,0 +1,41 @@
+#!/usr/bin/env php
+<?php
+
+/// The code template was  copied from  https://github.com/easy-swoole/easyswoole/blob/3.x/bin/easyswoole
+
+use EasySwoole\EasySwoole\Command\CommandRunner;
+
+defined('IN_PHAR') or define('IN_PHAR', boolval(\Phar::running(false)));
+defined('RUNNING_ROOT') or define('RUNNING_ROOT', realpath(getcwd()));
+defined('EASYSWOOLE_ROOT') or define('EASYSWOOLE_ROOT', IN_PHAR ? \Phar::running() : realpath(getcwd()));
+
+$file = EASYSWOOLE_ROOT.'/vendor/autoload.php';
+if (file_exists($file)) {
+    require $file;
+}else{
+    die("include composer autoload.php fail\n");
+}
+
+#################################################
+// pinpoint entry
+define('AOP_CACHE_DIR',__DIR__.'/Cache/');
+define('PLUGINS_DIR', __DIR__ . '/Plugins/');
+//define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"Plugins\Framework\app\ClassMapInFile");
+define('PER_REQ_CLASS_NAME','Plugins\Framework\Swoole\Http\Server\PerReqPlugin');
+define('APPLICATION_NAME','APP-3');
+define('APPLICATION_ID','app-3');
+define("PINPOINT_USE_CACHE",'NO');
+require_once __DIR__. '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
+#################################################
+
+if(file_exists(EASYSWOOLE_ROOT.'/bootstrap.php')){
+    require_once EASYSWOOLE_ROOT.'/bootstrap.php';
+}
+
+$args = $argv;
+//trim first command
+array_shift($args);
+$ret = CommandRunner::getInstance()->run($args);
+if(!empty($ret)){
+    echo $ret."\n";
+}

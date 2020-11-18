@@ -7,7 +7,7 @@ app info
 --FILE--
 <?php 
 
-// test in function
+## test in function
 function foo(&$a,$b,$c,$d)
 {
     $ar = \pinpoint_get_func_ref_args();
@@ -21,10 +21,10 @@ function foo(&$a,$b,$c,$d)
 $var = 100;
 foo($var,1,3,4);
 var_dump($var);
-// global
+## global
 var_dump(\pinpoint_get_func_ref_args());
 
-// test in class
+## test in class
 class Foo{
     public function __construct( $a,$b)
     {
@@ -43,13 +43,13 @@ class Foo{
         var_dump(\pinpoint_get_func_ref_args()); 
     }
 
-    public function foo( $a, $b, $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
+    public function foo( $a, $b,array $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
     {
        $input = \pinpoint_get_func_ref_args();
        var_dump($input);
     }
 
-    public static function static_foo( $a, $b, $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
+    public static function static_foo( $a, $b,array $ar,$c = 'hello pinpoint-php',$d=123.4534,$e=null)
     {
        $var =  \pinpoint_get_func_ref_args();
        var_dump($var);
@@ -63,7 +63,7 @@ class Foo{
 }
 
 $foo = new Foo(1,2);
-$foo->foo("hello pinpoint",1,array('1'=>2,'c'=>3,'e'=>5));
+$foo->foo('hello pinpoint',1,array('1'=>2,'c'=>3,'e'=>5));
 Foo::static_foo('hello pinpoint',1,array('1'=>2,'c'=>3,'e'=>5));
 $foo->test_none();
 var_dump($foo->return_all("23",1,null));
@@ -72,8 +72,8 @@ echo "test anonymous \n";
 $name = 'eeliu';
 $nobody = function ($arg) use (&$name) {
     var_dump(\pinpoint_get_func_ref_args());
-    //$name = 'eeliu-01';
-    //$arg = $arg.$name;
+    $name = 'eeliu-01';
+    $arg = $arg.$name;
     return \pinpoint_get_func_ref_args();
 };
 var_dump($nobody("hello "));

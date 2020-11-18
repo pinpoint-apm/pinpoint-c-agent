@@ -1,7 +1,8 @@
-aux_source_directory(. COMMON_SRC)
-add_library(pinpoint_common STATIC  ${COMMON_SRC})
+LIST(APPEND src_dir . NodePool Cache Context Util ConnectionPool)
+foreach(dir  ${src_dir})
+    aux_source_directory(${dir} SRC_FILES)
+endforeach()
 
-set_target_properties(pinpoint_common
-PROPERTIES
-ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/lib"
-)
+add_library(pinpoint_common STATIC ${SRC_FILES})
+set_target_properties(pinpoint_common PROPERTIES
+         ARCHIVE_OUTPUT_DIRECTORY  ${PROJECT_BINARY_DIR}/lib)

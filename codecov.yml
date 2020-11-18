@@ -1,0 +1,3 @@
+ignore:
+  - "*/jsoncpp/**/*"
+  - "*/test/*"
