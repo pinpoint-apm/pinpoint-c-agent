@@ -1,0 +1,4 @@
+include *.txt README.md NOTICE LICENSE  MANIFEST.in
+recursive-include common *.cmake *.h *.txt *.in *.cc *.c *.cpp *.h *.inl
+recursive-include src/PY *.py *.c *.h *.txt
+prune common/build
