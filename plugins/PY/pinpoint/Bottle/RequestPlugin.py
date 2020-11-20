@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
+# Created by eeliu at 11/9/20
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -17,14 +17,13 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 11/9/20
-
 from bottle import response
 
 from pinpoint.libs import monkey_patch_for_pinpoint
 monkey_patch_for_pinpoint()
 
 import pinpointPy
+from pinpoint.common import *
 
 class RequestPlugin(WSGIPlugin):
 
