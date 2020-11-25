@@ -1,7 +1,7 @@
 ## How to use?
 
 ## app
-Goto [app](../../../testapps/PHP)
+Goto [app](../../testapps/PHP)
 
 ### EasySwoole/Swoole
 Goto [pinpoint-in-swoole](https://github.com/eeliu/pinpoint-in-swoole)
