@@ -1,6 +1,6 @@
-# The Difference Between v0.1.x And v0.2.x
+## The Difference between v0.1.x and v0.2.+
 
-##  v0.1.x VS. v0.2+
+##  v0.1.x VS. v0.2.+
 
 > Why do we refactor the pinpoint_c_agent (v0.1.x)?
 
@@ -15,7 +15,7 @@
 > AOP base on zend_excuted_hook
 
 ![How does it work](../../images/principle_v0.1.x.png)
-#### v0.2+
+#### v0.2.+
 
 > AOP base on classloader (like java-classloaders)
 
@@ -30,13 +30,14 @@ v0.2.+|✔|✔|✔|✔
 
 #### PHP Framework
 
-Framework|v0.1.x|v0.2+
+Framework|v0.1.x|v0.2.+
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|todo
+ThinkPHP|✔|✔
 YII|✔|✔
 Workerman|✘|✔
 EasySwoole|✘|✔
+
 
 > Note
 
@@ -44,7 +45,7 @@ EasySwoole|✘|✔
 
 #### Stability
 
-`v0.2+ > v0.1.x`
+`v0.2.+ > v0.1.x`
 
 
 #### Maintainability(Dynamically)
@@ -56,13 +57,39 @@ EasySwoole|✘|✔
 
 Operation|v0.1.x|v0.2.+
 ----|-----|----
-1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/eeliu/php_simple_aop#how-to-reload-all-plugins)
+1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/pinpoint-apm/pinpoint-php-aop#how-to-reload-all-plugins)
 2.Update pinpoint collector|✘|✔
-3.Update pinpiont_php.so(pinpoint.so)|✘|✘
+3.Update pinpoint_php.so(pinpoint.so)|✘|✘
+
+
+#### Performance Loss Under Stress Test
+
+> Test Scene
+
+```
+Test Object: PHPMYAdmin
+URL: http://dev-mysql-phpmyadmin/db_structure.php?server=1&db=testDB
+Plugins Amount: 4
+Hooked Times: 30
+```
+
+> Test Result
+
+Case|MTT
+---|----
+phpmyadmin without pinpoint|387.28ms
+phpmyadmin with pinpoint-php v0.1|511.46ms
+phpmyadmin with pinpoint-php v0.2|398.26ms
+
+
+```
+MTT: Mean RTT Time 
+```
+> [ pinpoint-php on Flraum test result ](./User%20Manual.md#1.1-performance-result)
+
+> By the way, pinpoint is an APM system but not a performance enhancement system. The loss can't be avoided at present.
+
 
 ### Contributors' words
 
-As composer is widely used, v0.2+ is our long-time support version, v0.1.x could be obsoleted in the future. But we could fix some fatal error into v0.1.x.
-
-
-
+As composer is widely used, v0.2+ is our long-time support version, and v0.1.x could be obsoleted in the future. But we could fix some fatal error into v0.1.x.
