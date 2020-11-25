@@ -2,7 +2,7 @@
 
 ### Tutorial
 
-1. First, you need to know how to use [ pinpoint-php-aop ☚](https://github.com/naver/pinpoint-php-aop) and how it works. 
+1. First, you need to know how to use [ pinpoint-php-aop ☚](https://github.com/pinpoint-apm/pinpoint-php-aop) and how it works. 
 2. Write your own XXXPlugin.php class.
    
    ```php
@@ -71,7 +71,7 @@
 
 ## Example
 
-https://github.com/naver/pinpoint-c-agent/tree/v0.3.1/Example/PHP/Plugins
+https://github.com/pinpoint-apm/pinpoint-c-agent/tree/v0.3.1/Example/PHP/Plugins
 
 ## API of Pinpoint_php_ext
-[Goto pinpoint_ext_api ☚](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
+[Goto pinpoint_ext_api ☚](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
