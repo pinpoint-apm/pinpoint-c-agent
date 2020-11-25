@@ -20,6 +20,10 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 
 [I use PYTHON ☚](DOC/PY/Readme.md)
 
+## C/CPP tutorial
+
+[Use c/cpp application ☚](DOC/C-CPP/Readme.md)
+
 ## Overview Pinpoint Common Agent
 
 ### Pinpoint-c-agent 
