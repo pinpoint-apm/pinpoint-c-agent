@@ -81,5 +81,28 @@ Todo....
 > Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
 
 
-### 2. Specify pinpoint option into settings.py
+### 2. Specify pinpoint option into [settings.py](./pinpoint/settings.py)
 
+```
+###############################################################
+# user should set below before use
+APP_ID ='python-agent' # application id
+APP_NAME ='PYTHON-AGNNT' # application name
+# COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
+COLLECTOR_HOST='tcp:dev-collector:9999'
+APP_SUB_ID='1'
+###############################################################
+
+pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
+
+# pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
+
+# def output(msg):
+#     print(msg)
+#
+pinpointPy.enable_debug(None)
+```
+1. APP_ID: Agent ID.
+2. APP_NAME: Application name.
+3. COLLECTOR_HOST: Collector-Agent's address.
+4. pinpointPy.enable_debug(None): DEBUG agent, pinpoint infomation will print in concole. Commented out it, pinpoint infomation will not be printed. For performance, recommend commented out it.

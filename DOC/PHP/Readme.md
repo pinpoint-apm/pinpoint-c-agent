@@ -157,5 +157,5 @@ https://www.php.net/supported-versions.php
 
 https://github.com/pinpoint-apm/pinpoint-c-agent/issues/100
 
-#### 5. Some built-in functions can't AOP
+#### 5. ~Some built-in functions can't AOP~ Already done!
 https://github.com/pinpoint-apm/pinpoint-c-agent/issues/102
