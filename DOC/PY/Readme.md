@@ -21,15 +21,24 @@ pinpoint| 2.0+(GRPC)
 1. Install python virtual environment, and please refer to 
 https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 
-2. Come back to the root directory, and install pinpointPy (Python virtual environment is recommended).
+2. Install pinpointPy (Python virtual environment is recommended).
 ```shell
-$ python setup.py install
+$ pip install pinpointPy
 ```
-#### Build Collector Agent
-[Collector Agent Installation ☚](../CollectorAgent/Readme.md)
+#### Install Collector Agent
+There are two way to install Collector-Agent, just choose one:
+
+1. [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
+2. Use Dockerized Collector-Agent:
+    
+    ```
+    docker pull eeliu2020/pinpoint-collector-agent:latest 
+    docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
+    ```
+   
 
 ### [How to Use]
-[Click me ☚](../../Example/PY/Readme.md)
+[Click me ☚](../../plugins/PY/Readme.md)
 
 
 ## Performance Test Result

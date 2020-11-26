@@ -28,12 +28,11 @@ Agent version|PHP5.5.x|PHP5.6.x|PHP7.x |php-zts
 v0.1.x|✔|✔|✔|✘
 v0.2.+|✔|✔|✔|✔
 
-#### PHP Framework
-
+#### PHP Framework and Library
 Framework|v0.1.x|v0.2.+
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|✔
+ThinkPHP|✔|✘
 YII|✔|✔
 Workerman|✘|✔
 EasySwoole|✘|✔
