@@ -131,7 +131,7 @@ pinpoint| `1.8.0+`, `2.0+`
 
 ### 对于开发人员
 
-[插件编写指南  ☚](../../Example/PHP/Readme-CN.md)
+[插件编写指南  ☚](../../plugins/PHP/Readme.md)
 
 [PHP用户手册  ☚](./User%20Manual-CN.md)
 
@@ -157,6 +157,3 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/issues/100
 
 #### 5. 一些内置函数不支持AOP。
 https://github.com/pinpoint-apm/pinpoint-c-agent/issues/102
-
-
-> [v0.1.x 和 v0.2.+ 的区别](./detail_versions-CN.md)
