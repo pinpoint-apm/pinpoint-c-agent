@@ -38,7 +38,7 @@ class HTTPRequestPlugins(AsyCandy):
         print("------------------- call before -----------------------")
         insBaseHttp = args[0]
         assert isinstance(insBaseHttp,tornado.web.RequestHandler)
-        pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'tornado.web.RequestHandler',self.node_id)
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'tornado.web.RequestHandler',self.node_id)
         pinpointPy.add_clue(PP_REQ_URI,insBaseHttp.request.uri,self.node_id)
         pinpointPy.add_clue(PP_REQ_CLIENT,insBaseHttp.request.remote_ip,self.node_id)
         pinpointPy.add_clue(PP_REQ_SERVER,insBaseHttp.request.host_name,self.node_id)

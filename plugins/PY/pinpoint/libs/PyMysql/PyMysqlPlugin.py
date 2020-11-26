@@ -26,7 +26,7 @@ class PyMysqlPlugin(Candy):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(PP_INTERCEPTER_NAME,self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
         pinpointPy.add_clue(PP_SQL_FORMAT,  args[1])
         ###############################################################

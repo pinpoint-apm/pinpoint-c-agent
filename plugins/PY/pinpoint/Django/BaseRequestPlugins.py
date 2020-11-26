@@ -37,7 +37,7 @@ class BaseRequestPlugins(Candy):
         ###############################################################
         request = args[1]
         # assert isinstance(request,BaseHTTPRequestHandler)
-        pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'BaseDjangoRequest request')
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'BaseDjangoRequest request')
         pinpointPy.add_clue(PP_REQ_URI,request.path)
         # print(request.META)
         pinpointPy.add_clue(PP_REQ_CLIENT,request.META['REMOTE_ADDR'])
