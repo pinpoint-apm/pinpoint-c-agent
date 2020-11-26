@@ -32,7 +32,7 @@ sid = None
 
 def generateTid():
     global tid
-    tid = ('%s^%s^%s') % (APP_ID, APP_SUB_ID, str(pinpointPy.unique_id()))
+    tid = ('%s^%s^%s') % (APP_ID, str(pinpointPy.start_time()), str(pinpointPy.unique_id()))
     return tid
 
 def generateSid():
