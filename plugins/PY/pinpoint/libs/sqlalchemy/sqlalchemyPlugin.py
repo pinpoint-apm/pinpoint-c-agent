@@ -31,7 +31,7 @@ import pinpointPy
 def before_cursor_execute(conn, cursor, statement,
                         parameters, context, executemany):
     pinpointPy.start_trace()
-    pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'before_cursor_execute')
+    pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'before_cursor_execute')
     pinpointPy.add_clue(PP_SQL_FORMAT,statement)
     pinpointPy.add_clues(PP_ARGS, 'user not cared')
     DBUrl = urlparse(str(conn.engine.url))

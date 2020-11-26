@@ -96,7 +96,7 @@ class AcceptPlugin
         pinpoint_add_clue(PP_REQ_CLIENT,$connection->getRemoteIp(),$id);
         pinpoint_add_clue(PP_REQ_SERVER,$header['host'],$id);
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP,$id);
-        pinpoint_add_clue(PP_INTERCEPTER_NAME, "workerman-http",$id);
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "workerman-http",$id);
         $this->app_name = APPLICATION_NAME;
         pinpoint_add_clue(PP_APP_NAME, $this->app_name,$id);
         pinpoint_set_context(PP_APP_NAME,$this->app_name,$id);

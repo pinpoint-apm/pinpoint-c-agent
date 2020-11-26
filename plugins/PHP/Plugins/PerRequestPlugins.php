@@ -55,7 +55,7 @@ class PerRequestPlugins
         pinpoint_add_clue(PP_REQ_CLIENT, $_SERVER["REMOTE_ADDR"]);
         pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP);
-        pinpoint_add_clue(PP_INTERCEPTER_NAME, "PHP Request");
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "PHP Request");
 
 
         $this->app_name = APPLICATION_NAME;
