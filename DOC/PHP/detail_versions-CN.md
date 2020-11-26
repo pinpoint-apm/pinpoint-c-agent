@@ -33,10 +33,11 @@ v0.2.+|✔|✔|✔|✔
 框架|v0.1.x|v0.2.+
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|todo
+ThinkPHP|✔|✘
 YII|✔|✔
 Workerman|✘|✔
 EasySwoole|✘|✔
+
 
 > 备注
 

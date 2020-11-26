@@ -29,7 +29,6 @@ pinpoint| `1.8.0+`, `2.0+`
             docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
             ```
    
-    > Build pinpoint-php-module
 3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, do following steps:
    1. phpize        
    2. ./configure
@@ -134,7 +133,7 @@ After full test, the AOP code could cost at least 1ms in our env(E5-2660 v4 @ 2.
 
 ### For the developer
 
-[Plugins Tutorial ☚](../../Example/PHP/Readme.md)
+[Plugins Tutorial ☚](../../plugins/PHP/Readme.md)
 
 [PHP user manual ☚](./User%20Manual.md)
 
@@ -160,5 +159,3 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/issues/100
 
 #### 5. Some built-in functions can't AOP
 https://github.com/pinpoint-apm/pinpoint-c-agent/issues/102
-
-> [The Difference between v0.1.x and v0.2.+ ](./detail_versions.md)

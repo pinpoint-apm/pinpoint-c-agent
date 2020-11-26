@@ -24,9 +24,10 @@ Pinpoint-php agent employs [pinpoint-php-aop](https://github.com/pinpoint-apm/pi
 ![FlarumPerformanceTest](../images/FlarumPerformanceTest.png)
 
 > TPS: time per request 
+
 > TPR: requests per second
 
-[How to use pinpoint-php agent into Flarum?](/Example/PHP/demo/Flarum-demo/Readme.md)
+[How to use pinpoint-php agent into Flarum?](https://github.com/eeliu/pinpoint-in-laravel)
 
 >  Call Tree
 
@@ -35,7 +36,7 @@ Pinpoint-php agent employs [pinpoint-php-aop](https://github.com/pinpoint-apm/pi
 > Summary
 * Less than 5% loss, when Flarum adds PHP Agent.
 
-If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
+If you care about the performance most, you can call pinpoint-php agent module API directly, which is written by C&C++. [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
 
 ## 2 How to hook a object ?
 
@@ -56,7 +57,7 @@ class Foo{
 
 Replace the return object with a decorated object in onEnd(). There are some [magic methods](https://www.php.net/manual/en/language.oop5.magic.php) to help "hacking" the object.
 
-[ [How does it work? ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
+[ [How does it work? ☚]](../../plugins/PHP/Plugins/Common/InstancePlugins.php)
 
 
 ### 2.2 Examples
@@ -82,7 +83,7 @@ Replace the return object with a decorated object in onEnd(). There are some [ma
     }
     ...
 ```
-[ [Goto GeneratorPlugin ☚] ](../../Example/PHP/Plugins/GeneratorPlugin.php)
+[ [Goto GeneratorPlugin ☚] ](../../plugins/PHP/Plugins/AutoGen/app/GeneratorPlugin.php)
 
 #### 2.2.2 PDO::prepare return a PDOStatement
 
@@ -101,5 +102,5 @@ $yellow = $sth->fetchAll();
 
 ```
 
-Replace $dbh->prepare return value with [Plugins\PDOStatement](../../Example/PHP/Plugins/PDOStatement.php).
+Replace $dbh->prepare return value with [ProfilerPDOStatement](../../plugins/PHP/Plugins/Sys/PDO/ProfilerPDOStatement.php).
 
