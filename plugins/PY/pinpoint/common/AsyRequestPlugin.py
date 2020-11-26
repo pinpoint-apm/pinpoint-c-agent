@@ -37,7 +37,7 @@ class AsyRequestPlugin(AsyCandy):
         pinpointPy.add_clue(PP_APP_ID, APP_ID, self.traceId)
         ###############################################################
         request = args[0]
-        # pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'tornado.web.RequestHandler',self.node_id)
+        # pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'tornado.web.RequestHandler',self.node_id)
         # pinpointPy.add_clue(PP_REQ_URI, request.uri, self.traceId)
         # pinpointPy.add_clue(PP_REQ_CLIENT, request.remote_ip, self.traceId)
         # pinpointPy.add_clue(PP_REQ_SERVER, request.host_name, self.traceId)

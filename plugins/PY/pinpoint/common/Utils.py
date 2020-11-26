@@ -27,7 +27,7 @@ def startPinpointByEnviron(environ):
     pinpointPy.add_clue(PP_APP_ID, APP_ID)
     ###############################################################
     # print("------------------- call before -----------------------")
-    pinpointPy.add_clue(PP_INTERCEPTER_NAME, 'WSGI handle')
+    pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'WSGI handle')
 
     path,remote_addr,host = environ['PATH_INFO'],environ['REMOTE_ADDR'],environ['HTTP_HOST']
 

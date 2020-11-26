@@ -35,7 +35,7 @@ abstract class Candy
         $this->pinpoint_id = $newid;
         // update global id
         Context::getInstance()->setId($newid);
-        pinpoint_add_clue(PP_INTERCEPTER_NAME,$apId,$this->pinpoint_id);
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME,$apId,$this->pinpoint_id);
         echo "$apId start -> $parent_id $newid \n";
     }
 
