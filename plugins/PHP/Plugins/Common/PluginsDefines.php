@@ -57,7 +57,7 @@ define("PP_HEADER_PSPANID","HTTP_PINPOINT_PSPANID");
 define("PP_SERVER_TYPE","stp");
 define("PP_NEXT_SPAN_ID",'nsid');
 define("PP_DESTINATION","dst");
-define("PP_INTERCEPTER_NAME","name");
+define("PP_INTERCEPTOR_NAME","name");
 define("PP_ADD_EXCEPTION","EXP");
 define("PP_ROOT_LOC",1);
 define("PP_REQ_URI","uri");

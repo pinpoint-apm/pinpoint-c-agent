@@ -52,7 +52,7 @@ class PerReqPlugin
         pinpoint_add_clue(PP_REQ_CLIENT,$request->server['remote_addr'],$id);
         pinpoint_add_clue(PP_REQ_SERVER,$header['host'],$id);
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP,$id);
-        pinpoint_add_clue(PP_INTERCEPTER_NAME, "swoole-http-server",$id);
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "swoole-http-server",$id);
         pinpoint_add_clue(PP_APP_NAME, APPLICATION_NAME,$id);
         pinpoint_set_context(PP_APP_NAME,APPLICATION_NAME,$id);
         pinpoint_add_clue(PP_APP_ID, APPLICATION_ID,$id);
