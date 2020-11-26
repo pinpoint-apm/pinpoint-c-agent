@@ -10,7 +10,7 @@ The current stable version is [the Latest](https://github.com/naver/pinpoint-c-a
 
 # Pinpoint Common Agent
 
-It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_** and **_PYTHON_**.
+It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_**, **_C/CPP_** and **_PYTHON_**.
 
 ## PHP tutorial
 
@@ -27,7 +27,7 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 ## Overview Pinpoint Common Agent
 
 ### Pinpoint-c-agent 
-![How does it work](images/pinpoint_0.2.png)
+![How does it work](images/pinpoint_v0.4.x.png)
 
 ### Distributed Tracking system
 ![php_agent_example](images/php_agent_example.png)
