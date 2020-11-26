@@ -8,6 +8,6 @@
     },
     "require": {
 
-        "pinpoint-apm/pinpoint-php-aop": "dev-test_np_hack"
+        "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
     }
 }
