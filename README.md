@@ -1,6 +1,6 @@
 ![Pinpoint](images/logo.png)
 
-[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/eeliu/pinpoint-c-agent/branch/dev/graph/badge.svg)](https://codecov.io/gh/eeliu/pinpoint-c-agent)
+[![Build Status](https://travis-ci.com/pinpoint-apm/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/pinpoint-apm/pinpoint-c-agent.svg)](https://gitter.im/pinpoint-apm/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)[![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent)
 
 
 **Visit [our official website](http://naver.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
