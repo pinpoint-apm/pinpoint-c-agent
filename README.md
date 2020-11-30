@@ -1,12 +1,12 @@
 ![Pinpoint](images/logo.png)
 
-[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/eeliu/pinpoint-c-agent/branch/dev/graph/badge.svg)](https://codecov.io/gh/eeliu/pinpoint-c-agent)
+[![Build Status](https://travis-ci.com/pinpoint-apm/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/pinpoint-apm/pinpoint-c-agent.svg)](https://gitter.im/pinpoint-apm/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)[![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent)
 
 
-**Visit [our official website](http://naver.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
+**Visit [our official website](http://pinpoint-apm.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://pinpoint-apm.github.io/pinpoint/news.html)**  
 
 
-The current stable version is [the Latest](https://github.com/naver/pinpoint-c-agent/releases).
+The current stable version is [the Latest](https://github.com/pinpoint-apm/pinpoint-c-agent/releases).
 
 # Pinpoint Common Agent
 
@@ -45,7 +45,7 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
  ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
  
 ## Contact Us
-* Submit an [issue](https://github.com/naver/pinpoint-c-agent/issues)
+* Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
 * Chinese Community:
 
 QQ Group1: 897594820 | QQ Group2: 812507584 | DING Group
