@@ -26,7 +26,7 @@ https://packaging.python.org/guides/installing-using-pip-and-virtual-environment
 $ pip install pinpointPy
 ```
 #### Install Collector Agent
-There are two way to install Collector-Agent, just choose one:
+There are two ways to install Collector-Agent, just choose one:
 
 1. [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
 2. Use Dockerized Collector-Agent:

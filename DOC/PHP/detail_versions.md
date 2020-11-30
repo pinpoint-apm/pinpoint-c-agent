@@ -40,7 +40,7 @@ EasySwoole|✘|✔
 
 > Note
 
-1. If your php application does not support composer(such as woredpress,phpwind etc), the only choice is v0.1.x.
+1. If your php application does not support composer(such as woredpress,phpwind, etc), the only choice is v0.1.x.
 
 #### Stability
 
@@ -51,7 +51,7 @@ EasySwoole|✘|✔
 
 ```
 ✔: Not block user's application.
-✘: Block user's application: php-fpm/apache should be restart.
+✘: Block user's application: php-fpm/apache should be restarted.
 ```
 
 Operation|v0.1.x|v0.2.+
