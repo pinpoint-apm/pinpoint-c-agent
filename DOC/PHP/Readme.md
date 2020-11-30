@@ -20,7 +20,7 @@ pinpoint| `1.8.0+`, `2.0+`
 #### Steps
 1. git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
    
-2. Build Collector-Agent yourself or use Dockerized Collector-Agent, just choose one way:
+2. Build Collector-Agent by yourself or use Dockerized Collector-Agent, just choose one way:
     * [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
     * Use Dockerized Collector-Agent:
     
@@ -29,15 +29,15 @@ pinpoint| `1.8.0+`, `2.0+`
             docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
             ```
    
-3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, do following steps:
+3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, and do following steps:
    1. phpize        
    2. ./configure
    3. make 
    4. make test TESTS=src/PHP/tests/ 
    
-        ps: We recommend you test whether the module is RIGHT. For PHP5: ```make test TESTS=src/PHP/tests5/```
+        ps: We recommend you to test whether the module is RIGHT. For PHP5: ```make test TESTS=src/PHP/tests5/```
    5. make install 
-   6. Activation pinpoint-php-module, please add the following configuration into your ```php.ini``` 
+   6. Activate pinpoint-php-module, please add the following configuration into your ```php.ini``` 
    
        >  php.ini 
         ```ini
@@ -56,7 +56,7 @@ pinpoint| `1.8.0+`, `2.0+`
         ;error_log = /tmp/php_fpm_error.log
         ```
 
-4. Use Pinpoint PHP Agent in your project, following the steps below: 
+4. Use Pinpoint PHP Agent in your project, and follow the steps below: 
     
     We assume that you have installed composer and known how to use it. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
 
@@ -119,11 +119,11 @@ pinpoint| `1.8.0+`, `2.0+`
 
 ### 2. Why not support automatically update AOP files?
 
-We can DO but prefer not DO! Because we have not yet find an efficient way to implement this and monitoring these files status every time is a bad deal.
+We can DO but prefer not to DO! Because we have not yet found an efficient way to implement this and monitoring these files status every time is a bad deal.
 
 ### 3. How much performance does it lose when using?
 
-After full test, the AOP code could cost at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitoring, the more you taking.
+After full test, the AOP code could spend at least 1ms in our env(E5-2660 v4 @ 2.00GHz). While, the more function/method you monitor, the more you take.
 
 #### Performance Test Result
 
@@ -145,7 +145,7 @@ https://github.com/pinpoint-apm/pinpoint-c-agent/issues/99
 
 #### 2. If I do not use composer/autoloader, can I use this version?
 
-Sorry, `pinpoint-php-aop` does not support wrapping the user class (or internal class) without composer/autoloader. By the way, [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
+Sorry, `pinpoint-php-aop` does not support to wrap the user class (or internal class) without composer/autoloader. By the way, [Composer](https://getcomposer.org/) is GOOD. O(∩_∩)O
 
 https://github.com/pinpoint-apm/pinpoint-c-agent/issues/103
 
