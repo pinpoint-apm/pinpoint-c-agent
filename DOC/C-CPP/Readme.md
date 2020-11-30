@@ -1,8 +1,8 @@
 ## Getting Started
 
->At present, we don't not find an easy and stable way to hack the code. You should link the common library and write your plugins on `remote call`, `database`,  `cache` and so on.
+>At present, we don't find an easy and stable way to hack the code. You should link the common library and write your plugins on `remote call`, `database`,  `cache` and so on.
 
-While, check example `src/CPP/test_pinpoint.cpp` and `src/CPP/test_pinpoint.c`.
+While, check examples `src/CPP/test_pinpoint.cpp` and `src/CPP/test_pinpoint.c`.
 ### Requirement
 
 Dependency|Version
