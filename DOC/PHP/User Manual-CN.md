@@ -1,6 +1,6 @@
 ## 1 pinpoint-php agent是如何工作的?
 
-Pinpoint-php agent将[pinpoint-php-aop](https://github.com/naver/pinpoint-php-aop)作为它的方面编程库，它有助于将origin class.php转换为proxied_class.php，其中包括plugins.php和origin.php，而不影响origin class.php的任何函数。
+Pinpoint-php agent将[pinpoint-php-aop](https://github.com/pinpoint-apm/pinpoint-php-aop)作为它的方面编程库，它有助于将origin class.php转换为proxied_class.php，其中包括plugins.php和origin.php，而不影响origin class.php的任何函数。
 
 ``` php
 +--------------+                    +-----------------------+
@@ -27,7 +27,7 @@ Pinpoint-php agent将[pinpoint-php-aop](https://github.com/naver/pinpoint-php-ao
 
 >TPR: requests per second（每秒的请求数量）
 
-[如何在Flarum中使用pinpoint-php agent ?](/Example/PHP/demo/Flarum-demo/Readme-CN.md)
+[如何在Flarum中使用pinpoint-php agent ?](https://github.com/eeliu/pinpoint-in-laravel)
 
 >  调用栈
 
@@ -36,7 +36,7 @@ Pinpoint-php agent将[pinpoint-php-aop](https://github.com/naver/pinpoint-php-ao
 > 总结
 * 当Flarum添加PHP Agent时，损失小于5%。
 
-如果您特别在意性能损耗问题，可以直接调用由C&C++编写的pinpoint-php agent模块API。 [(pinpoint-php api)](https://github.com/naver/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
+如果您特别在意性能损耗问题，可以直接调用由C&C++编写的pinpoint-php agent模块API。 [(pinpoint-php api)](../../src/PHP/pinpoint_php_api.php)
 
 ## 2 如何hook a object?
 
@@ -57,14 +57,14 @@ class Foo{
 
 用onEnd()中的修饰对象替换返回对象。这里有一些[魔术方法](https://www.php.net/manual/en/language.oop5.magic.php)可以帮助“破解”对象。 
 
-[ [如何运作 ☚]](../../Example/PHP/Plugins/InstancePlugins.php)
+[ [如何运作 ☚]](../../plugins/PHP/Plugins/Common/InstancePlugins.php)
 
 
 ### 2.2 示例
 
 #### 2.2.1 Hook a generator
 
-> https://github.com/naver/pinpoint-c-agent/issues/100
+> https://github.com/pinpoint-apm/pinpoint-c-agent/issues/100
 
 ``` php
     ...
@@ -83,7 +83,7 @@ class Foo{
     }
     ...
 ```
-[ [跳转到 GeneratorPlugin ☚] ](../../Example/PHP/Plugins/GeneratorPlugin.php)
+[ [跳转到 GeneratorPlugin ☚] ](../../plugins/PHP/Plugins/AutoGen/app/GeneratorPlugin.php)
 
 #### 2.2.2 PDO::prepare方法返回了一个PDOStatement类
 
@@ -102,4 +102,4 @@ $yellow = $sth->fetchAll();
 
 ```
 
-用[Plugins\PDOStatement](../../Example/PHP/Plugins/PDOStatement.php)替换$dbh->prepare方法的返回值
+用[Plugins\PDOStatement](../../plugins/PHP/Plugins/Sys/PDO/ProfilerPDOStatement.php)替换$dbh->prepare方法的返回值

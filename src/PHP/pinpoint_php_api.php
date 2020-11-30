@@ -1,29 +1,43 @@
 <?php
-
+define("PINPOINT_ROOT_LOC",1);
 /**
- * start trace,if callstack is empty, creat a span. Otherwise, create a span event
+ * start trace,if callstack is empty, create a span. Otherwise, create a span event
  */
-function pinpoint_start_trace(){}
+function pinpoint_start_trace($id=-1){}
 
 /**
  * pop a trace.
- * @return current stacksize
+ * @return current stack size
  */
-function pinpoint_end_trace(){}
+function pinpoint_end_trace($id=-1){}
 
 /**
  * insert key,value into current span/spanevent
  * @param string $key
  * @param string $value
  */
-function pinpoint_add_clue(string $key, string $value){}
+function pinpoint_add_clue(string $key, string $value,$id=-1,$loc=0){}
+
+/**
+ * insert key,value into current trace context
+ * @param string $key
+ * @param string $value
+ */
+function pinpoint_set_context(string $key, string $value,$id=-1,$loc=0){}
+
+/**
+ * get key-value from current trace
+ * @param string $key
+ * @return string value
+ */
+function pinpoint_get_context(string $key,$id=-1){}
 
 /**
  * insert key,value into current span/spanevent annotation
  * @param int $key
  * @param string $value
  */
-function pinpoint_add_clues(int $key, string $value){}
+function pinpoint_add_clues(int $key, string $value,$id=-1,$loc=0){}
 
 /**
  * create a process unique id
@@ -40,19 +54,9 @@ function pinpoint_tracelimit(int $timestamp=null){}
 /**
  *Drop current span. Will not send to collector-agent
  */
-function pinpoint_drop_trace(){}
+function pinpoint_drop_trace($id=-1){}
 
 /**
- * Get appName
- */
-function pinpoint_app_name(){}
-
-/**
- *Get appID
- */
-function pinpoint_app_id(){}
-
-/**
- * @return collector-agent starttime
+ * @return collector-agent start time
  */
 function pinpoint_start_time(){}

@@ -11,15 +11,16 @@ matrix:
         - cd common
         - mkdir -p build
         - cd build
-        - cmake -DWITH_TEST_CASE=1 -DCMAKE_BUILD_TYPE=Release .. 
+        - cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
         - make 
-        - ./test/unittest
+        - ./bin/unittest
         
     - language: php
       php: "7.4"
       script:
         - phpize
         - ./configure
+        - ls build/lib
         - make
         - make test TESTS=src/PHP/tests/
 
@@ -76,7 +77,7 @@ matrix:
         - cmake --version
         - pip install -r requirements.txt 
         - python setup.py install
-        - nosetests src/PY/test
+        - nosetests src/PY/test --ignore-files="TestCoroutines.*"
         
     - language: python
       python: "3.5"
@@ -84,7 +85,7 @@ matrix:
         - cmake --version
         - pip install -r requirements.txt 
         - python setup.py install
-        - nosetests src/PY/test
+        - nosetests src/PY/test --ignore-files="TestCoroutines.*"
 
     - language: python
       python: "3.7"
@@ -102,14 +103,8 @@ matrix:
         - python setup.py install
         - nosetests src/PY/test --ignore-files="TestCoroutines.*"
 
-
-    - language: python
-      python: "3.7"
-      script:
-        - cd collector-agent
-        - pip install -r requirements.txt
-        - sh init_python_env.sh
-        - nosetests Test/
+after_success:
+ - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email:

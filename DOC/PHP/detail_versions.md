@@ -28,12 +28,11 @@ Agent version|PHP5.5.x|PHP5.6.x|PHP7.x |php-zts
 v0.1.x|✔|✔|✔|✘
 v0.2.+|✔|✔|✔|✔
 
-#### PHP Framework
-
+#### PHP Framework and Library
 Framework|v0.1.x|v0.2.+
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|✔
+ThinkPHP|✔|✘
 YII|✔|✔
 Workerman|✘|✔
 EasySwoole|✘|✔
@@ -41,7 +40,7 @@ EasySwoole|✘|✔
 
 > Note
 
-1. If your php application does not support composer(such as woredpress,phpwind etc), the only choice is v0.1.x.
+1. If your php application does not support composer(such as woredpress,phpwind, etc), the only choice is v0.1.x.
 
 #### Stability
 
@@ -52,12 +51,12 @@ EasySwoole|✘|✔
 
 ```
 ✔: Not block user's application.
-✘: Block user's application: php-fpm/apache should be restart.
+✘: Block user's application: php-fpm/apache should be restarted.
 ```
 
 Operation|v0.1.x|v0.2.+
 ----|-----|----
-1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/naver/pinpoint-php-aop#how-to-reload-all-plugins)
+1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/pinpoint-apm/pinpoint-php-aop#how-to-reload-all-plugins)
 2.Update pinpoint collector|✘|✔
 3.Update pinpoint_php.so(pinpoint.so)|✘|✘
 

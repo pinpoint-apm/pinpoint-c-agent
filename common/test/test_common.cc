@@ -2,6 +2,8 @@
 #include <pcre.h>
 #include <locale.h>
 #include <regex.h>
+#include <thread>
+#include <chrono>
 #include "common.h"
 
 using namespace testing;
@@ -12,51 +14,51 @@ void cc_log_error_cb(char*msg)
     ouputMsg+=msg;
 }
 
-TEST(common, trace)
-{
-    register_error_cb(cc_log_error_cb);
-    global_agent_info.inter_flag |= E_UTEST;
-    pinpoint_set_special_key("key1","1");
-    EXPECT_EQ(pinpoint_start_trace(),1);
-    pinpoint_set_special_key("key2","2");
-    const char* key = "k1";
-    const char* value = "v1";
-    pinpoint_add_clue(key,value);
-    pinpoint_add_clues(key,value);
-    pinpoint_add_clues(key,value);
-    pinpoint_set_special_key("key3","3");
-    EXPECT_EQ( pinpoint_start_trace(),2);
-    const char* value3 = pinpoint_get_special_key("key3");
-    EXPECT_STREQ(value3,"3");
+// TEST(common, trace)
+// {
+//     register_error_cb(cc_log_error_cb);
+//     global_agent_info.inter_flag |= E_UTEST;
+//     pinpoint_set_special_key("key1","1");
+//     EXPECT_EQ(pinpoint_start_trace(),1);
+//     pinpoint_set_special_key("key2","2");
+//     const char* key = "k1";
+//     const char* value = "v1";
+//     pinpoint_add_clue(key,value);
+//     pinpoint_add_clues(key,value);
+//     pinpoint_add_clues(key,value);
+//     pinpoint_set_special_key("key3","3");
+//     EXPECT_EQ( pinpoint_start_trace(),2);
+//     const char* value3 = pinpoint_get_special_key("key3");
+//     EXPECT_STREQ(value3,"3");
 
-    key = "k2";
-    value = "v2";
-    pinpoint_add_clue(key,value);
-    pinpoint_add_clues(key,value);
-    pinpoint_add_clues(key,value);
-    EXPECT_EQ( pinpoint_end_trace(),1);
-    value3 = pinpoint_get_special_key("key3");
-    EXPECT_STREQ(value3,"3");
+//     key = "k2";
+//     value = "v2";
+//     pinpoint_add_clue(key,value);
+//     pinpoint_add_clues(key,value);
+//     pinpoint_add_clues(key,value);
+//     EXPECT_EQ( pinpoint_end_trace(),1);
+//     value3 = pinpoint_get_special_key("key3");
+//     EXPECT_STREQ(value3,"3");
 
-    value3 = pinpoint_get_special_key("key2");
-    EXPECT_STREQ(value3,"2");
+//     value3 = pinpoint_get_special_key("key2");
+//     EXPECT_STREQ(value3,"2");
     
-    value3 = pinpoint_get_special_key("key1");
-    EXPECT_STREQ(value3,"1");
+//     value3 = pinpoint_get_special_key("key1");
+//     EXPECT_STREQ(value3,"1");
 
-    EXPECT_EQ( pinpoint_end_trace(),0);
+//     EXPECT_EQ( pinpoint_end_trace(),0);
 
-    value3 = pinpoint_get_special_key("key1");
-    EXPECT_STREQ(value3,NULL);
+//     value3 = pinpoint_get_special_key("key1");
+//     EXPECT_STREQ(value3,NULL);
 
-    value3 = pinpoint_get_special_key("key2");
-    EXPECT_STREQ(value3,NULL);
+//     value3 = pinpoint_get_special_key("key2");
+//     EXPECT_STREQ(value3,NULL);
 
-    value3 = pinpoint_get_special_key("key3");
-    EXPECT_STREQ(value3,NULL);
+//     value3 = pinpoint_get_special_key("key3");
+//     EXPECT_STREQ(value3,NULL);
 
 
-}
+// }
 
 TEST(common, uid_all_in_one)
 {
@@ -85,16 +87,118 @@ TEST(common, uid_all_in_one)
 }
 
 
-
-TEST(common, fetch_id_name)
+TEST(common,start_end_trace)
 {
-    const char* app_name = pinpoint_app_name();
-    const char* app_id = pinpoint_app_id();
-    EXPECT_STREQ(app_name,"collector_blocking");
-    EXPECT_STREQ(app_id,"collector_blocking");
-    EXPECT_TRUE(pinpoint_start_time()==0);
+    NodeID id = pinpoint_start_trace(0);
+    mark_current_trace_status(id,E_OFFLINE);
+
+    id = pinpoint_start_trace(id);
+
+    mark_current_trace_status(id,E_OFFLINE);
+
+    id = pinpoint_start_trace(id);
+
+    mark_current_trace_status(id,E_TRACE_PASS);
+    catch_error(id,"sdfasfas","fsafdsfasd",234);
+    id = pinpoint_end_trace(id);
+
+    id = pinpoint_end_trace(id);
+
+    id = pinpoint_end_trace(id);
+    EXPECT_EQ(id,0);
 }
 
+
+TEST(common,context_check)
+{
+    NodeID id = pinpoint_start_trace(0);
+    std::string str="fdafadf";
+    pinpoint_add_clues(id,"fasdfas",str.c_str(),E_CURRENT_LOC);
+    pinpoint_add_clue(id,"fasdfas",str.c_str(),E_CURRENT_LOC);
+    pinpoint_add_clue(id,"fasdfas",str.c_str(),E_CURRENT_LOC);
+    pinpoint_add_clue(id,"fasdfas",str.c_str(),E_CURRENT_LOC);
+
+    id = pinpoint_start_trace(id);
+    pinpoint_add_clue(id,"global",str.c_str(),E_ROOT_LOC);
+    id = pinpoint_end_trace(id);
+    str.clear();
+    str = "fadfaffadf";
+    pinpoint_set_context_key(id,"adfadf",str.c_str());
+    str+="35486we32";
+    pinpoint_set_context_key(id,"adfadf23",str.c_str());
+    str.clear();
+    EXPECT_STREQ(pinpoint_get_context_key(id,"adfadf23"),"fadfaffadf35486we32");
+    EXPECT_STREQ(pinpoint_get_context_key(id,"adfadf"),"fadfaffadf");
+
+    pinpoint_set_context_long(id,"1024",1024);
+    long value ;
+    EXPECT_EQ(pinpoint_get_context_long(id,"1024",&value),0);
+    EXPECT_EQ(value,1024);
+    pinpoint_end_trace(id);
+}
+
+TEST(common,error_checking)
+{
+    NodeID id = pinpoint_start_trace(0);
+    id = pinpoint_end_trace(id);
+    EXPECT_EQ(id,0);
+    id = pinpoint_start_trace(128);
+    pinpoint_end_trace(128);
+    EXPECT_EQ(id,0);
+}
+
+
+static void test_per_thread_id_odd()
+{
+    NodeID  id = pinpoint_get_per_thread_id();
+    EXPECT_EQ(id,0);
+    id = 1;
+    for(int i =1;i<10000;i++)
+    {
+        id +=2;
+        pinpoint_update_per_thread_id(id);
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        EXPECT_EQ(pinpoint_get_per_thread_id(),i*2+1);
+    }
+
+}
+
+static void test_per_thread_id_even()
+{
+    NodeID  id = pinpoint_get_per_thread_id();
+    EXPECT_EQ(id,0);
+
+    for(int i =1;i<10000;i++)
+    {
+        id +=2;
+        pinpoint_update_per_thread_id(id);
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        EXPECT_EQ(pinpoint_get_per_thread_id(),i*2);
+    }
+}
+
+TEST(common,per_threadid)
+{
+    std::thread f1(test_per_thread_id_odd);
+    std::thread f2(test_per_thread_id_even);
+    f1.join();
+    f2.join();
+}
+
+TEST(common,force_end_trace)
+{
+    NodeID id = pinpoint_start_trace(0);
+    id = pinpoint_end_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_start_trace(id);
+    id = pinpoint_end_trace(id);
+    id = pinpoint_end_trace(id);
+    EXPECT_NE(id,0);
+    id = pinpoint_force_end_trace(id,300);
+    EXPECT_EQ(id,0);
+}
 
 
 // int mymatch(char *buf)

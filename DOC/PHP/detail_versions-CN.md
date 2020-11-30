@@ -33,10 +33,11 @@ v0.2.+|✔|✔|✔|✔
 框架|v0.1.x|v0.2.+
 ----|-----|----|
 Laravel|✔|✔
-ThinkPHP|✔|todo
+ThinkPHP|✔|✘
 YII|✔|✔
 Workerman|✘|✔
 EasySwoole|✘|✔
+
 
 > 备注
 
@@ -55,7 +56,7 @@ EasySwoole|✘|✔
 
 操作|v0.1.x|v0.2.+
 ----|-----|----
-1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/naver/pinpoint-php-aop#how-to-reload-all-plugins)
+1.Update plugins(CRUD) |✘|✔ [How to ?](https://github.com/pinpoint-apm/pinpoint-php-aop#how-to-reload-all-plugins)
 2.Update pinpoint collector|✘|✔
 3.Update pinpoint_php.so(pinpoint.so)|✘|✘
 #### 压力测试下的性能损失

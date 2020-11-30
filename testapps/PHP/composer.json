@@ -1,0 +1,22 @@
+{
+    "name": "eeliu/pinpoint-php-example",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "eeliu",
+            "email": "eeliu2009@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "app\\":"app/",
+            "app1\\": "app1",
+            "Plugins\\": "Plugins/"
+        }
+    },
+    "require": {
+        "pinpoint-apm/pinpoint-php-aop": "dev-v2.0.0-release",
+        "guzzlehttp/guzzle": "~6.0",
+        "mongodb/mongodb":"~1.6.0"
+    }
+}

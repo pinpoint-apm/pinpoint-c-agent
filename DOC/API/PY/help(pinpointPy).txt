@@ -1,0 +1,52 @@
+Help on module pinpointPy:
+
+NAME
+    pinpointPy - python agent for pinpoint platform
+
+FILE
+    /home/test/apps/pinpoint-c-agent/env2/lib/python2.7/site-packages/pinpointPy.so
+
+FUNCTIONS
+    add_clue(...)
+        def add_clue(string key,string value,int id=-1,int loc=0)
+    
+    add_clues(...)
+        def add_clues(string key,string value,int id=-1,int loc=0)
+    
+    check_tracelimit(...)
+        def check_tracelimit(long timestamp=-1): #check trace whether is limit
+    
+    drop_trace(...)
+        def drop_trace(int id=-1):# drop this trace
+    
+    enable_debug(...)
+        def enable_debug(callback):#enable logging output(callback )
+    
+    end_trace(...)
+        def end_trace(int id=-1):# end currently matched trace
+    
+    force_flush_trace(...)
+        def force_flush_trace(int id=-1): #force flush span during timeout
+    
+    get_context_key(...)
+        def get_context_key(key,int id=-1)->string
+    
+    mark_as_error(...)
+        def mark_as_error(string msg,string file_name,uint line_no,int id=-1): #This trace found an error
+    
+    set_agent(...)
+        def set_agent(collector_host="unix:/tmp/collector-agent.sock or tcp:host:port",trace_limit=-1): # set pinpint collector information
+    
+    set_context_key(...)
+        def set_context_key(string key,string value,int id=-1): # create a key-value pair that bases on current trace chain
+    
+    start_time(...)
+        def start_time()->long
+    
+    start_trace(...)
+        def start_trace(int id=-1):# create a new trace and insert into trace chain
+    
+    unique_id(...)
+        def unique_id()-> long
+
+(END)

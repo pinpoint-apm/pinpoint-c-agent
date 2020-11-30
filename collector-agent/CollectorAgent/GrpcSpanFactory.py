@@ -20,14 +20,15 @@
 # Created by eeliu at 11/7/19
 
 
+from Annotation_pb2 import PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
+from Span_pb2 import PSpan, PSpanEvent
 from google.protobuf.wrappers_pb2 import StringValue
 
-from Annotation_pb2 import PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
 from CollectorAgent.TCGenerator import ThriftProtocolUtil
 from Common.Logger import TCLogger
 from PHPAgent.SpanFactory import SpanFactory
-from PinpointAgent.Type import API_WEB_REQUEST, PHP, PHP_METHOD_CALL, PROXY_HTTP_HEADER
-from Span_pb2 import PSpan, PSpanEvent
+from PinpointAgent.Type import *
+from Proto.grpc.Annotation_pb2 import PIntStringStringValue
 
 
 class GrpcSpanFactory(SpanFactory):
@@ -89,6 +90,13 @@ class GrpcSpanFactory(SpanFactory):
             tSpan.exceptionInfo.intValue = id
             tSpan.exceptionInfo.stringValue.CopyFrom(value)
 
+        if 'EXP' in stackMap:
+            id = self.agent.updateStringMeta('EXP')
+            value = StringValue(value=stackMap['EXP'])
+            tSpan.exceptionInfo.intValue = id
+            tSpan.exceptionInfo.stringValue.CopyFrom(value)
+
+
         if 'clues' in stackMap:
             for annotation in stackMap['clues']:  # list
                 id, value = annotation.split(':', 1)
@@ -123,7 +131,7 @@ class GrpcSpanFactory(SpanFactory):
         return tSpan
 
     def createSpanEvent(self, stackMap):
-        assert 'name' in stackMap
+        assert 'name' in stackMap, " spanEvent should contain a name field"
         spanEv = PSpanEvent()
         spanEv.apiId = self.agent.updateApiMeta(stackMap['name'])
 
@@ -161,6 +169,12 @@ class GrpcSpanFactory(SpanFactory):
                 id, value = annotation.split(':', 1)
                 ann = PAnnotation(key=int(id), value=PAnnotationValue(stringValue=value))
                 spanEv.annotation.append(ann)
+        # todo SQL not support cache bindValue
+        if 'SQL' in stackMap:
+            id = self.agent.updateSqlMeta(stackMap['SQL'])
+            sqlValue = PIntStringStringValue(intValue=id)
+            ann = PAnnotation(key=SQL_ID, value=PAnnotationValue(intStringStringValue=sqlValue))
+            spanEv.annotation.append(ann)
 
         return spanEv
 

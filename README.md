@@ -1,6 +1,7 @@
 ![Pinpoint](images/logo.png)
 
-[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Build Status](https://travis-ci.com/naver/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/naver/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/eeliu/pinpoint-c-agent/branch/dev/graph/badge.svg)](https://codecov.io/gh/eeliu/pinpoint-c-agent)
+
 
 **Visit [our official website](http://naver.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://naver.github.io/pinpoint/news.html)**  
 
@@ -9,7 +10,7 @@ The current stable version is [the Latest](https://github.com/naver/pinpoint-c-a
 
 # Pinpoint Common Agent
 
-It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_** and **_PYTHON_**.
+It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_**, **_C/CPP_** and **_PYTHON_**.
 
 ## PHP tutorial
 
@@ -19,10 +20,14 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 
 [I use PYTHON ☚](DOC/PY/Readme.md)
 
+## C/CPP tutorial
+
+[Use c/cpp application ☚](DOC/C-CPP/Readme.md)
+
 ## Overview Pinpoint Common Agent
 
 ### Pinpoint-c-agent 
-![How does it work](images/pinpoint_0.2.png)
+![How does it work](images/pinpoint_v0.4.x.png)
 
 ### Distributed Tracking system
 ![php_agent_example](images/php_agent_example.png)

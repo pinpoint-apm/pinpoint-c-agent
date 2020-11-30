@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>pinpoint-php demo</title>
+</head>
+
+<body>
+
+<h3>Simple server</h3>
+
+<form method="get" action="index.php">
+    <table border="1">
+        <tr>
+            <th>Link</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <th>
+                Call internal function "date".
+            </th>
+            <th>
+                <button type="submit" name="type" value="get_date"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call user-defined function.
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_func1"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call user-defined function in a namespace
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_func2_caller"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call inherit function
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_inherit_func"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call generator
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_generator_func"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call abstract function
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_abstract_func"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call interface function
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_interface_func"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call Clone
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_clone"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call Recursion
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_recursion"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call function in Anonymous
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_anonymous"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call Static function
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_static"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call function in final class
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_final_class"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call final function
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_final_func"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call function in trait
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_trait"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Callback function
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_callback"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call function with different access
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_level"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call function with args
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_args"> click me </button>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                Call function return datas
+            </th>
+            <th>
+                <button type="submit" name="type" value="test_return"> click me </button>
+            </th>
+        </tr>
+
+    </table>
+</form>
+
+    <h3>Error and exception</h3>
+
+    <form method="get" action="index.php">
+        <table border="2">
+            <tr>
+                <th>Link</th>
+                <th>Description</th>
+            </tr>
+
+            <tr>
+                <th>
+                    Call undefined function.
+                </th>
+
+                <th>
+                    <button type="submit" name="type"
+                            value="test_call_undefined_function"> click me </button>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    Call Static
+                </th>
+
+                <th>
+                    <button type="submit" name="type"
+                            value="test_call_static"> click me </button>
+                </th>
+            </tr>
+
+            <tr>
+                <th>
+                    Call uncaught exception
+                </th>
+
+                <th>
+                    <button type="submit" name="type" value="test_uncaught_exception"> click me </button>
+                </th>
+            </tr>
+
+            <tr>
+                <th>
+                    Call caught exception
+                </th>
+
+                <th>
+                    <button type="submit" name="type" value="test_caught_exception"> click me </button>
+                </th>
+            </tr>
+
+            <tr>
+                <th>
+                    Call exception in recursion
+                </th>
+
+                <th>
+                    <button type="submit" name="type" value="test_exception_recursion"> click me </button>
+                </th>
+            </tr>
+        </table>
+    </form>
+
+    <h3>Test curl</h3>
+    <form method="get" action="index.php">
+        remote url: <input type="text"  name="remote" value="http://10.34.130.156:8989"/>
+        <input type="submit" name="type" value="test_curl">
+    </form>
+
+    <h3>Test PDO</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_pdo">
+    </form>
+
+    <h3>Test mysqli</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_mysqli">
+    </form>
+
+    <h3>Test redis</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_redis">
+    </form>
+
+    <h3>Test memcached</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_memcached">
+    </form>
+
+    <h3>Test kafka</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_kafka">
+    </form>
+
+    <h3>Test Guzzle</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_guzzle">
+    </form>
+
+</body>
+
+</html>
