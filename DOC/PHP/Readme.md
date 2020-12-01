@@ -20,7 +20,7 @@ pinpoint| `1.8.0+`, `2.0+`
 #### Steps
 1. git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
    
-2. Build Collector-Agent by yourself or use Dockerized Collector-Agent, just choose one way:
+2. Build Collector-Agent yourself or use Dockerized Collector-Agent, just choose one way:
     * [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
     * Use Dockerized Collector-Agent:
     
