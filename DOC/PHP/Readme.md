@@ -1,5 +1,5 @@
 ## Support Plan
-What we have supported and what we are going to support: [support plan](SupportPlan.md)
+What we have supported and what will support: [support plan](SupportPlan.md)
 
 ## Getting Started
 
