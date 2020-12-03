@@ -15,27 +15,24 @@
 # ------------------------------------------------------------------------------
 
 
-from django.utils.deprecation import MiddlewareMixin
 
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
+def monkey_patch():
+    from pinpoint.common import Interceptor
 
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
+    try:
+        import requests
+        from .NextSpanPlugin import NextSpanPlugin
 
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+        Interceptors = [
+            Interceptor(requests.post,'find', NextSpanPlugin),
+            Interceptor(requests.get, 'insert', NextSpanPlugin),
+            Interceptor(requests.patch, 'update', NextSpanPlugin),
+        ]
 
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
+    except ImportError:
+        pass
 
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+__all__=['monkey_patch']

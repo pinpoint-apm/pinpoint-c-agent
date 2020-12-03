@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,28 +17,23 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+# Created by eeliu at 8/20/20
 
-from django.utils.deprecation import MiddlewareMixin
+def monkey_patch():
+    from pinpoint.common import Interceptor
+    try:
+        import urllib.request
+        from .UrlOpenPlugin import UrlOpenPlugin
 
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
+        Interceptors = [
+            Interceptor(urllib.request,'urlopen', UrlOpenPlugin)
+        ]
 
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+    except ImportError:
+        pass
 
+__all__=['monkey_patch']
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
-
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)

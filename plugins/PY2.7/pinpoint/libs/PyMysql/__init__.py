@@ -14,28 +14,36 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-
-from django.utils.deprecation import MiddlewareMixin
-
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
-
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
-
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+from pinpoint.common import Interceptor
 
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
+def monkey_patch():
+    try:
+        import pymysql
+        from pymysql.cursors import Cursor
+        from .PyMysqlPlugin import PyMysqlPlugin
+
+        # HookSet = [
+        #     ('pymysql', 'connect', pymysql, pymysql.connect),
+        #     ('Cursor','execute', Cursor, Cursor.execute),
+        #     ('Cursor','fetchall', Cursor, Cursor.fetchall)
+        # ]
+        #
+        # for hook in HookSet:
+        #     new_Cursor = PyMysqlPlugin(hook[0], '')
+        #     setattr(hook[2],hook[1], new_Cursor(hook[3]))
+
+        Interceptors = [
+            # Interceptor(pymysql, 'connect', PyMysqlPlugin),
+            Interceptor(Cursor, 'execute', PyMysqlPlugin),
+            # Interceptor(Cursor, 'fetchall', PyMysqlPlugin)
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
 
 
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+    except ImportError as e:
+        # do nothing
+        print(e)
+
+__all__=['monkey_patch']

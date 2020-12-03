@@ -15,27 +15,34 @@
 # ------------------------------------------------------------------------------
 
 
-from django.utils.deprecation import MiddlewareMixin
+def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True,urllib=True,
+                            sqlalchemy=True,aioHttp=False,amqp=True):
+    if pymysql:
+        from libs.PyMysql import monkey_patch
+        monkey_patch()
 
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
+    # if mongo:
+    #     from libs.pymongo import monkey_patch
+    #     monkey_patch()
+    
+    # if pyredis:
+    #     from libs.pyRedis import monkey_patch
+    #     monkey_patch()
+    
+    if requests:
+        from libs.requests import monkey_patch
+        monkey_patch()
+    
+    if sqlalchemy:
+        from libs.sqlalchemy import monkey_patch
+        monkey_patch()
+    
+    if urllib:
+        from libs.urllib import monkey_patch
+        monkey_patch()
+    if amqp:
+        from libs.amqp import monkey_patch
+        monkey_patch()
 
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
 
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
-
-
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
-
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+__all__=['monkey_patch_for_pinpoint']

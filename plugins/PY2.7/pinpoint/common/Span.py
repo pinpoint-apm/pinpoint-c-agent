@@ -2,10 +2,9 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 8/20/20
 
-from urllib.parse import urlparse
-
-from ...settings import *
-from .PinpointDefine import *
+from urlparse import urlparse
+from settings import *
+from .Defines import *
 import random
 import pinpointPy
 
@@ -31,16 +30,16 @@ def generateNextSid():
 def generatePinpointHeader(url, headers):
 
     if pinpointPy.check_tracelimit():
-        headers[SAMPLED] = 's0'
+        headers[PP_HTTP_SAMPLED] = PP_NOT_SAMPLED
         return
     else:
-        headers[SAMPLED] = 's1'
-    headers[PINPOINT_PAPPTYPE] = '1700'
-    headers[PINPOINT_PAPPNAME] = APP_NAME
+        headers[PP_HTTP_SAMPLED] = PP_SAMPLED
+    headers[PP_HEADER_PINPOINT_PAPPTYPE] = PYTHON
+    headers[PP_HEADER_PINPOINT_PAPPNAME] = APP_NAME
     headers['Pinpoint-Flags'] = "0"
-    headers[PINPOINT_HOST] =  urlparse(url)['netloc']
-    headers[PINPOINT_TRACEID] = pinpointPy.get_context_key('tid')
-    headers[PINPOINT_PSPANID] = pinpointPy.get_context_key('sid')
+    headers[PP_HEADER_PINPOINT_HOST] =  urlparse(url)['netloc']
+    headers[PP_HEADER_PINPOINT_TRACEID] = pinpointPy.get_context_key(PP_TRANSCATION_ID)
+    headers[PP_HEADER_PINPOINT_PSPANID] = pinpointPy.get_context_key(PP_SPAN_ID)
     nsid = generateSid()
-    pinpointPy.set_context_key('nsid', nsid)
-    headers[PINPOINT_SPANID] = nsid
+    pinpointPy.set_context_key(PP_NEXT_SPAN_ID, nsid)
+    headers[PP_HEADER_PINPOINT_SPANID] = nsid

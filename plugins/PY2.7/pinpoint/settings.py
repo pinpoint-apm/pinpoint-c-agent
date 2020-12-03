@@ -24,7 +24,7 @@ import pinpointPy
 
 # user should set below before use
 APP_ID ='python-agent' # application id
-APP_NAME ='PYTHON-AGNNT' # application name
+APP_NAME ='PYTHON-AGENT' # application name
 # COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
 COLLECTOR_HOST='tcp:dev-collector:9999'
 APP_SUB_ID='1'
@@ -38,4 +38,4 @@ pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
 # def output(msg):
 #     print(msg)
 #
-# pinpointPy.enable_debug(None)
+pinpointPy.enable_debug(None)

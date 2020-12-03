@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,28 +17,13 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-
-from django.utils.deprecation import MiddlewareMixin
-
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
-
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
-
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+# Created by eeliu at 7/31/20
 
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
 
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+def monkey_patch():
+    try:
+        from .sqlalchemyPlugin import before_cursor_execute,after_cursor_execute
+    except ImportError:
+        pass
+__all__=['monkey_patch']

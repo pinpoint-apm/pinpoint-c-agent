@@ -23,24 +23,21 @@
 
 import pinpointPy
 
-
-from flask import Flask,Request
-
 from pinpoint.common import *
 
-from pinpoint.libs import monkey_patch_for_pinpoint
+from pinpoint.libs import *
 monkey_patch_for_pinpoint()
 
 from pinpoint.settings import *
 
-class BaseFlaskPlugins(Candy):
+class RequestPlugin(Candy):
     def __init__(self, name):
         super().__init__(name)
         self.isLimit = False
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
-        request = Request(args[1])
+        request = args[1]
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
         pinpointPy.add_clue(PP_APP_ID, APP_ID)
         ###############################################################
@@ -114,17 +111,15 @@ class BaseFlaskPlugins(Candy):
         if PP_APACHE_PROXY in request.headers:
             pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY])
 
-        pinpointPy.set_context_key("Pinpoint-Sampled","s1")
-        if (PP_HTTP_SAMPLED in request.headers and request.headers[PP_HTTP_SAMPLED] ==  PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
+        if PP_HTTP_SAMPLED in request.headers:
             if request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
-            pinpointPy.drop_trace()
-            pinpointPy.set_context_key("Pinpoint-Sampled", "s0")
-
-
+                self.isLimit = True
+                pinpointPy.drop_trace()
+        else:
+            pinpointPy.check_tracelimit()
+            # print(self.isLimit)
         pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid)
         pinpointPy.add_clue(PP_SPAN_ID,self.sid)
-        pinpointPy.set_context_key(PP_TRANSCATION_ID, self.tid)
-        pinpointPy.set_context_key(PP_SPAN_ID, self.sid)
         ###############################################################
         return args, kwargs
 

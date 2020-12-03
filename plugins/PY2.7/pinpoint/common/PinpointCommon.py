@@ -1,7 +1,7 @@
 ﻿import random
 import pinpointPy
-from .PinpointDefine import *
-from pinpoint.settings import *
+from .Defines import *
+from ..settings import *
 
 class Candy(object):
     def __init__(self,class_name,module_name):
@@ -23,7 +23,6 @@ class Candy(object):
         self.func_name=func.__name__
         def pinpointTrace(*args, **kwargs):
             ret = None
-            # print("start", self.func_name)
             args, kwargs = self.onBefore(*args, **kwargs)
             try:
                 ret = func(*args, **kwargs)
@@ -32,7 +31,6 @@ class Candy(object):
                 self.onException(e)
                 raise e
             finally:
-                # print("end", self.func_name)
                 self.onEnd(ret)
 
         return pinpointTrace

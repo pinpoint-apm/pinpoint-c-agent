@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,28 +17,34 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-
-from django.utils.deprecation import MiddlewareMixin
-
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
-
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
-
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+# Created by eeliu at 7/31/20
 
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
+from pinpoint.common import *
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from urllib.parse import urlparse
+import pinpointPy
 
 
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+@event.listens_for(Engine, "before_cursor_execute")
+def before_cursor_execute(conn, cursor, statement,
+                        parameters, context, executemany):
+    pinpointPy.start_trace()
+    pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'before_cursor_execute')
+    pinpointPy.add_clue(PP_SQL_FORMAT,statement)
+    pinpointPy.add_clues(PP_ARGS, 'user not cared')
+    DBUrl = urlparse(str(conn.engine.url))
+    if 'mysql'  in DBUrl.scheme:
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
+    
+    if 'postgresql' in DBUrl.scheme:
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_POSTGRESQL)
+
+    pinpointPy.add_clue(PP_DESTINATION,DBUrl.hostname)
+
+@event.listens_for(Engine, "after_cursor_execute")
+def after_cursor_execute(conn, cursor, statement,
+                        parameters, context, executemany):
+    pinpointPy.end_trace()
+

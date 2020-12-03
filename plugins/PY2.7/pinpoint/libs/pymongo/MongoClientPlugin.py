@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,28 +17,35 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+# Created by eeliu at 8/20/20
 
-from django.utils.deprecation import MiddlewareMixin
-
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
-
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
-
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+from pinpoint.common import *
+import pinpointPy
 
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
+class MongoClientPlugin(Candy):
+    def __init__(self, name):
+        super().__init__(name)
+        self.dst = ''
 
+    def onBefore(self, *args, **kwargs):
+        super().onBefore(*args, **kwargs)
+        collection = args[0]
+        self.dst = str(collection.__database.address)
+        ###############################################################
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_MONGDB_EXE_QUERY)
+        # pinpointPy.add_clues(PP_ARGS, )
+        ###############################################################
+        pinpointPy.add_clue(PP_DESTINATION, self.dst)
+        return args, kwargs
 
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+    def onEnd(self, ret):
+        ###############################################################
+        pinpointPy.add_clues(PP_RETURN, str(ret))
+        ###############################################################
+        super().onEnd(ret)
+        return ret
+
+    def onException(self, e):
+        pinpointPy.add_clue(PP_ADD_EXCEPTION, str(e))

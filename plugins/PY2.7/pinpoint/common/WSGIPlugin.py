@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,28 +17,26 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+# Created by eeliu at 11/9/20
 
-from django.utils.deprecation import MiddlewareMixin
+from .Utils import *
+from .Common import Candy
 
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
+class WSGIPlugin(Candy):
+    def __init__(self, name):
+        super().__init__(name)
 
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
+    def onBefore(self, *args, **kwargs):
+        super().onBefore(*args, **kwargs)
+        environ = args[0]
+        startPinpointByEnviron(environ)
 
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
+        return (args, kwargs)
 
+    def onEnd(self, ret):
+        endPinpointByEnviron(ret)
+        super().onEnd(ret)
+        return ret
 
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
-
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+    def onException(self, e):
+        pinpointPy.mark_as_error(e,"",0)

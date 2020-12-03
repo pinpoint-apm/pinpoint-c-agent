@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,28 +17,22 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+# Created by eeliu at 8/20/20
 
-from django.utils.deprecation import MiddlewareMixin
+def monkey_patch():
+    from pinpoint.common import Interceptor
+    from .PyRedisPlugins import PyRedisPlugins
+    try:
+        import redis
+        Interceptors = [
+            Interceptor(redis, 'Redis', PyRedisPlugins),
+            Interceptor(redis.Redis, 'execute_command', PyRedisPlugins)
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
+    except ImportError as e:
+        # do nothing
+        print(e)
 
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
-
-    def process_request(self,request):
-        print("*****MyMiddleware request******")
-        self.request_plugin.onBefore(self,request)
-
-
-    def process_response(self,request,response):
-        print("*****MyMiddleware response******")
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
-        return response
-
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+__all__=['monkey_patch']
