@@ -154,7 +154,7 @@ public:
 
     void setStrContext(const char* key,const char* buf)
     {
-        PContextType context(new StringContextType(buf));
+        PContextType context(std::make_shared<StringContextType>(buf));
         this->_context[key] = context;
         // std::string& value =  this->_context[key]->asStringValue();
         // pp_trace("value %s",value.c_str());
@@ -162,7 +162,7 @@ public:
 
     void setLongContext(const char* key,long l)
     {
-        PContextType context(new LongContextType(l));
+        PContextType context(std::make_shared<LongContextType>(l));
         this->_context[key] = context;
     }
 
