@@ -17,13 +17,14 @@
 
 from django.utils.deprecation import MiddlewareMixin
 
-from pinpoint.Django.BaseRequestPlugins import BaseRequestPlugins
+from pinpoint.Django.BaseDjangoRequestPlugins import BaseDjangoRequestPlugins
+
 
 class DjangoMiddleWare(MiddlewareMixin):
     def __init__(self, get_response=None):
         self.get_response = get_response
         super().__init__(self.get_response)
-        self.request_plugin = BaseRequestPlugins("Django Web App")
+        self.request_plugin = BaseDjangoRequestPlugins("Django Web App")
 
     def process_request(self,request):
         print("*****MyMiddleware request******")
