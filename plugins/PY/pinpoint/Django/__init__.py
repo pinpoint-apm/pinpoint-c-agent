@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+# Created by eeliu at 12/4/20
+
 # ******************************************************************************
 #   Copyright  2020. NAVER Corp.
 #
@@ -14,3 +18,5 @@
 #   limitations under the License.
 # ******************************************************************************
 
+from .DjangoMiddleWare import DjangoMiddleWare
+__all__=['DjangoMiddleWare']

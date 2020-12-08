@@ -14,6 +14,15 @@ matrix:
         - cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
         - make 
         - ./bin/unittest
+
+    - language: php
+      php: "8.0"
+      script:
+        - phpize
+        - ./configure
+        - ls build/lib
+        - make
+        - make test TESTS=src/PHP/tests/
         
     - language: php
       php: "7.4"

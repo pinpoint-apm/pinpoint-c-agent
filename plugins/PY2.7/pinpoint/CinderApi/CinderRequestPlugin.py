@@ -19,33 +19,25 @@
 
 # Created by eeliu at 3/5/20
 
-
-
+import sys,os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+print sys.path
 import pinpointPy
+from common import *
+from settings import *
 
-
-from flask import Flask,Request
-
-from pinpoint.common import *
-
-from pinpoint.libs import monkey_patch_for_pinpoint
-monkey_patch_for_pinpoint()
-
-from pinpoint.settings import *
-
-class BaseFlaskPlugins(Candy):
+class CinderRequestPlugin(Candy):
     def __init__(self, name):
-        super().__init__(name)
-        self.isLimit = False
+        super(CinderRequestPlugin,self).__init__(name)
 
     def onBefore(self,*args, **kwargs):
-        super().onBefore(*args, **kwargs)
-        request = Request(args[1])
+        super(CinderRequestPlugin,self).onBefore(*args, **kwargs)
+        request = args[1]
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
         pinpointPy.add_clue(PP_APP_ID, APP_ID)
         ###############################################################
         # print("------------------- call before -----------------------")
-        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'BaseFlaskrequest')
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'cinder api')
         pinpointPy.add_clue(PP_REQ_URI, request.path)
         pinpointPy.add_clue(PP_REQ_CLIENT,request.remote_addr)
         pinpointPy.add_clue(PP_REQ_SERVER, request.host)
@@ -117,9 +109,8 @@ class BaseFlaskPlugins(Candy):
         pinpointPy.set_context_key("Pinpoint-Sampled","s1")
         if (PP_HTTP_SAMPLED in request.headers and request.headers[PP_HTTP_SAMPLED] ==  PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
             if request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
-            pinpointPy.drop_trace()
-            pinpointPy.set_context_key("Pinpoint-Sampled", "s0")
-
+                pinpointPy.drop_trace()
+                pinpointPy.set_context_key("Pinpoint-Sampled", "s0")
 
         pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid)
         pinpointPy.add_clue(PP_SPAN_ID,self.sid)
@@ -130,15 +121,20 @@ class BaseFlaskPlugins(Candy):
 
     def onEnd(self,ret):
         ###############################################################
-
-
+        if ret:
+            response = ret
+            pinpointPy.add_clues(PP_HTTP_STATUS_CODE,str(response.status_code))
+            if response.status_code >400 :
+                pinpointPy.add_clue(PP_ADD_EXCEPTION,"status_code is %d"%(response.status_code))
 
         ###############################################################
-        super().onEnd(ret)
-        self.isLimit = False
+        super(CinderRequestPlugin,self).onEnd(ret)
         return ret
 
     def onException(self, e):
         import traceback
         pinpointPy.mark_as_error(traceback.format_exc(),"",0)
         raise e
+
+from libs import monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint()

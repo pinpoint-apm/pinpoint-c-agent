@@ -14,3 +14,25 @@
 #   limitations under the License.
 # ******************************************************************************
 
+
+
+def monkey_patch():
+    from pinpoint.common import Interceptor
+
+    try:
+        import requests
+        from .NextSpanPlugin import NextSpanPlugin
+
+        Interceptors = [
+            Interceptor(requests.post,'find', NextSpanPlugin),
+            Interceptor(requests.get, 'insert', NextSpanPlugin),
+            Interceptor(requests.patch, 'update', NextSpanPlugin),
+        ]
+
+        for interceptor in Interceptors:
+            interceptor.enable()
+
+    except ImportError:
+        pass
+
+__all__=['monkey_patch']
