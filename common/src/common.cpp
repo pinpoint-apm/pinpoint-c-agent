@@ -102,16 +102,15 @@ static void free_nodes_tree(TraceNode* root)
 
 static void flush_to_agent(std::string& span)
 {
-    if(span.length() > MAX_SPAN_SIZE)
-    {
-        pp_trace("current span is too heavy! size:%d",span.length());
-        return ;
-    }
-
     TransConnection trans = Helper::getConnection();
-    trans->sendMsgToAgent(span);
-    trans->trans_layer_pool(_span_timeout);
 
+    if(span.length() < MAX_SPAN_SIZE){
+        trans->sendMsgToAgent(span);
+    }
+    else{
+        pp_trace("Drop current span as it's too heavy! size:%d",span.length());
+    }
+    trans->trans_layer_pool(_span_timeout);
     Helper::freeConnection(trans);
 }
 

@@ -40,8 +40,18 @@ class Chunks
     typedef struct chunk_
     {
         uint32_t block_size;
-        uint32_t l_ofs; // The continuous buffer left offset in data ***(l_ofs)--------------(r_ofs)*****
-        uint32_t r_ofs; // The continuous buffer right offset in data
+        /**
+         * @brief 
+         * The continuous buffer left offset in data ***(l_ofs)--------------(r_ofs)*****
+         *   for read data from ck
+         */
+        uint32_t l_ofs; 
+
+        /**
+         * @brief  The continuous buffer right offset in data
+         * for write data into ck
+         */
+        uint32_t r_ofs; 
         char data[0];
     } Chunk;
 
@@ -51,15 +61,15 @@ class Chunks
 private:
 
     CkIter iter;
-    CKList ready_list;  //Wait to send
-    CKList free_list;  //already send, can be reuse
+    CKList ready_cks;  //Wait to send
+    CKList free_cks;  //already send, can be reuse
 
     const uint32_t c_resident_size;
     const uint32_t c_max_size;    // if  ck_alloc_size > c_max_size buffer is full
     uint32_t threshold;
 
     uint32_t ck_alloc_size;
-    uint32_t ck_free_list_size;
+    uint32_t ck_free_ck_capacity;
 
 private:
 
@@ -70,17 +80,17 @@ private:
      * @param length
      * @return rest size of data
      */
-    int copyDataIntoReadyList(const void* data, uint32_t length);
+    int copyDataIntoReadyCK(const void* data, uint32_t length);
 
-    int copyDataIntoFreeList(const void*data, uint32_t length);
+    int copyDataIntoFreeCK(const void*data, uint32_t length);
 
     int copyDataIntoNewChunk(const void* data, uint32_t length);
 
-    void reduceFreeList();
+    void reduceFreeCK();
 
     void checkWaterLevel();
     // try to use the ready and free list
-    bool useExistChunk(uint32_t length) const;
+    bool useExistingChunk(uint32_t length) const;
 
 public:
 
@@ -101,7 +111,7 @@ public:
     inline bool checkCapacity(uint32_t length) const 
     {
         // exist chunk is full and the thredhold is reached
-        if( this->useExistChunk(length) == false && this->ck_alloc_size+ length > this->c_max_size  ){
+        if( this->useExistingChunk(length) == false && this->ck_alloc_size+ length > this->c_max_size  ){
            return false;
         }    
         return true;
