@@ -11,11 +11,11 @@
     {
         public function onBefore(){
             pinpoint_add_clue("stp",PHP_METHOD);
-            pinpoint_add_clues(PHP_ARGS,print_r($this->args,true));
+            pinpoint_add_clues(PHP_ARGS,"fetch data from $this->args");
         }
 
         public function onEnd(&$ret){
-            pinpoint_add_clues(PHP_RETURN,"ture");
+            pinpoint_add_clues(PHP_RETURN,"parse data from $ret");
         }
 
         public function onException($e){

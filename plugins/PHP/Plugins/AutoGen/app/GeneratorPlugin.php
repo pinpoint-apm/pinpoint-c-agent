@@ -24,7 +24,7 @@ class GeneratorPlugin extends Candy
 {
     public function onBefore(){
         pinpoint_add_clue("stp",PP_PHP_METHOD);
-        pinpoint_add_clues(PP_PHP_ARGS,print_r($this->args,true));
+        pinpoint_add_clues(PP_PHP_ARGS,"--placeholder---");
     }
     public function onEnd(&$ret){
         if (isset($ret)){

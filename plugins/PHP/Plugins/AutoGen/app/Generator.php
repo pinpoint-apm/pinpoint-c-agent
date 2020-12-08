@@ -33,7 +33,7 @@ class Generator extends InstancePlugins implements \Iterator
         #####################################
 //        echo "--------------------------before";
         pinpoint_add_clue("stp",PP_PHP_METHOD);
-        pinpoint_add_clues(PP_PHP_ARGS,print_r($this->args,true));
+        pinpoint_add_clues(PP_PHP_ARGS,"--placeholder---");
         #####################################
     }
     protected function onEnd(&$ret)
@@ -41,7 +41,7 @@ class Generator extends InstancePlugins implements \Iterator
         #####################################
 
 //        echo "--------------------------end";
-        pinpoint_add_clues(PP_PHP_RETURN,print_r($ret,true));
+        pinpoint_add_clues(PP_PHP_RETURN,"--placeholder---");
         #####################################
         parent::onEnd($ret);
     }
