@@ -22,68 +22,70 @@
 #include "Chunk.h"
 namespace Cache{
     
-int Chunks::copyDataIntoReadyList(const void* data, uint32_t length)
+int Chunks::copyDataIntoReadyCK(const void* data, uint32_t length)
 {
-    if (ready_list.empty())
+    if (ready_cks.empty())
     {
         return length;
     }
-    Chunk* e = ready_list.back();
 
-    char* e_buf_start = &e->data[e->r_ofs];
-    uint32_t in_max_len = e->block_size - e->r_ofs;
-    if (e)
+    Chunk* ck = ready_cks.back();
+
+    char* p_ck_r = &ck->data[ck->r_ofs];
+    uint32_t capacity = ck->block_size - ck->r_ofs;
+    if (capacity >= length)
     {
-        if (in_max_len >= length)
-        {
-            memcpy(e_buf_start, data, length);
-            e->r_ofs += length;
-            length = 0;
-        }
-        else if (in_max_len > 0)
-        {
-            memcpy(e_buf_start, data, in_max_len);
-            length -= in_max_len;
-            e->r_ofs += in_max_len;
-        }
+        memcpy(p_ck_r, data, length);
+        ck->r_ofs += length;
+        length = 0;
     }
+    else if (capacity > 0) // capacity < length
+    { // current ck is full
+        memcpy(p_ck_r, data, capacity);
+        length -= capacity;
+        ck->r_ofs += capacity;
+    }
+
     return length;
 }
 
-int Chunks::copyDataIntoFreeList(const void*data, uint32_t length)
+int Chunks::copyDataIntoFreeCK(const void*data, uint32_t length)
 {
-    if (this->free_list.empty())
+    if (this->free_cks.empty())
     {
         return length;
     }
 
 
-    iter = this->free_list.begin();
+    iter = this->free_cks.begin();
 
-    while (iter != this->free_list.end() && length > 0)
+    while (iter != this->free_cks.end() && length >0 )
     {
-        Chunk* free = *iter;
+        Chunk* ck = *iter;
         iter++;
-        char* f_buf_start = &free->data[free->r_ofs];
-        uint32_t in_max_len = free->block_size - free->r_ofs;
-        if (in_max_len >= length)
+        char* f_buf_start = &ck->data[ck->r_ofs];
+        uint32_t ck_capacity = ck->block_size - ck->r_ofs;
+        if (ck_capacity >= length)
         {
+            // current data task is done
             memcpy(f_buf_start, data, length);
-            free->r_ofs += length;
+            ck->r_ofs += length;
             length = 0;
+
         }
-        else if (in_max_len > 0)
+        else if (ck_capacity > 0) //ck_capacity < length
         {
-            memcpy(f_buf_start, data, in_max_len);
-            length -= in_max_len;
-            data = (const char*) data + in_max_len;
-            free->r_ofs += in_max_len;
+            memcpy(f_buf_start, data, ck_capacity);
+            length -= ck_capacity;
+            data = (const char*) data + ck_capacity;
+            ck->r_ofs += ck_capacity;
         }
-        this->ck_free_list_size -=free->block_size;
+
+        this->ck_free_ck_capacity -= ck->block_size;
         // remove free in flist
-        this->free_list.pop_front();
+        this->free_cks.pop_front();
         // append free into rlist_end
-        this->ready_list.push_back(free);
+        this->ready_cks.push_back(ck);
 
     }
 
@@ -107,32 +109,32 @@ uint32_t Chunks::ck_ceil_to_k(uint32_t i)
 
 int Chunks::copyDataIntoNewChunk(const void* data, uint32_t length)
 {
-    int block_size = ck_ceil_to_k(sizeof(Chunk) + length);
+    int mem_size = ck_ceil_to_k(sizeof(Chunk) + length);
 
     // new a chunk
-    Chunk* nc = (Chunk*) malloc(block_size);
-    if (nc == NULL)
+    Chunk* ck = (Chunk*) malloc(mem_size);
+    if (ck == NULL)
     {
         return -1;
     }
-    nc->block_size = block_size - sizeof(Chunk);
-    memcpy(&nc->data[0], data, length);
-    nc->r_ofs = length;
-    nc->l_ofs = 0;
-    /// insert into busy_chunk
-    this->ready_list.push_back(nc);
-    this->ck_alloc_size +=  block_size;
+    ck->block_size = mem_size - sizeof(Chunk);
+    memcpy(&ck->data[0], data, length);
+    ck->r_ofs = length;
+    ck->l_ofs = 0;
+    /// insert into ready list
+    this->ready_cks.push_back(ck);
+    this->ck_alloc_size +=  mem_size;
     return 0;
 }
 
-void Chunks::reduceFreeList()
+void Chunks::reduceFreeCK()
 {
-    if (!this->free_list.empty())
+    if (!this->free_cks.empty())
     {
-        Chunk* c = *this->free_list.begin();
-        this->free_list.pop_front();
-        this->ck_alloc_size -= c->block_size + sizeof(Chunk);
-        this->ck_free_list_size -= c->block_size;
+        Chunk* c = *this->free_cks.begin();
+        this->free_cks.pop_front();
+        this->ck_alloc_size -= (c->block_size + sizeof(Chunk) );
+        this->ck_free_ck_capacity -= c->block_size;
         free(c);
     }
 }
@@ -140,9 +142,9 @@ void Chunks::reduceFreeList()
 void Chunks::checkWaterLevel()
 {
     while (this->c_resident_size < this->ck_alloc_size
-            && !this->free_list.empty())
+            && !this->free_cks.empty())
     {
-        this->reduceFreeList();
+        this->reduceFreeCK();
     }
 }
 
@@ -156,44 +158,44 @@ Chunks::Chunks(uint32_t max_size, uint32_t resident_size) :
          c_resident_size(resident_size),c_max_size(max_size),threshold(1024)
 {
     this->ck_alloc_size = 0;
-    this->ck_free_list_size = 0;
+    this->ck_free_ck_capacity = 0;
     if(max_size < resident_size)
         throw std::invalid_argument("chunks: max_size must bigger then resident_size");
 }
 
 Chunks::~Chunks()
 {
-    while (!this->ready_list.empty())
+    while (!this->ready_cks.empty())
     {
-        Chunk* c = this->ready_list.front();
+        Chunk* c = this->ready_cks.front();
         free(c);
-        ready_list.pop_front();
+        ready_cks.pop_front();
     }
 
-    while (!this->free_list.empty())
+    while (!this->free_cks.empty())
     {
-        Chunk* c = *this->free_list.begin();
+        Chunk* c = *this->free_cks.begin();
         free(c);
-        free_list.pop_front();
+        free_cks.pop_front();
     }
-    this->ck_free_list_size = 0;
+    this->ck_free_ck_capacity = 0;
 }
 
-bool Chunks::useExistChunk(uint32_t length) const
+bool Chunks::useExistingChunk(uint32_t length) const
 {
     Chunk * c = nullptr;
-    if(!this->ready_list.empty())
+    if(!this->ready_cks.empty())
     {
-        c = this->ready_list.back();
-        uint32_t avilable = c->block_size - c->r_ofs ;
-        if (avilable < length){
+        c = this->ready_cks.back();
+        uint32_t availiable = c->block_size - c->r_ofs ;
+        if (availiable < length){
             return false;
         }else{
-            length -= avilable;
+            length -= availiable;
         }
     }
 
-    if(this->ck_free_list_size >=length)
+    if(this->ck_free_ck_capacity >=length)
     {
         return true;
     }
@@ -207,7 +209,11 @@ int Chunks::copyDataIntoChunks(const void*data, uint32_t length)
     const char* p_in = (const char*) data;
     int ret = 0;
 
-    if ((ret = copyDataIntoReadyList(p_in, length)) == 0)
+    // fill order 
+    // 1. ready ck
+    // 2. free ck
+    // 3. create a new ck
+    if ((ret = copyDataIntoReadyCK(p_in, length)) == 0)
     {
        goto DONE;
     }
@@ -215,7 +221,7 @@ int Chunks::copyDataIntoChunks(const void*data, uint32_t length)
     p_in += (length - ret);
     length = ret;
 
-    if ((ret = copyDataIntoFreeList(p_in, length)) == 0)
+    if ((ret = copyDataIntoFreeCK(p_in, length)) == 0)
     {
         goto DONE;
     }
@@ -235,34 +241,38 @@ DONE:
 
 int Chunks::drainOutWithPipe(std::function<int(const char*, uint32_t)> in_pipe_cb)
 {
-    if (this->ready_list.empty())
+    if (this->ready_cks.empty())
     {
         return 0;
     }
-    this->iter = this->ready_list.begin();
+    this->iter = this->ready_cks.begin();
 
-    while (this->iter != this->ready_list.end())
+    while (this->iter != this->ready_cks.end())
     {
         Chunk* cur = *iter;
         char* cur_buf = &cur->data[cur->l_ofs];
         uint32_t cur_size = cur->r_ofs - cur->l_ofs;
-        //  ret is used size
+        // call in_pipe_cb flush the data out
         int ret = in_pipe_cb(cur_buf, cur_size);
         if (ret <= 0)
         {
             return ret;
         }
-        else if (ret == (int)cur_size)
-        {
+        else if (ret == (int)cur_size) 
+        { // current chunk is done, drop current chunk
+            // reset read offset
             cur->l_ofs = 0;
+            //reset write offset
             cur->r_ofs = 0;
-            this->ck_free_list_size +=cur->block_size;
-            this->free_list.push_front(cur);
+            // insert into free cks
+            this->ck_free_ck_capacity +=cur->block_size;
+            this->free_cks.push_front(cur);
+            // remove from read cks
             iter++;
-            this->ready_list.pop_front();
+            this->ready_cks.pop_front();
         }
         else if (ret < (int)cur_size)
-        {
+        {   // some are failed, resend at next time
             cur->l_ofs += (uint32_t)ret;
         }
     }
@@ -272,14 +282,14 @@ int Chunks::drainOutWithPipe(std::function<int(const char*, uint32_t)> in_pipe_c
 
 void Chunks::resetChunks()
 {
-    while (!this->ready_list.empty())
+    while (!this->ready_cks.empty())
     {
-        Chunk* c = *this->ready_list.begin();
+        Chunk* c = *this->ready_cks.begin();
         c->l_ofs = 0;
         c->r_ofs = 0;
-        this->ready_list.pop_front();
-        this->ck_free_list_size +=c->block_size;
-        this->free_list.push_back(c);
+        this->ready_cks.pop_front();
+        this->ck_free_ck_capacity +=c->block_size;
+        this->free_cks.push_back(c);
     }
     this->checkWaterLevel();
 }

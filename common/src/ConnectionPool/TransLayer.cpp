@@ -209,6 +209,7 @@ void TransLayer::sendMsgToAgent(const std::string &data)
     this->chunks.copyDataIntoChunks((const char* )&header,sizeof(header));
     //copy body
     this->chunks.copyDataIntoChunks(data.data(),data.size());
+    //enable write event
     this->_state |=  S_WRITING;
 }
 
