@@ -30,7 +30,7 @@ class StreamServerLayer(object):
             self.socket = socket
             self._read_watcher = readEv
             self._write_watcher = writeEv
-            self.RECV_BUF_SIZE = 409600
+            self.RECV_BUF_SIZE = 409600 # The highest water mark for span
             self.recvBuf = bytearray(self.RECV_BUF_SIZE)
             self.pRBufStart = memoryview(self.recvBuf)
             self.rest_data_sz = 0
@@ -45,6 +45,9 @@ class StreamServerLayer(object):
             rLen = self._recvFromPeer()
             if rLen > 0:
                 self.rest_data_sz = in_msg_cb(self, self.pRBufStart, rLen)
+                if self.rest_data_sz >=self.RECV_BUF_SIZE:
+                    TCLogger.warning("data from peer is overflow size=%d",self.rest_data_sz)
+                    return -1
                 if self.rest_data_sz > 0:
                     self.pRBufStart[0:self.rest_data_sz] = self.pRBufStart[rLen - self.rest_data_sz:rLen]
             return rLen
@@ -56,7 +59,7 @@ class StreamServerLayer(object):
             try:
                 recv_total = self.socket.recv_into(recv_buf, self.RECV_BUF_SIZE - recv_total)
                 if recv_total == 0:
-                    TCLogger.warning("peer close socket");
+                    TCLogger.warning("peer close socket")
                     return -1
             except asy_socket.error as error:
                 if error.errno in [asy_socket.EAGAIN, asy_socket.EWOULDBLOCK]:

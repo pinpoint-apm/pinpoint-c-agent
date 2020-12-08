@@ -102,6 +102,7 @@ void PoolManager::expandOnce()
     pp_trace("Node pool expanding self! Old size:%ld",this->nodeIndexVec.size()*CELL_SIZE);
     // append new nodes into nodeIndexVec
     this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
+    // this->nodeIndexVec.push_back(std::make_unique<TraceNode[]>(CELL_SIZE));
     // append new bitflag into aliveNodeSet
     this->_aliveNodeSet.insert(this->_aliveNodeSet.end(),this->_emptyAliveSet.begin(),this->_emptyAliveSet.end());
     for( NodeID id = this->maxId ; id < (this->maxId + CELL_SIZE) ;id++)
