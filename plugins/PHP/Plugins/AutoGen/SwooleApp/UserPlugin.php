@@ -28,11 +28,11 @@ class UserPlugin extends Candy
 {
     public function onBefore(){
         pinpoint_add_clue(PP_SERVER_TYPE,PP_PHP_METHOD,$this->id);
-        pinpoint_add_clues(PP_PHP_ARGS,print_r($this->args, true),$this->id);
+        pinpoint_add_clues(PP_PHP_ARGS,"placeholder",$this->id);
     }
 
     public function onEnd(&$ret){
-        pinpoint_add_clues(PP_PHP_RETURN,print_r($this->args, true),$this->id);
+        pinpoint_add_clues(PP_PHP_RETURN,"placeholder",$this->id);
     }
 
     public function onException($e){
