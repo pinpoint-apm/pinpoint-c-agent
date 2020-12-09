@@ -17,12 +17,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-import socket
+from gevent import socket as gsocket
 
 class AgentHost(object):
     def __init__(self):
-        self.hostname = socket.gethostname()
-        self.ip   = socket.gethostbyname(self.hostname)
+        self.hostname = gsocket.gethostname()
+        self.ip   = gsocket.gethostbyname(self.hostname)
     def __str__(self):
         return "host:%s ip:%s"%(self.hostname,self.ip)
 

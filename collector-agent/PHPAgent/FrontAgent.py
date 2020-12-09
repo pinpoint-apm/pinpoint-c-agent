@@ -26,19 +26,13 @@ from gevent import socket as gsocket
 
 from Common.Logger import TCLogger
 from Events import StreamServerLayer
-from PHPAgent.PHPAgentConf import PHPAgentConf
 from PHPAgent.Type import RESPONSE_AGENT_INFO
 
 
 class FrontAgent(object):
     HEADERSIZE = 8
     def __init__(self, ac, msgCallback):
-        '''
-
-        :param PHPAgentConf ac:
-        '''
         self.address =ac.Address
-
         self.listen_socket = self._bindSocket(self.address)
         self.server = StreamServerLayer(self.listen_socket, self._recvData, self._phpClientSayHello)
         self.msgHandleCallback = msgCallback
@@ -100,4 +94,8 @@ class FrontAgent(object):
         self.server.start()
 
     def stop(self):
-        pass
+        self.server.stop()
+        TCLogger.debug("close listen_socket:%d[%s]",self.listen_socket.fileno(),self.address)
+        self.listen_socket.close()
+
+
