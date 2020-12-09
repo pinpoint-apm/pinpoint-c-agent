@@ -24,7 +24,7 @@ TEST(poolManger, get_and_give_back)
     EXPECT_EQ(ref_new_node,_node);
     // reuse the same id
     EXPECT_EQ(id,_node.getId());
-    EXPECT_THROW(pool.getNodeById(1024),std::out_of_range);
+    EXPECT_THROW(pool.getNodeById(100),std::out_of_range);
 }
 
 static NodePool::PoolManager g_pool;

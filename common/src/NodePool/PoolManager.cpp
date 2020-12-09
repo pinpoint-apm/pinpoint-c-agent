@@ -76,8 +76,10 @@ TraceNode& PoolManager::getNodeById(NodeID id)
     id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
 
-    if(!this->nodeIsAlive(id))
+    if(this->nodeIsAlive(id) == false){
         throw std::out_of_range("id is not alive");
+    }
+        
 
     return this->nodeIndexVec[id/CELL_SIZE][id%CELL_SIZE];
 }

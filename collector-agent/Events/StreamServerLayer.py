@@ -18,7 +18,7 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 from gevent import get_hub
-from gevent import socket as asy_socket
+from gevent import socket as gsocket
 
 from Common.Logger import TCLogger
 
@@ -26,8 +26,9 @@ from Common.Logger import TCLogger
 class StreamServerLayer(object):
 
     class Client:
-        def __init__(self,socket,readEv,writeEv):
+        def __init__(self,socket,readEv,writeEv,address):
             self.socket = socket
+            self.address = address
             self._read_watcher = readEv
             self._write_watcher = writeEv
             self.RECV_BUF_SIZE = 409600 # The highest water mark for span
@@ -61,24 +62,30 @@ class StreamServerLayer(object):
                 if recv_total == 0:
                     TCLogger.warning("peer close socket")
                     return -1
-            except asy_socket.error as error:
-                if error.errno in [asy_socket.EAGAIN, asy_socket.EWOULDBLOCK]:
+            except gsocket.error as error:
+                if error.errno in [gsocket.EAGAIN, gsocket.EWOULDBLOCK]:
                     return 0
                 TCLogger.warning("peer error:%s ", error)
                 return -1
             return recv_total+self.rest_data_sz
 
+
         def close(self):
-            self.socket.close()
+            TCLogger.debug("close client:%d(%s)", self.socket.fileno(),self.address)
+
             if self._read_watcher is not None:
                 self._read_watcher.stop()
             if self._write_watcher is not None:
                 self._write_watcher.stop()
 
+            self.socket.close()
+
+
+
         def _sendData(self):
             try:
                 ret = self.socket.send(self.send_buf)
-            except asy_socket.error as e:
+            except gsocket.error as e:
                 TCLogger.error("_sendData  %s", e)
                 self.close()
                 return
@@ -106,9 +113,19 @@ class StreamServerLayer(object):
     def start(self):
         self._startAccept()
 
+    def stop(self):
+        for fd in self.clients:
+            assert isinstance(self.clients[fd],StreamServerLayer.Client)
+            self.clients[fd].close()
+        self.clients.clear()
+        self._stopAccept()
+
     def _startAccept(self):
         self.listen_event = self.loop.io(self.listen.fileno(), 1)
         self.listen_event.start(self._listenhandler)
+
+    def _stopAccept(self):
+        self.listen_event.stop()
 
     def _listenhandler(self):
         try:
@@ -117,7 +134,7 @@ class StreamServerLayer(object):
             client_socket, address = sock.accept()
             client_socket.setblocking(False)
             # sock = gsocket(_socket = client_socket)
-        except asy_socket.error as error:
+        except gsocket.error as error:
             TCLogger.warning("accept:%s",error)
             return
 
@@ -125,7 +142,7 @@ class StreamServerLayer(object):
         client_in_event= self.loop.io(client_socket.fileno(), 1)
         client_out_event =  self.loop.io(client_socket.fileno(), 2)
 
-        client = self.Client(client_socket,client_in_event,client_out_event)
+        client = self.Client(client_socket,client_in_event,client_out_event,address)
 
         client_in_event.start(self.handleClientRead, client)
 
@@ -155,6 +172,7 @@ class StreamServerLayer(object):
             break
 
 
+
 def msgHandle(client,buffer,blen):
     '''
 
@@ -171,7 +189,7 @@ if __name__ == '__main__':
     if os.path.exists(address):
         os.remove(address)
 
-    listen_socket = asy_socket.socket(asy_socket.AF_UNIX, asy_socket.SOCK_STREAM)
+    listen_socket = gsocket.socket(gsocket.AF_UNIX, gsocket.SOCK_STREAM)
     listen_socket.bind(address)
     listen_socket.listen(256)
     server = StreamServerLayer(listen_socket,msgHandle,None)

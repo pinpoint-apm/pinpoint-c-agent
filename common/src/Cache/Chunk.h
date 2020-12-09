@@ -110,7 +110,7 @@ public:
      */
     inline bool checkCapacity(uint32_t length) const 
     {
-        // exist chunk is full and the thredhold is reached
+        // existing chunk is full and the threshold is reached
         if( this->useExistingChunk(length) == false && this->ck_alloc_size+ length > this->c_max_size  ){
            return false;
         }    
