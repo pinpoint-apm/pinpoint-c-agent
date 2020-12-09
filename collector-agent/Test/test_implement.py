@@ -13,7 +13,7 @@ from unittest import TestCase
 
 import gevent
 
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from CollectorAgentConf.CollectorAgentConf import CollectorAgentConf
 from PinpointAgent.AppManagement import AppManagement
 import os
 

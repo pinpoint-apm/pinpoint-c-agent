@@ -108,7 +108,7 @@ static void flush_to_agent(std::string& span)
         trans->sendMsgToAgent(span);
     }
     else{
-        pp_trace("Drop current span as it's too heavy! size:%d",span.length());
+        pp_trace("drop current span as it's too heavy! size:%d",span.length());
     }
     trans->trans_layer_pool(_span_timeout);
     Helper::freeConnection(trans);
