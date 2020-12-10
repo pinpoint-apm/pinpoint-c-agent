@@ -30,6 +30,7 @@ define("PP_HTTP_PARAM",  41);
 define("PP_HTTP_PARAM_ENTITY",  42);
 define("PP_HTTP_COOKIE",  45);
 define("PP_HTTP_STATUS_CODE",  46);
+define("PP_MEMORY_USAGE",330);
 define("PP_HTTP_INTERNAL_DISPLAY",  48);
 define("PP_HTTP_IO",  49);
 define("PP_MESSAGE_QUEUE_URI ",100);
