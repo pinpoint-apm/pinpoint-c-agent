@@ -32,6 +32,7 @@ class PerRequestPlugins
     public $app_id = null;
     private $curNextSpanId = '';
     private $isLimit = false;
+    private $mem_start=0;
 
     public function traceLimit()
     {
@@ -48,6 +49,9 @@ class PerRequestPlugins
 
     private function __construct()
     {
+        if( defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE==='1'){
+            $this->mem_start = memory_get_usage();
+        }
 
         pinpoint_start_trace();
 
@@ -129,8 +133,14 @@ class PerRequestPlugins
     {
         // reset limit
         $this->isLimit = false;
+        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE==='1'){
+            $memory_usage = (memory_get_peak_usage() - $this->mem_start)/1024;
+            pinpoint_add_clues(PP_MEMORY_USAGE,"$memory_usage KB");
+        }
+
         pinpoint_add_clues(PP_HTTP_STATUS_CODE, http_response_code());
         pinpoint_end_trace();
+
     }
 
     public function generateSpanID()
