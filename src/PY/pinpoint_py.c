@@ -288,7 +288,7 @@ static PyObject *py_generate_unique_id(PyObject *self, CYTHON_UNUSED PyObject *u
 
 static PyObject *py_pinpoint_drop_trace(PyObject *self, PyObject *args)
 {
-    long id = -1;
+    int id = pinpoint_get_per_thread_id();
     if(! PyArg_ParseTuple(args,"|i",&id))
     {
         return NULL;
