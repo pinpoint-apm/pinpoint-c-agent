@@ -19,12 +19,13 @@
 
 # !/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import os,sys
+import os
+import sys
 
 proto_class = os.getcwd()+'/Proto/grpc'
 sys.path.append(proto_class)
 
-from Common.Logger import TCLogger
+from Common import TCLogger
 from PinpointAgent import start_pinpoint_agent,stop_pinpoint_agent
 
 class Server(object):

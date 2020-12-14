@@ -24,7 +24,7 @@ from CollectorAgent.TPackets import ControlMessageDecoder, ControlMessage, HandS
 from CollectorAgent.ThriftAPIMeta import *
 from CollectorAgent.ThriftAgentStateManager import ThriftAgentStateManager
 from CollectorAgent.ThriftSpanFactory import ThriftSpanFactory
-from Common.AgentHost import AgentHost
+from Common import agentHost
 from Events import *
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import PHP, API_DEFAULT, AgentSocketCode, AGENT_INFO, SPAN
@@ -151,9 +151,9 @@ class ThriftAgentImplement(PinpointAgent):
         return True
 
     def scanLocalInfo(self):
-        ah = AgentHost()
-        self.agentInfo.hostname = ah.hostname
-        self.agentInfo.ip = ah.ip
+
+        self.agentInfo.hostname = agentHost.hostname
+        self.agentInfo.ip = agentHost.ip
         self.agentInfo.ports = self.ac.getWebPort()
 
     def start(self):

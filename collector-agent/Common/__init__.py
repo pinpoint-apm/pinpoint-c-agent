@@ -3,6 +3,6 @@
 # Created by eeliu at 12/9/20
 
 from .AgentHost import AgentHost
-
+from .Logger import TCLogger, PALogger
 agentHost = AgentHost()
-__all__=['agentHost']
+__all__ = ['agentHost', 'TCLogger', 'PALogger']
