@@ -50,7 +50,7 @@ else:
     pinpointBuild = CommonBuild
 
 setup(name='pinpointPy',
-      version="1.0.0",
+      version="1.0.1",
       author="eeliu", 
       author_email='eeliu2009@gmail.com',
       license='Apache License 2.0',
