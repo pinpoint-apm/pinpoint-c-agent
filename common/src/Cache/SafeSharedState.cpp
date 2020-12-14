@@ -32,6 +32,12 @@ bool SafeSharedState::checkTraceLimit(int64_t timestamp)
         return false;
     }
 
+    if(global_agent_info.trace_limit == 0)
+    {
+        // block without any checking
+        goto BLOCK;
+    }
+
     if( this->_global_state->timestamp != ts )
     {
         this->_global_state->timestamp = ts;
