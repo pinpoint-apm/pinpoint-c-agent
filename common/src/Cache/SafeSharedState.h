@@ -56,6 +56,11 @@ public:
 
     bool isReady()
     {
+        if( (global_agent_info.inter_flag & E_UTEST) == E_UTEST )
+        {
+            return true;
+        }
+
         if( this->_global_state != nullptr &&
           (this->_global_state->state & E_READY)){
             return true ;

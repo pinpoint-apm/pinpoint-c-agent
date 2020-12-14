@@ -41,7 +41,7 @@ bool SafeSharedState::checkTraceLimit(int64_t timestamp)
     else if(this->_global_state->tick >= global_agent_info.trace_limit)
     {
         goto BLOCK;
-    }else if(this->isReady()){
+    }else if(this->isReady() == false){
         goto BLOCK;
     }else
     {
