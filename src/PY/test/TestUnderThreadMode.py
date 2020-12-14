@@ -26,6 +26,7 @@ class TestUnderThreadMode(TestCase):
             self.assertEqual(value,'12345678')
             pinpointPy.mark_as_error("fghjk","fghjkl",234234)
             pinpointPy.end_trace()
+            pinpointPy.drop_trace()
             value = pinpointPy.get_special_key('sid')
             self.assertFalse(value)
 

@@ -24,6 +24,7 @@ class TestUnderProcessMode(TestCase):
             self.assertEqual(value,id)
             pinpointPy.mark_as_error("fghjk","fghjkl",234234)
             pinpointPy.end_trace()
+            pinpointPy.drop_trace()
 
     def test_process(self):
         p1 = Process(target=self._test_api_flow)
