@@ -450,7 +450,7 @@ static PyMethodDef PinpointMethods[] = {
     {"get_context_key", py_pinpoint_get_key, METH_VARARGS, "def get_context_key(key,int id=-1)->string "},
     {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "def check_tracelimit(long timestamp=-1): #check trace whether is limit"},
     {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "def enable_debug(callback):#enable logging output(callback )"},
-    {"force_flush_trace", py_force_flush_span, METH_VARARGS, "def force_flush_trace(int id=-1): #force flush span during timeout"},
+    {"force_flush_trace", py_force_flush_span, METH_VARARGS, "def force_flush_trace(timeout=3,int id=-1): #force flush span during timeout"},
     {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no,int id=-1): #This trace found an error"},
     {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=-1): # set pinpint collector information"},
     { NULL, NULL, 0, NULL}

@@ -12,8 +12,7 @@ class TestInCoroutines(TestCase):
     def setUpClass(cls):
         # pinpointPy.enable_debug(None)
         pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock")
-        
-
+    
 
     @unittest.skipIf(hex(sys.hexversion) <'0x30701f0', "python version must 3.7.1+")
     def testCoroFlow(self):
@@ -25,6 +24,10 @@ class TestInCoroutines(TestCase):
                 func_name = func.__name__
                 pinpointPy.add_clue('name',func_name,id,0)
                 pinpointPy.add_clues('start','3434',id)
+                pinpointPy.set_context_key('sid','12345',id)
+                value = pinpointPy.get_context_key('sid',id)
+                self.assertEqual(value,'12345')
+
                 ret = await func(*args, **kwargs)
                 pinpointPy.add_clue('end','3434',id)
                 id = pinpointPy.end_trace(id)
