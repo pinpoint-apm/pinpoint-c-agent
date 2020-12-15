@@ -17,13 +17,14 @@ class TestUnderProcessMode(TestCase):
         while True:
             id = str(random.randint(1,10000000))
             pinpointPy.start_trace()
-            pinpointPy.set_special_key('sid',id)
+            pinpointPy.set_context_key('sid',id)
             pinpointPy.add_clue("key","value3")
             pinpointPy.add_clues("key","value3")
-            value = pinpointPy.get_special_key('sid')
+            value = pinpointPy.get_context_key('sid')
             self.assertEqual(value,id)
             pinpointPy.mark_as_error("fghjk","fghjkl",234234)
             pinpointPy.end_trace()
+            pinpointPy.force_flush_trace()
             pinpointPy.drop_trace()
 
     def test_process(self):
