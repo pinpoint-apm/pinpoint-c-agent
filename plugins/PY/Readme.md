@@ -17,7 +17,7 @@ settings.py
 ```python
 
 MIDDLEWARE = [
-    'pinpoint.DjangoMiddleWare',
+    'pinpoint.Django.DjangoMiddleWare',
     ...
     ]
 

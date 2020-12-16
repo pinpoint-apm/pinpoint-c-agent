@@ -107,11 +107,10 @@ class RequestPlugin(Candy):
         if PP_APACHE_PROXY in request.headers:
             pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY])
 
-        pinpointPy.set_context_key("Pinpoint-Sampled", "s1")
-        if (PP_HTTP_SAMPLED in request.headers and request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
-            if request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
-                pinpointPy.drop_trace()
-                pinpointPy.set_context_key("Pinpoint-Sampled", "s0")
+        pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s1")
+        if (PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[PP_HTTP_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
+            pinpointPy.drop_trace()
+            pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s0")
 
         pinpointPy.add_clue(PP_TRANSCATION_ID, self.tid)
         pinpointPy.add_clue(PP_SPAN_ID, self.sid)

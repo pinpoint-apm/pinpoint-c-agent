@@ -109,18 +109,11 @@ class PerRequestPlugins
         }
 
         pinpoint_set_context("Pinpoint-Sampled",PP_SAMPLED);
-        if (isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) {
-            if ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED) {
-                $this->isLimit = true;
-                //drop this request. collector could not receive any thing
-                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
-                pinpoint_drop_trace();
-            }
-        } else {
-            if(pinpoint_tracelimit()){
-                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
-                pinpoint_drop_trace();
-            }
+        if (((isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) && ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED)) or pinpoint_tracelimit()) {
+            $this->isLimit = true;
+            //drop this request. collector could not receive any thing
+            pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
+            pinpoint_drop_trace();
         }
 
         pinpoint_add_clue(PP_TRANSCATION_ID, $this->tid);

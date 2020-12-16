@@ -36,7 +36,7 @@ class BaseDjangoRequestPlugins(Candy):
         ###############################################################
         request = args[1]
         headers = request.META
-        
+
         # assert isinstance(request,BaseHTTPRequestHandler)
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'BaseDjangoRequest request')
         pinpointPy.add_clue(PP_REQ_URI,request.path)
@@ -76,13 +76,13 @@ class BaseDjangoRequestPlugins(Candy):
             pinpointPy.set_context_key(PP_PARENT_TYPE,self.ptype)
             pinpointPy.add_clue(PP_PARENT_TYPE,self.ptype)
 
-        if PP_HTTP_PINPOINT_HOST in request.headers:
+        if PP_HTTP_PINPOINT_HOST in headers:
             self.Ah = headers[PP_HTTP_PINPOINT_HOST]
             pinpointPy.set_context_key(PP_PARENT_HOST, self.Ah)
             pinpointPy.add_clue(PP_PARENT_HOST, self.Ah)
 
-        if PP_HTTP_PINPOINT_HOST in headers:
-            pinpointPy.add_clue(PP_PARENT_SPAN_ID, headers[PP_HEADER_PINPOINT_PSPANID])
+        if PP_HTTP_PINPOINT_PSPANID in headers:
+            pinpointPy.add_clue(PP_PARENT_SPAN_ID, headers[PP_HTTP_PINPOINT_PSPANID])
 
         if PP_HEADER_PINPOINT_PAPPNAME in headers:
             self.pname = headers[PP_HEADER_PINPOINT_PAPPNAME]
@@ -106,11 +106,10 @@ class BaseDjangoRequestPlugins(Candy):
         if PP_APACHE_PROXY in headers:
             pinpointPy.add_clue(PP_APACHE_PROXY,headers[PP_APACHE_PROXY])
 
-        pinpointPy.set_context_key("Pinpoint-Sampled", "s1")
-        if (PP_HTTP_SAMPLED in headers and headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
-            if headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
-                pinpointPy.drop_trace()
-                pinpointPy.set_context_key("Pinpoint-Sampled", "s0")
+        pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s1")
+        if (PP_HTTP_PINPOINT_SAMPLED in headers and headers[PP_HTTP_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
+            pinpointPy.drop_trace()
+            pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s0")
 
 
 

@@ -24,7 +24,7 @@
 import random
 import asyncio
 from ..settings import *
-from  ..plugins.common.PinpointDefine import *
+from pinpoint.common import *
 import pinpointPy
 import contextvars
 
