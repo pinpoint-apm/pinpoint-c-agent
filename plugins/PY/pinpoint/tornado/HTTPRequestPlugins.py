@@ -135,7 +135,7 @@ class HTTPRequestPlugins(AsyCandy):
         return ret
 
     def onException(self, e):
-        pinpointPy.mark_as_error(e,"",0,self.node_id)
+        pinpointPy.mark_as_error(str(e),"",0,self.node_id)
         raise e
 
 

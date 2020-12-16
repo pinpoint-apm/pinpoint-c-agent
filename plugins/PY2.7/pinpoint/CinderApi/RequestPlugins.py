@@ -134,6 +134,5 @@ class RequestPlugin(Candy):
         return ret
 
     def onException(self, e):
-        import traceback
-        pinpointPy.mark_as_error(traceback.format_exc(),"",0)
+        pinpointPy.mark_as_error(str(e),"",0)
         raise e
