@@ -40,7 +40,7 @@ class Candy(object):
         self.func_name=func.__name__
         def pinpointTrace(*args, **kwargs):
             ret = None
-            self.onBefore(*args, **kwargs)
+            args, kwargs = self.onBefore(*args, **kwargs)
             try:
                 ret = func(*args, **kwargs)
                 return ret
