@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+# Created by eeliu at 12/16/20
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -15,34 +19,34 @@
 # ------------------------------------------------------------------------------
 
 
-def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True,urllib=True,
-                            sqlalchemy=True,aioHttp=False,mysqldb=True):
-    if pymysql:
-        from .PyMysql import monkey_patch
-        monkey_patch()
 
-    if mongo:
-        from .pymongo import monkey_patch
-        monkey_patch()
+from pinpoint.common import *
+import pinpointPy
 
-    if pyredis:
-        from .pyRedis import monkey_patch
-        monkey_patch()
+class MysqldbPlugin(Candy):
+    def __init__(self, name):
+        super().__init__(name)
+        self.dst = ''
 
-    if requests:
-        from .requests import monkey_patch
-        monkey_patch()
+    def onBefore(self, *args, **kwargs):
+        super().onBefore(*args, **kwargs)
+        connection = args[0]
+        self.dst = connection.get_host_info()
+        ###############################################################
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
+        query = args[1]
+        ## copy from MySQLdb  def query(self, query):
+        if isinstance(query, bytearray):
+            query = bytes(query)
+        pinpointPy.add_clue(PP_SQL_FORMAT, query.decode('utf-8'))
+        ###############################################################
+        pinpointPy.add_clue(PP_DESTINATION, self.dst)
+        return args, kwargs
 
-    if sqlalchemy:
-        from .sqlalchemy import monkey_patch
-        monkey_patch()
+    def onEnd(self, ret):
+        super().onEnd(ret)
+        return ret
 
-    if urllib:
-        from .urllib import monkey_patch
-        monkey_patch()
-
-    if mysqldb:
-        from .MySQLdb import monkey_patch
-        monkey_patch()
-
-__all__=['monkey_patch_for_pinpoint']
+    def onException(self, e):
+        pinpointPy.add_clue(PP_ADD_EXCEPTION, str(e))

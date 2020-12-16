@@ -21,9 +21,7 @@
 
 ### Refactor
 
-- beauty the output
-- use make_xxx
-- Django plugins [py2.7]
+- Django,Flask plugins
 
 ## v0.4.0-beta  API for asynchronus framework: swoole-src(easyswoole),workerman
 * [PHP] add `id` to keep the async call chain
