@@ -107,10 +107,18 @@ class HTTPRequestPlugins(AsyCandy):
         if PP_APACHE_PROXY in insRequest.headers:
             pinpointPy.add_clue(PP_APACHE_PROXY, insRequest.headers[PP_APACHE_PROXY], self.node_id)
 
-        pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s1")
-        if (PP_HTTP_PINPOINT_SAMPLED in insRequest.headers and insRequest.headers[PP_HTTP_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
-            pinpointPy.drop_trace()
-            pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s0")
+        if PP_HEADER_PINPOINT_SAMPLED in insRequest.headers:
+            if insRequest.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED:
+                self.isLimit = True
+                pinpointPy.drop_trace(self.node_id)
+                pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED,PP_NOT_SAMPLED,self.node_id)
+        else:
+            if pinpointPy.check_tracelimit():
+                self.isLimit = True
+                pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, PP_NOT_SAMPLED,self.node_id)
+            else:
+                self.isLimit = False
+                pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, PP_SAMPLED,self.node_id)
 
         pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid,self.node_id)
         pinpointPy.add_clue(PP_SPAN_ID,self.sid,self.node_id)
