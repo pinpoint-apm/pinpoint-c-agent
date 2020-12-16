@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,35 +17,20 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+from pinpoint.common import Interceptor
 
-def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True,urllib=True,
-                            sqlalchemy=True,aioHttp=False,mysqldb=True):
-    if pymysql:
-        from .PyMysql import monkey_patch
-        monkey_patch()
+def monkey_patch():
+    try:
+        from MySQLdb.connections import Connection
+        from .MysqldbPlugin import MysqldbPlugin
 
-    if mongo:
-        from .pymongo import monkey_patch
-        monkey_patch()
+        Interceptors = [
+            Interceptor(Connection, 'query', MysqldbPlugin)
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-    if pyredis:
-        from .pyRedis import monkey_patch
-        monkey_patch()
+    except ImportError as e:
+        print(e)
 
-    if requests:
-        from .requests import monkey_patch
-        monkey_patch()
-
-    if sqlalchemy:
-        from .sqlalchemy import monkey_patch
-        monkey_patch()
-
-    if urllib:
-        from .urllib import monkey_patch
-        monkey_patch()
-
-    if mysqldb:
-        from .MySQLdb import monkey_patch
-        monkey_patch()
-
-__all__=['monkey_patch_for_pinpoint']
+__all__=['monkey_patch']
