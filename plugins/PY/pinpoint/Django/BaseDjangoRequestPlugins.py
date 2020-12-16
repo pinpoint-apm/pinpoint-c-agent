@@ -117,13 +117,15 @@ class BaseDjangoRequestPlugins(Candy):
         pinpointPy.add_clue(PP_SPAN_ID,self.sid)
         pinpointPy.set_context_key(PP_TRANSCATION_ID, self.tid)
         pinpointPy.set_context_key(PP_SPAN_ID, self.sid)
+        pinpointPy.add_clues(PP_HTTP_METHOD,headers["REQUEST_METHOD"])
 
         ###############################################################
         return args, kwargs
 
     def onEnd(self,ret):
         ###############################################################
-        
+        if ret:
+            pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(ret.status_code))
         ###############################################################
         super().onEnd(ret)
         return ret

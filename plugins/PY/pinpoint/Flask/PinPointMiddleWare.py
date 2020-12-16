@@ -21,12 +21,20 @@
 
 from .FlaskPlugins import BaseFlaskPlugins
 
+from pinpoint.common import *
+import pinpointPy
 
 class PinPointMiddleWare():
 
     def __init__(self, app,wsgi_app):
         self.app = app
         self.wsgi_app = wsgi_app
+
+        @app.after_request
+        def mark_status_code(response):
+            if response:
+                pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(response.status))
+            return response
 
     @BaseFlaskPlugins("Flask Web App")
     def __call__(self, environ, start_response):
