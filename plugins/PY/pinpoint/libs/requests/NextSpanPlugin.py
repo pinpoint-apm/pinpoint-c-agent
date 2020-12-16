@@ -17,7 +17,6 @@
 
 
 from pinpoint.common import *
-# from .PinpointDefine import *
 import pinpointPy
 from  urllib.parse import urlparse
 
@@ -35,7 +34,6 @@ class NextSpanPlugin(Candy):
         if "headers" not in kwargs:
             kwargs["headers"] = {}
         generatePinpointHeader(self.url, kwargs['headers'])
-        print(kwargs)
         ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
         pinpointPy.add_clue(PP_SERVER_TYPE,PP_METHOD_CALL)
