@@ -124,13 +124,12 @@ class BaseFlaskPlugins(Candy):
         pinpointPy.add_clue(PP_SPAN_ID,self.sid)
         pinpointPy.set_context_key(PP_TRANSCATION_ID, self.tid)
         pinpointPy.set_context_key(PP_SPAN_ID, self.sid)
+        pinpointPy.add_clues(PP_HTTP_METHOD,request.method)
         ###############################################################
         return args, kwargs
 
     def onEnd(self,ret):
         ###############################################################
-
-
 
         ###############################################################
         super().onEnd(ret)
