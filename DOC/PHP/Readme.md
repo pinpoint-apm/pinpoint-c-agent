@@ -5,15 +5,14 @@ What we have supported and what we are going to support: [support plan](SupportP
 
 ### Requirement
 
-Dependency|Version
----|----
-PHP| php `7+` ,`5+`
-GCC| GCC `4.7+`
-cmake| cmake `3.8+`
-*inux|
-Python | `Python 3`
-pinpoint| `1.8.0+`, `2.0+`
-**Composer**| 
+Dependency|Version| More
+---|----|----
+PHP| php `7+` ,`5+`|
+GCC| GCC `4.7+`| C++11 
+cmake| cmake `3.2+`|
+*inux|| `windows is on the way`
+pinpoint| `2.0+`|
+composer| | class can be automatic pinpoint-cut
 
 ### Installation
 
@@ -60,7 +59,7 @@ pinpoint| `1.8.0+`, `2.0+`
     
     We assume that you have installed composer and known how to use it. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
 
-   1. Copy [Plugins](../../plugins/PHP/Plugins) to the root of your project, and autoload ```Plugins``` in ```composer.json```.
+   1. Download [ `pinpoint-php-plugins.tar.gz`](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/V2020.12.17/pinpoint-php-plugins-v0.0.1.tar.gz)  and autoload ```Plugins``` in ```composer.json```.
    
         > composer.json
         ```
@@ -100,7 +99,7 @@ pinpoint| `1.8.0+`, `2.0+`
         6. ```PP_REQ_PLUGINS```: path to ```PerRequestPlugins```(```PerRequestPlugins``` is the base interceptor, different framework should use different ```PerRequestPlugins```) Where is PerRequestPlugins? ```Swoole``` for example: [swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php). We have prepared some framework's ```PerRequestPlugins``` for you [Here](../../plugins/PHP/Plugins/Framework), and welcome to pull request other frameworks.
         7. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: Require pinpoint's ```auto_pinpointed.php```.**Please add after ```require_once __DIR__."/../vendor/autoload.php";```, this is very important!**
 
-    We have prepared some examples for you, please goto [plugins/PHP](../../plugins/PHP).
+    We have prepared some examples for you, please goto [testapps](../../testapps/PHP).
 
 
 ## Changes 
