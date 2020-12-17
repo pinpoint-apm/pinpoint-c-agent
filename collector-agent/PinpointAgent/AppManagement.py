@@ -63,7 +63,7 @@ class AppManagement(object):
             TCLogger.debug(content)
             stack = json.loads(content)
         except Exception as e:
-            TCLogger.error("json is crash")
+            TCLogger.error("json is crash.[%s]",content)
             return
         if 'appid' not in stack:
             TCLogger.warning(" drop %s, as no appid", content)
