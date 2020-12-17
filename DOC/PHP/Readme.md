@@ -1,5 +1,5 @@
 ## Support Plan
-What we have supported and what we are going to support: [support plan](SupportPlan.md)
+What we have supported and what will support: [support plan](SupportPlan.md)
 
 ## Getting Started
 
@@ -19,7 +19,7 @@ composer| | class can be automatic pinpoint-cut
 #### Steps
 1. git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
    
-2. Build Collector-Agent by yourself or use Dockerized Collector-Agent, just choose one way:
+2. Build Collector-Agent yourself or use Dockerized Collector-Agent, just choose one:
     * [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
     * Use Dockerized Collector-Agent:
     
@@ -77,7 +77,7 @@ composer| | class can be automatic pinpoint-cut
             "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
         }
         ```
-   3. Add the following constants in the index file of your project, including:
+   3. Add the following constants in the index file of your project:
    
         ```
         #################################################
@@ -95,7 +95,7 @@ composer| | class can be automatic pinpoint-cut
         2. ```APPLICATION_ID```: Agent ID.
         3. ```AOP_CACHE_DIR```: Where to generate ```Cache```.
         4. ```PLUGINS_DIR```: Path to ```Plugins```.
-        5. ```PINPOINT_USE_CACHE```: 'YES' will not update ```Cache``` when request coming; 'No' will update ```Cache``` every request coming.(You can also update ```Cache``` by just delete it.) Considering the performance, recommond 'YES'. Further more, if you modify the plugins, you should update the ```Cache``` to take effect.
+        5. ```PINPOINT_USE_CACHE```: 'YES' will not update ```Cache``` when request coming; 'No' will update ```Cache``` when every request coming.(You can also update ```Cache``` by just deleting it.) Considering the performance, we recommend 'YES'. Further more, if you modify the plugins, you should update the ```Cache``` to take effect.
         6. ```PP_REQ_PLUGINS```: path to ```PerRequestPlugins```(```PerRequestPlugins``` is the base interceptor, different framework should use different ```PerRequestPlugins```) Where is PerRequestPlugins? ```Swoole``` for example: [swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php). We have prepared some framework's ```PerRequestPlugins``` for you [Here](../../plugins/PHP/Plugins/Framework), and welcome to pull request other frameworks.
         7. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: Require pinpoint's ```auto_pinpointed.php```.**Please add after ```require_once __DIR__."/../vendor/autoload.php";```, this is very important!**
 
