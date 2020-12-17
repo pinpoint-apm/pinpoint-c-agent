@@ -114,22 +114,22 @@ class BaseFlaskPlugins(Candy):
         if PP_APACHE_PROXY in request.headers:
             pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY])
 
-        if PP_HTTP_SAMPLED in request.headers:
-            if request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
-                self.isLimit = True
-                pinpointPy.drop_trace()
-        else:
-            pinpointPy.check_tracelimit()
-            # print(self.isLimit)
+        pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED,"s1")
+        if (PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[PP_HTTP_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
+            pinpointPy.drop_trace()
+            pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s0")
+
+
         pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid)
         pinpointPy.add_clue(PP_SPAN_ID,self.sid)
+        pinpointPy.set_context_key(PP_TRANSCATION_ID, self.tid)
+        pinpointPy.set_context_key(PP_SPAN_ID, self.sid)
+        pinpointPy.add_clues(PP_HTTP_METHOD,request.method)
         ###############################################################
         return args, kwargs
 
     def onEnd(self,ret):
         ###############################################################
-
-
 
         ###############################################################
         super().onEnd(ret)
@@ -137,6 +137,5 @@ class BaseFlaskPlugins(Candy):
         return ret
 
     def onException(self, e):
-        import traceback
-        pinpointPy.mark_as_error(traceback.format_exc(),"",0)
+        pinpointPy.mark_as_error(str(e),"",0)
         raise e

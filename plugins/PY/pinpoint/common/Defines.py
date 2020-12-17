@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+# Created by eeliu at 7/31/20
 
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
@@ -16,9 +17,6 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-
-# Created by eeliu at 7/31/20
-
 
 
 PP_HTTP_PINPOINT_PSPANID = 'HTTP_PINPOINT_PSPANID'
@@ -40,8 +38,10 @@ PP_HTTP_NGINX_PROXY = 'HTTP_Pinpoint-ProxyNginx'
 PP_HEADER_APACHE_PROXY = 'PINPOINT_PROXYAPACHE'
 PP_HTTP_APACHE_PROXY = 'HTTP_PINPOINT_PROXYAPACHE'
 
+PP_HEADER_PINPOINT_SAMPLED = "Pinpoint-Sampled"
+PP_HTTP_PINPOINT_SAMPLED = 'HTTP_PINPOINT_SAMPLED'
+
 PP_DESTINATION='dst'
-PP_HTTP_SAMPLED = 'HTTP_PINPOINT_SAMPLED'
 PP_INTERCEPTOR_NAME='name'
 PP_APP_NAME='appname'
 PP_APP_ID='appid'
@@ -77,6 +77,7 @@ PP_HTTP_PARAM= '41'
 PP_HTTP_PARAM_ENTITY= '42'
 PP_HTTP_COOKIE= '45'
 PP_HTTP_STATUS_CODE= '46'
+PP_HTTP_METHOD = '206'
 PP_HTTP_INTERNAL_DISPLAY=48
 PP_HTTP_IO=49
 PP_MESSAGE_QUEUE_URI=100
@@ -88,7 +89,9 @@ PP_REDIS_REDISSON= '8203'
 PP_REDIS_REDISSON_INTERNAL= '8204'
 PP_POSTGRESQL='2501'
 PP_MEMCACHED= '8050'
+PP_MEMCACHED_FUTURE_GET='8051'
 PP_MONGDB_EXE_QUERY= '2651'
 PP_KAFKA='8660'
-
-PP_KAFKA_TOPIC=140
+PP_KAFKA_TOPIC='140'
+PP_RABBITMQ_CLIENT='8300'
+PP_RABBITMQ_ROUTINGKEY='131'

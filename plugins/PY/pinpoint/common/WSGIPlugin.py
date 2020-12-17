@@ -39,4 +39,4 @@ class WSGIPlugin(Candy):
         return ret
 
     def onException(self, e):
-        pinpointPy.mark_as_error(e,"",0)
+        pinpointPy.mark_as_error(str(e),"",0)

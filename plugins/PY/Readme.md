@@ -1,10 +1,14 @@
 ## How to use 
-### 1.Import your framework's entry file
+### 1. Import your framework's entry file
 
+> export PYTHONPYTH="where's pinpoint-python-plugins"
 #### 1.1 Flask
 
-```python
-import pinpoint.FlaskPlugins.*
+> include middleware
+
+```
+app = Flask(__name__)
+app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
 ```
 
 #### 1.2 Django
@@ -17,7 +21,7 @@ settings.py
 ```python
 
 MIDDLEWARE = [
-    'pinpoint.DjangoMiddleWare',
+    'pinpoint.Django.DjangoMiddleWare',
     ...
     ]
 
@@ -25,16 +29,16 @@ MIDDLEWARE = [
 #### 1.3 Tornado
 
 ```python
-from pinpoint.TornadoPlugin import RequestPlugin as PinpointHTTPRequestPlugins,\
+from pinpoint.tornado  import RequestPlugin as PinpointHTTPRequestPlugins,\
     CommonPlugin as PinpointCommonPlugin
 
 class MainHandler(tornado.web.RequestHandler):
-    @PinpointHTTPRequestPlugins('tornado.web.RequestHandler', __name__)
+    @PinpointHTTPRequestPlugins('tornado.web.RequestHandler')
     async def get(self):
         await self.get_1()
         self.write("Hello, world")
 
-    @PinpointCommonPlugin('',__name__)
+    @PinpointCommonPlugin('get_1')
     async def get_1(self,t = 2):
         await gen.sleep(0.01)
         if t == 0:
@@ -81,28 +85,32 @@ Todo....
 > Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
 
 
-### 2. Specify pinpoint option into [settings.py](./pinpoint/settings.py)
+### 2. Configuration
+
+ [settings.py](./pinpoint/settings.py)
 
 ```
 ###############################################################
-# user should set below before use
+
+# 1. APP_ID: Agent ID.
+# 2. APP_NAME: Application name.
+# 3. COLLECTOR_HOST: Collector-Agent's address.
+# 4. pinpointPy.enable_debug(None): DEBUG agent, pinpoint infomation will print in concole. 
+
 APP_ID ='python-agent' # application id
 APP_NAME ='PYTHON-AGNNT' # application name
 # COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
 COLLECTOR_HOST='tcp:dev-collector:9999'
 APP_SUB_ID='1'
 ###############################################################
-
 pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
-
-# pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
-
+pinpointPy.enable_debug(None) # None for console output
+# 
+# if you want to log the debug message from pinpointPy
 # def output(msg):
-#     print(msg)
-#
-pinpointPy.enable_debug(None)
+#     logging.debug(msg)
+# pinpointPy.enable_debug(output) 
+# 
+
 ```
-1. APP_ID: Agent ID.
-2. APP_NAME: Application name.
-3. COLLECTOR_HOST: Collector-Agent's address.
-4. pinpointPy.enable_debug(None): DEBUG agent, pinpoint infomation will print in concole. Commented out it, pinpoint infomation will not be printed. For performance, recommend commented out it.
+

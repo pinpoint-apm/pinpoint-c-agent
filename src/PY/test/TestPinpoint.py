@@ -21,7 +21,9 @@ class TestAgent(TestCase):
         pinpointPy.start_trace()
         pinpointPy.add_clue("key","value")
         pinpointPy.add_clue("key","value3")
-
+        pinpointPy.set_context_key('sid','12345')
+        value = pinpointPy.get_context_key('sid')
+        self.assertEqual(value,'12345')
         pinpointPy.add_clues("key","values")
         pinpointPy.add_clues("key","values")
         pinpointPy.add_clues("key","values")
@@ -30,6 +32,7 @@ class TestAgent(TestCase):
         pinpointPy.end_trace()
         pinpointPy.end_trace()
         pinpointPy.end_trace()
+        pinpointPy.force_flush_trace(10)
 
     def test_set_collector_host(self):
         self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/collector1.sock'))

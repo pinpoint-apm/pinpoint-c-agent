@@ -1,5 +1,28 @@
 ﻿# Changes
 
+## v0.4.1
+
+### Fix
+
+- tracelimit failed
+- compile problem
+- **Full and pending**: fork and  clean font-agent
+- Big clue  #252
+- divide zero 
+- cmd channel re-connection
+- crash in mark_an_error
+- thrift crash when json span in wrong format
+
+### Feat
+
+- memory.usage
+- **php 8.0**: Support php 8.0 in module  #249
+- **cinder-api**: plugins,python2.7
+
+### Refactor
+
+- Django,Flask plugins
+
 ## v0.4.0-beta  API for asynchronus framework: swoole-src(easyswoole),workerman
 * [PHP] add `id` to keep the async call chain
 * [python] idem

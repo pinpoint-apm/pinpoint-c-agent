@@ -21,12 +21,13 @@ def monkey_patch():
 
     try:
         import requests
+
         from .NextSpanPlugin import NextSpanPlugin
 
         Interceptors = [
-            Interceptor(requests.post,'find', NextSpanPlugin),
-            Interceptor(requests.get, 'insert', NextSpanPlugin),
-            Interceptor(requests.patch, 'update', NextSpanPlugin),
+            Interceptor(requests,'post', NextSpanPlugin),
+            Interceptor(requests, 'get', NextSpanPlugin),
+            Interceptor(requests, 'patch', NextSpanPlugin),
         ]
 
         for interceptor in Interceptors:

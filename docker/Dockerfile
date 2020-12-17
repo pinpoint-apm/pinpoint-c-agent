@@ -8,6 +8,7 @@ ENV COLLECTOR_CONFIG=${DIR}/conf/collector.conf
 ENV COLLECTOR_PATH=collector-agent
 ## files
 COPY ${COLLECTOR_PATH}/CollectorAgent/ ${DIR}/CollectorAgent
+COPY ${COLLECTOR_PATH}/CollectorAgentConf/ ${DIR}/CollectorAgentConf
 COPY ${COLLECTOR_PATH}/Common/ ${DIR}/Common/
 COPY ${COLLECTOR_PATH}/conf/ ${DIR}/conf/
 COPY ${COLLECTOR_PATH}/Events/ ${DIR}/Events/

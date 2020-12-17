@@ -26,8 +26,7 @@ function curl_init($url = null)
     if($url){
         $curlChAr[strval($ch)] = [CH_URL=>$url,CH_HEADRR=>[]];
     }else{
-        $curlChAr[strval($ch)] = [CH_URL=>"",
-            CH_HEADRR=>[]];
+        $curlChAr[strval($ch)] = [CH_URL=>"",CH_HEADRR=>[]];
     }
     return $ch;
 }

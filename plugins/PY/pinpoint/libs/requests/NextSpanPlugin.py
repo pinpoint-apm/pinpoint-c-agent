@@ -17,21 +17,22 @@
 
 
 from pinpoint.common import *
-from .PinpointDefine import *
 import pinpointPy
 from  urllib.parse import urlparse
 
 
 class NextSpanPlugin(Candy):
 
-    def __init__(self,class_name,module_name):
-        super().__init__(class_name,module_name)
+    def __init__(self,name):
+        super().__init__(name)
         self.nsid = ''
         self.url =''
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         self.url = args[0]
+        if "headers" not in kwargs:
+            kwargs["headers"] = {}
         generatePinpointHeader(self.url, kwargs['headers'])
         ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
@@ -42,7 +43,7 @@ class NextSpanPlugin(Candy):
 
     def onEnd(self,ret):
         ###############################################################
-        pinpointPy.add_clue(PP_DESTINATION, urlparse(self.url)['netloc'])
+        pinpointPy.add_clue(PP_DESTINATION, urlparse(self.url).netloc)
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_REMOTE_METHOD)
         pinpointPy.add_clue(PP_NEXT_SPAN_ID, pinpointPy.get_context_key(PP_NEXT_SPAN_ID))
         pinpointPy.add_clues(PP_HTTP_URL, self.url)

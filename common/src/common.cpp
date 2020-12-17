@@ -100,12 +100,17 @@ static void free_nodes_tree(TraceNode* root)
     g_node_pool.freeNode(*root);
 }
 
-static void flush_to_agent(std::string&& buffer)
+static void flush_to_agent(std::string& span)
 {
     TransConnection trans = Helper::getConnection();
-    trans->sendMsgToAgent(buffer);
-    trans->trans_layer_pool(_span_timeout);
 
+    if(span.length() < MAX_SPAN_SIZE){
+        trans->sendMsgToAgent(span);
+    }
+    else{
+        pp_trace("drop current span as it's too heavy! size:%d",span.length());
+    }
+    trans->trans_layer_pool(_span_timeout);
     Helper::freeConnection(trans);
 }
 
@@ -123,7 +128,7 @@ NodeID do_end_trace(TraceNode& node)
             const Json::Value& trace = Helper::merge_node_tree(node);
             std::string spanStr = Helper::node_tree_to_string(trace);
             pp_trace("this span:(%s)",spanStr.c_str());
-            flush_to_agent(std::move(spanStr));
+            flush_to_agent(spanStr);
 
         }else if( node.limit == E_TRACE_BLOCK ){
             pp_trace("current#%ld span dropped,due to TRACE_BLOCK",node.getId());

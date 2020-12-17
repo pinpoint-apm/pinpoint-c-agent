@@ -18,7 +18,30 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
+from PHPAgent import PHPAgentConf, FrontAgent
+from PinpointAgent.AppManagement import AppManagement
+from CollectorAgentConf import config
+from Common.Config import CAConfig
+_app_management = AppManagement(config)
+_pac = PHPAgentConf(CAConfig)
+_agent = FrontAgent(_pac, _app_management.handleFrontAgentData)
+_agent.registerPHPAgentHello(_app_management.tellMeWho)
 
-# from PinpointAgent.PinpointAgent import PinpointAgent
-# from PinpointAgent.AppManagement import AppManagement
-# __all__=['PinpointAgent','AppManagement']
+
+def start_pinpoint_agent():
+    _agent.start()
+
+
+
+def stop_pinpoint_agent():
+    _app_management.stopAll()
+    _agent.stop()
+
+"""
+stop_front_agent: works on subprocess, free all front res before running
+"""
+def stop_front_agent():
+    _agent.stop()
+
+
+__all__=['start_pinpoint_agent', 'stop_pinpoint_agent', 'stop_front_agent']

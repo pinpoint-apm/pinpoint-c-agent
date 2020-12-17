@@ -20,9 +20,11 @@
 # Created by eeliu at 10/16/19
 import json
 import os
-from multiprocessing import Process, Queue as MPQueue
+import multiprocessing
 from queue import Full, Queue
-
+from gevent import monkey
+monkey.patch_all(thread=False)
+from Common import agentHost
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
@@ -81,20 +83,22 @@ class GrpcAgentImplement(PinpointAgent):
         self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorStatPort)
         self.span_addr = ac.CollectorSpanIp + ':' + str(ac.CollectorSpanPort)
         self.web_port = ac.getWebPort()
-        self.agentHost = AgentHost()
         self.max_span_sender_size = 2
         self.sender_index = 0
 
     def start(self):
-        self.mpQueue = MPQueue()
-        self.process = Process(target=self.processMain)
+        self.mpQueue = multiprocessing.Queue()
+        self.process = multiprocessing.Process(target=self.processMain)
         self.process.start()
 
     def processMain(self):
+        from PinpointAgent import stop_front_agent
+        stop_front_agent()
+
         self.span_helper = GrpcAgentImplement.SpanHelper(self.span_addr, self.app_id, self.app_name,
                                                          self.startTimeStamp,
                                                          self.max_pending_sz)
-        self.agent_client = GrpcAgent(self.agentHost.hostname, self.agentHost.ip, self.web_port, os.getpid(),
+        self.agent_client = GrpcAgent(agentHost.hostname, agentHost.ip, self.web_port, os.getpid(),
                                       self.agent_addr, self.service_type,self.agent_meta,self.getReqStat)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
         self.stat_client = GrpcStat(self.stat_addr,self.agent_meta,self.getIntervalStat)
@@ -120,10 +124,9 @@ class GrpcAgentImplement(PinpointAgent):
             else:
                 content = body.decode('utf-8')
                 try:
-                    TCLogger.debug(content)
                     stack = json.loads(content)
                 except Exception as e:
-                    TCLogger.error("json is crash")
+                    TCLogger.error("json is crash:[%s]",content)
                     return
 
                 super().sendSpan(stack, body)
@@ -136,10 +139,10 @@ class GrpcAgentImplement(PinpointAgent):
                 self.span_helper.sendSpan(spanMesg)
 
     def asynSendSpan(self, stack, body):
-        self.mpQueue.put(body, 5)
+        self.mpQueue.put(body,timeout= 5,block=False)
 
     def stop(self):
-        self.mpQueue.put(None, 5)
+        self.mpQueue.put(None, timeout=5)
         self.process.join()
 
     def stopProcessMain(self):

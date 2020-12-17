@@ -82,10 +82,6 @@ class CollectorAgentConf(object):
             self.collector_type = SUPPORT_THRIFT
             self.collector_implement = ThriftAgentImplement
 
-        # self.AgentID = config.get('Collector',
-        #                           'AgentID')
-        # self.ApplicationName = config.get('Collector',
-        #                                   'ApplicationName')
         self.version = AGENT_VERSION
 
         log_dir = config.get('Common', 'LOG_DIR', fallback=None)

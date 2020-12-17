@@ -5,26 +5,25 @@ What we have supported and what we are going to support: [support plan](SupportP
 
 ### Requirement
 
-Dependency| Version
----|----
-python |python 3.5+
-python async|python 3.7.1+
-gcc|gcc 4.7+
-cmake| 3.0+
-*inux| 
-pinpoint| 2.0+(GRPC)
+Dependency| Version| More
+---|----|---
+python |2.7,3+ | (async must 3.7.1+)
+gcc|gcc 4.7+| c++11
+cmake| 3.1+| ✔
+*inux|  | `windows` is on the way
+pinpoint| 2.0+(GRPC)|
 
 ### Installation
 
-#### Build pinpointPy module
+#### pinpointPy 
 
-1. Install python virtual environment, and please refer to 
-https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
-
-2. Install pinpointPy (Python virtual environment is recommended).
 ```shell
 $ pip install pinpointPy
 ```
+### Download pinpoint-python-plugins
+
+[pinpoint-python-plugins.tar.gz](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/V2020.12.17/pinpoint-python-plugins-v0.0.1.tar.gz)
+
 #### Install Collector Agent
 There are two ways to install Collector-Agent, just choose one:
 

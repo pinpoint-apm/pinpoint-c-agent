@@ -20,7 +20,7 @@
 # Created by eeliu at 9/4/19
 import json
 
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
+from CollectorAgentConf.CollectorAgentConf import CollectorAgentConf
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
 
@@ -29,19 +29,9 @@ class AppManagement(object):
     def __init__(self,collector_conf):
         assert isinstance(collector_conf,CollectorAgentConf)
         self.collector_conf = collector_conf
-        # self.default_appid = self.collector_conf.AgentID
-        # self.default_appname = self.collector_conf.ApplicationName
         self.app_map = {}
         self.default_app = None
         self.recv_count = 0
-
-    # self.createDefaultImplement(collector_conf.server_type)
-    # def createDefaultImplement(self, service_type):
-    #
-    #     self.default_app = self.collector_conf.collector_implement(self.collector_conf, self.default_appid, self.default_appname, service_type)
-    #
-    #     self.default_app.start()
-    #     self.app_map[self.default_appid] = self.default_app
 
     def findApp(self, app_id, app_name, service_type):
         if app_id in self.app_map:
@@ -73,7 +63,7 @@ class AppManagement(object):
             TCLogger.debug(content)
             stack = json.loads(content)
         except Exception as e:
-            TCLogger.error("json is crash")
+            TCLogger.error("json is crash.[%s]",content)
             return
         if 'appid' not in stack:
             TCLogger.warning(" drop %s, as no appid", content)

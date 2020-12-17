@@ -16,7 +16,7 @@
 
 
 def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True,urllib=True,
-                            sqlalchemy=True,aioHttp=False):
+                            sqlalchemy=True,aioHttp=False,mysqldb=True):
     if pymysql:
         from .PyMysql import monkey_patch
         monkey_patch()
@@ -41,5 +41,8 @@ def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True
         from .urllib import monkey_patch
         monkey_patch()
 
+    if mysqldb:
+        from .MySQLdb import monkey_patch
+        monkey_patch()
 
 __all__=['monkey_patch_for_pinpoint']

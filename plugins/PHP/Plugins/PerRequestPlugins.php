@@ -32,6 +32,7 @@ class PerRequestPlugins
     public $app_id = null;
     private $curNextSpanId = '';
     private $isLimit = false;
+    private $mem_start=0;
 
     public function traceLimit()
     {
@@ -48,6 +49,9 @@ class PerRequestPlugins
 
     private function __construct()
     {
+        if( defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE==='1'){
+            $this->mem_start = memory_get_usage();
+        }
 
         pinpoint_start_trace();
 
@@ -105,18 +109,11 @@ class PerRequestPlugins
         }
 
         pinpoint_set_context("Pinpoint-Sampled",PP_SAMPLED);
-        if (isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) {
-            if ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED) {
-                $this->isLimit = true;
-                //drop this request. collector could not receive any thing
-                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
-                pinpoint_drop_trace();
-            }
-        } else {
-            if(pinpoint_tracelimit()){
-                pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
-                pinpoint_drop_trace();
-            }
+        if (((isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) && ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED)) or pinpoint_tracelimit()) {
+            $this->isLimit = true;
+            //drop this request. collector could not receive any thing
+            pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
+            pinpoint_drop_trace();
         }
 
         pinpoint_add_clue(PP_TRANSCATION_ID, $this->tid);
@@ -129,8 +126,14 @@ class PerRequestPlugins
     {
         // reset limit
         $this->isLimit = false;
+        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE==='1'){
+            $memory_usage = (memory_get_peak_usage() - $this->mem_start)/1024;
+            pinpoint_add_clues(PP_MEMORY_USAGE,"$memory_usage KB");
+        }
+
         pinpoint_add_clues(PP_HTTP_STATUS_CODE, http_response_code());
         pinpoint_end_trace();
+
     }
 
     public function generateSpanID()

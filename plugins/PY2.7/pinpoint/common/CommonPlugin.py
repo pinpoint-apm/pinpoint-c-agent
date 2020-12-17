@@ -16,26 +16,24 @@
 
 import pinpointPy
 import threading
-
-from PinpointCommon import *
-
-
+from Defines import *
+from Common import Candy
 class PinpointCommonPlugin(Candy):
 
     def onBefore(self,*args, **kwargs):
         args, kwargs = super(PinpointCommonPlugin,self).onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(FuncName,self.getFuncUniqueName())
-        pinpointPy.add_clue(ServerType,PYTHON_METHOD_CALL)
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE,PP_METHOD_CALL)
         arg = self.get_arg(*args, **kwargs)
-        pinpointPy.add_clues(PY_ARGS, arg)
+        pinpointPy.add_clues(PP_ARGS, arg)
         ###############################################################
         # print( threading.currentThread().ident)
         return args,kwargs
 
     def onEnd(self,ret):
         ###############################################################
-        pinpointPy.add_clues(PY_RETURN,str(ret))
+        pinpointPy.add_clues(PP_RETURN,str(ret))
         ###############################################################
         super(PinpointCommonPlugin,self).onEnd(ret)
         return ret

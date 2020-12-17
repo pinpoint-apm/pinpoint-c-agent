@@ -120,7 +120,7 @@ class AsyRequestPlugin(AsyCandy):
         return ret
 
     def onException(self, e):
-        pinpointPy.mark_as_error(e,"", 0, self.traceId)
+        pinpointPy.mark_as_error(str(e),"", 0, self.traceId)
         raise e
 
 

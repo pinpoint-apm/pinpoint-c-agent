@@ -20,7 +20,7 @@
 # Created by eeliu at 3/5/20
 
 
-from .AsyCommon import *
+from .PinpointAsyCommon import *
 
 import pinpointPy
 import tornado.web
@@ -107,18 +107,18 @@ class HTTPRequestPlugins(AsyCandy):
         if PP_APACHE_PROXY in insRequest.headers:
             pinpointPy.add_clue(PP_APACHE_PROXY, insRequest.headers[PP_APACHE_PROXY], self.node_id)
 
-        if PP_HTTP_SAMPLED in insRequest.headers:
-            if insRequest.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
+        if PP_HEADER_PINPOINT_SAMPLED in insRequest.headers:
+            if insRequest.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED:
                 self.isLimit = True
                 pinpointPy.drop_trace(self.node_id)
-                pinpointPy.set_context_key(PP_HTTP_SAMPLED,PP_NOT_SAMPLED,self.node_id)
+                pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED,PP_NOT_SAMPLED,self.node_id)
         else:
             if pinpointPy.check_tracelimit():
                 self.isLimit = True
-                pinpointPy.set_context_key(PP_HTTP_SAMPLED, PP_NOT_SAMPLED,self.node_id)
+                pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, PP_NOT_SAMPLED,self.node_id)
             else:
                 self.isLimit = False
-                pinpointPy.set_context_key(PP_HTTP_SAMPLED, PP_SAMPLED,self.node_id)
+                pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, PP_SAMPLED,self.node_id)
 
         pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid,self.node_id)
         pinpointPy.add_clue(PP_SPAN_ID,self.sid,self.node_id)
@@ -135,7 +135,7 @@ class HTTPRequestPlugins(AsyCandy):
         return ret
 
     def onException(self, e):
-        pinpointPy.mark_as_error(e,"",0,self.node_id)
+        pinpointPy.mark_as_error(str(e),"",0,self.node_id)
         raise e
 
 

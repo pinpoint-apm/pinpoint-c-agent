@@ -25,33 +25,21 @@ import sys
 proto_class = os.getcwd()+'/Proto/grpc'
 sys.path.append(proto_class)
 
-import gevent
-
-from CollectorAgent.CollectorAgentConf import CollectorAgentConf
-from Common.Config import CAConfig
-from Common.Logger import TCLogger
-from PHPAgent import PHPAgentConf, FrontAgent
-from PinpointAgent.AppManagement import AppManagement
-
+from Common import TCLogger
+from PinpointAgent import start_pinpoint_agent,stop_pinpoint_agent
 
 class Server(object):
     def __init__(self):
-        self.collector_conf = CollectorAgentConf(CAConfig)
-        self.app_management = AppManagement(self.collector_conf)
-        self.pac = PHPAgentConf(CAConfig)
-        self.php_agent = FrontAgent(self.pac, self.app_management.handleFrontAgentData)
-        self.php_agent.registerPHPAgentHello(self.app_management.tellMeWho)
-        self.php_agent.start()
+        start_pinpoint_agent()
 
     def run(self):
         while True:
             try:
+                import gevent
                 gevent.sleep(10)
             except:
                 break
-        # break by a signal
-        self.app_management.stopAll()
-        self.php_agent.stop()
+        stop_pinpoint_agent()
         TCLogger.warning("collector agent exit with SIGNAL")
 
 if __name__ == '__main__':

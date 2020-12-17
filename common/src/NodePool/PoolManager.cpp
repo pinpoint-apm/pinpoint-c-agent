@@ -76,8 +76,10 @@ TraceNode& PoolManager::getNodeById(NodeID id)
     id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
 
-    if(!this->nodeIsAlive(id))
+    if(this->nodeIsAlive(id) == false){
         throw std::out_of_range("id is not alive");
+    }
+        
 
     return this->nodeIndexVec[id/CELL_SIZE][id%CELL_SIZE];
 }
@@ -102,6 +104,7 @@ void PoolManager::expandOnce()
     pp_trace("Node pool expanding self! Old size:%ld",this->nodeIndexVec.size()*CELL_SIZE);
     // append new nodes into nodeIndexVec
     this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
+    // this->nodeIndexVec.push_back(std::make_unique<TraceNode[]>(CELL_SIZE));
     // append new bitflag into aliveNodeSet
     this->_aliveNodeSet.insert(this->_aliveNodeSet.end(),this->_emptyAliveSet.begin(),this->_emptyAliveSet.end());
     for( NodeID id = this->maxId ; id < (this->maxId + CELL_SIZE) ;id++)

@@ -169,7 +169,6 @@ size_t TransLayer::trans_layer_pool(uint32_t timeout)
 
         if((this->_state & S_WRITING) && FD_ISSET(fd,&wfds)){
             if(_send_msg_to_collector() == -1){
-                pp_trace("send_msg_to_collector error");
                 goto ERROR;
             }
         }
@@ -209,6 +208,7 @@ void TransLayer::sendMsgToAgent(const std::string &data)
     this->chunks.copyDataIntoChunks((const char* )&header,sizeof(header));
     //copy body
     this->chunks.copyDataIntoChunks(data.data(),data.size());
+    //enable write event
     this->_state |=  S_WRITING;
 }
 

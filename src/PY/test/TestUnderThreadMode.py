@@ -19,14 +19,16 @@ class TestUnderThreadMode(TestCase):
 
         while self.thread_running:
             pinpointPy.start_trace()
-            pinpointPy.set_special_key('sid','12345678')
+            pinpointPy.set_context_key('sid','12345678')
             pinpointPy.add_clue("key","value3")
             pinpointPy.add_clues("key","value3")
-            value = pinpointPy.get_special_key('sid')
+            value = pinpointPy.get_context_key('sid')
             self.assertEqual(value,'12345678')
             pinpointPy.mark_as_error("fghjk","fghjkl",234234)
             pinpointPy.end_trace()
-            value = pinpointPy.get_special_key('sid')
+            pinpointPy.force_flush_trace()
+            pinpointPy.drop_trace()
+            value = pinpointPy.get_context_key('sid')
             self.assertFalse(value)
 
 

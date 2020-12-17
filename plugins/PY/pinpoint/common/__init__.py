@@ -19,6 +19,15 @@
 
 # Created by eeliu at 8/20/20
 
+
+import sys
+__python_version = "%d.%d" %(sys.version_info.major,sys.version_info.minor)
+
+if __python_version >="3.7":
+    from .AsyCommon import *
+    from .AsyRequestPlugin import *
+    from .AsyCommonPlugin import *
+
 from .Defines import *
 from .Span import *
 from .Interceptor import *
@@ -27,6 +36,4 @@ from .Utils import *
 from .Common import *
 from .RequestPlugins import *
 from .CommonPlugin import *
-from .AsyCommon import *
-from .AsyRequestPlugin import *
-from .AsyCommonPlugin import *
+
