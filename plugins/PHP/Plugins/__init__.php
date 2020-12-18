@@ -16,6 +16,16 @@
  ******************************************************************************/
 require_once "Common/PluginsDefines.php";
 
-require_once "Sys/curl/curl.php";// intercept all curl_xxxx
-require_once "Sys/date/date.php";// intercept all date_xxxx
-require_once "Sys/mysqli/mysqli.php";
+// intercept all date_xxxx, part of php core
+require_once "Sys/date/date.php";
+
+// intercept all curl_xxxx, if curl extension is available
+if (function_exists('curl_exec'))
+{
+    require_once "Sys/curl/curl.php";
+}
+
+if (function_exists('mysqli_connect'))
+{
+    require_once "Sys/mysqli/mysqli.php";
+}
