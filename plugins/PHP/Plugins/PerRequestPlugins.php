@@ -32,7 +32,7 @@ class PerRequestPlugins
     public $app_id = null;
     private $curNextSpanId = '';
     private $isLimit = false;
-    private $mem_start=0;
+    private $mem_start = 0;
 
     public function traceLimit()
     {
@@ -49,18 +49,28 @@ class PerRequestPlugins
 
     private function __construct()
     {
-        if( defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE==='1'){
+        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE ==='1') {
             $this->mem_start = memory_get_usage();
         }
 
         pinpoint_start_trace();
-
-        pinpoint_add_clue(PP_REQ_URI, $_SERVER['REQUEST_URI']);
-        pinpoint_add_clue(PP_REQ_CLIENT, $_SERVER["REMOTE_ADDR"]);
-        pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
         pinpoint_add_clue(PP_SERVER_TYPE, PP_PHP);
-        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "PHP Request");
+        // Handle web request and CLI request
+        pinpoint_add_clue(PP_INTERCEPTOR_NAME, "PHP Request: ". php_sapi_name());
 
+        if(isset($_SERVER['REQUEST_URI'])) {
+            pinpoint_add_clue(PP_REQ_URI, $_SERVER['REQUEST_URI']);
+        } elseif(isset($_SERVER['argv'])) {
+            pinpoint_add_clue(PP_REQ_URI, implode(" ", $_SERVER['argv']));
+        }
+
+        if(isset($_SERVER['REMOTE_ADDR'])) {
+            pinpoint_add_clue(PP_REQ_CLIENT, $_SERVER["REMOTE_ADDR"]);
+        }
+
+        if(isset($_SERVER['HTTP_HOST'])) {
+            pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
+        }
 
         $this->app_name = APPLICATION_NAME;
         pinpoint_add_clue(PP_APP_NAME, $this->app_name);
@@ -87,7 +97,6 @@ class PerRequestPlugins
 
         if (isset($_SERVER[PP_HEADER_PAPPNAME]) || array_key_exists(PP_HEADER_PAPPNAME, $_SERVER)) {
             $this->pname = $_SERVER[PP_HEADER_PAPPNAME];
-
             pinpoint_add_clue(PP_PARENT_NAME, $this->pname);
         }
 
@@ -100,6 +109,7 @@ class PerRequestPlugins
             $this->ah = $_SERVER[PP_HEADER_PINPOINT_HOST];
             pinpoint_add_clue(PP_PARENT_HOST, $this->ah);
         }
+
         if (isset($_SERVER[PP_HEADER_NGINX_PROXY]) || array_key_exists(PP_HEADER_NGINX_PROXY, $_SERVER)) {
             pinpoint_add_clue(PP_NGINX_PROXY, $_SERVER[PP_HEADER_NGINX_PROXY]);
         }
@@ -108,11 +118,11 @@ class PerRequestPlugins
             pinpoint_add_clue(PP_APACHE_PROXY, $_SERVER[PP_HEADER_APACHE_PROXY]);
         }
 
-        pinpoint_set_context("Pinpoint-Sampled",PP_SAMPLED);
+        pinpoint_set_context("Pinpoint-Sampled", PP_SAMPLED);
         if (((isset($_SERVER[PP_HEADER_SAMPLED]) || array_key_exists(PP_HEADER_SAMPLED, $_SERVER)) && ($_SERVER[PP_HEADER_SAMPLED] == PP_NOT_SAMPLED)) or pinpoint_tracelimit()) {
             $this->isLimit = true;
             //drop this request. collector could not receive any thing
-            pinpoint_set_context("Pinpoint-Sampled",PP_NOT_SAMPLED);
+            pinpoint_set_context("Pinpoint-Sampled", PP_NOT_SAMPLED);
             pinpoint_drop_trace();
         }
 
@@ -120,8 +130,8 @@ class PerRequestPlugins
         pinpoint_add_clue(PP_SPAN_ID, $this->sid);
         pinpoint_set_context(PP_TRANSCATION_ID, $this->tid);
         pinpoint_set_context(PP_SPAN_ID, (string)$this->sid);
-
     }
+
     public function __destruct()
     {
         // reset limit
@@ -131,7 +141,9 @@ class PerRequestPlugins
             pinpoint_add_clues(PP_MEMORY_USAGE,"$memory_usage KB");
         }
 
-        pinpoint_add_clues(PP_HTTP_STATUS_CODE, http_response_code());
+        if (($http_response_code = http_response_code()) != null) {
+            pinpoint_add_clues(PP_HTTP_STATUS_CODE, $http_response_code);
+        }
         pinpoint_end_trace();
 
     }
