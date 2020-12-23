@@ -27,12 +27,10 @@ class DjangoMiddleWare(MiddlewareMixin):
         self.request_plugin = BaseDjangoRequestPlugins("Django Web App")
 
     def process_request(self,request):
-        print("*****MyMiddleware request******")
         self.request_plugin.onBefore(self,request)
 
 
     def process_response(self,request,response):
-        print("*****MyMiddleware response******")
         self.request_plugin.onEnd(response)
         #todo add reponse status-code
         return response

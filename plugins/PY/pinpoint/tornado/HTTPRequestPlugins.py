@@ -35,7 +35,6 @@ class HTTPRequestPlugins(AsyCandy):
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME,self.node_id)
         pinpointPy.add_clue(PP_APP_ID, APP_ID,self.node_id)
         ###############################################################
-        print("------------------- call before -----------------------")
         insBaseHttp = args[0]
         assert isinstance(insBaseHttp,tornado.web.RequestHandler)
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'tornado.web.RequestHandler',self.node_id)
@@ -48,7 +47,6 @@ class HTTPRequestPlugins(AsyCandy):
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in insRequest.headers:
             pinpointPy.add_clue(PP_PARENT_SPAN_ID, insRequest.headers[PP_HTTP_PINPOINT_PSPANID], self.node_id)
-            print("PINPOINT_PSPANID:", insRequest.headers[PP_HTTP_PINPOINT_PSPANID])
 
         if PP_HTTP_PINPOINT_SPANID in insRequest.headers:
             self.sid = insRequest.headers[PP_HTTP_PINPOINT_SPANID]
@@ -84,7 +82,6 @@ class HTTPRequestPlugins(AsyCandy):
         # Not nginx, no http
         if PP_HEADER_PINPOINT_PSPANID in insRequest.headers:
             pinpointPy.add_clue(PP_PARENT_SPAN_ID, insRequest.headers[PP_HEADER_PINPOINT_PSPANID], self.node_id)
-            print("PINPOINT_PSPANID:", insRequest.headers[PP_HEADER_PINPOINT_PSPANID])
 
         if PP_HEADER_PINPOINT_PAPPNAME in insRequest.headers:
             self.pname = insRequest.headers[PP_HEADER_PINPOINT_PAPPNAME]

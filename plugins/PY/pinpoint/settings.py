@@ -41,6 +41,6 @@ pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
 # def output(msg):
 #     print(msg)
 #
-pinpointPy.enable_debug(None)
+# pinpointPy.enable_debug(None)
 
 __all__=['APP_ID','APP_NAME','APP_SUB_ID','COLLECTOR_HOST']
