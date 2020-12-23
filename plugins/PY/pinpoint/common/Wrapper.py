@@ -24,7 +24,6 @@ class Wrapper:
         self.origObj = obj
 
     def __getattr__(self, item):
-        print(item)
         if item in self.__dict__:
             return getattr(self,item)
         else:

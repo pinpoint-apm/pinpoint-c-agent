@@ -54,7 +54,6 @@ class BaseFlaskPlugins(Candy):
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in request.headers:
             pinpointPy.add_clue(PP_PARENT_SPAN_ID, request.headers[PP_HTTP_PINPOINT_PSPANID])
-            print("PINPOINT_PSPANID:", request.headers[PP_HTTP_PINPOINT_PSPANID])
 
         if PP_HTTP_PINPOINT_SPANID in request.headers:
             self.sid = request.headers[PP_HTTP_PINPOINT_SPANID]
