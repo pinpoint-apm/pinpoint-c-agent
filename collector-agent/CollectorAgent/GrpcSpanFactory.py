@@ -104,8 +104,9 @@ class GrpcSpanFactory(SpanFactory):
                 tSpan.annotation.append(ann)
 
         try:
-            value = PLongIntIntByteByteStringValue()
+            value = None
             if 'NP' in stackMap:  ## nginx
+                value = PLongIntIntByteByteStringValue()
                 arr = ThriftProtocolUtil._parseStrField(stackMap['NP'])
                 value.intValue1 = 2
                 if 'D' in arr:
@@ -113,6 +114,7 @@ class GrpcSpanFactory(SpanFactory):
                 if 't' in arr:
                     value.longValue = ThriftProtocolUtil._parseDotFormat(arr['t'])
             elif 'AP' in stackMap:  ## apache
+                value = PLongIntIntByteByteStringValue()
                 arr = ThriftProtocolUtil._parseStrField(stackMap['AP'])
                 value.intValue1 = 3
                 if 'i' in arr:
@@ -123,8 +125,9 @@ class GrpcSpanFactory(SpanFactory):
                     value.intValue2 = int(arr['D'])
                 if 't' in arr:
                     value.longValue = int(int(arr['t']) / 1000)
-            ann = PAnnotation(key=PROXY_HTTP_HEADER, value=PAnnotationValue(longIntIntByteByteStringValue=value))
-            tSpan.annotation.append(ann)
+            if value is not None:
+                ann = PAnnotation(key=PROXY_HTTP_HEADER, value=PAnnotationValue(longIntIntByteByteStringValue=value))
+                tSpan.annotation.append(ann)
         except Exception as e:
             TCLogger.error("input is illegal,Exception %s", e)
 
