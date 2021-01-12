@@ -1,0 +1,70 @@
+name: Build
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  cpp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.5
+        with:
+          cmake-version: '3.2.x'
+      - name: Build ppt-agent
+        run: |
+          cd common
+          mkdir -p build
+          cd build
+          cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
+          make
+          ./bin/unittest
+      - name: Codecovage
+        uses: codecov/codecov-action@v1
+       
+  PHP5:
+    runs-on: ubuntu-16.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '5.6'
+      - run: |
+          phpize
+          ./configure
+          make
+          make test TESTS=src/PHP/tests5/
+        
+  PHP78:
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - run: |
+          phpize
+          ./configure
+          make
+          make test TESTS=src/PHP/tests/
+          
+  Python3:
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        python-version: ['2.7', '3.5', '3.6', '3.7', '3.8']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jwlawson/actions-setup-cmake@v1.5
+        with:
+          cmake-version: '3.2.x'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: |
+          pip install -r requirements.txt 
+          python setup.py install
+          nosetests src/PY/test --ignore-files="TestCoroutines.*"
