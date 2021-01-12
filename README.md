@@ -1,6 +1,7 @@
 ![Pinpoint](images/logo.png)
 
-[![Build Status](https://travis-ci.com/pinpoint-apm/pinpoint-c-agent.svg?branch=master)](https://travis-ci.com/pinpoint-apm/pinpoint-c-agent) [![Gitter](https://badges.gitter.im/pinpoint-apm/pinpoint-c-agent.svg)](https://gitter.im/pinpoint-apm/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)[![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent)
+[![Build](https://github.com/pinpoint-apm/pinpoint-c-agent/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-c-agent/actions) [![Gitter](https://badges.gitter.im/pinpoint-apm/pinpoint-c-agent.svg)](https://gitter.im/pinpoint-apm/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent) [![License](https://img.shields.io/github/license/pinpoint-apm/pinpoint-c-agent)](LICENSE)
+
 
 
 **Visit [our official website](http://pinpoint-apm.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://pinpoint-apm.github.io/pinpoint/news.html)**  
