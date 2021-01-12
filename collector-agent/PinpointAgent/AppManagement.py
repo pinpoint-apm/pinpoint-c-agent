@@ -81,7 +81,7 @@ class AppManagement(object):
             TCLogger.warning(" drop %s, as no FT", content)
             return
         else:
-            ft = stack['FT']
+            ft = int(stack['FT'])
 
         app = self.findApp(appid, appname, ft)
         app.asynSendSpan(stack, body)
