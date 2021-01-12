@@ -111,8 +111,6 @@ class BaseDjangoRequestPlugins(Candy):
             pinpointPy.drop_trace()
             pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s0")
 
-
-
         pinpointPy.add_clue(PP_TRANSCATION_ID,self.tid)
         pinpointPy.add_clue(PP_SPAN_ID,self.sid)
         pinpointPy.set_context_key(PP_TRANSCATION_ID, self.tid)
