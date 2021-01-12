@@ -13,36 +13,24 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+import importlib
+from .internal import gl
+
+def __monkey_patch(*args,**kwargs):
+    for key in kwargs:
+        if kwargs[key]:
+            module = importlib.import_module('pinpoint.libs.'+key)
+            monkey_patch = getattr(module,'monkey_patch')
+            if callable(monkey_patch):
+                monkey_patch()
 
 
-def monkey_patch_for_pinpoint(mongo=True,pymysql=True,pyredis=True,requests=True,urllib=True,
-                            sqlalchemy=True,aioHttp=False,mysqldb=True):
-    if pymysql:
-        from .PyMysql import monkey_patch
-        monkey_patch()
 
-    if mongo:
-        from .pymongo import monkey_patch
-        monkey_patch()
-
-    if pyredis:
-        from .pyRedis import monkey_patch
-        monkey_patch()
-
-    if requests:
-        from .requests import monkey_patch
-        monkey_patch()
-
-    if sqlalchemy:
-        from .sqlalchemy import monkey_patch
-        monkey_patch()
-
-    if urllib:
-        from .urllib import monkey_patch
-        monkey_patch()
-
-    if mysqldb:
-        from .MySQLdb import monkey_patch
-        monkey_patch()
+def monkey_patch_for_pinpoint(pymongo=True,PyMysql=True,pyRedis=True,requests=True,urllib=True,
+                       sqlalchemy=True,aioHttp=False,MySQLdb=True,amqp=True,kombu=True,celeryCaller=True):
+    if not gl.patched:
+        gl.patched = True
+        __monkey_patch(pymongo=pymongo,PyMysql=PyMysql,pyRedis=pyRedis,requests=requests,urllib=urllib,
+                       sqlalchemy=sqlalchemy,aioHttp=aioHttp,MySQLdb=MySQLdb,amqp=amqp,kombu=kombu,celeryCaller=celeryCaller)
 
 __all__=['monkey_patch_for_pinpoint']
