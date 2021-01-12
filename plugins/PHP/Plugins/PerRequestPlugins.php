@@ -66,14 +66,15 @@ class PerRequestPlugins
 
         if(isset($_SERVER['REMOTE_ADDR'])) {
             pinpoint_add_clue(PP_REQ_CLIENT, $_SERVER["REMOTE_ADDR"]);
-        } elseif (($hostname = gethostname()) !== false) {
-            pinpoint_add_clue(PP_REQ_CLIENT, $hostname);
         }
 
         if(isset($_SERVER['HTTP_HOST'])) {
             pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
-        } elseif(($pid = getmypid()) !== false) {
-            pinpoint_add_clue(PP_REQ_SERVER, sprintf("[pid:%d]", $pid));
+        } elseif(($hostname = gethostname()) !== false) {
+            if(($pid = getmypid()) !== false) {
+                $hostname .= sprintf("[pid:%d]", $pid);
+            }
+            pinpoint_add_clue(PP_REQ_SERVER, $hostname);
         }
 
         $this->app_name = APPLICATION_NAME;
