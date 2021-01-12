@@ -88,7 +88,6 @@ if __name__ == '__main__':
     async def run(i):
         if i == 0:
             return
-        print("run")
         await asyncio.sleep(0.1)
         await run(i-1)
 

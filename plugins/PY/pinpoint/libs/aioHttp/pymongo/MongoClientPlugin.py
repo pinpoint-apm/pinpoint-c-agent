@@ -35,10 +35,8 @@ class MongoClientPlugin(AsyCandy):
         # ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName(),self.traceId)
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_MONGDB_EXE_QUERY,self.traceId)
-        print(args[0].database._client.address)
         # ###############################################################
         pinpointPy.add_clue(PP_DESTINATION, self.dst,self.traceId)
-        print("------------------")
         return args, kwargs
 
     def onEnd(self, ret):
