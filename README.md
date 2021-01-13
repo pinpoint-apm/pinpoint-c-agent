@@ -1,6 +1,6 @@
 ![Pinpoint](images/logo.png)
 
-[![Build](https://github.com/pinpoint-apm/pinpoint-c-agent/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-c-agent/actions) [![Gitter](https://badges.gitter.im/pinpoint-apm/pinpoint-c-agent.svg)](https://gitter.im/pinpoint-apm/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent) [![License](https://img.shields.io/github/license/pinpoint-apm/pinpoint-c-agent)](LICENSE)
+[![Build](https://github.com/pinpoint-apm/pinpoint-c-agent/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-c-agent/actions) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent) [![License](https://img.shields.io/github/license/pinpoint-apm/pinpoint-c-agent)](LICENSE)
 
 
 
