@@ -41,15 +41,15 @@ class PerRequestPlugins
 
     public static function instance()
     {
-        if (self::$_intance == null) {
-            self::$_intance = new PerRequestPlugins();
+        if (static::$_intance == null) {
+            static::$_intance = new static();
         }
-        return self::$_intance;
+        return static::$_intance;
     }
 
-    private function __construct()
+    protected function __construct()
     {
-        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE ==='1') {
+        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
             $this->mem_start = memory_get_usage();
         }
 
@@ -70,12 +70,17 @@ class PerRequestPlugins
 
         if(isset($_SERVER['HTTP_HOST'])) {
             pinpoint_add_clue(PP_REQ_SERVER, $_SERVER["HTTP_HOST"]);
+        } elseif(($hostname = gethostname()) !== false) {
+            if(($pid = getmypid()) !== false) {
+                $hostname .= sprintf("[pid:%d]", $pid);
+            }
+            pinpoint_add_clue(PP_REQ_SERVER, $hostname);
         }
 
         $this->app_name = APPLICATION_NAME;
         pinpoint_add_clue(PP_APP_NAME, $this->app_name);
 
-        $this->app_id = APPLICATION_ID;
+        $this->app_id = substr(APPLICATION_ID, 0, 24);
         pinpoint_add_clue(PP_APP_ID, $this->app_id);
 
         if (isset($_SERVER[PP_HEADER_PSPANID]) || array_key_exists(PP_HEADER_PSPANID, $_SERVER)) {
@@ -136,16 +141,15 @@ class PerRequestPlugins
     {
         // reset limit
         $this->isLimit = false;
-        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE==='1'){
-            $memory_usage = (memory_get_peak_usage() - $this->mem_start)/1024;
-            pinpoint_add_clues(PP_MEMORY_USAGE,"$memory_usage KB");
+        if(defined('PP_REPORT_MEMORY_USAGE') && PP_REPORT_MEMORY_USAGE === '1') {
+            $memory_usage = (memory_get_peak_usage() - $this->mem_start) / 1024;
+            pinpoint_add_clues(PP_MEMORY_USAGE, "$memory_usage KB");
         }
 
         if (($http_response_code = http_response_code()) != null) {
             pinpoint_add_clues(PP_HTTP_STATUS_CODE, $http_response_code);
         }
         pinpoint_end_trace();
-
     }
 
     public function generateSpanID()
