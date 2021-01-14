@@ -7,6 +7,7 @@ import time
 import psutil
 
 from CollectorAgent.GrpcClient import GrpcClient
+from Common import Stat
 from Common.Logger import TCLogger
 from PinpointAgent.Type import STAT_INTERVAL
 from Proto.grpc.Service_pb2_grpc import StatStub
@@ -36,11 +37,10 @@ class GrpcStat(GrpcClient):
             self.exit_cv.notify_all()
         self.channel.close()
 
-
     def _generAgentStat(self):
         max,avg = self.get_inter_stat_cb()
         responseTime = PResponseTime(max=max,avg=avg)
-        stat = PAgentStat(responseTime=responseTime)
+        stat = PAgentStat(responseTime=responseTime, gc=Stat.collectJvmInfo())
         stat.timestamp = int(round(time.time()*1000))
         stat.collectInterval = STAT_INTERVAL
         stat.cpuLoad.systemCpuLoad =psutil.cpu_percent()*0.01

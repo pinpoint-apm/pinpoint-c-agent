@@ -23,21 +23,22 @@ import queue
 import threading
 import time
 
-import Service_pb2_grpc
 import grpc
-from Stat_pb2 import PAgentInfo, PPing
 
+import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 from PinpointAgent.Type import PHP
 from Proto.grpc.Cmd_pb2 import PCmdMessage, PCmdServiceHandshake, PCommandType, PCmdActiveThreadCountRes, \
     PCmdStreamResponse, PCmdActiveThreadLightDumpRes
+from Stat_pb2 import PAgentInfo, PPing
 
 
 class GrpcAgent(GrpcClient):
     PINGID = 0
 
-    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP,meta=None,get_req_stat=None,get_interval_stat=None,maxPending=-1, timeout=10):
+    def __init__(self, hostname, ip, ports, pid, address, server_type=PHP, meta=None, get_req_stat=None,
+                 get_interval_stat=None, maxPending=-1, timeout=300):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
