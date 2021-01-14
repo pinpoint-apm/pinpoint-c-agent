@@ -4,5 +4,6 @@
 
 from .AgentHost import AgentHost
 from .Logger import TCLogger, PALogger
+from .Stat import Stat
 agentHost = AgentHost()
-__all__ = ['agentHost', 'TCLogger', 'PALogger']
+__all__ = ['agentHost', 'TCLogger', 'PALogger', 'Stat']

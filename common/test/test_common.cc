@@ -64,11 +64,11 @@ TEST(common, uid_all_in_one)
 {
     // register_error_cb(cc_log_error_cb);
     // test_trace();
+    int64_t startId =  generate_unique_id();
     generate_unique_id();
     generate_unique_id();
     generate_unique_id();
-    generate_unique_id();
-    EXPECT_EQ(generate_unique_id(),4);
+    EXPECT_EQ(generate_unique_id(),4+ startId);
 
 #define _100K 100000
 
@@ -83,7 +83,7 @@ TEST(common, uid_all_in_one)
         generate_unique_id();
     waitpid(pid,NULL,0);
     //[0~9999]
-    EXPECT_EQ(generate_unique_id(),(2*_100K+5));
+    EXPECT_EQ(generate_unique_id(),(startId + 2*_100K+5));
 }
 
 
