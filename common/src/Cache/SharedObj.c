@@ -23,7 +23,7 @@
 #include "SharedObj.h"
 
 
-#ifdef __linux__
+#if defined(__linux__) || defined(_UNIX) ||defined(__APPLE__)
 #define SHARE_OBJ_NAME "pinpoint-php.shm"
 
 #include <sys/types.h>

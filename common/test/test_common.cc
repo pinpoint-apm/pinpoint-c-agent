@@ -1,5 +1,4 @@
 ﻿#include <gtest/gtest.h>
-#include <pcre.h>
 #include <locale.h>
 #include <regex.h>
 #include <thread>

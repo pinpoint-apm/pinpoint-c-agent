@@ -16,7 +16,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 option (WITH_TEST_CASE "Enable Gtest" OFF)
 option (WITH_CODECOVERAGE "Enable CodeCoverage" OFF)
 
-if (WITH_CODECOVERAGE)
+ if(UNIX AND NOT APPLE)
+    set(LINUX_ TRUE)
+endif()
+
+if (WITH_CODECOVERAGE AND LINUX_)
     # message("WITH_CODECOVERAGE = ON")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_CXX_FLAGS   "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")

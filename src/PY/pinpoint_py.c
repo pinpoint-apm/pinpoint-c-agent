@@ -22,7 +22,7 @@ PPAgentT global_agent_info;
 static PyObject *py_obj_msg_callback;
 static char* g_collector_host;
 
-#ifdef __linux__
+#if defined(__linux__)  || defined(_UNIX) ||defined(__APPLE__)
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -57,6 +57,9 @@ void _free_common_shared(void)
 {
     pthread_rwlock_destroy(&rwlock);
 }
+#else
+
+#error "your platform not support"
 
 #endif
 
@@ -202,7 +205,7 @@ static PyObject *py_force_flush_span(PyObject *self, PyObject *args)
 }
 
 
-static inline long  startTraceWithPerThreadId(void)
+static inline uint32_t  startTraceWithPerThreadId(void)
 {
     uint32_t id = pinpoint_start_trace(pinpoint_get_per_thread_id());
     pinpoint_update_per_thread_id(id);
@@ -213,7 +216,7 @@ static inline long  startTraceWithPerThreadId(void)
 static PyObject *py_pinpoint_start_trace(PyObject *self,PyObject *args)
 {
     int ret = 0;
-    long id = -1; 
+    int32_t id = -1; 
 
     if(! PyArg_ParseTuple(args,"|i",&id))
     {
@@ -240,10 +243,10 @@ static PyObject *py_pinpoint_start_trace(PyObject *self,PyObject *args)
     return Py_BuildValue("i", ret);
 }
 
-static inline long endTraceWithPerThreadId(void)
+static inline int endTraceWithPerThreadId(void)
 {
-    uint32_t cid = pinpoint_get_per_thread_id();
-    uint32_t id = pinpoint_end_trace(cid);
+    int cid = pinpoint_get_per_thread_id();
+    int id = pinpoint_end_trace(cid);
     pinpoint_update_per_thread_id(id);
     return id;
 }
@@ -251,7 +254,7 @@ static inline long endTraceWithPerThreadId(void)
 static PyObject *py_pinpoint_end_trace(PyObject *self, PyObject *args)
 {
     int ret = 0;
-    long id = -1;
+    int32_t id = -1;
     if(! PyArg_ParseTuple(args,"|i",&id))
     {
         return NULL;
@@ -427,8 +430,8 @@ static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
 {
     char * msg = NULL;
     char * file_name= NULL;
-    uint line_no= 0;
-    long id = pinpoint_get_per_thread_id();
+    uint32_t line_no= 0;
+    int id = pinpoint_get_per_thread_id();
     if(PyArg_ParseTuple(args,"ssi|i",&msg,&file_name,&line_no,&id))
     {
         catch_error(id,msg,file_name,line_no);

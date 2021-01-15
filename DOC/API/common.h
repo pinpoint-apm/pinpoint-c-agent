@@ -21,14 +21,14 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#ifdef __linux__
-#define likely(x)        __builtin_expect(!!(x), 1)
-#define unlikely(x)      __builtin_expect(!!(x), 0)
-#elif _WIN32
+// #if defined(__linux__)  || defined(_UNIX) ||defined(__APPLE__)
+// #define likely(x)        __builtin_expect(!!(x), 1)
+// #define unlikely(x)      __builtin_expect(!!(x), 0)
+// #elif _WIN32
 
-#else
+// #else
 
-#endif
+// #endif
 
 #define MAX_VEC 512
 #define LOG_SIZE 4096
