@@ -48,7 +48,7 @@ typedef enum{
     E_UTEST = 0x4
 }AGENT_FLAG;
 
-typedef uint32_t NodeID;
+typedef int32_t NodeID;
 
 #pragma pack (1)
 typedef  struct {

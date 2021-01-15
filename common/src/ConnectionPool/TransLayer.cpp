@@ -153,7 +153,7 @@ size_t TransLayer::trans_layer_pool(uint32_t timeout)
         FD_SET(fd,&rfds);
     }
 
-    struct timeval tv = {0,timeout *1000};
+    struct timeval tv = {0,(int)timeout *1000};
 
     int retval = select(fd+1,&rfds,&wfds,&efds,&tv);
     if(retval == -1)

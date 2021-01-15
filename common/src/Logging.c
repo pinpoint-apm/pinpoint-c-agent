@@ -18,18 +18,27 @@
 
 #include <stdio.h>
 
-#if defined(__linux__) || defined(_UNIX)
-#include <sys/types.h>
-#include <sys/syscall.h>
-#include <stdarg.h>
-#include <unistd.h>
-#define gettid() syscall(SYS_gettid)
-#define getOSPid getpid
-#elif defined(_WIN32)
-#include <processthreadsapi.h>
-#define getOSPid GetCurrentProcessId
-#else 
+#if defined(__linux__) || defined(_UNIX) 
+    #include <sys/types.h>
+    #include <sys/syscall.h>
+    #include <stdarg.h>
+    #include <unistd.h>
+    #define gettid() syscall(SYS_gettid)
+    #define getOSPid getpid
+#endif
 
+#if defined(__APPLE__)
+    #include <sys/types.h>
+    #include <sys/syscall.h>
+    #include <stdarg.h>
+    #include <unistd.h>
+    #define gettid() (long)getpid()
+    #define getOSPid getpid
+#endif
+
+#if defined(_WIN32)
+    #include <processthreadsapi.h>
+    #define getOSPid GetCurrentProcessId
 #endif
 
 static log_msg_cb _error_cb;
