@@ -1,6 +1,7 @@
 from setuptools import setup, Extension
 from distutils.command.build_ext  import build_ext 
 import os,subprocess,sys
+import platform
 
 with open("README", "r") as fh:
     long_description = fh.read()
@@ -49,6 +50,22 @@ else:
 
     pinpointBuild = CommonBuild
 
+###############################################
+# check os type
+
+name = platform.system().lower()
+agent_libraries = []   
+if name=='windows':
+    raise RuntimeError('pinpoint-c-agent currently not support MS')
+elif  name == 'darwin':
+    agent_libraries = ['pinpoint_common','jsoncpp', 'stdc++']
+elif  name == 'linux':
+    agent_libraries = ['pinpoint_common','jsoncpp','rt','stdc++']
+else:
+    raise RuntimeError('Unknow platform to me: '+name)
+###############################################
+
+
 setup(name='pinpointPy',
       version="1.0.1",
       author="eeliu", 
@@ -62,7 +79,7 @@ setup(name='pinpointPy',
           ['src/PY/pinpoint_py.c'],
           include_dirs = ['common/include'],
           library_dirs = [pinpointBuild.build_temp+"/lib"],
-          libraries = ['pinpoint_common','jsoncpp', 'rt', 'stdc++']
+          libraries = agent_libraries
           )
         ],
       cmdclass={'build_ext': pinpointBuild}
