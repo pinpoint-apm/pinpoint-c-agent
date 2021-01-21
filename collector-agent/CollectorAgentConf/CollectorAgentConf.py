@@ -103,6 +103,7 @@ class CollectorAgentConf(object):
         self.log_dir = config.get('Common', 'LOG_DIR', fallback='/tmp')
         self.log_level = config.get('Common', 'Log_Level', fallback='DEBUG')
         self.webPort = self.config.get('Common', 'Web_Port')
+        self._setLog(self.log_dir, self.log_level)
 
     def _parseSysEnv(self):
         try:
@@ -118,6 +119,7 @@ class CollectorAgentConf(object):
             self.webPort = os.getenv('PP_WEB_PORT', '80')
             self.collector_type = SUPPORT_GRPC
             self.collector_implement = GrpcAgentImplement
+            self._setLog(self.log_dir, self.log_level)
         except KeyError as e:
             # an exception is convenience for debugging
             raise RuntimeError('Please check your environment variable %s is missing' % (e))

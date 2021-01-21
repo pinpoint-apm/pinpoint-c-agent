@@ -32,10 +32,10 @@ class GrpcStat(GrpcClient):
         pass
 
     def stop(self):
+        TCLogger.debug("try to stop stat thread")
         self.task_running = False
         with self.exit_cv:
             self.exit_cv.notify_all()
-        self.channel.close()
 
     def _generAgentStat(self):
         max,avg = self.get_inter_stat_cb()
@@ -47,14 +47,10 @@ class GrpcStat(GrpcClient):
         return stat
 
     def _generator_PstatMessage(self):
-        try:
-            while self.task_running:
-                ps = PStatMessage(agentStat=self._generAgentStat())
-                TCLogger.debug(ps)
-                yield ps
-                time.sleep(STAT_INTERVAL)
-        except Exception as e:
-            TCLogger.warning("_generator_PstatMessage catch %s", e)
+        ps = PStatMessage(agentStat=self._generAgentStat())
+        TCLogger.debug(ps)
+        yield ps
+
 
     def _stat_thread_main(self):
         self.task_running = True
@@ -64,7 +60,7 @@ class GrpcStat(GrpcClient):
             except Exception as e:
                 TCLogger.warning("SendAgentStat met:%s",e)
             with self.exit_cv:
-                if self.exit_cv.wait(self.timeout):
+                if not self.task_running or not self.exit_cv.wait(self.timeout):
                     break
 
 
