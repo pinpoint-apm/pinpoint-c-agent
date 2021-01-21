@@ -36,13 +36,16 @@ class AppManagement(object):
     def findApp(self, app_id, app_name, service_type):
         if app_id in self.app_map:
             app = self.app_map[app_id]
-            ## check app_name
-            if app.app_name != app_name:
-                TCLogger.warning(" app_name can't change when working ")
-                return None
-            ## check service_type
-            else:
-                return app
+            #########
+            # remove app_name checking
+            # ## check app_name
+            # if app.app_name != app_name:
+            #     TCLogger.warning(" app_name can't change when working ")
+            #     return None
+            # ## check service_type
+            # else:
+            #     return app
+            return app
         else:
             TCLogger.info("collector-agent try to create a new application agent.[%s@%s@%d]",app_id,app_name,service_type)
             app = self.collector_conf.collector_implement(self.collector_conf, app_id, app_name,service_type)
