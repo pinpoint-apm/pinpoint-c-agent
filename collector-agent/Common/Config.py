@@ -24,15 +24,15 @@ import os
 
 def get_conf(env_name):
     if not env_name in os.environ:
-        raise Exception("COLLECTOR_CONFIG not found in your environment")
+        return None
 
     __config_path = os.environ[env_name]
-    if not os.path.exists(__config_path):
-        raise Exception("COLLECTOR_CONFIG:%s not exist" % (__config_path))
-
-    config =  ConfigParser.ConfigParser()
-    config.read(__config_path)
-    return config
+    if os.path.exists(__config_path):
+        config = ConfigParser.ConfigParser()
+        config.read(__config_path)
+        return config
+    else:
+        return None
 
 CAConfig = get_conf('COLLECTOR_CONFIG')
 
