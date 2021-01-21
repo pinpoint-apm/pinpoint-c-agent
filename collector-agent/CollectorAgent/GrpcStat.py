@@ -52,6 +52,7 @@ class GrpcStat(GrpcClient):
         yield ps
 
 
+
     def _stat_thread_main(self):
         self.task_running = True
         while self.task_running:
@@ -60,9 +61,9 @@ class GrpcStat(GrpcClient):
             except Exception as e:
                 TCLogger.warning("SendAgentStat met:%s",e)
             with self.exit_cv:
-                if not self.task_running or not self.exit_cv.wait(self.timeout):
+                if not self.task_running or self.exit_cv.wait(self.timeout):
                     break
-
+        TCLogger.debug("stat thread is done")
 
     def start(self):
         self.stat_thread = threading.Thread(target=self._stat_thread_main, args=())

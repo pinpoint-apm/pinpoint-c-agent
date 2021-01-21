@@ -117,7 +117,7 @@ class GrpcAgent(GrpcClient):
                 TCLogger.error("handleCommand channel  %s error", e)
             finally:
                 with self.exit_cv:
-                    if not self.task_running or not self.exit_cv.wait(self.timeout):
+                    if not self.task_running or self.exit_cv.wait(self.timeout):
                         break
 
     def _send_thread_count(self,requestId):
@@ -183,7 +183,7 @@ class GrpcAgent(GrpcClient):
                 continue
             finally:
                 with self.exit_cv:
-                    if not self.task_running or not self.exit_cv.wait(self.timeout):
+                    if not self.task_running or self.exit_cv.wait(self.timeout):
                         break
             iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
             try:
@@ -201,7 +201,7 @@ class GrpcAgent(GrpcClient):
             TCLogger.debug("%s send ping", self)
             yield ping
             with self.exit_cv:
-                if not self.task_running or not self.exit_cv.wait(self.timeout):
+                if not self.task_running or self.exit_cv.wait(self.timeout):
                     TCLogger.debug("generate ping exit")
                     break
 
