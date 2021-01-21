@@ -19,10 +19,12 @@
 
 # Created by eeliu at 10/16/19
 import json
-import os
 import multiprocessing
+import os
 from queue import Full, Queue
+
 from gevent import monkey
+
 monkey.patch_all(thread=False)
 from Common import agentHost
 from CollectorAgent.GrpcAgent import GrpcAgent
@@ -30,7 +32,6 @@ from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
 from CollectorAgent.GrpcStat import GrpcStat
-from Common.AgentHost import AgentHost
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import SUPPORT_GRPC, API_DEFAULT
@@ -83,6 +84,7 @@ class GrpcAgentImplement(PinpointAgent):
         self.stat_addr = ac.CollectorStatIp + ':' + str(ac.CollectorStatPort)
         self.span_addr = ac.CollectorSpanIp + ':' + str(ac.CollectorSpanPort)
         self.web_port = ac.getWebPort()
+        self.isContainer = ac.agentIsDocker
         self.max_span_sender_size = 2
         self.sender_index = 0
 
@@ -99,7 +101,8 @@ class GrpcAgentImplement(PinpointAgent):
                                                          self.startTimeStamp,
                                                          self.max_pending_sz)
         self.agent_client = GrpcAgent(agentHost.hostname, agentHost.ip, self.web_port, os.getpid(),
-                                      self.agent_addr, self.service_type,self.agent_meta,self.getReqStat)
+                                      self.agent_addr, self.service_type, self.agent_meta, self.getReqStat,
+                                      self.isContainer)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
         self.stat_client = GrpcStat(self.stat_addr,self.agent_meta,self.getIntervalStat)
         self.span_factory = GrpcSpanFactory(self)
