@@ -38,7 +38,7 @@ class GrpcAgent(GrpcClient):
     PINGID = 0
 
     def __init__(self, hostname, ip, ports, pid, address, server_type=PHP, meta=None, get_req_stat=None,
-                 get_interval_stat=None, maxPending=-1, timeout=300):
+                 maxPending=-1, timeout=300, isContainer=False):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
@@ -51,7 +51,7 @@ class GrpcAgent(GrpcClient):
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
         self.cmd_sub = Service_pb2_grpc.ProfilerCommandServiceStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
-                                    serviceType=server_type)
+                                    serviceType=server_type, container=isContainer)
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
         self.profile_meta = meta
         self.task_running = False

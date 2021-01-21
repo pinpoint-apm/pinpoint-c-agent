@@ -48,6 +48,7 @@ class CollectorAgentConf(object):
         self.startTimestamp = int(time.time() * 1000)
         self.config = config
         self.version = AGENT_VERSION
+        self.max_pending_size = 10000
 
         if not config:
             ## update system evn and it own a higher priority
@@ -95,6 +96,7 @@ class CollectorAgentConf(object):
                                                'CollectorTcpIp')
             self.CollectorAgentPort = config.getint('Collector',
                                                     'CollectorTcpPort')
+            self.agentIsDocker = False
             self.collector_type = SUPPORT_THRIFT
             self.collector_implement = ThriftAgentImplement
 
