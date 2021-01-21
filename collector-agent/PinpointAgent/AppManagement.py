@@ -39,13 +39,12 @@ class AppManagement(object):
             #########
             # remove app_name checking
             # ## check app_name
-            # if app.app_name != app_name:
-            #     TCLogger.warning(" app_name can't change when working ")
-            #     return None
-            # ## check service_type
-            # else:
-            #     return app
-            return app
+            if app.app_name != app_name:
+                TCLogger.warning(" app_name can't change when working ")
+                return None
+            ## check service_type
+            else:
+                return app
         else:
             TCLogger.info("collector-agent try to create a new application agent.[%s@%s@%d]",app_id,app_name,service_type)
             app = self.collector_conf.collector_implement(self.collector_conf, app_id, app_name,service_type)
