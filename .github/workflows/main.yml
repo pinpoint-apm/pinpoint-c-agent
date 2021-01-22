@@ -4,13 +4,16 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   cpp:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - name: actions-setup-cmake
-        uses: jwlawson/actions-setup-cmake@v1.5
+        uses: jwlawson/actions-setup-cmake@v1.6
         with:
-          cmake-version: '3.2.x'
+          cmake-version: '3.16.x'
       - name: Build ppt-agent
         run: |
           cd common
@@ -52,15 +55,16 @@ jobs:
           make test TESTS=src/PHP/tests/
           
   Python3:
-    runs-on: ubuntu-16.04
     strategy:
       matrix:
-        python-version: ['2.7', '3.5', '3.6', '3.7', '3.8']
+        os: [ubuntu-16.04, macos-latest]
+        python-version: ['2.7', '3.5', '3.6', '3.7']
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: jwlawson/actions-setup-cmake@v1.5
+      - uses: jwlawson/actions-setup-cmake@v1.6
         with:
-          cmake-version: '3.2.x'
+          cmake-version: '3.16.x'
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}

@@ -38,7 +38,7 @@ class GrpcAgent(GrpcClient):
     PINGID = 0
 
     def __init__(self, hostname, ip, ports, pid, address, server_type=PHP, meta=None, get_req_stat=None,
-                 get_interval_stat=None, maxPending=-1, timeout=300):
+                 maxPending=-1, timeout=300, isContainer=False):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip
@@ -51,7 +51,7 @@ class GrpcAgent(GrpcClient):
         self.stub = Service_pb2_grpc.AgentStub(self.channel)
         self.cmd_sub = Service_pb2_grpc.ProfilerCommandServiceStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
-                                    serviceType=server_type)
+                                    serviceType=server_type, container=isContainer)
         self.ping_meta = meta.append(('socketid', str(GrpcAgent.PINGID)))
         self.profile_meta = meta
         self.task_running = False
@@ -87,7 +87,7 @@ class GrpcAgent(GrpcClient):
                 return response
              else:
                 TCLogger.info("HandStreamIterator stopped")
-                return
+                raise StopIteration()
          def add_response(self,message):
              self._response_queue.put(message)
 
@@ -117,7 +117,7 @@ class GrpcAgent(GrpcClient):
                 TCLogger.error("handleCommand channel  %s error", e)
             finally:
                 with self.exit_cv:
-                    if self.exit_cv.wait(self.timeout):
+                    if not self.task_running or self.exit_cv.wait(self.timeout):
                         break
 
     def _send_thread_count(self,requestId):
@@ -126,7 +126,7 @@ class GrpcAgent(GrpcClient):
 
         def generator_cmd():
             i = 0
-            while True:
+            while self.task_running:
                 try:
                     cmd_response = PCmdStreamResponse(responseId=requestId, sequenceId=i)
                     cmd_response.message.value = 'hello'
@@ -137,17 +137,17 @@ class GrpcAgent(GrpcClient):
                     threadCountRes.timeStamp = int(time.time())
                     i += 1
                     yield threadCountRes
-
-                    with self.exit_cv:
-                        if self.exit_cv.wait(1):
-                            break
+                    ## it's a templated task, don't use exit_cv
+                    time.sleep(1)
                 except Exception as e:
                     TCLogger.warning("catch exception %s", e)
                     break
 
         try:
+            TCLogger.debug("new a thread for activeThreadCound %d", requestId)
             stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
             TCLogger.debug("send req state requestId: %d done",requestId)
+            channel.close()
         except Exception as e:
             TCLogger.error("CommandStreamActiveThreadCount, catch exception %s",e)
     def _handleCmd(self,msg,cmdIter):
@@ -183,7 +183,7 @@ class GrpcAgent(GrpcClient):
                 continue
             finally:
                 with self.exit_cv:
-                    if self.exit_cv.wait(self.timeout):
+                    if not self.task_running or self.exit_cv.wait(self.timeout):
                         break
             iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
             try:
@@ -201,7 +201,7 @@ class GrpcAgent(GrpcClient):
             TCLogger.debug("%s send ping", self)
             yield ping
             with self.exit_cv:
-                if self.exit_cv.wait(self.timeout):
+                if not self.task_running or self.exit_cv.wait(self.timeout):
                     TCLogger.debug("generate ping exit")
                     break
 

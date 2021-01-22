@@ -40,7 +40,7 @@ class CurlUtil
 //        pinpoint_set_context(PP_NEXT_SPAN_ID, (string)$nsid);
 //    }
 
-    public static function getPinpointHeader($url)
+    public static function getPinpointHeader()
     {
         if(pinpoint_get_context('Pinpoint-Sampled')==PP_NOT_SAMPLED){
             return ["Pinpoint-Sampled:s0"];
@@ -52,7 +52,7 @@ class CurlUtil
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
             'Pinpoint-Pappname:'.APPLICATION_NAME,
-            'Pinpoint-Host:'.static::getHostFromURL($url),
+            'Pinpoint-Host:'.gethostname(),
             'Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID),
             'Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID),
             'Pinpoint-Spanid:'.$nsid
@@ -62,7 +62,7 @@ class CurlUtil
     }
 
     // for GuzzleHttp header
-    public static function getPPHeader($url)
+    public static function getPPHeader()
     {
         if(pinpoint_get_context('Pinpoint-Sampled')==PP_NOT_SAMPLED){
             return ["Pinpoint-Sampled"=>"s0"];
@@ -74,7 +74,7 @@ class CurlUtil
             'Pinpoint-Flags'=>'0',
             'Pinpoint-Papptype'=>'1500',
             'Pinpoint-Pappname'=>APPLICATION_NAME,
-            'Pinpoint-Host'=>static::getHostFromURL($url),
+            'Pinpoint-Host'=>gethostname(),
             'Pinpoint-Traceid'=>pinpoint_get_context(PP_TRANSCATION_ID),
             'Pinpoint-Pspanid'=>pinpoint_get_context(PP_SPAN_ID),
             'Pinpoint-Spanid'=>$nsid

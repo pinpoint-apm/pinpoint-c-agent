@@ -23,7 +23,6 @@ from queue import Empty
 from threading import Condition, Thread
 
 import Service_pb2_grpc
-
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 
@@ -78,7 +77,7 @@ class GrpcSpan(GrpcClient):
             try:
                 if not get_n_span(self.queue, 10240):
                     with self.exit_cv:
-                        if self.exit_cv.wait(5):
+                        if not self.task_running and not self.exit_cv.wait(5):
                             break
                     continue
                 self.send_span_count+=len(spans)

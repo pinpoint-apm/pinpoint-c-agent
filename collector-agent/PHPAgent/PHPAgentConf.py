@@ -17,6 +17,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
+import os
 class PHPAgentConf(object):
     def __init__(self,config):
-        self.Address = config.get('Agent','Address')
+        if config:
+            self.Address = config.get('Agent', 'Address')
+        else:
+            self.Address = os.environ.get('PP_ADDRESS')

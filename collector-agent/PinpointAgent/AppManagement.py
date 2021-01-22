@@ -36,7 +36,7 @@ class AppManagement(object):
     def findApp(self, app_id, app_name, service_type):
         if app_id in self.app_map:
             app = self.app_map[app_id]
-            ## check app_name
+            # ## check app_name
             if app.app_name != app_name:
                 TCLogger.warning(" app_name can't change when working ")
                 return None
@@ -84,8 +84,9 @@ class AppManagement(object):
             ft = int(stack['FT'])
 
         app = self.findApp(appid, appname, ft)
-        app.asynSendSpan(stack, body)
-        self.recv_count+=1
+        if app:
+            app.asynSendSpan(stack, body)
+            self.recv_count += 1
 
     def tellMeWho(self):
         return {

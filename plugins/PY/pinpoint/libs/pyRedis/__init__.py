@@ -23,11 +23,11 @@ def monkey_patch():
     from pinpoint.common import Interceptor
     from .PyRedisPlugins import PyRedisPlugins
     try:
-        import redis
+        from redis.connection import Connection
         Interceptors = [
-            Interceptor(redis, 'Redis', PyRedisPlugins),
-            Interceptor(redis.Redis, 'execute_command', PyRedisPlugins)
+            Interceptor(Connection, 'send_command', PyRedisPlugins)
         ]
+
         for interceptor in Interceptors:
             interceptor.enable()
 

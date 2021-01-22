@@ -23,6 +23,8 @@
 
 import pinpointPy
 
+import socket
+
 class Candy(object):
     def __init__(self,name):
         self.name = name
@@ -55,6 +57,12 @@ class Candy(object):
 
     def getFuncUniqueName(self):
         return self.name
+
+
+local_host_name = socket.getfqdn()
+local_ip = socket.gethostbyname(local_host_name)
+
+__all__=['local_host_name', 'Candy','local_ip']
 
 if __name__ == '__main__':
 
