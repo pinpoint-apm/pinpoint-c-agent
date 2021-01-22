@@ -46,7 +46,7 @@ def generateNextSid():
     nsid = str(random.randint(0, 2147483647))
     return nsid
 
-def generatePinpointHeader(headers):
+def generatePinpointHeader(host,headers):
 
     if pinpointPy.check_tracelimit():
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_NOT_SAMPLED
@@ -56,7 +56,7 @@ def generatePinpointHeader(headers):
     headers[PP_HEADER_PINPOINT_PAPPTYPE] = PYTHON
     headers[PP_HEADER_PINPOINT_PAPPNAME] = APP_NAME
     headers['Pinpoint-Flags'] = "0"
-    headers[PP_HEADER_PINPOINT_HOST] =local_host_name
+    headers[PP_HEADER_PINPOINT_HOST] =host
     headers[PP_HEADER_PINPOINT_TRACEID] = pinpointPy.get_context_key(PP_TRANSCATION_ID)
     headers[PP_HEADER_PINPOINT_PSPANID] = pinpointPy.get_context_key(PP_SPAN_ID)
     nsid = generateSid()
