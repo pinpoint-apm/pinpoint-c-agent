@@ -29,10 +29,10 @@ There are two ways to install Collector-Agent, just choose one:
 
 1. [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
 2. Use Dockerized Collector-Agent:
-    
+    [env.file](../../collector-agent/conf/env.file)
     ```
     docker pull eeliu2020/pinpoint-collector-agent:latest 
-    docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
+    docker run --env-file path-to-env.file -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
     ```
    
 
