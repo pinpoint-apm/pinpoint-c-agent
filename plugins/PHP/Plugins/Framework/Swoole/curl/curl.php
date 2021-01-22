@@ -136,7 +136,7 @@ function curl_setopt_array($ch, array $options)
 
 function set_pinpoint_header($ch,$url,$userHeader)
 {
-    $ppHeader = CurlUtil::getPinpointHeader();
+    $ppHeader = CurlUtil::getPinpointHeader($url);
     $header= array_merge($userHeader,$ppHeader);
     \curl_setopt($ch,CURLOPT_HTTPHEADER,$header);
 }
