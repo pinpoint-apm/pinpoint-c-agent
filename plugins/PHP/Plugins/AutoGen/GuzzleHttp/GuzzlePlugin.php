@@ -36,7 +36,7 @@ class GuzzlePlugin extends Candy
             {
                 $n_headers = $this->args[2];
             }
-            $n_headers = array_merge($n_headers,CurlUtil::getPPHeader($this->args[1]));
+            $n_headers = array_merge($n_headers,CurlUtil::getPPHeader());
             $this->args[2] = $n_headers;
         }
     }
