@@ -21,7 +21,7 @@ use Plugins\Util\Trace;
 use Plugins\Sys\curl\CurlUtil as URLUtils;
 class CurlUtil
 {
-    public static function getPinpointHeader()
+    public static function getPinpointHeader($url)
     {
         if(pinpoint_get_context('Pinpoint-Sampled',IDContext::get())==PP_NOT_SAMPLED){
             return ["Pinpoint-Sampled:s0"];
@@ -33,7 +33,7 @@ class CurlUtil
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
             'Pinpoint-Pappname:'.APPLICATION_NAME,
-            'Pinpoint-Host:'.gethostname(),
+            'Pinpoint-Host:'.static::getHostFromURL($url),
             'Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID,IDContext::get()),
             'Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID,IDContext::get()),
             'Pinpoint-Spanid:'.$nsid
