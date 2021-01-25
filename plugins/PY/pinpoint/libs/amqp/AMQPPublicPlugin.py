@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
-# Created by eeliu at 8/20/20
+# Created by eeliu at 12/29/20
 
 
 # ******************************************************************************
@@ -20,35 +19,31 @@
 #   limitations under the License.
 # ******************************************************************************
 
+from pinpoint.common import *
 import pinpointPy
 
-from pinpoint.common import *
-
-
-class PyRedisPlugins(Candy):
-
-    def __init__(self,name):
+class AMQPPublicPlugin(Candy):
+    def __init__(self, name):
         super().__init__(name)
-        self.dst = ''
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
-        pinpointPy.add_clue(PP_SERVER_TYPE, PP_REDIS)
-        pinpointPy.add_clues(PP_ARGS,("%s:%s")%(args[1],args[2]))
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_RABBITMQ_CLIENT)
+
+        if 'routing_key' in kwargs and not kwargs['routing_key']:
+            pinpointPy.add_clues(PP_RABBITMQ_ROUTINGKEY, kwargs['routing_key'])
+
+        if 'exchange' in kwargs and not kwargs['exchange']:
+            pinpointPy.add_clues(PP_RABBITMQ_EXCHANGEKEY, kwargs['exchange'])
+
+        connect = args[0].connection
+        pinpointPy.add_clue(PP_DESTINATION, str(connect))
         ###############################################################
-        pinpointPy.add_clue(PP_DESTINATION, str(args[0]))
-        return args,kwargs
+
+        return args, kwargs
 
     def onEnd(self,ret):
-        ###############################################################
-        # pinpointPy.add_clues(PP_RETURN,str(ret))
-        ###############################################################
         super().onEnd(ret)
         return ret
-
-    def onException(self, e):
-        pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
-
-
