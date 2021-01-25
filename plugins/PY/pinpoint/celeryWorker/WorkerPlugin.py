@@ -36,7 +36,6 @@ class WorkerPlugin(Candy):
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'worker')
         pinpointPy.add_clue(PP_REQ_URI, name)
 
-        pinpointPy.add_clue(PP_REQ_SERVER, local_host_name)
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_CELERY_WORKER)
         pinpointPy.add_clue('FT', PP_CELERY_WORKER)
 
@@ -97,6 +96,7 @@ class WorkerPlugin(Candy):
             self.Ah = headers[PP_HEADER_PINPOINT_HOST]
             pinpointPy.set_context_key(PP_PARENT_HOST, self.Ah)
             pinpointPy.add_clue(PP_PARENT_HOST, self.Ah)
+            pinpointPy.add_clue(PP_REQ_SERVER, self.Ah)
 
         pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s1")
         if (PP_HTTP_PINPOINT_SAMPLED in headers and headers[
