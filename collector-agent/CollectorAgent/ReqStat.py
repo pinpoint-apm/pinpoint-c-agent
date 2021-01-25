@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 6/2/20
 
+import math
 import time
 
 from PinpointAgent.Type import STAT_INTERVAL
@@ -46,7 +47,7 @@ class ReqStat(object):
         self.inter_stat.update(req_time)
 
         # update request stat
-        req_time = int(req_time / 1000)
+        req_time = math.ceil(req_time / 1000)
         last_time = int(time.time())
         if last_time != self.last_time:
             self.req_stat_count = [0, 0, 0, 0]

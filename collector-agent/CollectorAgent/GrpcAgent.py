@@ -146,7 +146,7 @@ class GrpcAgent(GrpcClient):
         try:
             TCLogger.debug("new a thread for activeThreadCound %d", requestId)
             stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
-            TCLogger.debug("send req state requestId: %d done",requestId)
+            TCLogger.debug("send activeThreadCound requestId: %d is done", requestId)
             channel.close()
         except Exception as e:
             TCLogger.error("CommandStreamActiveThreadCount, catch exception %s",e)
