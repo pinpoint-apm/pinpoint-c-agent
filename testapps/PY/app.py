@@ -142,7 +142,8 @@ def test_generator_form():
 
 @app.route('/test_higher_order', methods=['GET'])
 def test_higher_order_form():
-    @PinpointCommonPlugin("", __name__)
+    from pinpoint.common import PinpointCommonPlugin
+    @PinpointCommonPlugin(__name__)
     def f(x):
         return x * x
 
