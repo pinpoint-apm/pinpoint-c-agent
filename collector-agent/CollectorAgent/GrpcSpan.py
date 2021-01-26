@@ -77,7 +77,8 @@ class GrpcSpan(GrpcClient):
             try:
                 if not get_n_span(self.queue, 10240):
                     with self.exit_cv:
-                        if not self.task_running and not self.exit_cv.wait(5):
+                        if not self.task_running or self.exit_cv.wait(5):
+                            TCLogger.info("span send thread is done")
                             break
                     continue
                 self.send_span_count+=len(spans)
