@@ -81,16 +81,14 @@ class GrpcClient(object):
         if meta is not None:
             self.meta = meta
             intercept_channel = grpc.intercept_channel(channel,
-                                                       self._interceptorAddHeader(meta))
+                                                       GrpcClient.InterceptorAddHeader(meta))
             channel = intercept_channel
 
         self.channel = channel
         self.channel.subscribe(self._channelStateChange, try_reconnect)
 
-
-
-
-    def _interceptorAddHeader(self, header):
+    @staticmethod
+    def InterceptorAddHeader(header):
         def intercept_call(client_call_details, request_iterator, request_streaming,
                            response_streaming):
             metadata = []
