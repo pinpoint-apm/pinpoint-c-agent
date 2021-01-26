@@ -179,7 +179,7 @@ class GrpcAgent(GrpcClient):
                 TCLogger.debug("sending agentinfo %s",self.agentinfo)
                 self.stub.RequestAgentInfo(self.agentinfo)
             except Exception as e:
-                TCLogger.warn(" pinpoint collector is not available. Try it again [%s] ",self.agentinfo)
+                TCLogger.error(" pinpoint collector is not available. Try it again [%s] ", self.agentinfo)
                 continue
             finally:
                 with self.exit_cv:
@@ -192,7 +192,7 @@ class GrpcAgent(GrpcClient):
             except Exception as e:
                 TCLogger.error("ping response abort with exception: [%s]  %s",self.agentinfo, e)
 
-        TCLogger.debug('agent thread exit: %s',self.task_running)
+        TCLogger.info('agent thread exit: %s', self.task_running)
 
 
     def _pingPPing(self):
