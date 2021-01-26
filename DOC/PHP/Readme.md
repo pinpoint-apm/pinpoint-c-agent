@@ -21,12 +21,11 @@ composer| | class can be automatic pinpoint-cut
    
 2. Build Collector-Agent yourself or use Dockerized Collector-Agent, just choose one:
     * [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
-    * Use Dockerized Collector-Agent:
-    
-            ```
-            docker pull eeliu2020/pinpoint-collector-agent:latest 
-            docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
-            ```
+    * Use Dockerized Collector-Agent: [env.file](../../collector-agent/conf/env.file)
+        ```
+        docker pull eeliu2020/pinpoint-collector-agent:latest 
+        docker run --env-file path-to-env.file -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
+        ```
    
 3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, and do following steps:
    1. phpize        
