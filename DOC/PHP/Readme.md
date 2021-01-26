@@ -26,6 +26,17 @@ composer| | class can be automatic pinpoint-cut
         docker pull eeliu2020/pinpoint-collector-agent:latest 
         docker run --env-file path-to-env.file -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
         ```
+        
+        
+      change configuration in env.file (../../collector-agent/conf/env.file)
+             
+          PP_COLLECTOR_AGENT_SPAN_IP, PP_COLLECTOR_AGENT_AGENT_IP, PP_COLLECTOR_AGENT_STAT_IP: pinpoint collector ip
+          PP_COLLECTOR_AGENT_SPAN_PORT, PP_COLLECTOR_AGENT_AGENT_PORT, PP_COLLECTOR_AGENT_STAT_PORT: pinpoint collector span/agent/stat port(default:9993/9992/9991)
+          PP_LOG_DIR: Set the path of collector-agent's log
+          PP_Log_Level=ERROR (according to your requirements, choose ERROR or DEBUG)
+          PP_ADDRESS=ip@9999 (ip: IP of your server)
+
+         
    
 3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, and do following steps:
    1. phpize        
