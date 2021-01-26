@@ -18,41 +18,54 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 10/31/19
-import traceback
 from queue import Empty
 from threading import Condition, Thread
+
+import grpc
 
 import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
 
 
-class GrpcSpan(GrpcClient):
+class GrpcSpan:
+    class SpanClient:
+        def __init__(self, address, meta):
+            self.address = address
+            self.meta = meta
+            self._connect()
+
+        def _connect(self):
+            TCLogger.info("span channel connect %s with meta:%s", self.address, self.meta)
+            self.channel = grpc.intercept_channel(grpc.insecure_channel(self.address),
+                                                  GrpcClient.InterceptorAddHeader(self.meta))
+            self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
+
+        def sendSpans(self, iter):
+            self.span_stub.SendSpan(iter)
+
+        def reconnect(self):
+            self.channel.close()
+            self._connect()
+
+
     def __init__(self, address, meta, queue):
-        super().__init__(address, meta)
-        self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
+        self.address = address
+        self.meta = meta
         self.exit_cv = Condition()
         self.send_span_count = 0
-        self.is_ok = False
+
         self.task_thead = Thread(target=self.getAndSendSpan)
         self.task_running = False
         self.queue = queue
 
-    def channelSetReady(self):
-        self.is_ok = True
 
-    def channelSetIdle(self):
-        self.is_ok = False
-
-    def channelSetError(self):
-        self.is_ok = False
 
     def stop(self):
         self.task_running = False
         with self.exit_cv:
             self.exit_cv.notify_all()
         self.task_thead.join()
-        super().stop()
         TCLogger.info("send %d to pinpoint collector",self.send_span_count)
 
     def start(self):
@@ -60,7 +73,6 @@ class GrpcSpan(GrpcClient):
 
     def getAndSendSpan(self):
         self.task_running = True
-
         spans = []
 
         def get_n_span(queue, N):
@@ -73,7 +85,9 @@ class GrpcSpan(GrpcClient):
                 pass
             return True if i > 0 else False
 
+        client = GrpcSpan.SpanClient(self.address, self.meta)
         while self.task_running:
+
             try:
                 if not get_n_span(self.queue, 10240):
                     with self.exit_cv:
@@ -82,9 +96,10 @@ class GrpcSpan(GrpcClient):
                             break
                     continue
                 self.send_span_count+=len(spans)
-                self.span_stub.SendSpan(iter(spans))
+                client.sendSpans(iter(spans))
+                TCLogger.debug("send %d", self.send_span_count)
             except Exception as e:
-                TCLogger.error("span channel, can't work:exception:%s", e)
-                traceback.print_exc()
+                TCLogger.error("span channel catches an exception:%s", e)
+                client.reconnect()
             finally:
                 spans.clear()

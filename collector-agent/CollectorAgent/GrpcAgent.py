@@ -117,7 +117,8 @@ class GrpcAgent(GrpcClient):
                 TCLogger.error("handleCommand channel  %s error", e)
             finally:
                 with self.exit_cv:
-                    if not self.task_running or self.exit_cv.wait(self.timeout):
+                    ## hard code 300->5
+                    if not self.task_running or self.exit_cv.wait(5):
                         break
 
     def _send_thread_count(self,requestId):
