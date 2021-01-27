@@ -53,8 +53,8 @@ def generatePinpointHeader(host,headers):
         return
     else:
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_SAMPLED
-    headers[PP_HEADER_PINPOINT_PAPPTYPE] = PYTHON
-    headers[PP_HEADER_PINPOINT_PAPPNAME] = APP_NAME
+    headers[PP_HEADER_PINPOINT_PAPPTYPE] = pinpointPy.get_context_key(PP_SERVER_TYPE)
+    headers[PP_HEADER_PINPOINT_PAPPNAME] = pinpointPy.get_context_key(PP_APP_NAME)
     headers['Pinpoint-Flags'] = "0"
     headers[PP_HEADER_PINPOINT_HOST] =host
     headers[PP_HEADER_PINPOINT_TRACEID] = pinpointPy.get_context_key(PP_TRANSCATION_ID)
@@ -63,18 +63,18 @@ def generatePinpointHeader(host,headers):
     pinpointPy.set_context_key(PP_NEXT_SPAN_ID, nsid)
     headers[PP_HEADER_PINPOINT_SPANID] = nsid
 
-def generatePPRabbitMqHeader(headers):
+def generatePPRabbitMqHeader(func,headers):
 
     if pinpointPy.check_tracelimit():
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_NOT_SAMPLED
         return
     else:
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_SAMPLED
-    headers[PP_HEADER_PINPOINT_PAPPTYPE] = PYTHON
-    headers[PP_HEADER_PINPOINT_PAPPNAME] = APP_NAME
+    headers[PP_HEADER_PINPOINT_PAPPTYPE] = pinpointPy.get_context_key(PP_SERVER_TYPE)
+    headers[PP_HEADER_PINPOINT_PAPPNAME] = pinpointPy.get_context_key(PP_APP_NAME)
     headers['Pinpoint-Flags'] = "0"
-    headers[PP_HEADER_PINPOINT_HOST] = local_host_name
+    headers[PP_HEADER_PINPOINT_HOST] = func
     headers[PP_HEADER_PINPOINT_CLIENT] = local_ip
     headers[PP_HEADER_PINPOINT_TRACEID] = pinpointPy.get_context_key(PP_TRANSCATION_ID)
     headers[PP_HEADER_PINPOINT_PSPANID] = pinpointPy.get_context_key(PP_SPAN_ID)
-    headers[PP_HEADER_PINPOINT_SPANID] =  pinpointPy.get_context_key(PP_NEXT_SPAN_ID) #nsid
+    headers[PP_HEADER_PINPOINT_SPANID] = pinpointPy.get_context_key(PP_NEXT_SPAN_ID)

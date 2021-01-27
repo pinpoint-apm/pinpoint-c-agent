@@ -31,10 +31,10 @@ class NextSpanPlugin(Candy):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         self.url = args[0]
-        self.host = urlparse(self.url).netloc
+        self.target = urlparse(self.url).netloc
         if "headers" not in kwargs:
             kwargs["headers"] = {}
-        generatePinpointHeader(self.host,kwargs['headers'])
+        generatePinpointHeader(self.target,kwargs['headers'])
         ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_REMOTE_METHOD)
@@ -44,7 +44,7 @@ class NextSpanPlugin(Candy):
 
     def onEnd(self,ret):
         ###############################################################
-        pinpointPy.add_clue(PP_DESTINATION, self.host)
+        pinpointPy.add_clue(PP_DESTINATION, self.target)
         pinpointPy.add_clue(PP_NEXT_SPAN_ID, pinpointPy.get_context_key(PP_NEXT_SPAN_ID))
         pinpointPy.add_clues(PP_HTTP_URL, self.url)
         pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(ret.status_code))

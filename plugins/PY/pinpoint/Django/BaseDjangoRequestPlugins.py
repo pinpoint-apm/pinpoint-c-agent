@@ -33,6 +33,7 @@ class BaseDjangoRequestPlugins(Candy):
         super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
         pinpointPy.add_clue(PP_APP_ID, APP_ID)
+        pinpointPy.set_context_key(PP_APP_NAME, APP_NAME)
         ###############################################################
         request = args[1]
         headers = request.META
@@ -44,7 +45,7 @@ class BaseDjangoRequestPlugins(Candy):
         pinpointPy.add_clue(PP_REQ_CLIENT,headers['REMOTE_ADDR'])
         pinpointPy.add_clue(PP_REQ_SERVER,request.get_host())
         pinpointPy.add_clue(PP_SERVER_TYPE,PYTHON)
-
+        pinpointPy.set_context_key(PP_SERVER_TYPE, PYTHON)
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in headers:
             pinpointPy.add_clue(PP_PARENT_SPAN_ID, headers[PP_HTTP_PINPOINT_PSPANID])
