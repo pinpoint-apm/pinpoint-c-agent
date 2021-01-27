@@ -30,7 +30,7 @@ class TaskPlugin(PinpointCommonPlugin):
     def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_REMOTE_METHOD)
-        pinpointPy.add_clue(PP_DESTINATION,local_host_name)
+        pinpointPy.add_clue(PP_DESTINATION,args[0].name)
         nsid = generateSid()
         pinpointPy.set_context_key(PP_NEXT_SPAN_ID, nsid)
         pinpointPy.add_clue(PP_NEXT_SPAN_ID,nsid)

@@ -102,7 +102,7 @@ class GrpcAgentImplement(PinpointAgent):
                                                          self.max_pending_sz)
         self.agent_client = GrpcAgent(agentHost.hostname, agentHost.ip, self.web_port, os.getpid(),
                                       self.agent_addr, self.service_type, self.agent_meta, self.getReqStat,
-                                      self.isContainer)
+                                      isContainer=self.isContainer)
         self.meta_client = GrpcMeta(self.agent_addr, self.agent_meta)
         self.stat_client = GrpcStat(self.stat_addr,self.agent_meta,self.getIntervalStat)
         self.span_factory = GrpcSpanFactory(self)

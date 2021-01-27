@@ -18,8 +18,9 @@
 #   limitations under the License.
 # ******************************************************************************
 
-from pinpoint.common import *
+
 import pinpointPy
+from pinpoint.common import *
 
 class WorkerPlugin(Candy):
     def __init__(self, name):
@@ -27,21 +28,23 @@ class WorkerPlugin(Candy):
 
     def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
-        pinpointPy.add_clue(PP_APP_NAME, "celery-worker")
-        pinpointPy.add_clue(PP_APP_ID, "celery-worker")
+        APP_NAME = 'celery-task-queue'
+        APP_ID = args[0].name[0:24]
+        pinpointPy.add_clue(PP_APP_NAME, APP_NAME)
+        pinpointPy.add_clue(PP_APP_ID, APP_ID)
+        pinpointPy.set_context_key(PP_APP_NAME,APP_NAME)
         ###############################################################
-        name = args[0].name
         headers = args[4]
         
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'worker')
-        pinpointPy.add_clue(PP_REQ_URI, name)
-
+        pinpointPy.add_clue(PP_REQ_URI, APP_ID)
+        pinpointPy.add_clue(PP_REQ_SERVER, APP_ID)
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_CELERY_WORKER)
         pinpointPy.add_clue('FT', PP_CELERY_WORKER)
+        pinpointPy.set_context_key(PP_SERVER_TYPE,PP_CELERY_WORKER)
 
         if PP_HEADER_PINPOINT_CLIENT in headers:
             pinpointPy.add_clue(PP_REQ_CLIENT, headers[PP_HEADER_PINPOINT_CLIENT])
-
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in headers:
             pinpointPy.add_clue(PP_PARENT_SPAN_ID, headers[PP_HTTP_PINPOINT_PSPANID])
@@ -96,7 +99,6 @@ class WorkerPlugin(Candy):
             self.Ah = headers[PP_HEADER_PINPOINT_HOST]
             pinpointPy.set_context_key(PP_PARENT_HOST, self.Ah)
             pinpointPy.add_clue(PP_PARENT_HOST, self.Ah)
-            pinpointPy.add_clue(PP_REQ_SERVER, self.Ah)
 
         pinpointPy.set_context_key(PP_HEADER_PINPOINT_SAMPLED, "s1")
         if (PP_HTTP_PINPOINT_SAMPLED in headers and headers[
@@ -108,7 +110,7 @@ class WorkerPlugin(Candy):
         pinpointPy.add_clue(PP_SPAN_ID, self.sid)
         pinpointPy.set_context_key(PP_TRANSCATION_ID, self.tid)
         pinpointPy.set_context_key(PP_SPAN_ID, self.sid)
-        # pinpointPy.add_clues(PP_HTTP_METHOD, headers["REQUEST_METHOD"])
+
 
         ###############################################################
         return args, kwargs

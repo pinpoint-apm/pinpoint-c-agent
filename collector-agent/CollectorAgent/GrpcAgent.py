@@ -38,7 +38,7 @@ class GrpcAgent(GrpcClient):
     PINGID = 0
 
     def __init__(self, hostname, ip, ports, pid, address, server_type=PHP, meta=None, get_req_stat=None,
-                 maxPending=-1, timeout=300, isContainer=False):
+                 maxPending=-1, timeout=30, isContainer=False):
         super().__init__(address, meta, maxPending)
         self.hostname = hostname
         self.ip = ip

@@ -75,8 +75,7 @@ class CollectorAgentConf(object):
             self.max_pending_size = config.getint('Collector',
                                                   'collector.grpc.discardpolicy.maxpendingthreshold',fallback=10000)
 
-            agentIsDocker = config.get('Collector',
-                                       'collector.agent.isdocker', fallback='false')
+            agentIsDocker = config.get('Common', 'Isdocker', fallback='false')
 
             self.agentIsDocker = True if agentIsDocker.lower() == 'true' else False
 
