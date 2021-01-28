@@ -22,7 +22,7 @@ import time
 
 from CollectorAgent.GrpcAgentImplement import GrpcAgentImplement
 from CollectorAgent.ThriftAgentImplement import ThriftAgentImplement
-from Common.Logger import set_logger_file, set_logger_level, logger_enable_console
+from Common.Logger import set_logger_file, set_logger_level, logger_enable_console, TCLogger
 from PinpointAgent.Type import SUPPORT_THRIFT, SUPPORT_GRPC
 
 AGENT_VERSION = '1.8.0-RC1'
@@ -54,51 +54,18 @@ class CollectorAgentConf(object):
             ## update system evn and it own a higher priority
             ## while, only support grpc
             self._parseSysEnv()
-            return
-
-        if config.has_option('Collector', 'collector.grpc.agent.ip') and \
+        elif config.has_option('Collector', 'collector.grpc.agent.ip') and \
                 config.has_option('Collector', 'collector.grpc.stat.ip') and \
                 config.has_option('Collector', 'collector.grpc.span.ip'):
-            self.CollectorSpanIp = config.get('Collector',
-                                              'collector.grpc.span.ip')
-            self.CollectorSpanPort = config.getint('Collector',
-                                                   'collector.grpc.span.port')
-            self.CollectorStatIp = config.get('Collector',
-                                              'collector.grpc.stat.ip')
-            self.CollectorStatPort = config.getint('Collector',
-                                                   'collector.grpc.stat.port')
-            self.CollectorAgentIp = config.get('Collector',
-                                               'collector.grpc.agent.ip')
-            self.CollectorAgentPort = config.getint('Collector',
-                                                    'collector.grpc.agent.port')
-
-            self.max_pending_size = config.getint('Collector',
-                                                  'collector.grpc.discardpolicy.maxpendingthreshold',fallback=10000)
-
-            agentIsDocker = config.get('Common', 'Isdocker', fallback='false')
-
-            self.agentIsDocker = True if agentIsDocker.lower() == 'true' else False
-
-            self.collector_type = SUPPORT_GRPC
-            self.collector_implement = GrpcAgentImplement
-
+            self._readCommon(config)
+            self._readGrpc(config)
         else:
-            self.CollectorSpanIp = config.get('Collector',
-                                              'CollectorSpanIp')
-            self.CollectorSpanPort = config.getint('Collector',
-                                                   'CollectorSpanPort')
-            self.CollectorStatIp = config.get('Collector',
-                                              'CollectorStatIp')
-            self.CollectorStatPort = config.getint('Collector',
-                                                   'CollectorStatPort')
-            self.CollectorAgentIp = config.get('Collector',
-                                               'CollectorTcpIp')
-            self.CollectorAgentPort = config.getint('Collector',
-                                                    'CollectorTcpPort')
-            self.agentIsDocker = False
-            self.collector_type = SUPPORT_THRIFT
-            self.collector_implement = ThriftAgentImplement
+            self._readCommon(config)
+            self._readThrift(config)
 
+        self._outputConfig()
+
+    def _readCommon(self, config):
         self.log_dir = config.get('Common', 'LOG_DIR', fallback='/tmp')
         self.log_level = config.get('Common', 'Log_Level', fallback='DEBUG')
         self.webPort = self.config.get('Common', 'Web_Port')
@@ -106,22 +73,78 @@ class CollectorAgentConf(object):
 
     def _parseSysEnv(self):
         try:
-            self.CollectorSpanIp = os.environ['PP_COLLECTOR_AGENT_SPAN_IP']
+            self.CollectorSpanIp = os.environ['PP_COLLECTOR_AGENT_SPAN_IP'].rstrip()
             self.CollectorSpanPort = int(os.environ['PP_COLLECTOR_AGENT_SPAN_PORT'])
-            self.CollectorAgentIp = os.environ['PP_COLLECTOR_AGENT_AGENT_IP']
+            self.CollectorAgentIp = os.environ['PP_COLLECTOR_AGENT_AGENT_IP'].rstrip()
             self.CollectorAgentPort = int(os.environ['PP_COLLECTOR_AGENT_AGENT_PORT'])
-            self.CollectorStatIp = os.environ['PP_COLLECTOR_AGENT_STAT_IP']
+            self.CollectorStatIp = os.environ['PP_COLLECTOR_AGENT_STAT_IP'].rstrip()
             self.CollectorStatPort = int(os.environ['PP_COLLECTOR_AGENT_STAT_PORT'])
-            self.agentIsDocker = True if os.environ.get('PP_COLLECTOR_AGENT_ISDOCKER').lower() == 'true' else False
-            self.log_dir = os.getenv('PP_LOG_DIR', '/tmp/')
-            self.log_level = os.getenv('PP_Log_Level', 'DEBUG')
-            self.webPort = os.getenv('PP_WEB_PORT', '80')
+            self.agentIsDocker = True if os.environ.get(
+                'PP_COLLECTOR_AGENT_ISDOCKER').rstrip().lower() == 'true' else False
+            self.log_dir = os.getenv('PP_LOG_DIR', '/tmp/').rstrip()
+            self.log_level = os.getenv('PP_Log_Level', 'DEBUG').rstrip()
+            self.webPort = os.getenv('PP_WEB_PORT', '80').rstrip()
             self.collector_type = SUPPORT_GRPC
             self.collector_implement = GrpcAgentImplement
             self._setLog(self.log_dir, self.log_level)
         except KeyError as e:
             # an exception is convenience for debugging
             raise RuntimeError('Please check your environment variable %s is missing' % (e))
+
+    def _readGrpc(self, config):
+        self.CollectorSpanIp = config.get('Collector',
+                                          'collector.grpc.span.ip')
+        self.CollectorSpanPort = config.getint('Collector',
+                                               'collector.grpc.span.port')
+        self.CollectorStatIp = config.get('Collector',
+                                          'collector.grpc.stat.ip')
+        self.CollectorStatPort = config.getint('Collector',
+                                               'collector.grpc.stat.port')
+        self.CollectorAgentIp = config.get('Collector',
+                                           'collector.grpc.agent.ip')
+        self.CollectorAgentPort = config.getint('Collector',
+                                                'collector.grpc.agent.port')
+
+        self.max_pending_size = config.getint('Collector',
+                                              'collector.grpc.discardpolicy.maxpendingthreshold', fallback=10000)
+
+        agentIsDocker = config.get('Common', 'Isdocker', fallback='false')
+
+        self.agentIsDocker = True if agentIsDocker.lower() == 'true' else False
+
+        self.collector_type = SUPPORT_GRPC
+        self.collector_implement = GrpcAgentImplement
+
+    def _readThrift(self, config):
+        self.CollectorSpanIp = config.get('Collector',
+                                          'CollectorSpanIp')
+        self.CollectorSpanPort = config.getint('Collector',
+                                               'CollectorSpanPort')
+        self.CollectorStatIp = config.get('Collector',
+                                          'CollectorStatIp')
+        self.CollectorStatPort = config.getint('Collector',
+                                               'CollectorStatPort')
+        self.CollectorAgentIp = config.get('Collector',
+                                           'CollectorTcpIp')
+        self.CollectorAgentPort = config.getint('Collector',
+                                                'CollectorTcpPort')
+        self.agentIsDocker = False
+        self.collector_type = SUPPORT_THRIFT
+        self.collector_implement = ThriftAgentImplement
+
+    def _outputConfig(self):
+        TCLogger.info("CollectorSpanIp:%s", self.CollectorSpanIp)
+        TCLogger.info("CollectorStatIp:%s", self.CollectorStatIp)
+        TCLogger.info("CollectorAgentIp:%s", self.CollectorAgentIp)
+        TCLogger.info("CollectorSpanPort:%d", self.CollectorSpanPort)
+        TCLogger.info("CollectorStatPort:%d", self.CollectorStatPort)
+        TCLogger.info("CollectorAgentPort:%d", self.CollectorAgentPort)
+        TCLogger.info("collector_type:%s", "gRpc" if self.collector_type == SUPPORT_GRPC else "thrift")
+        TCLogger.info("log_dir:%s", self.log_dir)
+        TCLogger.info("log_level:%s", self.log_level)
+        TCLogger.info("webPort:%s", self.webPort)
+        TCLogger.info("agentIsDocker:%s", self.agentIsDocker)
+
 
     def _setLog(self, dir, level):
         if dir is not None:
