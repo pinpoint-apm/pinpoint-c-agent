@@ -202,8 +202,8 @@ class GrpcAgent(GrpcClient):
             TCLogger.debug("%s send ping", self)
             yield ping
             with self.exit_cv:
-                if not self.task_running or self.exit_cv.wait(self.timeout):
-                    TCLogger.debug("generate ping exit")
+                if not self.task_running or self.exit_cv.wait(self.timeout * 10):
+                    TCLogger.warning("generate ping exit")
                     break
 
 

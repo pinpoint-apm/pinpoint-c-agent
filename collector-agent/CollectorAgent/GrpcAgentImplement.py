@@ -150,7 +150,7 @@ class GrpcAgentImplement(PinpointAgent):
 
     def stopProcessMain(self):
         self.agent_client.stop()
-        # self.meta_client.stop()
+        self.meta_client.stop()
         self.stat_client.stop()
         self.span_helper.stop()
 
