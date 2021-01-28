@@ -34,6 +34,7 @@ class HTTPRequestPlugins(AsyCandy):
         super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME,self.node_id)
         pinpointPy.add_clue(PP_APP_ID, APP_ID,self.node_id)
+        pinpointPy.set_context_key(PP_APP_NAME, APP_NAME,self.node_id)
         ###############################################################
         insBaseHttp = args[0]
         assert isinstance(insBaseHttp,tornado.web.RequestHandler)
@@ -42,7 +43,7 @@ class HTTPRequestPlugins(AsyCandy):
         pinpointPy.add_clue(PP_REQ_CLIENT,insBaseHttp.request.remote_ip,self.node_id)
         pinpointPy.add_clue(PP_REQ_SERVER,insBaseHttp.request.host_name,self.node_id)
         pinpointPy.add_clue(PP_SERVER_TYPE,PYTHON,self.node_id)
-
+        pinpointPy.set_context_key(PP_SERVER_TYPE, PYTHON,self.node_id)
         insRequest = insBaseHttp.request
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in insRequest.headers:
