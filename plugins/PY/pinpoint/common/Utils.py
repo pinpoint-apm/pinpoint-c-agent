@@ -25,6 +25,7 @@ from .Span import *
 def startPinpointByEnviron(environ):
     pinpointPy.add_clue(PP_APP_NAME, APP_NAME)
     pinpointPy.add_clue(PP_APP_ID, APP_ID)
+    pinpointPy.set_context_key(PP_APP_NAME, APP_NAME)
     ###############################################################
     # print("------------------- call before -----------------------")
     pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'WSGI handle')
@@ -35,7 +36,7 @@ def startPinpointByEnviron(environ):
     pinpointPy.add_clue(PP_REQ_CLIENT, remote_addr)
     pinpointPy.add_clue(PP_REQ_SERVER, host)
     pinpointPy.add_clue(PP_SERVER_TYPE, PYTHON)
-
+    pinpointPy.set_context_key(PP_SERVER_TYPE, PYTHON)
     # nginx add http
     if PP_HTTP_PINPOINT_PSPANID in environ:
         pinpointPy.add_clue(PP_PARENT_SPAN_ID, environ[PP_HTTP_PINPOINT_PSPANID])

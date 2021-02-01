@@ -17,10 +17,11 @@
 #  limitations under the License.
 # ------------------------------------------------------------------------------
 
+from threading import Thread, Condition
+
 # Created by eeliu at 11/5/19
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
-from Events.GTimer import GTimer
 from Proto.grpc import Service_pb2_grpc
 from Proto.grpc.Span_pb2 import PSqlMetaData, PApiMetaData, PStringMetaData
 
@@ -30,12 +31,15 @@ class GrpcMeta(GrpcClient):
         super().__init__(address, meta, -1)
         self.meta_stub = Service_pb2_grpc.MetadataStub(self.channel)
         self.must_snd_meta_now = False
+        self.snd_task_is_running = False
+        self.exit_cv = Condition()
+        self.thread = None
         self.id = 1
         self.sql_table = {}
         self.api_table = {}
         self.string_table = {}
-        self.recover_timer = GTimer()
 
+    # changes remove async to sync
     def _sendSqlMeta(self, meta):
         assert isinstance(meta, PSqlMetaData)
         future = self.meta_stub.RequestSqlMetaData.future(meta)
@@ -53,8 +57,12 @@ class GrpcMeta(GrpcClient):
 
     def _channelCheck(fun):
         def update(self, *args):
-            if self.must_snd_meta_now:
-                self.recover_timer.start(self._registerAllMeta, 10)
+            if self.must_snd_meta_now and not self.snd_task_is_running:
+                TCLogger.info("try to register all meta")
+                self.snd_task_is_running = True
+                self.thread = Thread(target=self._registerAllMeta, args=(10,))
+                self.thread.start()
+                self.must_snd_meta_now = False
             result = fun(self, *args)
             return result
         return update
@@ -103,7 +111,6 @@ class GrpcMeta(GrpcClient):
     def _response(self, future):
         if future.exception():
             TCLogger.warning("register meta failed %s", future.exception)
-            # self.is_ok = False
             return
         self.must_snd_meta_now = False
 
@@ -117,17 +124,35 @@ class GrpcMeta(GrpcClient):
     def channelSetError(self):
         self.must_snd_meta_now =True
 
-    def _registerAllMeta(self):
+    def _registerAllMeta(self, sec):
         TCLogger.info("register all meta data")
-        # register sql
-        for key, value in self.sql_table.items():
-            self._sendSqlMeta(value[1])
-        # api
-        for key, value in self.api_table.items():
-            self._sendApiMeta(value[1])
-        # string
-        for key, value in self.string_table.items():
-            self._sendStringMeta(value[1])
+
+        while self.snd_task_is_running:
+            try:
+                for key, value in self.sql_table.items():
+                    self.meta_stub.RequestSqlMetaData(value[1])
+                # api
+                for key, value in self.api_table.items():
+                    self.meta_stub.RequestApiMetaData(value[1])
+
+                # string
+                for key, value in self.string_table.items():
+                    self.meta_stub.RequestStringMetaData(value[1])
+                self.snd_task_is_running = False
+                TCLogger.info("send all meta data is done")
+                break
+            except Exception as e:
+                TCLogger.warning("re-send all meta data, met exception:%s", e)
+                with self.exit_cv:
+                    if not self.snd_task_is_running or self.exit_cv.wait(sec):
+                        break
 
     def start(self):
         pass
+
+    def stop(self):
+        self.snd_task_is_running = False
+        with self.exit_cv:
+            self.exit_cv.notify()
+        if self.thread:
+            self.thread.join()

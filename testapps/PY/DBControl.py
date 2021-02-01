@@ -17,9 +17,9 @@ class DBControl(object):
 
     def con_db(self):
         if self.db is None:
-            self.conn = pymysql.connect(self.ip, user=self.user, passwd=self.pw)
+            self.conn = pymysql.connect(host=self.ip, user=self.user, passwd=self.pw)
         else:
-            self.conn = pymysql.connect(self.ip,user=self.user,passwd=self.pw, db=self.db)
+            self.conn = pymysql.connect(host=self.ip,user=self.user,passwd=self.pw, db=self.db)
         if self.conn is None:
             print("Connect to Database failed!")
         else:

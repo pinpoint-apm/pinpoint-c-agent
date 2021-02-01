@@ -52,7 +52,7 @@ class CurlUtil
             'Pinpoint-Flags:0',
             'Pinpoint-Papptype:1500',
             'Pinpoint-Pappname:'.APPLICATION_NAME,
-            'Pinpoint-Host:'.static::getHostFromURL($url),
+            'Pinpoint-Host:'.  static::getHostFromURL($url),
             'Pinpoint-Traceid:'.pinpoint_get_context(PP_TRANSCATION_ID),
             'Pinpoint-Pspanid:'.pinpoint_get_context(PP_SPAN_ID),
             'Pinpoint-Spanid:'.$nsid

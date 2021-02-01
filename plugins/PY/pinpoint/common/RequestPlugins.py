@@ -36,6 +36,7 @@ class RequestPlugin(Candy):
         super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
         pinpointPy.add_clue(PP_APP_ID, APP_ID)
+        pinpointPy.set_context_key(PP_APP_NAME, APP_NAME)
         request =args[0]
         ###############################################################
         # print("------------------- call before -----------------------")
@@ -44,6 +45,7 @@ class RequestPlugin(Candy):
         pinpointPy.add_clue(PP_REQ_CLIENT, request.remote_addr)
         pinpointPy.add_clue(PP_REQ_SERVER, request.host)
         pinpointPy.add_clue(PP_SERVER_TYPE, PYTHON)
+        pinpointPy.set_context_key(PP_SERVER_TYPE, PYTHON)
 
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in request.headers:

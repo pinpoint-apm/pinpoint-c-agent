@@ -76,7 +76,8 @@ SUPPORT_THRIFT=2
 
 
 ##### Some setting for internal use
-STAT_INTERVAL=5
+## @eeliu interval 5 ->30
+STAT_INTERVAL = 30
 REQ_STAT_INTERVAL=1
 
 #####

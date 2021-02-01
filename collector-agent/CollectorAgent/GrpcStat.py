@@ -7,6 +7,7 @@ import time
 import psutil
 
 from CollectorAgent.GrpcClient import GrpcClient
+from Common import Stat
 from Common.Logger import TCLogger
 from PinpointAgent.Type import STAT_INTERVAL
 from Proto.grpc.Service_pb2_grpc import StatStub
@@ -31,30 +32,26 @@ class GrpcStat(GrpcClient):
         pass
 
     def stop(self):
+        TCLogger.debug("try to stop stat thread")
         self.task_running = False
         with self.exit_cv:
             self.exit_cv.notify_all()
-        self.channel.close()
-
 
     def _generAgentStat(self):
         max,avg = self.get_inter_stat_cb()
         responseTime = PResponseTime(max=max,avg=avg)
-        stat = PAgentStat(responseTime=responseTime)
+        stat = PAgentStat(responseTime=responseTime, gc=Stat.collectJvmInfo())
         stat.timestamp = int(round(time.time()*1000))
         stat.collectInterval = STAT_INTERVAL
         stat.cpuLoad.systemCpuLoad =psutil.cpu_percent()*0.01
         return stat
 
     def _generator_PstatMessage(self):
-        try:
-            while self.task_running:
-                ps = PStatMessage(agentStat=self._generAgentStat())
-                TCLogger.debug(ps)
-                yield ps
-                time.sleep(STAT_INTERVAL)
-        except Exception as e:
-            TCLogger.warning("_generator_PstatMessage catch %s", e)
+        ps = PStatMessage(agentStat=self._generAgentStat())
+        TCLogger.debug(ps)
+        yield ps
+
+
 
     def _stat_thread_main(self):
         self.task_running = True
@@ -64,9 +61,9 @@ class GrpcStat(GrpcClient):
             except Exception as e:
                 TCLogger.warning("SendAgentStat met:%s",e)
             with self.exit_cv:
-                if self.exit_cv.wait(self.timeout):
+                if not self.task_running or self.exit_cv.wait(self.timeout):
                     break
-
+        TCLogger.debug("stat thread is done")
 
     def start(self):
         self.stat_thread = threading.Thread(target=self._stat_thread_main, args=())

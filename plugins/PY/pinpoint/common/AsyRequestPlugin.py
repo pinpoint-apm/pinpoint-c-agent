@@ -35,6 +35,7 @@ class AsyRequestPlugin(AsyCandy):
         super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_APP_NAME, APP_NAME, self.traceId)
         pinpointPy.add_clue(PP_APP_ID, APP_ID, self.traceId)
+        pinpointPy.set_context_key(PP_APP_NAME, APP_NAME, self.traceId)
         ###############################################################
         request = args[0]
         # pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'tornado.web.RequestHandler',self.node_id)
@@ -42,6 +43,7 @@ class AsyRequestPlugin(AsyCandy):
         # pinpointPy.add_clue(PP_REQ_CLIENT, request.remote_ip, self.traceId)
         # pinpointPy.add_clue(PP_REQ_SERVER, request.host_name, self.traceId)
         pinpointPy.add_clue(PP_SERVER_TYPE, PYTHON, self.traceId)
+        pinpointPy.set_context_key(PP_SERVER_TYPE, PYTHON, self.traceId)
 
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in request.headers:
@@ -103,8 +105,8 @@ class AsyRequestPlugin(AsyCandy):
             pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY], self.traceId)
 
         pinpointPy.set_context_key("Pinpoint-Sampled", "s1", self.traceId)
-        if (PP_HTTP_SAMPLED in request.headers and request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
-            if request.headers[PP_HTTP_SAMPLED] == PP_NOT_SAMPLED:
+        if (PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or pinpointPy.check_tracelimit():
+            if request.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED:
                 pinpointPy.drop_trace(self.traceId)
                 pinpointPy.set_context_key("Pinpoint-Sampled", "s0", self.traceId)
 

@@ -43,6 +43,7 @@ class BaseFlaskPlugins(Candy):
         request = Request(args[1])
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME)
         pinpointPy.add_clue(PP_APP_ID, APP_ID)
+        pinpointPy.set_context_key(PP_APP_NAME, APP_NAME)
         ###############################################################
         # print("------------------- call before -----------------------")
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'BaseFlaskrequest')
@@ -50,6 +51,7 @@ class BaseFlaskPlugins(Candy):
         pinpointPy.add_clue(PP_REQ_CLIENT,request.remote_addr)
         pinpointPy.add_clue(PP_REQ_SERVER, request.host)
         pinpointPy.add_clue(PP_SERVER_TYPE, PYTHON)
+        pinpointPy.set_context_key(PP_SERVER_TYPE, PYTHON)
 
         # nginx add http
         if PP_HTTP_PINPOINT_PSPANID in request.headers:

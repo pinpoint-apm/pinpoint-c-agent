@@ -4,7 +4,6 @@ ARG DIR="/CollectorAgent"
 
 WORKDIR ${DIR}
 
-ENV COLLECTOR_CONFIG=${DIR}/conf/collector.conf
 ENV COLLECTOR_PATH=collector-agent
 ## files
 COPY ${COLLECTOR_PATH}/CollectorAgent/ ${DIR}/CollectorAgent
