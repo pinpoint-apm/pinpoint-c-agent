@@ -18,14 +18,16 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 10/31/19
+from concurrent.futures.thread import ThreadPoolExecutor
 from queue import Empty
-from threading import Condition, Thread
+from threading import Condition
 
 import grpc
 
 import Service_pb2_grpc
 from CollectorAgent.GrpcClient import GrpcClient
 from Common.Logger import TCLogger
+from Common.util import profile
 
 
 class GrpcSpan:
@@ -41,8 +43,9 @@ class GrpcSpan:
                                                   GrpcClient.InterceptorAddHeader(self.meta))
             self.span_stub = Service_pb2_grpc.SpanStub(self.channel)
 
+        @profile
         def sendSpans(self, iter):
-            self.span_stub.SendSpan(iter)
+            self.span_stub.SendSpan(iter, timeout=5)
 
         def reconnect(self):
             self.channel.close()
@@ -54,52 +57,59 @@ class GrpcSpan:
         self.meta = meta
         self.exit_cv = Condition()
         self.send_span_count = 0
-
-        self.task_thead = Thread(target=self.getAndSendSpan)
-        self.task_running = False
+        self.executor = ThreadPoolExecutor(max_workers=5)
+        self.task_running = True
+        self.sender_result = self.executor.submit(self.getAndSendSpan)
         self.queue = queue
-
-
 
     def stop(self):
         self.task_running = False
         with self.exit_cv:
             self.exit_cv.notify_all()
-        self.task_thead.join()
-        TCLogger.info("send %d to pinpoint collector",self.send_span_count)
+        self.executor.shutdown(True)
+        TCLogger.info("Total send %d to pinpoint collector", self.send_span_count)
 
     def start(self):
-        self.task_thead.start()
+        pass
+
+    def sendSpans(self, client, spans):
+        size = len(spans)
+        client.sendSpans(iter(spans))
+        TCLogger.debug("send %d to collector", size)
 
     def getAndSendSpan(self):
-        self.task_running = True
-        spans = []
 
-        def get_n_span(queue, N):
+        def get_n_span(queue, MAX_SIZE):
             i = 0
+            spans = []
             try:
-                while N > i:
-                    spans.append(queue.get(timeout=0.005))
+                while MAX_SIZE > i:
+                    spans.append(queue.get(timeout=0.05))
                     i += 1
             except Empty as e:
                 pass
-            return True if i > 0 else False
+            return spans
 
         client = GrpcSpan.SpanClient(self.address, self.meta)
-        while self.task_running:
 
+        while self.task_running:
             try:
-                if not get_n_span(self.queue, 10240):
+                spans = get_n_span(self.queue, 10240)
+                size = len(spans)
+                if size == 0:
                     with self.exit_cv:
                         if not self.task_running or self.exit_cv.wait(5):
                             TCLogger.info("span send thread is done")
                             break
-                    continue
-                self.send_span_count+=len(spans)
-                client.sendSpans(iter(spans))
-                TCLogger.debug("send %d", self.send_span_count)
+                        else:
+                            continue
+                self.send_span_count += size
+                if size > 4086:  # if 5K, submit to executor
+                    self.executor.submit(self.sendSpans, GrpcSpan.SpanClient(self.address, self.meta), spans)
+                    TCLogger.info("submit a task to send span")
+                else:
+                    self.sendSpans(client, spans)
             except Exception as e:
                 TCLogger.error("span channel catches an exception:%s", e)
                 client.reconnect()
-            finally:
-                spans.clear()
+        TCLogger.warning("getAndSendSpan exit")

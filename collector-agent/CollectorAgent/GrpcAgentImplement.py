@@ -23,15 +23,16 @@ import multiprocessing
 import os
 from queue import Full, Queue
 
-from gevent import monkey
-
-monkey.patch_all(thread=False)
-from Common import agentHost
 from CollectorAgent.GrpcAgent import GrpcAgent
 from CollectorAgent.GrpcMeta import GrpcMeta
 from CollectorAgent.GrpcSpan import GrpcSpan
 from CollectorAgent.GrpcSpanFactory import GrpcSpanFactory
 from CollectorAgent.GrpcStat import GrpcStat
+# remove gevent poll
+# from gevent import monkey
+#
+# monkey.patch_all(thread=False)
+from Common import agentHost
 from Common.Logger import TCLogger
 from PinpointAgent.PinpointAgent import PinpointAgent
 from PinpointAgent.Type import SUPPORT_GRPC, API_DEFAULT
@@ -40,7 +41,7 @@ from Proto.grpc.Span_pb2 import PSpanMessage
 
 class GrpcAgentImplement(PinpointAgent):
     class SpanHelper(object):
-        def __init__(self, span_addr, appid, appname, starttime,max_pending_sz):
+        def __init__(self, span_addr, appid, appname, starttime, max_pending_sz):
             self.agent_meta = [('starttime', str(starttime)), ('agentid', appid), ('applicationname', appname)]
             self.agent_id = appid
             self.agent_name = appname
@@ -59,8 +60,10 @@ class GrpcAgentImplement(PinpointAgent):
             try:
                 self.span_queue.put(spanMesg, False)
             except Full as e:
-                self.dropped_span_count+=1
-                TCLogger.warning("span send queue is full")
+                self.dropped_span_count += 1
+                TCLogger.info("span send queue is full")
+                if self.dropped_span_count % 10000 == 0:
+                    TCLogger.warning("span send queue is full: dropped %d", self.dropped_span_count)
                 return False
             except Exception as e:
                 TCLogger.error("send span failed: %s", e)
@@ -142,7 +145,8 @@ class GrpcAgentImplement(PinpointAgent):
                 self.span_helper.sendSpan(spanMesg)
 
     def asynSendSpan(self, stack, body):
-        self.mpQueue.put(body,timeout= 5,block=False)
+        # 5sec to 2sec
+        self.mpQueue.put(body, timeout=1, block=False)
 
     def stop(self):
         self.mpQueue.put(None, timeout=5)
