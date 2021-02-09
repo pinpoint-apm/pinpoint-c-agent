@@ -16,9 +16,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-import gevent
-def try_to_recycle_the_event_hub():
-    gevent.reinit()
-    # loop = gevent.config.loop(default=True)
-    # loop.destory()
-    # gevent.joinall()
+import time
+
+from Common.Logger import TCLogger
+
+
+def profile(func):
+    def _profile_func(*args, **kwargs):
+        _start = time.time()
+        ret = func(*args, **kwargs)
+        _takes = int(time.time() - _start)
+        if _takes > 3:
+            TCLogger.warning("A slow func:%s takes:%d sec", func.__name__, _takes)
+        return ret
+
+    return _profile_func
