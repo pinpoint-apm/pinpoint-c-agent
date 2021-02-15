@@ -104,14 +104,14 @@ class GrpcAgent(GrpcClient):
         cmd = PCmdMessage(handshakeMessage=handshake)
 
         while self.task_running:
-            self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
             # while self.task_running:
-            msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
             try:
+                self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
+                msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
                 for msg in msg_iter:
                     TCLogger.debug("command channel %s", msg)
                     self._handleCmd(msg, self.cmd_pipe)
-                TCLogger.debug('iter_response is over')
+                TCLogger.info('iter_response is over')
 
             except Exception as e:
                 TCLogger.error("handleCommand channel  %s error", e)
@@ -145,9 +145,9 @@ class GrpcAgent(GrpcClient):
                     break
 
         try:
-            TCLogger.debug("new a thread for activeThreadCound %d", requestId)
-            stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta)
-            TCLogger.debug("send activeThreadCound requestId: %d is done", requestId)
+            TCLogger.debug("new a thread for activeThreadCount %d", requestId)
+            stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta,timeout=self.timeout)
+            TCLogger.debug("send activeThreadCount requestId: %d is done", requestId)
             channel.close()
         except Exception as e:
             TCLogger.error("CommandStreamActiveThreadCount, catch exception %s",e)
@@ -178,7 +178,7 @@ class GrpcAgent(GrpcClient):
         while self.task_running:
             try:
                 TCLogger.debug("sending agentinfo %s",self.agentinfo)
-                self.stub.RequestAgentInfo(self.agentinfo)
+                self.stub.RequestAgentInfo(self.agentinfo,timeout=self.timeout/3)
             except Exception as e:
                 TCLogger.error(" pinpoint collector is not available. Try it again [%s] ", self.agentinfo)
                 continue
@@ -186,8 +186,8 @@ class GrpcAgent(GrpcClient):
                 with self.exit_cv:
                     if not self.task_running or self.exit_cv.wait(self.timeout):
                         break
-            iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
             try:
+                iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
                 for response in iter_response:
                     TCLogger.debug('get ping response:%s agentinfo:%s', response,self.meta)
             except Exception as e:
@@ -203,7 +203,7 @@ class GrpcAgent(GrpcClient):
             yield ping
             with self.exit_cv:
                 if not self.task_running or self.exit_cv.wait(self.timeout * 10):
-                    TCLogger.warning("generate ping exit")
+                    TCLogger.info("generate ping exit task_state:%s",self.task_running)
                     break
 
 
