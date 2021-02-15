@@ -57,7 +57,7 @@ class GrpcStat(GrpcClient):
         self.task_running = True
         while self.task_running:
             try:
-                self.meta_stub.SendAgentStat(self._generator_PstatMessage())
+                self.meta_stub.SendAgentStat(self._generator_PstatMessage(),timeout=self.timeout)
             except Exception as e:
                 TCLogger.warning("SendAgentStat met:%s",e)
             with self.exit_cv:

@@ -60,7 +60,7 @@ class StreamServerLayer(object):
             try:
                 recv_total = self.socket.recv_into(recv_buf, self.RECV_BUF_SIZE - recv_total)
                 if recv_total == 0:
-                    TCLogger.warning("peer close socket")
+                    TCLogger.info("peer close socket")
                     return -1
             except gsocket.error as error:
                 if error.errno in [gsocket.EAGAIN, gsocket.EWOULDBLOCK]:
@@ -165,7 +165,7 @@ class StreamServerLayer(object):
             if len > 0:## read again
                 continue
             if len < 0:
-                TCLogger.warning(" client:%d disconnected",client.socket.fileno())
+                TCLogger.info(" client:%d disconnected",client.socket.fileno())
                 fd = client.socket.fileno()
                 client.close()
                 del self.clients[fd]

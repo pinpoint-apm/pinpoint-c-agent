@@ -38,6 +38,7 @@ class GrpcMeta(GrpcClient):
         self.sql_table = {}
         self.api_table = {}
         self.string_table = {}
+        self.timeout = 5
 
     # changes remove async to sync
     def _sendSqlMeta(self, meta):
@@ -130,14 +131,14 @@ class GrpcMeta(GrpcClient):
         while self.snd_task_is_running:
             try:
                 for key, value in self.sql_table.items():
-                    self.meta_stub.RequestSqlMetaData(value[1])
+                    self.meta_stub.RequestSqlMetaData(value[1],timeout=self.timeout)
                 # api
                 for key, value in self.api_table.items():
-                    self.meta_stub.RequestApiMetaData(value[1])
+                    self.meta_stub.RequestApiMetaData(value[1],timeout=self.timeout)
 
                 # string
                 for key, value in self.string_table.items():
-                    self.meta_stub.RequestStringMetaData(value[1])
+                    self.meta_stub.RequestStringMetaData(value[1],timeout=self.timeout)
                 self.snd_task_is_running = False
                 TCLogger.info("send all meta data is done")
                 break
