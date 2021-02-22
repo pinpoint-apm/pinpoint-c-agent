@@ -107,14 +107,15 @@ class GrpcAgent(GrpcClient):
             # while self.task_running:
             try:
                 self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
-                msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
+                msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta,
+                                                      timeout=self.timeout * 10)
                 for msg in msg_iter:
                     TCLogger.debug("command channel %s", msg)
                     self._handleCmd(msg, self.cmd_pipe)
                 TCLogger.info('iter_response is over')
 
             except Exception as e:
-                TCLogger.error("handleCommand channel  %s error", e)
+                TCLogger.error("catch %s when HandleCommand. retry ...", e)
             finally:
                 with self.exit_cv:
                     ## hard code 300->5
