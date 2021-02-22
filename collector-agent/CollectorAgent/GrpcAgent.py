@@ -107,15 +107,14 @@ class GrpcAgent(GrpcClient):
             # while self.task_running:
             try:
                 self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
-                msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta,
-                                                      timeout=self.timeout * 10)
+                msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
                 for msg in msg_iter:
                     TCLogger.debug("command channel %s", msg)
                     self._handleCmd(msg, self.cmd_pipe)
                 TCLogger.info('iter_response is over')
 
             except Exception as e:
-                TCLogger.error("catch %s when HandleCommand. retry ...", e)
+                TCLogger.error("catch exception when HandleCommand. Retry ... %s", e)
             finally:
                 with self.exit_cv:
                     ## hard code 300->5
@@ -147,7 +146,7 @@ class GrpcAgent(GrpcClient):
 
         try:
             TCLogger.debug("new a thread for activeThreadCount %d", requestId)
-            stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta,timeout=self.timeout)
+            stub.CommandStreamActiveThreadCount(generator_cmd(), metadata=self.profile_meta)
             TCLogger.debug("send activeThreadCount requestId: %d is done", requestId)
             channel.close()
         except Exception as e:
@@ -155,13 +154,12 @@ class GrpcAgent(GrpcClient):
     def _handleCmd(self,msg,cmdIter):
         try:
             if msg.HasField('commandEcho'):
-                pass
+                TCLogger.debug("Echo command")
             elif msg.HasField('commandActiveThreadCount'):
                 self.thread_count = threading.Thread(target=self._send_thread_count,args=(msg.requestId,))
                 self.thread_count.start()
             elif msg.HasField('commandActiveThreadDump'):
-                pass
-
+                TCLogger.debug("Thread dump, not support")
             elif msg.HasField('commandActiveThreadLightDump'):
                 lightDumpRes =  PCmdActiveThreadLightDumpRes()
                 lightDumpRes.commonResponse.responseId = msg.requestId
