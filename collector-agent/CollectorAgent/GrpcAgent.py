@@ -114,7 +114,7 @@ class GrpcAgent(GrpcClient):
                 TCLogger.info('iter_response is over')
 
             except Exception as e:
-                TCLogger.error("handleCommand channel  %s error", e)
+                TCLogger.error("catch exception when HandleCommand. Retry ... %s", e)
             finally:
                 with self.exit_cv:
                     ## hard code 300->5
@@ -146,7 +146,7 @@ class GrpcAgent(GrpcClient):
 
         try:
             TCLogger.debug("new a thread for activeThreadCount %d", requestId)
-            stub.CommandStreamActiveThreadCount(generator_cmd(),metadata=self.profile_meta,timeout=self.timeout)
+            stub.CommandStreamActiveThreadCount(generator_cmd(), metadata=self.profile_meta)
             TCLogger.debug("send activeThreadCount requestId: %d is done", requestId)
             channel.close()
         except Exception as e:
@@ -154,13 +154,12 @@ class GrpcAgent(GrpcClient):
     def _handleCmd(self,msg,cmdIter):
         try:
             if msg.HasField('commandEcho'):
-                pass
+                TCLogger.debug("Echo command")
             elif msg.HasField('commandActiveThreadCount'):
                 self.thread_count = threading.Thread(target=self._send_thread_count,args=(msg.requestId,))
                 self.thread_count.start()
             elif msg.HasField('commandActiveThreadDump'):
-                pass
-
+                TCLogger.debug("Thread dump, not support")
             elif msg.HasField('commandActiveThreadLightDump'):
                 lightDumpRes =  PCmdActiveThreadLightDumpRes()
                 lightDumpRes.commonResponse.responseId = msg.requestId
