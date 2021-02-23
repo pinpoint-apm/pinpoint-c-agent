@@ -29,6 +29,9 @@ class BaseDjangoRequestPlugins(Candy):
     def __init__(self,name):
         super().__init__(name)
 
+    def isSample(self):
+        return True
+
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         pinpointPy.add_clue(PP_APP_NAME,APP_NAME)

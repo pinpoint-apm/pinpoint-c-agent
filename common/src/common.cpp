@@ -196,6 +196,20 @@ int pinpoint_force_end_trace(NodeID id,int32_t timeout)
     return -1;
 }
 
+int pinpoint_trace_is_root(NodeID _id)
+{
+    try
+    {
+        TraceNode&  node = g_node_pool.getNodeById(_id);
+        return node.isRoot()?(1):(0);
+    }catch(const std::out_of_range&){
+        pp_trace("#%ld not found",_id);
+        return -1;
+    }catch(const std::exception &ex){
+        pp_trace("#%ld end trace failed. %s",_id,ex.what());
+        return -1;
+    }
+}
 
 NodeID pinpoint_end_trace(NodeID _id)
 {
@@ -218,8 +232,6 @@ uint64_t pinpoint_start_time(void)
     return (uint64_t)SafeSharedState::instance().getStartTime();
 }
 
-
-void register_error_cb(log_msg_cb error_cb);
 
 int64_t generate_unique_id()
 {

@@ -25,7 +25,7 @@ def monkey_patch():
     try:
         from amqp.channel import Channel
         from .AMQPPublicPlugin import AMQPPublicPlugin
-        from .AMQPConsumerPlugin import AMQPConsumerPlugin
+        # from .AMQPConsumerPlugin import AMQPConsumerPlugin
 
         Interceptors = [
             Interceptor(Channel, 'basic_publish_confirm', AMQPPublicPlugin),

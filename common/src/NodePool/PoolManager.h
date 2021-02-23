@@ -71,8 +71,10 @@ public:
 private:
     inline bool nodeIsAlive(NodeID id)
     {
-
-        return this->_aliveNodeSet[id];
+        if(id>0 && id <this->maxId){
+            return this->_aliveNodeSet[id];
+        }
+        return false;
     }
 
     void expandOnce();

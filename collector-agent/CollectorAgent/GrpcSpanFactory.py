@@ -20,15 +20,15 @@
 # Created by eeliu at 11/7/19
 
 
-from Annotation_pb2 import PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
-from Span_pb2 import PSpan, PSpanEvent
 from google.protobuf.wrappers_pb2 import StringValue
 
+from Annotation_pb2 import PAnnotation, PAnnotationValue, PLongIntIntByteByteStringValue
 from CollectorAgent.TCGenerator import ThriftProtocolUtil
 from Common.Logger import TCLogger
 from PHPAgent.SpanFactory import SpanFactory
 from PinpointAgent.Type import *
 from Proto.grpc.Annotation_pb2 import PIntStringStringValue
+from Span_pb2 import PSpan, PSpanEvent
 
 
 class GrpcSpanFactory(SpanFactory):
@@ -38,7 +38,7 @@ class GrpcSpanFactory(SpanFactory):
         tSpan.version = 1
         if 'stp' in stackMap:
             tSpan.serviceType = int(stackMap['stp'])
-            tSpan.applicationServiceType = int(stackMap['stp'])
+            tSpan.applicationServiceType = int(stackMap['FT'])
         else:
             tSpan.serviceType = PHP
             tSpan.applicationServiceType = PHP
