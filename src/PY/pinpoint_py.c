@@ -289,6 +289,32 @@ static PyObject *py_generate_unique_id(PyObject *self, CYTHON_UNUSED PyObject *u
     return Py_BuildValue("l", ret);
 }
 
+static PyObject *py_trace_has_root(PyObject *self, PyObject *args)
+{
+    int id = -1;
+    if(! PyArg_ParseTuple(args,"|i",&id))
+    {
+         return NULL;
+    }
+    if (id == -1){
+        id = pinpoint_get_per_thread_id();
+    }
+
+    if(id == 0){
+         return Py_BuildValue("O",Py_False);
+     }else{
+         // check the input id
+         int ret = pinpoint_trace_is_root(id);
+         if(ret == -1){
+             PyErr_SetString(PyExc_Exception, "input traceId is not exist");
+             return Py_BuildValue("O", Py_False);;
+         }
+         return Py_BuildValue("O", Py_True);
+     }
+
+}
+
+
 static PyObject *py_pinpoint_drop_trace(PyObject *self, PyObject *args)
 {
     int id = pinpoint_get_per_thread_id();
@@ -445,16 +471,17 @@ static PyMethodDef PinpointMethods[] = {
     {"start_trace", py_pinpoint_start_trace, METH_VARARGS, "def start_trace(int id=-1):# create a new trace and insert into trace chain"},
     {"end_trace", py_pinpoint_end_trace, METH_VARARGS, "def end_trace(int id=-1):# end currently matched trace"},
     {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
+    {"trace_has_root", py_trace_has_root, METH_VARARGS, "def trace_has_root(int id=-1)-> long # check current whether have a root. \n True: \nFalse: \n Note：If the id is invalid, return false" },
     {"drop_trace", py_pinpoint_drop_trace, METH_VARARGS, "def drop_trace(int id=-1):# drop this trace"},
     {"start_time", py_pinpoint_start_time, METH_NOARGS, "def start_time()->long"},
     {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value,int id=-1,int loc=0)"},
     {"add_clue", py_pinpoint_add_clue, METH_VARARGS, "def add_clue(string key,string value,int id=-1,int loc=0)"},
     {"set_context_key", py_pinpoint_context_key, METH_VARARGS, "def set_context_key(string key,string value,int id=-1): # create a key-value pair that bases on current trace chain"},
-    {"get_context_key", py_pinpoint_get_key, METH_VARARGS, "def get_context_key(key,int id=-1)->string "},
+    {"get_context_key", py_pinpoint_get_key, METH_VARARGS, "def get_context_key(string key,int id=-1)->string "},
     {"check_tracelimit", py_check_tracelimit, METH_VARARGS, "def check_tracelimit(long timestamp=-1): #check trace whether is limit"},
     {"enable_debug", py_pinpoint_enable_utest, METH_VARARGS, "def enable_debug(callback):#enable logging output(callback )"},
     {"force_flush_trace", py_force_flush_span, METH_VARARGS, "def force_flush_trace(timeout=3,int id=-1): #force flush span during timeout"},
-    {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no,int id=-1): #This trace found an error"},
+    {"mark_as_error",py_pinpoint_mark_an_error,METH_VARARGS,"def mark_as_error(string msg,string file_name,uint line_no,int id=-1): #Found an error in this trace"},
     {"set_agent",(PyCFunction)py_set_agent, METH_VARARGS|METH_KEYWORDS, "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or tcp:host:port\",trace_limit=-1): # set pinpint collector information"},
     { NULL, NULL, 0, NULL}
 };

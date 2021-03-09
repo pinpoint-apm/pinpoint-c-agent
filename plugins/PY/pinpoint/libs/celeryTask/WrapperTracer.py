@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-# Created by eeliu at 12/29/20
+# Created by eeliu at 2/4/21
 
 
 # ******************************************************************************
@@ -19,26 +19,21 @@
 #   limitations under the License.
 # ******************************************************************************
 
-from pinpoint.common import Interceptor
+
+from pinpoint.common import *
+
+from .TaskPlugin import TaskPlugin
 
 
-def monkey_patch():
-    try:
-        import celery
-        from celery.app.task import Task
-        from celery.result import AsyncResult
+class WrapperTracer:
+    def __init__(self, name):
+        pass
 
-        from .TaskPlugin import TaskPlugin
-        from .GetPlugin import GetPlugin
+    def __call__(self, func):
+        self.func_name=func.__name__
+        def pinpointTrace(*args, **kwargs):
+            ori= func(*args, **kwargs)
+            plugin = TaskPlugin("build_tracer_trace_task")
+            return plugin(ori)
 
-        Interceptors = [
-            Interceptor(Task, 'delay', TaskPlugin),
-            Interceptor(AsyncResult, 'get', GetPlugin),
-        ]
-        for interceptor in Interceptors:
-            interceptor.enable()
-    except ImportError as e:
-        # do nothing
-        print(e)
-
-__all__=['monkey_patch']
+        return pinpointTrace

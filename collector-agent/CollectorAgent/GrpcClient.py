@@ -76,7 +76,11 @@ class GrpcClient(object):
         self.meta = None
         self.max_pending_size = maxPending
 
-        channel = grpc.insecure_channel(address)
+        self.options = {
+            ('grpc.keepalive_timeout_ms', 60000)  # check keepalive in 1min
+        }
+
+        channel = grpc.insecure_channel(address, options=self.options)
 
         if meta is not None:
             self.meta = meta

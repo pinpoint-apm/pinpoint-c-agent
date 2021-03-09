@@ -48,7 +48,6 @@ class GrpcStat(GrpcClient):
 
     def _generator_PstatMessage(self):
         ps = PStatMessage(agentStat=self._generAgentStat())
-        TCLogger.debug("send stat appid:%s", self.meta)
         yield ps
 
 

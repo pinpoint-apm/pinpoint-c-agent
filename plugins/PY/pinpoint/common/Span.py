@@ -48,9 +48,9 @@ def generateNextSid():
 
 def generatePinpointHeader(host,headers):
 
-    if pinpointPy.check_tracelimit():
+    if pinpointPy.get_context_key(PP_HEADER_PINPOINT_SAMPLED) == 's0':
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_NOT_SAMPLED
-        return
+        return False
     else:
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_SAMPLED
     headers[PP_HEADER_PINPOINT_PAPPTYPE] = pinpointPy.get_context_key(PP_SERVER_TYPE)
@@ -62,12 +62,13 @@ def generatePinpointHeader(host,headers):
     nsid = generateSid()
     pinpointPy.set_context_key(PP_NEXT_SPAN_ID, nsid)
     headers[PP_HEADER_PINPOINT_SPANID] = nsid
+    return True
 
 def generatePPRabbitMqHeader(func,headers):
 
-    if pinpointPy.check_tracelimit():
+    if pinpointPy.get_context_key(PP_HEADER_PINPOINT_SAMPLED) == 's0':
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_NOT_SAMPLED
-        return
+        return False
     else:
         headers[PP_HEADER_PINPOINT_SAMPLED] = PP_SAMPLED
     headers[PP_HEADER_PINPOINT_PAPPTYPE] = pinpointPy.get_context_key(PP_SERVER_TYPE)
@@ -78,3 +79,4 @@ def generatePPRabbitMqHeader(func,headers):
     headers[PP_HEADER_PINPOINT_TRACEID] = pinpointPy.get_context_key(PP_TRANSCATION_ID)
     headers[PP_HEADER_PINPOINT_PSPANID] = pinpointPy.get_context_key(PP_SPAN_ID)
     headers[PP_HEADER_PINPOINT_SPANID] = pinpointPy.get_context_key(PP_NEXT_SPAN_ID)
+    return True

@@ -47,8 +47,8 @@ class GrpcAgent(GrpcClient):
         self.timeout = timeout
         self.pingid = GrpcAgent.PINGID
         GrpcAgent.PINGID += 1
-        self.exit_cv  = threading.Condition()
-        self.stub = Service_pb2_grpc.AgentStub(self.channel)
+        self.exit_cv = threading.Condition()
+        self.agent_stub = Service_pb2_grpc.AgentStub(self.channel)
         self.cmd_sub = Service_pb2_grpc.ProfilerCommandServiceStub(self.channel)
         self.agentinfo = PAgentInfo(hostname=hostname, ip=ip, ports=ports, pid=pid, endTimestamp=-1,
                                     serviceType=server_type, container=isContainer)
@@ -104,7 +104,6 @@ class GrpcAgent(GrpcClient):
         cmd = PCmdMessage(handshakeMessage=handshake)
 
         while self.task_running:
-            # while self.task_running:
             try:
                 self.cmd_pipe = GrpcAgent.HandStreamIterator(cmd)
                 msg_iter = self.cmd_sub.HandleCommand(self.cmd_pipe, metadata=self.profile_meta)
@@ -121,9 +120,10 @@ class GrpcAgent(GrpcClient):
                     if not self.task_running or self.exit_cv.wait(5):
                         break
 
-    def _send_thread_count(self,requestId):
-        channel = grpc.insecure_channel(self.address)
-        stub  = Service_pb2_grpc.ProfilerCommandServiceStub(channel)
+    def _send_thread_count(self, requestId):
+        TCLogger.debug(self.address)
+        channel = grpc.insecure_channel(self.address, options=self.options)
+        stub = Service_pb2_grpc.ProfilerCommandServiceStub(channel)
 
         def generator_cmd():
             i = 0
@@ -145,12 +145,13 @@ class GrpcAgent(GrpcClient):
                     break
 
         try:
-            TCLogger.debug("new a thread for activeThreadCount %d", requestId)
+            TCLogger.debug("new a thread for activeThreadCount %d %s", requestId, self.profile_meta),
             stub.CommandStreamActiveThreadCount(generator_cmd(), metadata=self.profile_meta)
             TCLogger.debug("send activeThreadCount requestId: %d is done", requestId)
             channel.close()
         except Exception as e:
             TCLogger.error("CommandStreamActiveThreadCount, catch exception %s",e)
+
     def _handleCmd(self,msg,cmdIter):
         try:
             if msg.HasField('commandEcho'):
@@ -176,8 +177,8 @@ class GrpcAgent(GrpcClient):
     def _registerAgent(self):
         while self.task_running:
             try:
-                TCLogger.debug("sending agentinfo %s",self.agentinfo)
-                self.stub.RequestAgentInfo(self.agentinfo,timeout=self.timeout/3)
+                TCLogger.debug("sending agentinfo %s", self.agentinfo)
+                self.agent_stub.RequestAgentInfo(self.agentinfo, timeout=self.timeout / 3)
             except Exception as e:
                 TCLogger.error(" pinpoint collector is not available. Try it again [%s] ", self.agentinfo)
                 continue
@@ -186,7 +187,7 @@ class GrpcAgent(GrpcClient):
                     if not self.task_running or self.exit_cv.wait(self.timeout):
                         break
             try:
-                iter_response = self.stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
+                iter_response = self.agent_stub.PingSession(self._pingPPing(), metadata=self.ping_meta)
                 for response in iter_response:
                     TCLogger.debug('get ping response:%s agentinfo:%s', response,self.meta)
             except Exception as e:
