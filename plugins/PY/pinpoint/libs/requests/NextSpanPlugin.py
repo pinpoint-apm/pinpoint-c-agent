@@ -27,7 +27,8 @@ class NextSpanPlugin(Candy):
         super().__init__(name)
         self.nsid = ''
         self.url =''
-    def isSample(self)
+
+    def isSample(self):
         return True
 
     def onBefore(self,*args, **kwargs):

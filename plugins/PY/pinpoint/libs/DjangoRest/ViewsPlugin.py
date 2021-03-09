@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-
-# ------------------------------------------------------------------------------
+﻿# ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
 #  Licensed under the Apache License, Version 2.0 (the "License");             -
@@ -17,46 +14,28 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 8/20/20
 
 from pinpoint.common import *
 import pinpointPy
 
-class UrlOpenPlugin(Candy):
+class ViewsPlugin(Candy):
 
-    def __init__(self, name):
+    def __init__(self,name):
         super().__init__(name)
-        self.dst = ''
-        self.url =''
-
-    def isSample(self):
-        return True
 
     def onBefore(self,*args, **kwargs):
-        self.url = args[0]
-        self.target = urlparse(self.url).netloc
-        if not generatePinpointHeader(self.target,kwargs['headers']):
-            return args, kwargs
         super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
-        pinpointPy.add_clue(PP_SERVER_TYPE,PP_REMOTE_METHOD)
-        pinpointPy.add_clues(PP_ARGS, self.url)
+        pinpointPy.add_clue(PP_INTERCEPTOR_NAME,args[0].get_view_name())
+        pinpointPy.add_clue(PP_SERVER_TYPE, PP_METHOD_CALL)
         ###############################################################
-
+        url = '{%s %r}' % (args[1].method,args[1].get_full_path())
+        pinpointPy.add_clues(PP_ARGS, url)
         return args,kwargs
 
     def onEnd(self,ret):
-        ###############################################################
-        pinpointPy.add_clue(PP_DESTINATION, self.target)
-        pinpointPy.add_clue(PP_NEXT_SPAN_ID, pinpointPy.get_context_key(PP_NEXT_SPAN_ID))
-        pinpointPy.add_clues(PP_HTTP_URL, self.url)
-        pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(ret.status_code))
-        pinpointPy.add_clues(PP_RETURN, str(ret))
-        ###############################################################
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
         pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
-
