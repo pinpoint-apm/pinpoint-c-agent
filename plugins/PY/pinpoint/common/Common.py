@@ -20,19 +20,21 @@
 # Created by eeliu at 3/5/20
 
 
-
+import threading
 import pinpointPy
 
 import socket
+
+from .Defines import *
+
 
 class Candy(object):
     E_PER_REQ=1
     E_FUNCTION = 2
 
     def __init__(self,name):
+        self.local = threading.local()
         self.name = name
-        # 2/5/2021 protect onBefore and onEnd
-        self.traced = False
         
     def isSample(self):
         '''
@@ -47,12 +49,10 @@ class Candy(object):
 
     def onBefore(self,*args, **kwargs):
         pinpointPy.start_trace()
-        self.traced = True
+        self.local.traced = True
 
     def onEnd(self,ret):
-        if self.traced:
-            pinpointPy.end_trace()
-            self.traced = False
+        pinpointPy.end_trace()
 
     def onException(self,e):
         raise NotImplementedError()
@@ -60,6 +60,7 @@ class Candy(object):
     def __call__(self, func):
         self.func_name=func.__name__
         def pinpointTrace(*args, **kwargs):
+            self.local.traced = False
             if not self.isSample():
                 return func(*args, **kwargs)
 
@@ -72,8 +73,9 @@ class Candy(object):
                 self.onException(e)
                 raise e
             finally:
-                self.onEnd(ret)
-
+                if self.local.traced:
+                    self.onEnd(ret)
+                    self.local.traced = False
         return pinpointTrace
 
     def getFuncUniqueName(self):

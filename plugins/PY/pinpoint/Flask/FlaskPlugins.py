@@ -38,6 +38,9 @@ class BaseFlaskPlugins(Candy):
         super().__init__(name)
         self.isLimit = False
 
+    def isSample(self):
+        return True
+
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         request = Request(args[1])

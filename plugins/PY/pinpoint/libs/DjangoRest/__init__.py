@@ -13,26 +13,25 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-import importlib
-from .internal import gl
 
-def __monkey_patch(*args,**kwargs):
-    for key in kwargs:
-        if kwargs[key]:
-            module = importlib.import_module('pinpoint.libs.'+key)
-            monkey_patch = getattr(module,'monkey_patch')
-            if callable(monkey_patch):
-                monkey_patch()
-                print("try to install pinpoint.lib.%s module"%(key))
+from pinpoint.common import Interceptor
 
 
+def monkey_patch():
+    try:
+        from rest_framework.views import APIView
+        from .ViewsPlugin import ViewsPlugin
 
-def monkey_patch_for_pinpoint(pymongo=True,PyMysql=True,pyRedis=True,requests=True,urllib=True,
-                       sqlalchemy=True,aioHttp=False,MySQLdb=True,amqp=True,kombu=True,celeryCaller=True,celeryTask=True,DjangoRest=True):
-    if not gl.patched:
-        gl.patched = True
-        __monkey_patch(pymongo=pymongo,PyMysql=PyMysql,pyRedis=pyRedis,requests=requests,urllib=urllib,
-                       sqlalchemy=sqlalchemy,aioHttp=aioHttp,MySQLdb=MySQLdb,amqp=amqp,kombu=kombu,
-                       celeryCaller=celeryCaller,celeryTask=celeryTask,DjangoRest=DjangoRest)
 
-__all__=['monkey_patch_for_pinpoint']
+        Interceptors = [
+            Interceptor(APIView, 'dispatch', ViewsPlugin),
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
+
+
+    except ImportError as e:
+        # do nothing
+        print(e)
+
+__all__=['monkey_patch']
