@@ -147,7 +147,7 @@ class CollectorAgentConf(object):
 
 
     def _setLog(self, dir, level):
-        if dir is not None:
+        if dir:
             set_logger_file(dir)
         else:
             logger_enable_console()
