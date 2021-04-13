@@ -27,7 +27,7 @@ int32_t id = 0;
 const char* app_id ="c_test_app";
 const char* app_name ="c_test_name";
 PPAgentT global_agent_info ={
-    "tcp:dev-collector:9999",1000,-1,1300,1,NULL,NULL,NULL
+    "tcp:127.0.0.1:9999",1000,-1,1700,0,NULL,NULL,NULL
 };
 
 char* get_sid()
@@ -48,8 +48,9 @@ char* get_tid()
 
 void random_sleep()
 {
-    int32_t delay = rand()%10;
-    usleep(delay* 1000);
+    // int32_t delay = rand()%10;
+    // usleep(delay* 1000);
+    // sleep(3);
 }
 
 void test_httpclient()
@@ -115,18 +116,26 @@ void test_req()
     pinpoint_add_clue(id,PP_SPAN_ID,sid,E_CURRENT_LOC);
     pinpoint_add_clues(id,PP_HTTP_STATUS_CODE, "200",E_CURRENT_LOC);
     id = pinpoint_end_trace(id);
+    check_tracelimit(-1);
     free(tid);
     free(sid);
 }
 
 int main(int argc, char const *argv[])
 {
+    char appid[] = "appid-c";
+    char appname[] = "appid-c";
+    app_id =   getenv("APPID");
+    app_name = getenv("APPNAME");
+    if(app_id == NULL || app_name == NULL){
+        app_id = appid;
+        app_name = appname;
+    }
     srand(time(NULL));
     int i=0;
-    for(;i<3;i++)
+    for(;i<100000;i++)
     {
         test_req();
-        sleep(1);
     }
     return 0;
 }
