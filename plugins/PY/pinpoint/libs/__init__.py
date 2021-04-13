@@ -28,11 +28,11 @@ def __monkey_patch(*args,**kwargs):
 
 
 def monkey_patch_for_pinpoint(pymongo=True,PyMysql=True,pyRedis=True,requests=True,urllib=True,
-                       sqlalchemy=True,aioHttp=False,MySQLdb=True,amqp=True,kombu=True,celeryCaller=True,celeryTask=True,DjangoRest=True,MysqlConnector=True):
+                       sqlalchemy=True,aioHttp=False,MySQLdb=True,amqp=True,kombu=True,celeryCaller=True,celeryTask=True,DjangoRest=True):
     if not gl.patched:
         gl.patched = True
         __monkey_patch(pymongo=pymongo,PyMysql=PyMysql,pyRedis=pyRedis,requests=requests,urllib=urllib,
                        sqlalchemy=sqlalchemy,aioHttp=aioHttp,MySQLdb=MySQLdb,amqp=amqp,kombu=kombu,
-                       celeryCaller=celeryCaller,celeryTask=celeryTask,DjangoRest=DjangoRest,MysqlConnector=MysqlConnector)
+                       celeryCaller=celeryCaller,celeryTask=celeryTask,DjangoRest=DjangoRest)
 
 __all__=['monkey_patch_for_pinpoint']
