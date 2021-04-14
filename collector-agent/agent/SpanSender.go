@@ -111,7 +111,7 @@ func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, Ispan interf
 			spanSender.sequenceId += 1
 			spanEv.Depth = depth
 			genSpan.SpanEvent = append(genSpan.SpanEvent, spanEv)
-			if calls, OK := span["calls"].([]map[string]interface{}); OK {
+			if calls, OK := span["calls"].([]interface{}); OK {
 				for _, call := range calls {
 					spanSender.makePinpointSpanEv(genSpan, call, depth+1)
 				}

@@ -95,7 +95,7 @@ func (server *SpanServer) parseInComePacket(size, packetType uint32, body []byte
 
 	err = server.agentRouter.DispatchPacket(&rawPacket)
 	if err != nil {
-		log.Error("dispather packet with an exception:", err)
+		log.Warnf("dispather packet with an exception: %s", err)
 		return err
 	}
 
