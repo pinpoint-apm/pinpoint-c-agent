@@ -28,7 +28,7 @@ class TaskPlugin(Candy):
         super().__init__(name)
         self.type= Candy.E_PER_REQ
 
-    def isSample(self):
+    def isSample(self,args):
         if pinpointPy.trace_has_root():# no trace
             self.type = Candy.E_FUNCTION 
         else:
