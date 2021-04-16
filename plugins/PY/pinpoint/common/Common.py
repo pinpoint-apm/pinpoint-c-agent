@@ -20,7 +20,6 @@
 # Created by eeliu at 3/5/20
 
 
-import threading
 import pinpointPy
 
 import socket
@@ -33,10 +32,9 @@ class Candy(object):
     E_FUNCTION = 2
 
     def __init__(self,name):
-        self.local = threading.local()
         self.name = name
-        
-    def isSample(self):
+
+    def isSample(self,args):
         '''
         if not root, no trace
         :return:
@@ -49,7 +47,6 @@ class Candy(object):
 
     def onBefore(self,*args, **kwargs):
         pinpointPy.start_trace()
-        self.local.traced = True
 
     def onEnd(self,ret):
         pinpointPy.end_trace()
@@ -60,8 +57,7 @@ class Candy(object):
     def __call__(self, func):
         self.func_name=func.__name__
         def pinpointTrace(*args, **kwargs):
-            self.local.traced = False
-            if not self.isSample():
+            if not self.isSample((args,kwargs)):
                 return func(*args, **kwargs)
 
             ret = None
@@ -73,9 +69,7 @@ class Candy(object):
                 self.onException(e)
                 raise e
             finally:
-                if self.local.traced:
-                    self.onEnd(ret)
-                    self.local.traced = False
+                self.onEnd(ret)
         return pinpointTrace
 
     def getFuncUniqueName(self):

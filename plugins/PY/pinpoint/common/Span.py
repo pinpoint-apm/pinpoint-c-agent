@@ -47,12 +47,7 @@ def generateNextSid():
     return nsid
 
 def generatePinpointHeader(host,headers):
-
-    if pinpointPy.get_context_key(PP_HEADER_PINPOINT_SAMPLED) == 's0':
-        headers[PP_HEADER_PINPOINT_SAMPLED] = PP_NOT_SAMPLED
-        return False
-    else:
-        headers[PP_HEADER_PINPOINT_SAMPLED] = PP_SAMPLED
+    headers[PP_HEADER_PINPOINT_SAMPLED] = PP_SAMPLED
     headers[PP_HEADER_PINPOINT_PAPPTYPE] = pinpointPy.get_context_key(PP_SERVER_TYPE)
     headers[PP_HEADER_PINPOINT_PAPPNAME] = pinpointPy.get_context_key(PP_APP_NAME)
     headers['Pinpoint-Flags'] = "0"
@@ -62,7 +57,6 @@ def generatePinpointHeader(host,headers):
     nsid = generateSid()
     pinpointPy.set_context_key(PP_NEXT_SPAN_ID, nsid)
     headers[PP_HEADER_PINPOINT_SPANID] = nsid
-    return True
 
 def generatePPRabbitMqHeader(func,headers):
 
