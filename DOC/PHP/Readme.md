@@ -24,7 +24,7 @@ composer| | class can be automatic pinpoint-cut
 
     `Collector-Agent`, who formats the datas from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
    1. Execute command `go build`
-   2. Add requirement variables:
+   2. Add environment variables:
       ```
         export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
         export PP_COLLECTOR_AGENT_SPAN_PORT=9993
@@ -37,12 +37,12 @@ composer| | class can be automatic pinpoint-cut
         export PP_Log_Level=INFO
         export PP_ADDRESS=0.0.0.0@9999
       ```
-      1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: Set the IP of pinpoint-collctor.
-      2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: Set the port of pinpoint-collctor(grpc).
+      1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: Set the IP of pinpoint-collector.
+      2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: Set the port of pinpoint-collector(grpc).
       3. `PP_LOG_DIR`: Set the path of Collector-Agent's log file.
       4. `PP_Log_Level`: Set the log level.
-      5. `PP_ADDRESS`: Set the address of Collector-Agent, then PHP/Python-Agent will connect Collector-Agent through this address.
-   3. Run Collector-Agent by execute command `./CollectorAgent`
+      5. `PP_ADDRESS`: Set the address of `Collector-Agent`, then `PHP/Python-Agent` will connect Collector-Agent through this address.
+   3. Run `Collector-Agent` by executing command `./CollectorAgent`
    
    Collector Agent Span Specification
    [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
@@ -60,7 +60,7 @@ composer| | class can be automatic pinpoint-cut
        >  php.ini 
         ```ini
         extension=pinpoint_php.so
-        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please insure it consistent with the `PP_ADDRESS` of `Collector-Agent` in step2(Build Collector-Agent).
+        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please ensure it consistent with the `PP_ADDRESS` of `Collector-Agent` in step2(Build Collector-Agent).
         pinpoint_php.CollectorHost=Tcp:ip:port
         pinpoint_php.SendSpanTimeOutMs=0 # 0 is recommanded
         ; request should be captured duing 1 second. < 0 means no limited

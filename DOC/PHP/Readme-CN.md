@@ -38,11 +38,11 @@ pinpoint| `1.8.0+`, `2.0+`
            export PP_Log_Level=INFO
            export PP_ADDRESS=0.0.0.0@9999
          ```
-         1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: 设置为 `pinpoint-collctor` 的IP.
-         2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: 设置为 `pinpoint-collctor`(grpc) 的端口(默认9993，9992， 9991).
+         1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: 设置为 `pinpoint-collector` 的IP.
+         2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: 设置为 `pinpoint-collector`(grpc) 的端口(默认9993，9992， 9991).
          3. `PP_LOG_DIR`: 设置 `Collector-Agent` 日志存放路径.
          4. `PP_Log_Level`: 设置日志的级别（DEBUG, INFO, WARN, ERROR）.
-         5. `PP_ADDRESS`: 设置 `pinpoint-collctor` 的地址合端口，`PHP/Python-Agent` 将会通过这个地址连接 `pinpoint-collctor`。
+         5. `PP_ADDRESS`: 设置 `Collector-Agent` 的地址合端口，`PHP/Python-Agent` 将会通过这个地址连接 `pinpoint-collctor`。
       3. 运行 `Collector-Agent`，执行命令：`./CollectorAgent`
          
    `Collector-Agent` 数据的说明：
@@ -60,7 +60,7 @@ pinpoint| `1.8.0+`, `2.0+`
        >  php.ini 
         ```ini
         extension=pinpoint_php.so
-        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please insure it consistent with the `PP_ADDRESS` of `Collector-Agent` in step2(Build Collector-Agent).
+        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please ensure it consistent with the `PP_ADDRESS` of `Collector-Agent` in step2(Build Collector-Agent).
         pinpoint_php.CollectorHost=Tcp:ip:port
         pinpoint_php.SendSpanTimeOutMs=0 # 0 is recommanded
         ; request should be captured duing 1 second. < 0 means no limited
