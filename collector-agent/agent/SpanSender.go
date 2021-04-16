@@ -2,7 +2,7 @@ package agent
 
 import (
 	"CollectorAgent/common"
-	"CollectorAgent/protocol"
+	v1 "CollectorAgent/protocol"
 	"context"
 	"errors"
 	"strconv"
@@ -111,7 +111,7 @@ func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, Ispan interf
 			spanSender.sequenceId += 1
 			spanEv.Depth = depth
 			genSpan.SpanEvent = append(genSpan.SpanEvent, spanEv)
-			if calls, OK := span["calls"].([]map[string]interface{}); OK {
+			if calls, OK := span["calls"].([]interface{}); OK {
 				for _, call := range calls {
 					spanSender.makePinpointSpanEv(genSpan, call, depth+1)
 				}
@@ -161,16 +161,14 @@ func (spanSender *SpanSender) createPinpointSpanEv(span map[string]interface{}) 
 			MessageEvent: &nextEv},
 	}
 
-	if value, OK := span["S"].(uint64); OK {
+	if value, OK := span["S"].(float64); OK {
 		//if value, err := strconv.ParseInt(value, 10, 32); err == nil {
 		//}
 		pspanEv.StartElapsed = int32(value)
 	}
 
-	if value, OK := span["E"].(string); OK {
-		if value, err := strconv.ParseInt(value, 10, 32); err == nil {
-			pspanEv.EndElapsed = int32(value)
-		}
+	if value, OK := span["E"].(float64); OK {
+		pspanEv.EndElapsed = int32(value)
 	}
 
 	if value, OK := span["stp"].(string); OK {
@@ -180,6 +178,8 @@ func (spanSender *SpanSender) createPinpointSpanEv(span map[string]interface{}) 
 	} else {
 		pspanEv.ServiceType = 1501
 	}
+
+	//pspanEv.AsyncEvent = 1
 
 	if value, OK := span["clues"].([]interface{}); OK {
 
