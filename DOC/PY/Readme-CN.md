@@ -9,6 +9,7 @@
 ---|----
 python |python 3.5+
 python async|python 3.7.1+
+GO | | 
 gcc|gcc 4.7+
 cmake| 3.0+
 *inux| 
@@ -26,14 +27,33 @@ https://packaging.python.org/guides/installing-using-pip-and-virtual-environment
 $ pip install pinpointPy
 ```
 #### 安装 Collector Agent
-Collector-Agent有两种安装方法，任选其一：
+`Collector-Agent` 负责接收并格式化 `PHP/Python/C/CPP-Agent` 的请求数据然后转发给 `Pinpoint-Collector`。由于 `Collector-Agent` 使用[golang](https://golang.google.cn/) 语言编写， 请先安装golang。[Install GO](https://golang.google.cn/doc/install)
 
-   1. [Collector-Agent 安装步骤 ☚](../CollectorAgent/Readme-CN.md)
-   2. 使用Docker Collector-Agent：
-      ```
-      docker pull eeliu2020/pinpoint-collector-agent:latest 
-      docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
-      ```
+  1. 执行命令 `go build`
+  2. 添加环境变量:
+     ```
+       export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
+       export PP_COLLECTOR_AGENT_SPAN_PORT=9993
+       export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
+       export PP_COLLECTOR_AGENT_AGENT_PORT=9991
+       export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
+       export PP_COLLECTOR_AGENT_STAT_PORT=9992
+       export PP_COLLECTOR_AGENT_ISDOCKER=false
+       export PP_LOG_DIR=/tmp/
+       export PP_Log_Level=INFO
+       export PP_ADDRESS=0.0.0.0@9999
+     ```
+     1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: 设置为 `pinpoint-collctor` 的IP.
+     2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: 设置为 `pinpoint-collctor`(grpc) 的端口(默认9993，9992， 9991).
+     3. `PP_LOG_DIR`: 设置 `Collector-Agent` 日志存放路径.
+     4. `PP_Log_Level`: 设置日志的级别（DEBUG, INFO, WARN, ERROR）.
+     5. `PP_ADDRESS`: 设置 `pinpoint-collctor` 的地址合端口，`PHP/Python-Agent` 将会通过这个地址连接 `pinpoint-collctor`。
+  3. 运行 `Collector-Agent`，执行命令：`./CollectorAgent`
+         
+   `Collector-Agent` 数据的说明：
+   [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
+   
+
 
 ### [如何使用]
 [请点击 ☚](../../plugins/PY/Readme.md)
