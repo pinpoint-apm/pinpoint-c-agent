@@ -27,7 +27,7 @@ https://packaging.python.org/guides/installing-using-pip-and-virtual-environment
 $ pip install pinpointPy
 ```
 #### 安装 Collector Agent
-`Collector-Agent` 负责接收并格式化 `PHP/Python/C/CPP-Agent` 的请求数据然后转发给 `Pinpoint-Collector`。由于 `Collector-Agent` 使用[golang](https://golang.google.cn/) 语言编写， 请先安装golang。[Install GO](https://golang.google.cn/doc/install)
+`Collector-Agent` 负责接收并格式化 `PHP/Python/C/CPP-Agent` 的span然后转发给 `Pinpoint-Collector`。由于 `Collector-Agent` 使用[golang](https://golang.google.cn/) 语言编写， 请先安装golang。[Install GO](https://golang.google.cn/doc/install)
 
   1. 执行命令 `go build`
   2. 添加环境变量:
