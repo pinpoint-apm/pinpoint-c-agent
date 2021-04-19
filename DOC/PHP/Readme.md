@@ -22,7 +22,7 @@ composer| | class can be automatic pinpoint-cut
    
 2. Goto collector-agent(`pinpoint-c-agent/collector-agent`) and build `Collector-Agent`
 
-    `Collector-Agent`, who formats the datas from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
+    `Collector-Agent`, who formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
    1. Execute command `go build`
    2. Add environment variables:
       ```
