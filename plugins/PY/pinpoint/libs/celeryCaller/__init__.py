@@ -37,7 +37,6 @@ def monkey_patch():
         ]
         for interceptor in Interceptors:
             interceptor.enable()
-        print('-------------------------------------------')
     except ImportError as e:
         # do nothing
         print(e)

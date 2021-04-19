@@ -1,7 +1,0 @@
-google
-grpcio
-psutil
-thrift
-grpcio-tools
-gevent
-nose

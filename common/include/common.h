@@ -134,6 +134,12 @@ NodeID pinpoint_start_trace(NodeID);
  */
 NodeID pinpoint_end_trace(NodeID);
 
+/**
+ *  check id->traceNode is root
+ * @param
+ * @return 1: is root; 0: not root node;-1: A wrong id
+ */
+int pinpoint_trace_is_root(NodeID);
 
 /**
  *  force end current trace, only called when callstack leaked

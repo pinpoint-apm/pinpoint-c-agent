@@ -8,6 +8,7 @@ What we have supported and what we are going to support: [support plan](SupportP
 Dependency| Version| More
 ---|----|---
 python |2.7,3+ | (async must 3.7.1+)
+GO | | 
 gcc|gcc 4.7+| c++11
 cmake| 3.1+| ✔
 *inux|  | `windows` is on the way
@@ -22,19 +23,35 @@ $ pip install pinpointPy
 ```
 ### Download pinpoint-python-plugins
 
-[pinpoint-python-plugins.tar.gz](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/V2020.12.17/pinpoint-python-plugins-v0.0.1.tar.gz)
+[pinpoint-python-plugins.tar.gz](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.4.0/pinpoint-py-v0.4.0.zip)
 
 #### Install Collector Agent
-There are two ways to install Collector-Agent, just choose one:
+`Collector-Agent`, who formats the datas from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
 
-1. [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
-2. Use Dockerized Collector-Agent:
-    [env.file](../../collector-agent/conf/env.file)
+1. Goto collector-agent(`pinpoint-c-agent/collector-agent`)
+2. Execute command `go build`
+3. Add environment variables:
     ```
-    docker pull eeliu2020/pinpoint-collector-agent:latest 
-    docker run --env-file path-to-env.file -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
+    export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
+    export PP_COLLECTOR_AGENT_SPAN_PORT=9993
+    export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
+    export PP_COLLECTOR_AGENT_AGENT_PORT=9991
+    export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
+    export PP_COLLECTOR_AGENT_STAT_PORT=9992
+    export PP_COLLECTOR_AGENT_ISDOCKER=false
+    export PP_LOG_DIR=/tmp/
+    export PP_Log_Level=INFO
+    export PP_ADDRESS=0.0.0.0@9999
     ```
+    1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: Set the IP of pinpoint-collector.
+    2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: Set the port of pinpoint-collector(grpc).
+    3. `PP_LOG_DIR`: Set the path of Collector-Agent's log file.
+    4. `PP_Log_Level`: Set the log level.
+    5. `PP_ADDRESS`: Set the address of `Collector-Agent`, then `PHP/Python-Agent` will connect Collector-Agent through this address.
+4. Run `Collector-Agent` by executing command `./CollectorAgent`
    
+  Collector Agent Span Specification
+  [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
 
 ### [How to Use]
 [Click me ☚](../../plugins/PY/Readme.md)

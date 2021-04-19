@@ -197,7 +197,7 @@ DONE:
 
             if(ret > 0){
                 buf_ofs += (uint32_t) ret;
-                pp_trace("%d send size %d",c_fd,ret);
+                pp_trace("fd %d send size %d",c_fd,ret);
             }else if(ret == -1){
                 if(errno == EAGAIN || errno == EWOULDBLOCK || errno== EINTR){
                     this->_state |=  S_WRITING;

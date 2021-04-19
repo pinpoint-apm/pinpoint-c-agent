@@ -108,6 +108,7 @@ void test_req()
     pinpoint_add_clue(id,PP_TRANSCATION_ID,get_tid().c_str(),E_CURRENT_LOC);
     pinpoint_add_clue(id,PP_SPAN_ID,get_sid().c_str(),E_CURRENT_LOC);
     pinpoint_add_clues(id,PP_HTTP_STATUS_CODE, "200",E_CURRENT_LOC);
+    catch_error(id,"msg",__FILE__,100);
     id = pinpoint_end_trace(id);
 }
 
