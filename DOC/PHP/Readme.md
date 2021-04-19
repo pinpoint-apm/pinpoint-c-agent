@@ -8,6 +8,7 @@ What we have supported and what will support: [support plan](SupportPlan.md)
 Dependency|Version| More
 ---|----|----
 PHP| php `7+` ,`5+`|
+GO | | 
 GCC| GCC `4.7+`| C++11 
 cmake| cmake `3.2+`|
 *inux|| `windows is on the way`
@@ -19,13 +20,32 @@ composer| | class can be automatic pinpoint-cut
 #### Steps
 1. git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
    
-2. Build Collector-Agent yourself or use Dockerized Collector-Agent, just choose one:
-    * [Build Collector-Agent yourself ☚](../CollectorAgent/Readme.md)
-    * Use Dockerized Collector-Agent: [env.file](../../collector-agent/conf/env.file)
-        ```
-        docker pull eeliu2020/pinpoint-collector-agent:latest 
-        docker run --env-file path-to-env.file -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
-        ```
+2. Goto collector-agent(`pinpoint-c-agent/collector-agent`) and build `Collector-Agent`
+
+    `Collector-Agent`, who formats the datas from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
+   1. Execute command `go build`
+   2. Add environment variables:
+      ```
+        export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
+        export PP_COLLECTOR_AGENT_SPAN_PORT=9993
+        export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
+        export PP_COLLECTOR_AGENT_AGENT_PORT=9991
+        export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
+        export PP_COLLECTOR_AGENT_STAT_PORT=9992
+        export PP_COLLECTOR_AGENT_ISDOCKER=false
+        export PP_LOG_DIR=/tmp/
+        export PP_Log_Level=INFO
+        export PP_ADDRESS=0.0.0.0@9999
+      ```
+      1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: Set the IP of pinpoint-collector.
+      2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: Set the port of pinpoint-collector(grpc).
+      3. `PP_LOG_DIR`: Set the path of Collector-Agent's log file.
+      4. `PP_Log_Level`: Set the log level.
+      5. `PP_ADDRESS`: Set the address of `Collector-Agent`, then `PHP/Python-Agent` will connect Collector-Agent through this address.
+   3. Run `Collector-Agent` by executing command `./CollectorAgent`
+   
+   Collector Agent Span Specification
+   [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
    
 3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, and do following steps:
    1. phpize        
@@ -40,10 +60,8 @@ composer| | class can be automatic pinpoint-cut
        >  php.ini 
         ```ini
         extension=pinpoint_php.so
-        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please insure it consistent with that in step2(Build Collector-Agent).
+        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please ensure it consistent with the `PP_ADDRESS` of `Collector-Agent` in step2(Build Collector-Agent).
         pinpoint_php.CollectorHost=Tcp:ip:port
-        ; or unix:(unix sock address)
-        ;pinpoint_php.CollectorHost=unix:/tmp/collector-agent.sock
         pinpoint_php.SendSpanTimeOutMs=0 # 0 is recommanded
         ; request should be captured duing 1 second. < 0 means no limited
         pinpoint_php.TraceLimit=-1 

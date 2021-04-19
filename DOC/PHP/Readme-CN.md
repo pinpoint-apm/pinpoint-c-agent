@@ -11,7 +11,7 @@ PHP| php `7+` ,`5+`
 GCC| GCC `4.7+`
 cmake| cmake `3.8+`
 *inux|
-Python | `Python 3`
+GO |
 pinpoint| `1.8.0+`, `2.0+`
 **Composer**| 
 
@@ -20,14 +20,34 @@ pinpoint| `1.8.0+`, `2.0+`
 #### 步骤
 1. 执行命令：git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
 
-2. 自行构建Collector-Agent，或者使用Docker Collector-Agent(二选一)：
-   * [Collector-Agent 安装步骤 ☚](../CollectorAgent/Readme-CN.md)
-   * 使用Docker Collector-Agent：
+2. 在 collector-agent(`pinpoint-c-agent/collector-agent`) 目录下安装 `Collector-Agent`
+       
+    `Collector-Agent` 负责接收并格式化 `PHP/Python/C/CPP-Agent` 的请求数据然后转发给 `Pinpoint-Collector`。由于 `Collector-Agent` 使用[golang](https://golang.google.cn/) 语言编写， 请先安装golang。[Install GO](https://golang.google.cn/doc/install)
 
-      ```
-      docker pull eeliu2020/pinpoint-collector-agent:latest 
-      docker run  --add-host collectorHost:your-pinpoint-hostname -d -p 9999:9999 eeliu2020/pinpoint-collector-agent
-      ```
+      1. 执行命令 `go build`
+      2. 添加环境变量:
+         ```
+           export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
+           export PP_COLLECTOR_AGENT_SPAN_PORT=9993
+           export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
+           export PP_COLLECTOR_AGENT_AGENT_PORT=9991
+           export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
+           export PP_COLLECTOR_AGENT_STAT_PORT=9992
+           export PP_COLLECTOR_AGENT_ISDOCKER=false
+           export PP_LOG_DIR=/tmp/
+           export PP_Log_Level=INFO
+           export PP_ADDRESS=0.0.0.0@9999
+         ```
+         1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: 设置为 `pinpoint-collector` 的IP.
+         2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: 设置为 `pinpoint-collector`(grpc) 的端口(默认9993，9992， 9991).
+         3. `PP_LOG_DIR`: 设置 `Collector-Agent` 日志存放路径.
+         4. `PP_Log_Level`: 设置日志的级别（DEBUG, INFO, WARN, ERROR）.
+         5. `PP_ADDRESS`: 设置 `Collector-Agent` 的地址合端口，`PHP/Python-Agent` 将会通过这个地址连接 `pinpoint-collctor`。
+      3. 运行 `Collector-Agent`，执行命令：`./CollectorAgent`
+         
+   `Collector-Agent` 数据的说明：
+   [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
+   
 
 3. 安装 pinpoint-php-module， 在pinpoint-c-agent安装包的根目录下，执行以下命令：
    1. phpize        
@@ -40,10 +60,8 @@ pinpoint| `1.8.0+`, `2.0+`
        >  php.ini 
         ```ini
         extension=pinpoint_php.so
-        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please guarantee it consistent with that in step2(Build Collector-Agent).
+        ; Collector-agent's TCP address, ip,port:Collector-Agent's ip,port, please ensure it consistent with the `PP_ADDRESS` of `Collector-Agent` in step2(Build Collector-Agent).
         pinpoint_php.CollectorHost=Tcp:ip:port
-        ; or unix:(unix sock address)
-        ;pinpoint_php.CollectorHost=unix:/tmp/collector-agent.sock
         pinpoint_php.SendSpanTimeOutMs=0 # 0 is recommanded
         ; request should be captured duing 1 second. < 0 means no limited
         pinpoint_php.TraceLimit=-1 
