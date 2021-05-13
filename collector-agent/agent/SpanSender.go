@@ -104,8 +104,8 @@ func (spanSender *SpanSender) cleanAllMetaData() {
 	spanSender.stringMeta.ResetMeta()
 }
 
-func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, Ispan interface{}, depth int32) error {
-	if span, OK := Ispan.(map[string]interface{}); OK {
+func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, ISpan interface{}, depth int32) error {
+	if span, OK := ISpan.(map[string]interface{}); OK {
 		if spanEv, err := spanSender.createPinpointSpanEv(span); err == nil {
 			spanEv.Sequence = spanSender.sequenceId
 			spanSender.sequenceId += 1
@@ -120,8 +120,6 @@ func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, Ispan interf
 		} else {
 			return err
 		}
-	} else {
-		panic(Ispan)
 	}
 }
 
@@ -280,7 +278,7 @@ func (spanSender *SpanSender) makePinpointSpan(span map[string]interface{}) (*v1
 	if value, OK := span["S"].(float64); OK {
 		pspan.StartTime = int64(value)
 	} else {
-		panic(span["S"])
+		pspan.StartTime = 0
 	}
 
 	if value, OK := span["E"].(float64); OK {

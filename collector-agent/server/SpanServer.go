@@ -218,7 +218,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 
 		if token == 0 {
 			if needs == 0 {
-				log.Panic("needs cannot be 0")
+				log.Error("needs cannot be 0")
 				break
 			}
 
@@ -226,7 +226,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 				// not enough space to hold income
 				if needs > (CLIENT_MAX_PACKET_SIZE / 2) {
 					msg := fmt.Sprintf("packet overflow and overlap.Reason packet_offset：%d,in_offset:%d", packetOffset, inOffset)
-					log.Panic(msg)
+					log.Error(msg)
 					break
 				}
 				unParsedSize := inOffset - packetOffset
