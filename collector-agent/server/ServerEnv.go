@@ -90,8 +90,8 @@ func InitServerConfig() {
 	// bind logger on the file
 	logger := &lumberjack.Logger{
 		Filename:   logFile,
-		MaxSize:    500,
-		MaxBackups: 500,
+		MaxSize:    50,
+		MaxBackups: 50,
 	}
 
 	log.SetOutput(logger)
