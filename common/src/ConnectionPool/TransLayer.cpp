@@ -84,7 +84,7 @@ int TransLayer::connect_stream_remote(const char* remote)
 int TransLayer::connect_unix_remote(const char* remote)
 {
     int fd = -1;
-    struct sockaddr_un u_sock = {0};
+    struct sockaddr_un u_sock = {0,{0}};
     struct linger fd_linger ={1, 1}; // open and 1 second
     if((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {

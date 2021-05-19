@@ -10,7 +10,8 @@ PPAgentT global_agent_info = {
         1,
         10,
         1500,
-        1
+        1,
+        nullptr,nullptr,nullptr
 };
 
 void remove_shm_file()

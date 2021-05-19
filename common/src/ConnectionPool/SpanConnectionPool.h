@@ -64,7 +64,7 @@ public:
         std::lock_guard<std::mutex> _safe(this->_lock);
         if(this->_cPool.empty())
         {
-            return TransConnection(new TransLayer(this->co_host,this->timeout_ms));
+            return TransConnection(new TransLayer(this->co_host));
         }else{
             TransConnection _con = std::move(_cPool.top());
             _cPool.pop();

@@ -20,13 +20,14 @@ bool run = true;
 
 void sig_exit(int signm)
 {
+    (void)signm;
     run = false;
 }
 
 int fack_server()
 {
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    struct sockaddr_un address = {0};
+    struct sockaddr_un address = {0,{0}};
     address.sun_family = AF_UNIX;
     strncpy(address.sun_path, unix_socket, sizeof(address.sun_path) -1);
     remove(unix_socket);
@@ -85,7 +86,7 @@ TEST(translayer, unix_socket_layer)
     }
     sleep(2);
     std::string remote = global_agent_info.co_host;
-    TransLayer layer(remote,10);
+    TransLayer layer(remote);
     using namespace std::placeholders;
     layer.registerPeerMsgCallback(std::bind(handle_agent_info,_1,_2,_3),NULL);
     while(run){

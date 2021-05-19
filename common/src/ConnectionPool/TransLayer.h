@@ -50,10 +50,9 @@ enum E_STATE{S_WRITING=0x1,S_READING=0x2,S_ERROR=0x4};
 
 
 public:
-    explicit TransLayer(const std::string& co_host,uint32_t w_timeout_ms):
+    explicit TransLayer(const std::string& co_host):
     co_host(co_host),
     chunks(1024*1024,1024*40),
-    w_timeout_ms(w_timeout_ms),
     _state(0),
     c_fd(-1)
     {
@@ -281,7 +280,6 @@ DONE:
 private:
     const std::string& co_host;
     Chunks        chunks;
-    uint32_t          w_timeout_ms;
     int32_t       _state;
     char          in_buf[IN_MSG_BUF_SIZE]= {0};
     std::function<void(int)> chann_error_cb;

@@ -58,9 +58,9 @@ agent_libraries = []
 if name=='windows':
     raise RuntimeError('pinpoint-c-agent currently not support MS')
 elif  name == 'darwin':
-    agent_libraries = ['pinpoint_common','jsoncpp', 'stdc++']
+    agent_libraries = ['pinpoint_common', 'stdc++']
 elif  name == 'linux':
-    agent_libraries = ['pinpoint_common','jsoncpp','rt','stdc++']
+    agent_libraries = ['pinpoint_common','rt','stdc++']
 else:
     raise RuntimeError('Unknow platform to me: '+name)
 ###############################################
