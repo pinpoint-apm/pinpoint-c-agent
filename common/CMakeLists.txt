@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 option(AGENT_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
-include(GNUInstallDirs)
 
 
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -fPIC")
@@ -40,16 +39,20 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 add_subdirectory(jsoncpp)
 add_subdirectory(src)
 
-add_library(pinpoint_common_shared SHARED $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)  
-install(DIRECTORY include/ DESTINATION include/pinpoint_common
-        FILES_MATCHING PATTERN "*.h")
+if(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+    add_library(pinpoint_common_shared SHARED $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)  
+    install(DIRECTORY include/ DESTINATION include/pinpoint_common
+            FILES_MATCHING PATTERN "*.h")
 
-install(TARGETS pinpoint_common_shared pinpoint_common ${INSTALL_EXPORT}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+    install(TARGETS pinpoint_common_shared pinpoint_common ${INSTALL_EXPORT}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+endif()
+
 
 if (WITH_TEST_CASE)
     include (CTest)

@@ -84,7 +84,11 @@ int TransLayer::connect_stream_remote(const char* remote)
 int TransLayer::connect_unix_remote(const char* remote)
 {
     int fd = -1;
+#if defined(__APPLE__)
+    struct sockaddr_un u_sock = {0,0,{0}};
+#else
     struct sockaddr_un u_sock = {0,{0}};
+#endif
     struct linger fd_linger ={1, 1}; // open and 1 second
     if((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
