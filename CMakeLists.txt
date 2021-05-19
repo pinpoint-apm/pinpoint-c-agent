@@ -9,5 +9,5 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 
 add_executable(test_pinpoint_cpp src/CPP/test_pinpoint.cpp)
 add_executable(test_pinpoint_c src/CPP/test_pinpoint.c)
-target_link_libraries(test_pinpoint_cpp pinpoint_common jsoncpp rt)
-target_link_libraries(test_pinpoint_c pinpoint_common jsoncpp rt)
+target_link_libraries(test_pinpoint_cpp pinpoint_common rt)
+target_link_libraries(test_pinpoint_c pinpoint_common rt)

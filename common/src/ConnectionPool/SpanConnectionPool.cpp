@@ -38,7 +38,7 @@ SpanConnectionPool::SpanConnectionPool(const char* co_host,uint32_t w_timeout_ms
 
 TransConnection SpanConnectionPool::createTrans()
 {
-    TransConnection _connect( new TransLayer(this->co_host,this->timeout_ms));
+    TransConnection _connect( new TransLayer(this->co_host));
     using namespace std::placeholders;
     // _connect->registerPeerMsgCallback(
     //     std::bind(&SpanConnectionPool::_handleMsgFromCollector,this,_1,_2,_3),
@@ -86,7 +86,7 @@ void SpanConnectionPool::_handleMsgFromCollector(int type,const char* buf,size_t
 void SpanConnectionPool::_handle_agent_info(int type,const char* buf,size_t len)
 {
     Json::Value  root;
-
+    (void)type;
     Json::CharReaderBuilder builder;
     builder["collectComments"] = false;
 
