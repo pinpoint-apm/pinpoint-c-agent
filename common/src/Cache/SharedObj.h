@@ -21,18 +21,29 @@
 #define COMMON_SHAREDOBJ_H
 
 #include "common.h"
-
+#include <time.h>
 #ifdef __cplusplus 
 extern "C"{
 #endif
 
-// bool pre_init_shared_object();
-// bool init_shared_obj();
-void* fetch_shared_obj_addr();
-int  fetch_shared_obj_length();
-bool checking_and_init();
-void detach_shared_obj();
+#ifndef NAME_MAX
+#define NAME_MAX 256
+#endif
 
+#define SHM_FILE_PREFIX_SIZE 32
+typedef struct shared_object_s{
+    void*  region;
+    int    length;
+    char   fileprefix[SHM_FILE_PREFIX_SIZE];
+}SharedObject_T;
+
+// void* fetch_shared_obj_addr();
+// bool checking_and_init();
+// void detach_shared_obj();
+
+bool attach_shared_memory(SharedObject_T* shm_obj);
+bool detach_shared_memory(SharedObject_T* shm_obj);
+time_t get_shared_memory_create_time(SharedObject_T* shm_obj);
 #ifdef __cplusplus
 }
 #endif

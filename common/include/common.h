@@ -30,6 +30,15 @@
 
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define DEPRECATED __declspec(deprecated)
+#else
+#define DEPRECATED
+#endif
+
+
 #define MAX_VEC 512
 #define LOG_SIZE 4096
 #define IN_MSG_BUF_SIZE 4096
@@ -234,7 +243,7 @@ void pp_trace(const char *format,...);
  */
 void reset_unique_id(void);
 
-void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
+DEPRECATED void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
 
 #ifdef __cplusplus 
 }

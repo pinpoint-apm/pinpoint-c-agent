@@ -33,7 +33,7 @@ endif()
 include_directories("include"
                     "src"
                     "jsoncpp/include")
-                    
+                  
 link_directories(${CMAKE_BINARY_DIR}/lib)
 
 add_subdirectory(jsoncpp)
