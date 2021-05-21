@@ -33,3 +33,4 @@ dist
 temp
 vendor
 Example/*/Cache/*
+CollectorAgentDocker/env.list

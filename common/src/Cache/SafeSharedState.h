@@ -102,6 +102,7 @@ private:
     SafeSharedState();
 
     ~SafeSharedState(){
+        detach_shared_memory(&this->shmObj);
         this->_global_state = nullptr;
     }
     

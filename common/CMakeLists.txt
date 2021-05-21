@@ -53,6 +53,19 @@ if(UNIX AND NOT APPLE)
     )
 endif()
 
+if(AGENT_WITH_PKGCONFIG_SUPPORT)
+    include(JoinPaths)
+
+    join_paths(libdir_for_pc_file "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
+    join_paths(includedir_for_pc_file "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
+
+    configure_file(
+        "pkg-config/pinpoint_common.pc.in"
+        "pkg-config/pinpoint_common.pc"
+        @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/pinpoint_common.pc"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+endif()
 
 if (WITH_TEST_CASE)
     include (CTest)
