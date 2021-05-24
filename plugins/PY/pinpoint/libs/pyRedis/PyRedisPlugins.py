@@ -36,7 +36,6 @@ class PyRedisPlugins(Candy):
         ###############################################################
         pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
         pinpointPy.add_clue(PP_SERVER_TYPE, PP_REDIS)
-        pinpointPy.add_clues(PP_ARGS,("%s:%s")%(args[1],args[2]))
         ###############################################################
         pinpointPy.add_clue(PP_DESTINATION, str(args[0]))
         return args,kwargs
