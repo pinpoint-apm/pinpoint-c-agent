@@ -63,5 +63,4 @@ bool(false)
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d,"calls":[{"E":%d,"S":%d}]})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
-[pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
