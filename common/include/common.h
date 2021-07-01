@@ -44,7 +44,7 @@
 #define IN_MSG_BUF_SIZE 4096
 #define NAMING_SIZE 128
 #define MAX_SPAN_SIZE 4096*100
-
+static const int RECONNECT_TIME_SEC = 5;
 typedef enum{
     RESPONSE_AGENT_INFO = 0,
     REQ_UPDATE_SPAN = 1
