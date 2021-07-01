@@ -156,7 +156,7 @@ ERROR:
         pp_trace("remote is not valid:%s",statement);
         return -1;
 DONE:
-        this->_state |= (S_ERROR|S_READING);
+        this->_state |= (S_ERROR|S_READING|S_WRITING);
         return fd;
     }
 
