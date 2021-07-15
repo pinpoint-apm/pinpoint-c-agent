@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type E_AGENT_STATUS int32
@@ -22,7 +23,9 @@ func ParseStringField(v string) map[string]string {
 	ret := map[string]string{}
 	for _, item := range strings.Split(v, " ") {
 		values := strings.SplitN(item, "=", 2)
-		ret[values[0]] = values[1]
+		if len(values) == 2 {
+			ret[values[0]] = values[1]
+		}
 	}
 	return ret
 }
