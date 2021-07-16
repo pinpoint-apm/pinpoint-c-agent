@@ -21,19 +21,29 @@
 #include <stdbool.h>
 #include <assert.h>
 
-// #if defined(__linux__)  || defined(_UNIX) ||defined(__APPLE__)
-// #define likely(x)        __builtin_expect(!!(x), 1)
-// #define unlikely(x)      __builtin_expect(!!(x), 0)
-// #elif _WIN32
+#ifdef __linux__
+#define likely(x)        __builtin_expect(!!(x), 1)
+#define unlikely(x)      __builtin_expect(!!(x), 0)
+#elif _WIN32
 
-// #else
+#else
 
-// #endif
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#define DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define DEPRECATED __declspec(deprecated)
+#else
+#define DEPRECATED
+#endif
+
 
 #define MAX_VEC 512
 #define LOG_SIZE 4096
 #define IN_MSG_BUF_SIZE 4096
 #define NAMING_SIZE 128
+#define MAX_SPAN_SIZE 4096*100
 
 typedef enum{
     RESPONSE_AGENT_INFO = 0,
@@ -47,7 +57,7 @@ typedef enum{
     E_UTEST = 0x4
 }AGENT_FLAG;
 
-typedef uint32_t NodeID;
+typedef int32_t NodeID;
 
 #pragma pack (1)
 typedef  struct {
@@ -69,9 +79,10 @@ typedef struct trace_store_layer{
 }TraceStoreLayer;
 
 #define LOG_SIZE 4096
+#define MAX_ADDRESS_SIZE 256
 typedef void (*VOID_FUNC)(void);
 typedef struct pp_agent_s{
-    const char* co_host; // tcp:ip:port should support dns
+    char co_host[MAX_ADDRESS_SIZE]; // tcp:ip:port should support dns
     uint32_t    timeout_ms;  // always be 0
     long        trace_limit;  // change to long as python need long
     int         agent_type;
@@ -133,6 +144,12 @@ NodeID pinpoint_start_trace(NodeID);
  */
 NodeID pinpoint_end_trace(NodeID);
 
+/**
+ *  check id->traceNode is root
+ * @param
+ * @return 1: is root; 0: not root node;-1: A wrong id
+ */
+int pinpoint_trace_is_root(NodeID);
 
 /**
  *  force end current trace, only called when callstack leaked
@@ -227,7 +244,7 @@ void pp_trace(const char *format,...);
  */
 void reset_unique_id(void);
 
-void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
+DEPRECATED void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
 
 #ifdef __cplusplus 
 }

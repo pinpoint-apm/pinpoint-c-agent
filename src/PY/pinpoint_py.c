@@ -20,7 +20,8 @@
 
 PPAgentT global_agent_info;
 static PyObject *py_obj_msg_callback;
-static char* g_collector_host;
+// global g_collector_host is suck
+// static char* g_collector_host;
 
 #if defined(__linux__)  || defined(_UNIX) ||defined(__APPLE__)
 #include <sys/types.h>
@@ -381,18 +382,7 @@ bool set_collector_host(char* host)
 {
     if(strcasestr(host,"unix") || strcasestr(host,"tcp"))
     {
-        if(g_collector_host)
-        {
-            free(g_collector_host);
-            g_collector_host = NULL;
-        }
-
-        g_collector_host = strdup(host);
-        
-        // NOTE: co_host must be protected when writting
-        
-        global_agent_info.co_host = g_collector_host;
-
+        strncpy(global_agent_info.co_host,host,MAX_ADDRESS_SIZE);
         return true;
     }
     PyErr_SetString(PyExc_TypeError, "collector_host must start with unix/tcp");
@@ -419,18 +409,7 @@ static PyObject *py_set_agent(PyObject *self, PyObject *args, PyObject *keywds)
         }
 
         global_agent_info.trace_limit = trace_limit;
-
-// #if PY_VERSION_HEX >= 0x30701f0
-//        if(enable_coro)
-//        {
-//
-//            // todo must hold GIL
-//            pinpoint_reset_store_layer(get_coro_store_layer());
-//            global_agent_info.inter_flag |= E_DISABLE_GIL ;
-//        }
-//        pp_trace("enable_coro:%d",enable_coro);
-//#endif
-
+        
         pp_trace("collector_host:%s",collector_host);
         pp_trace("trace_limit:%ld",trace_limit);
 
@@ -491,10 +470,6 @@ static PyMethodDef PinpointMethods[] = {
 static void free_pinpoint_module(void * module)
 {
     Py_XDECREF(py_obj_msg_callback);
-    if (g_collector_host)
-    {
-        free(g_collector_host);
-    }
 // #if PY_VERSION_HEX >= 0x30701f0
 //     if(coro_local)
 //     {
@@ -639,7 +614,7 @@ PyMODINIT_FUNC
 PyInit_pinpointPy(void) {
     
     global_agent_info.agent_type=1700;
-    global_agent_info.co_host = "unix:/tmp/collector.sock";
+    strncpy(global_agent_info.co_host ,"unix:/tmp/collector.sock",MAX_ADDRESS_SIZE);
     global_agent_info.inter_flag = 0;
     global_agent_info.timeout_ms = 0;
     global_agent_info.trace_limit = -1;
@@ -683,7 +658,7 @@ initpinpointPy(void)
         return;
 
     global_agent_info.agent_type=1700;
-    global_agent_info.co_host = "unix:/tmp/collector.sock";
+    strncpy(global_agent_info.co_host ,"unix:/tmp/collector.sock",MAX_ADDRESS_SIZE);
     global_agent_info.inter_flag = 0;
     global_agent_info.timeout_ms = 0;
     global_agent_info.trace_limit = -1;

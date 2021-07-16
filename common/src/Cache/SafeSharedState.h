@@ -50,7 +50,7 @@ public:
 
     void free()
     {
-        detach_shared_obj();
+
         this->_global_state = nullptr;
     }
 
@@ -73,14 +73,16 @@ public:
 
     void updateStartTime(std::time_t startTime)
     {
-        pp_trace("collector-agent starttime:%ld",startTime);
-        this->_global_state->starttime = startTime;
+        (void)startTime;
+        // pp_trace("collector-agent starttime:%ld",startTime);
+        // this->_global_state->starttime = startTime;
         this->_global_state->state |=  E_READY;
     }
 
     std::time_t getStartTime()
     {
-       return this->_global_state->starttime;
+    //    return this->_global_state->starttime;
+        return get_shared_memory_create_time(&this->shmObj);
     }
 
 
@@ -100,11 +102,12 @@ private:
     SafeSharedState();
 
     ~SafeSharedState(){
+        detach_shared_memory(&this->shmObj);
         this->_global_state = nullptr;
-        detach_shared_obj();
     }
     
     SharedState * _global_state;
+    SharedObject_T shmObj ={nullptr,1024,"pinpoint"} ;
 };
 
 } /* namespace Cache */

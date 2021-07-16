@@ -30,6 +30,15 @@
 
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define DEPRECATED __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define DEPRECATED __declspec(deprecated)
+#else
+#define DEPRECATED
+#endif
+
+
 #define MAX_VEC 512
 #define LOG_SIZE 4096
 #define IN_MSG_BUF_SIZE 4096
@@ -70,9 +79,10 @@ typedef struct trace_store_layer{
 }TraceStoreLayer;
 
 #define LOG_SIZE 4096
+#define MAX_ADDRESS_SIZE 256
 typedef void (*VOID_FUNC)(void);
 typedef struct pp_agent_s{
-    const char* co_host; // tcp:ip:port should support dns
+    char co_host[MAX_ADDRESS_SIZE]; // tcp:ip:port should support dns
     uint32_t    timeout_ms;  // always be 0
     long        trace_limit;  // change to long as python need long
     int         agent_type;
@@ -188,7 +198,7 @@ int pinpoint_get_context_long(NodeID _id,const char* key,long*);
 /**
  * if tracelimit enable, check current trace state,
  * @param timestamp
- * @return 0, sampled or else, not sampled
+ * @return 1, sampled or else, not sampled
  */
 int check_tracelimit(int64_t);
 
@@ -234,7 +244,7 @@ void pp_trace(const char *format,...);
  */
 void reset_unique_id(void);
 
-void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
+DEPRECATED void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
 
 #ifdef __cplusplus 
 }

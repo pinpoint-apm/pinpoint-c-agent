@@ -85,7 +85,7 @@ TEST(translayer, unix_socket_layer)
         exit(0);
     }
     sleep(2);
-    std::string remote = global_agent_info.co_host;
+    std::string remote =global_agent_info.co_host;
     TransLayer layer(remote);
     using namespace std::placeholders;
     layer.registerPeerMsgCallback(std::bind(handle_agent_info,_1,_2,_3),NULL);

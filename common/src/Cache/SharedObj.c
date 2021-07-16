@@ -22,97 +22,146 @@
 
 #include "SharedObj.h"
 
-
 #if defined(__linux__) || defined(_UNIX) ||defined(__APPLE__)
-#define SHARE_OBJ_NAME "pinpoint-php.shm"
+#define SHARE_OBJ_HEADER "pinpoint.shm"
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sys/mman.h>
+#include <stdio.h>
 
-typedef struct shared_object_s{
-    // int    shm_fd;
-    void*  region;
-    int     length;
-    const char *address;
-}SharedObject_T;
 
-static SharedObject_T object;
 
-// also this is not thread_safe version, but works fine
-bool pre_init_shared_object()
+#pragma pack(push, 1)
+typedef struct shared_file_header_s{
+    char header[sizeof(SHARE_OBJ_HEADER)];
+    time_t create_time;
+}SharedFileHeaderT;
+#pragma pack(pop)
+
+static inline int padding_pagesize(int length)
 {
-    object.address = SHARE_OBJ_NAME;
-    mode_t mode = S_IRUSR |S_IWUSR|S_IRGRP|S_IWGRP;
-    int fd = shm_open(object.address,O_WRONLY | O_CREAT,mode);
-    if( fd == -1)
+    int64_t pagesize = sysconf(_SC_PAGESIZE);
+    return (pagesize >= length) ? (pagesize):((length + pagesize)&(~pagesize));
+}
+
+static bool set_shm_file_header(int fd,int length)
+{
+    // extend the new file
+    struct stat _stat;
+    fstat(fd,&_stat);
+    assert(_stat.st_size == 0);
+
+    if(ftruncate(fd,length) == -1)
     {
-        pp_trace("%s: open address with:%s \n",__FUNCTION__,strerror(errno));
+        pp_trace("trancate %fd failed:%s",fd,strerror(errno));
         return false;
     }
-    
-    struct stat _stat;
-    size_t length;
-    fstat(fd,&_stat);
-    length = _stat.st_size;
-    if(length == 0)
+    // due to phpt, remove this line
+    // pp_trace("ftruncate the size to:%ld",length);
+
+    void* addr = mmap(NULL,length,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+    if(addr == MAP_FAILED)
     {
-        int64_t pagesize = sysconf(_SC_PAGESIZE);
-        if(ftruncate(fd,pagesize) == -1)
-        {
-            pp_trace("trancate %s failed:%s",SHARE_OBJ_NAME,strerror(errno));
-        }
+        pp_trace("mmap %d length:%d %s ",fd ,length,strerror(errno));
+        return false;
     }
-    
-    close(fd);
+    SharedFileHeaderT* header = (SharedFileHeaderT*)addr;
+    strcpy(header->header,SHARE_OBJ_HEADER);
+    header->create_time = time(NULL);
+    munmap(addr,length);
 
     return true;
 }
 
-bool init_shared_obj()
+static inline bool get_shm_body_region(int fd,int fileSize,SharedObject_T* obj)
 {
-    if(object.region != NULL || object.address == NULL )
+    void* addr = mmap(NULL,fileSize,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+    if(addr == MAP_FAILED)   
     {
+        pp_trace("mmap %d length:%d %s ",fd ,fileSize,strerror(errno));
+        return false;
+    }
+    obj->region = (char*)addr + sizeof(SharedFileHeaderT);
+    obj->length = fileSize - sizeof(SharedFileHeaderT);
+    return true;
+} 
+
+static int attach_file(const char* filepath,int length)
+{
+    int flag = O_RDWR;
+    mode_t mode = S_IRUSR |S_IWUSR|S_IRGRP|S_IWGRP;
+    // 2021-05-20 10:30:52 +0800
+    // if address exist, just return true
+    int fd = shm_open(filepath,flag,mode);
+    if( fd > 0)
+    {
+        return fd;
+    }
+
+    // not exist 
+    flag |=  O_CREAT | O_EXCL;
+    fd = shm_open(filepath,flag,mode);
+    if(fd == -1){
+        if(errno == EEXIST ){
+            return attach_file(filepath,length);
+        }
+        pp_trace("%s: shm_open:%s error:%s \n",filepath,__FUNCTION__,strerror(errno));
+        return -1;
+    }
+
+    return set_shm_file_header(fd,length) ? (fd):(-1);
+}
+
+static inline void rename_address(char *address,int max_size,const char* prefix,int length){
+    snprintf(address,max_size,"%s-%u-%d.shm",prefix,getuid(),length);
+}
+
+bool attach_shared_memory(SharedObject_T* shm_obj)
+{
+    assert(shm_obj);
+    char shm_name[NAME_MAX]={0};
+    int realLen = padding_pagesize(shm_obj->length);
+    rename_address(shm_name,NAME_MAX,shm_obj->fileprefix,shm_obj->length);
+
+    int fd = attach_file(shm_name,realLen);
+    if(fd == -1){
+        return false;
+    }
+
+    return get_shm_body_region(fd,realLen,shm_obj);
+}
+
+
+bool detach_shared_memory(SharedObject_T* shm_obj)
+{
+    void* body = shm_obj->region;
+    SharedFileHeaderT* header = (SharedFileHeaderT* )((char*)body - sizeof(SharedFileHeaderT));
+    if(strcmp(header->header,SHARE_OBJ_HEADER) == 0){
+        munmap(header,shm_obj->length+sizeof(SharedFileHeaderT));
         return true;
     }
-
-    int fd = shm_open(object.address,O_RDWR,S_IRUSR |S_IWUSR|S_IRGRP|S_IWGRP);
-    if(fd == -1)
-    {
-        pp_trace("attach file:[%s] with:[%s]",object.address,strerror(errno));
-        return false;
-    }
-
-    struct stat _stat;
-    size_t length;
-    fstat(fd,&_stat);
-    length = _stat.st_size;
-    assert(length > 0);
-    void* addr = mmap(NULL,length,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
-    if(addr == (void*)-1)
-    {
-        close(fd);
-        pp_trace("mmap file:[%s] with:[%s]",object.address,strerror(errno));
-        return false;
-    }
-    // start with zero
-    object.region = addr;
-    object.length = length;
-    close(fd);
-    return true;
+    pp_trace("not found header mark on shm_obj:%p",shm_obj);
+    return false;
 }
 
-void detach_shared_obj()
+time_t get_shared_memory_create_time(SharedObject_T* shm_obj)
 {
-    munmap(object.region,object.length);
-    object.region = NULL;
+    assert(shm_obj);
+    void* body = shm_obj->region;
+    SharedFileHeaderT* header = (SharedFileHeaderT* )((char*)body - sizeof(SharedFileHeaderT));
+    return header->create_time;
 }
+
 
 #elif _WIN32
+
+#error "No support on win32"
+
 #include <windows.h>
 
 typedef struct shared_object_s{
@@ -188,35 +237,5 @@ void detach_shared_obj()
 
 #error "not support platform"
 #endif
-
-
-void* fetch_shared_obj_addr()
-{
-    checking_and_init();
-    assert(object.region);
-    return object.region;
-}
-
-
-int  fetch_shared_obj_length()
-{
-    return object.length;
-}
-
-
-bool checking_and_init()
-{
-    if(object.region == NULL)
-    {
-        if(pre_init_shared_object() && init_shared_obj())
-        {
-            return true;
-        }else{
-            return false;
-        }
-    }
-    return true;
-}
-
 
 

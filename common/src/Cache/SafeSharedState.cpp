@@ -21,7 +21,7 @@
  */
 
 #include "SafeSharedState.h"
-
+#include <stdexcept>
 namespace Cache {
 bool SafeSharedState::checkTraceLimit(int64_t timestamp)
 {
@@ -63,7 +63,13 @@ BLOCK:
 
 SafeSharedState::SafeSharedState()
 {
-    this->_global_state = (SharedState*)fetch_shared_obj_addr();
+    // this->shmObj = ;
+    if(attach_shared_memory(&this->shmObj)){
+        this->_global_state = (SharedState*)this->shmObj.region;
+        return ;
+    }
+    
+    throw std::runtime_error("can not attach shm memory");
 }
 
 } /* namespace Cache */

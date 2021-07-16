@@ -3,9 +3,9 @@ exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
-Name: pinpoint_agent
+Name: pinpoint_common
 Description: A C/C++ library, support pinpoint agent
 Version: 0.4.4
 URL: https://github.com/pinpoint-apm/pinpoint-c-agent
-Libs: -L${libdir} -lpinpoint_common_shared
+Libs: -L${libdir} -lpinpoint_common_shared -lrt
 Cflags: -I${includedir}
