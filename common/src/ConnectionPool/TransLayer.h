@@ -54,6 +54,7 @@ public:
     co_host(co_host),
     chunks(1024*1024,1024*40),
     _state(0),
+    lastConnectTime(0),
     c_fd(-1)
     {
     }
@@ -130,6 +131,13 @@ private:
             goto ERROR;
         }
 
+        // check last connect time
+        if( time(NULL) < this->lastConnectTime + RECONNECT_TIME_SEC){
+            goto RECONNECT_WAITING;
+        }else{
+            this->lastConnectTime = time(NULL);
+        }
+
         /// unix
         substring = strcasestr(statement,UNIX_SOCKET);
         if( substring == statement )
@@ -155,8 +163,10 @@ private:
 ERROR:
         pp_trace("remote is not valid:%s",statement);
         return -1;
+RECONNECT_WAITING:
+        return -1;
 DONE:
-        this->_state |= (S_ERROR|S_READING);
+        this->_state |= (S_ERROR|S_READING|S_WRITING);
         return fd;
     }
 
@@ -285,7 +295,9 @@ private:
     std::function<void(int)> chann_error_cb;
     std::function<void(int type,const char* buf,size_t len)> peerMsgCallback;
     const static char* UNIX_SOCKET;
-    const static char* TCP_SOCKET ;
+    const static char* TCP_SOCKET;
+    time_t      lastConnectTime;
+
 public:
     int           c_fd;
 };
