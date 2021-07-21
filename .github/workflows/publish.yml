@@ -1,0 +1,58 @@
+name: publish
+
+on: [release]
+
+jobs:
+  collector-agent:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the collector-agent Docker image
+      run: |
+        docker build collector-agent --tag ghcr.io/$GITHUB_REPOSITORY/collector-agent:latest
+        docker push ghcr.io/$GITHUB_REPOSITORY/collector-agent:latest
+
+  golang-build-env-1-13:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the golang-build-env Docker image
+      run: |
+        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest -f common/Dockerfile common
+        docker push ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest
+
+  golang-build-env-1-16:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the golang-build-env Docker image
+      run: |
+        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest -f common/Go1.16.Dockerfile common
+        docker push ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest
