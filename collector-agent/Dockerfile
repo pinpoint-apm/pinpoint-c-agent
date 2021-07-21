@@ -3,6 +3,6 @@ WORKDIR /apps
 COPY  . /apps/collector-agent
 RUN  cd /apps/collector-agent && go build
 
-FROM centos:7
+FROM alpine:3.14
 COPY --from=builder /apps/collector-agent/CollectorAgent /usr/local/bin
 ENTRYPOINT [ "CollectorAgent" ]
