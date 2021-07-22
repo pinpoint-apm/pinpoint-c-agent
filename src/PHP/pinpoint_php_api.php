@@ -1,4 +1,5 @@
 <?php
+
 define("PINPOINT_ROOT_LOC",1);
 /**
  * start trace,if callstack is empty, create a span. Otherwise, create a span event
@@ -60,3 +61,12 @@ function pinpoint_drop_trace($id=-1){}
  * @return collector-agent start time
  */
 function pinpoint_start_time(){}
+
+/**
+ * @description: mark current span ($id) as error
+ * @param {string} $msg
+ * @param {string} $filename
+ * @param {int} $lineno
+ * @param {*} $id =-1 that means use the thread-local id
+ */
+function pinpoint_mark_as_error(string $msg, string $filename,int $lineno = 0,$id=-1){}
