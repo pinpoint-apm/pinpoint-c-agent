@@ -8,7 +8,7 @@ gcc|gcc 4.7+| c++11
 cmake| 3.13+ | ✔
 OS| *inx | 
 
-> Steps
+### Steps
 
 1. Execute commands below:
     ```shell
@@ -34,4 +34,10 @@ OS| *inx |
 export LD_LIBRARY_PATH=/path to pinpoint lib/:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=/path to pinpoint lib/:/path to pinpoint lib/pkgconfig:$PKG_CONFIG_PATH
 export LD_RUN_PATH=/path to pinpoint lib/:$LD_RUN_PATH
+```
+
+### Use docker images
+
+``` dockerfile
+from ghcr.io/pinpoint-apm/pinpoint-c-agent/golang-build-env-1.13:latest as gobuilder
 ```
