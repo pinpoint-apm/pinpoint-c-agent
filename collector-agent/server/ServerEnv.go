@@ -81,20 +81,22 @@ func InitServerConfig() {
 		log.SetLevel(level)
 	}
 
+	// if log dir exist use log file, if not keep loging on stdout
 	if _, err := os.Stat(config.LoggerDir); os.IsNotExist(err) {
-		msg := fmt.Sprintf("PP_LOG_DIR: %s not exist", config.LoggerDir)
-		panic(msg)
+		log.SetOutput(os.Stdout)
+		log.Info(fmt.Sprintf("PP_LOG_DIR: '%s' not set or doesn't exist, falling back to stdout", config.LoggerDir))
+	} else {
+		logFile := path.Join(config.LoggerDir, "collector.log")
+		// bind logger on the file
+		logger := &lumberjack.Logger{
+			Filename:   logFile,
+			MaxSize:    50,
+			MaxBackups: 50,
+		}
+	
+		log.SetOutput(logger)
 	}
 
-	logFile := path.Join(config.LoggerDir, "collector.log")
-	// bind logger on the file
-	logger := &lumberjack.Logger{
-		Filename:   logFile,
-		MaxSize:    50,
-		MaxBackups: 50,
-	}
-
-	log.SetOutput(logger)
 	log.SetFormatter(&prefixed.TextFormatter{
 		DisableColors:   true,
 		TimestampFormat: "2006-01-02 15:04:05.999999999",
