@@ -72,3 +72,22 @@ jobs:
           pip install -r requirements.txt 
           python setup.py install
           nosetests src/PY/test --ignore-files="TestCoroutines.*"
+  Collector-agent:
+      strategy:
+        matrix:
+          go-version: [1.16.x]
+          os: [ubuntu-latest]
+      runs-on: ${{ matrix.os }}
+      steps:
+        - name: Install Go
+          uses: actions/setup-go@v2
+          with:
+            go-version: ${{ matrix.go-version }}
+        - name: Checkout code
+          uses: actions/checkout@v2
+        - run: |
+            cd collector-agent
+            go mod download
+            go build
+            go test ./... -v
+            

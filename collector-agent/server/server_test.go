@@ -84,7 +84,7 @@ func handleWrite(t *testing.T, conn net.Conn, done chan string) {
 			t.Error("Error to send message because of ", e.Error())
 			break
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	conn.Write(generateUnvaalidPacket03())
@@ -116,7 +116,6 @@ func TestJsonServer(t *testing.T) {
 	go handleWrite(t, conn, done)
 	go handleRead(t, conn, done)
 
-	<-done
 	<-done
 	<-done
 	//time.Sleep(5 * time.Second)
