@@ -47,15 +47,16 @@ bool SafeSharedState::checkTraceLimit(int64_t timestamp)
     else if(this->_global_state->tick >= global_agent_info.trace_limit)
     {
         goto BLOCK;
-    }else if(this->isReady() == false){
-        goto BLOCK;
+    // note: if offline, just test it in 5secs
+    // }else if(this->isReady() == false){
+    //     goto BLOCK;
     }else
     {
         __sync_add_and_fetch(&this->_global_state->tick,1);
     }
     return false;
 BLOCK:
-    pp_trace("This span dropped. max_trace_limit:%d current_tick:%d offLine:%d",global_agent_info.trace_limit,
+    pp_trace("This span dropped. max_trace_limit:%d current_tick:%d onLine:%d",global_agent_info.trace_limit,
         this->_global_state->tick,this->isReady()?(1):(0));
     return true;
 }
