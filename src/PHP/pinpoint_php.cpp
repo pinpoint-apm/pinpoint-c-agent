@@ -67,6 +67,7 @@ PHP_FUNCTION(pinpoint_drop_trace);
 PHP_FUNCTION(pinpoint_start_time);
 PHP_FUNCTION(pinpoint_set_context);
 PHP_FUNCTION(pinpoint_get_context);
+PHP_FUNCTION(pinpoint_mark_as_error);
 PHP_FUNCTION(pinpoint_get_func_ref_args);
 
 ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
@@ -110,6 +111,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_add_id_key_value_flag, 0, 0, 2)
     ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_add_msg_filename_lineno_id, 0, 0, 2)
+    ZEND_ARG_INFO(0, msg)
+    ZEND_ARG_INFO(0, filename)
+    ZEND_ARG_INFO(0, lineno)
+    ZEND_ARG_INFO(0, nodeid)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_add_timestamp, 0, 0, 0)
     ZEND_ARG_INFO(0, timestamp)
 ZEND_END_ARG_INFO()
@@ -122,6 +130,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_add_id_value, 0, 0, 1)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, nodeid)
 ZEND_END_ARG_INFO()
+
+
 
 ZEND_BEGIN_ARG_INFO(arginfo_none, 0)
 ZEND_END_ARG_INFO()
@@ -140,6 +150,7 @@ const zend_function_entry pinpoint_php_functions[] = {
         PHP_FE(pinpoint_set_context,arginfo_add_id_key_value)
         PHP_FE(pinpoint_get_context,arginfo_add_id_value)
         PHP_FE(pinpoint_tracelimit,arginfo_add_timestamp)
+        PHP_FE(pinpoint_mark_as_error,arginfo_add_msg_filename_lineno_id)
         PHP_FE(pinpoint_add_clue,arginfo_add_id_key_value_flag)
         PHP_FE(pinpoint_add_clues,arginfo_add_id_key_value_flag)
         PHP_FE_END  /* Must be the last line in pinpioint_php_functions[] */
@@ -421,6 +432,40 @@ PHP_FUNCTION(pinpoint_unique_id)
 {
     RETURN_LONG(generate_unique_id());
 }
+
+
+PHP_FUNCTION(pinpoint_mark_as_error)
+{
+    std::string msg;
+    std::string fileName;
+    long _lineno =0;
+    long _id = -1;
+#if PHP_VERSION_ID < 70000
+    char* zkey = NULL,* zvalue =  NULL;
+    int zkey_len,value_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &zkey, &zkey_len,&zvalue, &value_len,&_lineno,&_id) == FAILURE)
+    {
+        zend_error(E_ERROR, "pinpoint_add_clues() expects (int, string).");
+        return;
+    }
+    msg = std::string(zkey,zkey_len);
+    fileName = std::string(zvalue,value_len);
+#else
+    zend_string* zkey;
+    zend_string* zvalue;
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ll", &zkey ,&zvalue,&_lineno,&_id) == FAILURE)
+    {
+        zend_error(E_ERROR, "pinpoint_add_clues() expects (int, string).");
+        return;
+    }
+    msg = std::string(zkey->val,zkey->len);
+    fileName = std::string(zvalue->val,zvalue->len);
+#endif
+    NodeID id =( _id== -1) ?(pinpoint_get_per_thread_id()):(_id);
+    catch_error(id,msg.c_str(),fileName.c_str(),_lineno);
+}
+
 
 
 PHP_FUNCTION(pinpoint_add_clues)
