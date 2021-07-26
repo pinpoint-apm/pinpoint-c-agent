@@ -114,7 +114,7 @@ func (agent *GrpcAgent) agentOnline() error {
 
 	defer func() {
 		if err := stream.CloseSend(); err != nil {
-			agent.log.Warnf("unwanted err when stream.CloseSend:%s", nil)
+			agent.log.Warnf("unwanted err when stream.CloseSend:%s", err)
 		}
 	}()
 

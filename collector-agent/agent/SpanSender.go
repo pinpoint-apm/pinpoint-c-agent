@@ -443,7 +443,7 @@ func (spanSender *SpanSender) Interceptor(span map[string]interface{}) bool {
 		// recv the channel status
 		select {
 		case statusCode := <-spanSender.spanRespCh:
-			log.Warn("span send stream is offline statusCode:%d, clear all string/sql/api meta data", statusCode)
+			log.Warnf("span send stream is offline statusCode:%d, clear all string/sql/api meta data", statusCode)
 			spanSender.cleanAllMetaData()
 		case <-time.After(0 * time.Second):
 			// do nothing, just go on

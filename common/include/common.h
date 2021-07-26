@@ -198,7 +198,7 @@ int pinpoint_get_context_long(NodeID _id,const char* key,long*);
 /**
  * if tracelimit enable, check current trace state,
  * @param timestamp
- * @return 1, sampled or else, not sampled
+ * @return 0, sampled or else, not sampled
  */
 int check_tracelimit(int64_t);
 

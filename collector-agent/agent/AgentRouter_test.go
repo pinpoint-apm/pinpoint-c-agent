@@ -25,7 +25,7 @@ func TestGetAgentInfo(t *testing.T) {
 
 	id, name, ft, startTime, err := GetAgentInfo(spanMap)
 
-	if id != "sfdaefe" && name != "sfdaefe" && ft != "23412" && startTime != "234123424" && err != nil {
+	if id != "sfdaefe" && name != "sfdaefe" && ft != 23412 && startTime != "234123424" && err != nil {
 		t.Fail()
 	}
 

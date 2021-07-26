@@ -42,7 +42,7 @@ string(1) "a"
 [pinpoint] [%d] [%d] pinpoint_get_context_key#127 failed with map::at, parameters:not exsit
 bool(false)
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]This span dropped. max_trace_limit:0 current_tick:0 offLine:1
+[pinpoint] [%d] [%d]This span dropped. max_trace_limit:0 current_tick:0 onLine:1
 [pinpoint] [%d] [%d]change current#128 status, before:2,now:4
 [pinpoint] [%d] [%d]current#128 span dropped,due to TRACE_BLOCK
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
