@@ -1,6 +1,7 @@
 ## Install Collector Agent
 `Collector-Agent`, who formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
 
+### Steps
 1. Goto collector-agent(`pinpoint-c-agent/collector-agent`)
 2. Execute command `go build`
 3. Add environment variables:
@@ -23,6 +24,12 @@
     5. `PP_ADDRESS`: Set the address of `Collector-Agent`, then `PHP/Python-Agent` will connect Collector-Agent through this address.
 4. Run `Collector-Agent` by executing command `./CollectorAgent`
    
+### Use docker images
+
+```sh
+docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:latest
+```
+
 > Collector Agent Span Specification
 
 [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
