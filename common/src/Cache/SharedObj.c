@@ -58,7 +58,7 @@ static bool set_shm_file_header(int fd,int length)
 
     if(ftruncate(fd,length) == -1)
     {
-        pp_trace("trancate %fd failed:%s",fd,strerror(errno));
+        pp_trace("trancate %d failed:%s",fd,strerror(errno));
         return false;
     }
     // due to phpt, remove this line

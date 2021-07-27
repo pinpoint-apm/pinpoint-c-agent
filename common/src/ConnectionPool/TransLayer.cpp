@@ -205,7 +205,7 @@ void TransLayer::sendMsgToAgent(const std::string &data)
     header.type    = htonl(REQ_UPDATE_SPAN);
 
     if(this->chunks.checkCapacity(sizeof(header)+data.size()) == false){
-        pp_trace("Send buffer is full. size:[%d]",data.size()+sizeof(header));
+        pp_trace("Send buffer is full. size:[%ld]",data.size()+sizeof(header));
         return ;
     }
     //copy header
