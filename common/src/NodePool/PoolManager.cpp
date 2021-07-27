@@ -56,7 +56,7 @@ void PoolManager::freeNode(NodeID id)
     id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
     if(this->_aliveNodeSet[id] == false){
-        pp_trace("%ld not alive !!!",id);
+        pp_trace("%d not alive !!!",id);
         #ifndef NDEBUG
             throw std::runtime_error("input is invalid");
         #endif
