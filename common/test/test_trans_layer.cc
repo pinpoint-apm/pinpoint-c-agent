@@ -121,7 +121,7 @@ TEST(translayer, stream_socket_layer)
 TEST(ConnectionPool, API)
 {
     std::string remote = global_agent_info.co_host;
-    SpanConnectionPool _pool(remote.c_str(),10);
+    SpanConnectionPool _pool(remote.c_str());
 
     // SpanConnectionPool _pool1 = _pool;
     // (void)_pool1;

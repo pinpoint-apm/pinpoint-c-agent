@@ -83,7 +83,7 @@ TransConnection getConnection()
 {
     
     std::call_once (_pool_init_flag,
-        [](){_con_pool.initPool(global_agent_info.co_host,global_agent_info.timeout_ms);}
+        [](){_con_pool.initPool(global_agent_info.co_host);}
     );
 
     return _con_pool.get();
@@ -93,7 +93,7 @@ void freeConnection(TransConnection& trans)
 {
   
     std::call_once (_pool_init_flag,
-        [](){_con_pool.initPool(global_agent_info.co_host,global_agent_info.timeout_ms);}
+        [](){_con_pool.initPool(global_agent_info.co_host);}
     );
     
     return _con_pool.free(trans);
