@@ -56,7 +56,7 @@ bool SafeSharedState::checkTraceLimit(int64_t timestamp)
     }
     return false;
 BLOCK:
-    pp_trace("This span dropped. max_trace_limit:%d current_tick:%d onLine:%d",global_agent_info.trace_limit,
+    pp_trace("This span dropped. max_trace_limit:%ld current_tick:%lld onLine:%d",global_agent_info.trace_limit,
         this->_global_state->tick,this->isReady()?(1):(0));
     return true;
 }
