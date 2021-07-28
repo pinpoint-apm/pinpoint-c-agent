@@ -27,9 +27,8 @@
 namespace ConnectionPool {
 using Cache::SafeSharedState;
 
-SpanConnectionPool::SpanConnectionPool(const char* co_host,uint32_t w_timeout_ms):
+SpanConnectionPool::SpanConnectionPool(const char* co_host):
         co_host(co_host),
-        timeout_ms(w_timeout_ms),
         con_counter(0)
 {
     this->_cPool.push(this->createTrans());

@@ -38,7 +38,7 @@ extern zend_module_entry pinpoint_php_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint_php)
-//    uint  w_timeout_ms;
+    uint  w_timeout_ms;
     char*  co_host; // tcp:ip:port should support dns
     zend_bool   utest_flag;
 //    zend_bool   limit;

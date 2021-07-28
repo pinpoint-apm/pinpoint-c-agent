@@ -44,8 +44,7 @@ static NodeID do_end_trace(TraceNode&);
 
 static thread_local NodeID __tls_id = 0;
 // send current span with timeout
-static const int SPAN_TIMEOUT_MS=0;
-static thread_local int _span_timeout = SPAN_TIMEOUT_MS;
+static thread_local int _span_timeout = global_agent_info.timeout_ms;
 
 NodeID pinpoint_get_per_thread_id()
 {
@@ -56,7 +55,6 @@ void pinpoint_update_per_thread_id(NodeID id)
 {
     __tls_id = id;
 }
-
 
 static NodeID do_start_trace(NodeID& _id)
 {
@@ -186,7 +184,8 @@ int pinpoint_force_end_trace(NodeID id,int32_t timeout)
         while(id != 0){
             id = pinpoint_end_trace(id);
         }
-        _span_timeout = SPAN_TIMEOUT_MS;
+        //back to normal
+        _span_timeout = global_agent_info.timeout_ms;
         return 0;
     }catch(const std::out_of_range&){
         pp_trace("#%d not found",id);

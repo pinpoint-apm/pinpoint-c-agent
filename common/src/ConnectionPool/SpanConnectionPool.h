@@ -43,17 +43,15 @@ public:
     SpanConnectionPool& operator=(SpanConnectionPool&&) =delete;
 
 public:
-    SpanConnectionPool(const char* co_host,uint32_t w_timeout_ms);
+    SpanConnectionPool(const char* co_host);
     //for delay initialization
     SpanConnectionPool(){
-        this->timeout_ms = 0;
         this->con_counter = 0;
     };
 
-    void initPool(const char* co_host,uint32_t w_timeout_ms)
+    void initPool(const char* co_host)
     {
         this->co_host = co_host;
-        this->timeout_ms = w_timeout_ms;
         this->_cPool.push(this->createTrans());
     }
 
@@ -88,7 +86,6 @@ private:
     // void _handleTransLayerState(int state);
 private:
     std::string co_host;
-    uint32_t timeout_ms;
     uint32_t con_counter;
     std::stack<TransConnection> _cPool;
     std::mutex _lock;
