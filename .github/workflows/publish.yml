@@ -72,17 +72,10 @@ jobs:
           pip install twine
       - name: package
         run: |
-          python setup_test.py sdist
+          python setup.py sdist
           twine check dist/*
-      - name: Publish package to pypitest
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.EELIUTEST }}
-          repository_url: https://test.pypi.org/legacy/
       - name: Publish package pypi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.pinpointPy }}
-          repository_url: https://pypi.org/legacy/
