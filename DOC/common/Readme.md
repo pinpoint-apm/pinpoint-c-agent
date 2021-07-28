@@ -14,7 +14,8 @@ OS| *inx |
     ```shell
      $ git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
      $ cd pinpoint-c-agent/common
-     $ make && make install
+     $ mkdir build && cd build
+     $ cmake .. && make && make install
     ```
     If the installation completes successfully, you will see the infomation like following:
     ```
