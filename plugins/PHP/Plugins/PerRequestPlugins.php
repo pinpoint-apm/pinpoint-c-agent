@@ -146,8 +146,13 @@ class PerRequestPlugins
             pinpoint_add_clues(PP_MEMORY_USAGE, "$memory_usage KB");
         }
 
-        if (($http_response_code = http_response_code()) != null) {
+        if (is_int($http_response_code = http_response_code())) {
             pinpoint_add_clues(PP_HTTP_STATUS_CODE, $http_response_code);
+            if (strpos($http_response_code, '5') === 0
+                && function_exists('pinpoint_mark_as_error'))
+            {
+                pinpoint_mark_as_error('Internal server error', __FILE__);
+            }
         }
         pinpoint_end_trace();
     }
