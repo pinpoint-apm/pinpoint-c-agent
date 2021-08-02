@@ -450,7 +450,7 @@ PHP_FUNCTION(pinpoint_mark_as_error)
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &zkey, &zkey_len,&zvalue, &value_len,&_lineno,&_id) == FAILURE)
     {
-        zend_error(E_ERROR, "pinpoint_mark_as_error() expects (int, string).");
+        zend_error(E_ERROR, "pinpoint_mark_as_error() expects (string,string,int,int).");
         return;
     }
     msg = std::string(zkey,zkey_len);
@@ -460,7 +460,7 @@ PHP_FUNCTION(pinpoint_mark_as_error)
     zend_string* zvalue;
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ll", &zkey ,&zvalue,&_lineno,&_id) == FAILURE)
     {
-        zend_error(E_ERROR, "pinpoint_mark_as_error() expects (int, string).");
+        zend_error(E_ERROR, "pinpoint_mark_as_error() expects (string,string,int,int).");
         return;
     }
     msg = std::string(zkey->val,zkey->len);
