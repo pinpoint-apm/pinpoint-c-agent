@@ -83,8 +83,8 @@ typedef struct trace_store_layer{
 typedef void (*VOID_FUNC)(void);
 typedef struct pp_agent_s{
     char co_host[MAX_ADDRESS_SIZE]; // tcp:ip:port should support dns
-    uint32_t    timeout_ms;  // always be 0
-    long        trace_limit;  // change to long as python need long
+    long    timeout_ms;  // always be 0
+    long    trace_limit;  // change to long as python need long
     int         agent_type;
     uint8_t     inter_flag;
     VOID_FUNC   get_read_lock;

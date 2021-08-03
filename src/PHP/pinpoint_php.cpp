@@ -134,10 +134,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_add_id_value, 0, 0, 1)
     ZEND_ARG_INFO(0, key)
     ZEND_ARG_INFO(0, nodeid)
 ZEND_END_ARG_INFO()
-
-
-
-ZEND_BEGIN_ARG_INFO(arginfo_none, 0)
+// php5 needs (0,0,0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0,0,0)
 ZEND_END_ARG_INFO()
 
 /* {{{ pinpioint_php_functions[]
@@ -628,7 +626,6 @@ PHP_FUNCTION(pinpoint_tracelimit)
 static void php_pinpoint_php_init_globals(zend_pinpoint_php_globals *pinpoint_php_globals)
 {
     memset(pinpoint_php_globals,0,sizeof(zend_pinpoint_php_globals));
-
 }
 
 /* }}} */
@@ -647,7 +644,7 @@ PHP_MINIT_FUNCTION(pinpoint_php)
     strncpy(global_agent_info.co_host ,PPG(co_host),MAX_ADDRESS_SIZE);
     global_agent_info.inter_flag = PPG(debug_report);
     global_agent_info.timeout_ms = PPG(w_timeout_ms);
-    global_agent_info.trace_limit =PPG(tracelimit);
+    global_agent_info.trace_limit = PPG(tracelimit);
     global_agent_info.agent_type = 1500; // PHP
 
     if (PPG(utest_flag) == 1){
