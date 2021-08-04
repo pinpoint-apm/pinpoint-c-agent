@@ -38,12 +38,18 @@ extern zend_module_entry pinpoint_php_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint_php)
-    uint  w_timeout_ms;
+
     char*  co_host; // tcp:ip:port should support dns
     zend_bool   utest_flag;
 //    zend_bool   limit;
     zend_bool    debug_report;
-    int   tracelimit;
+#if PHP_VERSION_ID >= 70000
+     zend_long   tracelimit;
+     zend_long  w_timeout_ms;
+#else
+     int   tracelimit;
+     int  w_timeout_ms;
+#endif
 ZEND_END_MODULE_GLOBALS(pinpoint_php)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php);
