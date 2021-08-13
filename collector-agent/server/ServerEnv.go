@@ -74,8 +74,17 @@ func InitServerConfig() {
 	if len(address) == 0 {
 		panic("PP_ADDRESS invalid")
 	}
-	config.Address = strings.Replace(address, "@", ":", 1)
-	config.SocketType = "tcp"
+
+	if string(address[len(address)-4:]) == "sock" {
+		// a very loose checking
+		// assume a file
+		config.SocketType = "unix"
+		config.Address = address
+	} else {
+		config.Address = strings.Replace(address, "@", ":", 1)
+		config.SocketType = "tcp"
+	}
+
 	// initialize logger
 	if level, err := log.ParseLevel(config.LoggerLevel); err == nil {
 		log.SetLevel(level)
@@ -93,7 +102,7 @@ func InitServerConfig() {
 			MaxSize:    50,
 			MaxBackups: 50,
 		}
-	
+
 		log.SetOutput(logger)
 	}
 
