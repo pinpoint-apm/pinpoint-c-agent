@@ -1,0 +1,19 @@
+name: Add contributors
+on: [workflow_dispatch]
+
+jobs:
+  add-contributors:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: BobAnkh/add-contributors@master
+      with:
+        REPO_NAME: 'pinpoint-apm/pinpoint-c-agent'
+        CONTRIBUTOR: '### Contributors'
+        COLUMN_PER_ROW: '6'
+        ACCESS_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        IMG_WIDTH: '50'
+        FONT_SIZE: '7'
+        PATH: '/README.md'
+        COMMIT_MESSAGE: 'docs(README): update contributors'
+        AVATAR_SHAPE: 'round'
