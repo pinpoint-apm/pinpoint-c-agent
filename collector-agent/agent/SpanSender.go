@@ -413,6 +413,15 @@ func (spanSender *SpanSender) makePinpointSpan(span map[string]interface{}) (*v1
 				pvalue.LongIntIntByteByteStringValue.LongValue = value / 1000
 			}
 		}
+
+		ann := v1.PAnnotation{
+			Key: 300,
+			Value: &v1.PAnnotationValue{
+				Field: &pvalue,
+			},
+		}
+
+		pspan.Annotation = append(pspan.Annotation, &ann)
 	}
 
 	return &pspan, nil

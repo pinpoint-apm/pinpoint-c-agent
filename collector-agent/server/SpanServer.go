@@ -107,7 +107,7 @@ func (server *SpanServer) startListen() {
 	server.wg.Add(1)
 	server.quit = make(chan bool)
 	config := common.GetConfig()
-	log.Debug("listen: ", config.SocketType, "address: ", config.Address)
+	log.Debug("listen: ", config.SocketType, " address: ", config.Address)
 	listener, err := net.Listen(config.SocketType, config.Address)
 	if err != nil {
 		log.Errorf("bind %s:%s failed with %v", config.SocketType, config.Address, err.Error())
