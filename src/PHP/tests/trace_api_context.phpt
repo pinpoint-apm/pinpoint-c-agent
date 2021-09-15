@@ -23,7 +23,7 @@ var_dump(pinpoint_get_context('b'));
 pinpoint_set_context('c','c');
 var_dump(pinpoint_get_context('c'));
 
-var_dump(pinpoint_get_context('not exsit'));
+var_dump(pinpoint_get_context('not exist'));
 
 pinpoint_end_trace();
 
@@ -36,7 +36,7 @@ pinpoint_set_context('c','c',$id);
 var_dump(pinpoint_get_context('c',$id));
 var_dump(pinpoint_get_context('b',$id));
 var_dump(pinpoint_get_context('a',$id));
-var_dump(pinpoint_get_context('not exsit',$id));
+var_dump(pinpoint_get_context('not exist',$id));
 
 $id = pinpoint_end_trace($id);
 pinpoint_end_trace($id);
@@ -47,7 +47,7 @@ pinpoint_end_trace($id);
 string(1) "a"
 string(1) "b"
 string(1) "c"
-[pinpoint] [%d] [%d] pinpoint_get_context_key#128 failed with map::at, parameters:not exsit
+[pinpoint] [%d] [%d] pinpoint_get_context_key#128 failed with map::at, parameters:not exist
 bool(false)
 [pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
@@ -58,7 +58,7 @@ bool(false)
 string(1) "c"
 string(1) "b"
 string(1) "a"
-[pinpoint] [%d] [%d] pinpoint_get_context_key#127 failed with map::at, parameters:not exsit
+[pinpoint] [%d] [%d] pinpoint_get_context_key#127 failed with map::at, parameters:not exist
 bool(false)
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d,"calls":[{"E":%d,"S":%d}]})
