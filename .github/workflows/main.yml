@@ -27,11 +27,14 @@ jobs:
        
   PHP5:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-versions: ['5.6','5.4','5.5']
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '5.6'
+          php-version: ${{ matrix.php-versions }}
       - run: |
           phpize
           ./configure
