@@ -16,7 +16,7 @@ RUN mkdir -p /tmp/cmake && \
 ENV PATH="/usr/local/bin:${PATH}"
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib64/
 ## Build pinpoint_common
-COPY . pinpoint_common/
+COPY ./common pinpoint_common/
 RUN pushd / && cd pinpoint_common && mkdir build && cd build && cmake .. && make && make install && popd && rm -rf pinpoint_common
 ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH
 
@@ -26,3 +26,9 @@ RUN wget -P /tmp 'https://golang.org/dl/go1.13.10.linux-amd64.tar.gz' && \
     rm /tmp/go1.13.10.linux-amd64.tar.gz
 ENV PATH="${PATH}:/usr/local/go/bin"
 RUN pkg-config --cflags pinpoint_common
+
+## install collector-agent
+
+COPY ./collector-agent /tmp/collector-agent
+
+RUN cd /tmp/collector-agent && go build && cp CollectorAgent /usr/local/bin/ && rm -rf /tmp/collector-agent
