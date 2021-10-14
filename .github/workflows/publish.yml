@@ -38,7 +38,7 @@ jobs:
 
     - name: Build the golang-build-env Docker image
       run: |
-        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest -f common/Dockerfile common
+        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest -f common/Dockerfile .
         docker push ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest
 
   golang-build-env-1-16:
@@ -56,7 +56,7 @@ jobs:
 
     - name: Build the golang-build-env Docker image
       run: |
-        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest -f common/Go1.16.Dockerfile common
+        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest -f common/Go1.16.Dockerfile .
         docker push ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest
 
   pinpointPy:
