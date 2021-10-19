@@ -17,7 +17,6 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 11/11/20
 
 from .AsyRequestPlugin import *
 

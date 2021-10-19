@@ -17,8 +17,6 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 3/5/20
-
 
 
 import asyncio
