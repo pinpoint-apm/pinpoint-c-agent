@@ -317,6 +317,14 @@ func (spanSender *SpanSender) makePinpointSpan(span map[string]interface{}) (*v1
 	acceptEv.ParentInfo = &parentInfo
 
 	pspan.AcceptEvent = &acceptEv
+	// changes: ERRs's priority bigger EXP, so ERR will replace EXP
+	if value, OK := span["EXP"].(string); OK {
+		id := spanSender.stringMeta.GetId("EXP", nil)
+		pspan.ExceptionInfo = &v1.PIntStringValue{}
+		pspan.ExceptionInfo.IntValue = id
+		stringValue := wrapperspb.StringValue{Value: value}
+		pspan.ExceptionInfo.StringValue = &stringValue
+	}
 
 	if value, OK := span["ERR"]; OK {
 		id := spanSender.stringMeta.GetId("ERR", nil)
@@ -329,13 +337,6 @@ func (spanSender *SpanSender) makePinpointSpan(span map[string]interface{}) (*v1
 				pspan.ExceptionInfo.StringValue = &stringValue
 			}
 		}
-	}
-
-	if value, OK := span["EXP"].(string); OK {
-		id := spanSender.stringMeta.GetId("EXP", nil)
-		pspan.ExceptionInfo.IntValue = id
-		stringValue := wrapperspb.StringValue{Value: value}
-		pspan.ExceptionInfo.StringValue = &stringValue
 	}
 
 	if value, OK := span["clues"].([]interface{}); OK {
