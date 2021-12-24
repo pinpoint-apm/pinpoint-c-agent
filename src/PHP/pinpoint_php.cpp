@@ -178,7 +178,9 @@ zend_module_entry pinpoint_php_module_entry = {
     STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
-#if PHP_VERSION_ID >=80000
+#if PHP_VERSION_ID>=80100
+void (*old_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+#elif PHP_VERSION_ID >=80000
 void (*old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 #else
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -331,12 +333,17 @@ PHP_FUNCTION(pinpoint_start_trace)
 
 }
 
-
-#if PHP_VERSION_ID >=80000
-void apm_error_cb (int type, const char *error_filename, const uint32_t error_lineno, zend_string *message)
+#if PHP_VERSION_ID>=80100
+void apm_error_cb(int type, zend_string *_error_filename, const uint32_t error_lineno, zend_string *_message)
 {
-    char* msg = message->val;
+    char* error_filename = _error_filename->val;
+    char* msg = _message->val;
 
+#elif PHP_VERSION_ID >=80000
+void apm_error_cb (int type, const char *_error_filename, const uint32_t error_lineno, zend_string *_message)
+{
+    char* msg = _message->val;
+    const char* error_filename =_error_filename;
 #else
 
 void apm_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
@@ -368,7 +375,7 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
     old_error_cb(type, error_filename, error_lineno, format, args);
 #else
 
-    old_error_cb(type, error_filename, error_lineno, message);
+    old_error_cb(type, _error_filename, error_lineno, _message);
 #endif
 }
 

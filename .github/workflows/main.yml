@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0']
+        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0','8.1']
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
@@ -60,7 +60,7 @@ jobs:
   Python3:
     strategy:
       matrix:
-        os: [ubuntu-16.04, macos-latest]
+        os: [ubuntu-18.04, macos-latest]
         python-version: ['2.7', '3.5', '3.6', '3.7']
     runs-on: ${{ matrix.os }}
     steps:
