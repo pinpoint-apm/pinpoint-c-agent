@@ -1,6 +1,6 @@
 ﻿from unittest import TestCase
 import unittest
-import pinpointPy
+import _pinpointPy
 import asyncio
 import contextvars
 import sys
@@ -10,8 +10,8 @@ pinpointId.set(0)
 class TestInCoroutines(TestCase):
     @classmethod
     def setUpClass(cls):
-        # pinpointPy.enable_debug(None)
-        pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock")
+        # _pinpointPy.enable_debug(None)
+        _pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock")
     
 
     @unittest.skipIf(hex(sys.hexversion) <'0x30701f0', "python version must 3.7.1+")
@@ -19,18 +19,18 @@ class TestInCoroutines(TestCase):
         def decorator_pinpoint(func):
             async def pinpoint_trace(*args, **kwargs):
                 id = pinpointId.get()
-                id = pinpointPy.start_trace(id)
+                id = _pinpointPy.start_trace(id)
                 pinpointId.set(id)
                 func_name = func.__name__
-                pinpointPy.add_clue('name',func_name,id,0)
-                pinpointPy.add_clues('start','3434',id)
-                pinpointPy.set_context_key('sid','12345',id)
-                value = pinpointPy.get_context_key('sid',id)
+                _pinpointPy.add_clue('name',func_name,id,0)
+                _pinpointPy.add_clues('start','3434',id)
+                _pinpointPy.set_context_key('sid','12345',id)
+                value = _pinpointPy.get_context_key('sid',id)
                 self.assertEqual(value,'12345')
 
                 ret = await func(*args, **kwargs)
-                pinpointPy.add_clue('end','3434',id)
-                id = pinpointPy.end_trace(id)
+                _pinpointPy.add_clue('end','3434',id)
+                id = _pinpointPy.end_trace(id)
             return pinpoint_trace
 
         @decorator_pinpoint
