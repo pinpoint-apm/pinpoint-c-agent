@@ -75,8 +75,8 @@ setup(name='pinpointPy',
       long_description=long_description,
       long_description_content_type='text/markdown',
       ext_modules=[
-        Extension('pinpointPy',
-          ['src/PY/pinpoint_py.c'],
+        Extension('_pinpointPy',
+          ['src/PY/_pinpoint_py.c'],
           include_dirs = ['common/include'],
           library_dirs = [pinpointBuild.build_temp+"/lib"],
           libraries = agent_libraries
