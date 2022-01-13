@@ -15,7 +15,7 @@
  ******************************************************************************/
 #include <Python.h>
 #include <string.h>
-#include "pinpoint_py.h"
+#include "_pinpoint_py.h"
 
 
 PPAgentT global_agent_info;
@@ -464,7 +464,7 @@ static void free_pinpoint_module(void * module)
 }
 
 /* Module structure */
-static struct PyModuleDef pinpointPymodule = {
+static struct PyModuleDef _pinpointPymodule = {
 
     PyModuleDef_HEAD_INIT,
 
@@ -482,7 +482,7 @@ static struct PyModuleDef pinpointPymodule = {
 
 /* Module initialization function */
 PyMODINIT_FUNC
-PyInit_pinpointPy(void) {
+PyInit__pinpointPy(void) {
     
     global_agent_info.agent_type=1700;
     strncpy(global_agent_info.co_host ,"unix:/tmp/collector.sock",MAX_ADDRESS_SIZE);
@@ -491,7 +491,7 @@ PyInit_pinpointPy(void) {
     global_agent_info.trace_limit = -1;
     register_error_cb(NULL);
 
-    PyObject* m = PyModule_Create(&pinpointPymodule);
+    PyObject* m = PyModule_Create(&_pinpointPymodule);
      if (m == NULL) return NULL;
 
 
@@ -502,7 +502,7 @@ PyInit_pinpointPy(void) {
 PyDoc_STRVAR(pinpointPy__doc__,"python agent for pinpoint platform");
 
 PyMODINIT_FUNC
-initpinpointPy(void)
+init_pinpointPy(void)
 {
     PyObject *m;
 
