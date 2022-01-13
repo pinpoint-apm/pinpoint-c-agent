@@ -64,21 +64,7 @@ void _free_common_shared(void)
 
 #endif
 
-//#if PY_VERSION_HEX >= 0x30701f0
-//// for pinpoint_coro_local
-//#define SubObjName "agent"
-//
-// typedef struct py_agent_obj {
-//    PyObject_HEAD
-//    void *agent; //the agent trace unit for every coroutines
-// } PyAgentObj;
-//
-//static TraceStoreLayer* get_coro_store_layer(void);
-//
-//static TraceStoreLayer _coro_storage;
-//static PyObject* coro_local;
-//#define CORO_LOCAL_NAME "pinpoint_coro_local"
-//#endif
+#define MODNAME "_pinpointPy"
 
 #ifndef CYTHON_UNUSED
 # if defined(__GNUC__)
@@ -470,12 +456,7 @@ static PyMethodDef PinpointMethods[] = {
 static void free_pinpoint_module(void * module)
 {
     Py_XDECREF(py_obj_msg_callback);
-// #if PY_VERSION_HEX >= 0x30701f0
-//     if(coro_local)
-//     {
-//         Py_DECREF(coro_local);
-//     }
-// #endif
+
     if(py_obj_msg_callback)
     {
         Py_DECREF(py_obj_msg_callback);
@@ -487,7 +468,7 @@ static struct PyModuleDef pinpointPymodule = {
 
     PyModuleDef_HEAD_INIT,
 
-    "pinpointPy",           /* name of module */
+    MODNAME,           /* name of module */
     "python agent for pinpoint platform",  /* Doc string (may be NULL) */
     -1,                 /* Size of per-interpreter state or -1 */
     PinpointMethods,       /* Method table */
@@ -496,112 +477,6 @@ static struct PyModuleDef pinpointPymodule = {
     NULL,
     free_pinpoint_module /* free global variables*/
 };
-
-
-#if PY_VERSION_HEX >= 0x30701f0
-
-// static PyObject *Agent_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-//     PyAgentObj *self;
-//     self = (PyAgentObj*)type->tp_alloc(type, 0);
-//     if (self != NULL) {
-//         self->agent = NULL;
-//     }
-//     return (PyObject*)self;
-// }
-
-// static void Agent_dealloc(PyAgentObj *self) {
-//     give_back_agent(self->agent);
-//     Py_TYPE(self)->tp_free((PyObject*)self);
-// }
-
-// static PyTypeObject Agent_Type = {
-//     PyVarObject_HEAD_INIT(NULL, 0)
-//     "pinpointPy."SubObjName, /* tp_name */
-//     sizeof(PyAgentObj),         /* tp_basicsize */
-//     0,                         /* tp_itemsize */
-//     (destructor)Agent_dealloc,   /* tp_dealloc */
-//     0,                         /* tp_print */
-//     0,                         /* tp_getattr */
-//     0,                         /* tp_setattr */
-//     0,                         /* tp_compare */
-//     0,                         /* tp_repr */
-//     0,                         /* tp_as_number */
-//     0,                         /* tp_as_sequence */
-//     0,                         /* tp_as_mapping */
-//     0,                         /* tp_hash */
-//     0,                         /* tp_call */
-//     0,                         /* tp_str */
-//     0,                         /* tp_getattro */
-//     0,                         /* tp_setattro */
-//     0,                         /* tp_as_buffer */
-//     Py_TPFLAGS_DEFAULT |
-//         Py_TPFLAGS_BASETYPE,   /* tp_flags */
-//     SubObjName" objects",  /* tp_doc */
-//     0,                         /* tp_traverse */
-//     0,                         /* tp_clear */
-//     0,                         /* tp_richcompare */
-//     0,                         /* tp_weaklistoffset */
-//     0,                         /* tp_iter */
-//     0,                         /* tp_iternext */
-//     0,                         /* tp_methods */
-//     0,                         /* tp_members */
-//     0,               /* tp_getset Agent_getsets */
-//     0,                         /* tp_base */
-//     0,                         /* tp_dict */
-//     0,                         /* tp_descr_get */
-//     0,                         /* tp_descr_set */
-//     0,                         /* tp_dictoffset */
-//     0,                         /* tp_init */
-//     0,                         /* tp_alloc */
-//     Agent_new,                   /* tp_new */
-// };
-
-//static void set_coro_local(void* agent)
-//{
-//    PyObject *pp_agent_obj = PyObject_CallObject((PyObject *) &Agent_Type,NULL);
-//    assert(pp_agent_obj);
-//    ((PyAgentObj*)pp_agent_obj)->agent = agent;
-//    pp_trace("new  agent obj:%p",pp_agent_obj);
-//    PyObject *tok = PyContextVar_Set(coro_local, pp_agent_obj);
-//    if(tok == NULL ){
-//        Py_DECREF(pp_agent_obj);
-//        return;
-//    }
-//    Py_DECREF(tok);
-//    Py_DECREF(pp_agent_obj);
-//    pp_trace("set agent:%p success",agent);
-//}
-//
-//static void* get_coro_local(void)
-//{
-//    PyObject *pp_agent_obj;
-//    if(PyContextVar_Get(coro_local,NULL,&pp_agent_obj)<0){
-//        pp_trace("get coro local failed");
-//        return NULL;
-//    }
-//
-//    if (pp_agent_obj != NULL) {
-//        pp_trace("get_coro_local:%p",((PyAgentObj*)pp_agent_obj)->agent);
-//        Py_DECREF(pp_agent_obj);
-//        return ((PyAgentObj*)pp_agent_obj)->agent;
-//    }
-//    pp_trace("why agent is NULL");
-//    return NULL;
-//}
-
-// TraceStoreLayer* get_coro_store_layer(void)
-// {
-
-//     if(coro_local == NULL)
-//     {
-//         coro_local = PyContextVar_New(CORO_LOCAL_NAME, NULL);
-//     }
-
-//     _coro_storage.get_cur_trace_cb = get_coro_local;
-//     _coro_storage.set_cur_trace_cb = set_coro_local;
-
-//     return &_coro_storage;
-// }
 
 #endif
 
@@ -623,26 +498,10 @@ PyInit_pinpointPy(void) {
     PyObject* m = PyModule_Create(&pinpointPymodule);
      if (m == NULL) return NULL;
 
-    // register Agent_Type
-// #if PY_VERSION_HEX >= 0x30701f0
-//     if (PyType_Ready(&Agent_Type) < 0)
-//     {
-//         return NULL;
-//     }
-
-//     Py_INCREF(&Agent_Type);
-//     if (PyModule_AddObject(m, SubObjName, (PyObject*)&Agent_Type) <0)
-//     {
-//         Py_DECREF(&Agent_Type);
-//         Py_DECREF(m);
-//         return NULL;
-//     }
-// #endif
 
     return m;
 }
 #else
-#define MODNAME "pinpointPy"
 
 PyDoc_STRVAR(pinpointPy__doc__,"python agent for pinpoint platform");
 

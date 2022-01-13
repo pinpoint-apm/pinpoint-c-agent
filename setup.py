@@ -1,4 +1,4 @@
-from setuptools import setup, Extension
+from setuptools import setup, Extension,find_packages
 from distutils.command.build_ext  import build_ext 
 import os,subprocess,sys
 import platform
@@ -82,5 +82,7 @@ setup(name='pinpointPy',
           libraries = agent_libraries
           )
         ],
+      package_dir={'':'plugins/PY'},
+      packages=find_packages(where='plugins/PY'),
       cmdclass={'build_ext': pinpointBuild}
 )
