@@ -67,7 +67,7 @@ else:
 
 
 setup(name='pinpointPy',
-      version="1.0.14",
+      version="1.0.15",
       author="eeliu", 
       author_email='eeliu2009@gmail.com',
       license='Apache License 2.0',
@@ -75,8 +75,8 @@ setup(name='pinpointPy',
       long_description=long_description,
       long_description_content_type='text/markdown',
       ext_modules=[
-        Extension('pinpointPy',
-          ['src/PY/pinpoint_py.c'],
+        Extension('_pinpointPy',
+          ['src/PY/_pinpoint_py.c'],
           include_dirs = ['common/include'],
           library_dirs = [pinpointBuild.build_temp+"/lib"],
           libraries = agent_libraries
