@@ -1,4 +1,4 @@
-from setuptools import setup, Extension
+from setuptools import setup, Extension,find_packages
 from distutils.command.build_ext  import build_ext 
 import os,subprocess,sys
 import platform
@@ -67,7 +67,7 @@ else:
 
 
 setup(name='pinpointPy',
-      version="1.0.5",
+      version="1.0.6",
       author="eeliu", 
       author_email='eeliu2009@gmail.com',
       license='Apache License 2.0',
@@ -75,12 +75,14 @@ setup(name='pinpointPy',
       long_description=long_description,
       long_description_content_type='text/markdown',
       ext_modules=[
-        Extension('pinpointPy',
-          ['src/PY/pinpoint_py.c'],
+        Extension('_pinpointPy',
+          ['src/PY/_pinpoint_py.c'],
           include_dirs = ['common/include'],
           library_dirs = [pinpointBuild.build_temp+"/lib"],
           libraries = agent_libraries
           )
         ],
+      package_dir={'':'plugins/PY'},
+      packages=find_packages(where='plugins/PY'),
       cmdclass={'build_ext': pinpointBuild}
 )

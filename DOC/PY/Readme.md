@@ -23,7 +23,7 @@ $ pip install pinpointPy
 ```
 ### Download pinpoint-python-plugins
 
-[pinpoint-python-plugins.tar.gz](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.4.0/pinpoint-py-v0.4.0.zip)
+[pinpoint-python-plugins.tar.gz](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/V2020.12.17/pinpoint-python-plugins.tar.gz)
 
 #### Install Collector Agent
 `Collector-Agent`, who formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)

@@ -2,7 +2,7 @@
 import unittest
 from threading import Thread
 import time
-import pinpointPy
+import _pinpointPy
 
 
 class TestUnderThreadMode(TestCase):
@@ -11,28 +11,28 @@ class TestUnderThreadMode(TestCase):
         self.thread_running = True
 
     def tearDown(self):
-        pinpointPy.force_flush_trace(4)
+        _pinpointPy.force_flush_trace(4)
 
     def _test_api_flow(self):
-        self.assertTrue(pinpointPy.set_agent(collector_host='unix:/tmp/notexist.sock'))
-        # self.assertTrue(pinpointPy.enable_debug(None))
+        self.assertTrue(_pinpointPy.set_agent(collector_host='unix:/tmp/notexist.sock'))
+        # self.assertTrue(_pinpointPy.enable_debug(None))
 
         while self.thread_running:
-            self.assertFalse(pinpointPy.trace_has_root())
-            pinpointPy.start_trace()
-            self.assertTrue(pinpointPy.trace_has_root())
-            pinpointPy.set_context_key('sid','12345678')
-            pinpointPy.add_clue("key","value3")
-            pinpointPy.add_clues("key","value3")
-            value = pinpointPy.get_context_key('sid')
+            self.assertFalse(_pinpointPy.trace_has_root())
+            _pinpointPy.start_trace()
+            self.assertTrue(_pinpointPy.trace_has_root())
+            _pinpointPy.set_context_key('sid','12345678')
+            _pinpointPy.add_clue("key","value3")
+            _pinpointPy.add_clues("key","value3")
+            value = _pinpointPy.get_context_key('sid')
             self.assertEqual(value,'12345678')
-            pinpointPy.mark_as_error("fghjk","fghjkl",234234)
-            pinpointPy.end_trace()
-            pinpointPy.force_flush_trace()
-            pinpointPy.drop_trace()
-            value = pinpointPy.get_context_key('sid')
+            _pinpointPy.mark_as_error("fghjk","fghjkl",234234)
+            _pinpointPy.end_trace()
+            _pinpointPy.force_flush_trace()
+            _pinpointPy.drop_trace()
+            value = _pinpointPy.get_context_key('sid')
             self.assertFalse(value)
-            self.assertFalse(pinpointPy.trace_has_root())
+            self.assertFalse(_pinpointPy.trace_has_root())
 
 
     def test_thread_safe(self):
