@@ -478,10 +478,6 @@ static struct PyModuleDef pinpointPymodule = {
     free_pinpoint_module /* free global variables*/
 };
 
-#endif
-
-
-
 
 
 /* Module initialization function */
