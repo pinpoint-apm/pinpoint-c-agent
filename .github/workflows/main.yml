@@ -58,7 +58,7 @@ jobs:
           ./configure
           make
           make test TESTS=src/PHP/tests/
-          make install
+          sudo make install
           php --ini
        
   PHP8:
