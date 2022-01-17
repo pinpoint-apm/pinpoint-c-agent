@@ -52,6 +52,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
       - run: |
+          php -m
           phpize
           ./configure
           make
