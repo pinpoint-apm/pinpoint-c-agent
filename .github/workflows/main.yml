@@ -58,6 +58,8 @@ jobs:
           ./configure
           make
           make test TESTS=src/PHP/tests/
+          make install
+          php --ini
        
   PHP8:
     runs-on: ubuntu-18.04
