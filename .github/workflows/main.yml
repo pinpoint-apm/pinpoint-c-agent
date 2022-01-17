@@ -53,13 +53,13 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4, pinpoint-apm/pinpoint-c-agent
       - run: |
-          php -m
           phpize
           ./configure
           make
           make test TESTS=src/PHP/tests/
           sudo make install
-          php --ini
+          echo "extension=pinpoint_php.so" > /etc/php/7.4/cli/conf.d/10-pinpoint_php.ini
+          php -m
        
   PHP8:
     runs-on: ubuntu-18.04
