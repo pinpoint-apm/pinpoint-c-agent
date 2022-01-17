@@ -58,7 +58,7 @@ jobs:
           make
           make test TESTS=src/PHP/tests/
           sudo make install
-          echo "extension=pinpoint_php.so" > /etc/php/7.4/cli/conf.d/10-pinpoint_php.ini
+          sudo echo "extension=pinpoint_php.so" > /etc/php/7.4/cli/conf.d/10-pinpoint_php.ini
           php -m
        
   PHP8:
