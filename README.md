@@ -13,25 +13,19 @@ The current stable version is [the Latest](https://github.com/pinpoint-apm/pinpo
 
 It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_**, **_C/CPP_** and **_PYTHON_**.
 
-## PHP tutorial
+## Support Lists
 
-[ I use PHP !!! ☚](DOC/PHP/Readme.md)
-
-## PYTHON tutorial
-
-[I use PYTHON ☚](DOC/PY/Readme.md)
-
-## C/CPP tutorial
-
-[Use c/cpp application ☚](DOC/C-CPP/Readme.md)
-
-## GoLang tutorial
-
-[go-aop-agent ☚](https://github.com/pinpoint-apm/go-aop-agent)
+Languese| tutorial
+---|----
+php|[Readme](DOC/PHP/Readme.md)
+python3|[Readme](DOC/PY/Readme.md)
+c/cpp|[Readme](DOC/C-CPP/Readme.md)
+golang|[Readme](https://github.com/pinpoint-apm/go-aop-agent)
 
 ## Overview Pinpoint Common Agent
 
-### Pinpoint-c-agent 
+### How does it work
+
 ![How does it work](images/pinpoint_v0.5.x.png)
 
 ### Distributed Tracking system
