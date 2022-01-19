@@ -83,7 +83,7 @@ Replace the return object with a decorated object in onEnd(). There are some [ma
     }
     ...
 ```
-[ [Goto GeneratorPlugin ☚] ](../../plugins/PHP/Plugins/AutoGen/app/GeneratorPlugin.php)
+[ [Goto GeneratorPlugin ☚] ](../../testapps/PHP/Plugins/AutoGen/app/GeneratorPlugin.php)
 
 #### 2.2.2 PDO::prepare return a PDOStatement
 
@@ -102,5 +102,5 @@ $yellow = $sth->fetchAll();
 
 ```
 
-Replace $dbh->prepare return value with [ProfilerPDOStatement](../../plugins/PHP/Plugins/Sys/PDO/ProfilerPDOStatement.php).
+Replace $dbh->prepare return value with [ProfilerPDOStatement](https://github.com/pinpoint-apm/pinpoint-php-aop/tree/master/lib/Pinpoint/Plugins/Sys/PDO/ProfilerPDOStatement.php).
 
