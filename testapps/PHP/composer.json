@@ -1,22 +1,42 @@
 {
-    "name": "eeliu/pinpoint-php-example",
-    "minimum-stability": "dev",
+    "name": "topthink/think",
+    "description": "the new thinkphp framework",
+    "type": "project",
+    "keywords": [
+        "framework",
+        "thinkphp",
+        "ORM"
+    ],
+    "homepage": "http://thinkphp.cn/",
+    "license": "Apache-2.0",
     "authors": [
         {
-            "name": "eeliu",
-            "email": "eeliu2009@gmail.com"
+            "name": "liu21st",
+            "email": "liu21st@gmail.com"
         }
     ],
+    "require": {
+        "php": ">=5.4.0",
+        "topthink/framework": "5.0.*",
+	"pinpoint-apm/pinpoint-php-aop": "dev-dev",
+        "predis/predis": "^1.1",
+        "guzzlehttp/guzzle": "^7.4",
+        "mongodb/mongodb": "^1.11",
+        "topthink/think-mongo": "1.*"
+    },
     "autoload": {
         "psr-4": {
-            "app\\":"app/",
-            "app1\\": "app1",
-            "Plugins\\": "Plugins/"
+            "app\\": "application",
+	        "Plugins\\": "Plugins/"
         }
     },
-    "require": {
-        "pinpoint-apm/pinpoint-php-aop": "v2.0.1",
-        "guzzlehttp/guzzle": "~6.0",
-        "mongodb/mongodb":"~1.6.0"
+    "extra": {
+        "think-path": "thinkphp"
+    },
+    "config": {
+        "preferred-install": "dist",
+        "allow-plugins": {
+            "topthink/think-installer": true
+        }
     }
 }
