@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>pinpoint-php demo</title>
+</head>
+
+<body>
+
+<h3>Simple server</h3>
+
+<form method="get">
+    <table border="2">
+        <tr>
+            <th>Link</th>
+        </tr>
+        <tr>
+            <th>
+                <a href="/get_date">Call internal function "date".</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_func1">Call user-defined function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_func2_caller">Call user-defined function in a namespace.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_inherit_func">Call inherit function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_generator_func">Call generator.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_abstract_func">Call abstract function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_interface_func">Call interface function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_clone">Call Clone.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_recursion">Call Recursion.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_anonymous">Call function in Anonymous.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_static">Call Static function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_final_class">Call function in final class.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_final_func">Call final function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_trait">Call function in trait.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_callback">Callback function.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_level">Call function with different access.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_args">Call function with args.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_return">Call function return datas.</a>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                <a href="/test_guzzle">Test Guzzle.</a>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                <a href="/test_pdo">Test PDO.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_redis">Test Redis.</a>
+            </th>
+        </tr>
+
+    </table>
+</form>
+
+<h3>Error and exception</h3>
+
+<form method="get">
+    <table border="2">
+        <tr>
+            <th>Link</th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_call_undefined_function">Call undefined function.</a>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                <a href="/test_uncaught_exception">Call uncaught exception.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_caught_exception">Call caught exception.</a>
+            </th>
+        </tr>
+
+        <tr>
+            <th>
+                <a href="/test_exception_recursion">Call exception in recursion.</a>
+            </th>
+        </tr>
+    </table>
+</form>
+
+<h3>Test curl</h3>
+<form method="get" action="/test_curl">
+    remote url: <input type="text"  name="remote" value="http://www.baidu.com"/>
+    <input type="submit" value="Call remote" >
+</form>
+
+
+
+    <h3>Test mysqli</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_mysqli">
+    </form>
+
+    <h3>Test memcached</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_memcached">
+    </form>
+
+    <h3>Test kafka</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_kafka">
+    </form>
+
+    <h3>Test Guzzle</h3>
+    <form method="get" action="index.php">
+        <input type="submit" name="type" value="test_guzzle">
+    </form>
+
+</body>
+
+</html>
