@@ -83,7 +83,7 @@ class Foo{
     }
     ...
 ```
-[ [跳转到 GeneratorPlugin ☚] ](../../plugins/PHP/Plugins/AutoGen/app/GeneratorPlugin.php)
+[ [跳转到 GeneratorPlugin ☚] ](../../testapps/PHP/Plugins/AutoGen/app/GeneratorPlugin.php)
 
 #### 2.2.2 PDO::prepare方法返回了一个PDOStatement类
 
@@ -102,4 +102,4 @@ $yellow = $sth->fetchAll();
 
 ```
 
-用[Plugins\PDOStatement](../../plugins/PHP/Plugins/Sys/PDO/ProfilerPDOStatement.php)替换$dbh->prepare方法的返回值
+用[ProfilerPDOStatement](https://github.com/pinpoint-apm/pinpoint-php-aop/tree/master/lib/Pinpoint/Plugins/Sys/PDO/ProfilerPDOStatement.php)替换$dbh->prepare方法的返回值

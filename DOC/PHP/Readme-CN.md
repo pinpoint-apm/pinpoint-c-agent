@@ -72,30 +72,18 @@ pinpoint| `1.8.0+`, `2.0+`
         ;error_log = /tmp/php_fpm_error.log
         ```
         
-     > 试试 aop example
-4. 在您的项目中使用Pinpoint PHP Agent，请执行以下步骤：
+4. 在您的项目中使用Pinpoint PHP-Agent，请执行以下步骤：
 
    我们假设您已经安装composer，并了解怎么使用composer[如何使用 Composer?](https://getcomposer.org/doc/00-intro.md)
 
-   1. 拷贝[Plugins](../../plugins/PHP/Plugins)到您的项目根路径下，并在```composer.josn```中自动加载```Plugins```. 
-
-      > composer.josn
-      ```
-      "autoload": {
-               "psr-4": {
-                  ......
-                  "Plugins\\": path to the Plugins
-               }
-         },
-      ```
-   2. 安装 ```pinpoint-apm/pinpoint-php-aop```, 在```composer.josn```的```require```中添加```"pinpoint-apm/pinpoint-php-aop": "v2.0.1"```:
+   1. 安装 ```pinpoint-apm/pinpoint-php-aop```, 在```composer.josn```的```require```中添加```"pinpoint-apm/pinpoint-php-aop": "v2.0.1"```:
         ```
         "require": {
             ...
             "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
         }
         ```
-   3. 在项目的入口文件中添加下面的常量：
+   2. 在项目的入口文件中添加下面的常量：
         ```
         #################################################
         define('APPLICATION_NAME','APP-2');
@@ -116,7 +104,23 @@ pinpoint| `1.8.0+`, `2.0+`
         6. ```PP_REQ_PLUGINS```: ```PerRequestPlugins```的路径(```PerRequestPlugins```是基本的请求拦截器, 不同的PHP框架的拦截器不同，我们已经为您准备了一些框架的```PerRequestPlugins```，[请到这里获取](../../plugins/PHP/Plugins/Framework)，（例如:[swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php)）。欢迎PR其他框架哟~
         7. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: 导入pinpoint的auto_pinpointed.php。**请在```require_once __DIR__."/../vendor/autoload.php";```之后添加，这很重要**
 
-      另外，我们还准备了一些例子以供参考：[plugins/PHP](../../plugins/PHP)。
+   3. 拷贝[Plugins](../../plugins/PHP/Plugins)到您的项目根路径下，并在```composer.josn```中自动加载```Plugins```. 
+         Frameworks:
+            [ThinkPHP5](../../plugins/PHP/Framework/ThinkPHP5)
+            [Yii2](../../plugins/PHP/Framework/Yii2)
+            [laravel](../../plugins/PHP/Framework/laravel)
+
+      > composer.josn
+      ```
+      "autoload": {
+               "psr-4": {
+                  ......
+                  "Plugins\\": path to the Plugins
+               }
+         },
+      ```
+    
+      另外，我们还准备了一些例子以供参考：[testapps](../../testapps/PHP)。
 
 
 ##  变化

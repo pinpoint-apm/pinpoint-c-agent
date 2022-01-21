@@ -47,7 +47,7 @@ composer| | class can be automatic pinpoint-cut
    Collector Agent Span Specification
    [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
    
-3. Build pinpoint-php-module, goto the root directory of pinpoint-c-agent installation package, and do following steps:
+3. Build pinpoint_php module, goto the root directory of pinpoint-c-agent installation package, and do following steps:
    1. phpize        
    2. ./configure
    3. make 
@@ -72,12 +72,46 @@ composer| | class can be automatic pinpoint-cut
         ;error_log = /tmp/php_fpm_error.log
         ```
 
-4. Use Pinpoint PHP Agent in your project, and follow the steps below: 
+4. Use Pinpoint PHP-Agent in your project, and follow the steps below: 
     
     We assume that you have installed composer and known how to use it. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
 
-   1. Download [ `pinpoint-php-plugins.tar.gz`](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/V2020.12.17/pinpoint-php-plugins-v0.0.1.tar.gz)  and autoload ```Plugins``` in ```composer.json```.
+   1. Add ```pinpoint-apm/pinpoint-php-aop``` into composer.json and update.
+        ```
+        "require": {
+            ...
+            "pinpoint-apm/pinpoint-php-aop": "dev-master"
+        }
+        ```
+        or
+        ```
+        composer require pinpoint-apm/pinpoint-php-aop
+        ```
+   2. Add the following constants in the index file of your project:
    
+        ```
+        #################################################
+        define('APPLICATION_NAME','APP-2');
+        define('APPLICATION_ID','app-2');
+        define('AOP_CACHE_DIR',__DIR__.'./Cache/');
+        define('PLUGINS_DIR',__DIR__.'./Plugins/');
+        define('PINPOINT_USE_CACHE','YES');
+        require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
+        #################################################
+        ```
+        1. ```APPLICATION_NAME```: Application name.
+        2. ```APPLICATION_ID```: Agent ID.
+        3. ```AOP_CACHE_DIR```: Where to generate ```Cache```.
+        4. ```PLUGINS_DIR```: Path to ```Plugins```.
+        5. ```PINPOINT_USE_CACHE```: 'YES' will not update ```Cache``` when request coming; 'No' will update ```Cache``` when every request coming.(You can also update ```Cache``` by just deleting it.) Considering the performance, we recommend 'YES'. Further more, if you modify the plugins, you should update the ```Cache``` to take effect.
+        6. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: Require pinpoint's ```auto_pinpointed.php```.**Please add after ```require_once __DIR__."/../vendor/autoload.php";```, this is very important!**
+
+    3. Choose you framework and copy the directory as `Plugins` to the root of your application, autoload ```Plugins``` in ```composer.json```.
+        Details for frameworks:
+            [ThinkPHP5](../../plugins/PHP/Framework/ThinkPHP5)
+            [Yii2](../../plugins/PHP/Framework/Yii2)
+            [laravel](../../plugins/PHP/Framework/laravel)
+
         > composer.json
         ```
         "autoload": {
@@ -87,36 +121,8 @@ composer| | class can be automatic pinpoint-cut
                 }
             },
         ```
-   2. Add ```pinpoint-apm/pinpoint-php-aop``` into composer.json and update.
-        ```
-        "require": {
-            ...
-            "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
-        }
-        ```
-   3. Add the following constants in the index file of your project:
-   
-        ```
-        #################################################
-        define('APPLICATION_NAME','APP-2');
-        define('APPLICATION_ID','app-2');
-        define('AOP_CACHE_DIR',__DIR__.'./Cache/');
-        define('PLUGINS_DIR',__DIR__.'./Plugins/');
-        define('PINPOINT_USE_CACHE','YES');
-        define('PP_REQ_PLUGINS', '\Plugins\PerRequestPlugins');
-        #define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\Framework\app\ClassMapInFile");
-        require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
-        #################################################
-        ```
-        1. ```APPLICATION_NAME```: Application name.
-        2. ```APPLICATION_ID```: Agent ID.
-        3. ```AOP_CACHE_DIR```: Where to generate ```Cache```.
-        4. ```PLUGINS_DIR```: Path to ```Plugins```.
-        5. ```PINPOINT_USE_CACHE```: 'YES' will not update ```Cache``` when request coming; 'No' will update ```Cache``` when every request coming.(You can also update ```Cache``` by just deleting it.) Considering the performance, we recommend 'YES'. Further more, if you modify the plugins, you should update the ```Cache``` to take effect.
-        6. ```PP_REQ_PLUGINS```: path to ```PerRequestPlugins```(```PerRequestPlugins``` is the base interceptor, different framework should use different ```PerRequestPlugins```) Where is PerRequestPlugins? ```Swoole``` for example: [swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php). We have prepared some framework's ```PerRequestPlugins``` for you [Here](../../plugins/PHP/Plugins/Framework), and welcome to pull request other frameworks.
-        7. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: Require pinpoint's ```auto_pinpointed.php```.**Please add after ```require_once __DIR__."/../vendor/autoload.php";```, this is very important!**
-
-    We have prepared some examples for you, please goto [testapps](../../testapps/PHP).
+        
+        We have prepared some examples for you, please goto [testapps](../../testapps/PHP).
 
 
 ## Changes 
