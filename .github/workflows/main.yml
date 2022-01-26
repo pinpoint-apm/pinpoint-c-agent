@@ -40,9 +40,6 @@ jobs:
           sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           cd testapps/PHP
-          php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');"
-          php composer-setup.php
-          php -r "unlink('composer-setup.php');"
           composer update
        
   PHP8:
