@@ -19,10 +19,7 @@
         "php": ">=5.4.0",
         "topthink/framework": "5.0.*",
 	"pinpoint-apm/pinpoint-php-aop": "dev-dev",
-        "predis/predis": "^1.1",
-        "guzzlehttp/guzzle": "^7.4",
-        "mongodb/mongodb": "^1.11",
-        "topthink/think-mongo": "1.*"
+        "predis/predis": "^1.1"
     },
     "autoload": {
         "psr-4": {
