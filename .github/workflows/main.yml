@@ -59,8 +59,7 @@ jobs:
           make test TESTS=src/PHP/tests/
           sudo make install
           sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
-          php --ini
-          php -m
+          php -i |grep log
        
   PHP8:
     runs-on: ubuntu-18.04
