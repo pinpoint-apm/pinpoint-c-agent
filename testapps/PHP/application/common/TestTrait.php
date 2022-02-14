@@ -8,6 +8,6 @@ class TestTrait
     use FuncInTrait;
 
     public function test(){
-        echo "Func not in trait! ";
+        return "Func not in trait! ";
     }
 }

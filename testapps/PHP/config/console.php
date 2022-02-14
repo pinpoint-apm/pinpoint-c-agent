@@ -8,10 +8,13 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-// $Id$
 
-if (is_file($_SERVER["DOCUMENT_ROOT"] . $_SERVER["SCRIPT_NAME"])) {
-    return false;
-} else {
-    require __DIR__ . "/index.php";
-}
+// +----------------------------------------------------------------------
+// | 控制台配置
+// +----------------------------------------------------------------------
+return [
+    'name'      => 'Think Console',
+    'version'   => '0.1',
+    'user'      => null,
+    'auto_path' => env('app_path') . 'command' . DIRECTORY_SEPARATOR,
+];

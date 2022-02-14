@@ -30,7 +30,7 @@ use app\common\TestGuzzle;
 use app\index\model\User;
 
 use think\Controller;
-use think\Cache;
+use think\facade\Cache;
 use think\Db;
 
 class Index extends Controller
@@ -60,26 +60,29 @@ class Index extends Controller
     public function test_inherit_func()
     {
         $instance = new Student();
-        $instance->eat();
+        $r1 = $instance->eat();
         $instance = new Teacher();
-        $instance->eat();
+        $r2 = $instance->eat();
         $instance = new Doctor();
-        $instance->eat();
-        $instance->other();
+        $r3 = $instance->eat();
+        return $r1.$r2.$r3.$instance->other();
+
     }
 
     public function test_generator_func()
     {
         $instance = new TestGenerator();
-        foreach ($instance->generator(1, 10, 2) as $number){echo $number;}
+        $sum = 0;
+        foreach ($instance->generator(1, 10, 2) as $number){$sum += $number;}
+        return $sum;
     }
 
     public function test_abstract_func()
     {
         $instance = new AbstractStudent("Evy");
-        echo $instance->eat();
-        echo $instance->drink();
-        echo $instance->breath();
+        $r1 = $instance->eat();
+        $r2 = $instance->drink();
+        return $r1.$r2.$instance->breath();
     }
 
     public function test_interface_func()
@@ -87,8 +90,8 @@ class Index extends Controller
         $instance = new InterfaceStudent();
         $instance->setVariable("Evy", "Hua");
         $instance->setVariable("Sam", "Wei");
-        echo $instance->getHtml("Hello {Evy}");
-        echo $instance->other("Evy");
+        $r1 = $instance->getHtml("Hello {Evy}");
+        return $r1.$instance->other("Evy");
     }
 
     public function test_clone()
@@ -96,41 +99,42 @@ class Index extends Controller
         $instance1 = new TestClone();
         $instance2 = clone $instance1;
         $instance2->setColor("green");
-        echo $instance2->getColor();
+        $r1 = $instance2->getColor();
         $instance1->setColor("red");
-        echo $instance1->getColor();
+        return $r1.$instance1->getColor();
     }
 
     public function test_recursion()
     {
         $instance = new TestRecursion();
-        echo $instance->test_cumsum1(3);
-        echo $instance->test_cumsum2(3);
+        $r1 = $instance->test_cumsum1(3);
+//        return $instance->test_cumsum2(3);
+        return $r1;
     }
 
     public function test_anonymous()
     {
         $instance = new TestAnonymous();
         $bell = $instance->createbell(date("Y/m/d"));
-        $bell();
+        return $bell();
     }
 
     public function test_static()
     {
-        TestStatic::static_func(123);
+        return TestStatic::static_func(123);
     }
 
     public function test_final_class()
     {
         $instance = new TestFinalClass();
-        $instance->test();
+        return $instance->test();
 //        class swtest1 extends TestFinalClass{};
     }
 
     public function test_final_func()
     {
         $instance = new TestFinalFunc();
-        $instance->test("abc");
+        return $instance->test("abc");
 //        class swtest2 extends app\TestFinalFunc
 //        {
 //            public final function test(){
@@ -142,8 +146,8 @@ class Index extends Controller
     public function test_trait()
     {
         $instance = new TestTrait();
-        echo $instance->traitfunc("Evy");
-        $instance->test();
+        $r1 = $instance->traitfunc("Evy");
+        return $r1.$instance->test();
     }
 
     public function test_callback()
@@ -151,25 +155,26 @@ class Index extends Controller
         $className = "app\common\CallBackFunc";
         $funcName = "fnCallback1";
         $instance = new CallBackFunc();
-        call_user_func_array(array($className, $funcName), array("hello", "world"));
-        call_user_func_array(array($instance,"fnCallback2"), array("hello", "world"));
+        $r1 = call_user_func_array(array($className, $funcName), array("hello", "world"));
+        $r2 = call_user_func_array(array($instance,"fnCallback2"), array("hello", "world"));
+        return $r1.$r2;
     }
 
     public function test_level()
     {
         $instance = new LevelClass();
-        $instance->public_function(123);
+        $r1 = $instance->public_function(123);
         $instance = new ExtendLevel();
-        $instance->public_function(123);
+        $r2 = $instance->public_function(123);
         $instance = new OverRideLevel();
-        $instance->public_function(123);
+        return $instance->public_function(123);
     }
 
     public function test_args()
     {
         $myfile = fopen(__DIR__.'/Args.php', "r");
         $instance = new TestArgs();
-        $instance->test_args(null, 123, 3.1415, true, array(1, 2), new SObject(1), new SObjectString("ObjToString"), "abcd", $myfile, constant("GREETING"));
+        return $instance->test_args(null, 123, 3.1415, true, array(1, 2), new SObject(1), new SObjectString("ObjToString"), "abcd", $myfile, constant("GREETING"));
     }
 
     public function test_return()
@@ -177,22 +182,26 @@ class Index extends Controller
         $myfile = fopen(__DIR__.'/Args.php', "r");
         $instance = new TestReturn();
         $args = array(null, 123, 3.1415, true, array(1, 2), new SObject(1), new SObjectString("ObjToString"), "abcd", $myfile, constant("GREETING"));
+        $return_array = [];
         foreach($args as $value){
-            var_dump($instance->test_return($value));
+            array_push($return_array,$instance->test_return($value));
         }
+        return count($return_array);
     }
 
     public function test_curl()
     {
         $acr =  new AccessRemote();
-        return $acr->gotoUrl($_GET['remote']);
+        $acr->gotoUrl($_GET['remote']);
+        return "Call ".$_GET['remote'];
     }
 
     public function test_guzzle()
     {
         $guzzle = new TestGuzzle();
-        $guzzle->gotoV();
-        return $guzzle->gotofoo();
+        $tmp = $guzzle->gotoV();
+//        return $guzzle->gotofoo();
+        return $tmp."call remote";
     }
 
     public function test_pdo()
@@ -213,11 +222,6 @@ class Index extends Controller
 
     public function test_redis()
     {
-        $options = [
-            'type'  =>  'redis', 
-            'host'       => 'dev-redis',
-        ];
-        Cache::connect($options);
         Cache::set('name', 'value');
         return Cache::get('name');
     }
@@ -244,7 +248,7 @@ class Index extends Controller
 
     public function test_uncaught_exception()
     {
-        TestError::throwException();
+        return TestError::throwException();
     }
 
     public function test_caught_exception()

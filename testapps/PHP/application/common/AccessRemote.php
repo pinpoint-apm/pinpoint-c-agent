@@ -18,10 +18,11 @@ class AccessRemote
         );
 
         \curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        echo \curl_exec($ch);
-
+        $tmp = \curl_exec($ch);
         curl_close($ch);
+        var_dump($tmp);
 //        $this->callExample();
+        return $tmp;
     }
 
     private function callExample()
@@ -30,8 +31,9 @@ class AccessRemote
 
         \curl_setopt($ch, CURLOPT_URL, "exmaple.com");
 
-        echo \curl_exec($ch);
+        $tmp = \curl_exec($ch);
 
         curl_close($ch);
+        return $tmp;
     }
 }
