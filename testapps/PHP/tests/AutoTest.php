@@ -20,10 +20,10 @@ class AutoTest extends TestCase
     public function testGetDate()
     {
         $this->visit('/get_date');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\AppDate::outputDate","date"]), $log);
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\AppDate::outputDate","date"]), $log);
     }
 
 //     public function testFunc1()
