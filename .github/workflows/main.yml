@@ -31,7 +31,12 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4
+#       - uses: mirromutth/mysql-action@v1.1
+#         with:
+        
       - run: |
+          sudo service mysql stop
+          sudo service mysql start
           phpize
           ./configure
           make
