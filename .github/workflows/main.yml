@@ -37,6 +37,7 @@ jobs:
       - run: |
           sudo service mysql stop
           sudo service mysql start
+          mysql -u root -proot
           phpize
           ./configure
           make
