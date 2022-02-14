@@ -40,10 +40,9 @@ jobs:
           sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           cd testapps/PHP
-          cat /etc/php/${{ matrix.php-versions }}/cli/php.ini
           composer install
-          ls /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/
           php think unit
+          ls /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/
 
        
   PHP8:
