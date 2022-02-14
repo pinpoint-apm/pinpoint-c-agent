@@ -35,192 +35,192 @@ class AutoTest extends TestCase
 //         $this->assertTrue($this->util->check_span($log,["app\common\AopFunction::test_func1"]), $log);
 //     }
 
-//     public function testFunc2Caller()
-//     {
-//         $this->visit('/test_func2_caller');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\AopFunction::test_func2", "app\util\Foo::test_func_2"]), $log);
-//     }
+    public function testFunc2Caller()
+    {
+        $this->visit('/test_func2_caller');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\AopFunction::test_func2", "app\util\Foo::test_func_2"]), $log);
+    }
 
-//     public function testInherit()
-//     {
-//         $this->visit('/test_inherit_func');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\Person::eat", "app\common\Teacher::eat", "app\common\Student::eat", "app\common\Doctor::other"]), $log);    # "app\common\Doctor::eat"
-//     }
+    public function testInherit()
+    {
+        $this->visit('/test_inherit_func');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\Person::eat", "app\common\Teacher::eat", "app\common\Student::eat", "app\common\Doctor::other"]), $log);    # "app\common\Doctor::eat"
+    }
 
-//     public function testGenerator()
-//     {
-//         $this->visit('/test_generator_func');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestGenerator::generator", "next"]), $log);
-//     }
+    public function testGenerator()
+    {
+        $this->visit('/test_generator_func');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestGenerator::generator", "next"]), $log);
+    }
 
-//     public function testAbstract()
-//     {
-//         $this->visit('/test_abstract_func');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\AbstractStudent::eat", "app\common\AbstractStudent::drink", "app\common\AbstractPerson::breath"]), $log);   # "app\common\AbstractStudent::breath"
-//     }
+    public function testAbstract()
+    {
+        $this->visit('/test_abstract_func');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\AbstractStudent::eat", "app\common\AbstractStudent::drink", "app\common\AbstractPerson::breath"]), $log);   # "app\common\AbstractStudent::breath"
+    }
 
-//     public function testInterface()
-//     {
-//         $this->visit('/test_interface_func');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\InterfaceStudent::setVariable", "app\common\InterfaceStudent::getHtml", "app\common\InterfaceStudent::other"]), $log);
-//     }
+    public function testInterface()
+    {
+        $this->visit('/test_interface_func');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\InterfaceStudent::setVariable", "app\common\InterfaceStudent::getHtml", "app\common\InterfaceStudent::other"]), $log);
+    }
 
-//     public function testClone()
-//     {
-//         $this->visit('/test_clone');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestClone::setColor", "app\common\TestClone::getColor", "app\common\TestClone::__clone"]), $log);
-//     }
+    public function testClone()
+    {
+        $this->visit('/test_clone');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestClone::setColor", "app\common\TestClone::getColor", "app\common\TestClone::__clone"]), $log);
+    }
 
-//     public function testRecursion()
-//     {
-//         $this->visit('/test_recursion');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestRecursion::test_cumsum1"]), $log);    #, "app\common\TestRecursion::test_cumsum2"
-//     }
+    public function testRecursion()
+    {
+        $this->visit('/test_recursion');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestRecursion::test_cumsum1"]), $log);    #, "app\common\TestRecursion::test_cumsum2"
+    }
 
-//     public function testAnonymous()
-//     {
-//         $this->visit('/test_anonymous');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestAnonymous::createbell", "app\common\AopFunction::test_func1"]), $log);
-//     }
+    public function testAnonymous()
+    {
+        $this->visit('/test_anonymous');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestAnonymous::createbell", "app\common\AopFunction::test_func1"]), $log);
+    }
 
-//     public function testStatic()
-//     {
-//         $this->visit('/test_static');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestStatic::static_func"]), $log);
-//     }
+    public function testStatic()
+    {
+        $this->visit('/test_static');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestStatic::static_func"]), $log);
+    }
 
-//     public function testFinalClass()
-//     {
-//         $this->visit('/test_final_class');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestFinalClass::test"]), $log);
-//     }
+    public function testFinalClass()
+    {
+        $this->visit('/test_final_class');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestFinalClass::test"]), $log);
+    }
 
-//     public function testFinalFunc()
-//     {
-//         $this->visit('/test_final_func');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestFinalFunc::test"]), $log);
-//     }
+    public function testFinalFunc()
+    {
+        $this->visit('/test_final_func');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestFinalFunc::test"]), $log);
+    }
 
-//     public function testTrait()
-//     {
-//         $this->visit('/test_trait');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\FuncInTrait::traitfunc", "app\common\TestTrait::test"]), $log);
-//     }
+    public function testTrait()
+    {
+        $this->visit('/test_trait');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\FuncInTrait::traitfunc", "app\common\TestTrait::test"]), $log);
+    }
 
-//     public function testCallback()
-//     {
-//         $this->visit('/test_callback');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\CallBackFunc::fnCallback1", "app\common\CallBackFunc::fnCallback2"]), $log);
-//     }
+    public function testCallback()
+    {
+        $this->visit('/test_callback');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\CallBackFunc::fnCallback1", "app\common\CallBackFunc::fnCallback2"]), $log);
+    }
 
-//     public function testLevel()
-//     {
-//         $this->visit('/test_level');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\LevelClass::public_function", "app\common\LevelClass::protected_function", "app\common\LevelClass::private_function", "app\common\OverRideLevel::public_function", "app\common\OverRideLevel::protected_function"]), $log);
-//     }
+    public function testLevel()
+    {
+        $this->visit('/test_level');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\LevelClass::public_function", "app\common\LevelClass::protected_function", "app\common\LevelClass::private_function", "app\common\OverRideLevel::public_function", "app\common\OverRideLevel::protected_function"]), $log);
+    }
 
-//     public function testArgs()
-//     {
-//         $this->visit('/test_args');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestArgs::test_args","[1] => 123","3.1415","[4] => Array","[5] => app\index\controller\SObject Object", "[6] => app\index\controller\SObjectString Object","[7] => abcd", "[8] => Resource id","[9] => Hello you! How are you today?"]), $log);
-//     }
+    public function testArgs()
+    {
+        $this->visit('/test_args');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestArgs::test_args","[1] => 123","3.1415","[4] => Array","[5] => app\index\controller\SObject Object", "[6] => app\index\controller\SObjectString Object","[7] => abcd", "[8] => Resource id","[9] => Hello you! How are you today?"]), $log);
+    }
 
-//     public function testReturn()
-//     {
-//         $this->visit('/test_return');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestReturn::test_return","[0] =>", "[0] => 123", "[0] => 3.1415", "[0] => 1", "[0] => Array", "[0] => app\index\controller\SObject Object", "[0] => app\index\controller\SObjectString Object","[0] => abcd", "[0] => Resource id", "[0] => Hello you! How are you today?"]), $log);
-//     }
+    public function testReturn()
+    {
+        $this->visit('/test_return');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestReturn::test_return","[0] =>", "[0] => 123", "[0] => 3.1415", "[0] => 1", "[0] => Array", "[0] => app\index\controller\SObject Object", "[0] => app\index\controller\SObjectString Object","[0] => abcd", "[0] => Resource id", "[0] => Hello you! How are you today?"]), $log);
+    }
 
-//     public function testException()
-//     {
-//         $this->get('/test_uncaught_exception');
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["app\common\TestError::throwException", "EXP value:throw some thing"]), $log);
-//     }
+    public function testException()
+    {
+        $this->get('/test_uncaught_exception');
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["app\common\TestError::throwException", "EXP value:throw some thing"]), $log);
+    }
 
-//     public function testCurl()
-//     {
-//         $_GET['remote'] = 'http%3A%2F%2Fwww.baidu.com';
-//         $this->get('/test_curl');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["curl_exec", "key:dst", "nsid"]), $log);
-//     }
+    public function testCurl()
+    {
+        $_GET['remote'] = 'http%3A%2F%2Fwww.baidu.com';
+        $this->get('/test_curl');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["curl_exec", "key:dst", "nsid"]), $log);
+    }
 
-//     public function testGuzzle()
-//     {
-//         $this->visit('/test_guzzle');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["GuzzleHttp\Client::request","key:dst value:www.baidu.com", "nsid"]), $log);
-//     }
+    public function testGuzzle()
+    {
+        $this->visit('/test_guzzle');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["GuzzleHttp\Client::request","key:dst value:www.baidu.com", "nsid"]), $log);
+    }
 
-//     public function testPDO()
-//     {
-//         $this->visit('/test_pdo');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["PDO::__construct","dst value:dev-mysql", "PDO::prepare", "PDOStatement::execute", "PDOStatement::fetchAll"]), $log);
-//     }
+    public function testPDO()
+    {
+        $this->visit('/test_pdo');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["PDO::__construct","dst value:dev-mysql", "PDO::prepare", "PDOStatement::execute", "PDOStatement::fetchAll"]), $log);
+    }
 
-//     public function testRedis()
-//     {
-//         $this->visit('/test_redis');
-//         $this->assertResponseOk();
-//         $log = $this->util->get_log();
-//         $this->assertTrue($this->util->check_error($log), $log);
-//         $this->assertTrue($this->util->check_span($log,["Redis::set","Redis::get"]), $log);
-//     }
+    public function testRedis()
+    {
+        $this->visit('/test_redis');
+        $this->assertResponseOk();
+        $log = $this->util->get_log();
+        $this->assertTrue($this->util->check_error($log), $log);
+        $this->assertTrue($this->util->check_span($log,["Redis::set","Redis::get"]), $log);
+    }
 }
