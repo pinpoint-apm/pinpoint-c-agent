@@ -15,6 +15,6 @@
 
 return [
     // 驱动方式
-    'type'   => 'redis',
-    'host'   => 'dev-redis'
+    //'type'   => 'redis',
+    //'host'   => 'dev-redis'
 ];
