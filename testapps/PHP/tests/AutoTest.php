@@ -215,7 +215,7 @@ class AutoTest extends TestCase
         "age VARCHAR(40), ".
         "city VARCHAR(40), ".
         "PRIMARY KEY ( id ))ENGINE=InnoDB DEFAULT CHARSET=utf8; ";
-        Db::connect('mysql://root:123456@127.0.0.1:3306/DBTest#utf8')->Db::execute($sql);
+        Db::connect('mysql://root:123456@127.0.0.1:3306/DBTest#utf8')->execute($sql);
         $this->visit('/test_pdo');
         $this->assertResponseOk();
         $log = $this->util->get_log();
