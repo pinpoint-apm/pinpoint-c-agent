@@ -36,9 +36,8 @@ jobs:
           docker pull mysql:5.7
           docker run --name mysql-server -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE="DBTest" -d mysql:5.7 
       - run: |
-          sudo apt-get -y install mysql-client
-          docker ps -a
-          mysql --host='localhost' --port=3306 --user='root' --password='123456' < "/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql"
+          docker exec -it mysql-server bash
+          mysql -uroot -p
           php testapps/PHP/tests/test.php
 #          phpize
 #          make
