@@ -31,18 +31,10 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4
-      - name: shutdown ubuntu mysql
+      - name: set mysql-docker
         run: |
-          sudo service mysql stop
-      - uses: mirromutth/mysql-action@v1.1
-        with: 
-          character set server: 'utf8'
-          host port: 3306
-          container port: 3306
-          mysql version: '5.7'
-          mysql database: 'DBTest'
-          mysql user: 'test'
-          mysql password: '123456'
+          docker pull mysql:5.7
+          docker run --name mysql-server -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE="DBTest" -d mysql:5.7 
       - run: |
           docker ps -a
           php testapps/PHP/tests/test.php
