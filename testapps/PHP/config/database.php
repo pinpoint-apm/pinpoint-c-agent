@@ -13,7 +13,7 @@ return [
     // 数据库类型
     'type'            => 'mysql',
     // 服务器地址
-    'hostname'        => 'localhost',
+    'hostname'        => 'dev-mysql',
     // 数据库名
     'database'        => 'DBTest',
     // 用户名
