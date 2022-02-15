@@ -31,20 +31,20 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4
-      - name: shutdown ubuntu mysql
-        run: |
-          sudo service mysql stop
-      - uses: mirromutth/mysql-action@v1.1
-        with: 
-          character set server: 'utf8'
-          mysql version: '5.7'
-          mysql database: 'DBTest'
-          mysql root password: '123456'
-          mysql user: 'test'
-          mysql password: '123456'
+#       - name: shutdown ubuntu mysql
+#         run: |
+#           sudo service mysql stop
+#       - uses: mirromutth/mysql-action@v1.1
+#         with: 
+#           character set server: 'utf8'
+#           mysql version: '5.7'
+#           mysql database: 'DBTest'
+#           mysql root password: '123456'
+#           mysql user: 'test'
+#           mysql password: '123456'
       - run: |
           docker ps -a
-          mysql --user="test" --password="123456" < show databases;
+          mysql --user="root" --password="root" < "show databases";
           phpize
           ./configure
           make
