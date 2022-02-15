@@ -11,6 +11,7 @@
 namespace tests;
 
 use think\Exception;
+use think\Db;
 
 require_once __DIR__."/config.php";
 
@@ -208,6 +209,13 @@ class AutoTest extends TestCase
 
     public function testPDO()
     {
+        $sql = "CREATE TABLE user( ".
+        "id INT NOT NULL AUTO_INCREMENT, ".
+        "name VARCHAR(100) NOT NULL, ".
+        "age VARCHAR(40), ".
+        "city VARCHAR(40), ".
+        "PRIMARY KEY ( id ))ENGINE=InnoDB DEFAULT CHARSET=utf8; ";
+        Db::execute($sql);
         $this->visit('/test_pdo');
         $this->assertResponseOk();
         $log = $this->util->get_log();
