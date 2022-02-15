@@ -43,7 +43,9 @@ jobs:
 #           mysql user: 'test'
 #           mysql password: '123456'
       - run: |
-          mysql --user="root" --password="root" < "show databases;"
+          mysql --user="root" --password="root"
+          use mysql;
+          show databases;
           phpize
           ./configure
           make
