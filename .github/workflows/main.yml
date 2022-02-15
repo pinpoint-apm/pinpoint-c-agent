@@ -37,11 +37,14 @@ jobs:
       - uses: mirromutth/mysql-action@v1.1
         with: 
           character set server: 'utf8'
+          host port: 3306
+          container port: 3306
           mysql version: '5.7'
           mysql database: 'DBTest'
           mysql user: 'test'
           mysql password: '123456'
       - run: |
+          netstat -ntlp|grep 3306
           docker ps -a
           phpize
           ./configure
