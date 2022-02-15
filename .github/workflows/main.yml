@@ -44,7 +44,6 @@ jobs:
           mysql user: 'test'
           mysql password: '123456'
       - run: |
-          netstat -ntlp|grep 3306
           docker ps -a
           phpize
           ./configure
