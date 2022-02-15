@@ -4,22 +4,6 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
        
-  PHP5:
-    runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        php-versions: ['5.6','5.4','5.5']
-    steps:
-      - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-      - run: |
-          phpize
-          ./configure
-          make
-          make test TESTS=src/PHP/tests5/
-        
   PHP7:
     runs-on: ubuntu-18.04
     strategy:
@@ -36,8 +20,6 @@ jobs:
           docker pull mysql:5.7
           docker run --name mysql-server -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE="DBTest" -d mysql:5.7 
       - run: |
-          docker exec -it mysql-server bash
-          mysql -uroot -p
           php testapps/PHP/tests/test.php
 #          phpize
 #          make
@@ -50,19 +32,3 @@ jobs:
 #          composer install
 #          php think unit -v
        
-  PHP8:
-    runs-on: ubuntu-18.04
-    strategy:
-      matrix:
-        php-versions: ['8.0','8.1']
-    steps:
-      - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-      - run: |
-          php -m
-          phpize
-          ./configure
-          make
-          make test TESTS=src/PHP/tests/
