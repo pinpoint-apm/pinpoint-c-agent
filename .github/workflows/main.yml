@@ -43,8 +43,7 @@ jobs:
 #           mysql user: 'test'
 #           mysql password: '123456'
       - run: |
-          docker ps -a
-          mysql --user="root" --password="root" < "show databases";
+          mysql --user="root" --password="root" < "show databases;"
           phpize
           ./configure
           make
