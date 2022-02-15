@@ -39,9 +39,6 @@ jobs:
           mysql database: 'DBTest'
           mysql root password: 123456
       - run: |
-          sudo service mysql stop
-          sudo service mysql start
-          mysql -u root -proot
           phpize
           ./configure
           make
@@ -50,6 +47,7 @@ jobs:
           sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           sudo echo "pinpoint_php.DebugReport=true" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+          sudo echo "dev-mysql localhost" >> /etc/hosts
           cd testapps/PHP
           composer install
           php think unit
