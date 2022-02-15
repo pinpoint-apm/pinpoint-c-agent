@@ -45,17 +45,17 @@ jobs:
           mysql password: '123456'
       - run: |
           docker ps -a
-          phpize
-          ./configure
-          make
-          make test TESTS=src/PHP/tests/
-          sudo make install
-          sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
-          sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
-          sudo echo "pinpoint_php.DebugReport=true" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
-          cd testapps/PHP
-          composer install
-          php think unit -v
+          php testapps/PHP/tests/test.php
+#          phpize
+#          make
+#          make test TESTS=src/PHP/tests/
+#          sudo make install
+#          sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+#          sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+#          sudo echo "pinpoint_php.DebugReport=true" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+#          cd testapps/PHP
+#          composer install
+#          php think unit -v
        
   PHP8:
     runs-on: ubuntu-18.04
