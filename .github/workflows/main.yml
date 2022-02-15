@@ -33,11 +33,14 @@ jobs:
           extensions: redis-phpredis/phpredis@5.3.4
       - name: shutdown ubuntu mysql
         run: sudo service mysql stop
-      - uses: mirromutth/mysql-action@v1.1
+      - uses: gtadam/mysql-deploy-action@v1
         with:
-          character set server: 'utf8'
-          mysql database: 'DBTest'
-          mysql root password: 123456
+          DATABASE_HOST: 'dev-mysql'
+          DATABASE_PORT: '3306'
+          DATABASE_NAME: 'DBTest'
+          DATABASE_USERNAME: 'root'
+          DATABASE_PASSWORD: '123456'
+          DATABASE_SCRIPT: '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
       - run: |
           phpize
           ./configure
