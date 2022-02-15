@@ -40,6 +40,8 @@ jobs:
           mysql version: '5.7'
           mysql database: 'DBTest'
           mysql root password: '123456'
+          mysql user: 'test'
+          mysql password: '123456'
       - run: |
           phpize
           ./configure
