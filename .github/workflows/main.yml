@@ -31,9 +31,13 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4
-#       - uses: mirromutth/mysql-action@v1.1
-#         with:
-        
+      - name: shutdown ubuntu mysql
+        run: sudo service mysql stop
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          character set server: 'utf8'
+          mysql database: 'DBTest'
+          mysql root password: 123456
       - run: |
           sudo service mysql stop
           sudo service mysql start
