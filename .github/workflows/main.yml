@@ -15,16 +15,10 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4
-#       - name: set mysql-docker
-#         run: |
-#           docker pull mysql:5.7
-#           docker run --name mysql-server -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE="DBTest" -d mysql:5.7 
       - run: |
           sudo service mysql start
-          sudo iptables -A INPUT -i eth0 -p tcp -m tcp --dport 3306 -j ACCEPT
-          sudo apt list --installed |grep mysql
-          sudo apt-get -y install mysql-client
-          sudo mysql --host='127.0.0.1' --user='root' --password='root'
+          sudo apt list --installed | grep mysql
+          sudo mysql --host='127.0.0.1' --user='root' --password='root' < '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
           php testapps/PHP/tests/test.php
 #          phpize
 #          make
