@@ -15,7 +15,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: redis-phpredis/phpredis@5.3.4
-      -name: set mysql
+      - name: set mysql
         run: |
           sudo service mysql start
           sudo mysql --host='127.0.0.1' --user='root' --password='root' < '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
