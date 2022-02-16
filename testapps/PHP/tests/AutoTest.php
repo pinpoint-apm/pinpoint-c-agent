@@ -209,18 +209,11 @@ class AutoTest extends TestCase
 
     public function testPDO()
     {
-        $sql = "CREATE TABLE user( ".
-        "id INT NOT NULL AUTO_INCREMENT, ".
-        "name VARCHAR(100) NOT NULL, ".
-        "age VARCHAR(40), ".
-        "city VARCHAR(40), ".
-        "PRIMARY KEY ( id ))ENGINE=InnoDB DEFAULT CHARSET=utf8; ";
-        Db::connect('mysql://test:123456@127.0.0.1:3306/DBTest#utf8')->execute($sql);
         $this->visit('/test_pdo');
         $this->assertResponseOk();
         $log = $this->util->get_log();
         $this->assertTrue($this->util->check_error($log), $log);
-        $this->assertTrue($this->util->check_span($log,["PDO::__construct","dst value:dev-mysql", "PDO::prepare", "PDOStatement::execute", "PDOStatement::fetchAll"]), $log);
+        $this->assertTrue($this->util->check_span($log,["dst value:dev-mysql", "PDO::prepare", "PDOStatement::execute", "PDOStatement::fetchAll"]), $log);
     }
 
     public function testRedis()
