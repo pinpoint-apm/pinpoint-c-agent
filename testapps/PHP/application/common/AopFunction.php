@@ -12,6 +12,6 @@ class AopFunction
 
     function test_func2()
     {
-        Foo::test_func_2("1",23,null);
+        return Foo::test_func_2("1",23,null);
     }
 }

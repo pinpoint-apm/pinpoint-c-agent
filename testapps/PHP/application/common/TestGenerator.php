@@ -15,7 +15,7 @@ class TestGenerator
             try{
                 yield $i;
             }catch (Exception $exception){
-                echo $exception->getMessage();
+                return $exception->getMessage();
             }
         }
     }

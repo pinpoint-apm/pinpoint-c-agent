@@ -9,9 +9,6 @@ class TestRecursion
     public function test_cumsum1($n)
     {
         if ($n == 1) return 1;
-        print '*';
-        var_dump($this);
-        print '*';
 #        if ($n < 1) throw new \Exception("n < 1");
         return $n + $this->test_cumsum1($n - 1);
     }

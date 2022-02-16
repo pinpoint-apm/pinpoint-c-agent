@@ -14,7 +14,8 @@ class TestGuzzle
     {
         $this->client = new Client([
             // Base URI is used with relative requests
-            'base_uri' => 'http://localhost:8899/',
+//            'base_uri' => 'http://localhost:8088/',
+            'base_uri' => 'http://www.baidu.com/',
             // You can set any number of default request options.
             'timeout'  => 2.0,
         ]);
@@ -28,7 +29,7 @@ class TestGuzzle
 
     public function gotofoo()
     {
-        $response = $this->client->request('GET', '/index.php?',['query'=>['r'=>'country']]);
+        $response = $this->client->request('GET', '/dashboard');
         return $response->getStatusCode();
     }
 
