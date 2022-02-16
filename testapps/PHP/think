@@ -15,16 +15,6 @@ namespace think;
 // 加载基础文件
 require __DIR__ . '/thinkphp/base.php';
 
-
-###################################################################
-define('AOP_CACHE_DIR', __DIR__ . '/Cache/');
-define('PLUGINS_DIR', __DIR__ . '/Plugins/');
-define('APPLICATION_NAME','thinkphp'); // your application name
-define('APPLICATION_ID','thinkphp');  // your application id
-define('PINPOINT_USE_CACHE','YES');
-require_once __DIR__ . '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
-###################################################################
-
 // 应用初始化
 Container::get('app')->path(__DIR__ . '/application/')->initialize();
 
