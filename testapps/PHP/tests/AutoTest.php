@@ -213,7 +213,7 @@ class AutoTest extends TestCase
         $this->assertResponseOk();
         $log = $this->util->get_log();
         $this->assertTrue($this->util->check_error($log), $log);
-        $this->assertTrue($this->util->check_span($log,["dst value:dev-mysql", "PDO::prepare", "PDOStatement::execute", "PDOStatement::fetchAll"]), $log);
+        $this->assertTrue($this->util->check_span($log,["dst value:localhost", "PDO::prepare", "PDOStatement::execute", "PDOStatement::fetchAll"]), $log);
     }
 
     public function testRedis()
