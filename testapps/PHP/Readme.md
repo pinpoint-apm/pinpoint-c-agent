@@ -2,6 +2,7 @@
 1. Install Composer. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
 2. Execute `composer install` or `composer update`.
 3. Import pinpoint entry header into public/index.php as below
+
     ## start.php
     ```
     <?php

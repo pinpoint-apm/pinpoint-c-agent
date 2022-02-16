@@ -21,9 +21,10 @@
     	"pinpoint-apm/pinpoint-php-aop": "dev-master",
         "predis/predis": "^1.1",
         "topthink/think-testing": "2.0.*",
-        "guzzlehttp/guzzle": "^7.4",
+        "guzzlehttp/guzzle": "^6.0",
         "mongodb/mongodb": "^1.11",
         "topthink/think-mongo": "1.*"
+
     },
     "autoload": {
         "psr-4": {

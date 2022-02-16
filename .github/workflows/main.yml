@@ -40,12 +40,45 @@ jobs:
           ./configure
           make
           make test TESTS=src/PHP/tests5/
-        
-  PHP78:
+  
+  PHP7:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0','8.1']
+        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0']
+    steps:
+      - uses: actions/checkout@v2
+      - name: set mysql
+        run: |
+          sudo service mysql start
+          sudo mysql --host='127.0.0.1' --user='root' --password='root' < '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
+      - name: set redis
+        run: |
+          sudo apt-get install redis-server
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: redis-phpredis/phpredis@5.3.4
+      - name: testapp
+        run: |
+          phpize
+          ./configure
+          make
+          make test TESTS=src/PHP/tests/
+          sudo make install
+          sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+          sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+          sudo echo "pinpoint_php.DebugReport=true" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
+          cd testapps/PHP
+          composer install
+          cp /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/think .
+          php think unit -v
+          
+  PHP8:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-versions: ['8.1']
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
@@ -75,6 +108,7 @@ jobs:
           pip install -r requirements.txt 
           python setup.py install
           nosetests src/PY/test --ignore-files="TestCoroutines.*"
+          
   Collector-agent:
       strategy:
         matrix:
@@ -93,4 +127,3 @@ jobs:
             go mod download
             go build
             go test ./... -v
-            
