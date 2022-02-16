@@ -73,6 +73,22 @@ jobs:
           composer install
           php think unit -v
           
+  PHP78:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-versions: ['8.1']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - run: |
+          phpize
+          ./configure
+          make
+          make test TESTS=src/PHP/tests/
+          
   Python3:
     strategy:
       matrix:
