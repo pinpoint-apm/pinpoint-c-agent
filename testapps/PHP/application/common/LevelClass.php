@@ -7,20 +7,17 @@ namespace app\common;
 class LevelClass
 {
     private function private_function($a){
-        echo "Private!";
-        return $a;
+        return "Private!".$a;
     }
 
     protected function protected_function($a){
-        echo "Protected!";
-        $this->private_function(123);
-        return $a;
+        $tmp = $this->private_function(123);
+        return "Protected!".$a;
     }
 
     public function public_function($a){
-        echo "Public!";
-        $this->private_function(123);
-        $this->protected_function(123);
-        return $a;
+        $tmp1 = $this->private_function(123);
+        $tmp2 = $this->protected_function(123);
+        return "Public!".$a;
     }
 }
