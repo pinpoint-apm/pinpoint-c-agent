@@ -3,12 +3,49 @@ name: CI
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
+  cpp:
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.6
+        with:
+          cmake-version: '3.16.x'
+      - name: Build ppt-agent
+        run: |
+          cd common
+          mkdir -p build
+          cd build
+          cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
+          make
+          ./bin/unittest
+      - name: Codecovage
+        uses: codecov/codecov-action@v1
        
+  PHP5:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        php-versions: ['5.6','5.4','5.5']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - run: |
+          phpize
+          ./configure
+          make
+          make test TESTS=src/PHP/tests5/
+  
   PHP7:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4']
+        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1']
     steps:
       - uses: actions/checkout@v2
       - name: set mysql
@@ -35,3 +72,41 @@ jobs:
           cd testapps/PHP
           composer install
           php think unit -v
+          
+  Python3:
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, macos-latest]
+        python-version: ['2.7', '3.5', '3.6', '3.7']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jwlawson/actions-setup-cmake@v1.6
+        with:
+          cmake-version: '3.16.x'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: |
+          pip install -r requirements.txt 
+          python setup.py install
+          nosetests src/PY/test --ignore-files="TestCoroutines.*"
+          
+  Collector-agent:
+      strategy:
+        matrix:
+          go-version: [1.16.x]
+          os: [ubuntu-latest]
+      runs-on: ${{ matrix.os }}
+      steps:
+        - name: Install Go
+          uses: actions/setup-go@v2
+          with:
+            go-version: ${{ matrix.go-version }}
+        - name: Checkout code
+          uses: actions/checkout@v2
+        - run: |
+            cd collector-agent
+            go mod download
+            go build
+            go test ./... -v
