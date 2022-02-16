@@ -17,7 +17,7 @@ jobs:
           sudo mysql --host='127.0.0.1' --user='root' --password='root' < '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
       - name: set redis
         run: |
-          sudo apt-get list --installed | grep redis
+          sudo apt list --installed | grep redis
           sudo apt-get install redis-server
           sudo /etc/init.d/redis-server status
       - uses: shivammathur/setup-php@v2
