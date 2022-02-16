@@ -21,6 +21,7 @@ jobs:
           sudo mysql --host='127.0.0.1' --user='root' --password='root' < '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
       - name: testapp
         run: |
+          pwd
           phpize
           make
           make test TESTS=src/PHP/tests/
