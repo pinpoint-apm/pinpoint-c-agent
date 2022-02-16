@@ -21,8 +21,8 @@ jobs:
           extensions: redis-phpredis/phpredis@5.3.4
       - name: testapp
         run: |
-          ls -l
           phpize
+          ./configure
           make
           make test TESTS=src/PHP/tests/
           sudo make install
