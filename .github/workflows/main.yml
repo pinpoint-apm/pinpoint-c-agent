@@ -71,6 +71,7 @@ jobs:
           sudo echo "pinpoint_php.DebugReport=true" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           cd testapps/PHP
           composer install
+          cp /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/think .
           php think unit -v
           
   PHP8:
