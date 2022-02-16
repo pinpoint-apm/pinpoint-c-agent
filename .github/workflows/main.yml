@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1']
+        php-versions: ['7.0', '7.1', '7.2', '7.3', '7.4', '8.0']
     steps:
       - uses: actions/checkout@v2
       - name: set mysql
@@ -73,7 +73,7 @@ jobs:
           composer install
           php think unit -v
           
-  PHP78:
+  PHP8:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
