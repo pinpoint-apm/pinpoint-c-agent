@@ -8,7 +8,6 @@ class Student extends Person
 {
     function eat()
     {
-        echo "Student eating<br/>";
-        return "Student";
+        return "Student eating<br/>";
     }
 }

@@ -20,7 +20,6 @@ class InterfaceStudent implements InterfacePerson
     }
     public function other($vars)
     {
-        var_dump($vars);
         return $vars;
     }
 }
