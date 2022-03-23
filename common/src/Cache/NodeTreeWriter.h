@@ -25,8 +25,9 @@
 #include "json/json.h"
 #include <iostream>
 #include <sstream> 
-namespace Cache {
 
+namespace Cache {
+namespace Json = AliasJson;
 /*
  * @author eeliu
  * Sep 21, 2020 2:05:59 PM

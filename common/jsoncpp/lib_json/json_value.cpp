@@ -47,7 +47,7 @@ int JSON_API msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 
 #define JSON_ASSERT_UNREACHABLE assert(false)
 
-namespace Json {
+namespace AliasJson { 
 template <typename T>
 static std::unique_ptr<T> cloneUnique(const std::unique_ptr<T>& p) {
   std::unique_ptr<T> r;
@@ -90,7 +90,7 @@ static inline bool InRange(double d, T min, U max) {
   return d >= static_cast<double>(min) && d <= static_cast<double>(max);
 }
 #else  // if !defined(JSON_USE_INT64_DOUBLE_CONVERSION)
-static inline double integerToDouble(Json::UInt64 value) {
+static inline double integerToDouble(AliasJson::UInt64 value) {
   return static_cast<double>(Int64(value / 2)) * 2.0 +
          static_cast<double>(Int64(value & 1));
 }
@@ -120,7 +120,7 @@ static inline char* duplicateStringValue(const char* value, size_t length) {
 
   auto newString = static_cast<char*>(malloc(length + 1));
   if (newString == nullptr) {
-    throwRuntimeError("in Json::Value::duplicateStringValue(): "
+    throwRuntimeError("in AliasJson::Value::duplicateStringValue(): "
                       "Failed to allocate string value buffer");
   }
   memcpy(newString, value, length);
@@ -136,12 +136,12 @@ static inline char* duplicateAndPrefixStringValue(const char* value,
   // to a sane value.
   JSON_ASSERT_MESSAGE(length <= static_cast<unsigned>(Value::maxInt) -
                                     sizeof(unsigned) - 1U,
-                      "in Json::Value::duplicateAndPrefixStringValue(): "
+                      "in AliasJson::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   size_t actualLength = sizeof(length) + length + 1;
   auto newString = static_cast<char*>(malloc(actualLength));
   if (newString == nullptr) {
-    throwRuntimeError("in Json::Value::duplicateAndPrefixStringValue(): "
+    throwRuntimeError("in AliasJson::Value::duplicateAndPrefixStringValue(): "
                       "Failed to allocate string value buffer");
   }
   *reinterpret_cast<unsigned*>(newString) = length;
@@ -183,7 +183,7 @@ static inline void releasePrefixedStringValue(char* value) { free(value); }
 static inline void releaseStringValue(char* value, unsigned) { free(value); }
 #endif // JSONCPP_USING_SECURE_MEMORY
 
-} // namespace Json
+} // namespace AliasJson
 
 // //////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ static inline void releaseStringValue(char* value, unsigned) { free(value); }
 #include "json_valueiterator.inl"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
-namespace Json {
+namespace AliasJson { 
 
 #if JSON_USE_EXCEPTION
 Exception::Exception(String msg) : msg_(std::move(msg)) {}
@@ -589,7 +589,7 @@ bool Value::operator!=(const Value& other) const { return !(*this == other); }
 
 const char* Value::asCString() const {
   JSON_ASSERT_MESSAGE(type() == stringValue,
-                      "in Json::Value::asCString(): requires stringValue");
+                      "in AliasJson::Value::asCString(): requires stringValue");
   if (value_.string_ == nullptr)
     return nullptr;
   unsigned this_len;
@@ -602,7 +602,7 @@ const char* Value::asCString() const {
 #if JSONCPP_USING_SECURE_MEMORY
 unsigned Value::getCStringLength() const {
   JSON_ASSERT_MESSAGE(type() == stringValue,
-                      "in Json::Value::asCString(): requires stringValue");
+                      "in AliasJson::Value::asCString(): requires stringValue");
   if (value_.string_ == 0)
     return 0;
   unsigned this_len;
@@ -890,7 +890,7 @@ Value::operator bool() const { return !isNull(); }
 void Value::clear() {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue ||
                           type() == objectValue,
-                      "in Json::Value::clear(): requires complex value");
+                      "in AliasJson::Value::clear(): requires complex value");
   start_ = 0;
   limit_ = 0;
   switch (type()) {
@@ -905,7 +905,7 @@ void Value::clear() {
 
 void Value::resize(ArrayIndex newSize) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
-                      "in Json::Value::resize(): requires arrayValue");
+                      "in AliasJson::Value::resize(): requires arrayValue");
   if (type() == nullValue)
     *this = Value(arrayValue);
   ArrayIndex oldSize = size();
@@ -924,7 +924,7 @@ void Value::resize(ArrayIndex newSize) {
 Value& Value::operator[](ArrayIndex index) {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == arrayValue,
-      "in Json::Value::operator[](ArrayIndex): requires arrayValue");
+      "in AliasJson::Value::operator[](ArrayIndex): requires arrayValue");
   if (type() == nullValue)
     *this = Value(arrayValue);
   CZString key(index);
@@ -940,14 +940,14 @@ Value& Value::operator[](ArrayIndex index) {
 Value& Value::operator[](int index) {
   JSON_ASSERT_MESSAGE(
       index >= 0,
-      "in Json::Value::operator[](int index): index cannot be negative");
+      "in AliasJson::Value::operator[](int index): index cannot be negative");
   return (*this)[ArrayIndex(index)];
 }
 
 const Value& Value::operator[](ArrayIndex index) const {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == arrayValue,
-      "in Json::Value::operator[](ArrayIndex)const: requires arrayValue");
+      "in AliasJson::Value::operator[](ArrayIndex)const: requires arrayValue");
   if (type() == nullValue)
     return nullSingleton();
   CZString key(index);
@@ -960,7 +960,7 @@ const Value& Value::operator[](ArrayIndex index) const {
 const Value& Value::operator[](int index) const {
   JSON_ASSERT_MESSAGE(
       index >= 0,
-      "in Json::Value::operator[](int index) const: index cannot be negative");
+      "in AliasJson::Value::operator[](int index) const: index cannot be negative");
   return (*this)[ArrayIndex(index)];
 }
 
@@ -1037,7 +1037,7 @@ void Value::dupMeta(const Value& other) {
 Value& Value::resolveReference(const char* key) {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == objectValue,
-      "in Json::Value::resolveReference(): requires objectValue");
+      "in AliasJson::Value::resolveReference(): requires objectValue");
   if (type() == nullValue)
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(strlen(key)),
@@ -1056,7 +1056,7 @@ Value& Value::resolveReference(const char* key) {
 Value& Value::resolveReference(char const* key, char const* end) {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == objectValue,
-      "in Json::Value::resolveReference(key, end): requires objectValue");
+      "in AliasJson::Value::resolveReference(key, end): requires objectValue");
   if (type() == nullValue)
     *this = Value(objectValue);
   CZString actualKey(key, static_cast<unsigned>(end - key),
@@ -1080,7 +1080,7 @@ bool Value::isValidIndex(ArrayIndex index) const { return index < size(); }
 
 Value const* Value::find(char const* begin, char const* end) const {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
-                      "in Json::Value::find(begin, end): requires "
+                      "in AliasJson::Value::find(begin, end): requires "
                       "objectValue or nullValue");
   if (type() == nullValue)
     return nullptr;
@@ -1093,7 +1093,7 @@ Value const* Value::find(char const* begin, char const* end) const {
 }
 Value* Value::demand(char const* begin, char const* end) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
-                      "in Json::Value::demand(begin, end): requires "
+                      "in AliasJson::Value::demand(begin, end): requires "
                       "objectValue or nullValue");
   return &resolveReference(begin, end);
 }
@@ -1126,7 +1126,7 @@ Value& Value::append(const Value& value) { return append(Value(value)); }
 
 Value& Value::append(Value&& value) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
-                      "in Json::Value::append: requires arrayValue");
+                      "in AliasJson::Value::append: requires arrayValue");
   if (type() == nullValue) {
     *this = Value(arrayValue);
   }
@@ -1139,7 +1139,7 @@ bool Value::insert(ArrayIndex index, const Value& newValue) {
 
 bool Value::insert(ArrayIndex index, Value&& newValue) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == arrayValue,
-                      "in Json::Value::insert: requires arrayValue");
+                      "in AliasJson::Value::insert: requires arrayValue");
   ArrayIndex length = size();
   if (index > length) {
     return false;
@@ -1185,7 +1185,7 @@ bool Value::removeMember(String const& key, Value* removed) {
 }
 void Value::removeMember(const char* key) {
   JSON_ASSERT_MESSAGE(type() == nullValue || type() == objectValue,
-                      "in Json::Value::removeMember(): requires objectValue");
+                      "in AliasJson::Value::removeMember(): requires objectValue");
   if (type() == nullValue)
     return;
 
@@ -1232,7 +1232,7 @@ bool Value::isMember(String const& key) const {
 Value::Members Value::getMemberNames() const {
   JSON_ASSERT_MESSAGE(
       type() == nullValue || type() == objectValue,
-      "in Json::Value::getMemberNames(), value must be objectValue");
+      "in AliasJson::Value::getMemberNames(), value must be objectValue");
   if (type() == nullValue)
     return Value::Members();
   Members members;
@@ -1414,7 +1414,7 @@ void Value::setComment(String comment, CommentPlacement placement) {
   JSON_ASSERT(!comment.empty());
   JSON_ASSERT_MESSAGE(
       comment[0] == '\0' || comment[0] == '/',
-      "in Json::Value::setComment(): Comments must start with /");
+      "in AliasJson::Value::setComment(): Comments must start with /");
   comments_.set(placement, std::move(comment));
 }
 
@@ -1438,7 +1438,7 @@ String Value::toStyledString() const {
   StreamWriterBuilder builder;
 
   String out = this->hasComment(commentBefore) ? "\n" : "";
-  out += Json::writeString(builder, *this);
+  out += AliasJson::writeString(builder, *this);
   out += '\n';
 
   return out;
@@ -1632,4 +1632,4 @@ Value& Path::make(Value& root) const {
   return *node;
 }
 
-} // namespace Json
+} // namespace AliasJson

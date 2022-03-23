@@ -67,3 +67,4 @@ test.php
 .libs/
 aclocal.m4
 src/PHP/pinpoint_php.dep
+testapps/PHP/composer.phar

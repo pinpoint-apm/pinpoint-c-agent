@@ -104,7 +104,7 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
-namespace Json {
+namespace AliasJson { 
 using Int = int;
 using UInt = unsigned int;
 #if defined(JSON_NO_INT64)
@@ -138,13 +138,13 @@ using OStringStream =
                              String::allocator_type>;
 using IStream = std::istream;
 using OStream = std::ostream;
-} // namespace Json
+} // namespace AliasJson
 
 // Legacy names (formerly macros).
-using JSONCPP_STRING = Json::String;
-using JSONCPP_ISTRINGSTREAM = Json::IStringStream;
-using JSONCPP_OSTRINGSTREAM = Json::OStringStream;
-using JSONCPP_ISTREAM = Json::IStream;
-using JSONCPP_OSTREAM = Json::OStream;
+using JSONCPP_STRING = AliasJson::String;
+using JSONCPP_ISTRINGSTREAM = AliasJson::IStringStream;
+using JSONCPP_OSTRINGSTREAM = AliasJson::OStringStream;
+using JSONCPP_ISTREAM = AliasJson::IStream;
+using JSONCPP_OSTREAM = AliasJson::OStream;
 
 #endif // JSON_CONFIG_H_INCLUDED

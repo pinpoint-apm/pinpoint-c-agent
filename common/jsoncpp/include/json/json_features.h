@@ -12,7 +12,7 @@
 
 #pragma pack(push, 8)
 
-namespace Json {
+namespace AliasJson { 
 
 /** \brief Configuration passed to reader and writer.
  * This configuration object can be used to force the Reader or Writer
@@ -54,7 +54,7 @@ public:
   bool allowNumericKeys_{false};
 };
 
-} // namespace Json
+} // namespace AliasJson
 
 #pragma pack(pop)
 
