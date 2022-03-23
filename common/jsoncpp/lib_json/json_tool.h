@@ -25,7 +25,7 @@
  * It is an internal header that must not be exposed.
  */
 
-namespace Json {
+namespace AliasJson { 
 static inline char getDecimalPoint() {
 #ifdef JSONCPP_NO_LOCALE_SUPPORT
   return '\0';
@@ -129,6 +129,6 @@ template <typename Iter> Iter fixZerosInTheEnd(Iter begin, Iter end) {
   return end;
 }
 
-} // namespace Json
+} // namespace AliasJson
 
 #endif // LIB_JSONCPP_JSON_TOOL_H_INCLUDED

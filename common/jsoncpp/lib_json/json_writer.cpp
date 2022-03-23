@@ -83,7 +83,7 @@
 #pragma warning(disable : 4996)
 #endif
 
-namespace Json {
+namespace AliasJson { 
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 using StreamWriterPtr = std::unique_ptr<StreamWriter>;
@@ -1201,7 +1201,7 @@ StreamWriter* StreamWriterBuilder::newStreamWriter() const {
                                      precisionType);
 }
 
-bool StreamWriterBuilder::validate(Json::Value* invalid) const {
+bool StreamWriterBuilder::validate(AliasJson::Value* invalid) const {
   static const auto& valid_keys = *new std::set<String>{
       "indentation",
       "commentStyle",
@@ -1228,7 +1228,7 @@ Value& StreamWriterBuilder::operator[](const String& key) {
   return settings_[key];
 }
 // static
-void StreamWriterBuilder::setDefaults(Json::Value* settings) {
+void StreamWriterBuilder::setDefaults(AliasJson::Value* settings) {
   //! [StreamWriterBuilderDefaults]
   (*settings)["commentStyle"] = "All";
   (*settings)["indentation"] = "\t";
@@ -1255,4 +1255,4 @@ OStream& operator<<(OStream& sout, Value const& root) {
   return sout;
 }
 
-} // namespace Json
+} // namespace AliasJson

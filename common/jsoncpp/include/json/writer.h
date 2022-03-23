@@ -22,7 +22,7 @@
 
 #pragma pack(push, 8)
 
-namespace Json {
+namespace AliasJson { 
 
 class Value;
 
@@ -80,7 +80,7 @@ String JSON_API writeString(StreamWriter::Factory const& factory,
 *   StreamWriterBuilder builder;
 *   builder["commentStyle"] = "None";
 *   builder["indentation"] = "   ";  // or whatever you like
-*   std::unique_ptr<Json::StreamWriter> writer(
+*   std::unique_ptr<AliasJson::StreamWriter> writer(
 *      builder.newStreamWriter());
 *   writer->write(value, &std::cout);
 *   std::cout << std::endl;  // add lf and flush
@@ -88,7 +88,7 @@ String JSON_API writeString(StreamWriter::Factory const& factory,
 */
 class JSON_API StreamWriterBuilder : public StreamWriter::Factory {
 public:
-  // Note: We use a Json::Value so that we can add data-members to this class
+  // Note: We use a AliasJson::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
    *  Available settings (case-sensitive):
@@ -116,7 +116,7 @@ public:
    *  JSON Value.
    *  \sa setDefaults()
    */
-  Json::Value settings_;
+  AliasJson::Value settings_;
 
   StreamWriterBuilder();
   ~StreamWriterBuilder() override;
@@ -129,17 +129,17 @@ public:
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(AliasJson::Value* invalid) const;
   /** A simple way to update a specific setting.
    */
   Value& operator[](const String& key);
 
   /** Called by ctor, but you can use this to reset settings_.
-   * \pre 'settings' != NULL (but Json::null is fine)
+   * \pre 'settings' != NULL (but AliasJson::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_writer.cpp StreamWriterBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(AliasJson::Value* settings);
 };
 
 /** \brief Abstract class for writers.
@@ -353,10 +353,10 @@ String JSON_API valueToString(bool value);
 String JSON_API valueToQuotedString(const char* value);
 
 /// \brief Output using the StyledStreamWriter.
-/// \see Json::operator>>()
+/// \see AliasJson::operator>>()
 JSON_API OStream& operator<<(OStream&, const Value& root);
 
-} // namespace Json
+} // namespace AliasJson
 
 #pragma pack(pop)
 

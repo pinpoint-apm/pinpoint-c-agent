@@ -25,6 +25,7 @@
 #include "Helper.h"
 
 namespace Helper{
+namespace Json = AliasJson;
 using Cache::NodeTreeWriter;
 static NodeTreeWriter _writer;
 static ConnectionPool::SpanConnectionPool _con_pool;

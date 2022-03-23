@@ -26,7 +26,7 @@
 
 namespace ConnectionPool {
 using Cache::SafeSharedState;
-
+namespace Json = AliasJson;
 SpanConnectionPool::SpanConnectionPool(const char* co_host):
         co_host(co_host),
         con_counter(0)

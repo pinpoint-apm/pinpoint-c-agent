@@ -90,7 +90,7 @@ namespace NodePool{
 //    uint32_t _id;
 //};
 //
-
+namespace Json = AliasJson;
 using Context::ContextType;
 using Context::StringContextType;
 using Context::LongContextType;
