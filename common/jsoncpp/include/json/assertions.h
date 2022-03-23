@@ -23,7 +23,7 @@
 #define JSON_ASSERT(condition)                                                 \
   do {                                                                         \
     if (!(condition)) {                                                        \
-      Json::throwLogicError("assert json failed");                             \
+      AliasJson::throwLogicError("assert json failed");                             \
     }                                                                          \
   } while (0)
 
@@ -31,7 +31,7 @@
   do {                                                                         \
     OStringStream oss;                                                         \
     oss << message;                                                            \
-    Json::throwLogicError(oss.str());                                          \
+    AliasJson::throwLogicError(oss.str());                                          \
     abort();                                                                   \
   } while (0)
 

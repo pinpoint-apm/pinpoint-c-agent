@@ -10,7 +10,7 @@
 #include "config.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
-namespace Json {
+namespace AliasJson { 
 
 // writer.h
 class StreamWriter;
@@ -38,6 +38,6 @@ class ValueIteratorBase;
 class ValueIterator;
 class ValueConstIterator;
 
-} // namespace Json
+} // namespace AliasJson
 
 #endif // JSON_FORWARDS_H_INCLUDED

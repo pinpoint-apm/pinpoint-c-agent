@@ -31,6 +31,7 @@
 #include "Util/Helper.h"
 #include "ConnectionPool/SpanConnectionPool.h"
 
+namespace Json = AliasJson;
 using NodePool::TraceNode;
 using NodePool::PoolManager;
 using NodePool::PContextType;

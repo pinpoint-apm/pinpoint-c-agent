@@ -39,7 +39,7 @@
 #include "ConnectionPool/SpanConnectionPool.h"
 
 namespace Helper{
-
+namespace Json = AliasJson;
 using std::chrono::steady_clock;
 using std::chrono::duration;
 using std::chrono::duration_cast;
