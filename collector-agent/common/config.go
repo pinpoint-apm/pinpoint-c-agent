@@ -1,11 +1,12 @@
 package common
 
 import (
-	"CollectorAgent/protocol"
 	"fmt"
 	"net"
 	"os"
 	"time"
+
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/protocol"
 
 	"google.golang.org/grpc"
 )

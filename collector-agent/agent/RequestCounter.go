@@ -1,9 +1,10 @@
 package agent
 
 import (
-	"CollectorAgent/common"
 	"math"
 	"time"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 
 	log "github.com/sirupsen/logrus"
 )
