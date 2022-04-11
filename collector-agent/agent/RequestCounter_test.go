@@ -1,9 +1,10 @@
 package agent
 
 import (
-	"CollectorAgent/common"
 	"testing"
 	"time"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 )
 
 func TestRequestProfiler_Interceptor(t *testing.T) {
