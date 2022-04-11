@@ -1,9 +1,10 @@
 package agent
 
 import (
-	"CollectorAgent/common"
-	"CollectorAgent/protocol"
 	"time"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/protocol"
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/v3/mem"

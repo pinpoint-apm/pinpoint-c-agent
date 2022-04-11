@@ -1,8 +1,9 @@
 package main
 
 import (
-	"CollectorAgent/server"
-	_ "net/http/pprof"
+	// _ "net/http/pprof"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server"
 
 	log "github.com/sirupsen/logrus"
 )

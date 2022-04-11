@@ -1,14 +1,15 @@
 package agent
 
 import (
-	"CollectorAgent/common"
-	v1 "CollectorAgent/protocol"
 	"context"
 	"errors"
 	"fmt"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/protocol"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

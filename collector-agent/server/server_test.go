@@ -1,13 +1,14 @@
 package server
 
 import (
-	"CollectorAgent/common"
 	"encoding/binary"
 	"net"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 
 	log "github.com/sirupsen/logrus"
 )
