@@ -134,13 +134,14 @@ NodeID pinpoint_get_per_thread_id(void);
 void pinpoint_update_per_thread_id(NodeID id);
 
 /**
- * start a trace (span). if current span is empty, create a span or else create a spanevent
- * @return
+ * start a trace (span) from parentId. if current span is empty, create a span or else create a spanevent
+ * @param parentId 
+ * @return 
  */
-NodeID pinpoint_start_trace(NodeID);
+NodeID pinpoint_start_trace(NodeID parentId);
 /**
  * the same as pinpoint_start_trace. BUT, end a span or a spanevent
- * @return
+ * @return NodeID is parent node id
  */
 NodeID pinpoint_end_trace(NodeID);
 
