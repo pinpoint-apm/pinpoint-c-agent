@@ -55,6 +55,8 @@ void TraceNode::initId(NodeID& id)
 
 void TraceNode::addChild(TraceNode& child)
 {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    
     if(this->p_child_head)  child.p_brother_node = this->p_child_head;
 
     this->p_child_head = &child;

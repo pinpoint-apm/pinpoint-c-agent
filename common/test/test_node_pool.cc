@@ -15,10 +15,10 @@ TEST(poolManger, get_and_give_back)
     NodeID id = _node.getId();
     // give back
     pool.freeNode(id);
-    _node = pool.getNode();
+    TraceNode& _node_01 = pool.getNode();
 
     //ref current
-    TraceNode& ref_new_node =  pool.getNodeById(_node.getId());
+    TraceNode& ref_new_node =  pool.getNodeById(_node_01.getId());
 
     EXPECT_EQ(p,&_node);
     EXPECT_EQ(ref_new_node,_node);
