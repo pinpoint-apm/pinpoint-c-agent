@@ -18,17 +18,16 @@
 # ------------------------------------------------------------------------------
 
 
-
-
-from .AsyCommon import AsyCandy
-from common  import *
+from .AsyCommon import AsynPinTrace
+from common import *
 import _pinpointPy
 
-class AsyRequestPlugin(AsyCandy):
-    def __init__(self,name):
+
+class AsyRequestPlugin(AsynPinTrace):
+    def __init__(self, name):
         super().__init__(name)
 
-    def onBefore(self,*args, **kwargs):
+    def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         _pinpointPy.add_clue(PP_APP_NAME, APP_NAME, self.traceId)
         _pinpointPy.add_clue(PP_APP_ID, APP_ID, self.traceId)
@@ -102,7 +101,8 @@ class AsyRequestPlugin(AsyCandy):
             _pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY], self.traceId)
 
         _pinpointPy.set_context_key("Pinpoint-Sampled", "s1", self.traceId)
-        if (PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or _pinpointPy.check_tracelimit():
+        if (PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[
+            PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or _pinpointPy.check_tracelimit():
             if request.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED:
                 _pinpointPy.drop_trace(self.traceId)
                 _pinpointPy.set_context_key("Pinpoint-Sampled", "s0", self.traceId)
@@ -113,14 +113,11 @@ class AsyRequestPlugin(AsyCandy):
         _pinpointPy.set_context_key(PP_SPAN_ID, self.sid, self.traceId)
         return args, kwargs
 
-    def onEnd(self,ret):
+    def onEnd(self, ret):
         super().onEnd(ret)
         self.isLimit = False
         return ret
 
     def onException(self, e):
-        _pinpointPy.mark_as_error(str(e),"", 0, self.traceId)
+        _pinpointPy.mark_as_error(str(e), "", 0, self.traceId)
         raise e
-
-
-

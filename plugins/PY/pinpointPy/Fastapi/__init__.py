@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+# Created by eeliu at 4/14/22
 
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
@@ -16,22 +17,6 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-
-
-from .AsyRequestPlugin import *
-import _pinpointPy
-
-class FastAPIRequestPlugin(AsyRequestPlugin):
-    def onBefore(self,*args, **kwargs):
-        super().onBefore(*args, **kwargs)
-        request = args[0].scope
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'fastapi-middleware',self.traceId)
-        _pinpointPy.add_clue(PP_REQ_URI, request["path"], self.traceId)
-        _pinpointPy.add_clue(PP_REQ_CLIENT, request["client"][0], self.traceId)
-        _pinpointPy.add_clue(PP_REQ_SERVER, request["server"][0] + ":" + str(request["server"][1]), self.traceId)
-
-
-    def onEnd(self, ret):
-        response  = ret
-        return super().onEnd(response)
-
+from .middleware import PinPointMiddleWare
+from .AsyCommonPlugin import CommonPlugin
+__all__=['PinPointMiddleWare','CommonPlugin']

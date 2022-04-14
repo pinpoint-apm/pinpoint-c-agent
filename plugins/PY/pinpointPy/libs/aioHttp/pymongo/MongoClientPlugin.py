@@ -23,7 +23,7 @@ import _pinpointPy
 from common import *
 
 
-class MongoClientPlugin(AsyCandy):
+class MongoClientPlugin(AsynPinTrace):
     def __init__(self, name):
         super().__init__(name)
         self.dst = ''

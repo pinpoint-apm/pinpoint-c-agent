@@ -27,7 +27,7 @@ import contextvars
 
 _Id_ = contextvars.ContextVar('_pinpoint_id_',default=0)
 
-class AsyCandy(object):
+class AsynPinTrace(object):
 
     def __init__(self,name):
         self.name = name
@@ -70,7 +70,7 @@ class AsyCandy(object):
 
 if __name__ == '__main__':
 
-    @AsyCandy('main')
+    @AsynPinTrace('main')
     async def run(i):
         if i == 0:
             return

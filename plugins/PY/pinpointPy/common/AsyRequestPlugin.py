@@ -22,12 +22,12 @@
 
 
 
-from .AsyCommon import AsyCandy
+from .AsyCommon import AsynPinTrace
 from .Defines import *
 from .Span import *
 import _pinpointPy
 
-class AsyRequestPlugin(AsyCandy):
+class AsyRequestPlugin(AsynPinTrace):
     def __init__(self,name):
         super().__init__(name)
 
