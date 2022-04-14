@@ -15,13 +15,14 @@
 # ------------------------------------------------------------------------------
 
 
-from .AsyCommon import AsyCandy
+from .AsyCommon import AsynPinTrace
 from common.Defines import *
 import _pinpointPy
 
-class CommonPlugin(AsyCandy):
 
-    def onBefore(self,*args, **kwargs):
+class CommonPlugin(AsynPinTrace):
+
+    def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
         _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), self.traceId)
@@ -30,9 +31,9 @@ class CommonPlugin(AsyCandy):
         _pinpointPy.add_clues(PP_ARGS, arg, self.traceId)
         ###############################################################
         # print( threading.currentThread().ident)
-        return args,kwargs
+        return args, kwargs
 
-    def onEnd(self,ret):
+    def onEnd(self, ret):
         ###############################################################
         _pinpointPy.add_clues(PP_RETURN, str(ret), self.traceId)
         ###############################################################
@@ -47,7 +48,7 @@ class CommonPlugin(AsyCandy):
         j = 0
 
         for i in args:
-            args_tmp["arg["+str(j)+"]"] = (str(i))
+            args_tmp["arg[" + str(j) + "]"] = (str(i))
             j += 1
 
         for k in kwargs:
