@@ -67,7 +67,7 @@ else:
 
 
 setup(name='pinpointPy',
-      version="1.0.16",
+      version="1.0.18",
       author="eeliu", 
       author_email='eeliu2009@gmail.com',
       license='Apache License 2.0',
