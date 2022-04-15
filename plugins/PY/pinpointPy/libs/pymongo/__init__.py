@@ -22,22 +22,22 @@
 
 def monkey_patch():
 
-    from common import Interceptor
+    from pinpointPy.common import Interceptor
     try:
-        import pymongo
+        from pymongo.collection import Collection
         from .MongoClientPlugin import MongoClientPlugin
-
+        # print(pymongo.collection)
         Interceptors = [
-            Interceptor(pymongo.collection,'find', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'insert', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'update', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'update_many', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'delete_one', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'delete_many', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'insert_many', MongoClientPlugin),
-            Interceptor(pymongo.collection, 'insert_one', MongoClientPlugin),
+            Interceptor(Collection,'find', MongoClientPlugin),
+            # Interceptor(Collection, 'insert', MongoClientPlugin),
+            # Interceptor(Collection, 'update', MongoClientPlugin),
+            Interceptor(Collection, 'update_many', MongoClientPlugin),
+            Interceptor(Collection, 'delete_one', MongoClientPlugin),
+            Interceptor(Collection, 'delete_many', MongoClientPlugin),
+            Interceptor(Collection, 'insert_many', MongoClientPlugin),
+            Interceptor(Collection, 'insert_one', MongoClientPlugin),
         ]
-
+        
         for interceptor in Interceptors:
             interceptor.enable()
 

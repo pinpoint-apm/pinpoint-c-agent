@@ -20,7 +20,7 @@
 
 
 import _pinpointPy
-from common import *
+from pinpointPy.common import *
 
 # @deprected
 class WorkerTaskTracePlugin(PinTrace):

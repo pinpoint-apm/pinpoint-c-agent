@@ -20,7 +20,7 @@
 # Created by eeliu at 7/31/20
 
 
-from common import *
+from pinpointPy.common import *
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from urllib.parse import urlparse

@@ -20,7 +20,7 @@
 # Created by eeliu at 8/20/20
 
 import _pinpointPy
-from common import *
+from pinpointPy.common import *
 
 
 class MongoClientPlugin(AsynPinTrace):

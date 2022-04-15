@@ -19,7 +19,7 @@
 
 # Created by eeliu at 11/11/20
 
-from common import *
+from pinpointPy.common import *
 
 
 class AioRequestPlugin(AsyRequestPlugin):
