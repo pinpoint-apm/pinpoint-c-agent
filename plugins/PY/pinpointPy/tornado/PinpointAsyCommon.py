@@ -23,7 +23,7 @@
 
 import random
 import asyncio
-from common import *
+from pinpointPy.common import *
 import _pinpointPy
 import contextvars
 

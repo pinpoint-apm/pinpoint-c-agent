@@ -19,7 +19,7 @@
 #   limitations under the License.
 # ******************************************************************************
 
-from common import *
+from pinpointPy.common import *
 import _pinpointPy
 
 #@deprecated

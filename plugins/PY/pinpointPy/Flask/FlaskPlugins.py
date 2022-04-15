@@ -26,12 +26,12 @@ import _pinpointPy
 
 from flask import Flask,Request
 
-from _pinpointPy.common import *
+from pinpointPy.common import *
 
-from _pinpointPy.libs import monkey_patch_for_pinpoint
-monkey_patch_for_pinpoint()
+from pinpointPy.libs import monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint(celeryCaller=False, kombu=False,amqp=False,DjangoRest=False)
 
-from _pinpointPy.settings import *
+from pinpointPy.settings import *
 
 class BaseFlaskPlugins(PinTrace):
     def __init__(self, name):

@@ -20,7 +20,7 @@
 # Created by eeliu at 11/12/20
 
 
-from common import *
+from pinpointPy.common import *
 
 class PyRequestPlugin(RequestPlugin):
     def onBefore(self,*args, **kwargs):

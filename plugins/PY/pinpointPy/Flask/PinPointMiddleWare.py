@@ -21,7 +21,7 @@
 
 from .FlaskPlugins import BaseFlaskPlugins
 
-from common import *
+from pinpointPy.common import *
 import _pinpointPy
 
 class PinPointMiddleWare():

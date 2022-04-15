@@ -22,7 +22,7 @@
 
 import _pinpointPy
 
-from common import PinpointCommonPlugin, PP_DESTINATION, PP_NEXT_SPAN_ID, generateSid, \
+from pinpointPy.common import PinpointCommonPlugin, PP_DESTINATION, PP_NEXT_SPAN_ID, generateSid, \
     PP_SERVER_TYPE, PP_REMOTE_METHOD, local_host_name
 
 

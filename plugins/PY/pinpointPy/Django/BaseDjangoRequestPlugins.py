@@ -21,7 +21,7 @@
 
 import _pinpointPy
 
-from common import *
+from pinpointPy.common import *
 
 class BaseDjangoRequestPlugins(PinTrace):
     def __init__(self,name):
