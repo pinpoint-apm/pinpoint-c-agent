@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from pinpoint.common import PinpointCommonPlugin
+from pinpointPy.common import PinpointCommonPlugin
 
 
 @PinpointCommonPlugin( __name__)
