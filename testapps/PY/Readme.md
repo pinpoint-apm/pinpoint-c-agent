@@ -22,7 +22,7 @@
     
     
     ```
-    from pinpoint.common import PinpointCommonPlugin
+    from pinpointPy.common import PinpointCommonPlugin
     
     
     @PinpointCommonPlugin(__name__)
