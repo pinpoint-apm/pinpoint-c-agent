@@ -101,8 +101,7 @@ class AsyRequestPlugin(AsynPinTrace):
             _pinpointPy.add_clue(PP_APACHE_PROXY, request.headers[PP_APACHE_PROXY], self.traceId)
 
         _pinpointPy.set_context_key("Pinpoint-Sampled", "s1", self.traceId)
-        if (PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[
-            PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or _pinpointPy.check_tracelimit():
+        if (PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED) or _pinpointPy.check_tracelimit():
             if request.headers[PP_HEADER_PINPOINT_SAMPLED] == PP_NOT_SAMPLED:
                 _pinpointPy.drop_trace(self.traceId)
                 _pinpointPy.set_context_key("Pinpoint-Sampled", "s0", self.traceId)
