@@ -21,6 +21,7 @@
 
 from .Common import PinTrace
 from .Utils import *
+import _pinpointPy
 
 class WSGIPlugin(PinTrace):
     def __init__(self, name):

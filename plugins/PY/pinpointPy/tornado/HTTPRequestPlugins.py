@@ -25,7 +25,7 @@ from .PinpointAsyCommon import *
 import _pinpointPy
 import tornado.web
 
-class HTTPRequestPlugins(AsyCandy):
+class HTTPRequestPlugins(AsynPinTrace):
     def __init__(self,class_name,module_name):
         super().__init__(class_name,module_name)
         self.isLimit = False

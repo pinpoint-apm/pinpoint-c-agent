@@ -19,7 +19,7 @@ from .PinpointAsyCommon import *
 import _pinpointPy
 
 
-class CommonPlugin(AsyCandy):
+class CommonPlugin(AsynPinTrace):
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
