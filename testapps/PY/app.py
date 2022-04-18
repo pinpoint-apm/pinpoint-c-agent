@@ -35,7 +35,7 @@ import test_lambda
 import test_decorator
 import test_partial
 import test_band
-from pinpoint.Flask.PinPointMiddleWare import PinPointMiddleWare
+from pinpointPy.Flask.PinPointMiddleWare import PinPointMiddleWare
 from test_band import BandClass
 import test_mixin
 import test_special
@@ -142,7 +142,7 @@ def test_generator_form():
 
 @app.route('/test_higher_order', methods=['GET'])
 def test_higher_order_form():
-    from pinpoint.common import PinpointCommonPlugin
+    from pinpointPy.common import PinpointCommonPlugin
     @PinpointCommonPlugin(__name__)
     def f(x):
         return x * x
