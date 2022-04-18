@@ -17,7 +17,7 @@
 
 
 def monkey_patch():
-    from _pinpointPy.common import Interceptor
+    from pinpointPy.common import Interceptor
 
     try:
         import requests

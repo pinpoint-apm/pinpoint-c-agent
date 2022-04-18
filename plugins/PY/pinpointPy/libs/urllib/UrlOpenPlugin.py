@@ -19,7 +19,7 @@
 
 # Created by eeliu at 8/20/20
 
-from common import *
+from pinpointPy.common import *
 import _pinpointPy
 
 class UrlOpenPlugin(PinTrace):

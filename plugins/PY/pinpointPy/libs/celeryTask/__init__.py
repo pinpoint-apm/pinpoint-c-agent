@@ -18,7 +18,7 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 2/4/21
 
-from common import Interceptor
+from pinpointPy.common import Interceptor
 
 def monkey_patch():
     try:

@@ -16,7 +16,7 @@
 
 
 
-from common import *
+from pinpointPy.common import *
 import _pinpointPy
 from  urllib.parse import urlparse
 

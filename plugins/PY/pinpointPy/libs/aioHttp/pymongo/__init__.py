@@ -20,7 +20,7 @@
 # Created by eeliu at 8/20/20
 
 
-from common import Interceptor
+from pinpointPy.common import Interceptor
 from .MongoClientPlugin import MongoClientPlugin
 try:
 

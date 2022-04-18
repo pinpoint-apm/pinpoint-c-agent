@@ -20,7 +20,7 @@
 # ******************************************************************************
 
 
-from common import *
+from pinpointPy.common import *
 
 from .TaskPlugin import TaskPlugin
 

@@ -19,7 +19,7 @@
 #   limitations under the License.
 # ******************************************************************************
 
-from common import PinpointCommonPlugin
+from pinpointPy.common import PinpointCommonPlugin
 
 
 class GetPlugin(PinpointCommonPlugin):
