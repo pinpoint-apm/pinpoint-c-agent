@@ -68,8 +68,8 @@ else:
 
 setup(name='pinpointPy',
       version="1.0.19",
-      author="eeliu", 
-      author_email='eeliu2009@gmail.com',
+      author="cd_pinpoint members", 
+      author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',
       url="https://github.com/pinpoint-apm/pinpoint-c-agent",
       long_description=long_description,
