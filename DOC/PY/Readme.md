@@ -1,60 +1,104 @@
-﻿## Support Plan
-What we have supported and what we are going to support: [support plan](SupportPlan.md)
+﻿# Tutorial for pinpoint-py agent
 
 ## Getting Started
 
-### Requirement
+> Requirement
 
 Dependency| Version| More
 ---|----|---
 python |2.7,3+ | (async must 3.7.1+)
 GO | | 
 gcc|gcc 4.7+| c++11
-cmake| 3.1+| ✔
+cmake| 3.1+| 
 *inux|  | `windows` is on the way
 pinpoint| 2.0+(GRPC)|
+collector-agent| [installed ?](../collector-agent/readme.md)
 
 ### Installation
-
-#### pinpointPy 
 
 ```shell
 $ pip install pinpointPy
 ```
-### Download pinpoint-python-plugins
 
-[pinpoint-python-plugins.tar.gz](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/V2020.12.17/pinpoint-python-plugins.tar.gz)
+### How to Use
 
-#### Install Collector Agent
-`Collector-Agent`, who formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
 
-1. Goto collector-agent(`pinpoint-c-agent/collector-agent`)
-2. Execute command `go build`
-3. Add environment variables:
-    ```
-    export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
-    export PP_COLLECTOR_AGENT_SPAN_PORT=9993
-    export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
-    export PP_COLLECTOR_AGENT_AGENT_PORT=9991
-    export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
-    export PP_COLLECTOR_AGENT_STAT_PORT=9992
-    export PP_COLLECTOR_AGENT_ISDOCKER=false
-    export PP_LOG_DIR=/tmp/
-    export PP_Log_Level=INFO
-    export PP_ADDRESS=0.0.0.0@9999
-    ```
-    1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: Set the IP of pinpoint-collector.
-    2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: Set the port of pinpoint-collector(grpc).
-    3. `PP_LOG_DIR`: Set the path of Collector-Agent's log file.
-    4. `PP_Log_Level`: Set the log level.
-    5. `PP_ADDRESS`: Set the address of `Collector-Agent`, then `PHP/Python-Agent` will connect Collector-Agent through this address.
-4. Run `Collector-Agent` by executing command `./CollectorAgent`
-   
-  Collector Agent Span Specification
-  [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
+#### 1.1 Flask
 
-### [How to Use]
-[Click me ☚](../../plugins/PY/Readme.md)
+> include middleware
+
+```
+app = Flask(__name__)
+app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
+```
+
+#### 1.2 Django
+
+> append into django middleware
+
+
+settings.py
+
+```python
+
+MIDDLEWARE = [
+    'pinpointPy.Django.DjangoMiddleWare',
+    ...
+    ]
+
+```
+#### 1.3 Tornado
+
+Todo....
+
+#### 1.4 pyramid
+
+> Add pinpoint_tween middleware
+
+```python
+
+    config = Configurator(settings=settings, root_factory="conduit.auth.RootFactory")
+    config.add_tween('pinpoint.pyramid.tween.pinpoint_tween')
+
+```
+
+Example [pinpoint-in-pyramid](https://github.com/eeliu/pinpoint-in-pyramid)
+
+#### 1.5 bottle
+
+> Loading pinpint.Bottle before application run
+
+Example [pinpoint-in-bottle](https://github.com/eeliu/pinpoint-in-bottle)
+
+#### 1.6 aiohttp
+
+Todo....
+
+#### 1.7 web.py
+
+> Add pinpoint middleware
+
+> Example [py-web](https://github.com/eeliu/pinpoint-in-pyweb)
+
+
+#### 1.8 web2.py (synchronize)
+
+> Add pinpoint middleware
+
+> Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
+
+
+### 2. Configuration
+
+
+```py
+
+# enable auto-interceptor plugins
+monkey_patch_for_pinpoint()
+# set pinpoint related environment
+set_agent("flask-agent","FLASK-AGENT",'tcp:dev-collector:9999',-1)
+
+```
 
 
 ## Performance Test Result
@@ -63,7 +107,7 @@ $ pip install pinpointPy
 
 -|TPR(ms)|RPS(#/sec)
 ----|-----|----
-pinpoint-py|4.487|445.73|
+pinpointPy|4.487|445.73|
 -|4.498 |444.69
 -|4.526 |441.88
 pure|4.440|450.44
