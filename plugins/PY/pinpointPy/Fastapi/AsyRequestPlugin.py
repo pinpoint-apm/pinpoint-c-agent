@@ -19,7 +19,7 @@
 
 
 from .AsyCommon import AsynPinTrace
-from Common import *
+from pinpointPy.Common import *
 
 
 

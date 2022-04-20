@@ -19,9 +19,9 @@
 
 # Created by eeliu at 3/5/20
 
-import Common
-import Defines
-import pinpoint
+from pinpointPy import Common
+from pinpointPy import Defines
+from pinpointPy import pinpoint
 
 class RequestPlugin(Common.PinTrace):
     def __init__(self,name):

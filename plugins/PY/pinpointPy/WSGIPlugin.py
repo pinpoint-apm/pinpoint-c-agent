@@ -19,9 +19,9 @@
 
 # Created by eeliu at 11/9/20
 
-from Common import PinTrace
-import Helper
-import pinpoint
+from pinpointPy.Common import PinTrace
+from pinpointPy import Helper
+from pinpointPy import pinpoint
 
 
 class WSGIPlugin(PinTrace):

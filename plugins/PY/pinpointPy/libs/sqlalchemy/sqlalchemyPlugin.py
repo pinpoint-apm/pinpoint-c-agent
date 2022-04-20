@@ -20,8 +20,8 @@
 # Created by eeliu at 7/31/20
 
 
-import pinpoint
-import Defines
+from pinpointPy import pinpoint
+from pinpointPy import Defines
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from urllib.parse import urlparse
