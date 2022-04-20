@@ -14,7 +14,6 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 import importlib
-from .internal import gl
 
 def __monkey_patch(*args,**kwargs):
     for key in kwargs:

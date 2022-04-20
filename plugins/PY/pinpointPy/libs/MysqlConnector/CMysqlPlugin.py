@@ -15,10 +15,11 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy.common import *
-import _pinpointPy
+import Common
+import Defines
 
-class CMysqlPlugin(PinTrace):
+
+class CMysqlPlugin(Common.PinTrace):
 
     def __init__(self,name):
         super().__init__(name)
@@ -26,12 +27,12 @@ class CMysqlPlugin(PinTrace):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
-        _pinpointPy.add_clue(PP_SQL_FORMAT,  args[1])
+        Common.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        Common.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MYSQL)
+        Common.add_trace_header(Defines.PP_SQL_FORMAT, args[1])
         ###############################################################
         dst = self.get_dst(args[0])
-        _pinpointPy.add_clue(PP_DESTINATION, dst)
+        Common.add_trace_header(Defines.PP_DESTINATION, dst)
         return args,kwargs
 
     def onEnd(self,ret):
@@ -39,7 +40,7 @@ class CMysqlPlugin(PinTrace):
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
+        Common.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}
