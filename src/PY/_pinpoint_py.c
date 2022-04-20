@@ -88,10 +88,13 @@ static PyObject *py_pinpoint_add_clues(PyObject *self, PyObject *args)
 {
     char* key = NULL;
     char* value = NULL;
-    int id = pinpoint_get_per_thread_id(); 
+    int id = -1;
     int loc = 0;
     if(PyArg_ParseTuple(args,"ss|ii",&key,&value,&id,&loc))
     {
+        // python is special, use thread-id
+        if(id == -1) id = pinpoint_get_per_thread_id();
+            
         pinpoint_add_clues(id,key,value,loc);
     }
     return Py_BuildValue("O",Py_True);
@@ -104,11 +107,13 @@ static PyObject *py_pinpoint_add_clue(PyObject *self, PyObject *args)
 {
     char* key = NULL;
     char* value = NULL;
-    int id = pinpoint_get_per_thread_id(); 
+    int id = -1;
     int loc = 0;
     if(PyArg_ParseTuple(args,"ss|ii",&key,&value,&id,&loc))
     {
-       pinpoint_add_clue(id,key,value,loc);
+        if(id == -1) id = pinpoint_get_per_thread_id();
+
+        pinpoint_add_clue(id,key,value,loc);
     }
     return Py_BuildValue("O",Py_True);
 }
@@ -121,10 +126,12 @@ static PyObject *py_pinpoint_context_key(PyObject *self, PyObject *args)
 {
     char* key = NULL;
     char* value = NULL;
-    int id = pinpoint_get_per_thread_id(); 
+    int id = -1;
     if(PyArg_ParseTuple(args,"ss|i",&key,&value,&id))
     {
-       pinpoint_set_context_key(id,key,value);
+        if (id == -1) id = pinpoint_get_per_thread_id();
+        
+        pinpoint_set_context_key(id,key,value);
     }
     return Py_BuildValue("O",Py_True);
 }
@@ -136,9 +143,11 @@ static PyObject *py_pinpoint_context_key(PyObject *self, PyObject *args)
 static PyObject *py_pinpoint_get_key(PyObject *self, PyObject *args)
 {
     char* key = NULL;
-    int id = pinpoint_get_per_thread_id(); 
+    int id = -1;
     if(PyArg_ParseTuple(args,"s|i",&key,&id))
     {
+        if(id == -1) id = pinpoint_get_per_thread_id();
+
         const char* data = pinpoint_get_context_key(id,key);
         return Py_BuildValue("s",data);
     }
@@ -172,11 +181,14 @@ static PyObject *py_check_tracelimit(PyObject *self, PyObject *args)
 static PyObject *py_force_flush_span(PyObject *self, PyObject *args)
 {
     int32_t timeout= 3;
-    int id = pinpoint_get_per_thread_id(); 
+    int id = -1; 
     if(! PyArg_ParseTuple(args,"|ii",&timeout,&id))
     {
         return NULL;
     }
+
+    if(id == -1) id = pinpoint_get_per_thread_id();
+
     if(global_agent_info.inter_flag & E_DISABLE_GIL)
     {
         pinpoint_force_end_trace(id,timeout);
@@ -304,11 +316,15 @@ static PyObject *py_trace_has_root(PyObject *self, PyObject *args)
 
 static PyObject *py_pinpoint_drop_trace(PyObject *self, PyObject *args)
 {
-    int id = pinpoint_get_per_thread_id();
+    int id = -1;
+
     if(! PyArg_ParseTuple(args,"|i",&id))
     {
         return NULL;
     }
+
+    if(id == -1) id = pinpoint_get_per_thread_id();
+
     mark_current_trace_status(id,E_TRACE_BLOCK);
     
     return Py_BuildValue("O",Py_True);
@@ -422,9 +438,11 @@ static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args)
     char * msg = NULL;
     char * file_name= NULL;
     uint32_t line_no= 0;
-    int id = pinpoint_get_per_thread_id();
+    int id = -1;
     if(PyArg_ParseTuple(args,"ssi|i",&msg,&file_name,&line_no,&id))
     {
+        if(id == -1) id = pinpoint_get_per_thread_id();
+        
         catch_error(id,msg,file_name,line_no);
     }
 
@@ -436,7 +454,7 @@ static PyMethodDef PinpointMethods[] = {
     {"start_trace", py_pinpoint_start_trace, METH_VARARGS, "def start_trace(int id=-1):# create a new trace and insert into trace chain"},
     {"end_trace", py_pinpoint_end_trace, METH_VARARGS, "def end_trace(int id=-1):# end currently matched trace"},
     {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
-    {"trace_has_root", py_trace_has_root, METH_VARARGS, "def trace_has_root(int id=-1)-> long # check current whether have a root. \n True: \nFalse: \n Note：If the id is invalid, return false" },
+    {"trace_has_root", py_trace_has_root, METH_VARARGS, "def trace_has_root(int id=-1)-> long # check current whether have a root. \n True: \nFalse: \n Note: If the id is invalid, return false" },
     {"drop_trace", py_pinpoint_drop_trace, METH_VARARGS, "def drop_trace(int id=-1):# drop this trace"},
     {"start_time", py_pinpoint_start_time, METH_NOARGS, "def start_time()->long"},
     {"add_clues", py_pinpoint_add_clues, METH_VARARGS, "def add_clues(string key,string value,int id=-1,int loc=0)"},
