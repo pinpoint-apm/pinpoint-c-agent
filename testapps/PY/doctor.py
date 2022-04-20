@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from person import Person
-from pinpointPy.common import PinpointCommonPlugin
+from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
 class Doctor(Person):
