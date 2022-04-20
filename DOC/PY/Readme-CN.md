@@ -1,5 +1,4 @@
-## 支持计划
-我们已经支持以及将要支持的计划详情: [支持计划](SupportPlan.md)
+# pinpoint-py agent 使用说明
 
 ## 入门指南
 
@@ -14,50 +13,94 @@ gcc|gcc 4.7+
 cmake| 3.0+
 *inux| 
 pinpoint| 2.0+(GRPC)
+collector-agent| [installed ?](../collector-agent/readme.md)
 
 ### 安装步骤
 
 #### 搭建 pinpointPy 模块
 
-1. 安装python虚拟环境，请参考
-https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
-
-2. 安装 pinpointPy（建议在Python虚拟环境下执行）
 ```shell
 $ pip install pinpointPy
 ```
-#### 安装 Collector Agent
-`Collector-Agent` 负责接收并格式化 `PHP/Python/C/CPP-Agent` 的span然后转发给 `Pinpoint-Collector`。由于 `Collector-Agent` 使用[golang](https://golang.google.cn/) 语言编写， 请先安装golang。[Install GO](https://golang.google.cn/doc/install)
 
-  1. 执行命令 `go build`
-  2. 添加环境变量:
-     ```
-       export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
-       export PP_COLLECTOR_AGENT_SPAN_PORT=9993
-       export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
-       export PP_COLLECTOR_AGENT_AGENT_PORT=9991
-       export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
-       export PP_COLLECTOR_AGENT_STAT_PORT=9992
-       export PP_COLLECTOR_AGENT_ISDOCKER=false
-       export PP_LOG_DIR=/tmp/
-       export PP_Log_Level=INFO
-       export PP_ADDRESS=0.0.0.0@9999
-     ```
-     1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: 设置为 `pinpoint-collector` 的IP.
-     2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: 设置为 `pinpoint-collector`(grpc) 的端口(默认9993，9992， 9991).
-     3. `PP_LOG_DIR`: 设置 `Collector-Agent` 日志存放路径.
-     4. `PP_Log_Level`: 设置日志的级别（DEBUG, INFO, WARN, ERROR）.
-     5. `PP_ADDRESS`: 设置 `Collector-Agent` 的地址合端口，`PHP/Python-Agent` 将会通过这个地址连接 `pinpoint-collctor`。
-  3. 运行 `Collector-Agent`，执行命令：`./CollectorAgent`
-         
-   `Collector-Agent` 数据的说明：
-   [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
-   
+### 框架集成
 
 
-### [如何使用]
-[请点击 ☚](../../plugins/PY/Readme.md)
+#### 1.1 Flask
 
+> include middleware
+
+```
+app = Flask(__name__)
+app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
+```
+
+#### 1.2 Django
+
+> append into django middleware
+
+
+settings.py
+
+```python
+
+MIDDLEWARE = [
+    'pinpointPy.Django.DjangoMiddleWare',
+    ...
+    ]
+
+```
+
+#### 1.3 Tornado
+
+Todo....
+
+#### 1.4 pyramid
+
+> Add pinpoint_tween middleware
+
+```python
+
+    config = Configurator(settings=settings, root_factory="conduit.auth.RootFactory")
+    config.add_tween('pinpoint.pyramid.tween.pinpoint_tween')
+
+```
+
+Example [pinpoint-in-pyramid](https://github.com/eeliu/pinpoint-in-pyramid)
+
+#### 1.5 bottle
+
+> Loading pinpint.Bottle before application run
+
+Example [pinpoint-in-bottle](https://github.com/eeliu/pinpoint-in-bottle)
+
+#### 1.6 aiohttp
+
+Todo....
+
+#### 1.7 web.py
+
+> Add pinpoint middleware
+
+> Example [py-web](https://github.com/eeliu/pinpoint-in-pyweb)
+
+
+#### 1.8 web2.py (synchronize)
+
+> Add pinpoint middleware
+
+> Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
+
+### 2. 配置
+
+```py
+
+# enable auto-interceptor plugins
+monkey_patch_for_pinpoint()
+# set pinpoint related environment
+set_agent("flask-agent","FLASK-AGENT",'tcp:dev-collector:9999',-1)
+
+```
 
 ## 性能测试结果
 

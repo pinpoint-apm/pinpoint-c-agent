@@ -15,13 +15,12 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 
 ## Support Lists
 
-Languese| tutorial
+language| tutorial
 ---|----
-php|[Readme](DOC/PHP/Readme.md)
-python3|[Readme](DOC/PY/Readme.md)
-c/cpp|[Readme](DOC/C-CPP/Readme.md)
-golang|[Readme](https://github.com/pinpoint-apm/go-aop-agent)
-
+php|[English](DOC/PHP/Readme.md) [中文](DOC/PHP/Readme-CN.md) 
+python3|[English](DOC/PY/Readme.md) [中文](DOC/PHP/Readme-CN.md) 
+c/cpp|[English](DOC/C-CPP/Readme.md)
+golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) 
 ## Overview Pinpoint Common Agent
 
 ### How does it work
