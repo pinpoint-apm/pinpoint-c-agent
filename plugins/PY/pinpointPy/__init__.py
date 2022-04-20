@@ -17,7 +17,7 @@
 # !/usr/bin/env python
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 2/4/21
-__version__ = "0.0.5"
+__version__ = "0.1.0"
 
 from .libs import monkey_patch_for_pinpoint
 from .pinpoint import set_agent
