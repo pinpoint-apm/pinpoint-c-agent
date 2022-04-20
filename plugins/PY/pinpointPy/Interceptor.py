@@ -35,3 +35,11 @@ class Interceptor:
 
     def disable(self):
         setattr(self.scope, self.point, self.origin_point)
+
+def intercept_once(point):
+    def func(*args,**kwargs):
+        if not func.already_intercept:
+            func.already_intercept=True
+            return point(*args,**kwargs)
+    func.already_intercept=False
+    return func

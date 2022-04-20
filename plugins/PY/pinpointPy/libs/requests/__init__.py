@@ -15,9 +15,10 @@
 # ------------------------------------------------------------------------------
 
 
+from Interceptor import Interceptor,intercept_once
 
+@intercept_once
 def monkey_patch():
-    from Common import Interceptor
 
     try:
         import requests

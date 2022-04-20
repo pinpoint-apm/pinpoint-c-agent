@@ -19,8 +19,9 @@
 
 # Created by eeliu at 7/31/20
 
+from Interceptor import intercept_once
 
-
+@intercept_once
 def monkey_patch():
     try:
         from .sqlalchemyPlugin import before_cursor_execute,after_cursor_execute
