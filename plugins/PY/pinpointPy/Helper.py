@@ -18,8 +18,8 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 11/10/20
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from . import Defines
+from . import pinpoint
 
 def generateNextSid():
    return pinpoint.gen_sid()

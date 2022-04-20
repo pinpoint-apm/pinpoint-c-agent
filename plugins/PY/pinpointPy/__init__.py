@@ -21,5 +21,8 @@ __version__ = "0.1.0"
 
 from .libs import monkey_patch_for_pinpoint
 from .pinpoint import set_agent
-
-__all__ = ['monkey_patch_for_pinpoint', 'set_agent']
+import Common
+import Defines
+from .CommonPlugin import PinpointCommonPlugin
+from .RequestPlugins import RequestPlugin
+__all__ = ['monkey_patch_for_pinpoint', 'set_agent','Common','Defines','PinpointCommonPlugin','RequestPlugin']
