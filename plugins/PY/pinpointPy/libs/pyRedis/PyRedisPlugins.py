@@ -21,9 +21,9 @@
 # ******************************************************************************
 
 
-from pinpointPy import Common
-from pinpointPy import pinpoint
-from pinpointPy import Defines
+from ... import Common
+from ... import pinpoint
+from ... import Defines
 
 
 class PyRedisPlugins(Common.PinTrace):

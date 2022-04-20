@@ -19,7 +19,7 @@
 
 # Created by eeliu at 7/31/20
 
-from pinpointPy.Interceptor import intercept_once
+from ...Interceptor import intercept_once
 
 @intercept_once
 def monkey_patch():

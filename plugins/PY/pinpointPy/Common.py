@@ -19,8 +19,8 @@
 
 # Created by eeliu at 3/5/20
 
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from . import Defines
+from . import pinpoint
 
 class PinTrace(object):
     E_PER_REQ=1

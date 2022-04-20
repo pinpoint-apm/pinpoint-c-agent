@@ -20,8 +20,8 @@
 # Created by eeliu at 11/12/20
 
 
-from pinpointPy import pinpoint
-from pinpointPy import Defines
+from .. import pinpoint
+from .. import Defines
 from RequestPlugins import RequestPlugin
 class PyRequestPlugin(RequestPlugin):
     def onBefore(self,*args, **kwargs):
