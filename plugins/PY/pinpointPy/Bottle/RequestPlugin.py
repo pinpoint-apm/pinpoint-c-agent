@@ -19,12 +19,15 @@
 
 from bottle import response
 
-from .common import *
+from Defines import PP_HTTP_STATUS_CODE, PP_ADD_EXCEPTION
+from WSGIPlugin import WSGIPlugin
+from pinpoint import add_trace_header_v2, add_trace_header
+
 
 class RequestPlugin(WSGIPlugin):
 
     def onEnd(self, ret):
-        _pinpointPy.add_clues(PP_HTTP_STATUS_CODE,str(response.status_code))
-        if response.status_code !=200:
-            _pinpointPy.add_clue(PP_ADD_EXCEPTION,"status code not 200")
+        add_trace_header_v2(PP_HTTP_STATUS_CODE, str(response.status_code))
+        if response.status_code != 200:
+            add_trace_header(PP_ADD_EXCEPTION, "status code not 200")
         return super().onEnd(ret)

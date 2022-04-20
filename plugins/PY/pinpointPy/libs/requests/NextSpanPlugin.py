@@ -15,15 +15,15 @@
 # ------------------------------------------------------------------------------
 
 
-from Common import *
-from Helper import *
+import Common
+import Helper
 import Defines
 import pinpoint
 
 from urllib.parse import urlparse
 
 
-class NextSpanPlugin(PinTrace):
+class NextSpanPlugin(Common.PinTrace):
 
     def __init__(self, name):
         super().__init__(name)
@@ -39,7 +39,7 @@ class NextSpanPlugin(PinTrace):
         if "headers" not in kwargs:
             kwargs["headers"] = {}
         if pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED) == "s1":
-            generatePinpointHeader(target, kwargs['headers'])
+            Helper.generatePinpointHeader(target, kwargs['headers'])
             return True
         else:
             kwargs['headers'][Defines.PP_HEADER_PINPOINT_SAMPLED] = Defines.PP_NOT_SAMPLED

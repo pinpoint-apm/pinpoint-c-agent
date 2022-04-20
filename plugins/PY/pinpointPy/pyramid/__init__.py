@@ -17,9 +17,8 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by suwei at 4/15/22
-from libs.PyMysql import *
-from libs.sqlalchemy import *
-from .tween import *
 from .PyRequestPlugin import PyRequestPlugin
+# Created by suwei at 4/15/22
+from .tween import *
+
 __all__=['pinpoint_tween','PyRequestPlugin']
