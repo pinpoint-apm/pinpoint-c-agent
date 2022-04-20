@@ -17,8 +17,8 @@
 
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from pinpointPy.Defines import PP_HTTP_STATUS_CODE
-from pinpointPy.pinpoint import add_trace_header_v2
+from ..Defines import PP_HTTP_STATUS_CODE
+from ..pinpoint import add_trace_header_v2
 from .FlaskPlugins import BaseFlaskPlugins
 
 

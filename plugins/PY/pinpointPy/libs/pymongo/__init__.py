@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 8/20/20
-from pinpointPy.Interceptor import Interceptor,intercept_once
+from ...Interceptor import Interceptor,intercept_once
 
 @intercept_once
 def monkey_patch():
