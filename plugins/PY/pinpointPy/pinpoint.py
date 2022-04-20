@@ -56,7 +56,7 @@ def add_context(key: str, value: str, trace_id: int = -1):
 
 
 def get_context(key: str, trace_id: int = -1):
-    return get_context(key)
+    return _pinpointPy.get_context_key(key,trace_id)
 
 
 def gen_tid():
