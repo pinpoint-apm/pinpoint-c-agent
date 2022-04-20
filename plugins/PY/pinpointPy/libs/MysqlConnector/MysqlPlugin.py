@@ -15,9 +15,9 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy import Common
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from ... import Common
+from ... import Defines
+from ... import pinpoint
 
 
 class MysqlPlugin(Common.PinTrace):
