@@ -20,34 +20,33 @@
 #   limitations under the License.
 # ******************************************************************************
 
-import _pinpointPy
 
-from pinpointPy.common import *
+import Common
+import pinpoint
+import Defines
 
 
-class PyRedisPlugins(PinTrace):
+class PyRedisPlugins(Common.PinTrace):
 
-    def __init__(self,name):
+    def __init__(self, name):
         super().__init__(name)
         self.dst = ''
 
-    def onBefore(self,*args, **kwargs):
+    def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_REDIS)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REDIS)
         ###############################################################
-        _pinpointPy.add_clue(PP_DESTINATION, str(args[0]))
-        return args,kwargs
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, str(args[0]))
+        return args, kwargs
 
-    def onEnd(self,ret):
+    def onEnd(self, ret):
         ###############################################################
-        # _pinpointPy.add_clues(PP_RETURN,str(ret))
+        # add_trace_header_v2(PP_RETURN,str(ret))
         ###############################################################
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
-
-
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))

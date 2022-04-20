@@ -22,7 +22,7 @@
 
 def monkey_patch():
 
-    from pinpointPy.common import Interceptor
+    from Common import Interceptor
     try:
         from pymongo.collection import Collection
         from .MongoClientPlugin import MongoClientPlugin

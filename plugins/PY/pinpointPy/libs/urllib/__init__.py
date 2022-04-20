@@ -20,7 +20,7 @@
 # Created by eeliu at 8/20/20
 
 def monkey_patch():
-    from pinpointPy.common import Interceptor
+    from Interceptor import Interceptor
     try:
         import urllib.request
         from .UrlOpenPlugin import UrlOpenPlugin

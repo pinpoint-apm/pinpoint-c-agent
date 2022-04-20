@@ -14,7 +14,7 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pinpointPy.common import Interceptor
+from Common import Interceptor
 
 
 def monkey_patch():
