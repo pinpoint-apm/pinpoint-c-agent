@@ -19,9 +19,9 @@
 
 from bottle import response
 
-from Defines import PP_HTTP_STATUS_CODE, PP_ADD_EXCEPTION
+from pinpointPy.Defines import PP_HTTP_STATUS_CODE, PP_ADD_EXCEPTION
 from WSGIPlugin import WSGIPlugin
-from pinpoint import add_trace_header_v2, add_trace_header
+from pinpointPy.pinpoint import add_trace_header_v2, add_trace_header
 
 
 class RequestPlugin(WSGIPlugin):

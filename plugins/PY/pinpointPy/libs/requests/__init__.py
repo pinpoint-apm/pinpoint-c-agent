@@ -15,7 +15,7 @@
 # ------------------------------------------------------------------------------
 
 
-from Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor,intercept_once
 
 @intercept_once
 def monkey_patch():

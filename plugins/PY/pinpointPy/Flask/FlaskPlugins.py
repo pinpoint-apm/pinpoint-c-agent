@@ -21,9 +21,9 @@
 
 from flask import Flask,Request
 
-import Common
-import pinpoint
-import Defines
+from pinpointPy import Common
+from pinpointPy import pinpoint
+from pinpointPy import Defines
 
 class BaseFlaskPlugins(Common.PinTrace):
     def __init__(self, name):

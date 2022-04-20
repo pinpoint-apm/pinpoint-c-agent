@@ -16,8 +16,8 @@
 
 
 from .AsyCommon import AsynPinTrace
-import Defines
-import pinpoint
+from pinpointPy import Defines
+from pinpointPy import pinpoint
 
 
 class CommonPlugin(AsynPinTrace):

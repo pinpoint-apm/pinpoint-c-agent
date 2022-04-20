@@ -19,9 +19,9 @@
 
 # Created by eeliu at 8/20/20
 
-import Common
-import pinpoint
-import Defines
+from pinpointPy import Common
+from pinpointPy import pinpoint
+from pinpointPy import Defines
 
 
 class MongoClientPlugin(Common.PinTrace):

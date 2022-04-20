@@ -15,9 +15,9 @@
 # ------------------------------------------------------------------------------
 
 
-import Common
-import Defines
-import pinpoint
+from pinpointPy import Common
+from pinpointPy import Defines
+from pinpointPy import pinpoint
 
 
 class CMysqlPlugin(Common.PinTrace):

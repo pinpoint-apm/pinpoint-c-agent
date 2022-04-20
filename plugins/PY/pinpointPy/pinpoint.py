@@ -80,7 +80,7 @@ def drop_trace(trace_id: int = -1):
     _pinpointPy.drop_trace(trace_id)
 
 
-def check_trace_limit(time: int) -> bool:
+def check_trace_limit(time: int=-1) -> bool:
     return _pinpointPy.check_tracelimit(time)
 
 

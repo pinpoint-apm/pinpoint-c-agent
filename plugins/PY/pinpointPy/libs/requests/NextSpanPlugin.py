@@ -15,10 +15,10 @@
 # ------------------------------------------------------------------------------
 
 
-import Common
-import Helper
-import Defines
-import pinpoint
+from pinpointPy import Common
+from pinpointPy import Helper
+from pinpointPy import Defines
+from pinpointPy import pinpoint
 
 from urllib.parse import urlparse
 
