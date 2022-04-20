@@ -17,30 +17,21 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 7/31/20
+# Created by eeliu at 8/20/20
 
+class Interceptor:
+    def __init__(self, scope, point, WrapperClass):
+        assert isinstance(point,str)
+        self.scope_name = scope.__name__
+        self.point = point
+        # new a handle and bind on full_name
+        self.wrapper = WrapperClass(self.scope_name+'.'+self.point)
+        self.scope = scope
+        self.origin_point = getattr(scope,point)
 
+    def enable(self):
+        assert callable(self.wrapper)
+        setattr(self.scope, self.point, self.wrapper(self.origin_point))
 
-import pinpointPy
-
-###############################################################
-
-# user should set below before use
-APP_ID ='python-agent' # application id
-APP_NAME ='PYTHON-AGENT' # application name
-# COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
-# COLLECTOR_HOST='tcp:dev-collector:9999'
-# APP_SUB_ID='1'
-
-###############################################################
-
-# pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
-
-# pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
-
-# def output(msg):
-#     print(msg)
-#
-# pinpointPy.enable_debug(None)
-
-# __all__=['APP_ID','APP_NAME','APP_SUB_ID','COLLECTOR_HOST']
+    def disable(self):
+        setattr(self.scope, self.point, self.origin_point)
