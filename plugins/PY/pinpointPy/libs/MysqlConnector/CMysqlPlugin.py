@@ -17,6 +17,7 @@
 
 import Common
 import Defines
+import pinpoint
 
 
 class CMysqlPlugin(Common.PinTrace):
@@ -27,12 +28,12 @@ class CMysqlPlugin(Common.PinTrace):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        Common.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
-        Common.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MYSQL)
-        Common.add_trace_header(Defines.PP_SQL_FORMAT, args[1])
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MYSQL)
+        pinpoint.add_trace_header(Defines.PP_SQL_FORMAT, args[1])
         ###############################################################
         dst = self.get_dst(args[0])
-        Common.add_trace_header(Defines.PP_DESTINATION, dst)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst)
         return args,kwargs
 
     def onEnd(self,ret):
@@ -40,7 +41,7 @@ class CMysqlPlugin(Common.PinTrace):
         return ret
 
     def onException(self, e):
-        Common.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}

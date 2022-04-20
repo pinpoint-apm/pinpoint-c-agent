@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 11/12/20
-from pinpointPy.common import WSGIPlugin
+from WSGIPlugin import WSGIPlugin
 
 class RequestPlugin(WSGIPlugin):
     pass
