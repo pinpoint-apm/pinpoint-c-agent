@@ -29,18 +29,11 @@ def monkey_patch_for_pinpoint(pymongo=True,
                               requests=True,
                               urllib=True,
                               sqlalchemy=True,
-                              aioHttp=False,
                               MySQLdb=True,
-                              amqp=True,
-                              kombu=True,
-                              celeryCaller=True,
-                              celeryTask=False,
                               DjangoRest=True,
                               MysqlConnector=True):
     __monkey_patch(pymongo=pymongo, PyMysql=PyMysql, pyRedis=pyRedis, requests=requests, urllib=urllib,
-                   sqlalchemy=sqlalchemy, aioHttp=aioHttp, MySQLdb=MySQLdb, amqp=amqp, kombu=kombu,
-                   celeryCaller=celeryCaller, celeryTask=celeryTask, DjangoRest=DjangoRest,
-                   MysqlConnector=MysqlConnector)
+                   sqlalchemy=sqlalchemy, MySQLdb=MySQLdb, DjangoRest=DjangoRest,MysqlConnector=MysqlConnector)
 
 
 __all__ = ['monkey_patch_for_pinpoint']
