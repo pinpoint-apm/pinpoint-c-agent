@@ -19,8 +19,10 @@
 
 # Created by eeliu at 8/20/20
 
+from Interceptor import Interceptor,intercept_once
+
+@intercept_once
 def monkey_patch():
-    from Interceptor import Interceptor
     try:
         import urllib.request
         from .UrlOpenPlugin import UrlOpenPlugin

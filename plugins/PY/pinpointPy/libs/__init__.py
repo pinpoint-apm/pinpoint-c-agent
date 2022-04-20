@@ -14,17 +14,14 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 import importlib
-
-def __monkey_patch(*args,**kwargs):
+def __monkey_patch(*args, **kwargs):
     for key in kwargs:
         if kwargs[key]:
-            module = importlib.import_module('pinpointPy.libs.'+key)
-            monkey_patch = getattr(module,'monkey_patch')
+            module = importlib.import_module('pinpointPy.libs.' + key)
+            monkey_patch = getattr(module, 'monkey_patch')
             if callable(monkey_patch):
                 monkey_patch()
-                print("try to install pinpointPy.lib.%s module"%(key))
-
-
+                print("try to install pinpointPy.lib.%s module" % (key))
 
 def monkey_patch_for_pinpoint(pymongo=True,
                               PyMysql=True,
@@ -40,10 +37,10 @@ def monkey_patch_for_pinpoint(pymongo=True,
                               celeryTask=False,
                               DjangoRest=True,
                               MysqlConnector=True):
-    if not gl.patched:
-        gl.patched = True
-        __monkey_patch(pymongo=pymongo,PyMysql=PyMysql,pyRedis=pyRedis,requests=requests,urllib=urllib,
-                       sqlalchemy=sqlalchemy,aioHttp=aioHttp,MySQLdb=MySQLdb,amqp=amqp,kombu=kombu,
-                       celeryCaller=celeryCaller,celeryTask=celeryTask,DjangoRest=DjangoRest,MysqlConnector=MysqlConnector)
+    __monkey_patch(pymongo=pymongo, PyMysql=PyMysql, pyRedis=pyRedis, requests=requests, urllib=urllib,
+                   sqlalchemy=sqlalchemy, aioHttp=aioHttp, MySQLdb=MySQLdb, amqp=amqp, kombu=kombu,
+                   celeryCaller=celeryCaller, celeryTask=celeryTask, DjangoRest=DjangoRest,
+                   MysqlConnector=MysqlConnector)
 
-__all__=['monkey_patch_for_pinpoint']
+
+__all__ = ['monkey_patch_for_pinpoint']

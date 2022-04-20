@@ -14,9 +14,9 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from Common import Interceptor
+from Interceptor import Interceptor,intercept_once
 
-
+@intercept_once
 def monkey_patch():
     try:
         from rest_framework.views import APIView
