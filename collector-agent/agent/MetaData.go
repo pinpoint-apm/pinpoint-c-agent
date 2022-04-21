@@ -1,11 +1,15 @@
 package agent
 
+import "time"
+
 type PARAMS_TYPE map[string]int32
 
 var _id int32 = 1
 
+const retryInterval = time.Second * 5
+
 type I_SendMeta interface {
-	SenderGrpcMetaData(name string, id int32, Type int32, params PARAMS_TYPE)
+	SenderGrpcMetaData(name string, id int32, Type int32, params PARAMS_TYPE) error
 }
 
 type MetaData struct {
@@ -32,5 +36,13 @@ func (meta *MetaData) GetId(name string, params PARAMS_TYPE) int32 {
 }
 
 func (meta *MetaData) registerSelf(name string, id, Type int32, params PARAMS_TYPE, sender I_SendMeta) {
-	go sender.SenderGrpcMetaData(name, id, Type, params)
+	go func() {
+		for {
+			if err := sender.SenderGrpcMetaData(name, id, Type, params); err == nil {
+				return
+			}
+			timer := time.NewTimer(retryInterval)
+			<-timer.C
+		}
+	}()
 }

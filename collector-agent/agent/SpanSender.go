@@ -465,13 +465,12 @@ func (spanSender *SpanSender) Interceptor(span map[string]interface{}) bool {
 	return true
 }
 
-func (spanSender *SpanSender) SenderGrpcMetaData(name string, id int32, Type int32,
-	params PARAMS_TYPE) {
+func (spanSender *SpanSender) SenderGrpcMetaData(name string, id int32, Type int32, params PARAMS_TYPE) error {
 	config := common.GetConfig()
 	conn, err := common.CreateGrpcConnection(config.AgentAddress)
 	if err != nil {
 		log.Warnf("connect:%s failed. %s", config.AgentAddress, err)
-		return
+		return errors.New("SenderGrpcMetaData: connect failed")
 	}
 
 	defer conn.Close()
@@ -499,9 +498,9 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, id int32, Type int
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				log.Warnf("agentOnline api meta failed %s", err)
+				return errors.New("SenderGrpcMetaData: RequestApiMetaData failed")
 			}
 		}
-		break
 	case common.META_STRING:
 		{
 			metaMeta := v1.PStringMetaData{
@@ -511,9 +510,9 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, id int32, Type int
 
 			if _, err = client.RequestStringMetaData(ctx, &metaMeta); err != nil {
 				log.Warnf("agentOnline api meta failed %s", err)
+				return errors.New("SenderGrpcMetaData: RequestStringMetaData failed")
 			}
 		}
-		break
 	case common.META_SQL:
 		{
 			sqlMeta := v1.PSqlMetaData{
@@ -523,12 +522,13 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, id int32, Type int
 
 			if _, err = client.RequestSqlMetaData(ctx, &sqlMeta); err != nil {
 				log.Warnf("agentOnline api meta failed %s", err)
+				return errors.New("SenderGrpcMetaData: RequestSqlMetaData failed")
 			}
 		}
-		break
 	default:
 		log.Warnf("SenderGrpcMetaData: No such Type:%d", Type)
 	}
 
 	log.Debugf("send metaData:type:%d,Id:%d,value:%s para:%v", Type, id, name, params)
+	return nil
 }

@@ -428,7 +428,7 @@ func (agent *GrpcAgent) consumeJsonSpan() {
 			return
 		}
 		for i := range agent.spanFilter {
-			if agent.spanFilter[i].Interceptor(span) == false {
+			if !agent.spanFilter[i].Interceptor(span) {
 				break
 			}
 		}
