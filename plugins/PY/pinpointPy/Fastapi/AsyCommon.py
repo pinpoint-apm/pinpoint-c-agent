@@ -20,7 +20,7 @@
 
 
 import asyncio
-import _pinpointPy
+
 from starlette_context import context
 
 
@@ -32,13 +32,13 @@ class AsynPinTrace(object):
 
     def onBefore(self,*args, **kwargs):
         id = context.get('_pinpoint_id_', default=0)
-        traceId = _pinpointPy.start_trace(id)
+        traceId = with_trace(id)
         context['_pinpoint_id_'] = traceId
         self.traceId = traceId
         return (args,kwargs)
 
     def onEnd(self,ret):
-        traceId = _pinpointPy.end_trace(self.traceId)
+        traceId = trace_ready(self.traceId)
         context['_pinpoint_id_'] = traceId
 
     def onException(self,e):

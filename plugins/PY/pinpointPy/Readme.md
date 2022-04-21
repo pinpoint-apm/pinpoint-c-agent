@@ -92,13 +92,13 @@ Todo....
 ```
 ###############################################################
 
-# 1. APP_ID: Agent ID.
-# 2. APP_NAME: Application name.
+# 1. app_id(): Agent ID.
+# 2. app_name(): Application name.
 # 3. COLLECTOR_HOST: Collector-Agent's address.
 # 4. pinpointPy.enable_debug(None): DEBUG agent, pinpoint infomation will print in concole. 
 
-APP_ID ='python-agent' # application id
-APP_NAME ='PYTHON-AGNNT' # application name
+app_id() ='python-agent' # application id
+app_name() ='PYTHON-AGNNT' # application name
 # COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
 COLLECTOR_HOST='tcp:dev-collector:9999'
 APP_SUB_ID='1'

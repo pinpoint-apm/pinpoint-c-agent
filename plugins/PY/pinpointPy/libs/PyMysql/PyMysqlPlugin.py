@@ -15,10 +15,11 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy.common import *
-import _pinpointPy
+from ... import Common
+from ... import pinpoint
+from ... import Defines
 
-class PyMysqlPlugin(PinTrace):
+class PyMysqlPlugin(Common.PinTrace):
 
     def __init__(self,name):
         super().__init__(name)
@@ -26,13 +27,13 @@ class PyMysqlPlugin(PinTrace):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
-        _pinpointPy.add_clue(PP_SQL_FORMAT,  args[1])
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MYSQL)
+        pinpoint.add_trace_header(Defines.PP_SQL_FORMAT, args[1])
         ###############################################################
         cursor = args[0]
         dst = cursor.connection.get_host_info()
-        _pinpointPy.add_clue(PP_DESTINATION, dst)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst)
         return args,kwargs
 
     def onEnd(self,ret):
@@ -40,7 +41,7 @@ class PyMysqlPlugin(PinTrace):
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}

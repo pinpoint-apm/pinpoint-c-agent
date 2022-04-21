@@ -15,32 +15,32 @@
 # ------------------------------------------------------------------------------
 
 
-from .AsyCommon import AsynPinTrace
-from .Defines import *
-import _pinpointPy
+from . import Common
+from . import Defines
+from . import pinpoint
 
-class CommonPlugin(AsynPinTrace):
+
+class PinpointCommonPlugin(Common.PinTrace):
 
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), self.traceId)
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_REMOTE_METHOD, self.traceId)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL)
         arg = self.get_arg(*args, **kwargs)
-        _pinpointPy.add_clues(PP_ARGS, arg, self.traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_ARGS, arg)
         ###############################################################
-        # print( threading.currentThread().ident)
         return args,kwargs
 
     def onEnd(self,ret):
         ###############################################################
-        _pinpointPy.add_clues(PP_RETURN, str(ret), self.traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret))
         ###############################################################
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION, str(e), self.traceId)
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}

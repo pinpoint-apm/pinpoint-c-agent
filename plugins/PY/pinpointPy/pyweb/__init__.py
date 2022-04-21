@@ -17,6 +17,6 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-from .middleWare import PinPointMiddleWare
+from .middleware import PinPointMiddleWare
 from .RequestPlugin import RequestPlugin
 __all__=['PinPointMiddleWare','RequestPlugin']

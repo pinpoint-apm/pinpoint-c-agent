@@ -18,11 +18,14 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 8/20/20
+from urllib.parse import urlparse
 
-from pinpointPy.common import *
-import _pinpointPy
+from ... import Common
+from ... import Defines
+from ... import pinpoint
+from ... import Helper
 
-class UrlOpenPlugin(PinTrace):
+class UrlOpenPlugin(Common.PinTrace):
 
     def __init__(self, name):
         super().__init__(name)
@@ -37,11 +40,11 @@ class UrlOpenPlugin(PinTrace):
         kwargs = args[1]
         if "headers" not in kwargs:
             kwargs["headers"] = {}
-        if _pinpointPy.get_context_key(PP_HEADER_PINPOINT_SAMPLED) =="s1":
-            generatePinpointHeader(target, kwargs['headers'])
+        if pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED) == "s1":
+            Helper.generatePinpointHeader(target, kwargs['headers'])
             return True
         else:
-            kwargs['headers'][PP_HEADER_PINPOINT_SAMPLED] = PP_NOT_SAMPLED
+            kwargs['headers'][Defines.PP_HEADER_PINPOINT_SAMPLED] = Defines.PP_NOT_SAMPLED
             return False
 
     def onBefore(self,*args, **kwargs):
@@ -49,24 +52,24 @@ class UrlOpenPlugin(PinTrace):
         target = urlparse(url).netloc
         super().onBefore(*args, **kwargs)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME,self.getFuncUniqueName())
-        _pinpointPy.add_clue(PP_SERVER_TYPE,PP_REMOTE_METHOD)
-        _pinpointPy.add_clues(PP_ARGS, url)
-        _pinpointPy.add_clues(PP_HTTP_URL, url)
-        _pinpointPy.add_clue(PP_DESTINATION, target)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD)
+        pinpoint.add_trace_header_v2(Defines.PP_ARGS, url)
+        pinpoint.add_trace_header_v2(Defines.PP_HTTP_URL, url)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, target)
         ###############################################################
         return args,kwargs
 
     def onEnd(self,ret):
         ###############################################################
 
-        _pinpointPy.add_clue(PP_NEXT_SPAN_ID, _pinpointPy.get_context_key(PP_NEXT_SPAN_ID))
-        _pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(ret.status_code))
-        _pinpointPy.add_clues(PP_RETURN, str(ret))
+        pinpoint.add_trace_header(Defines.PP_NEXT_SPAN_ID, pinpoint.get_context(Defines.PP_NEXT_SPAN_ID))
+        pinpoint.add_trace_header_v2(Defines.PP_HTTP_STATUS_CODE, str(ret.status_code))
+        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret))
         ###############################################################
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
 

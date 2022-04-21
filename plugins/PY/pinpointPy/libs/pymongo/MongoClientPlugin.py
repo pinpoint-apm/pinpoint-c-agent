@@ -19,11 +19,12 @@
 
 # Created by eeliu at 8/20/20
 
-from pinpointPy.common import *
-import _pinpointPy
+from ... import Common
+from ... import pinpoint
+from ... import Defines
 
 
-class MongoClientPlugin(PinTrace):
+class MongoClientPlugin(Common.PinTrace):
     def __init__(self, name):
         super().__init__(name)
         self.dst = ''
@@ -33,19 +34,19 @@ class MongoClientPlugin(PinTrace):
         collection = args[0]
         self.dst = str(collection.__database.address)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_MONGDB_EXE_QUERY)
-        # _pinpointPy.add_clues(PP_ARGS, )
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MONGDB_EXE_QUERY)
+        # add_trace_header_v2(PP_ARGS, )
         ###############################################################
-        _pinpointPy.add_clue(PP_DESTINATION, self.dst)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, self.dst)
         return args, kwargs
 
     def onEnd(self, ret):
         ###############################################################
-        _pinpointPy.add_clues(PP_RETURN, str(ret))
+        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret))
         ###############################################################
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION, str(e))
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))

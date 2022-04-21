@@ -100,8 +100,3 @@ PP_KAFKA_TOPIC='140'
 PP_RABBITMQ_CLIENT='8300'
 PP_RABBITMQ_EXCHANGEKEY='130'
 PP_RABBITMQ_ROUTINGKEY='131'
-
-APP_ID ='python-agent-default' # application id
-APP_NAME ='PYTHON-AGENT-DEFAULT' # application name
-# COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
-# COLLECTOR_HOST='tcp:dev-collector:9999'

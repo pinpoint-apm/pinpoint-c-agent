@@ -18,11 +18,11 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 8/20/20
+from ...Interceptor import Interceptor,intercept_once
 
-
+@intercept_once
 def monkey_patch():
 
-    from pinpointPy.common import Interceptor
     try:
         from pymongo.collection import Collection
         from .MongoClientPlugin import MongoClientPlugin

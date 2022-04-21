@@ -20,31 +20,32 @@
 # Created by eeliu at 7/31/20
 
 
-from pinpointPy.common import *
+from ... import pinpoint
+from ... import Defines
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from urllib.parse import urlparse
-import _pinpointPy
+
 
 
 @event.listens_for(Engine, "before_cursor_execute")
 def before_cursor_execute(conn, cursor, statement,
                         parameters, context, executemany):
-    _pinpointPy.start_trace()
-    _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'before_cursor_execute')
-    _pinpointPy.add_clue(PP_SQL_FORMAT,statement)
-    _pinpointPy.add_clues(PP_ARGS, 'user not cared')
+    pinpoint.with_trace()
+    pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'before_cursor_execute')
+    pinpoint.add_trace_header(Defines.PP_SQL_FORMAT, statement)
+    pinpoint.add_trace_header_v2(Defines.PP_ARGS, 'user not cared')
     DBUrl = urlparse(str(conn.engine.url))
     if 'mysql'  in DBUrl.scheme:
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MYSQL)
     
     if 'postgresql' in DBUrl.scheme:
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_POSTGRESQL)
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_POSTGRESQL)
 
-    _pinpointPy.add_clue(PP_DESTINATION,DBUrl.hostname)
+    pinpoint.add_trace_header(Defines.PP_DESTINATION, DBUrl.hostname)
 
 @event.listens_for(Engine, "after_cursor_execute")
 def after_cursor_execute(conn, cursor, statement,
                         parameters, context, executemany):
-    _pinpointPy.end_trace()
+    pinpoint.end_trace()
 

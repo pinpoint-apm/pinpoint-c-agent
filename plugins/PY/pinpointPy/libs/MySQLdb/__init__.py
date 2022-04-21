@@ -16,9 +16,9 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+from ...Interceptor import Interceptor,intercept_once
 
-from pinpointPy.common import Interceptor
-
+@intercept_once
 def monkey_patch():
     try:
         from MySQLdb.connections import Connection

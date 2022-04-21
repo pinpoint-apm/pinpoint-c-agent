@@ -17,30 +17,28 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 7/31/20
+# Created by eeliu at 11/9/20
+
+from .Common import PinTrace
+from . import Helper
+from . import pinpoint
 
 
+class WSGIPlugin(PinTrace):
+    def __init__(self, name):
+        super().__init__(name)
 
-import pinpointPy
+    def onBefore(self, *args, **kwargs):
+        super().onBefore(*args, **kwargs)
+        environ = args[0]
+        Helper.startPinpointByEnviron(environ)
 
-###############################################################
+        return (args, kwargs)
 
-# user should set below before use
-APP_ID ='python-agent' # application id
-APP_NAME ='PYTHON-AGENT' # application name
-# COLLECTOR_HOST='unix:/tmp/collector-agent.sock'
-# COLLECTOR_HOST='tcp:dev-collector:9999'
-# APP_SUB_ID='1'
+    def onEnd(self, ret):
+        Helper.endPinpointByEnviron(ret)
+        super().onEnd(ret)
+        return ret
 
-###############################################################
-
-# pinpointPy.set_agent(collector_host=COLLECTOR_HOST,trace_limit=-1)
-
-# pinpointPy.set_agent(collector_host='Tcp:ip:port',trace_limit=-1)
-
-# def output(msg):
-#     print(msg)
-#
-# pinpointPy.enable_debug(None)
-
-# __all__=['APP_ID','APP_NAME','APP_SUB_ID','COLLECTOR_HOST']
+    def onException(self, e):
+        pinpoint.mark_as_error(str(e), "", 0)

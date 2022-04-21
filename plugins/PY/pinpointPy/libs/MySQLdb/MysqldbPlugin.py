@@ -19,11 +19,12 @@
 # ------------------------------------------------------------------------------
 
 
+from ... import Common
+from ... import pinpoint
+from ... import Defines
 
-from pinpointPy.common import *
-import _pinpointPy
 
-class MysqldbPlugin(PinTrace):
+class MysqldbPlugin(Common.PinTrace):
     def __init__(self, name):
         super().__init__(name)
         self.dst = ''
@@ -33,15 +34,15 @@ class MysqldbPlugin(PinTrace):
         connection = args[0]
         self.dst = connection.get_host_info()
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_MYSQL)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MYSQL)
         query = args[1]
         ## copy from MySQLdb  def query(self, query):
         if isinstance(query, bytearray):
             query = bytes(query)
-        _pinpointPy.add_clue(PP_SQL_FORMAT, query.decode('utf-8'))
+        pinpoint.add_trace_header(Defines.PP_SQL_FORMAT, query.decode('utf-8'))
         ###############################################################
-        _pinpointPy.add_clue(PP_DESTINATION, self.dst)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, self.dst)
         return args, kwargs
 
     def onEnd(self, ret):
@@ -49,4 +50,4 @@ class MysqldbPlugin(PinTrace):
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION, str(e))
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))

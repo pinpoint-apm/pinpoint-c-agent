@@ -20,16 +20,17 @@
 # Created by eeliu at 11/12/20
 
 
-from pinpointPy.common import *
-
+from .. import pinpoint
+from .. import Defines
+from RequestPlugins import RequestPlugin
 class PyRequestPlugin(RequestPlugin):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         request = args[0]
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME, 'Pyramid-middleware')
-        _pinpointPy.add_clue(PP_REQ_URI, request.path)
-        _pinpointPy.add_clue(PP_REQ_CLIENT, request.remote_addr)
-        _pinpointPy.add_clue(PP_REQ_SERVER, request.host)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'Pyramid-middleware')
+        pinpoint.add_trace_header(Defines.PP_REQ_URI, request.path)
+        pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request.remote_addr)
+        pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request.host)
 
 
     def onEnd(self, ret):

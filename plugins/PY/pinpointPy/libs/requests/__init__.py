@@ -15,9 +15,10 @@
 # ------------------------------------------------------------------------------
 
 
+from ...Interceptor import Interceptor,intercept_once
 
+@intercept_once
 def monkey_patch():
-    from pinpointPy.common import Interceptor
 
     try:
         import requests

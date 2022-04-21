@@ -19,64 +19,56 @@
 
 # Created by eeliu at 3/5/20
 
+from . import Defines
+from . import pinpoint
 
-
-import asyncio
-import _pinpointPy
-import contextvars
-
-_Id_ = contextvars.ContextVar('_pinpoint_id_',default=0)
-
-class AsynPinTrace(object):
+class PinTrace(object):
+    E_PER_REQ=1
+    E_FUNCTION = 2
 
     def __init__(self,name):
         self.name = name
-        self.traceId = 0
+
+    def isSample(self,args):
+        '''
+        if not root, no trace
+        :return:
+        '''
+        if pinpoint.trace_has_root() and pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED) == "s1":
+            return True
+        else:
+            return False
 
     def onBefore(self,*args, **kwargs):
-        global _Id_
-        id = _Id_.get()
-        traceId = _pinpointPy.start_trace(id)
-        _Id_.set(traceId)
-        self.traceId = traceId
-        return (args,kwargs)
+        pinpoint.with_trace()
 
     def onEnd(self,ret):
-        traceId = _pinpointPy.end_trace(self.traceId)
-        global _Id_
-        _Id_.set(traceId)
+        pinpoint.end_trace()
 
     def onException(self,e):
         raise NotImplementedError()
 
     def __call__(self, func):
         self.func_name=func.__name__
-        async def pinpointTrace(*args, **kwargs):
+        def pinpointTrace(*args, **kwargs):
+            if not self.isSample((args,kwargs)):
+                return func(*args, **kwargs)
+
             ret = None
-            self.onBefore(*args, **kwargs)
             try:
-                ret = await func(*args, **kwargs)
+                args, kwargs = self.onBefore(*args, **kwargs)
+                ret = func(*args, **kwargs)
                 return ret
             except Exception as e:
                 self.onException(e)
                 raise e
             finally:
                 self.onEnd(ret)
-
         return pinpointTrace
 
     def getFuncUniqueName(self):
         return self.name
 
-if __name__ == '__main__':
 
-    @AsynPinTrace('main')
-    async def run(i):
-        if i == 0:
-            return
-        print("run")
-        await asyncio.sleep(0.1)
-        await run(i-1)
 
-    asyncio.run(run(2))
-    asyncio.run(run(2))
+

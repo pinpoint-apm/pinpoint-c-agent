@@ -15,10 +15,12 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy.common import *
-import _pinpointPy
+from ... import Common
+from ... import Defines
+from ... import pinpoint
 
-class ViewsPlugin(PinTrace):
+
+class ViewsPlugin(Common.PinTrace):
 
     def __init__(self,name):
         super().__init__(name)
@@ -26,11 +28,11 @@ class ViewsPlugin(PinTrace):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        _pinpointPy.add_clue(PP_INTERCEPTOR_NAME,args[0].get_view_name())
-        _pinpointPy.add_clue(PP_SERVER_TYPE, PP_METHOD_CALL)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, args[0].get_view_name())
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL)
         ###############################################################
         url = '{%s %r}' % (args[1].method,args[1].get_full_path())
-        _pinpointPy.add_clues(PP_ARGS, url)
+        pinpoint.add_trace_header_v2(Defines.PP_ARGS, url)
         return args,kwargs
 
     def onEnd(self,ret):
@@ -38,4 +40,4 @@ class ViewsPlugin(PinTrace):
         return ret
 
     def onException(self, e):
-        _pinpointPy.add_clue(PP_ADD_EXCEPTION,str(e))
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))

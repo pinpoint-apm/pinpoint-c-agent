@@ -14,9 +14,9 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pinpointPy.common import Interceptor
+from ...Interceptor import Interceptor,intercept_once
 
-
+@intercept_once
 def monkey_patch():
     try:
         import pymysql

@@ -17,12 +17,10 @@
 
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-
-
+from ..Defines import PP_HTTP_STATUS_CODE
+from ..pinpoint import add_trace_header_v2
 from .FlaskPlugins import BaseFlaskPlugins
 
-from pinpointPy.common import *
-import _pinpointPy
 
 class PinPointMiddleWare():
 
@@ -33,7 +31,7 @@ class PinPointMiddleWare():
         @app.after_request
         def mark_status_code(response):
             if response:
-                _pinpointPy.add_clues(PP_HTTP_STATUS_CODE, str(response.status))
+                add_trace_header_v2(PP_HTTP_STATUS_CODE, str(response.status))
             return response
 
     @BaseFlaskPlugins("Flask Web App")
