@@ -31,4 +31,4 @@ RUN pkg-config --cflags pinpoint_common
 
 COPY ./collector-agent /tmp/collector-agent
 
-RUN cd /tmp/collector-agent && go build && cp CollectorAgent /usr/local/bin/ && rm -rf /tmp/collector-agent
+RUN cd /tmp/collector-agent && go build  -o  CollectorAgent server.go && cp CollectorAgent /usr/local/bin/ && rm -rf /tmp/collector-agent
