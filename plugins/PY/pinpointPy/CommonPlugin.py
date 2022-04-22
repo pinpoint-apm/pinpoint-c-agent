@@ -41,6 +41,7 @@ class PinpointCommonPlugin(Common.PinTrace):
 
     def onException(self, e):
         pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
+        raise e
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}

@@ -8,13 +8,13 @@ from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 class AllFle(metaclass=abc.ABCMeta):
     all_type='file'
-    @PinpointCommonPlugin('AllFle'+ __name__)
+    @PinpointCommonPlugin(__name__+'.AllFle.read')
     @abc.abstractmethod
     def read(self):
         pass
 
 
 class Txt(AllFle):
-    @PinpointCommonPlugin('Txt'+__name__)
+    @PinpointCommonPlugin(__name__+'.Txt.read')
     def read(self):
         return "Reading txt!"

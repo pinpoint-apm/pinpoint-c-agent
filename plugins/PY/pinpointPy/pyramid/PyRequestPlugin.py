@@ -22,7 +22,7 @@
 
 from .. import pinpoint
 from .. import Defines
-from RequestPlugins import RequestPlugin
+from pinpointPy.RequestPlugins import RequestPlugin
 class PyRequestPlugin(RequestPlugin):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)

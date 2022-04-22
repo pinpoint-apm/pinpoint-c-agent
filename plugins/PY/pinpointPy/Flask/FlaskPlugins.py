@@ -111,7 +111,7 @@ class BaseFlaskPlugins(Common.PinTrace):
             pinpoint.add_trace_header(Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY])
 
         pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1")
-        if (Defines.PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
+        if (Defines.PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or (Defines.PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HEADER_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
             pinpoint.drop_trace()
             pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s0")
 

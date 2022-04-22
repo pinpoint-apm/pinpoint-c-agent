@@ -5,7 +5,7 @@ from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
 def lazy_sum(*args):
-    @PinpointCommonPlugin(__name__)
+    @PinpointCommonPlugin(__name__+".sum")
     def sum():
         ax = 0
         for n in args:
