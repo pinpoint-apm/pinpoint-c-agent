@@ -7,6 +7,7 @@
 using NodePool::TraceNode;
 using NodePool::PoolManager;
 using namespace testing;
+namespace Json = AliasJson;
 
 static NodePool::PoolManager g_pool;
 

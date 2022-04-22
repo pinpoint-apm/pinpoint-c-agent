@@ -50,7 +50,7 @@
 static size_t const stackLimit_g =
     JSONCPP_DEPRECATED_STACK_LIMIT; // see readValue()
 
-namespace Json {
+namespace AliasJson { 
 
 #if __cplusplus >= 201103L || (defined(_CPPLIB_VER) && _CPPLIB_VER >= 520)
 using CharReaderPtr = std::unique_ptr<CharReader>;
@@ -1901,7 +1901,7 @@ CharReader* CharReaderBuilder::newCharReader() const {
   return new OurCharReader(collectComments, features);
 }
 
-bool CharReaderBuilder::validate(Json::Value* invalid) const {
+bool CharReaderBuilder::validate(AliasJson::Value* invalid) const {
   static const auto& valid_keys = *new std::set<String>{
       "collectComments",
       "allowComments",
@@ -1932,7 +1932,7 @@ Value& CharReaderBuilder::operator[](const String& key) {
   return settings_[key];
 }
 // static
-void CharReaderBuilder::strictMode(Json::Value* settings) {
+void CharReaderBuilder::strictMode(AliasJson::Value* settings) {
   //! [CharReaderBuilderStrictMode]
   (*settings)["allowComments"] = false;
   (*settings)["allowTrailingCommas"] = false;
@@ -1948,7 +1948,7 @@ void CharReaderBuilder::strictMode(Json::Value* settings) {
   //! [CharReaderBuilderStrictMode]
 }
 // static
-void CharReaderBuilder::setDefaults(Json::Value* settings) {
+void CharReaderBuilder::setDefaults(AliasJson::Value* settings) {
   //! [CharReaderBuilderDefaults]
   (*settings)["collectComments"] = true;
   (*settings)["allowComments"] = true;
@@ -1990,4 +1990,4 @@ IStream& operator>>(IStream& sin, Value& root) {
   return sin;
 }
 
-} // namespace Json
+} // namespace AliasJson

@@ -5,51 +5,23 @@
 
 ### 要求
 
-依赖|版本
----|----
-PHP| php `7+` ,`5+`
-GCC| GCC `4.7+`
-cmake| cmake `3.8+`
-*inux|
-GO |
-pinpoint| `1.8.0+`, `2.0+`
-**Composer**| 
+依赖|版本|附加
+---|----|----
+PHP| php `7+`|
+GO | | 
+GCC| GCC `4.7+`| C++11 
+cmake| cmake `3.2+`|
+*inux|| `windows is on the way`
+pinpoint| `2.0+`|
+composer| | class can be automatic pinpoint-cut
+collector-agent| [installed ?](../collector-agent/readme.md)
 
 ### 安装
 
 #### 步骤
 1. 执行命令：git clone https://github.com/pinpoint-apm/pinpoint-c-agent.git
 
-2. 在 collector-agent(`pinpoint-c-agent/collector-agent`) 目录下安装 `Collector-Agent`
-       
-    `Collector-Agent` 负责接收并格式化 `PHP/Python/C/CPP-Agent` 的span然后转发给 `Pinpoint-Collector`。由于 `Collector-Agent` 使用[golang](https://golang.google.cn/) 语言编写， 请先安装golang。[Install GO](https://golang.google.cn/doc/install)
-
-      1. 执行命令 `go build`
-      2. 添加环境变量:
-         ```
-           export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
-           export PP_COLLECTOR_AGENT_SPAN_PORT=9993
-           export PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
-           export PP_COLLECTOR_AGENT_AGENT_PORT=9991
-           export PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
-           export PP_COLLECTOR_AGENT_STAT_PORT=9992
-           export PP_COLLECTOR_AGENT_ISDOCKER=false
-           export PP_LOG_DIR=/tmp/
-           export PP_Log_Level=INFO
-           export PP_ADDRESS=0.0.0.0@9999
-         ```
-         1. `PP_COLLECTOR_AGENT_SPAN_IP`, `PP_COLLECTOR_AGENT_AGENT_IP`, `PP_COLLECTOR_AGENT_STAT_IP`: 设置为 `pinpoint-collector` 的IP.
-         2. `PP_COLLECTOR_AGENT_SPAN_PORT`, `PP_COLLECTOR_AGENT_AGENT_PORT`, `PP_COLLECTOR_AGENT_STAT_PORT`: 设置为 `pinpoint-collector`(grpc) 的端口(默认9993，9992， 9991).
-         3. `PP_LOG_DIR`: 设置 `Collector-Agent` 日志存放路径.
-         4. `PP_Log_Level`: 设置日志的级别（DEBUG, INFO, WARN, ERROR）.
-         5. `PP_ADDRESS`: 设置 `Collector-Agent` 的地址合端口，`PHP/Python-Agent` 将会通过这个地址连接 `pinpoint-collctor`。
-      3. 运行 `Collector-Agent`，执行命令：`./CollectorAgent`
-         
-   `Collector-Agent` 数据的说明：
-   [Json string map to Pinpoint item](../API/collector-agent/Readme.md)
-   
-
-3. 安装 pinpoint-php-module， 在pinpoint-c-agent安装包的根目录下，执行以下命令：
+2. 安装 pinpoint-php-module， 在pinpoint-c-agent安装包的根目录下，执行以下命令：
    1. phpize        
    2. ./configure
    3. make 
@@ -72,30 +44,18 @@ pinpoint| `1.8.0+`, `2.0+`
         ;error_log = /tmp/php_fpm_error.log
         ```
         
-     > 试试 aop example
-4. 在您的项目中使用Pinpoint PHP Agent，请执行以下步骤：
+3. 在您的项目中使用Pinpoint PHP-Agent，请执行以下步骤：
 
    我们假设您已经安装composer，并了解怎么使用composer[如何使用 Composer?](https://getcomposer.org/doc/00-intro.md)
 
-   1. 拷贝[Plugins](../../plugins/PHP/Plugins)到您的项目根路径下，并在```composer.josn```中自动加载```Plugins```. 
-
-      > composer.josn
-      ```
-      "autoload": {
-               "psr-4": {
-                  ......
-                  "Plugins\\": path to the Plugins
-               }
-         },
-      ```
-   2. 安装 ```pinpoint-apm/pinpoint-php-aop```, 在```composer.josn```的```require```中添加```"pinpoint-apm/pinpoint-php-aop": "v2.0.1"```:
+   1. 安装 ```pinpoint-apm/pinpoint-php-aop```, 在```composer.josn```的```require```中添加```"pinpoint-apm/pinpoint-php-aop": "v2.0.1"```:
         ```
         "require": {
             ...
             "pinpoint-apm/pinpoint-php-aop": "v2.0.1"
         }
         ```
-   3. 在项目的入口文件中添加下面的常量：
+   2. 在项目的入口文件中添加下面的常量：
         ```
         #################################################
         define('APPLICATION_NAME','APP-2');
@@ -116,7 +76,13 @@ pinpoint| `1.8.0+`, `2.0+`
         6. ```PP_REQ_PLUGINS```: ```PerRequestPlugins```的路径(```PerRequestPlugins```是基本的请求拦截器, 不同的PHP框架的拦截器不同，我们已经为您准备了一些框架的```PerRequestPlugins```，[请到这里获取](../../plugins/PHP/Plugins/Framework)，（例如:[swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php)）。欢迎PR其他框架哟~
         7. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: 导入pinpoint的auto_pinpointed.php。**请在```require_once __DIR__."/../vendor/autoload.php";```之后添加，这很重要**
 
-      另外，我们还准备了一些例子以供参考：[plugins/PHP](../../plugins/PHP)。
+   3. 拷贝[Plugins](../../plugins/PHP/Plugins)到您的项目根路径下，并在```composer.josn```中自动加载```Plugins```. 
+         Frameworks:
+            [ThinkPHP5](../../plugins/PHP/Framework/ThinkPHP5)
+            [Yii2](../../plugins/PHP/Framework/Yii2)
+            [laravel](../../plugins/PHP/Framework/laravel)
+    
+      另外，我们还准备了一些例子以供参考：[testapps](../../testapps/PHP)。
 
 
 ##  变化

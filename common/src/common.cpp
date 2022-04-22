@@ -31,6 +31,7 @@
 #include "Util/Helper.h"
 #include "ConnectionPool/SpanConnectionPool.h"
 
+namespace Json = AliasJson;
 using NodePool::TraceNode;
 using NodePool::PoolManager;
 using NodePool::PContextType;
@@ -78,8 +79,6 @@ static NodeID do_start_trace(NodeID& _id)
     }
 }
 
-// root must be the trace root
-// if not, your nodes must be leaked !!!
 static void free_nodes_tree(TraceNode* root)
 {
     if(root == nullptr) return ;
@@ -155,23 +154,23 @@ NodeID do_end_trace(NodeID& _id)
     return do_end_trace(node);
 }
 
-NodeID pinpoint_start_trace(NodeID _id)
+NodeID pinpoint_start_trace(NodeID parentId)
 {
     try
     {
-        pp_trace("#%d pinpoint_start start",_id);
-        return do_start_trace(_id);
+        pp_trace("#%d pinpoint_start start",parentId);
+        return do_start_trace(parentId);
     }
     catch(const std::out_of_range& ex)
     {
-        pp_trace(" start_trace#%d failed with %s",_id,ex.what());
+        pp_trace(" start_trace#%d failed with %s",parentId,ex.what());
     }
     catch(const std::runtime_error& ex)
     {
-        pp_trace(" start_trace#%d failed with %s",_id,ex.what());
+        pp_trace(" start_trace#%d failed with %s",parentId,ex.what());
     }catch(...)
     {
-        pp_trace(" start_trace#%d failed with unkonw reason",_id);
+        pp_trace(" start_trace#%d failed with unkonw reason",parentId);
     }
     return 0;
 }

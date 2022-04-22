@@ -1,8 +1,6 @@
 package server
 
 import (
-	"CollectorAgent/agent"
-	"CollectorAgent/common"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -14,6 +12,9 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/agent"
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 
 	log "github.com/sirupsen/logrus"
 )

@@ -1,77 +1,31 @@
-## How to write your own plugins 
-
-### Tutorial
-
-1. First, you need to know how to use [ pinpoint-php-aop ☚](https://github.com/pinpoint-apm/pinpoint-php-aop) and how it works. 
-2. Write your own XXXPlugin.php class.
-   
-   ```php
-
-    class XXXPlugins extends Candy
-    {
-        public function onBefore(){
-            pinpoint_add_clue("stp",PHP_METHOD);
-            pinpoint_add_clues(PHP_ARGS,"fetch data from $this->args");
-        }
-
-        public function onEnd(&$ret){
-            pinpoint_add_clues(PHP_RETURN,"parse data from $ret");
-        }
-
-        public function onException($e){
-            pinpoint_add_clue("EXP",$e->getMessage());
-        }
-    }
-   ```
-   > You could find some out of box plugins in [[Example/PHP/Plugins](../../Example/PHP/Plugins)].
-    When you add clue(clues), DO NOT assignment with large string or string included some special characters(https://www.freeformatter.com/json-escape.html)
-3. Add the function that you care about such as "///@hook:app\User::adduser" before ClassName(XXXPlugins), onBefore, onEnd or onException. If you care about all cases, please call before&after&around function.
-
-4. Remove the "__class_index_table" file under AOP_CACHE_DIR.
-
-5. Copy your plugins files into source tree/plugins_dir, and add this directory into composer.json{"autoload"}.
-   
+## How to start testapp
+1. Install Composer. [How to Use Composer?](https://getcomposer.org/doc/00-intro.md)
+2. Execute `composer install` or `composer update`.
+3. Import pinpoint entry header into public/index.php as below
+    ## start.php
     ```
-    "autoload": {
-            "psr-4": {
-                ......
-                "Plugins\\": "your source tree/plugins_dir"
-            }
-        },
+    <?php
+
+    ...
+
+    // [ 应用入口文件 ]
+    namespace think;
+
+    // 加载基础文件
+    require __DIR__ . '/../thinkphp/base.php';
+
+    //###################################################################
+    define('AOP_CACHE_DIR', __DIR__ . '/../Cache/');
+    define('PLUGINS_DIR', __DIR__ . '/../Plugins/');
+    define('APPLICATION_NAME','thinkphp5.1'); // your application name
+    define('APPLICATION_ID','thinkphp5.1');  // your application id
+    define('PINPOINT_USE_CACHE','YES');
+    require_once __DIR__ . '/../vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
+    //###################################################################
+
+    // 支持事先使用静态方法设置Request对象和Config对象
+
+    // 执行应用并响应
+    Container::get('app')->run()->send();
     ```
-    
-6. Update your autoload. $ composer update.
-7. Enjoy the pinpoint-php-aop.
-## Protocol
-
-> Json -> Thrift/GRPC
-
-```
-                   +------------------+
-                   |  php-fpm         |
-                   |  pinpoint_php.so |
-                   +------------------+
-                           |
-                json       |
-            unix:socket    |
-                           v
-                    +----------------+
-                    |collector-agent |
-                    |                |
-                    +----------------+
-                           |
-                           |    thrift TCP&UDP
-                           |    GRPC
-                           v
-                  +----------------------+
-                  |  pinpoint collector  |
-                  +----------------------+
-
-```
-
-## Example
-
-https://github.com/pinpoint-apm/pinpoint-c-agent/tree/v0.3.1/Example/PHP/Plugins
-
-## API of Pinpoint_php_ext
-[Goto pinpoint_ext_api ☚](https://github.com/pinpoint-apm/pinpoint-c-agent/blob/v0.3.1/src/PHP/pinpoint_php_api.php)
+4. Start testapp by executing `php think run`.

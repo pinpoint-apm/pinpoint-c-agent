@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.common import PinpointCommonPlugin
+from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
-@PinpointCommonPlugin( __name__)
+@PinpointCommonPlugin( __name__+".func1")
 def func1(a, b="Wool"):
     return a + b

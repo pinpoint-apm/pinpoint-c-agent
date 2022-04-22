@@ -11,7 +11,7 @@
 
 #pragma pack(push, 8)
 
-namespace Json {
+namespace AliasJson { 
 template <typename T> class SecureAllocator {
 public:
   // Type definitions
@@ -81,7 +81,7 @@ bool operator!=(const SecureAllocator<T>&, const SecureAllocator<U>&) {
   return false;
 }
 
-} // namespace Json
+} // namespace AliasJson
 
 #pragma pack(pop)
 

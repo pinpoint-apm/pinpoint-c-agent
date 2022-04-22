@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.common import PinpointCommonPlugin
+from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
 class Private(object):
-    @PinpointCommonPlugin('Private.'+ __name__)
+    @PinpointCommonPlugin(__name__+'.Private.__private_func')
     def __private_func(self, arg):
         return "Private called by " + arg
 
-    @PinpointCommonPlugin('Private.'+ __name__)
+    @PinpointCommonPlugin(__name__+'.Private.common_func')
     def common_func(self, name):
         r = self.__private_func(name)
         return r

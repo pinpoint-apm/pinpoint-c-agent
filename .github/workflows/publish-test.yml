@@ -16,7 +16,9 @@ jobs:
           pip install twine
       - name: package
         run: |
-          python setup_test.py sdist
+          rm setup.py
+          ln -s setup_pypi_test.py setup.py
+          python setup.py sdist
           twine check dist/*
       - name: Publish package to pypitest
         uses: pypa/gh-action-pypi-publish@release/v1

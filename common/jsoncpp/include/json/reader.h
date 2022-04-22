@@ -25,7 +25,7 @@
 
 #pragma pack(push, 8)
 
-namespace Json {
+namespace AliasJson { 
 
 /** \brief Unserialize a <a HREF="http://www.json.org">JSON</a> document into a
  * Value.
@@ -97,7 +97,7 @@ public:
              bool collectComments = true);
 
   /// \brief Parse from input stream.
-  /// \see Json::operator>>(std::istream&, Json::Value&).
+  /// \see AliasJson::operator>>(std::istream&, AliasJson::Value&).
   bool parse(IStream& is, Value& root, bool collectComments = true);
 
   /** \brief Returns a user friendly string that list errors in the parsed
@@ -288,7 +288,7 @@ public:
  */
 class JSON_API CharReaderBuilder : public CharReader::Factory {
 public:
-  // Note: We use a Json::Value so that we can add data-members to this class
+  // Note: We use a AliasJson::Value so that we can add data-members to this class
   // without a major version bump.
   /** Configuration of this builder.
    * These are case-sensitive.
@@ -329,7 +329,7 @@ public:
    * write and read them just like any JSON Value.
    * \sa setDefaults()
    */
-  Json::Value settings_;
+  AliasJson::Value settings_;
 
   CharReaderBuilder();
   ~CharReaderBuilder() override;
@@ -339,24 +339,24 @@ public:
   /** \return true if 'settings' are legal and consistent;
    *   otherwise, indicate bad settings via 'invalid'.
    */
-  bool validate(Json::Value* invalid) const;
+  bool validate(AliasJson::Value* invalid) const;
 
   /** A simple way to update a specific setting.
    */
   Value& operator[](const String& key);
 
   /** Called by ctor, but you can use this to reset settings_.
-   * \pre 'settings' != NULL (but Json::null is fine)
+   * \pre 'settings' != NULL (but AliasJson::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderDefaults
    */
-  static void setDefaults(Json::Value* settings);
+  static void setDefaults(AliasJson::Value* settings);
   /** Same as old Features::strictMode().
-   * \pre 'settings' != NULL (but Json::null is fine)
+   * \pre 'settings' != NULL (but AliasJson::null is fine)
    * \remark Defaults:
    * \snippet src/lib_json/json_reader.cpp CharReaderBuilderStrictMode
    */
-  static void strictMode(Json::Value* settings);
+  static void strictMode(AliasJson::Value* settings);
 };
 
 /** Consume entire stream and use its begin/end.
@@ -373,7 +373,7 @@ bool JSON_API parseFromStream(CharReader::Factory const&, IStream&, Value* root,
  * This can be used to read a file into a particular sub-object.
  * For example:
  *   \code
- *   Json::Value root;
+ *   AliasJson::Value root;
  *   cin >> root["dir"]["file"];
  *   cout << root;
  *   \endcode
@@ -388,11 +388,11 @@ bool JSON_API parseFromStream(CharReader::Factory const&, IStream&, Value* root,
  * }
  * \endverbatim
  * \throw std::exception on parse error.
- * \see Json::operator<<()
+ * \see AliasJson::operator<<()
  */
 JSON_API IStream& operator>>(IStream&, Value&);
 
-} // namespace Json
+} // namespace AliasJson
 
 #pragma pack(pop)
 

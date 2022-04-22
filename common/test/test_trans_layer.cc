@@ -12,6 +12,7 @@ using namespace testing;
 using ConnectionPool::TransLayer;
 using ConnectionPool::SpanConnectionPool;
 using ConnectionPool::TransConnection;
+namespace Json = AliasJson;
 
 #define unix_socket  "./pinpoint_test.sock"
 #pragma GCC diagnostic push

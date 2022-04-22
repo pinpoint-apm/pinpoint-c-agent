@@ -2,11 +2,11 @@
 # -*- coding: UTF-8 -*-
 
 from person import Person
-from pinpoint.common import PinpointCommonPlugin
+from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
 class Teacher(Person):
 
-    @PinpointCommonPlugin("Teacher"+__name__)
+    @PinpointCommonPlugin(__name__+".Teacher.eat")
     def eat(self):
         return super().eat()+"Teacher eating too!"

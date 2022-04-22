@@ -28,6 +28,7 @@
 #include <atomic>
 #include <map>
 #include <iostream>
+#include <mutex>
 
 namespace NodePool{
 
@@ -90,7 +91,7 @@ namespace NodePool{
 //    uint32_t _id;
 //};
 //
-
+namespace Json = AliasJson;
 using Context::ContextType;
 using Context::StringContextType;
 using Context::LongContextType;
@@ -149,11 +150,13 @@ public:
 
     PContextType& getContextByKey(const char* key)
     {
+         std::lock_guard<std::mutex> _safe(this->_lock);
         return this->_context.at(key);
     }
 
     void setStrContext(const char* key,const char* buf)
     {
+        std::lock_guard<std::mutex> _safe(this->_lock);
         PContextType context(std::make_shared<StringContextType>(buf));
         this->_context[key] = context;
         // std::string& value =  this->_context[key]->asStringValue();
@@ -180,6 +183,7 @@ public:
 
     Json::Value& operator[](const std::string key)
     {
+        std::lock_guard<std::mutex> _safe(this->_lock);
         return this->_value[key];
     }
 
@@ -209,6 +213,7 @@ private:
     Json::Value _value;
 
     std::map<std::string,PContextType>  _context;
+    std::mutex _lock;
 };
 }
 #endif /* COMMON_SRC_TRACENODE_H_ */

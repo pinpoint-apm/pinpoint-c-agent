@@ -1,4 +1,4 @@
-module CollectorAgent
+module github.com/pinpoint-apm/pinpoint-c-agent/collector-agent
 
 go 1.15
 

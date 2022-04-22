@@ -35,7 +35,9 @@ import test_lambda
 import test_decorator
 import test_partial
 import test_band
-from pinpoint.Flask.PinPointMiddleWare import PinPointMiddleWare
+from pinpointPy.Flask.PinPointMiddleWare import PinPointMiddleWare
+from pinpointPy import set_agent,monkey_patch_for_pinpoint
+monkey_patch_for_pinpoint()
 from test_band import BandClass
 import test_mixin
 import test_special
@@ -51,6 +53,8 @@ from RedisControl import RedisControl
 
 
 app = Flask(__name__)
+
+set_agent("flask-agent","FLASK-AGENT",'tcp:dev-collector:9999',-1)
 
 app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
 
@@ -142,7 +146,7 @@ def test_generator_form():
 
 @app.route('/test_higher_order', methods=['GET'])
 def test_higher_order_form():
-    from pinpoint.common import PinpointCommonPlugin
+    from pinpointPy.CommonPlugin import PinpointCommonPlugin
     @PinpointCommonPlugin(__name__)
     def f(x):
         return x * x

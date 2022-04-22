@@ -28,6 +28,7 @@
 using Helper::STT;
 using Cache::SafeSharedState;
 using std::chrono::seconds;
+namespace Json = AliasJson;
 
 TEST(util, sst)
 {

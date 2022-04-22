@@ -1,12 +1,13 @@
 package server
 
 import (
-	"CollectorAgent/common"
 	"fmt"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 
 	log "github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"

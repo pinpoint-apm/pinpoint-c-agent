@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-from pinpoint.common import PinpointCommonPlugin
+from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
-@PinpointCommonPlugin(__name__)
+@PinpointCommonPlugin(__name__+".test_returns1")
 def test_returns1(arg):
     return arg
 
 
-@PinpointCommonPlugin( __name__)
+@PinpointCommonPlugin( __name__+".test_returns2")
 def test_returns2(a1, a2="Mer", *a3, **a4):
     a1 = a1 + " "
     a2 = a2 + "!"
