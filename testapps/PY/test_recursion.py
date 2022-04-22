@@ -4,7 +4,7 @@
 from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
-@PinpointCommonPlugin(__name__)
+@PinpointCommonPlugin(__name__+".fact")
 def fact(n):
     if n==1:
         return 1

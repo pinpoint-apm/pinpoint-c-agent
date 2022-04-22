@@ -5,6 +5,6 @@ from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
 class Person(object):
-    @PinpointCommonPlugin("Person."+__name__)
+    @PinpointCommonPlugin(__name__+".Person.eat")
     def eat(self):
         return "father eating!"
