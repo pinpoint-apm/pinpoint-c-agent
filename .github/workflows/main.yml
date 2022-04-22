@@ -72,7 +72,6 @@ jobs:
           cd testapps/PHP
           composer install
           cp tests/think .
-          cat think
           php think unit -v
           
   PHP8:

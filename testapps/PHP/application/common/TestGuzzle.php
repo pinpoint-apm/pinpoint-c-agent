@@ -17,7 +17,7 @@ class TestGuzzle
 //            'base_uri' => 'http://localhost:8088/',
             'base_uri' => 'http://www.baidu.com/',
             // You can set any number of default request options.
-            'timeout'  => 2.0,
+            'timeout'  => 5.0,
         ]);
     }
 
