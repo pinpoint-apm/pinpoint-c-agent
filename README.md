@@ -43,12 +43,19 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
  ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
  
 ## Contact Us
-* Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
-* Chinese Community:
 
-QQ Group1: 897594820 | QQ Group2: 812507584 | DING Group
-:---:| :---: | :---:
-![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+* Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
+
+* Chinese Community:
+    <details>
+    <summary>chat group </summary>
+
+    QQ Group1: 897594820 | QQ Group2: 812507584 | DING Group
+    :---:| :---: | :---:
+    ![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+
+    </details>
+* [Gitter char room](https://gitter.im/naver/pinpoint-c-agent)
 
 ## Contributing
 We are looking forward to your contributions via pull requests.
