@@ -7,6 +7,6 @@ from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 class Doctor(Person):
 
-    @PinpointCommonPlugin("Doctor"+ __name__)
+    @PinpointCommonPlugin(__name__+".Doctor.other")
     def other(self):
         return "Doctor not eating!"

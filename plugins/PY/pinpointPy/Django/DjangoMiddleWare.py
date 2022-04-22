@@ -17,7 +17,7 @@
 
 from django.utils.deprecation import MiddlewareMixin
 
-from Django.BaseDjangoRequestPlugins import BaseDjangoRequestPlugins
+from .BaseDjangoRequestPlugins import BaseDjangoRequestPlugins
 
 
 class DjangoMiddleWare(MiddlewareMixin):

@@ -3,6 +3,6 @@
 from pinpointPy.CommonPlugin import PinpointCommonPlugin
 
 
-@PinpointCommonPlugin( __name__)
+@PinpointCommonPlugin( __name__+".f")
 def f(x:int):
     return x * x
