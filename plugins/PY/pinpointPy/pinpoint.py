@@ -36,11 +36,11 @@ def app_name():
 
 
 def with_trace(trace_id=-1):
-    _pinpointPy.start_trace(trace_id)
+    return _pinpointPy.start_trace(trace_id)
 
 
 def end_trace(trace_id=-1):
-    _pinpointPy.end_trace(trace_id)
+    return _pinpointPy.end_trace(trace_id)
 
 
 def add_trace_header(key: str, value: str, trace_id: int = -1, location: int = 0):

@@ -19,16 +19,17 @@
 
 
 from .AsyRequestPlugin import *
-
+from .. import pinpoint
+from .. import Defines
 
 class FastAPIRequestPlugin(AsyRequestPlugin):
     def onBefore(self,*args, **kwargs):
         super().onBefore(*args, **kwargs)
         request = args[0].scope
-        add_trace_header(PP_INTERCEPTOR_NAME, 'fastapi-middleware',self.traceId)
-        add_trace_header(PP_REQ_URI, request["path"], self.traceId)
-        add_trace_header(PP_REQ_CLIENT, request["client"][0], self.traceId)
-        add_trace_header(PP_REQ_SERVER, request["server"][0] + ":" + str(request["server"][1]), self.traceId)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'fastapi-middleware',self.traceId)
+        pinpoint.add_trace_header(Defines.PP_REQ_URI, request["path"], self.traceId)
+        pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request["client"][0], self.traceId)
+        pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request["server"][0] + ":" + str(request["server"][1]), self.traceId)
 
 
     def onEnd(self, ret):
