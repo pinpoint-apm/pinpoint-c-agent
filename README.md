@@ -39,7 +39,7 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 ## Installation guide
 
 **Components:**
-* Collector-Agent: Formats the span from PHP/Python/C/CPP/Golang Agent and send to Pinpoint-Collector (**Required**)
+* Collector-Agent: (**Required**)
 * PHP-Agent (Optional)
 * Python-Agent (Optional)
 * c/cpp=Agent (Optional)
