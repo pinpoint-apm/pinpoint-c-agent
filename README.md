@@ -39,11 +39,11 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 ## Installation guide
 
 **Components:**
-* Collector-Agent: (**Required**)
-* PHP-Agent (Optional)
-* Python-Agent (Optional)
-* c/cpp=Agent (Optional)
-* Golang-Agent (Optional)
+* Collector-Agent (**Required**)
+* PHP-Agent
+* Python-Agent
+* c/cpp=Agent
+* Golang-Agent
 
 ### Install Collector-Agent
 
