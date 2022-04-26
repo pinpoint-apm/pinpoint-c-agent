@@ -13,15 +13,6 @@ The current stable version is [the Latest](https://github.com/pinpoint-apm/pinpo
 
 It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_**, **_C/CPP_** and **_PYTHON_**.
 
-## Support Lists
-
-language| tutorial
----|----
-php|[English](DOC/PHP/Readme.md) [中文](DOC/PHP/Readme-CN.md) [한국어](DOC/PHP/Readme-KR.md)
-python3|[English](DOC/PY/Readme.md) [中文](DOC/PY/Readme-CN.md) [한국어]((DOC/PY/Readme-KR.md))
-c/cpp|[English](DOC/C-CPP/Readme.md)
-golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) 
-
 ## Overview Pinpoint Common Agent
 
 ### How does it work
@@ -43,7 +34,30 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
  CPU | Response Time
  --- | ---
  ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
- 
+
+
+## Installation guide
+
+**Components:**
+* Collector-Agent: Formats the span from PHP/Python/C/CPP/Golang Agent and send to Pinpoint-Collector (**Required**)
+* PHP-Agent (Optional)
+* Python-Agent (Optional)
+* c/cpp=Agent (Optional)
+* Golang-Agent (Optional)
+
+### Install Collector-Agent
+
+[How to install Collector-Agent](DOC/collector-agent/readme.md)
+
+### Install PHP / Python / C/CPP / Golang Agent
+
+language| tutorial
+---|---
+php|[English](DOC/PHP/Readme.md) [中文](DOC/PHP/Readme-CN.md) [한국어](DOC/PHP/Readme-KR.md)
+python3|[English](DOC/PY/Readme.md) [中文](DOC/PY/Readme-CN.md) [한국어]((DOC/PY/Readme-KR.md))
+c/cpp|[English](DOC/C-CPP/Readme.md)
+golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) 
+
 ## Contact Us
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
