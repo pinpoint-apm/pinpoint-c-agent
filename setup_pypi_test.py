@@ -67,7 +67,7 @@ else:
 
 
 setup(name='pinpointPy',
-      version="1.0.20",
+      version="1.0.21",
       author="cd_pinpoint members", 
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',
