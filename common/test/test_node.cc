@@ -2,7 +2,9 @@
 #include <gtest/gtest.h>
 #include "../src/Util/Helper.h"
 #include "NodePool/PoolManager.h"
-
+#include <condition_variable>
+#include <thread>
+#include <chrono>
 
 using NodePool::TraceNode;
 using NodePool::PoolManager;
@@ -209,4 +211,52 @@ TEST(node,merge_children)
     std::cout<<stdBody;
     EXPECT_STREQ(stdBody.c_str(),"{\"calls\":[{\"name\":\"127\"},{\"name\":\"126\"}],\"name\":\"128\"}");
 
+}
+
+std::mutex cv_m; 
+std::condition_variable cv;
+NodeID func_Id;
+
+void func(){
+    std::unique_lock<std::mutex> lk(cv_m);
+    cv.wait(lk);
+    pinpoint_add_clues(func_Id,"xxxx","bbbbbbss",E_CURRENT_LOC);
+    pinpoint_add_clue(func_Id,"xxx","bbbbbb",E_CURRENT_LOC);
+    for (int i = 0; i < 10; ++i)
+    {
+        func_Id = pinpoint_start_trace(func_Id);
+        pinpoint_set_context_key(func_Id,"xxxx","bbbbbb");
+        std::this_thread::yield();
+        const char*value = pinpoint_get_context_key(func_Id,"xxxx");
+        std::cout<<"read value:"<<value<<" ";
+        pinpoint_add_clues(func_Id,"xxxx","bbbbbbss",E_CURRENT_LOC);
+        std::this_thread::yield();
+        pinpoint_add_clue(func_Id,"xxx","bbbbbb",E_CURRENT_LOC);
+        std::this_thread::yield();
+        func_Id = pinpoint_end_trace(func_Id);
+        std::this_thread::yield();
+    }
+    pinpoint_add_clues(func_Id,"xxxx","bbbbbbss",E_CURRENT_LOC);
+    pinpoint_add_clue(func_Id,"xxx","bbbbbb",E_CURRENT_LOC);
+}
+
+TEST(node,multipleThread)
+{
+    // no crash, works fine
+    NodeID func_Id = pinpoint_start_trace(0);
+    
+    std::vector<std::thread> threads;
+
+    for(int i = 0; i < 10; i++){
+        threads.push_back(std::thread(func));
+    }
+
+    sleep(2);
+    cv.notify_all();
+
+    for(int i = 0; i < 10; i++){
+        threads[i].join();
+    }
+    pinpoint_end_trace(func_Id);
+    pinpoint_end_trace(func_Id);
 }

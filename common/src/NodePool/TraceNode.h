@@ -150,7 +150,7 @@ public:
 
     PContextType& getContextByKey(const char* key)
     {
-         std::lock_guard<std::mutex> _safe(this->_lock);
+        std::lock_guard<std::mutex> _safe(this->_lock);
         return this->_context.at(key);
     }
 
@@ -186,6 +186,8 @@ public:
         std::lock_guard<std::mutex> _safe(this->_lock);
         return this->_value[key];
     }
+
+    void appendClues(const std::string& value);
 
 private:
 

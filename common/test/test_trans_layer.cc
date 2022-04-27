@@ -94,7 +94,7 @@ TEST(translayer, unix_socket_layer)
         layer.trans_layer_pool(3);
     }
     std::string data="msg-1918";
-    layer.sendMsgToAgent(data);
+    layer.copy_into_send_buffer(data);
     layer.forceFlushMsg(10);
     waitpid(pid,0,0);
 }
