@@ -198,7 +198,7 @@ ERROR:
     return -1;
 }
 
-void TransLayer::sendMsgToAgent(const std::string &data)
+void TransLayer::copy_into_send_buffer(const std::string &data)
 {
     Header header;
     header.length  = htonl(data.size());

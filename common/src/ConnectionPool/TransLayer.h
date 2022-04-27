@@ -75,7 +75,7 @@ public:
     
     size_t trans_layer_pool(uint32_t);
     
-    void sendMsgToAgent(const std::string &data);
+    void copy_into_send_buffer(const std::string &data);
 
     // void sendMsgToAgent(const char* pbuf,uint32_t len)
     // {

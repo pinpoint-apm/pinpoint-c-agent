@@ -125,22 +125,24 @@ extern "C"{
 extern PPAgentT global_agent_info;
 
 /**
- * @brief 
- * 
+ * @brief [tls]
+ *  pinpoint_get_per_thread_id and pinpoint_update_per_thread_id are paired API
+ *  pinpoint_get_per_thread_id get the current trace-id of current thread
+ *  pinpoint_update_per_thread_id update(stores) the current trace-id for pinpoint_get_per_thread_id
  * @return NodeID 
  */
 NodeID pinpoint_get_per_thread_id(void);
-
 void pinpoint_update_per_thread_id(NodeID id);
 
 /**
- * start a trace (span) from parentId. if current span is empty, create a span or else create a spanevent
+ * [tls] start a trace (span) from parentId. if current span is empty, create a span or else create a spanevent
  * @param parentId 
- * @return 
+ * @return new traceId related to parentId (caller [parentId] -> callee [NodeID] )
  */
 NodeID pinpoint_start_trace(NodeID parentId);
-/**
+/**[tls]
  * the same as pinpoint_start_trace. BUT, end a span or a spanevent
+ * Note: pinpoint_end_trace is thread safe, but you should avoid to call it in the multi-thread, it may send duplicate trace span
  * @return NodeID is parent node id
  */
 NodeID pinpoint_end_trace(NodeID);
@@ -160,25 +162,25 @@ int pinpoint_trace_is_root(NodeID);
 int pinpoint_force_end_trace(NodeID,int32_t timeout);
 
 /**
- * pinpoint_add_clues, append a value into span[key]
+ * [tls] pinpoint_add_clues, append a value into span[key]
  * @param key must be a string
  * @param value key must be a string
  */
 void pinpoint_add_clues(NodeID _id,const char* key,const  char* value,E_NODE_LOC flag);
 /**
- * pinpoint_add_clues, add  a key-value into span. span[key]=value
+ * [tls] pinpoint_add_clues, add  a key-value into span. span[key]=value
  * @param key must be a string
  * @param value key must be a string
  */
 void pinpoint_add_clue(NodeID _id,const char* key,const  char* value,E_NODE_LOC flag);
 /**
- *  add a key value into current trace. IF the trace is end, all data(key-value) will be free
+ * [tls] add a key value into current trace. IF the trace is end, all data(key-value) will be free
  * @param key
  * @param value
  */
 void pinpoint_set_context_key(NodeID _id,const char* key,const char* value);
 /**
- * get the corresponding value with key(in current trace)
+ * [tls] get the corresponding value with key(in current trace)
  * @param key
  * @return
  */
@@ -197,14 +199,14 @@ void pinpoint_set_context_long(NodeID _id,const char* key,long);
  */
 int pinpoint_get_context_long(NodeID _id,const char* key,long*);
 /**
- * if tracelimit enable, check current trace state,
+ * [tls] if tracelimit enable, check current trace state,
  * @param timestamp
  * @return 0, sampled or else, not sampled
  */
 int check_tracelimit(int64_t);
 
 /**
- * @brief setting current trace status
+ * @brief [tls] setting current trace status
        typedef enum {
              E_OFFLINE = 0x1,
             E_TRACE_PASS =0x2,
@@ -213,19 +215,19 @@ int check_tracelimit(int64_t);
         }E_AGENT_STATUS;
  * @param _id 
  * @param status 
- * @return int 
+ * @return int last status
  */
-int mark_current_trace_status(NodeID _id,int status);
+uint64_t mark_current_trace_status(NodeID _id,int status);
 
 /**
- * get an unique auto-increment id
+ * [tls] get an unique auto-increment id
  * NOTE: implement by shared memory, only valid in current host.
  * @return
  */
 int64_t generate_unique_id(void);
 
 /**
- * get the start time of collector-agent.Use to generate transactionID
+ * [tls] get the start time of collector-agent.Use to generate transactionID
  * @return
  */
 uint64_t pinpoint_start_time(void);
@@ -244,8 +246,6 @@ void pp_trace(const char *format,...);
  * NOTE: only for testcase
  */
 void reset_unique_id(void);
-
-DEPRECATED void pinpoint_reset_store_layer(TraceStoreLayer* storeLayer);
 
 #ifdef __cplusplus 
 }

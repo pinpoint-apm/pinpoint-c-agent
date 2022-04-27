@@ -39,7 +39,6 @@ using ConnectionPool::TransConnection;
 using Cache::SafeSharedState;
 using Helper::get_current_msec_stamp;
 static NodePool::PoolManager g_node_pool;
-const static char* CLUSE="clues";
 static NodeID do_end_trace(NodeID&);
 static NodeID do_end_trace(TraceNode&);
 
@@ -102,12 +101,13 @@ static void flush_to_agent(std::string& span)
     TransConnection trans = Helper::getConnection();
 
     if(span.length() < MAX_SPAN_SIZE){
-        trans->sendMsgToAgent(span);
+        trans->copy_into_send_buffer(span);
     }
     else{
         pp_trace("drop current span as it's too heavy! size:%lu",span.length());
     }
     trans->trans_layer_pool(_span_timeout);
+    // if network not ready, span will send in next time.
     Helper::freeConnection(trans);
 }
 
@@ -135,8 +135,7 @@ NodeID do_end_trace(TraceNode& node)
         /// this span is done, reset the trace node tree
         free_nodes_tree(&node);
         return 0;
-    }else
-    {
+    }else{
         assert(node.p_root_node);
         uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
                                 (Helper::get_current_msec_stamp()):
@@ -242,21 +241,21 @@ void reset_unique_id(void)
     return SafeSharedState::instance().resetUniqueId();
 }
 
-bool do_mark_current_trace_status(NodeID& _id,E_AGENT_STATUS status) 
+uint64_t inline do_mark_current_trace_status(NodeID& _id,E_AGENT_STATUS status) 
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
     assert(node.p_root_node);
     TraceNode* root = node.p_root_node;
     pp_trace("change current#%d status, before:%lld,now:%d",root->getId(),root->limit,status);
-    root->limit = status;
-    return true;
+    // root->limit = status;
+    return __sync_lock_test_and_set(&root->limit,status);
 }
 
-int mark_current_trace_status(NodeID _id,int status)
+uint64_t mark_current_trace_status(NodeID _id,int status)
 {
     try
     {
-        return do_mark_current_trace_status(_id,(E_AGENT_STATUS)status)?(0):(1);
+        return do_mark_current_trace_status(_id,(E_AGENT_STATUS)status);
     }
     catch(const std::out_of_range& ex)
     {
@@ -269,7 +268,7 @@ int mark_current_trace_status(NodeID _id,int status)
     {
         pp_trace(" %s#%d failed with unkonw reason",__func__,_id);
     }
-    return 1;
+    return 0;
 }
 
 
@@ -300,11 +299,13 @@ static void do_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LO
 static void do_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
 {
     TraceNode& node = parse_flag(_id,flag);
+
     std::string cvalue ="";
     cvalue+=key;
     cvalue+=':';
     cvalue+=value;
-    node[CLUSE].append(cvalue);
+    node.appendClues(cvalue);
+
     pp_trace("#%d add clues:%s:%s",_id,key,value);
 }
 
