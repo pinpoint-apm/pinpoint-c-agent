@@ -27,14 +27,14 @@ NodeID start_trace(NodeID _id)
 {
     if(_id == 0){
         TraceNode&  node =  g_pool.getNode();
-        node["name"] = std::to_string(node.getId());
+        node.setNodeValue("name", std::to_string(node.getId()).c_str());
         return node.getId();
     } 
 
     TraceNode&  parent = g_pool.getNodeById(_id);
     TraceNode&  child  = g_pool.getNode();
     parent.addChild(child);
-    child["name"] = std::to_string(child.getId());
+    child.setNodeValue("name", std::to_string(child.getId()).c_str());
     return child.getId();
 }
 
