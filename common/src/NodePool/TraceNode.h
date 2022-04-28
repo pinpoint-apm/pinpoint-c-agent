@@ -181,13 +181,42 @@ public:
         return this->id != _node.id;
     }
 
-    Json::Value& operator[](const std::string key)
+    // Json::Value& operator[](const std::string key)
+    // {
+    //     return this->_value[key];
+    // }
+
+public:
+    void setNodeValue(const char* key,const char* v)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
-        return this->_value[key];
+        this->_value[key] = v;
     }
 
-    void appendClues(const std::string& value);
+    void setNodeValue(const char* key,int v)
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+        this->_value[key] = v;
+    }
+
+    void setNodeValue(const char* key,uint64_t v)
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+        this->_value[key] = v;
+    }
+
+    void setNodeValue(const char* key,Json::Value& v)
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+        this->_value[key] = v;
+    }
+
+    void appendNodeValue(const char* key,const char* v)
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+        this->_value[key].append(v);
+    }
+
 
 private:
 

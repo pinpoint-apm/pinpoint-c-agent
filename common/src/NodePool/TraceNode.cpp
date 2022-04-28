@@ -24,7 +24,6 @@
 
 namespace NodePool{
 
-const static char* CLUSE="clues";
 
 TraceNode::TraceNode(NodeID id)
 {
@@ -37,12 +36,6 @@ TraceNode::TraceNode(NodeID id)
 TraceNode::~TraceNode()
 {
 
-}
-
-void TraceNode::appendClues(const std::string& value)
-{
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    this->_value[CLUSE].append(value);
 }
 
 void TraceNode::clearAttach()

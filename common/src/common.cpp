@@ -41,7 +41,7 @@ using Helper::get_current_msec_stamp;
 static NodePool::PoolManager g_node_pool;
 static NodeID do_end_trace(NodeID&);
 static NodeID do_end_trace(TraceNode&);
-
+const static char* CLUSE="clues";
 static thread_local NodeID __tls_id = 0;
 // send current span with timeout
 static thread_local int _span_timeout = global_agent_info.timeout_ms;
@@ -62,8 +62,9 @@ static NodeID do_start_trace(NodeID& _id)
     if(_id == 0)  // it's a root node
     {
         TraceNode&  node =  g_node_pool.getNode();
-        node["S"] = time_in_ms;
-        node["FT"] = global_agent_info.agent_type;
+
+        node.setNodeValue("S", time_in_ms);
+        node.setNodeValue("FT", global_agent_info.agent_type);
         node.start_time = time_in_ms;
         return node.getId();
     }else 
@@ -72,7 +73,9 @@ static NodeID do_start_trace(NodeID& _id)
         TraceNode&  child  = g_node_pool.getNode();
         parent.addChild(child);
         assert(child.p_root_node);
-        child["S"] = time_in_ms - child.p_root_node->start_time;
+
+        child.setNodeValue("S", time_in_ms - child.p_root_node->start_time);
+
         child.start_time = time_in_ms;
         return child.getId();
     }
@@ -121,7 +124,7 @@ NodeID do_end_trace(TraceNode& node)
             uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
                                 (Helper::get_current_msec_stamp()):
                                 (node.p_root_node->fetal_error_time);
-            node["E"] = end_time - node.start_time;
+            node.setNodeValue("E", end_time - node.start_time);
             const Json::Value& trace = Helper::merge_node_tree(node);
             std::string spanStr = Helper::node_tree_to_string(trace);
             pp_trace("this span:(%s)",spanStr.c_str());
@@ -140,7 +143,7 @@ NodeID do_end_trace(TraceNode& node)
         uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
                                 (Helper::get_current_msec_stamp()):
                                 (node.p_root_node->fetal_error_time);
-        node["E"] = end_time - node.start_time;
+        node.setNodeValue("E", end_time - node.start_time);
         return node.p_parent_node->getId();
     }
 }
@@ -292,7 +295,7 @@ static inline TraceNode& parse_flag(NodeID _id,E_NODE_LOC flag)
 static void do_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
 {
     TraceNode& node = parse_flag(_id,flag);
-    node[key]=value;
+    node.setNodeValue(key,value);
     pp_trace("#%d add clue key:%s value:%s",_id,key,value);
 }
 
@@ -304,8 +307,7 @@ static void do_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_L
     cvalue+=key;
     cvalue+=':';
     cvalue+=value;
-    node.appendClues(cvalue);
-
+    node.appendNodeValue(CLUSE,cvalue.c_str());
     pp_trace("#%d add clues:%s:%s",_id,key,value);
 }
 
@@ -466,7 +468,7 @@ void do_catch_error(NodeID _id,const char* msg,const char* error_filename,uint32
     eMsg["msg"] = msg;
     eMsg["file"] = error_filename;
     eMsg["line"] = error_lineno;
-    (*root)["ERR"] = eMsg;
+    root->setNodeValue("ERR", eMsg);
 }
 
 
