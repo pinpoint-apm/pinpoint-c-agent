@@ -260,3 +260,21 @@ TEST(node,multipleThread)
     pinpoint_end_trace(func_Id);
     pinpoint_end_trace(func_Id);
 }
+
+TEST(node, wakeTrace){
+    NodeID root = pinpoint_start_trace(0);
+    NodeID child1 = pinpoint_start_trace(root);
+    
+    pinpoint_end_trace(child1);
+
+    pinpoint_wake_trace(child1);
+    pinpoint_wake_trace(root);
+    pinpoint_wake_trace(159);
+    pinpoint_wake_trace(1027);
+    // do something
+    sleep(1);
+    pinpoint_end_trace(child1);
+
+    pinpoint_end_trace(root);
+
+}

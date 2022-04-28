@@ -144,7 +144,7 @@ TEST(common,error_checking)
     EXPECT_EQ(id,0);
     id = pinpoint_start_trace(128);
     pinpoint_end_trace(128);
-    EXPECT_EQ(id,0);
+    EXPECT_EQ(id,-1);
 }
 
 
@@ -200,6 +200,9 @@ TEST(common,force_end_trace)
     EXPECT_EQ(id,0);
 }
 
+TEST(common,version){
+    EXPECT_STREQ(pinpoint_agent_version(),AGENT_VERSION);
+}
 
 // int mymatch(char *buf)
 // {

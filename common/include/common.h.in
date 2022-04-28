@@ -106,17 +106,16 @@ typedef enum {
     E_CURRENT_LOC=0x0,
     E_ROOT_LOC=0x1
 }E_NODE_LOC;
+
+#define PINPOINT_C_AGENT_API_VERSION "@PROJECT_VERSION@"
+
 /**
- *pinpoint_start_trace
- *pinpoint_end_trace
- *pinpoint_add_clue
- *pinpoint_add_clues
- *pinpoint_unique_id
- *pinpoint_tracelimit $timestamp
- *pinpoint_drop_trace
- *pinpoint_app_name
- *pinpoint_app_id
- *pinpoint_start_time
+ * @brief change logs
+ * ## v0.4.8
+ * - add 
+ * 
+ * 
+ * 
  */
 #ifdef __cplusplus 
 extern "C"{
@@ -136,16 +135,27 @@ void pinpoint_update_per_thread_id(NodeID id);
 
 /**
  * [tls] start a trace (span) from parentId. if current span is empty, create a span or else create a spanevent
+ * 
  * @param parentId 
- * @return new traceId related to parentId (caller [parentId] -> callee [NodeID] )
+ * @return -1: failed new traceId related to parentId (caller [parentId] -> callee [NodeID] )
  */
 NodeID pinpoint_start_trace(NodeID parentId);
+
+
 /**[tls]
  * the same as pinpoint_start_trace. BUT, end a span or a spanevent
  * Note: pinpoint_end_trace is thread safe, but you should avoid to call it in the multi-thread, it may send duplicate trace span
  * @return NodeID is parent node id
  */
 NodeID pinpoint_end_trace(NodeID);
+
+/**
+ * @brief wake a finished trace: this trace get a new startime, so it could be profile again. the end_trace will update the ["e"] by cumulative time (NOTE: root trace not supported)
+ * 
+ * @param traceId 
+ * @return int 0 if success, -1 if failed
+ */
+int pinpoint_wake_trace(NodeID traceId);
 
 /**
  *  check id->traceNode is root
@@ -246,7 +256,7 @@ void pp_trace(const char *format,...);
  * NOTE: only for testcase
  */
 void reset_unique_id(void);
-
+const char* pinpoint_agent_version();
 #ifdef __cplusplus 
 }
 #endif

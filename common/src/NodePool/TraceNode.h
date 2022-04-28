@@ -110,6 +110,7 @@ public:
     uint64_t start_time;
     uint64_t fetal_error_time;
     uint64_t limit;
+    uint64_t  cumulative_time;
 
 public:
     void addChild(TraceNode& child);
@@ -236,6 +237,7 @@ private:
         this->fetal_error_time = 0;
         this->start_time = 0;
         this->limit  = E_TRACE_PASS;
+        this->cumulative_time = 0;
     }
 
 private:
