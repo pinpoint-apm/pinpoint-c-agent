@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
-project(common)
+project(common VERSION 0.4.8 DESCRIPTION  "pinpoint common library")
+
 set(CMAKE_CXX_STANDARD 11)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -16,6 +17,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG  -O2")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+add_definitions( -DAGENT_VERSION="${PROJECT_VERSION}")
 
 option (WITH_TEST_CASE "Enable Gtest" OFF)
 option (WITH_CODECOVERAGE "Enable CodeCoverage" OFF)
@@ -30,6 +32,8 @@ if (WITH_CODECOVERAGE AND LINUX_)
     set(CMAKE_CXX_FLAGS   "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/common.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/include/common.h" @ONLY)
+    
 include_directories("include"
                     "src"
                     "jsoncpp/include")
@@ -45,11 +49,17 @@ if(UNIX AND NOT APPLE)
     install(DIRECTORY include/ DESTINATION include/pinpoint_common
             FILES_MATCHING PATTERN "*.h")
 
+    set_target_properties(pinpoint_common_shared pinpoint_common PROPERTIES 
+            VERSION ${PROJECT_VERSION}
+            SOVERSION 1
+            PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/common.h")      
+
     install(TARGETS pinpoint_common_shared pinpoint_common ${INSTALL_EXPORT}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pinpoint_common
     )
 endif()
 
@@ -59,10 +69,7 @@ if(AGENT_WITH_PKGCONFIG_SUPPORT)
     join_paths(libdir_for_pc_file "\${exec_prefix}" "${CMAKE_INSTALL_LIBDIR}")
     join_paths(includedir_for_pc_file "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
 
-    configure_file(
-        "pkg-config/pinpoint_common.pc.in"
-        "pkg-config/pinpoint_common.pc"
-        @ONLY)
+    configure_file("pkg-config/pinpoint_common.pc.in" "pkg-config/pinpoint_common.pc" @ONLY)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/pinpoint_common.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
