@@ -124,7 +124,8 @@ NodeID do_end_trace(TraceNode& node)
             uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
                                 (Helper::get_current_msec_stamp()):
                                 (node.p_root_node->fetal_error_time);
-            node.setNodeValue("E", end_time - node.start_time);
+            node.cumulative_time += (end_time - node.start_time);
+            node.setNodeValue("E", node.cumulative_time);
             const Json::Value& trace = Helper::merge_node_tree(node);
             std::string spanStr = Helper::node_tree_to_string(trace);
             pp_trace("this span:(%s)",spanStr.c_str());
@@ -143,7 +144,8 @@ NodeID do_end_trace(TraceNode& node)
         uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
                                 (Helper::get_current_msec_stamp()):
                                 (node.p_root_node->fetal_error_time);
-        node.setNodeValue("E", end_time - node.start_time);
+        node.cumulative_time += (end_time - node.start_time);
+        node.setNodeValue("E", node.cumulative_time);
         return node.p_parent_node->getId();
     }
 }
@@ -174,7 +176,46 @@ NodeID pinpoint_start_trace(NodeID parentId)
     {
         pp_trace(" start_trace#%d failed with unkonw reason",parentId);
     }
+    return -1;
+}
+
+static NodeID do_wake_trace(NodeID& _id)
+{
+    // routine 
+    // 1. check id alive
+    // 2. check if it's a root node
+    // 3. update start time
+
+    TraceNode&  trace_node = g_node_pool.getNodeById(_id);
+    if(trace_node.isRoot())
+    {
+        pp_trace("#%d wake_trace failed, it's a root node",_id);
+        return -1;
+    }
+
+    trace_node.start_time = Helper::get_current_msec_stamp();
     return 0;
+}
+
+int pinpoint_wake_trace(NodeID traceId)
+{
+    try
+    {
+        pp_trace("wake_trace #%d ",traceId);
+        return do_wake_trace(traceId);
+    }
+    catch(const std::out_of_range& ex)
+    {
+        pp_trace(" wake_trace#%d failed with %s",traceId,ex.what());
+    }
+    catch(const std::runtime_error& ex)
+    {
+        pp_trace(" wake_trace#%d failed with %s",traceId,ex.what());
+    }catch(...)
+    {
+        pp_trace(" wake_trace#%d failed with unkonw reason",traceId);
+    }
+    return 0; 
 }
 
 int pinpoint_force_end_trace(NodeID id,int32_t timeout)
@@ -489,4 +530,15 @@ void catch_error(NodeID _id,const char* msg,const char* error_filename,uint32_t 
     {
         pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
     }
+}
+
+
+const char* pinpoint_agent_version()
+{
+    #ifdef AGENT_VERSION
+    static const char* _version_=AGENT_VERSION;
+    #else
+    static const char* _version_="x.x.x";
+    #endif
+    return _version_;
 }
