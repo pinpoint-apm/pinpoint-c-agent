@@ -1,4 +1,4 @@
-name: publish-test
+name: publish-pypitest
 
 on: [workflow_dispatch]
 

@@ -1,4 +1,4 @@
-name: publish
+name: publish-build-env
 
 on: 
   release:
