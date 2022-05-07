@@ -131,6 +131,8 @@ TEST(common,context_check)
     EXPECT_STREQ(pinpoint_get_context_key(id,"adfadf"),"fadfaffadf");
 
     pinpoint_set_context_long(id,"1024",1024);
+    pinpoint_set_context_long(0,"1024",1024);
+    pinpoint_set_context_long(1205,"1024",1024);
     long value ;
     EXPECT_EQ(pinpoint_get_context_long(id,"1024",&value),0);
     EXPECT_EQ(value,1024);
@@ -202,6 +204,15 @@ TEST(common,force_end_trace)
 
 TEST(common,version){
     EXPECT_STREQ(pinpoint_agent_version(),AGENT_VERSION);
+}
+
+//./bin/unittest --gtest_filter=common.id_1
+TEST(common,id_1){
+    NodeID id = pinpoint_start_trace(0);
+    for (int i = 0; i < 1280; i++) {
+        id =pinpoint_start_trace(id);
+    }
+    pinpoint_set_context_long(id,"1024",1024);
 }
 
 // int mymatch(char *buf)

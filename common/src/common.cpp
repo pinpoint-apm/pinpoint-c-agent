@@ -23,6 +23,7 @@
 #include <map>
 #include <memory>
 #include <thread>
+#include <stdexcept> 
 
 #include "common.h"
 
@@ -424,7 +425,7 @@ void pinpoint_set_context_key(NodeID _id,const char* key,const char* value)
     }
 }
 
-static void do_set_long_key(NodeID _id,const char* key,long l) noexcept
+static void do_set_long_key(NodeID _id,const char* key,long l) 
 {
     TraceNode& node = g_node_pool.getNodeById(_id);
     assert(node.p_root_node);
@@ -444,7 +445,7 @@ void pinpoint_set_context_long(NodeID _id,const char* key,long l)
     catch(const std::runtime_error& ex)
     {
         pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
-    }catch(const std::exception&ex)
+    }catch(const std::exception& ex)
     {
         pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
     }
@@ -473,7 +474,7 @@ int pinpoint_get_context_long(NodeID _id,const char* key,long* l)
     catch(const std::runtime_error& ex)
     {
         pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
-    }catch(const std::exception&ex)
+    }catch(const std::exception& ex)
     {
         pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
     }

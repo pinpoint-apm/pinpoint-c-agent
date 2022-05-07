@@ -71,7 +71,7 @@ public:
 private:
     inline bool nodeIsAlive(NodeID id)
     {
-        if(id>0 && id <this->maxId){
+        if(id>=0 && id <this->maxId){
             return this->_aliveNodeSet[id];
         }
         return false;
