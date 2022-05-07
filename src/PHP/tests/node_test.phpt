@@ -25,7 +25,6 @@ pinpoint_get_context('b',$unexist_node);
 pinpoint_end_trace($unexist_node);
 
 --EXPECTF--
-[pinpoint] [%d] [%d]#1024 pinpoint_start start
 [pinpoint] [%d] [%d] start_trace#1024 failed with id is not alive
 [pinpoint] [%d] [%d] pinpoint_add_clue#1024 failed. Reason: id is not alive,parameters:adf:fdfd
 [pinpoint] [%d] [%d] pinpoint_add_clue#1024 failed. Reason: id is not alive,parameters:adf:fdfd

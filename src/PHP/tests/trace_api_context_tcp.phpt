@@ -43,7 +43,7 @@ pinpoint_end_trace($id);
 
 ?>
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
 string(1) "a"
 string(1) "b"
 string(1) "c"
@@ -54,8 +54,8 @@ bool(false)
 [pinpoint] [%d] [%d]_do_write_data@215 send data error:(Connection refused) fd:(%d)
 [pinpoint] [%d] [%d]reset peer:%d
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]#0 pinpoint_start start
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 string(1) "c"
 string(1) "b"
 string(1) "a"

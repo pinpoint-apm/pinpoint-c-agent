@@ -34,15 +34,15 @@ if(pinpoint_tracelimit())
 pinpoint_end_trace($id);
 
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 string(1) "c"
 string(1) "b"
 string(1) "a"
 [pinpoint] [%d] [%d] pinpoint_get_context_key#127 failed with map::at, parameters:not exist
 bool(false)
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]This span dropped. max_trace_limit:0 current_tick:0 onLine:1
+[pinpoint] [%d] [%d]This span dropped. max_trace_limit:0 current_tick:2 onLine:1
 [pinpoint] [%d] [%d]change current#128 status, before:2,now:4
 [pinpoint] [%d] [%d]current#128 span dropped,due to TRACE_BLOCK
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!

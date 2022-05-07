@@ -50,8 +50,8 @@ try{
 
 pinpoint_start_trace();
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 [pinpoint] [%d] [%d]#127 add clue key:name value:Foo
 [pinpoint] [%d] [%d]apm_error_cb called
 
@@ -61,7 +61,7 @@ Stack trace:
 #1 {main}
   thrown in %s on line 27
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({"E":%d,"ERR":{"file":"%s","line":27,"msg":"Uncaught exception 'Exception' with message 'I am testting' in %s:27\nStack trace:\n#0 %s(34): Test()\n#1 {main}\n  thrown"},"FT":1500,"S":%d,"calls":[{"E":%d,"S":%d,"name":"Foo"}]})
+[pinpoint] [%d] [%d]this span:({"E":0,"ERR":{"file":"%s","line":27,"msg":"Uncaught exception 'Exception' with message 'I am testting' in %s:27\nStack trace:\n#0 %s(34): Test()\n#1 {main}\n  thrown"},"FT":1500,"S":%d,"calls":[{"E":0,"S":0,"name":"Foo"}]})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!

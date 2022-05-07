@@ -53,73 +53,73 @@ echo pinpoint_end_trace()."\n";
 
 ?>
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
 128
 [pinpoint] [%d] [%d]#128 add clue key:name value:ouput_234
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 127
 [pinpoint] [%d] [%d]#127 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#127 add clues:1:234,3432
 [pinpoint] [%d] [%d]#127 add clues:2:234
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #126
 126
 [pinpoint] [%d] [%d]#126 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#126 add clues:1:234,3432
 [pinpoint] [%d] [%d]#126 add clues:2:234
 [pinpoint] [%d] [%d]#126 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #125
 125
 [pinpoint] [%d] [%d]#125 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#125 add clues:1:234,3432
 [pinpoint] [%d] [%d]#125 add clues:2:234
 [pinpoint] [%d] [%d]#125 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #124
 124
 [pinpoint] [%d] [%d]#124 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#124 add clues:1:234,3432
 [pinpoint] [%d] [%d]#124 add clues:2:234
 [pinpoint] [%d] [%d]#124 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #123
 123
 [pinpoint] [%d] [%d]#123 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#123 add clues:1:234,3432
 [pinpoint] [%d] [%d]#123 add clues:2:234
 [pinpoint] [%d] [%d]#123 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #122
 122
 [pinpoint] [%d] [%d]#122 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#122 add clues:1:234,3432
 [pinpoint] [%d] [%d]#122 add clues:2:234
 [pinpoint] [%d] [%d]#122 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #121
 121
 [pinpoint] [%d] [%d]#121 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#121 add clues:1:234,3432
 [pinpoint] [%d] [%d]#121 add clues:2:234
 [pinpoint] [%d] [%d]#121 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #120
 120
 [pinpoint] [%d] [%d]#120 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#120 add clues:1:234,3432
 [pinpoint] [%d] [%d]#120 add clues:2:234
 [pinpoint] [%d] [%d]#120 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #119
 119
 [pinpoint] [%d] [%d]#119 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#119 add clues:1:234,3432
 [pinpoint] [%d] [%d]#119 add clues:2:234
 [pinpoint] [%d] [%d]#119 pinpoint_end_trace Done!
 128
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #118
 118
 [pinpoint] [%d] [%d]#118 add clue key:name value:Foo
 [pinpoint] [%d] [%d]#118 add clues:1:234,3432
