@@ -73,8 +73,9 @@ TraceNode& PoolManager::getNodeById(NodeID id)
         throw std::out_of_range("id should not be 0");
     }
 
-    id--;
     std::lock_guard<std::mutex> _safe(this->_lock);
+    
+    id--;
 
     if(this->nodeIsAlive(id) == false){
         throw std::out_of_range("id is not alive");
