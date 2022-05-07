@@ -34,8 +34,8 @@ if(pinpoint_tracelimit())
 pinpoint_end_trace($id);
 
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 string(1) "c"
 string(1) "b"
 string(1) "a"

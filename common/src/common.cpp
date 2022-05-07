@@ -163,8 +163,9 @@ NodeID pinpoint_start_trace(NodeID parentId)
 {
     try
     {
-        pp_trace("#%d pinpoint_start start",parentId);
-        return do_start_trace(parentId);
+        NodeID childId= do_start_trace(parentId);
+        pp_trace("#%d pinpoint_start child #%d",parentId,childId);
+        return childId;
     }
     catch(const std::out_of_range& ex)
     {

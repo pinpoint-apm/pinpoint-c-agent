@@ -43,7 +43,7 @@ pinpoint_end_trace($id);
 
 ?>
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
 string(1) "a"
 string(1) "b"
 string(1) "c"
@@ -53,8 +53,8 @@ bool(false)
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]#0 pinpoint_start start
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 string(1) "c"
 string(1) "b"
 string(1) "a"

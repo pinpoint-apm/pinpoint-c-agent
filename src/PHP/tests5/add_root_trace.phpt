@@ -21,13 +21,13 @@ $id = pinpoint_end_trace($id);
 $id = pinpoint_end_trace($id);
 $id = pinpoint_end_trace($id);
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start start
+[pinpoint] [%d] [%d]#0 pinpoint_start child #128
 [pinpoint] [%d] [%d]#128 add clue key:name value:Foo
-[pinpoint] [%d] [%d]#128 pinpoint_start start
+[pinpoint] [%d] [%d]#128 pinpoint_start child #127
 [pinpoint] [%d] [%d]#127 add clues:global:global_value
 [pinpoint] [%d] [%d]#127 add clue key:global value:global_value
 [pinpoint] [%d] [%d]#127 add clues:name:Foo1
-[pinpoint] [%d] [%d]#127 pinpoint_start start
+[pinpoint] [%d] [%d]#127 pinpoint_start child #126
 [pinpoint] [%d] [%d]#126 add clue key:name value:Foo2
 [pinpoint] [%d] [%d]#126 pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
