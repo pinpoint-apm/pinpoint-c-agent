@@ -61,17 +61,18 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
 ## Contact Us
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
-
-* Chinese Community:
-    <details>
-    <summary>chat group </summary>
-
-    QQ Group1: 897594820 | QQ Group2: 812507584 | DING Group
-    :---:| :---: | :---:
-    ![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png) | ![DING Group](images/NaverPinpoint交流群-DING.jpg)
-
-    </details>
 * [Gitter char room](https://gitter.im/naver/pinpoint-c-agent)
+* Chinese Community
+  
+<details>
+  <summary> 👆 click me
+</summary>
+
+QQ Group1: 897594820 | QQ Group2: 812507584 | QQ Group3: 882020485| DING Group : 21981598
+:----------------: |:----------------: | :-----------: | :-----------: 
+![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png)| ![QQ Group3](images/NAVERPinpoint3.png)| ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+
+</details>
 
 ## Contributing
 We are looking forward to your contributions via pull requests.
