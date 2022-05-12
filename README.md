@@ -62,15 +62,14 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
 * [Gitter char room](https://gitter.im/naver/pinpoint-c-agent)
-* Chinese Community
-  
-<details>
-  <summary> 👆 click me
-</summary>
+* Chinese Community (QQ Group: 897594820)
+    <details>
+    <summary> show more 
+    </summary>
 
-QQ Group1: 897594820 | QQ Group2: 812507584 | QQ Group3: 882020485| DING Group : 21981598
-:----------------: |:----------------: | :-----------: | :-----------: 
-![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png)| ![QQ Group3](images/NAVERPinpoint3.png)| ![DING Group](images/NaverPinpoint交流群-DING.jpg)
+    QQ Group1: 897594820 | QQ Group2: 812507584 | QQ Group3: 882020485| DING Group : 21981598
+    :----------------: |:----------------: | :-----------: | :-----------: 
+    ![QQ Group1](images/NAVERPinpoint.png) | ![QQ Group2](images/NAVERPinpoint2.png)| ![QQ Group3](images/NAVERPinpoint3.png)| ![DING Group](images/NaverPinpoint交流群-DING.jpg)
 
 </details>
 
