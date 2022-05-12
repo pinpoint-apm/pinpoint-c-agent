@@ -62,7 +62,7 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
 * [Gitter char room](https://gitter.im/naver/pinpoint-c-agent)
-* Chinese Community (QQ Group: 897594820)
+* Chinese Community (QQ Group: 882020485)
     <details>
     <summary> show more 
     </summary>
