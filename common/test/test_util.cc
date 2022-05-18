@@ -25,6 +25,7 @@
 
 #include "../src/Util/Helper.h"
 #include "Cache/SafeSharedState.h"
+#include<stdarg.h>
 using Helper::STT;
 using Cache::SafeSharedState;
 using std::chrono::seconds;
@@ -55,7 +56,7 @@ TEST(util,time_in_msec)
     EXPECT_GE(Helper::get_current_msec_stamp(),time+1000);
 
 }
-
+// restrict typeva_start
 TEST(util,test_node_to_string)
 {
     Json::Value _value;
@@ -67,3 +68,49 @@ TEST(util,test_node_to_string)
     std::string str =  Helper::node_tree_to_string(_value);
     EXPECT_STREQ(str.c_str(),"{\"a\":1,\"b\":1,\"d\":1}");
 }
+
+int sum(int n_args, ...)
+{
+    va_list ap;
+    va_start(ap, n_args);
+    int var = n_args;
+
+    int total= n_args;
+    do{
+        var = va_arg(ap, int);
+        total += var;
+    }while(var != 0);
+
+    va_end(ap);
+
+    return total;
+}
+//./bin/unittest --gtest_filter=util.variadic_func
+TEST(util,variadic_func_int)
+{
+    EXPECT_EQ(sum(1,2,3,4,5,6,0),21);
+    EXPECT_EQ(sum(1,2,3,5,0),11);
+}
+
+int opt(const char* start, ...)
+{
+    va_list ap;
+    va_start(ap, start);
+    const char* var = start;
+
+    int total = 0;
+    while( var != nullptr){
+        printf("%s\n",var);
+        total++;
+        var = va_arg(ap, const char*);
+    }
+
+    va_end(ap);
+
+    return total;
+}
+//./bin/unittest --gtest_filter=util.variadic_func_str
+TEST(util,variadic_func_str){
+    EXPECT_EQ(opt("a","b","c","d",nullptr),4);
+    EXPECT_EQ(opt("a","b","c",nullptr),3);
+}   

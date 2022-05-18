@@ -23,8 +23,8 @@
 #include <map>
 #include <memory>
 #include <thread>
-#include <stdexcept> 
-
+#include <stdexcept>
+#include <stdarg.h>
 #include "common.h"
 
 #include "Cache/SafeSharedState.h"
@@ -33,17 +33,15 @@
 #include "ConnectionPool/SpanConnectionPool.h"
 
 namespace Json = AliasJson;
-using NodePool::TraceNode;
-using NodePool::PoolManager;
-using NodePool::PContextType;
-using ConnectionPool::TransConnection;
 using Cache::SafeSharedState;
+using ConnectionPool::TransConnection;
 using Helper::get_current_msec_stamp;
-static NodePool::PoolManager g_node_pool;
-static NodeID do_end_trace(NodeID&);
-static NodeID do_end_trace(TraceNode&);
-const static char* CLUSE="clues";
-static thread_local NodeID __tls_id = 0;
+using NodePool::PContextType;
+using NodePool::PoolManager;
+using NodePool::TraceNode;
+
+const static char *CLUSE = "clues";
+static thread_local NodeID __tls_id = E_ROOT_NODE;
 // send current span with timeout
 static thread_local int _span_timeout = global_agent_info.timeout_ms;
 
@@ -57,184 +55,204 @@ void pinpoint_update_per_thread_id(NodeID id)
     __tls_id = id;
 }
 
-static NodeID do_start_trace(NodeID& _id)
+static NodeID do_start_trace(NodeID id)
 {
-    uint64_t time_in_ms = Helper::get_current_msec_stamp();
-    if(_id == 0)  // it's a root node
+    if (id <= E_INVALID_NODE)
     {
-        TraceNode&  node =  g_node_pool.getNode();
-
-        node.setNodeValue("S", time_in_ms);
-        node.setNodeValue("FT", global_agent_info.agent_type);
-        node.start_time = time_in_ms;
-        return node.getId();
-    }else 
+        throw std::runtime_error("invalid node id");
+    }
+    else if (id == E_ROOT_NODE)
     {
-        TraceNode&  parent = g_node_pool.getNodeById(_id);
-        TraceNode&  child  = g_node_pool.getNode();
-        parent.addChild(child);
-        assert(child.p_root_node);
+        TraceNode &node = PoolManager::getInstance().getNode();
+        node.startTimer();
+        return node.ID;
+    }
+    else
+    {
+        TraceNode &parent = PoolManager::getInstance().getNodeById(id);
+        TraceNode &node = PoolManager::getInstance().getNode();
+        node.startTimer();
+        node.setParent(parent);
 
-        child.setNodeValue("S", time_in_ms - child.p_root_node->start_time);
+        // pass opt
+        // if (opt != nullptr)
+        // {
+        //     node.setOpt(opt, args);
+        // }
 
-        child.start_time = time_in_ms;
-        return child.getId();
+        return node.ID;
     }
 }
 
-static void free_nodes_tree(TraceNode* root)
+static void free_nodes_tree(NodeID id)
 {
-    if(root == nullptr) return ;
-
-    TraceNode * p_child = root->p_child_head;
-    while (p_child) // free all children
+    if (id == E_INVALID_NODE || id == E_ROOT_NODE)
     {
-        // keep the next child
-        TraceNode * p_bro = p_child->p_brother_node;
-        // free current child tree
-        free_nodes_tree(p_child);
-        // go on
-        p_child = p_bro;
+        return;
     }
-    // free self
-    g_node_pool.freeNode(*root);
+
+    TraceNode &node = PoolManager::getInstance().getNodeById(id);
+
+    NodeID child_id = node.mChildId;
+    while (child_id != E_INVALID_NODE)
+    {
+        TraceNode &child = PoolManager::getInstance().getNodeById(child_id);
+        child_id = child.mNextId;
+        free_nodes_tree(child.ID);
+    }
+
+    PoolManager::getInstance().freeNode(id);
 }
 
-static void flush_to_agent(std::string& span)
+static void flush_to_agent(std::string &span)
 {
     TransConnection trans = Helper::getConnection();
 
-    if(span.length() < MAX_SPAN_SIZE){
+    if (span.length() < MAX_SPAN_SIZE)
+    {
         trans->copy_into_send_buffer(span);
     }
-    else{
-        pp_trace("drop current span as it's too heavy! size:%lu",span.length());
+    else
+    {
+        pp_trace("drop current span as it's too heavy! size:%lu", span.length());
     }
     trans->trans_layer_pool(_span_timeout);
     // if network not ready, span will send in next time.
     Helper::freeConnection(trans);
 }
 
-NodeID do_end_trace(TraceNode& node)
+NodeID do_end_trace(NodeID Id)
 {
-    if(node.isRoot())
+    TraceNode &node = PoolManager::getInstance().getNodeById(Id);
+    if (node.isRoot())
     {
-        assert(node.p_root_node);
+        // assert(node.mRootId);
         /// this trace is end. Try to send current trace
-        if( node.limit == E_TRACE_PASS ){
-            uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
-                                (Helper::get_current_msec_stamp()):
-                                (node.p_root_node->fetal_error_time);
-            node.cumulative_time += (end_time - node.start_time);
-            node.setNodeValue("E", node.cumulative_time);
-            const Json::Value& trace = Helper::merge_node_tree(node);
-            std::string spanStr = Helper::node_tree_to_string(trace);
-            pp_trace("this span:(%s)",spanStr.c_str());
-            flush_to_agent(spanStr);
+        if (node.limit == E_TRACE_PASS)
+        {
 
-        }else if( node.limit == E_TRACE_BLOCK ){
-            pp_trace("current#%d span dropped,due to TRACE_BLOCK",node.getId());
-        }else{
-            pp_trace("current#%d span dropped,due to limit=%ld",node.getId(),node.limit);
+            node.endTimer();
+            node.convertToSpan();
+            const Json::Value trace = Helper::mergeTraceNodeTree(node);
+            std::string spanStr = Helper::node_tree_to_string(trace);
+            pp_trace("this span:(%s)", spanStr.c_str());
+            flush_to_agent(spanStr);
+        }
+        else if (node.limit == E_TRACE_BLOCK)
+        {
+            pp_trace("current#%d span dropped,due to TRACE_BLOCK", node.getId());
+        }
+        else
+        {
+            pp_trace("current#%d span dropped,due to limit=%ld", node.getId(), node.limit);
         }
         /// this span is done, reset the trace node tree
-        free_nodes_tree(&node);
-        return 0;
-    }else{
-        assert(node.p_root_node);
-        uint64_t end_time = (node.p_root_node->fetal_error_time == 0) ? 
-                                (Helper::get_current_msec_stamp()):
-                                (node.p_root_node->fetal_error_time);
-        node.cumulative_time += (end_time - node.start_time);
-        node.setNodeValue("E", node.cumulative_time);
-        return node.p_parent_node->getId();
+        free_nodes_tree(node.ID);
+        return E_ROOT_NODE;
+    }
+    else
+    {
+        node.endTimer();
+        node.convertToSpanEvent();
+
+        TraceNode &parent = PoolManager::getInstance().getNodeById(node.mParentId);
+        parent.addChild(node);
+
+        return node.mParentId;
     }
 }
 
-
-
-NodeID do_end_trace(NodeID& _id)
-{
-    TraceNode&  node = g_node_pool.getNodeById(_id);
-    return do_end_trace(node);
-}
+// NodeID do_end_trace(NodeID &_id)
+// {
+//     TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+//     return do_end_trace(node);
+// }
 
 NodeID pinpoint_start_trace(NodeID parentId)
 {
     try
     {
-        NodeID childId= do_start_trace(parentId);
-        pp_trace("#%d pinpoint_start child #%d",parentId,childId);
+        NodeID childId = do_start_trace(parentId);
+        pp_trace("#%d pinpoint_start child #%d", parentId, childId);
         return childId;
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" start_trace#%d failed with %s",parentId,ex.what());
+        pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" start_trace#%d failed with %s",parentId,ex.what());
-    }catch(...)
-    {
-        pp_trace(" start_trace#%d failed with unkonw reason",parentId);
+        pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
     }
-    return -1;
+    catch (const std::exception &ex)
+    {
+        pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    }
+    return E_INVALID_NODE;
 }
 
-static NodeID do_wake_trace(NodeID& _id)
+static NodeID do_wake_trace(NodeID &id)
 {
-    // routine 
+    // routine
     // 1. check id alive
     // 2. check if it's a root node
     // 3. update start time
 
-    TraceNode&  trace_node = g_node_pool.getNodeById(_id);
-    if(trace_node.isRoot())
+    TraceNode &trace_node = PoolManager::getInstance().getNodeById(id);
+
+    if (trace_node.isRoot())
     {
-        pp_trace("#%d wake_trace failed, it's a root node",_id);
-        return -1;
+        pp_trace("#%d wake_trace failed, it's a root node", id);
+        return E_INVALID_NODE;
     }
 
-    trace_node.start_time = Helper::get_current_msec_stamp();
-    return 0;
+    trace_node.wake();
+
+    return id;
 }
 
 int pinpoint_wake_trace(NodeID traceId)
 {
     try
     {
-        pp_trace("wake_trace #%d ",traceId);
+        pp_trace("wake_trace #%d ", traceId);
         return do_wake_trace(traceId);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" wake_trace#%d failed with %s",traceId,ex.what());
+        pp_trace(" wake_trace#%d failed with %s", traceId, ex.what());
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" wake_trace#%d failed with %s",traceId,ex.what());
-    }catch(...)
-    {
-        pp_trace(" wake_trace#%d failed with unkonw reason",traceId);
+        pp_trace(" wake_trace#%d failed with %s", traceId, ex.what());
     }
-    return 0; 
+    catch (...)
+    {
+        pp_trace(" wake_trace#%d failed with unkonw reason", traceId);
+    }
+    return 0;
 }
 
-int pinpoint_force_end_trace(NodeID id,int32_t timeout)
+int pinpoint_force_end_trace(NodeID id, int32_t timeout)
 {
     try
-    {   
+    {
         _span_timeout = timeout;
-        while(id != 0){
+        while (id != E_INVALID_NODE)
+        {
             id = pinpoint_end_trace(id);
         }
-        //back to normal
+        // back to normal
         _span_timeout = global_agent_info.timeout_ms;
         return 0;
-    }catch(const std::out_of_range&){
-        pp_trace("#%d not found",id);
-    }catch(const std::exception &ex){
-        pp_trace("#%d end trace failed. %s",id,ex.what());
+    }
+    catch (const std::out_of_range &)
+    {
+        pp_trace("#%d not found", id);
+    }
+    catch (const std::exception &ex)
+    {
+        pp_trace("#%d end trace failed. %s", id, ex.what());
     }
     return -1;
 }
@@ -243,38 +261,67 @@ int pinpoint_trace_is_root(NodeID _id)
 {
     try
     {
-        TraceNode&  node = g_node_pool.getNodeById(_id);
-        return node.isRoot()?(1):(0);
-    }catch(const std::out_of_range&){
-        pp_trace("#%d not found",_id);
-        return -1;
-    }catch(const std::exception &ex){
-        pp_trace("#%d end trace failed. %s",_id,ex.what());
-        return -1;
+        TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+        return node.isRoot() ? (1) : (0);
     }
+    catch (const std::out_of_range &)
+    {
+        pp_trace("#%d not found", _id);
+    }
+    catch (const std::exception &ex)
+    {
+        pp_trace("#%d end trace failed. %s", _id, ex.what());
+    }
+    return -1;
 }
 
-NodeID pinpoint_end_trace(NodeID _id)
+NodeID pinpoint_end_trace(NodeID traceId)
 {
     try
-    {   
-        NodeID ret = do_end_trace(_id);
-        pp_trace("#%d pinpoint_end_trace Done!",_id);
+    {
+        NodeID ret = do_end_trace(traceId);
+        pp_trace("#%d pinpoint_end_trace Done!", traceId);
         return ret;
-    }catch(const std::out_of_range&){
-        pp_trace("#%d not found",_id);
-        return 0;
-    }catch(const std::exception &ex){
-        pp_trace("#%d end trace failed. %s",_id,ex.what());
-        return 0;
     }
+    catch (const std::out_of_range &)
+    {
+        pp_trace("#%d not found", traceId);
+    }
+    catch (const std::exception &ex)
+    {
+        pp_trace("#%d end trace failed. %s", traceId, ex.what());
+    }
+
+    return E_INVALID_NODE;
 }
+
+// static int do_remove_trace(NodeID traceId)
+// {
+//     TraceNode&  node = PoolManager::getInstance().getNodeById(traceId);
+//     node.remove();
+//     return 0;
+// }
+
+// int pinpoint_remove_trace(NodeID traceId)
+// {
+//     try
+//     {
+//         NodeID ret = do_remove_trace(traceId);
+//         pp_trace("#%d pinpoint_remove_trace Done!",traceId);
+//         return ret;
+//     }catch(const std::out_of_range&){
+//         pp_trace("#%d not found",traceId);
+//         return -1;
+//     }catch(const std::exception &ex){
+//         pp_trace("#%d end trace failed. %s",traceId,ex.what());
+//         return -1;
+//     }
+// }
 
 uint64_t pinpoint_start_time(void)
 {
     return (uint64_t)SafeSharedState::instance().getStartTime();
 }
-
 
 int64_t generate_unique_id()
 {
@@ -287,260 +334,320 @@ void reset_unique_id(void)
     return SafeSharedState::instance().resetUniqueId();
 }
 
-uint64_t inline do_mark_current_trace_status(NodeID& _id,E_AGENT_STATUS status) 
+uint64_t inline do_mark_current_trace_status(NodeID &_id, E_AGENT_STATUS status)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    assert(node.p_root_node);
-    TraceNode* root = node.p_root_node;
-    pp_trace("change current#%d status, before:%lld,now:%d",root->getId(),root->limit,status);
-    // root->limit = status;
-    return __sync_lock_test_and_set(&root->limit,status);
+    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    assert(node.mRootId);
+    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    pp_trace("change current#%d status, before:%lld,now:%d", root.getId(), root.limit, status);
+    return __sync_lock_test_and_set(&root.limit, status);
 }
 
-uint64_t mark_current_trace_status(NodeID _id,int status)
+uint64_t mark_current_trace_status(NodeID _id, int status)
 {
     try
     {
-        return do_mark_current_trace_status(_id,(E_AGENT_STATUS)status);
+        return do_mark_current_trace_status(_id, (E_AGENT_STATUS)status);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
-    }catch(...)
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    }
+    catch (...)
     {
-        pp_trace(" %s#%d failed with unkonw reason",__func__,_id);
+        pp_trace(" %s#%d failed with unkonw reason", __func__, _id);
     }
     return 0;
 }
 
-
 int check_tracelimit(int64_t timestamp)
 {
-    return SafeSharedState::instance().checkTraceLimit(timestamp)?(1):(0);
+    return SafeSharedState::instance().checkTraceLimit(timestamp) ? (1) : (0);
 }
 
-static inline TraceNode& parse_flag(NodeID _id,E_NODE_LOC flag)
+static inline TraceNode &parse_flag(NodeID _id, E_NODE_LOC flag)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    if(flag == E_ROOT_LOC){
-        assert(node.p_root_node);
-        return *node.p_root_node;
-    }else{
+    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    if (flag == E_ROOT_LOC)
+    {
+        return PoolManager::getInstance().getNodeById(node.mRootId);
+    }
+    else
+    {
         return node;
     }
 }
 
-
-static void do_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
+static void do_add_clue(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
-    TraceNode& node = parse_flag(_id,flag);
-    node.setNodeValue(key,value);
-    pp_trace("#%d add clue key:%s value:%s",_id,key,value);
+    TraceNode &node = parse_flag(_id, flag);
+    node.setNodeValue(key, value);
+    pp_trace("#%d add clue key:%s value:%s", _id, key, value);
 }
 
-static void do_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
+static void do_add_clues(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
-    TraceNode& node = parse_flag(_id,flag);
+    TraceNode &node = parse_flag(_id, flag);
 
-    std::string cvalue ="";
-    cvalue+=key;
-    cvalue+=':';
-    cvalue+=value;
-    node.appendNodeValue(CLUSE,cvalue.c_str());
-    pp_trace("#%d add clues:%s:%s",_id,key,value);
+    std::string cvalue = "";
+    cvalue += key;
+    cvalue += ':';
+    cvalue += value;
+    node.appendNodeValue(CLUSE, cvalue.c_str());
+    pp_trace("#%d add clues:%s:%s", _id, key, value);
 }
 
-void pinpoint_add_clues(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
+void pinpoint_add_clues(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
     try
     {
-        do_add_clues(_id,key,value,flag);
+        do_add_clues(_id, key, value, flag);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed.Reason %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
+        pp_trace(" %s#%d failed.Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed.Reason %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
-    }catch(...)
+        pp_trace(" %s#%d failed.Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+    }
+    catch (...)
     {
-        pp_trace(" %s#%d failed.Reason: unknown reason,parameters:%s:%s",__func__,_id,key,value);
+        pp_trace(" %s#%d failed.Reason: unknown reason,parameters:%s:%s", __func__, _id, key, value);
     }
 }
 
-void pinpoint_add_clue(NodeID _id,const  char* key,const  char* value,E_NODE_LOC flag)
+void pinpoint_add_clue(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
     try
     {
-        do_add_clue(_id,key,value,flag);
+        do_add_clue(_id, key, value, flag);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed. Reason: %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
+        pp_trace(" %s#%d failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed. Reason: %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
-    }catch(...)
+        pp_trace(" %s#%d failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+    }
+    catch (...)
     {
-        pp_trace(" %s#%d failed. Reason: unknow reason,parameters:%s:%s",__func__,_id,key,value);
+        pp_trace(" %s#%d failed. Reason: unknow reason,parameters:%s:%s", __func__, _id, key, value);
     }
 }
 
-static inline void do_set_context_key(NodeID _id,const char* key,const char* value)
+static inline void do_set_context_key(NodeID _id, const char *key, const char *value)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    assert(node.p_root_node);
-    node.p_root_node->setStrContext(key,value);
+    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+
+    root.setStrContext(key, value);
 }
 
-static const char* do_get_context_key(NodeID _id,const char* key)
+static const char *do_get_context_key(NodeID _id, const char *key)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    assert(node.p_root_node);
-    PContextType& pValue = node.p_root_node->getContextByKey(key);
+    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    PContextType &pValue = root.getContextByKey(key);
     return pValue->asStringValue().c_str();
 }
 
-void pinpoint_set_context_key(NodeID _id,const char* key,const char* value)
+void pinpoint_set_context_key(NodeID _id, const char *key, const char *value)
 {
     try
     {
-        do_set_context_key(_id,key,value);
+        do_set_context_key(_id, key, value);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed with out_of_range. %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
+        pp_trace(" %s#%d failed with out_of_range. %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed with runtime_error. %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
-    }catch(const std::exception&ex)
+        pp_trace(" %s#%d failed with runtime_error. %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+    }
+    catch (const std::exception &ex)
     {
-        pp_trace(" %s#%d failed with %s,parameters:%s:%s",__func__,_id,ex.what(),key,value);
+        pp_trace(" %s#%d failed with %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
     }
 }
 
-static void do_set_long_key(NodeID _id,const char* key,long l) 
+static void do_set_long_key(NodeID id, const char *key, long l)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    assert(node.p_root_node);
-    node.p_root_node->setLongContext(key,l);
+    TraceNode &node = PoolManager::getInstance().getNodeById(id);
+    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    root.setLongContext(key, l);
 }
 
-void pinpoint_set_context_long(NodeID _id,const char* key,long l)
+void pinpoint_set_context_long(NodeID _id, const char *key, long l)
 {
     try
     {
-        do_set_long_key(_id,key,l);
+        do_set_long_key(_id, key, l);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
-    }catch(const std::exception& ex)
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    }
+    catch (const std::exception &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
 }
 
-static int do_get_long_key(NodeID _id,const char* key,long* l)
+static int do_get_long_key(NodeID _id, const char *key, long *l)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    assert(node.p_root_node);
-    PContextType& pValue = node.p_root_node->getContextByKey(key);
+    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    PContextType &pValue = root.getContextByKey(key);
     *l = pValue->asLongValue();
     return 0;
 }
 
-int pinpoint_get_context_long(NodeID _id,const char* key,long* l)
+int pinpoint_get_context_long(NodeID _id, const char *key, long *l)
 {
     try
     {
-        do_get_long_key(_id,key,l);
+        do_get_long_key(_id, key, l);
         return 0;
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
-    }catch(const std::exception& ex)
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    }
+    catch (const std::exception &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
     return 1;
 }
 
-const char* pinpoint_get_context_key(NodeID _id,const char* key)
+const char *pinpoint_get_context_key(NodeID _id, const char *key)
 {
     try
     {
-        return do_get_context_key(_id,key);
+        return do_get_context_key(_id, key);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed with %s, parameters:%s",__func__,_id,ex.what(),key);
+        pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed with %s, parameters:%s",__func__,_id,ex.what(),key);
-    }catch(const std::exception&ex)
+        pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
+    }
+    catch (const std::exception &ex)
     {
-        pp_trace(" %s#%d failed with %s, parameters:%s",__func__,_id,ex.what(),key);
+        pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
     }
     return nullptr;
 }
 
-void do_catch_error(NodeID _id,const char* msg,const char* error_filename,uint32_t error_lineno)
+void do_catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
 {
-    TraceNode& node = g_node_pool.getNodeById(_id);
-    TraceNode* root = node.p_root_node;
-    if(root == nullptr) throw std::runtime_error("traceNode tree is crash");
+    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+
     Json::Value eMsg;
     eMsg["msg"] = msg;
     eMsg["file"] = error_filename;
     eMsg["line"] = error_lineno;
-    root->setNodeValue("ERR", eMsg);
+    root.setNodeValue("ERR", eMsg);
 }
 
-
-void catch_error(NodeID _id,const char* msg,const char* error_filename,uint32_t error_lineno)
+void catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
 {
     try
     {
-        do_catch_error(_id,msg,error_filename,error_lineno);
+        do_catch_error(_id, msg, error_filename, error_lineno);
     }
-    catch(const std::out_of_range& ex)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
-    catch(const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
-    }catch(const std::exception& ex)
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    }
+    catch (const std::exception &ex)
     {
-        pp_trace(" %s#%d failed with %s",__func__,_id,ex.what());
+        pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
     }
 }
 
-
-const char* pinpoint_agent_version()
+const char *pinpoint_agent_version()
 {
-    #ifdef AGENT_VERSION
-    static const char* _version_=AGENT_VERSION;
-    #else
-    static const char* _version_="x.x.x";
-    #endif
+#ifdef AGENT_VERSION
+    static const char *_version_ = AGENT_VERSION;
+#else
+    static const char *_version_ = "x.x.x";
+#endif
     return _version_;
+}
+
+NodeID pinpoint_start_traceV1(NodeID parentId, const char *opt, ...)
+{
+    try
+    {
+        // va_list args;
+        // va_start(args, opt);
+        // // NodeID childId = do_start_trace(parentId);
+        // va_end(args);
+        // // pp_trace("#%d pinpoint_start child #%d", parentId, childId);
+        // return childId;
+    }
+    catch (const std::out_of_range &ex)
+    {
+        pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    }
+    catch (const std::runtime_error &ex)
+    {
+        pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    }
+    catch (...)
+    {
+        pp_trace(" start_trace#%d failed with unkonw reason", parentId);
+    }
+    return E_INVALID_NODE;
+}
+
+static void do_add_exp(NodeID _id, const char *value)
+{
+    TraceNode &node = parse_flag(_id, E_CURRENT_LOC);
+    node.setNodeValue("EXP", value);
+    node.mHasExp = true;
+    pp_trace("#%d add exp value:%s", _id, value);
+}
+
+void pinpoint_add_exception(NodeID traceId, const char *exp)
+{
+    try
+    {
+        do_add_exp(traceId, exp);
+    }
+    catch (const std::out_of_range &ex)
+    {
+        pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    }
+    catch (const std::runtime_error &ex)
+    {
+        pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    }
+    catch (const std::exception &ex)
+    {
+        pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    }
 }

@@ -27,7 +27,7 @@ thread_local int32_t id = 0;
 const char* app_id ="cpp_test_app";
 const char* app_name ="cpp_test_name";
 PPAgentT global_agent_info ={
-    "tcp:dev-collector:9999",1000,-1,1300,1,nullptr,nullptr,nullptr
+    "tcp:localhost:9999",1000,-1,1300,1,nullptr,nullptr,nullptr
 };
 
 std::string get_sid()
@@ -87,6 +87,15 @@ void test_func()
     id = pinpoint_end_trace(id);
 }
 
+void test_kafka()
+{
+    id = pinpoint_start_trace(id);                                  
+    pinpoint_add_clue(id, "name", "kafka", E_CURRENT_LOC);      
+    pinpoint_add_clue(id, "stp", PP_KAFKA, E_CURRENT_LOC);                 
+    pinpoint_add_clues(id, "140", "xxxxx", E_CURRENT_LOC);            
+    pinpoint_add_clue(id, "dst", "xxxx", E_CURRENT_LOC);          
+    id = pinpoint_end_trace(id);  
+}
 
 void test_req()
 {
@@ -104,7 +113,7 @@ void test_req()
     test_func();
     test_mysql();
     test_httpclient();
-
+    test_kafka();
     pinpoint_add_clue(id,PP_TRANSCATION_ID,get_tid().c_str(),E_CURRENT_LOC);
     pinpoint_add_clue(id,PP_SPAN_ID,get_sid().c_str(),E_CURRENT_LOC);
     pinpoint_add_clues(id,PP_HTTP_STATUS_CODE, "200",E_CURRENT_LOC);
