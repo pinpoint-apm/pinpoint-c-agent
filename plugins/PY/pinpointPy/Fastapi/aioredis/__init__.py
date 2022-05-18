@@ -17,20 +17,24 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-import importlib
-def __monkey_patch(*args, **kwargs):
-    for key in kwargs:
-        if kwargs[key]:
-            module = importlib.import_module('pinpointPy.Fastapi.' + key)
-            monkey_patch = getattr(module, 'monkey_patch')
-            if callable(monkey_patch):
-                monkey_patch()
-                print("try to install pinpointPy.asynlibs.%s module" % (key))
+# Created by suwei at 8/20/20
 
-def asyn_monkey_patch_for_pinpoint(AioRedis=True):
-    __monkey_patch(aioredis=AioRedis)
+from ...Interceptor import Interceptor,intercept_once
 
+@intercept_once
+def monkey_patch():
+    from .AioRedisPlugins import AioRedisPlugins
+    try:
+        from aioredis.client import Redis
+        Interceptors = [
+            Interceptor(Redis, 'execute_command', AioRedisPlugins)
+        ]
 
-from .middleware import PinPointMiddleWare
-from .AsyCommonPlugin import CommonPlugin
-__all__ = ['asyn_monkey_patch_for_pinpoint', 'PinPointMiddleWare', 'CommonPlugin']
+        for interceptor in Interceptors:
+            interceptor.enable()
+
+    except ImportError as e:
+        # do nothing
+        print(e)
+
+__all__=['monkey_patch']
