@@ -39,17 +39,28 @@ class AsynPinTrace(object):
         self.traceId = traceId
         return (args,kwargs)
 
+    def isSample(args,kwargs):
+        try:
+            context.get('_pinpoint_id_', default=0)
+            return True
+        except Exception as e:
+            return False
+
     def onEnd(self,ret):
         traceId = pinpoint.end_trace(self.traceId)
         context['_pinpoint_id_'] = traceId
 
     def onException(self,e):
         raise NotImplementedError()
-
+    
     def __call__(self, func):
         self.func_name=func.__name__
+
         async def pinpointTrace(*args, **kwargs):
             ret = None
+            if not self.isSample((args,kwargs)):
+                return await func(*args, **kwargs)
+
             self.onBefore(*args, **kwargs)
             try:
                 ret = await func(*args, **kwargs)
