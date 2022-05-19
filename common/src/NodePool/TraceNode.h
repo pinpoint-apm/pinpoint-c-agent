@@ -45,10 +45,11 @@ namespace NodePool
 
     public:
         // c-style tree node
-        NodeID mNextId;   // equal next node
-        NodeID mChildId;  // subtree
-        NodeID mParentId; // parent Id
-        NodeID mRootId;   // highway to root node
+        NodeID mNextId;            // equal next node
+        NodeID mChildId;           // subtree
+        NodeID mParentId;          // parent Id
+        NodeID startTraceParentId; // parent Id
+        NodeID mRootId;            // highway to root node
         NodeID ID;
 
         uint64_t start_time;
@@ -59,7 +60,7 @@ namespace NodePool
 
     public:
         void startTimer();
-        void setParent(TraceNode &parent);
+        void setTraceParent(TraceNode &parent);
         void endTimer();
         void wake();
 

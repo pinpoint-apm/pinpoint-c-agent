@@ -48,7 +48,6 @@ namespace Helper
 
     static void reverseNodeList(Json::Value &parents, TraceNode &head)
     {
-
         if (head.mNextId != E_INVALID_NODE)
         {
             TraceNode &next = PoolManager::getInstance().getNodeById(head.mNextId);

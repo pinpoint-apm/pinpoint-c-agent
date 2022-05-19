@@ -55,7 +55,7 @@ void pinpoint_update_per_thread_id(NodeID id)
     __tls_id = id;
 }
 
-static NodeID do_start_trace(NodeID id)
+static NodeID do_start_trace(NodeID id, const char *opt, va_list *args)
 {
     if (id <= E_INVALID_NODE)
     {
@@ -72,13 +72,13 @@ static NodeID do_start_trace(NodeID id)
         TraceNode &parent = PoolManager::getInstance().getNodeById(id);
         TraceNode &node = PoolManager::getInstance().getNode();
         node.startTimer();
-        node.setParent(parent);
+        node.setTraceParent(parent);
 
         // pass opt
-        // if (opt != nullptr)
-        // {
-        //     node.setOpt(opt, args);
-        // }
+        if (opt != nullptr)
+        {
+            node.setOpt(opt, args);
+        }
 
         return node.ID;
     }
@@ -130,7 +130,6 @@ NodeID do_end_trace(NodeID Id)
         /// this trace is end. Try to send current trace
         if (node.limit == E_TRACE_PASS)
         {
-
             node.endTimer();
             node.convertToSpan();
             const Json::Value trace = Helper::mergeTraceNodeTree(node);
@@ -155,7 +154,7 @@ NodeID do_end_trace(NodeID Id)
         node.endTimer();
         node.convertToSpanEvent();
 
-        TraceNode &parent = PoolManager::getInstance().getNodeById(node.mParentId);
+        TraceNode &parent = PoolManager::getInstance().getNodeById(node.startTraceParentId);
         parent.addChild(node);
 
         return node.mParentId;

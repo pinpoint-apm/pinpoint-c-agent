@@ -48,11 +48,14 @@ namespace NodePool
     void TraceNode::addChild(TraceNode &child)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
+        if (child.mParentId != ID)
+        {
+            if (this->mChildId != E_INVALID_NODE)
+                child.mNextId = this->mChildId;
 
-        if (this->mChildId != E_INVALID_NODE)
-            child.mNextId = this->mChildId;
-
-        this->mChildId = child.ID;
+            this->mChildId = child.ID;
+            child.mParentId = ID;
+        }
     }
 
     void TraceNode::endTimer()
@@ -83,9 +86,9 @@ namespace NodePool
         this->setNodeValue("S", this->start_time - root.start_time);
     }
 
-    void TraceNode::setParent(TraceNode &parent)
+    void TraceNode::setTraceParent(TraceNode &parent)
     {
-        this->mParentId = parent.ID;
+        this->startTraceParentId = parent.ID;
         this->mRootId = parent.mRootId;
     }
 
