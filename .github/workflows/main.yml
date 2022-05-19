@@ -25,6 +25,33 @@ jobs:
       - name: Codecovage
         uses: codecov/codecov-action@v1
 
+  memory-leak:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.6
+        with:
+          cmake-version: "3.16.x"
+      - name: Build ppt-agent
+        run: |
+          sudo apt install valgrind
+          cd common
+          mkdir -p build
+          cd build
+          cmake -DWITH_TEST_CASE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
+          make
+          valgrind --leak-check=full \
+            --show-leak-kinds=all \
+            --track-origins=yes \
+            --verbose \
+            --log-file=valgrind-out.txt \
+            ./bin/TestCommon
+      - name: Archive docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: valgrind-out
+          path: common/build/valgrind-out.txt
   PHP5:
     runs-on: ubuntu-18.04
     strategy:

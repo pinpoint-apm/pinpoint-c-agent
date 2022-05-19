@@ -160,13 +160,16 @@ NodeID do_end_trace(NodeID Id)
     }
     else
     {
+
         node.endTimer();
         node.convertToSpanEvent();
 
-        TraceNode &parent = PoolManager::getInstance().GetNode(node.startTraceParentId);
+        NodeID parentId = node.startParentId;
+
+        TraceNode &parent = PoolManager::getInstance().GetNode(parentId);
         parent.addChild(node);
 
-        return node.mParentId;
+        return parentId;
     }
 }
 

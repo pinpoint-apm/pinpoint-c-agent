@@ -28,6 +28,7 @@
 #include <atomic>
 #include <map>
 #include <iostream>
+#include <functional>
 #include <mutex>
 #include <stdarg.h>
 
@@ -45,11 +46,11 @@ namespace NodePool
 
     public:
         // c-style tree node
-        NodeID mNextId;            // equal brother node
-        NodeID mChildId;           // subtree/child tree
-        NodeID mParentId;          // parent Id [end_trace] avoiding re-add
-        NodeID startTraceParentId; // parent Id [start_trace]
-        NodeID mRootId;            // highway to root node
+        NodeID mNextId;       // equal brother node
+        NodeID mChildId;      // subtree/child tree
+        NodeID mParentId;     // parent Id [end_trace] avoiding re-add
+        NodeID startParentId; // parent Id [start_trace]
+        NodeID mRootId;       // highway to root node
         NodeID ID;
 
         uint64_t start_time;
@@ -114,13 +115,13 @@ namespace NodePool
 
         PContextType &getContextByKey(const char *key)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             return this->_context.at(key);
         }
 
         void setStrContext(const char *key, const char *buf)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             PContextType context(std::make_shared<StringContextType>(buf));
             this->_context[key] = context;
         }
@@ -132,6 +133,9 @@ namespace NodePool
         }
 
     public:
+        TraceNode &operator=(const TraceNode &) = delete;
+        TraceNode(const TraceNode &) = delete;
+
         bool operator==(TraceNode const &_node) const
         {
             return this->ID == _node.ID;
@@ -145,36 +149,37 @@ namespace NodePool
     public:
         void setNodeValue(const char *key, const char *v)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
         void setNodeValue(const char *key, int v)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
         void setNodeValue(const char *key, uint64_t v)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
         void setNodeValue(const char *key, Json::Value &v)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
         void appendNodeValue(const char *key, const char *v)
         {
-            std::lock_guard<std::mutex> _safe(this->_lock);
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key].append(v);
         }
 
     public:
         void setOpt(const char *opt, va_list *args);
+        bool checkOpt();
 
     private:
         void parseOpt(std::string key, std::string value);
@@ -202,11 +207,12 @@ namespace NodePool
 
     public:
         // changes: expose _lock
-        std::mutex _lock;
+        std::mutex mlock;
 
     private:
         Json::Value _value;
         std::map<std::string, PContextType> _context;
+        std::vector<std::function<bool()>> _callback;
     };
 }
 #endif /* COMMON_SRC_TRACENODE_H_ */

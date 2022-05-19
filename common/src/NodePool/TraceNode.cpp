@@ -47,7 +47,7 @@ namespace NodePool
 
     void TraceNode::addChild(TraceNode &child)
     {
-        std::lock_guard<std::mutex> _safe(this->_lock);
+        std::lock_guard<std::mutex> _safe(this->mlock);
         if (child.mParentId != ID)
         {
             if (this->mChildId != E_INVALID_NODE)
@@ -88,7 +88,7 @@ namespace NodePool
 
     void TraceNode::setTraceParent(TraceNode &parent)
     {
-        this->startTraceParentId = parent.ID;
+        this->startParentId = parent.ID;
         this->mRootId = parent.mRootId;
     }
 
@@ -100,6 +100,38 @@ namespace NodePool
 
     void TraceNode::parseOpt(std::string key, std::string value)
     {
+        pp_trace("#%d add opt: key:%s value:%s", ID, key.c_str(), value.c_str());
+        if (key == "TraceMinTimeMs")
+        {
+            auto cb = [=]() -> bool
+            {
+                int64_t min = std::stoll(value);
+                if ((int64_t)this->cumulative_time >= min)
+                    return true;
+                return false;
+            };
+            this->_callback.push_back(std::bind(cb));
+        }
+        else if (key == "TraceOnlyException")
+        {
+            auto cb = [=]() -> bool
+            {
+                return this->mHasExp;
+            };
+
+            this->_callback.push_back(std::bind(cb));
+        }
+    }
+
+    bool TraceNode::checkOpt()
+    {
+        bool ret = true;
+        for (auto &cb : this->_callback)
+        {
+            if ((ret = cb()) == true)
+                return ret;
+        }
+        return ret;
     }
 
     void TraceNode::setOpt(const char *opt, va_list *args)
@@ -116,12 +148,11 @@ namespace NodePool
             }
             else
             {
-                std::string key(var, delimit - var - 1);
+                std::string key(var, delimit - var);
                 std::string value(delimit + 1);
                 this->parseOpt(key, value);
             }
             var = va_arg(*args, const char *);
         }
     }
-
 }

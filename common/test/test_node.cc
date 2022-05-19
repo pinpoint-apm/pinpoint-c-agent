@@ -160,3 +160,31 @@ TEST(node, wakeTrace)
 
     pinpoint_end_trace(root);
 }
+
+void test_opt(TraceNode &node, const char *opt, ...)
+{
+    va_list args;
+    va_start(args, opt);
+    node.setOpt(opt, &args);
+    va_end(args);
+}
+
+TEST(node, opt)
+{
+    TraceNode &node = PoolManager::getInstance().GetNode();
+
+    test_opt(node, "TraceMinTimeMs:23", "TraceOnlyException", nullptr);
+
+    node.cumulative_time = 22;
+    EXPECT_FALSE(node.checkOpt());
+    node.cumulative_time = 23;
+    EXPECT_TRUE(node.checkOpt());
+
+    node.cumulative_time = 0;
+    node.mHasExp = true;
+    EXPECT_TRUE(node.checkOpt());
+    node.mHasExp = false;
+    EXPECT_FALSE(node.checkOpt());
+
+    PoolManager::getInstance().freeNode(node);
+}
