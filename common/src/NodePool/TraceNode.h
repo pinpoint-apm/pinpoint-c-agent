@@ -45,10 +45,10 @@ namespace NodePool
 
     public:
         // c-style tree node
-        NodeID mNextId;            // equal next node
-        NodeID mChildId;           // subtree
-        NodeID mParentId;          // parent Id
-        NodeID startTraceParentId; // parent Id
+        NodeID mNextId;            // equal brother node
+        NodeID mChildId;           // subtree/child tree
+        NodeID mParentId;          // parent Id [end_trace] avoiding re-add
+        NodeID startTraceParentId; // parent Id [start_trace]
         NodeID mRootId;            // highway to root node
         NodeID ID;
 

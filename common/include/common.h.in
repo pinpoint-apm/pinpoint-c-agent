@@ -21,15 +21,6 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#ifdef __linux__
-#define likely(x) __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-#elif _WIN32
-
-#else
-
-#endif
-
 #if defined(__GNUC__) || defined(__clang__)
 #define DEPRECATED __attribute__((deprecated))
 #elif defined(_MSC_VER)
@@ -276,6 +267,9 @@ extern "C"
     void catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno);
     typedef void (*log_msg_cb)(char *);
     void register_error_cb(log_msg_cb error_cb);
+
+    void register_span_handler(void (*handler)(const char *));
+
     void pp_trace(const char *format, ...);
     /**
      * NOTE: only for testcase

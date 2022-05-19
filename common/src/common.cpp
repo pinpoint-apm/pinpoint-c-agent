@@ -31,8 +31,9 @@
 #include "NodePool/PoolManager.h"
 #include "Util/Helper.h"
 #include "ConnectionPool/SpanConnectionPool.h"
-
+#include "define.h"
 namespace Json = AliasJson;
+
 using Cache::SafeSharedState;
 using ConnectionPool::TransConnection;
 using Helper::get_current_msec_stamp;
@@ -44,6 +45,7 @@ const static char *CLUSE = "clues";
 static thread_local NodeID __tls_id = E_ROOT_NODE;
 // send current span with timeout
 static thread_local int _span_timeout = global_agent_info.timeout_ms;
+static std::function<void(const char *)> _SpanHandler_;
 
 NodeID pinpoint_get_per_thread_id()
 {
@@ -55,7 +57,7 @@ void pinpoint_update_per_thread_id(NodeID id)
     __tls_id = id;
 }
 
-static NodeID do_start_trace(NodeID id, const char *opt, va_list *args)
+static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args = nullptr)
 {
     if (id <= E_INVALID_NODE)
     {
@@ -63,14 +65,14 @@ static NodeID do_start_trace(NodeID id, const char *opt, va_list *args)
     }
     else if (id == E_ROOT_NODE)
     {
-        TraceNode &node = PoolManager::getInstance().getNode();
+        TraceNode &node = PoolManager::getInstance().GetNode();
         node.startTimer();
         return node.ID;
     }
     else
     {
-        TraceNode &parent = PoolManager::getInstance().getNodeById(id);
-        TraceNode &node = PoolManager::getInstance().getNode();
+        TraceNode &parent = PoolManager::getInstance().GetNode(id);
+        TraceNode &node = PoolManager::getInstance().GetNode();
         node.startTimer();
         node.setTraceParent(parent);
 
@@ -91,12 +93,12 @@ static void free_nodes_tree(NodeID id)
         return;
     }
 
-    TraceNode &node = PoolManager::getInstance().getNodeById(id);
+    TraceNode &node = PoolManager::getInstance().GetNode(id);
 
     NodeID child_id = node.mChildId;
     while (child_id != E_INVALID_NODE)
     {
-        TraceNode &child = PoolManager::getInstance().getNodeById(child_id);
+        TraceNode &child = PoolManager::getInstance().GetNode(child_id);
         child_id = child.mNextId;
         free_nodes_tree(child.ID);
     }
@@ -123,7 +125,7 @@ static void flush_to_agent(std::string &span)
 
 NodeID do_end_trace(NodeID Id)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(Id);
+    TraceNode &node = PoolManager::getInstance().GetNode(Id);
     if (node.isRoot())
     {
         // assert(node.mRootId);
@@ -134,8 +136,15 @@ NodeID do_end_trace(NodeID Id)
             node.convertToSpan();
             const Json::Value trace = Helper::mergeTraceNodeTree(node);
             std::string spanStr = Helper::node_tree_to_string(trace);
-            pp_trace("this span:(%s)", spanStr.c_str());
-            flush_to_agent(spanStr);
+            if (unlikely(_SpanHandler_ != nullptr))
+            {
+                _SpanHandler_(spanStr.c_str());
+            }
+            else
+            {
+                pp_trace("this span:(%s)", spanStr.c_str());
+                flush_to_agent(spanStr);
+            }
         }
         else if (node.limit == E_TRACE_BLOCK)
         {
@@ -154,7 +163,7 @@ NodeID do_end_trace(NodeID Id)
         node.endTimer();
         node.convertToSpanEvent();
 
-        TraceNode &parent = PoolManager::getInstance().getNodeById(node.startTraceParentId);
+        TraceNode &parent = PoolManager::getInstance().GetNode(node.startTraceParentId);
         parent.addChild(node);
 
         return node.mParentId;
@@ -197,7 +206,7 @@ static NodeID do_wake_trace(NodeID &id)
     // 2. check if it's a root node
     // 3. update start time
 
-    TraceNode &trace_node = PoolManager::getInstance().getNodeById(id);
+    TraceNode &trace_node = PoolManager::getInstance().GetNode(id);
 
     if (trace_node.isRoot())
     {
@@ -237,7 +246,7 @@ int pinpoint_force_end_trace(NodeID id, int32_t timeout)
     try
     {
         _span_timeout = timeout;
-        while (id != E_INVALID_NODE)
+        while (id != E_ROOT_NODE)
         {
             id = pinpoint_end_trace(id);
         }
@@ -260,7 +269,7 @@ int pinpoint_trace_is_root(NodeID _id)
 {
     try
     {
-        TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+        TraceNode &node = PoolManager::getInstance().GetNode(_id);
         return node.isRoot() ? (1) : (0);
     }
     catch (const std::out_of_range &)
@@ -335,9 +344,9 @@ void reset_unique_id(void)
 
 uint64_t inline do_mark_current_trace_status(NodeID &_id, E_AGENT_STATUS status)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
     assert(node.mRootId);
-    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
     pp_trace("change current#%d status, before:%lld,now:%d", root.getId(), root.limit, status);
     return __sync_lock_test_and_set(&root.limit, status);
 }
@@ -370,10 +379,10 @@ int check_tracelimit(int64_t timestamp)
 
 static inline TraceNode &parse_flag(NodeID _id, E_NODE_LOC flag)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
     if (flag == E_ROOT_LOC)
     {
-        return PoolManager::getInstance().getNodeById(node.mRootId);
+        return PoolManager::getInstance().GetNode(node.mRootId);
     }
     else
     {
@@ -442,16 +451,16 @@ void pinpoint_add_clue(NodeID _id, const char *key, const char *value, E_NODE_LO
 
 static inline void do_set_context_key(NodeID _id, const char *key, const char *value)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
-    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
+    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
 
     root.setStrContext(key, value);
 }
 
 static const char *do_get_context_key(NodeID _id, const char *key)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
-    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
+    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
     PContextType &pValue = root.getContextByKey(key);
     return pValue->asStringValue().c_str();
 }
@@ -478,8 +487,8 @@ void pinpoint_set_context_key(NodeID _id, const char *key, const char *value)
 
 static void do_set_long_key(NodeID id, const char *key, long l)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(id);
-    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    TraceNode &node = PoolManager::getInstance().GetNode(id);
+    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
     root.setLongContext(key, l);
 }
 
@@ -505,8 +514,8 @@ void pinpoint_set_context_long(NodeID _id, const char *key, long l)
 
 static int do_get_long_key(NodeID _id, const char *key, long *l)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
-    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
+    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
     PContextType &pValue = root.getContextByKey(key);
     *l = pValue->asLongValue();
     return 0;
@@ -557,8 +566,8 @@ const char *pinpoint_get_context_key(NodeID _id, const char *key)
 
 void do_catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
-    TraceNode &root = PoolManager::getInstance().getNodeById(node.mRootId);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
+    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
 
     Json::Value eMsg;
     eMsg["msg"] = msg;
@@ -648,5 +657,13 @@ void pinpoint_add_exception(NodeID traceId, const char *exp)
     catch (const std::exception &ex)
     {
         pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    }
+}
+
+void register_span_handler(void (*handler)(const char *))
+{
+    if (likely(handler != nullptr))
+    {
+        _SpanHandler_ = std::bind(handler, std::placeholders::_1);
     }
 }

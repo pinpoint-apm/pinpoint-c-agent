@@ -71,6 +71,7 @@ namespace Helper
 
     Json::Value mergeTraceNodeTree(TraceNode &root);
 
+    Json::Value mergeTraceNodeTree(NodeID &Id);
     TransConnection getConnection();
 
     void freeConnection(TransConnection &);

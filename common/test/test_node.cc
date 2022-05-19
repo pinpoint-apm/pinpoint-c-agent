@@ -15,14 +15,14 @@ NodeID start_trace(NodeID _id)
 {
     if (_id == 0)
     {
-        TraceNode &node = PoolManager::getInstance().getNode();
+        TraceNode &node = PoolManager::getInstance().GetNode();
         node.setNodeValue("name", std::to_string(node.getId()).c_str());
         node.startTimer();
         return node.getId();
     }
 
-    TraceNode &parent = PoolManager::getInstance().getNodeById(_id);
-    TraceNode &child = PoolManager::getInstance().getNode();
+    TraceNode &parent = PoolManager::getInstance().GetNode(_id);
+    TraceNode &child = PoolManager::getInstance().GetNode();
     child.startTimer();
     child.setTraceParent(parent);
     child.setNodeValue("name", std::to_string(child.getId()).c_str());
@@ -32,7 +32,7 @@ NodeID start_trace(NodeID _id)
 
 NodeID end_trace(NodeID _id)
 {
-    TraceNode &node = PoolManager::getInstance().getNodeById(_id);
+    TraceNode &node = PoolManager::getInstance().GetNode(_id);
     return node.mParentId == node.ID ? E_ROOT_NODE : node.mParentId;
 }
 
@@ -42,7 +42,7 @@ void free_nodes_tree(TraceNode &node)
     if (childId != E_INVALID_NODE)
     {
         // keep the next child
-        TraceNode &child = PoolManager::getInstance().getNodeById(childId);
+        TraceNode &child = PoolManager::getInstance().GetNode(childId);
 
         childId = child.mNextId;
         free_nodes_tree(child);
@@ -60,7 +60,7 @@ void print_tree(TraceNode &node, int indent)
     NodeID childId = node.mChildId;
     while (childId != E_INVALID_NODE)
     {
-        TraceNode &child = PoolManager::getInstance().getNodeById(node.mChildId);
+        TraceNode &child = PoolManager::getInstance().GetNode(node.mChildId);
         print_tree(child, indent + 1);
         childId = child.mNextId;
     }

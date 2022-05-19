@@ -32,21 +32,6 @@
 namespace NodePool
 {
 
-    static std::atomic<int32_t> _Global_ID(0);
-
-    //     uint32_t generateNid()
-    //     {
-    //         int32_t _int_max = INT32_MAX;
-    //         _Global_ID.compare_exchange_weak(_int_max, 0);
-    // #ifdef COMMON_DEBUG
-    //         {
-    //             NodeID _id = _Global_ID;
-    //             pp_trace("last global id is %u", _id);
-    //         }
-    // #endif
-    //         return ++_Global_ID;
-    //     }
-
     void PoolManager::freeNode(TraceNode &node)
     {
         this->freeNode(node.getId());
@@ -70,7 +55,7 @@ namespace NodePool
         this->_freeNodeList.push(index);
     }
 
-    TraceNode &PoolManager::getNodeById(NodeID id)
+    TraceNode &PoolManager::_getNode(NodeID id)
     {
         // assert(id != E_INVALID_NODE);
         if (id == E_ROOT_NODE)
@@ -78,7 +63,6 @@ namespace NodePool
             throw std::out_of_range("id should not be 0");
         }
 
-        std::lock_guard<std::mutex> _safe(this->_lock);
         int32_t index = int32_t(id) - 1;
 
         if (this->nodeIsAlive(index) == false)
@@ -91,9 +75,14 @@ namespace NodePool
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
     }
 
-    TraceNode &PoolManager::getNode()
+    TraceNode &PoolManager::GetNode(NodeID id)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
+
+        if (id != E_ROOT_NODE)
+        {
+            return this->_getNode(id);
+        }
 
         if (this->_freeNodeList.empty())
         {

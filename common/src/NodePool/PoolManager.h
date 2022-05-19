@@ -34,15 +34,15 @@ namespace NodePool
 
     class PoolManager
     {
+    private:
+        TraceNode &_getNode(NodeID id);
 
     public:
-        TraceNode &getNodeById(NodeID id);
+        TraceNode &GetNode(NodeID id = E_ROOT_NODE);
 
         void freeNode(NodeID id);
 
         void freeNode(TraceNode &);
-
-        TraceNode &getNode();
 
         uint32_t totoalNodesCount()
         {

@@ -82,7 +82,7 @@ namespace NodePool
     void TraceNode::convertToSpanEvent()
     {
         this->setNodeValue("E", this->cumulative_time);
-        TraceNode &root = PoolManager::getInstance().getNodeById(this->mRootId);
+        TraceNode &root = PoolManager::getInstance().GetNode(this->mRootId);
         this->setNodeValue("S", this->start_time - root.start_time);
     }
 
