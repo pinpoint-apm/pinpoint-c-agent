@@ -113,7 +113,7 @@ typedef enum
 /**
  * @brief change logs
  * ## v0.4.10
- * -
+ * - new API: pinpoint_start_traceV1,pinpoint_add_exception
  * ## v0.4.9
  * - not open
  * ## v0.4.8
