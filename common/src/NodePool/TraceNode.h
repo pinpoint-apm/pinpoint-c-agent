@@ -1,12 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Copyright 2020 NAVER Corp
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
 // use this file except in compliance with the License.  You may obtain a copy
 // of the License at
-// 
+//
 //   http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
@@ -28,225 +28,191 @@
 #include <atomic>
 #include <map>
 #include <iostream>
+#include <functional>
 #include <mutex>
+#include <stdarg.h>
 
-namespace NodePool{
-
-//class NodeID{
-//public:
-//    NodeID() = default;
-//
-//    NodeID(uint32_t _id)
-//    {
-//        this->_id = _id;
-//    }
-//
-//    NodeID(const NodeID &_ID)
-//    {
-//        this->_id = _ID._id;
-//    }
-//
-//
-//    NodeID& operator=(const NodeID& _ID)
-//    {
-//        this->_id = _ID._id;
-//        return *this;
-//    }
-//
-//    NodeID& operator=(uint32_t _id)
-//    {
-//        this->_id = _id;
-//        return *this;
-//    }
-//
-//    std::string toString() const
-//    {
-//        return std::to_string(this->_id);
-//    }
-//
-//    bool operator<(NodeID const& _ID) const
-//    {
-//        return this->_id < _ID._id;
-//    }
-//
-//    bool operator==(NodeID const& _ID) const
-//    {
-//        return this->_id == _ID._id;
-//    }
-//
-//      bool operator!=(NodeID const& _ID) const
-//    {
-//        return this->_id != _ID._id;
-//    }
-//
-//private:
-//
-//    friend std::ostream& operator<<(std::ostream& iostream, const NodeID& nodeId){
-//        return iostream<<"NodeID:"<<nodeId._id;
-//    }
-//
-//
-//
-//private:
-//    uint32_t _id;
-//};
-//
-namespace Json = AliasJson;
-using Context::ContextType;
-using Context::StringContextType;
-using Context::LongContextType;
-
-typedef std::shared_ptr<ContextType> PContextType;
-class TraceNode
+namespace NodePool
 {
 
-public: 
-    // c-style tree node
-    TraceNode* p_brother_node; // equal next node
-    TraceNode* p_child_head;   // subtree
-    TraceNode* p_parent_node;  // parent
-    TraceNode* p_root_node;    // highway to root node
+    namespace Json = AliasJson;
+    using Context::ContextType;
+    using Context::LongContextType;
+    using Context::StringContextType;
 
-    uint64_t start_time;
-    uint64_t fetal_error_time;
-    uint64_t limit;
-    uint64_t  cumulative_time;
-
-public:
-    void addChild(TraceNode& child);
-
-    inline bool isRoot() const
+    typedef std::shared_ptr<ContextType> PContextType;
+    class TraceNode
     {
-        return (this->p_root_node  == this);
-    }
 
-    inline bool isLeaf() const
-    {
-        return !(this->p_child_head);
-    }
+    public:
+        // c-style tree node
+        NodeID mNextId;       // equal brother node
+        NodeID mChildId;      // subtree/child tree
+        NodeID mParentId;     // parent Id [end_trace] avoiding re-add
+        NodeID startParentId; // parent Id [start_trace]
+        NodeID mRootId;       // highway to root node
+        NodeID ID;
 
-public:
-    TraceNode(NodeID id = 0);
+        uint64_t start_time;
+        uint64_t fetal_error_time;
+        uint64_t limit;
+        uint64_t cumulative_time;
+        bool mHasExp;
 
-    virtual ~TraceNode();
+    public:
+        void startTimer();
+        void setTraceParent(TraceNode &parent);
+        void endTimer();
+        void wake();
 
-    Json::Value& getValue()
-    {
-        return this->_value;
-    }
+        void convertToSpanEvent();
+        void convertToSpan();
 
-    TraceNode& reset(NodeID id)
-    {
-        this->clearAttach();
-        this->initId(id);
-        this->resetStatus();
-        this->resetRelative();
-        return *this;
-    }
+    public:
+        void addChild(TraceNode &child);
 
-    NodeID getId() const
-    {
-        return this->id;
-    }
+        void remove();
 
-    PContextType& getContextByKey(const char* key)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        return this->_context.at(key);
-    }
+        inline bool isRoot() const
+        {
+            return this->mRootId == ID;
+        }
 
-    void setStrContext(const char* key,const char* buf)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        PContextType context(std::make_shared<StringContextType>(buf));
-        this->_context[key] = context;
-        // std::string& value =  this->_context[key]->asStringValue();
-        // pp_trace("value %s",value.c_str());
-    }
+        inline bool isLeaf() const
+        {
+            return this->mChildId == E_INVALID_NODE;
+        }
 
-    void setLongContext(const char* key,long l)
-    {
-        PContextType context(std::make_shared<LongContextType>(l));
-        this->_context[key] = context;
-    }
+    public:
+        TraceNode()
+        {
+            this->ID = E_INVALID_NODE;
+            this->mRootId = E_INVALID_NODE;
+            this->resetRelative();
+            this->resetStatus();
+        }
 
-public:
+        virtual ~TraceNode();
 
-    bool operator==(TraceNode const& _node) const
-    {
-        return this->id == _node.id;
-    }
+        Json::Value &getValue()
+        {
+            return this->_value;
+        }
 
-    bool operator!=(TraceNode const& _node) const
-    {
-        return this->id != _node.id;
-    }
+        TraceNode &reset(NodeID id)
+        {
+            this->clearAttach();
+            this->initId(id);
+            this->resetStatus();
+            this->resetRelative();
+            return *this;
+        }
 
-    // Json::Value& operator[](const std::string key)
-    // {
-    //     return this->_value[key];
-    // }
+        NodeID getId() const
+        {
+            return this->ID;
+        }
 
-public:
-    void setNodeValue(const char* key,const char* v)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        this->_value[key] = v;
-    }
+        PContextType &getContextByKey(const char *key)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            return this->_context.at(key);
+        }
 
-    void setNodeValue(const char* key,int v)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        this->_value[key] = v;
-    }
+        void setStrContext(const char *key, const char *buf)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            PContextType context(std::make_shared<StringContextType>(buf));
+            this->_context[key] = context;
+        }
 
-    void setNodeValue(const char* key,uint64_t v)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        this->_value[key] = v;
-    }
+        void setLongContext(const char *key, long l)
+        {
+            PContextType context(std::make_shared<LongContextType>(l));
+            this->_context[key] = context;
+        }
 
-    void setNodeValue(const char* key,Json::Value& v)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        this->_value[key] = v;
-    }
+    public:
+        TraceNode &operator=(const TraceNode &) = delete;
+        TraceNode(const TraceNode &) = delete;
 
-    void appendNodeValue(const char* key,const char* v)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        this->_value[key].append(v);
-    }
+        bool operator==(TraceNode const &_node) const
+        {
+            return this->ID == _node.ID;
+        }
 
+        bool operator!=(TraceNode const &_node) const
+        {
+            return this->ID != _node.ID;
+        }
 
-private:
+    public:
+        void setNodeValue(const char *key, const char *v)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            this->_value[key] = v;
+        }
 
-    void clearAttach();
+        void setNodeValue(const char *key, int v)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            this->_value[key] = v;
+        }
 
-    void initId(NodeID& id);
+        void setNodeValue(const char *key, uint64_t v)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            this->_value[key] = v;
+        }
 
-    inline void resetRelative(){
-        this->p_brother_node = nullptr;
-        this->p_child_head = nullptr;
-        this->p_parent_node = this;
-        this->p_root_node = this;
-    }
+        void setNodeValue(const char *key, Json::Value &v)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            this->_value[key] = v;
+        }
 
-    inline void resetStatus()
-    {
-        this->fetal_error_time = 0;
-        this->start_time = 0;
-        this->limit  = E_TRACE_PASS;
-        this->cumulative_time = 0;
-    }
+        void appendNodeValue(const char *key, const char *v)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            this->_value[key].append(v);
+        }
 
-private:
-    //note: logic_id  = physical_id + 1
-    NodeID id;
-    Json::Value _value;
+    public:
+        void setOpt(const char *opt, va_list *args);
+        bool checkOpt();
 
-    std::map<std::string,PContextType>  _context;
-    std::mutex _lock;
-};
+    private:
+        void parseOpt(std::string key, std::string value);
+
+        void clearAttach();
+
+        void initId(NodeID &id);
+
+        inline void resetRelative()
+        {
+            this->mNextId = E_INVALID_NODE;
+            this->mChildId = E_INVALID_NODE;
+            this->mParentId = ID;
+            this->mRootId = ID;
+        }
+
+        inline void resetStatus()
+        {
+            this->fetal_error_time = 0;
+            this->start_time = 0;
+            this->limit = E_TRACE_PASS;
+            this->cumulative_time = 0;
+            this->mHasExp = false;
+        }
+
+    public:
+        // changes: expose _lock
+        std::mutex mlock;
+
+    private:
+        Json::Value _value;
+        std::map<std::string, PContextType> _context;
+        std::vector<std::function<bool()>> _callback;
+    };
 }
 #endif /* COMMON_SRC_TRACENODE_H_ */

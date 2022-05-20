@@ -3,5 +3,6 @@
 ## Command
 
 ```shell
-$ ./bin/unittest --gtest_filter=node.wakeTrace
+$ cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
+$ ./bin/TestCommon --gtest_filter=node.wakeTrace
 ```
