@@ -93,7 +93,7 @@ TEST(translayer, unix_socket_layer)
     layer.registerPeerMsgCallback(std::bind(handle_agent_info, _1, _2, _3), NULL);
     while (run)
     {
-        layer.trans_layer_pool(3000);
+        layer.trans_layer_pool(300);
     }
     std::string data = "msg-1918";
     layer.copy_into_send_buffer(data);
@@ -116,6 +116,12 @@ TEST(translayer, stream_socket_layer)
     EXPECT_EQ(fd, -1);
 
     fd = TransLayer::connect_stream_remote("-.217.175.68:-80");
+    EXPECT_EQ(fd, -1);
+
+    fd = TransLayer::connect_stream_remote("-.217.175.68");
+    EXPECT_EQ(fd, -1);
+
+    fd = TransLayer::connect_stream_remote(":90");
     EXPECT_EQ(fd, -1);
 }
 

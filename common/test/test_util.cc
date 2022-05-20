@@ -151,13 +151,13 @@ TEST(util, mergeTraceNodeTree_1)
         id2, id3, id4;
     Json::Value var;
     id1 = pinpoint_start_trace(E_ROOT_NODE);
-    pinpoint_add_clue(id1, "name", "id1", E_CURRENT_LOC);
+    pinpoint_add_clue(id1, "name", "id1", E_LOC_CURRENT);
     id2 = pinpoint_start_trace(id1);
-    pinpoint_add_clue(id2, "name", "id2", E_CURRENT_LOC);
+    pinpoint_add_clue(id2, "name", "id2", E_LOC_CURRENT);
     id3 = pinpoint_start_trace(id2);
-    pinpoint_add_clue(id3, "name", "id3", E_CURRENT_LOC);
+    pinpoint_add_clue(id3, "name", "id3", E_LOC_CURRENT);
     id4 = pinpoint_start_trace(id2);
-    pinpoint_add_clue(id4, "name", "id4", E_CURRENT_LOC);
+    pinpoint_add_clue(id4, "name", "id4", E_LOC_CURRENT);
     pinpoint_end_trace(id3);
     pinpoint_end_trace(id2);
     pinpoint_end_trace(id1);

@@ -56,7 +56,16 @@ namespace NodePool
             return this->_freeNodeList.size();
         }
 
-        virtual ~PoolManager() {}
+#ifdef COMMON_DEBUG
+        inline bool NoNodeLeak()
+        {
+            std::lock_guard<std::mutex> _safe(this->_lock);
+            return this->_freeNodeList.size() == nodeIndexVec.size() * CELL_SIZE;
+        }
+#endif
+        virtual ~PoolManager()
+        {
+        }
 
     public:
         static PoolManager &getInstance()

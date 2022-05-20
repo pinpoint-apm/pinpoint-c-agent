@@ -112,7 +112,6 @@ array(4) {
   int(4)
 }
 string(12) "hello php!!!"
-[pinpoint] [%d] [%d] catch_error#0 failed with id should not be 0
 [pinpoint] [%d] [%d]apm_error_cb called
 
 Warning: pinpoint_get_func_ref_args():  Called from the global scope - no function context in %s on line 18

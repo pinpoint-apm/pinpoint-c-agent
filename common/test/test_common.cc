@@ -66,13 +66,13 @@ TEST(common, context_check)
 {
     NodeID id = pinpoint_start_trace(E_ROOT_NODE);
     std::string str = "fdafadf";
-    pinpoint_add_clues(id, "fasdfas", str.c_str(), E_CURRENT_LOC);
-    pinpoint_add_clue(id, "fasdfas", str.c_str(), E_CURRENT_LOC);
-    pinpoint_add_clue(id, "fasdfas", str.c_str(), E_CURRENT_LOC);
-    pinpoint_add_clue(id, "fasdfas", str.c_str(), E_CURRENT_LOC);
+    pinpoint_add_clues(id, "fasdfas", str.c_str(), E_LOC_CURRENT);
+    pinpoint_add_clue(id, "fasdfas", str.c_str(), E_LOC_CURRENT);
+    pinpoint_add_clue(id, "fasdfas", str.c_str(), E_LOC_CURRENT);
+    pinpoint_add_clue(id, "fasdfas", str.c_str(), E_LOC_CURRENT);
 
     id = pinpoint_start_trace(id);
-    pinpoint_add_clue(id, "global", str.c_str(), E_ROOT_LOC);
+    pinpoint_add_clue(id, "global", str.c_str(), E_LOC_ROOT);
     id = pinpoint_end_trace(id);
     str.clear();
     str = "fadfaffadf";

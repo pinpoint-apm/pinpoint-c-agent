@@ -36,19 +36,19 @@ NodeID end_trace(NodeID _id)
     return node.mParentId == node.ID ? E_ROOT_NODE : node.mParentId;
 }
 
-void free_nodes_tree(TraceNode &node)
-{
-    NodeID childId = node.mChildId;
-    if (childId != E_INVALID_NODE)
-    {
-        // keep the next child
-        TraceNode &child = PoolManager::getInstance().GetNode(childId);
+// void free_nodes_tree(TraceNode &node)
+// {
+//     NodeID childId = node.mChildId;
+//     if (childId != E_INVALID_NODE)
+//     {
+//         // keep the next child
+//         TraceNode &child = PoolManager::getInstance().GetNode(childId);
 
-        childId = child.mNextId;
-        free_nodes_tree(child);
-    }
-    PoolManager::getInstance().freeNode(node);
-}
+//         childId = child.mNextId;
+//         free_nodes_tree(child);
+//     }
+//     PoolManager::getInstance().freeNode(node);
+// }
 
 void print_tree(TraceNode &node, int indent)
 {
@@ -96,34 +96,35 @@ std::mutex cv_m;
 std::condition_variable cv;
 NodeID rootId = E_ROOT_NODE;
 
+// note: as it known, there may leak some node
 void func()
 {
     std::unique_lock<std::mutex> lk(cv_m);
     cv.wait(lk);
-    pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_CURRENT_LOC);
-    pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_CURRENT_LOC);
-    for (int i = 0; i < 10; ++i)
+    pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_LOC_CURRENT);
+    pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_LOC_CURRENT);
+    for (int i = 0; i < 100; ++i)
     {
         rootId = pinpoint_start_trace(rootId);
         pinpoint_set_context_key(rootId, "xxxx", "bbbbbb");
         std::this_thread::yield();
         const char *value = pinpoint_get_context_key(rootId, "xxxx");
         std::cout << "read value:" << value << " ";
-        pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_CURRENT_LOC);
+        pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_LOC_CURRENT);
         std::this_thread::yield();
-        pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_CURRENT_LOC);
+        pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_LOC_CURRENT);
         std::this_thread::yield();
         rootId = pinpoint_end_trace(rootId);
         std::this_thread::yield();
     }
-    pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_CURRENT_LOC);
-    pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_CURRENT_LOC);
+    pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_LOC_CURRENT);
+    pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_LOC_CURRENT);
 }
 
 TEST(node, multipleThread)
 {
     // no crash, works fine
-    NodeID func_Id = pinpoint_start_trace(E_ROOT_NODE);
+    NodeID root = pinpoint_start_trace(E_ROOT_NODE);
 
     std::vector<std::thread> threads;
 
@@ -139,8 +140,9 @@ TEST(node, multipleThread)
     {
         threads[i].join();
     }
-    pinpoint_end_trace(func_Id);
-    pinpoint_end_trace(func_Id);
+    pinpoint_end_trace(root);
+    pinpoint_end_trace(root);
+    // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
 TEST(node, wakeTrace)
@@ -159,6 +161,7 @@ TEST(node, wakeTrace)
     pinpoint_end_trace(child1);
 
     pinpoint_end_trace(root);
+    // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
 void test_opt(TraceNode &node, const char *opt, ...)
@@ -187,4 +190,49 @@ TEST(node, opt)
     EXPECT_FALSE(node.checkOpt());
 
     PoolManager::getInstance().freeNode(node);
+    // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
+}
+
+static std::string span;
+void capture(const char *msg)
+{
+    span = msg;
+}
+//./bin/TestCommon --gtest_filter=node.pinpoint_start_traceV1
+TEST(node, pinpoint_start_traceV1)
+{
+    auto count = PoolManager::getInstance().freeNodesCount();
+    register_span_handler(capture);
+    NodeID root, child1;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child1 = pinpoint_start_traceV1(root, "TraceMinTimeMs:23", nullptr);
+    pinpoint_add_clue(child1, "name", "Take1sec", E_LOC_CURRENT);
+    sleep(1);
+    pinpoint_end_trace(child1);
+
+    child1 = pinpoint_start_traceV1(root, "TraceOnlyException", nullptr);
+    pinpoint_add_clue(child1, "name", "Exception", E_LOC_CURRENT);
+    pinpoint_add_exception(child1, "xxxxxxxxx");
+    pinpoint_end_trace(child1);
+
+    child1 = pinpoint_start_traceV1(root, "TraceMinTimeMs:2000", nullptr);
+    pinpoint_add_clue(child1, "name", "TraceMinTimeMs:2000", E_LOC_CURRENT);
+    sleep(1);
+    pinpoint_end_trace(child1);
+
+    child1 = pinpoint_start_traceV1(root, "TraceOnlyException", nullptr);
+    pinpoint_add_clue(child1, "name", "NoException", E_LOC_CURRENT);
+    pinpoint_end_trace(child1);
+
+    child1 = pinpoint_start_traceV1(root, "TraceMinTimeMs:-23", nullptr);
+    pinpoint_add_clue(child1, "name", "TraceMinTimeMs:-23", E_LOC_CURRENT);
+    pinpoint_end_trace(child1);
+
+    pinpoint_end_trace(root);
+    std::cout << span << std::endl;
+    EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
+    EXPECT_TRUE(span.find("Take1sec") != span.npos);
+    EXPECT_TRUE(span.find("Exception") != span.npos);
+    EXPECT_TRUE(span.find("TraceMinTimeMs:2000") == span.npos);
+    EXPECT_TRUE(span.find("NoException") == span.npos);
 }

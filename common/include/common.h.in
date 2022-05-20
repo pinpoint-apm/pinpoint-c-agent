@@ -104,8 +104,8 @@ typedef enum
  */
 typedef enum
 {
-    E_CURRENT_LOC = 0x0,
-    E_ROOT_LOC = 0x1
+    E_LOC_CURRENT = 0x0,
+    E_LOC_ROOT = 0x1
 } E_NODE_LOC;
 
 #define PINPOINT_C_AGENT_API_VERSION "@PROJECT_VERSION@"
@@ -146,16 +146,16 @@ extern "C"
 
     /**
      * @brief [tls] V1 support trace with optional config
-     *
+     *      Not support on root traceNode
      * @param parentId
-     * @param opt_arg  param ... count; if opt_arg == 0, the same as pinpoint_start_trace
+     * @param opt  param ... count; if opt == nullptr, the same as pinpoint_start_trace; Note: must end with nullptr
      * @param ...  only support const char*;
      * eg:
      *      "TraceMinTimeMs:23" // the minimum time of a trace should be 23ms
      *      "TraceOnlyException" // only trace exception( only report when call pinpoint_add_exception)
      * @return NodeID
      */
-    NodeID pinpoint_start_traceV1(NodeID parentId, int opt_arg, ...);
+    NodeID pinpoint_start_traceV1(NodeID parentId, const char *opt, ...);
 
     void pinpoint_add_exception(NodeID, const char *exp);
 

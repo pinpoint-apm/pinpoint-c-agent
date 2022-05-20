@@ -170,7 +170,8 @@ namespace ConnectionPool
         int retval = select(fd + 1, &rfds, &wfds, &efds, &tv);
         if (retval == -1)
         {
-            //        pp_trace("select return error:(%s)",strerror(errno));
+            // it helped address the macosx issue
+            pp_trace("select return error:(%s)", strerror(errno));
             return -1;
         }
         else if (retval > 0)

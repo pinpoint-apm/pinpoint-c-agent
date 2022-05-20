@@ -98,7 +98,7 @@ namespace NodePool
     void PoolManager::expandOnce()
     {
         ADDTRACE();
-        pp_trace("Node pool expanding self! Old size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
+        // pp_trace("Node pool expanding self! Old size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
         // append new nodes into nodeIndexVec
         this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
         // this->nodeIndexVec.push_back(std::make_unique<TraceNode[]>(CELL_SIZE));
@@ -109,7 +109,7 @@ namespace NodePool
             this->_freeNodeList.push(id);
         }
         this->maxId += CELL_SIZE;
-        pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
+        // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
         assert(this->nodeIndexVec.size() * CELL_SIZE == this->_aliveNodeSet.size());
     }
 

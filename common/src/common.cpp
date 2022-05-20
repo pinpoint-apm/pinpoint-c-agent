@@ -166,8 +166,17 @@ NodeID do_end_trace(NodeID Id)
 
         NodeID parentId = node.startParentId;
 
-        TraceNode &parent = PoolManager::getInstance().GetNode(parentId);
-        parent.addChild(node);
+        // check opt
+        if (node.checkOpt() == true)
+        {
+            TraceNode &parent = PoolManager::getInstance().GetNode(parentId);
+            parent.addChild(node);
+        }
+        else
+        {
+            pp_trace("current#%d dropped,due to checkOpt false", node.ID);
+            PoolManager::getInstance().freeNode(node);
+        }
 
         return parentId;
     }
@@ -383,7 +392,7 @@ int check_tracelimit(int64_t timestamp)
 static inline TraceNode &parse_flag(NodeID _id, E_NODE_LOC flag)
 {
     TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    if (flag == E_ROOT_LOC)
+    if (flag == E_LOC_ROOT)
     {
         return PoolManager::getInstance().GetNode(node.mRootId);
     }
@@ -613,12 +622,12 @@ NodeID pinpoint_start_traceV1(NodeID parentId, const char *opt, ...)
 {
     try
     {
-        // va_list args;
-        // va_start(args, opt);
-        // // NodeID childId = do_start_trace(parentId);
-        // va_end(args);
-        // // pp_trace("#%d pinpoint_start child #%d", parentId, childId);
-        // return childId;
+        va_list args;
+        va_start(args, opt);
+        NodeID childId = do_start_trace(parentId, opt, &args);
+        va_end(args);
+        pp_trace("#%d pinpoint_start_traceV1 child #%d", parentId, childId);
+        return childId;
     }
     catch (const std::out_of_range &ex)
     {
@@ -637,7 +646,7 @@ NodeID pinpoint_start_traceV1(NodeID parentId, const char *opt, ...)
 
 static void do_add_exp(NodeID _id, const char *value)
 {
-    TraceNode &node = parse_flag(_id, E_CURRENT_LOC);
+    TraceNode &node = parse_flag(_id, E_LOC_CURRENT);
     node.setNodeValue("EXP", value);
     node.mHasExp = true;
     pp_trace("#%d add exp value:%s", _id, value);
