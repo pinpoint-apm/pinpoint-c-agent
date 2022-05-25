@@ -32,4 +32,4 @@ pinpoint_end_trace($unexist_node);
 [pinpoint] [%d] [%d] pinpoint_add_clues#1024 failed.Reason #1024 is not alive,parameters:32:fdfd
 [pinpoint] [%d] [%d] pinpoint_add_clues#1024 failed.Reason #1024 is not alive,parameters:32:fdfd
 [pinpoint] [%d] [%d] pinpoint_get_context_key#1024 failed with #1024 is not alive, parameters:b
-[pinpoint] [%d] [%d]#1024 not found
+[pinpoint] [%d] [%d]end_trace 1024 out_of_range exception: #1024 is not alive

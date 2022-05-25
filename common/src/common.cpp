@@ -169,8 +169,16 @@ NodeID do_end_trace(NodeID Id)
         // check opt
         if (node.checkOpt() == true)
         {
-            TraceNode &parent = PoolManager::getInstance().GetNode(parentId);
-            parent.addChild(node);
+            try
+            {
+                TraceNode &parent = PoolManager::getInstance().GetNode(parentId);
+                parent.addChild(node);
+            }
+            catch (const std::out_of_range &ex)
+            {
+                pp_trace("current#%d dropped,due to parent is end", node.ID);
+                PoolManager::getInstance().freeNode(node);
+            }
         }
         else
         {
@@ -303,13 +311,13 @@ NodeID pinpoint_end_trace(NodeID traceId)
         pp_trace("#%d pinpoint_end_trace Done!", traceId);
         return ret;
     }
-    catch (const std::out_of_range &)
+    catch (const std::out_of_range &ex)
     {
-        pp_trace("#%d not found", traceId);
+        pp_trace("end_trace %d out_of_range exception: %s", traceId, ex.what());
     }
     catch (const std::exception &ex)
     {
-        pp_trace("#%d end trace failed. %s", traceId, ex.what());
+        pp_trace("end_trace #%d end trace failed. %s", traceId, ex.what());
     }
 
     return E_INVALID_NODE;
@@ -678,4 +686,19 @@ void register_span_handler(void (*handler)(const char *))
     {
         _SpanHandler_ = std::bind(handler, std::placeholders::_1);
     }
+}
+
+void show_status(void)
+{
+    Json::Value status;
+    status["pool_total_node"] = PoolManager::getInstance().totoalNodesCount();
+    status["pool_free_node"] = PoolManager::getInstance().freeNodesCount();
+
+    auto add_alive_node_fun = [&status](int _id)
+    {
+        status["pool_alive_nodes"].append(_id);
+    };
+    PoolManager::getInstance().foreachAliveNode(std::bind(add_alive_node_fun, std::placeholders::_1));
+
+    fprintf(stderr, "%s\n", status.toStyledString().c_str());
 }

@@ -56,6 +56,16 @@ namespace NodePool
             return this->_freeNodeList.size();
         }
 
+        void foreachAliveNode(std::function<void(int i)> func)
+        {
+            std::lock_guard<std::mutex> _safe(this->_lock);
+            for (int32_t id = 0; id < this->maxId; id++)
+            {
+                if (this->nodeIsAlive(id))
+                    func(id + 1);
+            }
+        }
+
 #ifdef COMMON_DEBUG
         inline bool NoNodeLeak()
         {
