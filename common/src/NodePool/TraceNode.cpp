@@ -82,14 +82,15 @@ namespace NodePool
     void TraceNode::convertToSpanEvent()
     {
         this->setNodeValue("E", this->cumulative_time);
-        TraceNode &root = PoolManager::getInstance().GetNode(this->mRootId);
-        this->setNodeValue("S", this->start_time - root.start_time);
+        this->setNodeValue("S", this->start_time - this->root_start_time);
     }
 
     void TraceNode::setTraceParent(TraceNode &parent)
     {
         this->startParentId = parent.ID;
         this->mRootId = parent.mRootId;
+        TraceNode &root = PoolManager::getInstance().GetNode(this->mRootId);
+        this->root_start_time = root.start_time;
     }
 
     void TraceNode::startTimer()

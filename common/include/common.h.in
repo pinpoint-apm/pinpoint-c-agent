@@ -281,6 +281,7 @@ extern "C"
      */
     void reset_unique_id(void);
     const char *pinpoint_agent_version();
+    void show_status(void);
 #ifdef __cplusplus
 }
 #endif

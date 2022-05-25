@@ -57,6 +57,7 @@ namespace NodePool
         uint64_t fetal_error_time;
         uint64_t limit;
         uint64_t cumulative_time;
+        uint64_t root_start_time;
         bool mHasExp;
 
     public:

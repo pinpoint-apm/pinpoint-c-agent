@@ -236,3 +236,20 @@ TEST(node, pinpoint_start_traceV1)
     EXPECT_TRUE(span.find("TraceMinTimeMs:2000") == span.npos);
     EXPECT_TRUE(span.find("NoException") == span.npos);
 }
+
+TEST(node, leak_node)
+{
+    auto count = PoolManager::getInstance().freeNodesCount();
+    NodeID root, child1, child2;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child1 = pinpoint_start_trace(root);
+    child2 = pinpoint_start_trace(child1);
+    // root goes first
+    pinpoint_end_trace(root);
+
+    pinpoint_end_trace(child1);
+    pinpoint_end_trace(child2);
+
+    EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
+    show_status();
+}
