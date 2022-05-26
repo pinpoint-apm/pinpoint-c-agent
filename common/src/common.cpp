@@ -95,7 +95,7 @@ static void free_nodes_tree(NodeID id)
 
     TraceNode &node = PoolManager::getInstance().GetNode(id);
 
-    NodeID child_id = node.mChildId;
+    NodeID child_id = node.mChildListHeaderId;
     while (child_id != E_INVALID_NODE)
     {
         TraceNode &child = PoolManager::getInstance().GetNode(child_id);

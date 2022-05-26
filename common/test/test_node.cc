@@ -57,10 +57,10 @@ void print_tree(TraceNode &node, int indent)
 
     printf("|---[%u]\n", node.getId());
 
-    NodeID childId = node.mChildId;
+    NodeID childId = node.mChildListHeaderId;
     while (childId != E_INVALID_NODE)
     {
-        TraceNode &child = PoolManager::getInstance().GetNode(node.mChildId);
+        TraceNode &child = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
         print_tree(child, indent + 1);
         childId = child.mNextId;
     }

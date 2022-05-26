@@ -46,11 +46,11 @@ namespace NodePool
 
     public:
         // c-style tree node
-        NodeID mNextId;       // equal brother node
-        NodeID mChildId;      // subtree/child tree
-        NodeID mParentId;     // parent Id [end_trace] avoiding re-add
-        NodeID startParentId; // parent Id [start_trace]
-        NodeID mRootId;       // highway to root node
+        NodeID mNextId;            // equal brother node
+        NodeID mChildListHeaderId; // subtree/child tree
+        NodeID mParentId;          // parent Id [end_trace] avoiding re-add
+        NodeID startParentId;      // parent Id [start_trace]
+        NodeID mRootId;            // highway to root node
         NodeID ID;
 
         uint64_t start_time;
@@ -81,7 +81,13 @@ namespace NodePool
 
         inline bool isLeaf() const
         {
-            return this->mChildId == E_INVALID_NODE;
+            return this->mChildListHeaderId == E_INVALID_NODE;
+        }
+
+        inline bool hasParent()
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            return this->mParentId == this->startParentId && this->mParentId != E_INVALID_NODE;
         }
 
     public:
@@ -192,7 +198,8 @@ namespace NodePool
         inline void resetRelative()
         {
             this->mNextId = E_INVALID_NODE;
-            this->mChildId = E_INVALID_NODE;
+            this->mChildListHeaderId = E_INVALID_NODE;
+            this->startParentId = E_INVALID_NODE;
             this->mParentId = ID;
             this->mRootId = ID;
         }
@@ -200,6 +207,7 @@ namespace NodePool
         inline void resetStatus()
         {
             this->fetal_error_time = 0;
+            this->root_start_time = 0;
             this->start_time = 0;
             this->limit = E_TRACE_PASS;
             this->cumulative_time = 0;
