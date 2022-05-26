@@ -253,3 +253,54 @@ TEST(node, leak_node)
     EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
     show_status();
 }
+
+int usedNode()
+{
+    return PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+}
+
+TEST(node, tons_of_nodes_01)
+{
+    auto count = usedNode(); // PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+    NodeID root = pinpoint_start_trace(E_ROOT_NODE);
+    for (int i = 0; i < 1000; i++)
+    {
+        NodeID child1 = pinpoint_start_trace(root);
+        pinpoint_end_trace(child1);
+    }
+    pinpoint_end_trace(root);
+
+    EXPECT_EQ(count, usedNode()); //);
+
+    count = usedNode();
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    NodeID child1 = root;
+    for (int i = 0; i < 1000; i++)
+    {
+        NodeID child = pinpoint_start_trace(child1);
+        pinpoint_end_trace(child);
+        child1 = child;
+    }
+    pinpoint_end_trace(root);
+
+    EXPECT_EQ(count, usedNode());
+}
+
+TEST(node, tons_of_nodes_02)
+{
+    auto count = usedNode(); // PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+    NodeID root = pinpoint_start_trace(E_ROOT_NODE);
+    NodeID next = root;
+    for (int i = 0; i < 2000; i++)
+    {
+        NodeID child = pinpoint_start_trace(next);
+        pinpoint_end_trace(child);
+        if (i % 2 == 0)
+        {
+            next = child;
+        }
+    }
+    pinpoint_end_trace(root);
+
+    EXPECT_EQ(count, usedNode());
+}
