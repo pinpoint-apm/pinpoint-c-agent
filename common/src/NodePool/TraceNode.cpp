@@ -32,12 +32,16 @@ namespace NodePool
 
     void TraceNode::clearAttach()
     {
+        std::lock_guard<std::mutex> _safe(this->mlock);
         // empty the json value
         if (!this->_value.empty())
             this->_value.clear(); // Json::Value();
 
         if (!this->_context.empty())
             this->_context.clear();
+
+        if (!this->_callback.empty())
+            this->_callback.clear();
     }
 
     void TraceNode::initId(NodeID &id)
@@ -48,12 +52,12 @@ namespace NodePool
     void TraceNode::addChild(TraceNode &child)
     {
         std::lock_guard<std::mutex> _safe(this->mlock);
-        if (child.mParentId != ID)
+        if (child.hasParent() == false)
         {
-            if (this->mChildId != E_INVALID_NODE)
-                child.mNextId = this->mChildId;
-
-            this->mChildId = child.ID;
+            if (this->mChildListHeaderId != E_INVALID_NODE)
+                child.mNextId = this->mChildListHeaderId;
+            assert(child.mNextId != child.ID);
+            this->mChildListHeaderId = child.ID;
             child.mParentId = ID;
         }
     }
@@ -104,14 +108,14 @@ namespace NodePool
         pp_trace("#%d add opt: key:%s value:%s", ID, key.c_str(), value.c_str());
         if (key == "TraceMinTimeMs")
         {
+            int64_t min = std::stoll(value);
             auto cb = [=]() -> bool
             {
-                int64_t min = std::stoll(value);
                 if ((int64_t)this->cumulative_time >= min)
                     return true;
                 return false;
             };
-            this->_callback.push_back(std::bind(cb));
+            this->_callback.push_back(cb);
         }
         else if (key == "TraceOnlyException")
         {
@@ -120,7 +124,7 @@ namespace NodePool
                 return this->mHasExp;
             };
 
-            this->_callback.push_back(std::bind(cb));
+            this->_callback.push_back(cb);
         }
     }
 

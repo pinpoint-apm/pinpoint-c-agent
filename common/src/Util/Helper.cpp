@@ -63,7 +63,7 @@ namespace Helper
 
         if (!node.isLeaf())
         {
-            TraceNode &pstart = PoolManager::getInstance().GetNode(node.mChildId);
+            TraceNode &pstart = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
             reverseNodeList(value["calls"], pstart);
         }
 
