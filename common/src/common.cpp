@@ -693,7 +693,7 @@ void show_status(void)
     Json::Value status;
     status["pool_total_node"] = PoolManager::getInstance().totoalNodesCount();
     status["pool_free_node"] = PoolManager::getInstance().freeNodesCount();
-
+    status["common_libary_version"] = pinpoint_agent_version();
     auto add_alive_node_fun = [&status](int _id)
     {
         status["pool_alive_nodes"].append(_id);
