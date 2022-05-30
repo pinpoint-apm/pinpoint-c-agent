@@ -33,7 +33,7 @@ namespace Helper
     static NodeTreeWriter _writer;
     static ConnectionPool::SpanConnectionPool _con_pool;
     static std::once_flag _pool_init_flag;
-    static Json::Value &mergeChildren(TraceNode &node);
+    static Json::Value mergeChildren(TraceNode &node);
     uint64_t get_current_msec_stamp()
     {
         std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
@@ -57,17 +57,17 @@ namespace Helper
         parents.append(mergeChildren(head));
     }
 
-    Json::Value &mergeChildren(TraceNode &node)
+    Json::Value mergeChildren(TraceNode &node)
     {
-        Json::Value &value = node.getValue();
-
         if (!node.isLeaf())
         {
+            Json::Value calls;
             TraceNode &pstart = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
-            reverseNodeList(value["calls"], pstart);
+            reverseNodeList(calls, pstart);
+            // only a none leaf node has calls nodes
+            node.setNodeValue("calls", calls);
         }
-
-        return value;
+        return node.getJsValue();
     }
 
     Json::Value mergeTraceNodeTree(NodeID &Id)

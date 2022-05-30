@@ -80,12 +80,18 @@ TEST(common, context_check)
     str += "35486we32";
     pinpoint_set_context_key(id, "adfadf23", str.c_str());
     str.clear();
-    EXPECT_STREQ(pinpoint_get_context_key(id, "adfadf23"), "fadfaffadf35486we32");
-    EXPECT_STREQ(pinpoint_get_context_key(id, "adfadf"), "fadfaffadf");
+    char buf[1024] = {0};
+    pinpoint_get_context_key(id, "adfadf23", buf, 1024);
+
+    EXPECT_STREQ(buf, "fadfaffadf35486we32");
+    pinpoint_get_context_key(id, "adfadf", buf, 1024);
+
+    EXPECT_STREQ(buf, "fadfaffadf");
 
     pinpoint_set_context_long(id, "1024", 1024);
     pinpoint_set_context_long(NodeID(0), "1024", 1024);
     pinpoint_set_context_long(NodeID(1205), "1024", 1024);
+    pinpoint_set_context_key(id, "adfadf23", "fadfaffadf");
     long value;
     EXPECT_EQ(pinpoint_get_context_long(id, "1024", &value), 0);
     EXPECT_EQ(value, 1024);

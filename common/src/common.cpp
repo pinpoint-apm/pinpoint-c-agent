@@ -37,7 +37,7 @@ namespace Json = AliasJson;
 using Cache::SafeSharedState;
 using ConnectionPool::TransConnection;
 using Helper::get_current_msec_stamp;
-using NodePool::PContextType;
+// using NodePool::PContextType;
 using NodePool::PoolManager;
 using NodePool::TraceNode;
 
@@ -474,15 +474,25 @@ static inline void do_set_context_key(NodeID _id, const char *key, const char *v
     TraceNode &node = PoolManager::getInstance().GetNode(_id);
     TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
 
-    root.setStrContext(key, value);
+    root.setContext(key, value);
 }
 
-static const char *do_get_context_key(NodeID _id, const char *key)
+static int do_get_context_key(NodeID _id, const char *key, char *pbuf, int buf_size)
 {
     TraceNode &node = PoolManager::getInstance().GetNode(_id);
     TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
-    PContextType &pValue = root.getContextByKey(key);
-    return pValue->asStringValue().c_str();
+    std::string value;
+    root.getContext(key, value);
+    if (pbuf != nullptr && buf_size > (int)value.size())
+    {
+        strncpy(pbuf, value.c_str(), buf_size);
+        return (int)value.size();
+    }
+    else
+    {
+        pp_trace("#%d get context key:%s failed. buffer is not enough", _id, key);
+        return -1;
+    }
 }
 
 void pinpoint_set_context_key(NodeID _id, const char *key, const char *value)
@@ -509,7 +519,7 @@ static void do_set_long_key(NodeID id, const char *key, long l)
 {
     TraceNode &node = PoolManager::getInstance().GetNode(id);
     TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
-    root.setLongContext(key, l);
+    root.setContext(key, l);
 }
 
 void pinpoint_set_context_long(NodeID _id, const char *key, long l)
@@ -536,8 +546,12 @@ static int do_get_long_key(NodeID _id, const char *key, long *l)
 {
     TraceNode &node = PoolManager::getInstance().GetNode(_id);
     TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
-    PContextType &pValue = root.getContextByKey(key);
-    *l = pValue->asLongValue();
+    if (l != nullptr)
+    {
+        long v;
+        root.getContext(key, v);
+        *l = v;
+    }
     return 0;
 }
 
@@ -563,11 +577,11 @@ int pinpoint_get_context_long(NodeID _id, const char *key, long *l)
     return 1;
 }
 
-const char *pinpoint_get_context_key(NodeID _id, const char *key)
+int pinpoint_get_context_key(NodeID _id, const char *key, char *pbuf, int buf_size)
 {
     try
     {
-        return do_get_context_key(_id, key);
+        return do_get_context_key(_id, key, pbuf, buf_size);
     }
     catch (const std::out_of_range &ex)
     {
@@ -581,7 +595,7 @@ const char *pinpoint_get_context_key(NodeID _id, const char *key)
     {
         pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
     }
-    return nullptr;
+    return -1;
 }
 
 void do_catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
