@@ -117,7 +117,7 @@ jobs:
           make
           make test TESTS=src/PHP/tests/
 
-  Python3:
+  Python:
     strategy:
       matrix:
         os: [ubuntu-18.04, macos-latest]
