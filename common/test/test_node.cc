@@ -108,8 +108,9 @@ void func()
         rootId = pinpoint_start_trace(rootId);
         pinpoint_set_context_key(rootId, "xxxx", "bbbbbb");
         std::this_thread::yield();
-        const char *value = pinpoint_get_context_key(rootId, "xxxx");
-        std::cout << "read value:" << value << " ";
+        char buf[1024];
+        pinpoint_get_context_key(rootId, "xxxx", buf, 1024);
+        std::cout << "read value:" << buf << " ";
         pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_LOC_CURRENT);
         std::this_thread::yield();
         pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_LOC_CURRENT);

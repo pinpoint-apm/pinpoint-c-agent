@@ -40,7 +40,7 @@ namespace NodePool
     using Context::LongContextType;
     using Context::StringContextType;
 
-    typedef std::shared_ptr<ContextType> PContextType;
+    typedef std::shared_ptr<ContextType> _ContextType_;
     class TraceNode
     {
 
@@ -101,11 +101,6 @@ namespace NodePool
 
         virtual ~TraceNode();
 
-        Json::Value &getValue()
-        {
-            return this->_value;
-        }
-
         TraceNode &reset(NodeID id)
         {
             this->clearAttach();
@@ -120,22 +115,36 @@ namespace NodePool
             return this->ID;
         }
 
-        PContextType &getContextByKey(const char *key)
+        Json::Value getJsValue()
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
-            return this->_context.at(key);
+            return this->_value;
         }
 
-        void setStrContext(const char *key, const char *buf)
+        void getContext(const char *key, std::string &value)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
-            PContextType context(std::make_shared<StringContextType>(buf));
+            _ContextType_ &ctx = this->_context.at(key);
+            value = ctx->asStringValue();
+        }
+
+        void getContext(const char *key, long &value)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            _ContextType_ &ctx = this->_context.at(key);
+            value = ctx->asLongValue();
+        }
+
+        void setContext(const char *key, const char *buf)
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            _ContextType_ context(std::make_shared<StringContextType>(buf));
             this->_context[key] = context;
         }
 
-        void setLongContext(const char *key, long l)
+        void setContext(const char *key, long l)
         {
-            PContextType context(std::make_shared<LongContextType>(l));
+            _ContextType_ context(std::make_shared<LongContextType>(l));
             this->_context[key] = context;
         }
 
@@ -220,7 +229,7 @@ namespace NodePool
 
     private:
         Json::Value _value;
-        std::map<std::string, PContextType> _context;
+        std::map<std::string, _ContextType_> _context;
         std::vector<std::function<bool()>> _callback;
     };
 }

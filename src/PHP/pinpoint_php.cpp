@@ -290,14 +290,14 @@ PHP_FUNCTION(pinpoint_get_context)
     {
         _id = pinpoint_get_per_thread_id();
     }
-
-    const char *value = pinpoint_get_context_key((NodeID)_id, key.c_str());
-    if (value)
+    char value[1024] = {0};
+    int len = pinpoint_get_context_key((NodeID)_id, key.c_str(), value, 1024);
+    if (len > 0)
     {
 #if PHP_VERSION_ID < 70000
-        RETURN_STRING(value, 1);
+        RETURN_STRINGL(value, len,1);
 #else
-        RETURN_STRING(value);
+        RETURN_STRINGL(value, len);
 #endif
     }
     else

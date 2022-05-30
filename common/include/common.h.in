@@ -112,6 +112,8 @@ typedef enum
 
 /**
  * @brief change logs
+ * ## v0.4.13
+ * pinpoint_get_context_key API changed
  * ## v0.4.10
  * - new API: pinpoint_start_traceV1,pinpoint_add_exception
  * ## v0.4.9
@@ -208,10 +210,10 @@ extern "C"
     void pinpoint_set_context_key(NodeID _id, const char *key, const char *value);
     /**
      * [tls] get the corresponding value with key(in current trace)
-     * @param key
+     * @param size copy into pbuf, not include '\0'
      * @return
      */
-    const char *pinpoint_get_context_key(NodeID _id, const char *key);
+    int pinpoint_get_context_key(NodeID _id, const char *key, char *pbuf, int buf_size);
 
     void pinpoint_set_context_long(NodeID _id, const char *key, long);
 
