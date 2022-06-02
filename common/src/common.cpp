@@ -31,7 +31,7 @@
 #include "NodePool/PoolManager.h"
 #include "Util/Helper.h"
 #include "ConnectionPool/SpanConnectionPool.h"
-#include "define.h"
+#include "header.h"
 namespace Json = AliasJson;
 
 using Cache::SafeSharedState;
@@ -86,7 +86,7 @@ static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args
     }
 }
 
-static void free_nodes_tree(NodeID id)
+void free_nodes_tree(NodeID id)
 {
     if (id == E_INVALID_NODE || id == E_ROOT_NODE)
     {
@@ -177,13 +177,15 @@ NodeID do_end_trace(NodeID Id)
             catch (const std::out_of_range &ex)
             {
                 pp_trace("current#%d dropped,due to parent is end", node.ID);
-                PoolManager::getInstance().freeNode(node);
+                // PoolManager::getInstance().freeNode(node);
+                free_nodes_tree(node.ID);
             }
         }
         else
         {
             pp_trace("current#%d dropped,due to checkOpt false", node.ID);
-            PoolManager::getInstance().freeNode(node);
+            free_nodes_tree(node.ID);
+            // PoolManager::getInstance().freeNode(node);
         }
 
         return parentId;

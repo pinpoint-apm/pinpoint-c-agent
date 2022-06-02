@@ -1,6 +1,7 @@
 #include "common.h"
 #include <gtest/gtest.h>
 #include "Util/Helper.h"
+#include "header.h"
 #include "NodePool/PoolManager.h"
 #include <condition_variable>
 #include <thread>
@@ -287,7 +288,7 @@ TEST(node, tons_of_nodes_01)
     EXPECT_EQ(count, usedNode());
 }
 
-TEST(node, tons_of_nodes_02)
+TEST(node, tons_of_nodes_2k)
 {
     auto count = usedNode(); // PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
     NodeID root = pinpoint_start_trace(E_ROOT_NODE);
@@ -303,5 +304,39 @@ TEST(node, tons_of_nodes_02)
     }
     pinpoint_end_trace(root);
 
+    EXPECT_EQ(count, usedNode());
+}
+
+TEST(node, tons_of_nodes_leak)
+{
+    auto count = usedNode();
+
+    NodeID root, child_1, child_2;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+
+    child_1 = pinpoint_start_trace(root);
+    child_2 = pinpoint_start_trace(child_1);
+
+    pinpoint_end_trace(child_2);
+
+    pinpoint_end_trace(root);
+    pinpoint_end_trace(child_1);
+    EXPECT_EQ(count, usedNode());
+}
+
+TEST(node, tons_of_nodes_free_all)
+{
+    auto count = usedNode();
+
+    NodeID root, child_1, child_2;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+
+    child_1 = pinpoint_start_trace(root);
+    child_2 = pinpoint_start_trace(child_1);
+    free_nodes_tree(root);
+    pinpoint_end_trace(child_2);
+
+    pinpoint_end_trace(root);
+    pinpoint_end_trace(child_1);
     EXPECT_EQ(count, usedNode());
 }
