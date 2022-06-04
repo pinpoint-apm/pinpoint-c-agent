@@ -31,18 +31,19 @@
 
 namespace NodePool
 {
-
     class PoolManager
     {
     private:
-        TraceNode &_getNode(NodeID id);
+        TraceNode &_getNodeBy(NodeID id);
 
     public:
-        TraceNode &GetNode(NodeID id = E_ROOT_NODE);
+        TraceNode &take(NodeID id = E_ROOT_NODE);
 
-        void freeNode(NodeID id);
+        WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE);
 
-        void freeNode(TraceNode &);
+        void restore(NodeID id);
+
+        void restore(TraceNode &);
 
         uint32_t totoalNodesCount()
         {
@@ -118,8 +119,7 @@ namespace NodePool
         static const int CELL_SIZE = 128;
         std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
     };
-
-    // uint32_t generateNid();
+    void freeNodeTree(NodeID root);
 }
 
 #endif /* COMMON_SRC_NODEPOOL_POOLMANAGER_H_ */

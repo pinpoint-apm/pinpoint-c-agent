@@ -105,7 +105,7 @@ TEST(common, error_checking)
     id = pinpoint_end_trace(id);
     EXPECT_EQ(id, 0);
 
-    id = pinpoint_start_trace(NodeID(128));
+    id = pinpoint_start_trace(NodeID(1280));
     EXPECT_EQ(id, E_INVALID_NODE);
 }
 

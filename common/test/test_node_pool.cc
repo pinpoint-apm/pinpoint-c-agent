@@ -10,22 +10,22 @@ TEST(poolManger, get_and_give_back)
 {
     NodePool::PoolManager pool;
     // new
-    TraceNode &_node = pool.GetNode();
+    TraceNode &_node = pool.take();
     void *p = &_node;
     NodeID id = _node.getId();
     // give back
-    pool.freeNode(id);
-    TraceNode &_node_01 = pool.GetNode();
+    pool.restore(id);
+    TraceNode &_node_01 = pool.take();
 
     // ref current
-    TraceNode &ref_new_node = pool.GetNode(_node_01.getId());
+    TraceNode &ref_new_node = pool.take(_node_01.getId());
 
     EXPECT_EQ(p, &_node);
     EXPECT_EQ(ref_new_node, _node);
     // reuse the same id
     EXPECT_EQ(id, _node.getId());
-    EXPECT_THROW(pool.GetNode(NodeID(100)), std::out_of_range);
-    EXPECT_THROW(pool.GetNode(NodeID(10000)), std::out_of_range);
+    EXPECT_THROW(pool.take(NodeID(100)), std::out_of_range);
+    EXPECT_THROW(pool.take(NodeID(10000)), std::out_of_range);
 }
 
 static NodePool::PoolManager g_pool;
@@ -35,14 +35,14 @@ void test_node_pool(bool &result)
     NodeID it = E_INVALID_NODE;
     for (int i = 0; i < 1000; i++)
     {
-        TraceNode &_node = g_pool.GetNode();
+        TraceNode &_node = g_pool.take();
         usleep(1000);
         if (_node.getId() == it)
         {
             result = false;
             return;
         }
-        g_pool.freeNode(_node);
+        g_pool.restore(_node);
         // g_pool.freeNode(_node.getId());
     }
     result = true;

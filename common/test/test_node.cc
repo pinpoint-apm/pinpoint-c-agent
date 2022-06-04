@@ -10,22 +10,24 @@
 using NodePool::PoolManager;
 using NodePool::TraceNode;
 using namespace testing;
+using NodePool::freeNodeTree;
 namespace Json = AliasJson;
 
 NodeID start_trace(NodeID _id)
 {
     if (_id == 0)
     {
-        TraceNode &node = PoolManager::getInstance().GetNode();
+        TraceNode &node = PoolManager::getInstance().take();
         node.setNodeValue("name", std::to_string(node.getId()).c_str());
         node.startTimer();
         return node.getId();
     }
 
-    TraceNode &parent = PoolManager::getInstance().GetNode(_id);
-    TraceNode &child = PoolManager::getInstance().GetNode();
+    TraceNode &parent = PoolManager::getInstance().take(_id);
+    TraceNode &child = PoolManager::getInstance().take();
     child.startTimer();
-    child.setTraceParent(parent);
+
+    child.setTraceParent(parent.ID);
     child.setNodeValue("name", std::to_string(child.getId()).c_str());
 
     return child.ID;
@@ -33,7 +35,7 @@ NodeID start_trace(NodeID _id)
 
 NodeID end_trace(NodeID _id)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
+    TraceNode &node = PoolManager::getInstance().take(_id);
     return node.mParentId == node.ID ? E_ROOT_NODE : node.mParentId;
 }
 
@@ -61,7 +63,7 @@ void print_tree(TraceNode &node, int indent)
     NodeID childId = node.mChildListHeaderId;
     while (childId != E_INVALID_NODE)
     {
-        TraceNode &child = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
+        TraceNode &child = PoolManager::getInstance().take(node.mChildListHeaderId);
         print_tree(child, indent + 1);
         childId = child.mNextId;
     }
@@ -176,7 +178,7 @@ void test_opt(TraceNode &node, const char *opt, ...)
 
 TEST(node, opt)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode();
+    TraceNode &node = PoolManager::getInstance().take();
 
     test_opt(node, "TraceMinTimeMs:23", "TraceOnlyException", nullptr);
 
@@ -191,7 +193,7 @@ TEST(node, opt)
     node.mHasExp = false;
     EXPECT_FALSE(node.checkOpt());
 
-    PoolManager::getInstance().freeNode(node);
+    PoolManager::getInstance().restore(node);
     // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
@@ -283,6 +285,7 @@ TEST(node, tons_of_nodes_01)
         pinpoint_end_trace(child);
         child1 = child;
     }
+    mark_current_trace_status(root, E_TRACE_BLOCK);
     pinpoint_end_trace(root);
 
     EXPECT_EQ(count, usedNode());
@@ -333,10 +336,37 @@ TEST(node, tons_of_nodes_free_all)
 
     child_1 = pinpoint_start_trace(root);
     child_2 = pinpoint_start_trace(child_1);
-    free_nodes_tree(root);
+    freeNodeTree(root);
     pinpoint_end_trace(child_2);
 
     pinpoint_end_trace(root);
     pinpoint_end_trace(child_1);
     EXPECT_EQ(count, usedNode());
+}
+//./bin/TestCommon --gtest_filter=node.free_when_add
+TEST(node, free_when_add)
+{
+    auto count = usedNode();
+    NodeID root;
+    auto make_it_busy = [&]()
+    {
+        auto w_root = PoolManager::getInstance().GetWrapperNode();
+        root = w_root->ID;
+        auto w_child = PoolManager::getInstance().GetWrapperNode();
+        w_child->setTraceParent(w_root->ID);
+        w_root->addChild(w_child);
+        w_child->setNodeValue("E_ROOT_NODE", 234);
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    };
+    std::thread t(make_it_busy);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    auto start = Helper::get_current_msec_stamp();
+    freeNodeTree(root);
+    freeNodeTree(E_INVALID_NODE);
+    freeNodeTree(E_ROOT_NODE);
+    auto end = Helper::get_current_msec_stamp() - start;
+    printf("it takes: %ld to free ", end);
+    t.join();
+    EXPECT_EQ(count, usedNode());
+    EXPECT_TRUE(end >= 100);
 }

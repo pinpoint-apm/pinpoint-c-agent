@@ -39,6 +39,29 @@ namespace NodePool
     using Context::ContextType;
     using Context::LongContextType;
     using Context::StringContextType;
+    class TraceNode;
+    class WrapperTraceNode
+    {
+    public:
+        WrapperTraceNode() = delete;
+        WrapperTraceNode(const WrapperTraceNode &other) = delete;
+        WrapperTraceNode(WrapperTraceNode &&other) : _traceNode(std::move(other._traceNode))
+        {
+            other._traceNode = nullptr;
+        }
+
+        WrapperTraceNode &operator=(const WrapperTraceNode &other) = delete;
+
+        WrapperTraceNode(TraceNode *node);
+        TraceNode *operator->()
+        {
+            return _traceNode;
+        }
+        ~WrapperTraceNode();
+
+    private:
+        TraceNode *_traceNode;
+    };
 
     typedef std::shared_ptr<ContextType> _ContextType_;
     class TraceNode
@@ -49,7 +72,7 @@ namespace NodePool
         NodeID mNextId;            // equal brother node
         NodeID mChildListHeaderId; // subtree/child tree
         NodeID mParentId;          // parent Id [end_trace] avoiding re-add
-        NodeID startParentId;      // parent Id [start_trace]
+        NodeID mStartParentId;     // parent Id [start_trace]
         NodeID mRootId;            // highway to root node
         NodeID ID;
 
@@ -62,16 +85,16 @@ namespace NodePool
 
     public:
         void startTimer();
-        void setTraceParent(TraceNode &parent);
+        void setTraceParent(NodeID parentId);
         void endTimer();
-        void wake();
+        void wakeUp();
 
         void convertToSpanEvent();
         void convertToSpan();
 
     public:
-        void addChild(TraceNode &child);
-
+        // void addChild(TraceNode &child);
+        void addChild(WrapperTraceNode &child);
         void remove();
 
         inline bool isRoot() const
@@ -86,8 +109,8 @@ namespace NodePool
 
         inline bool hasParent()
         {
-            std::lock_guard<std::mutex> _safe(this->mlock);
-            return this->mParentId == this->startParentId && this->mParentId != E_INVALID_NODE;
+            // std::lock_guard<std::mutex> _safe(this->mlock);
+            return this->mParentId == this->mStartParentId && this->mParentId != E_INVALID_NODE;
         }
 
     public:
@@ -97,12 +120,14 @@ namespace NodePool
             this->mRootId = E_INVALID_NODE;
             this->resetRelative();
             this->resetStatus();
+            this->_mRef = 0;
         }
 
         virtual ~TraceNode();
 
         TraceNode &reset(NodeID id)
         {
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->clearAttach();
             this->initId(id);
             this->resetStatus();
@@ -144,6 +169,7 @@ namespace NodePool
 
         void setContext(const char *key, long l)
         {
+            std::lock_guard<std::mutex> _safe(this->mlock);
             _ContextType_ context(std::make_shared<LongContextType>(l));
             this->_context[key] = context;
         }
@@ -208,7 +234,7 @@ namespace NodePool
         {
             this->mNextId = E_INVALID_NODE;
             this->mChildListHeaderId = E_INVALID_NODE;
-            this->startParentId = E_INVALID_NODE;
+            this->mStartParentId = E_INVALID_NODE;
             this->mParentId = ID;
             this->mRootId = ID;
         }
@@ -226,6 +252,27 @@ namespace NodePool
     public:
         // changes: expose _lock
         std::mutex mlock;
+
+    public:
+        int addRef()
+        {
+            _mRef++;
+            return _mRef.load();
+        }
+
+        int rmRef()
+        {
+            _mRef--;
+            return _mRef.load();
+        }
+
+        bool checkZoreRef()
+        {
+            return _mRef.load() == 0;
+        }
+
+    private:
+        std::atomic<int> _mRef;
 
     private:
         Json::Value _value;

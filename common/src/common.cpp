@@ -38,8 +38,10 @@ using Cache::SafeSharedState;
 using ConnectionPool::TransConnection;
 using Helper::get_current_msec_stamp;
 // using NodePool::PContextType;
+using NodePool::freeNodeTree;
 using NodePool::PoolManager;
 using NodePool::TraceNode;
+using NodePool::WrapperTraceNode;
 
 const static char *CLUSE = "clues";
 static thread_local NodeID __tls_id = E_ROOT_NODE;
@@ -65,45 +67,24 @@ static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args
     }
     else if (id == E_ROOT_NODE)
     {
-        TraceNode &node = PoolManager::getInstance().GetNode();
-        node.startTimer();
-        return node.ID;
+        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
+        r_node->startTimer();
+        return r_node->ID;
     }
     else
     {
-        TraceNode &parent = PoolManager::getInstance().GetNode(id);
-        TraceNode &node = PoolManager::getInstance().GetNode();
-        node.startTimer();
-        node.setTraceParent(parent);
+        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode();
+        r_node->startTimer();
+        r_node->setTraceParent(id);
 
         // pass opt
         if (opt != nullptr)
         {
-            node.setOpt(opt, args);
+            r_node->setOpt(opt, args);
         }
 
-        return node.ID;
+        return r_node->ID;
     }
-}
-
-void free_nodes_tree(NodeID id)
-{
-    if (id == E_INVALID_NODE || id == E_ROOT_NODE)
-    {
-        return;
-    }
-
-    TraceNode &node = PoolManager::getInstance().GetNode(id);
-
-    NodeID child_id = node.mChildListHeaderId;
-    while (child_id != E_INVALID_NODE)
-    {
-        TraceNode &child = PoolManager::getInstance().GetNode(child_id);
-        child_id = child.mNextId;
-        free_nodes_tree(child.ID);
-    }
-
-    PoolManager::getInstance().freeNode(id);
 }
 
 static void flush_to_agent(std::string &span)
@@ -123,80 +104,69 @@ static void flush_to_agent(std::string &span)
     Helper::freeConnection(trans);
 }
 
-NodeID do_end_trace(NodeID Id)
+void sendSpan(NodeID rootId)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(Id);
-    if (node.isRoot())
+    const Json::Value trace = Helper::mergeTraceNodeTree(rootId);
+    std::string spanStr = Helper::node_tree_to_string(trace);
+    if (unlikely(_SpanHandler_ != nullptr))
     {
-        // assert(node.mRootId);
-        /// this trace is end. Try to send current trace
-        if (node.limit == E_TRACE_PASS)
-        {
-            node.endTimer();
-            node.convertToSpan();
-            const Json::Value trace = Helper::mergeTraceNodeTree(node);
-            std::string spanStr = Helper::node_tree_to_string(trace);
-            if (unlikely(_SpanHandler_ != nullptr))
-            {
-                _SpanHandler_(spanStr.c_str());
-            }
-            else
-            {
-                pp_trace("this span:(%s)", spanStr.c_str());
-                flush_to_agent(spanStr);
-            }
-        }
-        else if (node.limit == E_TRACE_BLOCK)
-        {
-            pp_trace("current#%d span dropped,due to TRACE_BLOCK", node.getId());
-        }
-        else
-        {
-            pp_trace("current#%d span dropped,due to limit=%ld", node.getId(), node.limit);
-        }
-        /// this span is done, reset the trace node tree
-        free_nodes_tree(node.ID);
-        return E_ROOT_NODE;
+        _SpanHandler_(spanStr.c_str());
     }
     else
     {
+        pp_trace("this span:(%s)", spanStr.c_str());
+        flush_to_agent(spanStr);
+    }
+}
 
-        node.endTimer();
-        node.convertToSpanEvent();
+NodeID do_end_trace(NodeID Id)
+{
+    WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(Id);
+    if (r_node->isRoot())
+    {
+        if (r_node->limit == E_TRACE_PASS)
+        {
+            r_node->endTimer();
+            r_node->convertToSpan();
+            sendSpan(Id);
+        }
+        else if (r_node->limit == E_TRACE_BLOCK)
+        {
+            pp_trace("current#%d span dropped,due to TRACE_BLOCK", r_node->getId());
+        }
+        else
+        {
+            pp_trace("current#%d span dropped,due to limit=%ld", r_node->getId(), r_node->limit);
+        }
+    }
+    else
+    {
+        r_node->endTimer();
+        r_node->convertToSpanEvent();
 
-        NodeID parentId = node.startParentId;
+        NodeID parentId = r_node->mStartParentId;
 
         // check opt
-        if (node.checkOpt() == true)
+        if (r_node->checkOpt() == true)
         {
             try
             {
-                TraceNode &parent = PoolManager::getInstance().GetNode(parentId);
-                parent.addChild(node);
+                WrapperTraceNode r_parent = PoolManager::getInstance().GetWrapperNode(parentId);
+                r_parent->addChild(r_node);
+                return r_parent->ID;
             }
             catch (const std::out_of_range &ex)
             {
-                pp_trace("current#%d dropped,due to parent is end", node.ID);
-                // PoolManager::getInstance().freeNode(node);
-                free_nodes_tree(node.ID);
+                pp_trace("current#%d dropped,due to parent is end", Id);
             }
         }
         else
         {
-            pp_trace("current#%d dropped,due to checkOpt false", node.ID);
-            free_nodes_tree(node.ID);
-            // PoolManager::getInstance().freeNode(node);
+            pp_trace("current#%d dropped,due to checkOpt false", Id);
         }
-
-        return parentId;
     }
+    return E_ROOT_NODE;
 }
-
-// NodeID do_end_trace(NodeID &_id)
-// {
-//     TraceNode &node = PoolManager::getInstance().getNodeById(_id);
-//     return do_end_trace(node);
-// }
 
 NodeID pinpoint_start_trace(NodeID parentId)
 {
@@ -228,15 +198,15 @@ static NodeID do_wake_trace(NodeID &id)
     // 2. check if it's a root node
     // 3. update start time
 
-    TraceNode &trace_node = PoolManager::getInstance().GetNode(id);
+    WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(id);
 
-    if (trace_node.isRoot())
+    if (w_node->isRoot())
     {
         pp_trace("#%d wake_trace failed, it's a root node", id);
         return E_INVALID_NODE;
     }
 
-    trace_node.wake();
+    w_node->wakeUp();
 
     return id;
 }
@@ -291,8 +261,8 @@ int pinpoint_trace_is_root(NodeID _id)
 {
     try
     {
-        TraceNode &node = PoolManager::getInstance().GetNode(_id);
-        return node.isRoot() ? (1) : (0);
+        WrapperTraceNode node = PoolManager::getInstance().GetWrapperNode(_id);
+        return node->isRoot() ? (1) : (0);
     }
     catch (const std::out_of_range &)
     {
@@ -310,6 +280,10 @@ NodeID pinpoint_end_trace(NodeID traceId)
     try
     {
         NodeID ret = do_end_trace(traceId);
+        if (ret == E_ROOT_NODE)
+        {
+            freeNodeTree(traceId);
+        }
         pp_trace("#%d pinpoint_end_trace Done!", traceId);
         return ret;
     }
@@ -366,11 +340,10 @@ void reset_unique_id(void)
 
 uint64_t inline do_mark_current_trace_status(NodeID &_id, E_AGENT_STATUS status)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    assert(node.mRootId);
-    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
-    pp_trace("change current#%d status, before:%lld,now:%d", root.getId(), root.limit, status);
-    return __sync_lock_test_and_set(&root.limit, status);
+    WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
+    WrapperTraceNode w_root = PoolManager::getInstance().GetWrapperNode(w_node->mRootId);
+    pp_trace("change current#%d status, before:%lld,now:%d", w_root->getId(), w_root->limit, status);
+    return __sync_lock_test_and_set(&w_root->limit, status);
 }
 
 uint64_t mark_current_trace_status(NodeID _id, int status)
@@ -399,35 +372,35 @@ int check_tracelimit(int64_t timestamp)
     return SafeSharedState::instance().checkTraceLimit(timestamp) ? (1) : (0);
 }
 
-static inline TraceNode &parse_flag(NodeID _id, E_NODE_LOC flag)
+static inline WrapperTraceNode locate_node_by_loc(NodeID _id, E_NODE_LOC flag)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
+    WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
     if (flag == E_LOC_ROOT)
     {
-        return PoolManager::getInstance().GetNode(node.mRootId);
+        return PoolManager::getInstance().GetWrapperNode(w_node->mRootId);
     }
     else
     {
-        return node;
+        return w_node;
     }
 }
 
 static void do_add_clue(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
-    TraceNode &node = parse_flag(_id, flag);
-    node.setNodeValue(key, value);
+    WrapperTraceNode w_node = locate_node_by_loc(_id, flag);
+    w_node->setNodeValue(key, value);
     pp_trace("#%d add clue key:%s value:%s", _id, key, value);
 }
 
 static void do_add_clues(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
-    TraceNode &node = parse_flag(_id, flag);
+    WrapperTraceNode w_node = locate_node_by_loc(_id, flag);
 
     std::string cvalue = "";
     cvalue += key;
     cvalue += ':';
     cvalue += value;
-    node.appendNodeValue(CLUSE, cvalue.c_str());
+    w_node->appendNodeValue(CLUSE, cvalue.c_str());
     pp_trace("#%d add clues:%s:%s", _id, key, value);
 }
 
@@ -473,18 +446,15 @@ void pinpoint_add_clue(NodeID _id, const char *key, const char *value, E_NODE_LO
 
 static inline void do_set_context_key(NodeID _id, const char *key, const char *value)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
-
-    root.setContext(key, value);
+    WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
+    w_node->setContext(key, value);
 }
 
 static int do_get_context_key(NodeID _id, const char *key, char *pbuf, int buf_size)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
+    WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
     std::string value;
-    root.getContext(key, value);
+    w_node->getContext(key, value);
     if (pbuf != nullptr && buf_size > (int)value.size())
     {
         strncpy(pbuf, value.c_str(), buf_size);
@@ -519,9 +489,8 @@ void pinpoint_set_context_key(NodeID _id, const char *key, const char *value)
 
 static void do_set_long_key(NodeID id, const char *key, long l)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(id);
-    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
-    root.setContext(key, l);
+    WrapperTraceNode w_node = locate_node_by_loc(id, E_LOC_ROOT);
+    w_node->setContext(key, l);
 }
 
 void pinpoint_set_context_long(NodeID _id, const char *key, long l)
@@ -546,12 +515,11 @@ void pinpoint_set_context_long(NodeID _id, const char *key, long l)
 
 static int do_get_long_key(NodeID _id, const char *key, long *l)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
+    WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
     if (l != nullptr)
     {
         long v;
-        root.getContext(key, v);
+        w_node->getContext(key, v);
         *l = v;
     }
     return 0;
@@ -602,14 +570,13 @@ int pinpoint_get_context_key(NodeID _id, const char *key, char *pbuf, int buf_si
 
 void do_catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    TraceNode &root = PoolManager::getInstance().GetNode(node.mRootId);
+    WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
 
     Json::Value eMsg;
     eMsg["msg"] = msg;
     eMsg["file"] = error_filename;
     eMsg["line"] = error_lineno;
-    root.setNodeValue("ERR", eMsg);
+    w_node->setNodeValue("ERR", eMsg);
 }
 
 void catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
@@ -670,9 +637,9 @@ NodeID pinpoint_start_traceV1(NodeID parentId, const char *opt, ...)
 
 static void do_add_exp(NodeID _id, const char *value)
 {
-    TraceNode &node = parse_flag(_id, E_LOC_CURRENT);
-    node.setNodeValue("EXP", value);
-    node.mHasExp = true;
+    WrapperTraceNode w_root = locate_node_by_loc(_id, E_LOC_CURRENT);
+    w_root->setNodeValue("EXP", value);
+    w_root->mHasExp = true;
     pp_trace("#%d add exp value:%s", _id, value);
 }
 

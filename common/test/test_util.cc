@@ -119,10 +119,10 @@ TEST(util, variadic_func_str)
 
 TEST(util, mergeTraceNodeTree)
 {
-    TraceNode &n1 = PoolManager::getInstance().GetNode();
-    TraceNode &n2 = PoolManager::getInstance().GetNode();
-    TraceNode &n3 = PoolManager::getInstance().GetNode();
-    TraceNode &n4 = PoolManager::getInstance().GetNode();
+    TraceNode &n1 = PoolManager::getInstance().take();
+    TraceNode &n2 = PoolManager::getInstance().take();
+    TraceNode &n3 = PoolManager::getInstance().take();
+    TraceNode &n4 = PoolManager::getInstance().take();
 
     n2.mParentId = n1.ID;
     n1.mChildListHeaderId = n2.ID;

@@ -25,23 +25,44 @@
 
 #include "../Util/Helper.h"
 #include "common.h"
+#include <thread>
 #ifndef UINT32_MAX
 #define UINT32_MAX (0xfffffff)
 #endif
 
 namespace NodePool
 {
-
-    void PoolManager::freeNode(TraceNode &node)
+    void freeNodeTree(NodeID root)
     {
-        this->freeNode(node.getId());
+        if (root == E_INVALID_NODE || root == E_ROOT_NODE)
+        {
+            return;
+        }
+
+        TraceNode &node = PoolManager::getInstance().take(root);
+
+        NodeID child_id = node.mChildListHeaderId;
+        PoolManager::getInstance().restore(root);
+
+        while (child_id != E_INVALID_NODE)
+        {
+            TraceNode &child = PoolManager::getInstance().take(child_id);
+            child_id = child.mNextId;
+            freeNodeTree(child.ID);
+        }
     }
 
-    void PoolManager::freeNode(NodeID id)
+    void PoolManager::restore(TraceNode &node)
     {
+        this->restore(node.getId());
+    }
+
+    void PoolManager::restore(NodeID id)
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+
         int32_t index = (int32_t)id - 1;
 
-        std::lock_guard<std::mutex> _safe(this->_lock);
         if (this->_aliveNodeSet[index] == false)
         {
             pp_trace("%d not alive !!!", id);
@@ -50,12 +71,22 @@ namespace NodePool
 #endif
             return;
         }
+
+        TraceNode &node = this->_getNodeBy(id);
+        while (node.checkZoreRef() == false)
+        {
+#ifdef UTEST
+            pp_trace("%d node is in used", id);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+#endif
+            std::this_thread::yield();
+        }
         this->_aliveNodeSet[index] = false;
 
         this->_freeNodeList.push(index);
     }
 
-    TraceNode &PoolManager::_getNode(NodeID id)
+    TraceNode &PoolManager::_getNodeBy(NodeID id)
     {
         // assert(id != E_INVALID_NODE);
         if (id == E_ROOT_NODE)
@@ -75,15 +106,21 @@ namespace NodePool
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
     }
 
-    TraceNode &PoolManager::GetNode(NodeID id)
+    WrapperTraceNode PoolManager::GetWrapperNode(NodeID id)
+    {
+        TraceNode &e = this->take(id);
+        return WrapperTraceNode(&e);
+    }
+
+    TraceNode &PoolManager::take(NodeID id)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
 
         if (id != E_ROOT_NODE)
         {
-            return this->_getNode(id);
+            return this->_getNodeBy(id);
         }
-
+        // create a new node
         if (this->_freeNodeList.empty())
         {
             this->expandOnce();
@@ -112,5 +149,4 @@ namespace NodePool
         // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
         assert(this->nodeIndexVec.size() * CELL_SIZE == this->_aliveNodeSet.size());
     }
-
 }

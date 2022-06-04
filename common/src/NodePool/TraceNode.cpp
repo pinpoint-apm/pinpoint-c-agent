@@ -26,13 +26,25 @@
 
 namespace NodePool
 {
+    WrapperTraceNode::WrapperTraceNode(TraceNode *node) : _traceNode(node)
+    {
+        assert(_traceNode != nullptr);
+        _traceNode->addRef();
+    }
+
+    WrapperTraceNode::~WrapperTraceNode()
+    {
+        if (_traceNode != nullptr)
+        {
+            _traceNode->rmRef();
+        }
+    }
     TraceNode::~TraceNode()
     {
     }
 
     void TraceNode::clearAttach()
     {
-        std::lock_guard<std::mutex> _safe(this->mlock);
         // empty the json value
         if (!this->_value.empty())
             this->_value.clear(); // Json::Value();
@@ -49,16 +61,18 @@ namespace NodePool
         this->ID = id;
     }
 
-    void TraceNode::addChild(TraceNode &child)
+    void TraceNode::addChild(WrapperTraceNode &child)
     {
         std::lock_guard<std::mutex> _safe(this->mlock);
-        if (child.hasParent() == false)
+
+        std::lock_guard<std::mutex> _child_safe(child->mlock);
+        if (child->hasParent() == false)
         {
             if (this->mChildListHeaderId != E_INVALID_NODE)
-                child.mNextId = this->mChildListHeaderId;
-            assert(child.mNextId != child.ID);
-            this->mChildListHeaderId = child.ID;
-            child.mParentId = ID;
+                child->mNextId = this->mChildListHeaderId;
+            assert(child->mNextId != child->ID);
+            this->mChildListHeaderId = child->ID;
+            child->mParentId = ID;
         }
     }
 
@@ -70,7 +84,7 @@ namespace NodePool
         this->cumulative_time += (end_time - this->start_time);
     }
 
-    void TraceNode::wake()
+    void TraceNode::wakeUp()
     {
         this->start_time = Helper::get_current_msec_stamp();
     }
@@ -89,12 +103,14 @@ namespace NodePool
         this->setNodeValue("S", this->start_time - this->root_start_time);
     }
 
-    void TraceNode::setTraceParent(TraceNode &parent)
+    void TraceNode::setTraceParent(NodeID parentId)
     {
-        this->startParentId = parent.ID;
-        this->mRootId = parent.mRootId;
-        TraceNode &root = PoolManager::getInstance().GetNode(this->mRootId);
-        this->root_start_time = root.start_time;
+        WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(parentId);
+        this->mStartParentId = parentId;
+
+        this->mRootId = parent->mRootId;
+        WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(this->mRootId);
+        this->root_start_time = root->start_time;
     }
 
     void TraceNode::startTimer()

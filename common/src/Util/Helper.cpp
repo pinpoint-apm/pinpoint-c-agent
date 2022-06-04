@@ -50,7 +50,7 @@ namespace Helper
     {
         if (head.mNextId != E_INVALID_NODE)
         {
-            TraceNode &next = PoolManager::getInstance().GetNode(head.mNextId);
+            TraceNode &next = PoolManager::getInstance().take(head.mNextId);
             reverseNodeList(parents, next);
         }
 
@@ -62,7 +62,7 @@ namespace Helper
         if (!node.isLeaf())
         {
             Json::Value calls;
-            TraceNode &pstart = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
+            TraceNode &pstart = PoolManager::getInstance().take(node.mChildListHeaderId);
             reverseNodeList(calls, pstart);
             // only a none leaf node has calls nodes
             node.setNodeValue("calls", calls);
@@ -72,7 +72,7 @@ namespace Helper
 
     Json::Value mergeTraceNodeTree(NodeID &Id)
     {
-        return mergeTraceNodeTree(PoolManager::getInstance().GetNode(Id));
+        return mergeTraceNodeTree(PoolManager::getInstance().take(Id));
     }
 
     Json::Value mergeTraceNodeTree(TraceNode &root)
