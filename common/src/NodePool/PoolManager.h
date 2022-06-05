@@ -36,14 +36,28 @@ namespace NodePool
     private:
         TraceNode &_getNodeBy(NodeID id);
 
-    public:
-        TraceNode &take(NodeID id = E_ROOT_NODE);
+        TraceNode &_take(NodeID id);
 
-        WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE);
+    public:
+        inline TraceNode &take(NodeID id = E_ROOT_NODE)
+        {
+            std::lock_guard<std::mutex> _safe(this->_lock);
+            return this->_take(id);
+        }
+
+        inline WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE)
+        {
+            std::lock_guard<std::mutex> _safe(this->_lock);
+            TraceNode &e = this->_take(id);
+            return WrapperTraceNode(&e);
+        }
 
         void restore(NodeID id);
 
-        void restore(TraceNode &);
+        inline void restore(TraceNode &node)
+        {
+            this->restore(node.getId());
+        }
 
         uint32_t totoalNodesCount()
         {

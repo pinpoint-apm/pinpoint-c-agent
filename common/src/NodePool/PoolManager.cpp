@@ -52,11 +52,6 @@ namespace NodePool
         }
     }
 
-    void PoolManager::restore(TraceNode &node)
-    {
-        this->restore(node.getId());
-    }
-
     void PoolManager::restore(NodeID id)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
@@ -77,7 +72,7 @@ namespace NodePool
         {
 #ifdef UTEST
             pp_trace("%d node is in used", id);
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #endif
             std::this_thread::yield();
         }
@@ -106,16 +101,8 @@ namespace NodePool
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
     }
 
-    WrapperTraceNode PoolManager::GetWrapperNode(NodeID id)
+    TraceNode &PoolManager::_take(NodeID id)
     {
-        TraceNode &e = this->take(id);
-        return WrapperTraceNode(&e);
-    }
-
-    TraceNode &PoolManager::take(NodeID id)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-
         if (id != E_ROOT_NODE)
         {
             return this->_getNodeBy(id);
