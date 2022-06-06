@@ -110,7 +110,7 @@ namespace NodePool
         inline bool hasParent()
         {
             // std::lock_guard<std::mutex> _safe(this->mlock);
-            return this->mParentId == this->mStartParentId && this->mParentId != E_INVALID_NODE;
+            return this->mParentId == this->mStartParentId && this->mStartParentId != E_INVALID_NODE;
         }
 
     public:
@@ -269,6 +269,22 @@ namespace NodePool
         bool checkZoreRef()
         {
             return _mRef.load() == 0;
+        }
+
+    public:
+        std::string ToString()
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            char pbuf[1024] = {0};
+            int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentId:%d mStartParentId:%d mRootId:%d ID:%d \n"
+                                           "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
+                                           "_value:%s \n"
+                                           "_context size:%lu,_callback:%lu \n",
+                               (int)this->mNextId, (int)this->mChildListHeaderId, (int)this->mParentId, (int)this->mStartParentId, (int)this->mRootId, (int)this->ID,
+                               this->start_time, this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp,
+                               this->_value.toStyledString().c_str(),
+                               this->_context.size(), this->_callback.size());
+            return std::string(pbuf, len);
         }
 
     private:

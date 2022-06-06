@@ -23,6 +23,7 @@
 #include "TraceNode.h"
 #include "Util/Helper.h"
 #include "PoolManager.h"
+#include "header.h"
 
 namespace NodePool
 {
@@ -68,11 +69,26 @@ namespace NodePool
         std::lock_guard<std::mutex> _child_safe(child->mlock);
         if (child->hasParent() == false)
         {
+            // todo, throw exception and restore self
+            // root trace was restored
+            if (child->mRootId != this->mRootId)
+            {
+                pp_trace("The trace tree where current trace blongs to was free, free self");
+                throw std::runtime_error("trace tree was done");
+            }
+
             if (this->mChildListHeaderId != E_INVALID_NODE)
                 child->mNextId = this->mChildListHeaderId;
             assert(child->mNextId != child->ID);
             this->mChildListHeaderId = child->ID;
             child->mParentId = ID;
+        }
+        else
+        {
+            if (unlikely(child->mParentId != this->ID))
+            {
+                pp_trace("[🐛] child ref parrent by mStartParentId");
+            }
         }
     }
 

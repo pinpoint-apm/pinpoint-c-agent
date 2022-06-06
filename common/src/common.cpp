@@ -67,7 +67,7 @@ static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args
     }
     else if (id == E_ROOT_NODE)
     {
-        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
+        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode();
         r_node->startTimer();
         return r_node->ID;
     }
@@ -158,6 +158,10 @@ NodeID do_end_trace(NodeID Id)
             catch (const std::out_of_range &ex)
             {
                 pp_trace("current#%d dropped,due to parent is end", Id);
+            }
+            catch (const std::exception &ex)
+            {
+                pp_trace("current#%d dropped,due to exception: %s", Id, ex.what());
             }
         }
         else
@@ -684,4 +688,10 @@ void show_status(void)
     PoolManager::getInstance().foreachAliveNode(std::bind(add_alive_node_fun, std::placeholders::_1));
 
     fprintf(stderr, "%s\n", status.toStyledString().c_str());
+}
+
+void debug_nodeid(NodeID id)
+{
+    WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
+    fprintf(stderr, "nodeid#%d: { value:%s }", id, r_node->ToString().c_str());
 }

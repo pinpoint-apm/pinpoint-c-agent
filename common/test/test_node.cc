@@ -371,3 +371,22 @@ TEST(node, free_when_add)
     EXPECT_EQ(count, usedNode());
     EXPECT_TRUE(end >= 100);
 }
+
+//./bin/TestCommon --gtest_filter=node.orphan_node
+TEST(node, orphan_node)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(root);
+
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(E_ROOT_NODE);
+    pinpoint_end_trace(orphan);
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(root);
+    EXPECT_EQ(count, usedNode());
+}
