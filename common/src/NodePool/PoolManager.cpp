@@ -32,17 +32,17 @@
 
 namespace NodePool
 {
-    void freeNodeTree(NodeID root)
+    void freeNodeTree(NodeID rootId)
     {
-        if (root == E_INVALID_NODE || root == E_ROOT_NODE)
+        if (rootId == E_INVALID_NODE || rootId == E_ROOT_NODE)
         {
             return;
         }
 
-        TraceNode &node = PoolManager::getInstance().take(root);
+        TraceNode &node = PoolManager::getInstance().take(rootId);
 
         NodeID child_id = node.mChildListHeaderId;
-        PoolManager::getInstance().restore(root);
+        PoolManager::getInstance().restore(rootId);
 
         while (child_id != E_INVALID_NODE)
         {

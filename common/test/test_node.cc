@@ -282,6 +282,7 @@ TEST(node, tons_of_nodes_01)
     for (int i = 0; i < 1000; i++)
     {
         NodeID child = pinpoint_start_trace(child1);
+        mark_current_trace_status(root, E_OFFLINE);
         pinpoint_end_trace(child);
         child1 = child;
     }
