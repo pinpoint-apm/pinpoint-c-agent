@@ -9,6 +9,7 @@
 
 using NodePool::PoolManager;
 using NodePool::TraceNode;
+using NodePool::WrapperTraceNode;
 using namespace testing;
 using NodePool::freeNodeTree;
 namespace Json = AliasJson;
@@ -17,25 +18,26 @@ NodeID start_trace(NodeID _id)
 {
     if (_id == 0)
     {
-        TraceNode &node = PoolManager::getInstance().take();
-        node.setNodeValue("name", std::to_string(node.getId()).c_str());
+        TraceNode &node = PoolManager::getInstance().Take();
+        node.AddTraceDetail("name", std::to_string(node.getId()).c_str());
         node.startTimer();
         return node.getId();
     }
 
-    TraceNode &parent = PoolManager::getInstance().take(_id);
-    TraceNode &child = PoolManager::getInstance().take();
-    child.startTimer();
+    WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(_id);
+    WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(parent->mRootId);
+    WrapperTraceNode child = PoolManager::getInstance().GetWrapperNode();
+    child->startTimer();
 
-    child.setTraceParent(parent.ID);
-    child.setNodeValue("name", std::to_string(child.getId()).c_str());
+    child->setTraceParent(parent, root);
+    child->AddTraceDetail("name", std::to_string(child->ID).c_str());
 
-    return child.ID;
+    return child->ID;
 }
 
 NodeID end_trace(NodeID _id)
 {
-    TraceNode &node = PoolManager::getInstance().take(_id);
+    TraceNode &node = PoolManager::getInstance().Take(_id);
     return node.mParentId == node.ID ? E_ROOT_NODE : node.mParentId;
 }
 
@@ -63,7 +65,7 @@ void print_tree(TraceNode &node, int indent)
     NodeID childId = node.mChildListHeaderId;
     while (childId != E_INVALID_NODE)
     {
-        TraceNode &child = PoolManager::getInstance().take(node.mChildListHeaderId);
+        TraceNode &child = PoolManager::getInstance().Take(node.mChildListHeaderId);
         print_tree(child, indent + 1);
         childId = child.mNextId;
     }
@@ -178,7 +180,7 @@ void test_opt(TraceNode &node, const char *opt, ...)
 
 TEST(node, opt)
 {
-    TraceNode &node = PoolManager::getInstance().take();
+    TraceNode &node = PoolManager::getInstance().Take();
 
     test_opt(node, "TraceMinTimeMs:23", "TraceOnlyException", nullptr);
 
@@ -193,7 +195,7 @@ TEST(node, opt)
     node.mHasExp = false;
     EXPECT_FALSE(node.checkOpt());
 
-    PoolManager::getInstance().restore(node);
+    PoolManager::getInstance().Restore(node);
     // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
@@ -354,9 +356,9 @@ TEST(node, free_when_add)
         auto w_root = PoolManager::getInstance().GetWrapperNode();
         root = w_root->ID;
         auto w_child = PoolManager::getInstance().GetWrapperNode();
-        w_child->setTraceParent(w_root->ID);
+        w_child->setTraceParent(w_root, w_root);
         w_root->addChild(w_child);
-        w_child->setNodeValue("E_ROOT_NODE", 234);
+        w_child->AddTraceDetail("E_ROOT_NODE", 234);
         std::this_thread::sleep_for(std::chrono::seconds(2));
     };
     std::thread t(make_it_busy);
@@ -385,8 +387,55 @@ TEST(node, orphan_node)
 
     root = pinpoint_start_trace(E_ROOT_NODE);
     child_1 = pinpoint_start_trace(E_ROOT_NODE);
+    debug_nodeid(orphan);
     pinpoint_end_trace(orphan);
+    debug_nodeid(orphan);
     pinpoint_end_trace(child_1);
     pinpoint_end_trace(root);
+    EXPECT_EQ(count, usedNode());
+}
+//./bin/TestCommon --gtest_filter=node.orphan_node_01
+TEST(node, orphan_node_01)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    pinpoint_end_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(orphan);
+
+    EXPECT_EQ(count, usedNode());
+}
+//./bin/TestCommon --gtest_filter=node.orphan_root_parent_end
+TEST(node, orphan_parent_root_end)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(root);
+
+    pinpoint_end_trace(orphan);
+
+    EXPECT_EQ(count, usedNode());
+}
+
+TEST(node, orphan_root_parent_end)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+    pinpoint_end_trace(root);
+    pinpoint_end_trace(child_1);
+
+    pinpoint_end_trace(orphan);
+
     EXPECT_EQ(count, usedNode());
 }

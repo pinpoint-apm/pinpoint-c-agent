@@ -69,12 +69,12 @@ namespace NodePool
         std::lock_guard<std::mutex> _child_safe(child->mlock);
         if (child->hasParent() == false)
         {
-            // todo, throw exception and restore self
+            // todo, throw exception and Restore self
             // root trace was restored
             if (child->mRootId != this->mRootId)
             {
                 pp_trace("The trace tree where current trace blongs to was free, free self");
-                throw std::runtime_error("trace tree was done");
+                throw std::logic_error("trace tree was done");
             }
 
             if (this->mChildListHeaderId != E_INVALID_NODE)
@@ -107,32 +107,31 @@ namespace NodePool
 
     void TraceNode::convertToSpan()
     {
-        this->setNodeValue("E", this->cumulative_time);
-        this->setNodeValue("S", this->start_time);
+        this->AddTraceDetail("E", this->cumulative_time);
+        this->AddTraceDetail("S", this->start_time);
 
-        this->setNodeValue("FT", global_agent_info.agent_type);
+        this->AddTraceDetail("FT", global_agent_info.agent_type);
     }
 
     void TraceNode::convertToSpanEvent()
     {
-        this->setNodeValue("E", this->cumulative_time);
-        this->setNodeValue("S", this->start_time - this->root_start_time);
+        this->AddTraceDetail("E", this->cumulative_time);
+        this->AddTraceDetail("S", this->start_time - this->root_start_time);
     }
 
-    void TraceNode::setTraceParent(NodeID parentId)
+    void TraceNode::setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root)
     {
-        WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(parentId);
-        this->mStartParentId = parentId;
-
-        this->mRootId = parent->mRootId;
-        WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(this->mRootId);
-        this->root_start_time = root->start_time;
+        std::lock_guard<std::mutex> _safe(this->mlock);
+        this->mRootId = root->ID;
+        this->mStartParentId = parent->ID;
+        this->root_start_time = root->root_start_time;
     }
 
     void TraceNode::startTimer()
     {
         uint64_t time_in_ms = Helper::get_current_msec_stamp();
         this->start_time = time_in_ms;
+        this->root_start_time = time_in_ms;
     }
 
     void TraceNode::parseOpt(std::string key, std::string value)

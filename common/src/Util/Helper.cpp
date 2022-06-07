@@ -34,7 +34,7 @@ namespace Helper
     static ConnectionPool::SpanConnectionPool _con_pool;
     static std::once_flag _pool_init_flag;
     static Json::Value mergeChildren(TraceNode &node);
-    uint64_t get_current_msec_stamp()
+    uint64_t get_current_msec_stamp() noexcept
     {
         std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
         time_point<system_clock, milliseconds> current = time_point_cast<std::chrono::milliseconds>(now);
@@ -50,7 +50,7 @@ namespace Helper
     {
         if (head.mNextId != E_INVALID_NODE)
         {
-            TraceNode &next = PoolManager::getInstance().take(head.mNextId);
+            TraceNode &next = PoolManager::getInstance().Take(head.mNextId);
             reverseNodeList(parents, next);
         }
 
@@ -62,17 +62,17 @@ namespace Helper
         if (!node.isLeaf())
         {
             Json::Value calls;
-            TraceNode &pstart = PoolManager::getInstance().take(node.mChildListHeaderId);
+            TraceNode &pstart = PoolManager::getInstance().Take(node.mChildListHeaderId);
             reverseNodeList(calls, pstart);
             // only a none leaf node has calls nodes
-            node.setNodeValue("calls", calls);
+            node.AddTraceDetail("calls", calls);
         }
         return node.getJsValue();
     }
 
     Json::Value mergeTraceNodeTree(NodeID &Id)
     {
-        return mergeTraceNodeTree(PoolManager::getInstance().take(Id));
+        return mergeTraceNodeTree(PoolManager::getInstance().Take(Id));
     }
 
     Json::Value mergeTraceNodeTree(TraceNode &root)

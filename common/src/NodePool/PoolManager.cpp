@@ -32,56 +32,65 @@
 
 namespace NodePool
 {
-    void freeNodeTree(NodeID rootId)
+    void freeNodeTree(NodeID rootId) noexcept
     {
         if (rootId == E_INVALID_NODE || rootId == E_ROOT_NODE)
         {
             return;
         }
 
-        TraceNode &node = PoolManager::getInstance().take(rootId);
+        TraceNode &node = PoolManager::getInstance().Take(rootId);
 
         NodeID child_id = node.mChildListHeaderId;
-        PoolManager::getInstance().restore(rootId);
+        PoolManager::getInstance().Restore(rootId);
 
         while (child_id != E_INVALID_NODE)
         {
-            TraceNode &child = PoolManager::getInstance().take(child_id);
+            TraceNode &child = PoolManager::getInstance().Take(child_id);
             child_id = child.mNextId;
             freeNodeTree(child.ID);
         }
     }
 
-    void PoolManager::restore(NodeID id)
+    void PoolManager::Restore(NodeID id)
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            if (this->_restore(id))
+            {
+                return;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        pp_trace("[🐛]Restore node failed: #%d; node leaked", id);
+        throw std::runtime_error("[🐛]must be a dead lock; node leaked");
+    }
+    // avoiding `locking and waitting`
+    bool PoolManager::_restore(NodeID id)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
 
         int32_t index = (int32_t)id - 1;
 
-        if (this->_aliveNodeSet[index] == false)
+        if (this->indexInAliveVec(index) == false)
         {
             pp_trace("%d not alive !!!", id);
-#ifndef NDEBUG
-            throw std::runtime_error("input is invalid");
-#endif
-            return;
+            return true;
         }
 
-        TraceNode &node = this->_getNodeBy(id);
-        while (node.checkZoreRef() == false)
+        TraceNode &node = this->_fetchNodeBy(id);
+        if (node.checkZoreRef() == false)
         {
-#ifdef UTEST
-            pp_trace("%d node is in used", id);
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-#endif
-            std::this_thread::yield();
+            return false;
         }
         this->_aliveNodeSet[index] = false;
 
         this->_freeNodeList.push(index);
+        pp_trace("Restore: #%d", id);
+        return true;
     }
 
-    TraceNode &PoolManager::_getNodeBy(NodeID id)
+    TraceNode &PoolManager::_fetchNodeBy(NodeID id)
     {
         // assert(id != E_INVALID_NODE);
         if (id == E_ROOT_NODE)
@@ -91,7 +100,7 @@ namespace NodePool
 
         int32_t index = int32_t(id) - 1;
 
-        if (this->nodeIsAlive(index) == false)
+        if (this->indexInAliveVec(index) == false)
         {
             std::string msg = "#";
             msg += std::to_string(id) + " is not alive";
@@ -101,13 +110,8 @@ namespace NodePool
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
     }
 
-    TraceNode &PoolManager::_take(NodeID id)
-    {
-        if (id != E_ROOT_NODE)
-        {
-            return this->_getNodeBy(id);
-        }
-        // create a new node
+    TraceNode &PoolManager::_getInitNode() noexcept
+    { // create a new node
         if (this->_freeNodeList.empty())
         {
             this->expandOnce();
@@ -115,8 +119,21 @@ namespace NodePool
         // as it holds a _lock, so no more _freeNodeList is empty
         int32_t index = this->_freeNodeList.top();
         this->_freeNodeList.pop();
+        pp_trace("_take: #%d", index + 1);
         this->_aliveNodeSet[index] = true;
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE].reset(NodeID(index + 1));
+    }
+
+    TraceNode &PoolManager::_take(NodeID id)
+    {
+        if (id != E_ROOT_NODE)
+        {
+            return this->_fetchNodeBy(id);
+        }
+        else
+        {
+            return this->_getInitNode();
+        }
     }
 
     void PoolManager::expandOnce()

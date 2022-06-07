@@ -85,7 +85,13 @@ namespace NodePool
 
     public:
         void startTimer();
-        void setTraceParent(NodeID parentId);
+        /**
+         * @brief Set the Trace Parent object
+         *  parent and root can be the same
+         * @param parent
+         * @param root
+         */
+        void setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root);
         void endTimer();
         void wakeUp();
 
@@ -107,9 +113,9 @@ namespace NodePool
             return this->mChildListHeaderId == E_INVALID_NODE;
         }
 
+    private:
         inline bool hasParent()
         {
-            // std::lock_guard<std::mutex> _safe(this->mlock);
             return this->mParentId == this->mStartParentId && this->mStartParentId != E_INVALID_NODE;
         }
 
@@ -189,25 +195,25 @@ namespace NodePool
         }
 
     public:
-        void setNodeValue(const char *key, const char *v)
+        void AddTraceDetail(const char *key, const char *v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
-        void setNodeValue(const char *key, int v)
+        void AddTraceDetail(const char *key, int v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
-        void setNodeValue(const char *key, uint64_t v)
+        void AddTraceDetail(const char *key, uint64_t v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
-        void setNodeValue(const char *key, Json::Value &v)
+        void AddTraceDetail(const char *key, Json::Value &v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
@@ -278,10 +284,12 @@ namespace NodePool
             char pbuf[1024] = {0};
             int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentId:%d mStartParentId:%d mRootId:%d ID:%d \n"
                                            "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
+                                           "_mRef:%d\n"
                                            "_value:%s \n"
                                            "_context size:%lu,_callback:%lu \n",
                                (int)this->mNextId, (int)this->mChildListHeaderId, (int)this->mParentId, (int)this->mStartParentId, (int)this->mRootId, (int)this->ID,
                                this->start_time, this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp,
+                               this->_mRef.load(),
                                this->_value.toStyledString().c_str(),
                                this->_context.size(), this->_callback.size());
             return std::string(pbuf, len);

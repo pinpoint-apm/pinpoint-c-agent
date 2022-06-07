@@ -63,27 +63,28 @@ static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args
 {
     if (id <= E_INVALID_NODE)
     {
-        throw std::runtime_error("invalid node id");
+        throw std::out_of_range("invalid node id");
     }
     else if (id == E_ROOT_NODE)
     {
-        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode();
-        r_node->startTimer();
-        return r_node->ID;
+        TraceNode &r_node = PoolManager::getInstance().Take();
+        r_node.startTimer();
+        return r_node.ID;
     }
     else
     {
-        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode();
-        r_node->startTimer();
-        r_node->setTraceParent(id);
-
+        WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(id);
+        WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(parent->mRootId);
+        WrapperTraceNode trace = PoolManager::getInstance().GetWrapperNode();
+        trace->startTimer();
+        trace->setTraceParent(parent, root);
         // pass opt
         if (opt != nullptr)
         {
-            r_node->setOpt(opt, args);
+            trace->setOpt(opt, args);
         }
 
-        return r_node->ID;
+        return trace->ID;
     }
 }
 
@@ -295,6 +296,10 @@ NodeID pinpoint_end_trace(NodeID traceId)
     {
         pp_trace("end_trace %d out_of_range exception: %s", traceId, ex.what());
     }
+    catch (const std::runtime_error &ex)
+    {
+        pp_trace("end_trace %d runtime_error: %s", traceId, ex.what());
+    }
     catch (const std::exception &ex)
     {
         pp_trace("end_trace #%d end trace failed. %s", traceId, ex.what());
@@ -392,7 +397,7 @@ static inline WrapperTraceNode locate_node_by_loc(NodeID _id, E_NODE_LOC flag)
 static void do_add_clue(NodeID _id, const char *key, const char *value, E_NODE_LOC flag)
 {
     WrapperTraceNode w_node = locate_node_by_loc(_id, flag);
-    w_node->setNodeValue(key, value);
+    w_node->AddTraceDetail(key, value);
     pp_trace("#%d add clue key:%s value:%s", _id, key, value);
 }
 
@@ -580,7 +585,7 @@ void do_catch_error(NodeID _id, const char *msg, const char *error_filename, uin
     eMsg["msg"] = msg;
     eMsg["file"] = error_filename;
     eMsg["line"] = error_lineno;
-    w_node->setNodeValue("ERR", eMsg);
+    w_node->AddTraceDetail("ERR", eMsg);
 }
 
 void catch_error(NodeID _id, const char *msg, const char *error_filename, uint32_t error_lineno)
@@ -642,7 +647,7 @@ NodeID pinpoint_start_traceV1(NodeID parentId, const char *opt, ...)
 static void do_add_exp(NodeID _id, const char *value)
 {
     WrapperTraceNode w_root = locate_node_by_loc(_id, E_LOC_CURRENT);
-    w_root->setNodeValue("EXP", value);
+    w_root->AddTraceDetail("EXP", value);
     w_root->mHasExp = true;
     pp_trace("#%d add exp value:%s", _id, value);
 }
@@ -681,9 +686,9 @@ void show_status(void)
     status["pool_total_node"] = PoolManager::getInstance().totoalNodesCount();
     status["pool_free_node"] = PoolManager::getInstance().freeNodesCount();
     status["common_libary_version"] = pinpoint_agent_version();
-    auto add_alive_node_fun = [&status](int _id)
+    auto add_alive_node_fun = [&status](TraceNode &node)
     {
-        status["pool_alive_nodes"].append(_id);
+        status["pool_alive_nodes"].append(node.ID);
     };
     PoolManager::getInstance().foreachAliveNode(std::bind(add_alive_node_fun, std::placeholders::_1));
 
@@ -692,6 +697,13 @@ void show_status(void)
 
 void debug_nodeid(NodeID id)
 {
-    WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
-    fprintf(stderr, "nodeid#%d: { value:%s }", id, r_node->ToString().c_str());
+    try
+    {
+        WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
+        fprintf(stderr, "nodeid#%d: { value:%s }", id, r_node->ToString().c_str());
+    }
+    catch (const std::exception &ex)
+    {
+        pp_trace(" debug_nodeid:#%d Reason: %s", id, ex.what());
+    }
 }

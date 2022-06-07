@@ -65,7 +65,7 @@ namespace Helper
         }
     } STT;
 
-    uint64_t get_current_msec_stamp();
+    uint64_t get_current_msec_stamp() noexcept;
 
     std::string node_tree_to_string(const Json::Value &value);
 
