@@ -27,6 +27,7 @@
 
 namespace NodePool
 {
+    // static std::atomic<int64_t> _uid_;
     WrapperTraceNode::WrapperTraceNode(TraceNode *node) : _traceNode(node)
     {
         assert(_traceNode != nullptr);
@@ -59,37 +60,21 @@ namespace NodePool
 
     void TraceNode::initId(NodeID &id)
     {
-        this->ID = id;
+        this->mPoolIndex = id;
     }
 
     void TraceNode::addChild(WrapperTraceNode &child)
     {
         std::lock_guard<std::mutex> _safe(this->mlock);
 
-        std::lock_guard<std::mutex> _child_safe(child->mlock);
-        if (child->hasParent() == false)
-        {
-            // todo, throw exception and Restore self
-            // root trace was restored
-            if (child->mRootId != this->mRootId)
-            {
-                pp_trace("The trace tree where current trace blongs to was free, free self");
-                throw std::logic_error("trace tree was done");
-            }
+        if (this->mChildHeadIndex != E_INVALID_NODE)
+            child->mNextId = this->mChildHeadIndex;
 
-            if (this->mChildListHeaderId != E_INVALID_NODE)
-                child->mNextId = this->mChildListHeaderId;
-            assert(child->mNextId != child->ID);
-            this->mChildListHeaderId = child->ID;
-            child->mParentId = ID;
-        }
-        else
-        {
-            if (unlikely(child->mParentId != this->ID))
-            {
-                pp_trace("[🐛] child ref parrent by mStartParentId");
-            }
-        }
+        this->mChildHeadIndex = child->mPoolIndex;
+
+        child->mParentIndex = this->mPoolIndex;
+        child->mRootIndex = this->mRootIndex;
+        child->root_start_time = this->root_start_time;
     }
 
     void TraceNode::endTimer()
@@ -119,13 +104,13 @@ namespace NodePool
         this->AddTraceDetail("S", this->start_time - this->root_start_time);
     }
 
-    void TraceNode::setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root)
-    {
-        std::lock_guard<std::mutex> _safe(this->mlock);
-        this->mRootId = root->ID;
-        this->mStartParentId = parent->ID;
-        this->root_start_time = root->root_start_time;
-    }
+    // void TraceNode::setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root)
+    // {
+    //     std::lock_guard<std::mutex> _safe(this->mlock);
+    //     this->mRootIndex = root->mPoolIndex;
+    //     this->mParentIndex = parent->mPoolIndex;
+    //     this->root_start_time = root->root_start_time;
+    // }
 
     void TraceNode::startTimer()
     {
@@ -136,12 +121,13 @@ namespace NodePool
 
     void TraceNode::parseOpt(std::string key, std::string value)
     {
-        pp_trace("#%d add opt: key:%s value:%s", ID, key.c_str(), value.c_str());
+        pp_trace("#%d add opt: key:%s value:%s", mPoolIndex, key.c_str(), value.c_str());
         if (key == "TraceMinTimeMs")
         {
             int64_t min = std::stoll(value);
             auto cb = [=]() -> bool
             {
+                pp_trace("checkOpt: TraceMinTimeMs:%ld cumulative_time:%lu", min, this->cumulative_time);
                 if ((int64_t)this->cumulative_time >= min)
                     return true;
                 return false;

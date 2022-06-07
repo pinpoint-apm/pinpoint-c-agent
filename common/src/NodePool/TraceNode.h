@@ -66,15 +66,16 @@ namespace NodePool
     typedef std::shared_ptr<ContextType> _ContextType_;
     class TraceNode
     {
-
     public:
-        // c-style tree node
-        NodeID mNextId;            // equal brother node
-        NodeID mChildListHeaderId; // subtree/child tree
-        NodeID mParentId;          // parent Id [end_trace] avoiding re-add
-        NodeID mStartParentId;     // parent Id [start_trace]
-        NodeID mRootId;            // highway to root node
-        NodeID ID;
+        NodeID mNextId;         // equal brother node
+        NodeID mChildHeadIndex; // subtree/child tree
+
+        NodeID mParentIndex; // parent Id [end_trace] avoiding re-add
+        NodeID mRootIndex;   // highway to root node
+        NodeID mPoolIndex;
+        // int64_t mUID;
+        // int64_t mParentUID;
+        // int64_t mRootUID;
 
         uint64_t start_time;
         uint64_t fetal_error_time;
@@ -85,13 +86,6 @@ namespace NodePool
 
     public:
         void startTimer();
-        /**
-         * @brief Set the Trace Parent object
-         *  parent and root can be the same
-         * @param parent
-         * @param root
-         */
-        void setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root);
         void endTimer();
         void wakeUp();
 
@@ -99,31 +93,42 @@ namespace NodePool
         void convertToSpan();
 
     public:
-        // void addChild(TraceNode &child);
         void addChild(WrapperTraceNode &child);
         void remove();
 
         inline bool isRoot() const
         {
-            return this->mRootId == ID;
+            return this->mRootIndex == mPoolIndex;
         }
 
         inline bool isLeaf() const
         {
-            return this->mChildListHeaderId == E_INVALID_NODE;
+            return this->mChildHeadIndex == E_INVALID_NODE;
         }
 
-    private:
-        inline bool hasParent()
-        {
-            return this->mParentId == this->mStartParentId && this->mStartParentId != E_INVALID_NODE;
-        }
+        // private:
+        //     inline bool isRelated(NodeID mParentIndex)
+        //     {
+        //         assert(mParentIndex != mPoolIndex);
+        //         assert(this->mStartParentId != E_INVALID_NODE);
+        //         assert(mParentIndex != E_INVALID_NODE);
+        //         if (this->mParentIndex == this->mStartParentId)
+        //         {
+        //             assert(this->mParentIndex == mParentIndex);
+        //             return true;
+        //         }
+        //         else
+        //         {
+        //             assert(this->mParentIndex == mPoolIndex);
+        //             return false;
+        //         }
+        //     }
 
     public:
         TraceNode()
         {
-            this->ID = E_INVALID_NODE;
-            this->mRootId = E_INVALID_NODE;
+            this->mPoolIndex = E_INVALID_NODE;
+            this->mRootIndex = E_INVALID_NODE;
             this->resetRelative();
             this->resetStatus();
             this->_mRef = 0;
@@ -143,7 +148,7 @@ namespace NodePool
 
         NodeID getId() const
         {
-            return this->ID;
+            return this->mPoolIndex;
         }
 
         Json::Value getJsValue()
@@ -186,12 +191,12 @@ namespace NodePool
 
         bool operator==(TraceNode const &_node) const
         {
-            return this->ID == _node.ID;
+            return this->mPoolIndex == _node.mPoolIndex;
         }
 
         bool operator!=(TraceNode const &_node) const
         {
-            return this->ID != _node.ID;
+            return this->mPoolIndex != _node.mPoolIndex;
         }
 
     public:
@@ -239,10 +244,9 @@ namespace NodePool
         inline void resetRelative()
         {
             this->mNextId = E_INVALID_NODE;
-            this->mChildListHeaderId = E_INVALID_NODE;
-            this->mStartParentId = E_INVALID_NODE;
-            this->mParentId = ID;
-            this->mRootId = ID;
+            this->mChildHeadIndex = E_INVALID_NODE;
+            this->mParentIndex = mPoolIndex;
+            this->mRootIndex = mPoolIndex;
         }
 
         inline void resetStatus()
@@ -282,12 +286,12 @@ namespace NodePool
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             char pbuf[1024] = {0};
-            int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentId:%d mStartParentId:%d mRootId:%d ID:%d \n"
+            int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentIndex:%d mRootIndex:%d mPoolIndex:%d \n"
                                            "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
                                            "_mRef:%d\n"
                                            "_value:%s \n"
                                            "_context size:%lu,_callback:%lu \n",
-                               (int)this->mNextId, (int)this->mChildListHeaderId, (int)this->mParentId, (int)this->mStartParentId, (int)this->mRootId, (int)this->ID,
+                               (int)this->mNextId, (int)this->mChildHeadIndex, (int)this->mParentIndex, (int)this->mRootIndex, (int)this->mPoolIndex,
                                this->start_time, this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp,
                                this->_mRef.load(),
                                this->_value.toStyledString().c_str(),

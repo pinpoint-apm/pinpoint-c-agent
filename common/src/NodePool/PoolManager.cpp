@@ -41,15 +41,15 @@ namespace NodePool
 
         TraceNode &node = PoolManager::getInstance().Take(rootId);
 
-        NodeID child_id = node.mChildListHeaderId;
-        PoolManager::getInstance().Restore(rootId);
+        NodeID child_id = node.mChildHeadIndex;
 
         while (child_id != E_INVALID_NODE)
         {
             TraceNode &child = PoolManager::getInstance().Take(child_id);
             child_id = child.mNextId;
-            freeNodeTree(child.ID);
+            freeNodeTree(child.mPoolIndex);
         }
+        PoolManager::getInstance().Restore(rootId);
     }
 
     void PoolManager::Restore(NodeID id)

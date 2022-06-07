@@ -46,31 +46,37 @@ namespace Helper
         return _writer.write(value);
     }
 
-    static void reverseNodeList(Json::Value &parents, TraceNode &head)
+    static void gatcherChildDetailByReverse(Json::Value &detail, TraceNode &head)
     {
         if (head.mNextId != E_INVALID_NODE)
         {
             TraceNode &next = PoolManager::getInstance().Take(head.mNextId);
-            reverseNodeList(parents, next);
+            gatcherChildDetailByReverse(detail, next);
         }
-
-        parents.append(mergeChildren(head));
+        Json::Value childrenDetail = mergeChildren(head);
+        if (!childrenDetail.empty())
+        {
+            detail.append(childrenDetail);
+        }
     }
 
     Json::Value mergeChildren(TraceNode &node)
     {
-        if (!node.isLeaf())
+        if (node.checkOpt() == false)
         {
-            Json::Value calls;
-            TraceNode &pstart = PoolManager::getInstance().Take(node.mChildListHeaderId);
-            reverseNodeList(calls, pstart);
-            // only a none leaf node has calls nodes
-            node.AddTraceDetail("calls", calls);
+            return Json::Value();
+        }
+        else if (!node.isLeaf())
+        {
+            TraceNode &child = PoolManager::getInstance().Take(node.mChildHeadIndex);
+            Json::Value childTraceDetail;
+            gatcherChildDetailByReverse(childTraceDetail, child);
+            node.AddTraceDetail("calls", childTraceDetail);
         }
         return node.getJsValue();
     }
 
-    Json::Value mergeTraceNodeTree(NodeID &Id)
+    Json::Value mergeTraceNodeTree(NodeID &Id) noexcept
     {
         return mergeTraceNodeTree(PoolManager::getInstance().Take(Id));
     }

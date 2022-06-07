@@ -69,22 +69,20 @@ static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args
     {
         TraceNode &r_node = PoolManager::getInstance().Take();
         r_node.startTimer();
-        return r_node.ID;
+        return r_node.mPoolIndex;
     }
     else
     {
         WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(id);
-        WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(parent->mRootId);
         WrapperTraceNode trace = PoolManager::getInstance().GetWrapperNode();
         trace->startTimer();
-        trace->setTraceParent(parent, root);
+        parent->addChild(trace);
         // pass opt
         if (opt != nullptr)
         {
             trace->setOpt(opt, args);
         }
-
-        return trace->ID;
+        return trace->mPoolIndex;
     }
 }
 
@@ -144,32 +142,31 @@ NodeID do_end_trace(NodeID Id)
     {
         r_node->endTimer();
         r_node->convertToSpanEvent();
-
-        NodeID parentId = r_node->mStartParentId;
-
+        return r_node->mParentIndex;
         // check opt
-        if (r_node->checkOpt() == true)
-        {
-            try
-            {
-                WrapperTraceNode r_parent = PoolManager::getInstance().GetWrapperNode(parentId);
-                r_parent->addChild(r_node);
-                return r_parent->ID;
-            }
-            catch (const std::out_of_range &ex)
-            {
-                pp_trace("current#%d dropped,due to parent is end", Id);
-            }
-            catch (const std::exception &ex)
-            {
-                pp_trace("current#%d dropped,due to exception: %s", Id, ex.what());
-            }
-        }
-        else
-        {
-            pp_trace("current#%d dropped,due to checkOpt false", Id);
-        }
+        // if (r_node->checkOpt() == true)
+        // {
+        //     try
+        //     {
+        //         WrapperTraceNode r_parent = PoolManager::getInstance().GetWrapperNode(parentId);
+        //         r_parent->addChild(r_node);
+        //         return r_parent->mPoolIndex;
+        //     }
+        //     catch (const std::out_of_range &ex)
+        //     {
+        //         pp_trace("current#%d dropped,due to parent is end", Id);
+        //     }
+        //     catch (const std::exception &ex)
+        //     {
+        //         pp_trace("current#%d dropped,due to exception: %s", Id, ex.what());
+        //     }
+        // }
+        // else
+        // {
+        //     pp_trace("current#%d dropped,due to checkOpt false", Id);
+        // }
     }
+    // free current ndde tree
     return E_ROOT_NODE;
 }
 
@@ -350,7 +347,7 @@ void reset_unique_id(void)
 uint64_t inline do_mark_current_trace_status(NodeID &_id, E_AGENT_STATUS status)
 {
     WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
-    WrapperTraceNode w_root = PoolManager::getInstance().GetWrapperNode(w_node->mRootId);
+    WrapperTraceNode w_root = PoolManager::getInstance().GetWrapperNode(w_node->mRootIndex);
     pp_trace("change current#%d status, before:%lld,now:%d", w_root->getId(), w_root->limit, status);
     return __sync_lock_test_and_set(&w_root->limit, status);
 }
@@ -386,7 +383,7 @@ static inline WrapperTraceNode locate_node_by_loc(NodeID _id, E_NODE_LOC flag)
     WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
     if (flag == E_LOC_ROOT)
     {
-        return PoolManager::getInstance().GetWrapperNode(w_node->mRootId);
+        return PoolManager::getInstance().GetWrapperNode(w_node->mRootIndex);
     }
     else
     {
@@ -688,7 +685,7 @@ void show_status(void)
     status["common_libary_version"] = pinpoint_agent_version();
     auto add_alive_node_fun = [&status](TraceNode &node)
     {
-        status["pool_alive_nodes"].append(node.ID);
+        status["pool_alive_nodes"].append(node.mPoolIndex);
     };
     PoolManager::getInstance().foreachAliveNode(std::bind(add_alive_node_fun, std::placeholders::_1));
 

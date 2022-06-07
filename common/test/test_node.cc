@@ -14,92 +14,14 @@ using namespace testing;
 using NodePool::freeNodeTree;
 namespace Json = AliasJson;
 
-NodeID start_trace(NodeID _id)
-{
-    if (_id == 0)
-    {
-        TraceNode &node = PoolManager::getInstance().Take();
-        node.AddTraceDetail("name", std::to_string(node.getId()).c_str());
-        node.startTimer();
-        return node.getId();
-    }
-
-    WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(_id);
-    WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(parent->mRootId);
-    WrapperTraceNode child = PoolManager::getInstance().GetWrapperNode();
-    child->startTimer();
-
-    child->setTraceParent(parent, root);
-    child->AddTraceDetail("name", std::to_string(child->ID).c_str());
-
-    return child->ID;
-}
-
-NodeID end_trace(NodeID _id)
-{
-    TraceNode &node = PoolManager::getInstance().Take(_id);
-    return node.mParentId == node.ID ? E_ROOT_NODE : node.mParentId;
-}
-
-// void free_nodes_tree(TraceNode &node)
-// {
-//     NodeID childId = node.mChildId;
-//     if (childId != E_INVALID_NODE)
-//     {
-//         // keep the next child
-//         TraceNode &child = PoolManager::getInstance().GetNode(childId);
-
-//         childId = child.mNextId;
-//         free_nodes_tree(child);
-//     }
-//     PoolManager::getInstance().freeNode(node);
-// }
-
-void print_tree(TraceNode &node, int indent)
-{
-    for (int i = 0; i < indent; i++)
-        printf("|     ");
-
-    printf("|---[%u]\n", node.getId());
-
-    NodeID childId = node.mChildListHeaderId;
-    while (childId != E_INVALID_NODE)
-    {
-        TraceNode &child = PoolManager::getInstance().Take(node.mChildListHeaderId);
-        print_tree(child, indent + 1);
-        childId = child.mNextId;
-    }
-}
-
-// TEST(node, merge_children)
-// {
-//     NodeID currentId;
-//     currentId = start_trace(E_ROOT_NODE); //# 128
-
-//     currentId = start_trace(currentId); //# 127
-
-//     currentId = end_trace(currentId); //# 128
-
-//     currentId = start_trace(currentId); //# 126
-//     std::cout << "currentId:" << currentId << std::endl;
-//     currentId = end_trace(currentId); //# 128
-
-//     std::cout << "currentId:" << currentId << std::endl;
-//     currentId = end_trace(currentId);
-//     std::cout << "currentId:" << currentId << std::endl;
-
-//     TraceNode &rootNode = PoolManager::getInstance().getNodeById(currentId);
-//     rootNode.endTimer();
-//     // rootNode.convertToSpan();
-//     Json::Value oRoot = Helper::mergeTraceNodeTree(rootNode);
-//     std::string stdBody = Helper::node_tree_to_string(oRoot);
-//     free_nodes_tree(rootNode);
-//     EXPECT_STREQ(stdBody.c_str(), "{\"calls\":[{\"name\":\"127\"},{\"name\":\"126\"}],\"name\":\"128\"}");
-// }
-
 std::mutex cv_m;
 std::condition_variable cv;
 NodeID rootId = E_ROOT_NODE;
+
+int usedNode()
+{
+    return PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+}
 
 // note: as it known, there may leak some node
 void func()
@@ -207,7 +129,7 @@ void capture(const char *msg)
 //./bin/TestCommon --gtest_filter=node.pinpoint_start_traceV1
 TEST(node, pinpoint_start_traceV1)
 {
-    auto count = PoolManager::getInstance().freeNodesCount();
+    auto count = usedNode();
     register_span_handler(capture);
     NodeID root, child1;
     root = pinpoint_start_trace(E_ROOT_NODE);
@@ -224,6 +146,19 @@ TEST(node, pinpoint_start_traceV1)
     child1 = pinpoint_start_traceV1(root, "TraceMinTimeMs:2000", nullptr);
     pinpoint_add_clue(child1, "name", "TraceMinTimeMs:2000", E_LOC_CURRENT);
     sleep(1);
+
+    {
+        NodeID child = pinpoint_start_traceV1(child1, "TraceMinTimeMs:23", nullptr);
+        pinpoint_add_clue(child1, "name", "childFromTraceMinTimeMs:23-1", E_LOC_CURRENT);
+        pinpoint_end_trace(child);
+        child = pinpoint_start_traceV1(child1, "TraceMinTimeMs:23", nullptr);
+        pinpoint_add_clue(child1, "name", "childFromTraceMinTimeMs:23-2", E_LOC_CURRENT);
+        pinpoint_end_trace(child);
+        child = pinpoint_start_traceV1(child1, "TraceMinTimeMs:23", nullptr);
+        pinpoint_add_clue(child1, "name", "childFromTraceMinTimeMs:23-3", E_LOC_CURRENT);
+        pinpoint_end_trace(child);
+    }
+
     pinpoint_end_trace(child1);
 
     child1 = pinpoint_start_traceV1(root, "TraceOnlyException", nullptr);
@@ -236,11 +171,14 @@ TEST(node, pinpoint_start_traceV1)
 
     pinpoint_end_trace(root);
     std::cout << span << std::endl;
-    EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
     EXPECT_TRUE(span.find("Take1sec") != span.npos);
     EXPECT_TRUE(span.find("Exception") != span.npos);
     EXPECT_TRUE(span.find("TraceMinTimeMs:2000") == span.npos);
     EXPECT_TRUE(span.find("NoException") == span.npos);
+
+    EXPECT_TRUE(span.find("childFromTraceMinTimeMs:23-3") == span.npos);
+    EXPECT_TRUE(span.find("childFromTraceMinTimeMs:23-2") == span.npos);
+    EXPECT_EQ(count, usedNode());
 }
 
 TEST(node, leak_node)
@@ -258,11 +196,6 @@ TEST(node, leak_node)
 
     EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
     show_status();
-}
-
-int usedNode()
-{
-    return PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
 }
 
 TEST(node, tons_of_nodes_01)
@@ -354,9 +287,8 @@ TEST(node, free_when_add)
     auto make_it_busy = [&]()
     {
         auto w_root = PoolManager::getInstance().GetWrapperNode();
-        root = w_root->ID;
+        root = w_root->mPoolIndex;
         auto w_child = PoolManager::getInstance().GetWrapperNode();
-        w_child->setTraceParent(w_root, w_root);
         w_root->addChild(w_child);
         w_child->AddTraceDetail("E_ROOT_NODE", 234);
         std::this_thread::sleep_for(std::chrono::seconds(2));
