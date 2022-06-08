@@ -143,6 +143,7 @@ namespace NodePool
             this->initId(id);
             this->resetStatus();
             this->resetRelative();
+            this->_mRef = 0;
             return *this;
         }
 

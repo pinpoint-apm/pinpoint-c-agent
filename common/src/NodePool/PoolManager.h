@@ -40,7 +40,7 @@ namespace NodePool
 
         TraceNode &_take(NodeID id);
 
-        bool _restore(NodeID id);
+        bool _restore(NodeID id, NodeID &child, bool force);
 
     public:
         inline TraceNode &Take(NodeID id = E_ROOT_NODE)
@@ -56,7 +56,7 @@ namespace NodePool
             return WrapperTraceNode(&e);
         }
 
-        void Restore(NodeID id);
+        NodeID Restore(NodeID id);
 
         inline void Restore(TraceNode &node)
         {
@@ -139,7 +139,7 @@ namespace NodePool
         static const int CELL_SIZE = 128;
         std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
     };
-    void freeNodeTree(NodeID root) noexcept;
+    void freeNodeTree(NodeID root);
 }
 
 #endif /* COMMON_SRC_NODEPOOL_POOLMANAGER_H_ */

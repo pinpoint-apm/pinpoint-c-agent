@@ -32,41 +32,40 @@
 
 namespace NodePool
 {
-    void freeNodeTree(NodeID rootId) noexcept
+    void freeNodeTree(NodeID rootId)
     {
         if (rootId == E_INVALID_NODE || rootId == E_ROOT_NODE)
         {
             return;
         }
 
-        TraceNode &node = PoolManager::getInstance().Take(rootId);
-
-        NodeID child_id = node.mChildHeadIndex;
-
+        NodeID child_id = PoolManager::getInstance().Restore(rootId);
         while (child_id != E_INVALID_NODE)
         {
             TraceNode &child = PoolManager::getInstance().Take(child_id);
             child_id = child.mNextId;
             freeNodeTree(child.mPoolIndex);
         }
-        PoolManager::getInstance().Restore(rootId);
     }
 
-    void PoolManager::Restore(NodeID id)
+    NodeID PoolManager::Restore(NodeID id)
     {
+        NodeID child = E_INVALID_NODE;
         for (int i = 0; i < 1000; i++)
         {
-            if (this->_restore(id))
+            if (this->_restore(id, child, false))
             {
-                return;
+                return child;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
-        pp_trace("[🐛]Restore node failed: #%d; node leaked", id);
-        throw std::runtime_error("[🐛]must be a dead lock; node leaked");
+        pp_trace("[🐛]Restore node failed: #%d; node restore forcefully", id);
+        this->_restore(id, child, true);
+        return child;
     }
+
     // avoiding `locking and waitting`
-    bool PoolManager::_restore(NodeID id)
+    bool PoolManager::_restore(NodeID id, NodeID &child, bool force)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
 
@@ -75,19 +74,25 @@ namespace NodePool
         if (this->indexInAliveVec(index) == false)
         {
             pp_trace("%d not alive !!!", id);
+            child = E_INVALID_NODE;
             return true;
         }
 
+        // check refcount
         TraceNode &node = this->_fetchNodeBy(id);
-        if (node.checkZoreRef() == false)
+
+        if (node.checkZoreRef() == false && force == false)
         {
             return false;
         }
-        this->_aliveNodeSet[index] = false;
-
-        this->_freeNodeList.push(index);
-        pp_trace("Restore: #%d", id);
-        return true;
+        else
+        {
+            this->_aliveNodeSet[index] = false;
+            child = node.mChildHeadIndex;
+            this->_freeNodeList.push(index);
+            pp_trace("Restore: #%d", id);
+            return true;
+        }
     }
 
     TraceNode &PoolManager::_fetchNodeBy(NodeID id)
