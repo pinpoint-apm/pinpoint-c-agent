@@ -371,3 +371,39 @@ TEST(node, orphan_root_parent_end)
 
     EXPECT_EQ(count, usedNode());
 }
+// ./bin/TestCommon --gtest_filter=node.end_trace_in_mt
+TEST(node, end_trace_in_mt)
+{
+    auto count = usedNode();
+    NodeID root = pinpoint_start_trace(E_ROOT_NODE);
+    NodeID next = root;
+    // limit size 100; due to https://github.com/pinpoint-apm/pinpoint-c-agent/runs/6806024797?check_suite_focus=true bus error under macos
+    for (int i = 0; i < 100; i++)
+    {
+        next = pinpoint_start_trace(next);
+        pinpoint_end_trace(next);
+    }
+
+    std::mutex mtx;
+    std::condition_variable cv;
+
+    auto thread_func = [&]()
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+        cv.wait(lck);
+        pp_trace("%lu ", std::this_thread::get_id());
+        pinpoint_end_trace(root);
+    };
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 10; i++)
+    {
+        // std::thread t(thread_func);
+        threads.emplace_back(thread_func);
+    }
+    // wait for all threads running
+    sleep(2);
+    cv.notify_all();
+    for (auto &thread : threads)
+        thread.join();
+    EXPECT_EQ(count, usedNode());
+}

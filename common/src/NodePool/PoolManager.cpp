@@ -90,7 +90,6 @@ namespace NodePool
             this->_aliveNodeSet[index] = false;
             child = node.mChildHeadIndex;
             this->_freeNodeList.push(index);
-            pp_trace("Restore: #%d", id);
             return true;
         }
     }
@@ -124,7 +123,6 @@ namespace NodePool
         // as it holds a _lock, so no more _freeNodeList is empty
         int32_t index = this->_freeNodeList.top();
         this->_freeNodeList.pop();
-        pp_trace("_take: #%d", index + 1);
         this->_aliveNodeSet[index] = true;
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE].reset(NodeID(index + 1));
     }
