@@ -25,37 +25,76 @@
 
 #include "../Util/Helper.h"
 #include "common.h"
+#include <thread>
 #ifndef UINT32_MAX
 #define UINT32_MAX (0xfffffff)
 #endif
 
 namespace NodePool
 {
-
-    void PoolManager::freeNode(TraceNode &node)
+    void freeNodeTree(NodeID rootId)
     {
-        this->freeNode(node.getId());
-    }
-
-    void PoolManager::freeNode(NodeID id)
-    {
-        int32_t index = (int32_t)id - 1;
-
-        std::lock_guard<std::mutex> _safe(this->_lock);
-        if (this->_aliveNodeSet[index] == false)
+        if (rootId == E_INVALID_NODE || rootId == E_ROOT_NODE)
         {
-            pp_trace("%d not alive !!!", id);
-#ifndef NDEBUG
-            throw std::runtime_error("input is invalid");
-#endif
             return;
         }
-        this->_aliveNodeSet[index] = false;
 
-        this->_freeNodeList.push(index);
+        NodeID child_id = PoolManager::getInstance().Restore(rootId);
+        while (child_id != E_INVALID_NODE)
+        {
+            TraceNode &child = PoolManager::getInstance().Take(child_id);
+            child_id = child.mNextId;
+            freeNodeTree(child.mPoolIndex);
+        }
     }
 
-    TraceNode &PoolManager::_getNode(NodeID id)
+    NodeID PoolManager::Restore(NodeID id)
+    {
+        NodeID child = E_INVALID_NODE;
+        for (int i = 0; i < 1000; i++)
+        {
+            if (this->_restore(id, child, false))
+            {
+                return child;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        pp_trace("[🐛]Restore node failed: #%d; node restore forcefully", id);
+        this->_restore(id, child, true);
+        return child;
+    }
+
+    // avoiding `locking and waitting`
+    bool PoolManager::_restore(NodeID id, NodeID &child, bool force)
+    {
+        std::lock_guard<std::mutex> _safe(this->_lock);
+
+        int32_t index = (int32_t)id - 1;
+
+        if (this->indexInAliveVec(index) == false)
+        {
+            pp_trace("%d not alive !!!", id);
+            child = E_INVALID_NODE;
+            return true;
+        }
+
+        // check refcount
+        TraceNode &node = this->_fetchNodeBy(id);
+
+        if (node.checkZoreRef() == false && force == false)
+        {
+            return false;
+        }
+        else
+        {
+            this->_aliveNodeSet[index] = false;
+            child = node.mChildHeadIndex;
+            this->_freeNodeList.push(index);
+            return true;
+        }
+    }
+
+    TraceNode &PoolManager::_fetchNodeBy(NodeID id)
     {
         // assert(id != E_INVALID_NODE);
         if (id == E_ROOT_NODE)
@@ -65,7 +104,7 @@ namespace NodePool
 
         int32_t index = int32_t(id) - 1;
 
-        if (this->nodeIsAlive(index) == false)
+        if (this->indexInAliveVec(index) == false)
         {
             std::string msg = "#";
             msg += std::to_string(id) + " is not alive";
@@ -75,15 +114,8 @@ namespace NodePool
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
     }
 
-    TraceNode &PoolManager::GetNode(NodeID id)
-    {
-        std::lock_guard<std::mutex> _safe(this->_lock);
-
-        if (id != E_ROOT_NODE)
-        {
-            return this->_getNode(id);
-        }
-
+    TraceNode &PoolManager::_getInitNode() noexcept
+    { // create a new node
         if (this->_freeNodeList.empty())
         {
             this->expandOnce();
@@ -93,6 +125,18 @@ namespace NodePool
         this->_freeNodeList.pop();
         this->_aliveNodeSet[index] = true;
         return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE].reset(NodeID(index + 1));
+    }
+
+    TraceNode &PoolManager::_take(NodeID id)
+    {
+        if (id != E_ROOT_NODE)
+        {
+            return this->_fetchNodeBy(id);
+        }
+        else
+        {
+            return this->_getInitNode();
+        }
     }
 
     void PoolManager::expandOnce()
@@ -112,5 +156,4 @@ namespace NodePool
         // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
         assert(this->nodeIndexVec.size() * CELL_SIZE == this->_aliveNodeSet.size());
     }
-
 }

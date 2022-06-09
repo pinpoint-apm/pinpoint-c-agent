@@ -119,17 +119,17 @@ TEST(util, variadic_func_str)
 
 TEST(util, mergeTraceNodeTree)
 {
-    TraceNode &n1 = PoolManager::getInstance().GetNode();
-    TraceNode &n2 = PoolManager::getInstance().GetNode();
-    TraceNode &n3 = PoolManager::getInstance().GetNode();
-    TraceNode &n4 = PoolManager::getInstance().GetNode();
+    TraceNode &n1 = PoolManager::getInstance().Take();
+    TraceNode &n2 = PoolManager::getInstance().Take();
+    TraceNode &n3 = PoolManager::getInstance().Take();
+    TraceNode &n4 = PoolManager::getInstance().Take();
 
-    n2.mParentId = n1.ID;
-    n1.mChildListHeaderId = n2.ID;
-    n3.mParentId = n2.ID;
-    n4.mParentId = n2.ID;
-    n3.mNextId = n4.ID;
-    n2.mChildListHeaderId = n3.ID;
+    n2.mParentIndex = n1.mPoolIndex;
+    n1.mChildHeadIndex = n2.mPoolIndex;
+    n3.mParentIndex = n2.mPoolIndex;
+    n4.mParentIndex = n2.mPoolIndex;
+    n3.mNextId = n4.mPoolIndex;
+    n2.mChildHeadIndex = n3.mPoolIndex;
 
     Json::Value var = Helper::mergeTraceNodeTree(n1);
     std::cout << var.toStyledString();
@@ -161,7 +161,8 @@ TEST(util, mergeTraceNodeTree_1)
     pinpoint_end_trace(id3);
     pinpoint_end_trace(id2);
     pinpoint_end_trace(id1);
-    EXPECT_TRUE(span.find("id4") == span.npos);
+    pinpoint_end_trace(id4);
+    EXPECT_TRUE(span.find("id4") != span.npos);
     EXPECT_TRUE(span.find("id1") != span.npos);
     EXPECT_TRUE(span.find("id2") != span.npos);
     EXPECT_TRUE(span.find("id3") != span.npos);

@@ -65,13 +65,13 @@ namespace Helper
         }
     } STT;
 
-    uint64_t get_current_msec_stamp();
+    uint64_t get_current_msec_stamp() noexcept;
 
     std::string node_tree_to_string(const Json::Value &value);
 
     Json::Value mergeTraceNodeTree(TraceNode &root);
 
-    Json::Value mergeTraceNodeTree(NodeID &Id);
+    Json::Value mergeTraceNodeTree(NodeID &Id) noexcept;
     TransConnection getConnection();
 
     void freeConnection(TransConnection &);

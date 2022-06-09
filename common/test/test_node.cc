@@ -9,93 +9,19 @@
 
 using NodePool::PoolManager;
 using NodePool::TraceNode;
+using NodePool::WrapperTraceNode;
 using namespace testing;
+using NodePool::freeNodeTree;
 namespace Json = AliasJson;
-
-NodeID start_trace(NodeID _id)
-{
-    if (_id == 0)
-    {
-        TraceNode &node = PoolManager::getInstance().GetNode();
-        node.setNodeValue("name", std::to_string(node.getId()).c_str());
-        node.startTimer();
-        return node.getId();
-    }
-
-    TraceNode &parent = PoolManager::getInstance().GetNode(_id);
-    TraceNode &child = PoolManager::getInstance().GetNode();
-    child.startTimer();
-    child.setTraceParent(parent);
-    child.setNodeValue("name", std::to_string(child.getId()).c_str());
-
-    return child.ID;
-}
-
-NodeID end_trace(NodeID _id)
-{
-    TraceNode &node = PoolManager::getInstance().GetNode(_id);
-    return node.mParentId == node.ID ? E_ROOT_NODE : node.mParentId;
-}
-
-// void free_nodes_tree(TraceNode &node)
-// {
-//     NodeID childId = node.mChildId;
-//     if (childId != E_INVALID_NODE)
-//     {
-//         // keep the next child
-//         TraceNode &child = PoolManager::getInstance().GetNode(childId);
-
-//         childId = child.mNextId;
-//         free_nodes_tree(child);
-//     }
-//     PoolManager::getInstance().freeNode(node);
-// }
-
-void print_tree(TraceNode &node, int indent)
-{
-    for (int i = 0; i < indent; i++)
-        printf("|     ");
-
-    printf("|---[%u]\n", node.getId());
-
-    NodeID childId = node.mChildListHeaderId;
-    while (childId != E_INVALID_NODE)
-    {
-        TraceNode &child = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
-        print_tree(child, indent + 1);
-        childId = child.mNextId;
-    }
-}
-
-// TEST(node, merge_children)
-// {
-//     NodeID currentId;
-//     currentId = start_trace(E_ROOT_NODE); //# 128
-
-//     currentId = start_trace(currentId); //# 127
-
-//     currentId = end_trace(currentId); //# 128
-
-//     currentId = start_trace(currentId); //# 126
-//     std::cout << "currentId:" << currentId << std::endl;
-//     currentId = end_trace(currentId); //# 128
-
-//     std::cout << "currentId:" << currentId << std::endl;
-//     currentId = end_trace(currentId);
-//     std::cout << "currentId:" << currentId << std::endl;
-
-//     TraceNode &rootNode = PoolManager::getInstance().getNodeById(currentId);
-//     rootNode.endTimer();
-//     // rootNode.convertToSpan();
-//     Json::Value oRoot = Helper::mergeTraceNodeTree(rootNode);
-//     std::string stdBody = Helper::node_tree_to_string(oRoot);
-//     free_nodes_tree(rootNode);
-//     EXPECT_STREQ(stdBody.c_str(), "{\"calls\":[{\"name\":\"127\"},{\"name\":\"126\"}],\"name\":\"128\"}");
-// }
 
 std::mutex cv_m;
 std::condition_variable cv;
 NodeID rootId = E_ROOT_NODE;
+
+int usedNode()
+{
+    return PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+}
 
 // note: as it known, there may leak some node
 void func()
@@ -176,7 +102,7 @@ void test_opt(TraceNode &node, const char *opt, ...)
 
 TEST(node, opt)
 {
-    TraceNode &node = PoolManager::getInstance().GetNode();
+    TraceNode &node = PoolManager::getInstance().Take();
 
     test_opt(node, "TraceMinTimeMs:23", "TraceOnlyException", nullptr);
 
@@ -191,7 +117,7 @@ TEST(node, opt)
     node.mHasExp = false;
     EXPECT_FALSE(node.checkOpt());
 
-    PoolManager::getInstance().freeNode(node);
+    PoolManager::getInstance().Restore(node);
     // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
@@ -203,7 +129,7 @@ void capture(const char *msg)
 //./bin/TestCommon --gtest_filter=node.pinpoint_start_traceV1
 TEST(node, pinpoint_start_traceV1)
 {
-    auto count = PoolManager::getInstance().freeNodesCount();
+    auto count = usedNode();
     register_span_handler(capture);
     NodeID root, child1;
     root = pinpoint_start_trace(E_ROOT_NODE);
@@ -220,6 +146,19 @@ TEST(node, pinpoint_start_traceV1)
     child1 = pinpoint_start_traceV1(root, "TraceMinTimeMs:2000", nullptr);
     pinpoint_add_clue(child1, "name", "TraceMinTimeMs:2000", E_LOC_CURRENT);
     sleep(1);
+
+    {
+        NodeID child = pinpoint_start_traceV1(child1, "TraceMinTimeMs:23", nullptr);
+        pinpoint_add_clue(child1, "name", "childFromTraceMinTimeMs:23-1", E_LOC_CURRENT);
+        pinpoint_end_trace(child);
+        child = pinpoint_start_traceV1(child1, "TraceMinTimeMs:23", nullptr);
+        pinpoint_add_clue(child1, "name", "childFromTraceMinTimeMs:23-2", E_LOC_CURRENT);
+        pinpoint_end_trace(child);
+        child = pinpoint_start_traceV1(child1, "TraceMinTimeMs:23", nullptr);
+        pinpoint_add_clue(child1, "name", "childFromTraceMinTimeMs:23-3", E_LOC_CURRENT);
+        pinpoint_end_trace(child);
+    }
+
     pinpoint_end_trace(child1);
 
     child1 = pinpoint_start_traceV1(root, "TraceOnlyException", nullptr);
@@ -232,11 +171,14 @@ TEST(node, pinpoint_start_traceV1)
 
     pinpoint_end_trace(root);
     std::cout << span << std::endl;
-    EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
     EXPECT_TRUE(span.find("Take1sec") != span.npos);
     EXPECT_TRUE(span.find("Exception") != span.npos);
     EXPECT_TRUE(span.find("TraceMinTimeMs:2000") == span.npos);
     EXPECT_TRUE(span.find("NoException") == span.npos);
+
+    EXPECT_TRUE(span.find("childFromTraceMinTimeMs:23-3") == span.npos);
+    EXPECT_TRUE(span.find("childFromTraceMinTimeMs:23-2") == span.npos);
+    EXPECT_EQ(count, usedNode());
 }
 
 TEST(node, leak_node)
@@ -254,11 +196,6 @@ TEST(node, leak_node)
 
     EXPECT_EQ(count, PoolManager::getInstance().freeNodesCount());
     show_status();
-}
-
-int usedNode()
-{
-    return PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
 }
 
 TEST(node, tons_of_nodes_01)
@@ -280,9 +217,11 @@ TEST(node, tons_of_nodes_01)
     for (int i = 0; i < 1000; i++)
     {
         NodeID child = pinpoint_start_trace(child1);
+        mark_current_trace_status(root, E_OFFLINE);
         pinpoint_end_trace(child);
         child1 = child;
     }
+    mark_current_trace_status(root, E_TRACE_BLOCK);
     pinpoint_end_trace(root);
 
     EXPECT_EQ(count, usedNode());
@@ -333,10 +272,138 @@ TEST(node, tons_of_nodes_free_all)
 
     child_1 = pinpoint_start_trace(root);
     child_2 = pinpoint_start_trace(child_1);
-    free_nodes_tree(root);
+    freeNodeTree(root);
     pinpoint_end_trace(child_2);
 
     pinpoint_end_trace(root);
     pinpoint_end_trace(child_1);
+    EXPECT_EQ(count, usedNode());
+}
+//./bin/TestCommon --gtest_filter=node.free_when_add
+TEST(node, free_when_add)
+{
+    auto count = usedNode();
+    NodeID root;
+    auto make_it_busy = [&]()
+    {
+        auto w_root = PoolManager::getInstance().GetWrapperNode();
+        root = w_root->mPoolIndex;
+        auto w_child = PoolManager::getInstance().GetWrapperNode();
+        w_root->addChild(w_child);
+        w_child->AddTraceDetail("E_ROOT_NODE", 234);
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    };
+    std::thread t(make_it_busy);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    auto start = Helper::get_current_msec_stamp();
+    freeNodeTree(root);
+    freeNodeTree(E_INVALID_NODE);
+    freeNodeTree(E_ROOT_NODE);
+    auto end = Helper::get_current_msec_stamp() - start;
+    printf("it takes: %ld to free ", end);
+    t.join();
+    EXPECT_EQ(count, usedNode());
+    EXPECT_TRUE(end >= 100);
+}
+
+//./bin/TestCommon --gtest_filter=node.orphan_node
+TEST(node, orphan_node)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(root);
+
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(E_ROOT_NODE);
+    debug_nodeid(orphan);
+    pinpoint_end_trace(orphan);
+    debug_nodeid(orphan);
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(root);
+    EXPECT_EQ(count, usedNode());
+}
+//./bin/TestCommon --gtest_filter=node.orphan_node_01
+TEST(node, orphan_node_01)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    pinpoint_end_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(orphan);
+
+    EXPECT_EQ(count, usedNode());
+}
+//./bin/TestCommon --gtest_filter=node.orphan_root_parent_end
+TEST(node, orphan_parent_root_end)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+    pinpoint_end_trace(child_1);
+    pinpoint_end_trace(root);
+
+    pinpoint_end_trace(orphan);
+
+    EXPECT_EQ(count, usedNode());
+}
+
+TEST(node, orphan_root_parent_end)
+{
+    auto count = usedNode();
+    NodeID root, child_1, orphan;
+    root = pinpoint_start_trace(E_ROOT_NODE);
+    child_1 = pinpoint_start_trace(root);
+    orphan = pinpoint_start_trace(child_1);
+    pinpoint_end_trace(root);
+    pinpoint_end_trace(child_1);
+
+    pinpoint_end_trace(orphan);
+
+    EXPECT_EQ(count, usedNode());
+}
+// ./bin/TestCommon --gtest_filter=node.end_trace_in_mt
+TEST(node, end_trace_in_mt)
+{
+    auto count = usedNode();
+    NodeID root = pinpoint_start_trace(E_ROOT_NODE);
+    NodeID next = root;
+    // limit size 100; due to https://github.com/pinpoint-apm/pinpoint-c-agent/runs/6806024797?check_suite_focus=true bus error under macos
+    for (int i = 0; i < 100; i++)
+    {
+        next = pinpoint_start_trace(next);
+        pinpoint_end_trace(next);
+    }
+
+    std::mutex mtx;
+    std::condition_variable cv;
+
+    auto thread_func = [&]()
+    {
+        std::unique_lock<std::mutex> lck(mtx);
+        cv.wait(lck);
+        pp_trace("%lu ", std::this_thread::get_id());
+        pinpoint_end_trace(root);
+    };
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 10; i++)
+    {
+        // std::thread t(thread_func);
+        threads.emplace_back(thread_func);
+    }
+    // wait for all threads running
+    sleep(2);
+    cv.notify_all();
+    for (auto &thread : threads)
+        thread.join();
     EXPECT_EQ(count, usedNode());
 }

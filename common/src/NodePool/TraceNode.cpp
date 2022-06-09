@@ -23,16 +23,30 @@
 #include "TraceNode.h"
 #include "Util/Helper.h"
 #include "PoolManager.h"
+#include "header.h"
 
 namespace NodePool
 {
+    // static std::atomic<int64_t> _uid_;
+    WrapperTraceNode::WrapperTraceNode(TraceNode *node) : _traceNode(node)
+    {
+        assert(_traceNode != nullptr);
+        _traceNode->addRef();
+    }
+
+    WrapperTraceNode::~WrapperTraceNode()
+    {
+        if (_traceNode != nullptr)
+        {
+            _traceNode->rmRef();
+        }
+    }
     TraceNode::~TraceNode()
     {
     }
 
     void TraceNode::clearAttach()
     {
-        std::lock_guard<std::mutex> _safe(this->mlock);
         // empty the json value
         if (!this->_value.empty())
             this->_value.clear(); // Json::Value();
@@ -46,20 +60,21 @@ namespace NodePool
 
     void TraceNode::initId(NodeID &id)
     {
-        this->ID = id;
+        this->mPoolIndex = id;
     }
 
-    void TraceNode::addChild(TraceNode &child)
+    void TraceNode::addChild(WrapperTraceNode &child)
     {
         std::lock_guard<std::mutex> _safe(this->mlock);
-        if (child.hasParent() == false)
-        {
-            if (this->mChildListHeaderId != E_INVALID_NODE)
-                child.mNextId = this->mChildListHeaderId;
-            assert(child.mNextId != child.ID);
-            this->mChildListHeaderId = child.ID;
-            child.mParentId = ID;
-        }
+
+        if (this->mChildHeadIndex != E_INVALID_NODE)
+            child->mNextId = this->mChildHeadIndex;
+
+        this->mChildHeadIndex = child->mPoolIndex;
+
+        child->mParentIndex = this->mPoolIndex;
+        child->mRootIndex = this->mRootIndex;
+        child->root_start_time = this->root_start_time;
     }
 
     void TraceNode::endTimer()
@@ -70,47 +85,49 @@ namespace NodePool
         this->cumulative_time += (end_time - this->start_time);
     }
 
-    void TraceNode::wake()
+    void TraceNode::wakeUp()
     {
         this->start_time = Helper::get_current_msec_stamp();
     }
 
     void TraceNode::convertToSpan()
     {
-        this->setNodeValue("E", this->cumulative_time);
-        this->setNodeValue("S", this->start_time);
+        this->AddTraceDetail("E", this->cumulative_time);
+        this->AddTraceDetail("S", this->start_time);
 
-        this->setNodeValue("FT", global_agent_info.agent_type);
+        this->AddTraceDetail("FT", global_agent_info.agent_type);
     }
 
     void TraceNode::convertToSpanEvent()
     {
-        this->setNodeValue("E", this->cumulative_time);
-        this->setNodeValue("S", this->start_time - this->root_start_time);
+        this->AddTraceDetail("E", this->cumulative_time);
+        this->AddTraceDetail("S", this->start_time - this->root_start_time);
     }
 
-    void TraceNode::setTraceParent(TraceNode &parent)
-    {
-        this->startParentId = parent.ID;
-        this->mRootId = parent.mRootId;
-        TraceNode &root = PoolManager::getInstance().GetNode(this->mRootId);
-        this->root_start_time = root.start_time;
-    }
+    // void TraceNode::setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root)
+    // {
+    //     std::lock_guard<std::mutex> _safe(this->mlock);
+    //     this->mRootIndex = root->mPoolIndex;
+    //     this->mParentIndex = parent->mPoolIndex;
+    //     this->root_start_time = root->root_start_time;
+    // }
 
     void TraceNode::startTimer()
     {
         uint64_t time_in_ms = Helper::get_current_msec_stamp();
         this->start_time = time_in_ms;
+        this->root_start_time = time_in_ms;
     }
 
     void TraceNode::parseOpt(std::string key, std::string value)
     {
-        pp_trace("#%d add opt: key:%s value:%s", ID, key.c_str(), value.c_str());
+        pp_trace("#%d add opt: key:%s value:%s", mPoolIndex, key.c_str(), value.c_str());
         if (key == "TraceMinTimeMs")
         {
             int64_t min = std::stoll(value);
             auto cb = [=]() -> bool
             {
+                pp_trace("checkOpt: TraceMinTimeMs:%ld cumulative_time:%lu", min, this->cumulative_time);
                 if ((int64_t)this->cumulative_time >= min)
                     return true;
                 return false;

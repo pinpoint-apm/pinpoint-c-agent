@@ -31,18 +31,37 @@
 
 namespace NodePool
 {
-
     class PoolManager
     {
     private:
-        TraceNode &_getNode(NodeID id);
+        TraceNode &_fetchNodeBy(NodeID id);
+
+        TraceNode &_getInitNode(void) noexcept;
+
+        TraceNode &_take(NodeID id);
+
+        bool _restore(NodeID id, NodeID &child, bool force);
 
     public:
-        TraceNode &GetNode(NodeID id = E_ROOT_NODE);
+        inline TraceNode &Take(NodeID id = E_ROOT_NODE)
+        {
+            std::lock_guard<std::mutex> _safe(this->_lock);
+            return this->_take(id);
+        }
 
-        void freeNode(NodeID id);
+        inline WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE)
+        {
+            std::lock_guard<std::mutex> _safe(this->_lock);
+            TraceNode &e = this->_take(id);
+            return WrapperTraceNode(&e);
+        }
 
-        void freeNode(TraceNode &);
+        NodeID Restore(NodeID id);
+
+        inline void Restore(TraceNode &node)
+        {
+            this->Restore(node.getId());
+        }
 
         uint32_t totoalNodesCount()
         {
@@ -56,13 +75,15 @@ namespace NodePool
             return this->_freeNodeList.size();
         }
 
-        void foreachAliveNode(std::function<void(int i)> func)
+        void foreachAliveNode(std::function<void(TraceNode &node)> func)
         {
             std::lock_guard<std::mutex> _safe(this->_lock);
-            for (int32_t id = 0; id < this->maxId; id++)
+            for (int32_t index = 0; index < this->maxId; index++)
             {
-                if (this->nodeIsAlive(id))
-                    func(id + 1);
+                if (this->indexInAliveVec(index))
+                {
+                    func(this->_fetchNodeBy((NodeID)(index + 1)));
+                }
             }
         }
 
@@ -97,11 +118,11 @@ namespace NodePool
         }
 
     private:
-        inline bool nodeIsAlive(int32_t id)
+        inline bool indexInAliveVec(int32_t index)
         {
-            if (id >= 0 && id < this->maxId)
+            if (index >= 0 && index < this->maxId)
             {
-                return this->_aliveNodeSet[id];
+                return this->_aliveNodeSet.at(index);
             }
             return false;
         }
@@ -118,8 +139,7 @@ namespace NodePool
         static const int CELL_SIZE = 128;
         std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
     };
-
-    // uint32_t generateNid();
+    void freeNodeTree(NodeID root);
 }
 
 #endif /* COMMON_SRC_NODEPOOL_POOLMANAGER_H_ */

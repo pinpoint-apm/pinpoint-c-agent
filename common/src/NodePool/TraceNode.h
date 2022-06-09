@@ -39,19 +39,43 @@ namespace NodePool
     using Context::ContextType;
     using Context::LongContextType;
     using Context::StringContextType;
+    class TraceNode;
+    class WrapperTraceNode
+    {
+    public:
+        WrapperTraceNode() = delete;
+        WrapperTraceNode(const WrapperTraceNode &other) = delete;
+        WrapperTraceNode(WrapperTraceNode &&other) : _traceNode(std::move(other._traceNode))
+        {
+            other._traceNode = nullptr;
+        }
+
+        WrapperTraceNode &operator=(const WrapperTraceNode &other) = delete;
+
+        WrapperTraceNode(TraceNode *node);
+        TraceNode *operator->()
+        {
+            return _traceNode;
+        }
+        ~WrapperTraceNode();
+
+    private:
+        TraceNode *_traceNode;
+    };
 
     typedef std::shared_ptr<ContextType> _ContextType_;
     class TraceNode
     {
-
     public:
-        // c-style tree node
-        NodeID mNextId;            // equal brother node
-        NodeID mChildListHeaderId; // subtree/child tree
-        NodeID mParentId;          // parent Id [end_trace] avoiding re-add
-        NodeID startParentId;      // parent Id [start_trace]
-        NodeID mRootId;            // highway to root node
-        NodeID ID;
+        NodeID mNextId;         // equal brother node
+        NodeID mChildHeadIndex; // subtree/child tree
+
+        NodeID mParentIndex; // parent Id [end_trace] avoiding re-add
+        NodeID mRootIndex;   // highway to root node
+        NodeID mPoolIndex;
+        // int64_t mUID;
+        // int64_t mParentUID;
+        // int64_t mRootUID;
 
         uint64_t start_time;
         uint64_t fetal_error_time;
@@ -62,57 +86,70 @@ namespace NodePool
 
     public:
         void startTimer();
-        void setTraceParent(TraceNode &parent);
         void endTimer();
-        void wake();
+        void wakeUp();
 
         void convertToSpanEvent();
         void convertToSpan();
 
     public:
-        void addChild(TraceNode &child);
-
+        void addChild(WrapperTraceNode &child);
         void remove();
 
         inline bool isRoot() const
         {
-            return this->mRootId == ID;
+            return this->mRootIndex == mPoolIndex;
         }
 
         inline bool isLeaf() const
         {
-            return this->mChildListHeaderId == E_INVALID_NODE;
+            return this->mChildHeadIndex == E_INVALID_NODE;
         }
 
-        inline bool hasParent()
-        {
-            std::lock_guard<std::mutex> _safe(this->mlock);
-            return this->mParentId == this->startParentId && this->mParentId != E_INVALID_NODE;
-        }
+        // private:
+        //     inline bool isRelated(NodeID mParentIndex)
+        //     {
+        //         assert(mParentIndex != mPoolIndex);
+        //         assert(this->mStartParentId != E_INVALID_NODE);
+        //         assert(mParentIndex != E_INVALID_NODE);
+        //         if (this->mParentIndex == this->mStartParentId)
+        //         {
+        //             assert(this->mParentIndex == mParentIndex);
+        //             return true;
+        //         }
+        //         else
+        //         {
+        //             assert(this->mParentIndex == mPoolIndex);
+        //             return false;
+        //         }
+        //     }
 
     public:
         TraceNode()
         {
-            this->ID = E_INVALID_NODE;
-            this->mRootId = E_INVALID_NODE;
+            this->mPoolIndex = E_INVALID_NODE;
+            this->mRootIndex = E_INVALID_NODE;
             this->resetRelative();
             this->resetStatus();
+            this->_mRef = 0;
         }
 
         virtual ~TraceNode();
 
         TraceNode &reset(NodeID id)
         {
+            std::lock_guard<std::mutex> _safe(this->mlock);
             this->clearAttach();
             this->initId(id);
             this->resetStatus();
             this->resetRelative();
+            this->_mRef = 0;
             return *this;
         }
 
         NodeID getId() const
         {
-            return this->ID;
+            return this->mPoolIndex;
         }
 
         Json::Value getJsValue()
@@ -144,6 +181,7 @@ namespace NodePool
 
         void setContext(const char *key, long l)
         {
+            std::lock_guard<std::mutex> _safe(this->mlock);
             _ContextType_ context(std::make_shared<LongContextType>(l));
             this->_context[key] = context;
         }
@@ -154,34 +192,34 @@ namespace NodePool
 
         bool operator==(TraceNode const &_node) const
         {
-            return this->ID == _node.ID;
+            return this->mPoolIndex == _node.mPoolIndex;
         }
 
         bool operator!=(TraceNode const &_node) const
         {
-            return this->ID != _node.ID;
+            return this->mPoolIndex != _node.mPoolIndex;
         }
 
     public:
-        void setNodeValue(const char *key, const char *v)
+        void AddTraceDetail(const char *key, const char *v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
-        void setNodeValue(const char *key, int v)
+        void AddTraceDetail(const char *key, int v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
-        void setNodeValue(const char *key, uint64_t v)
+        void AddTraceDetail(const char *key, uint64_t v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
         }
 
-        void setNodeValue(const char *key, Json::Value &v)
+        void AddTraceDetail(const char *key, Json::Value &v)
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             this->_value[key] = v;
@@ -207,10 +245,9 @@ namespace NodePool
         inline void resetRelative()
         {
             this->mNextId = E_INVALID_NODE;
-            this->mChildListHeaderId = E_INVALID_NODE;
-            this->startParentId = E_INVALID_NODE;
-            this->mParentId = ID;
-            this->mRootId = ID;
+            this->mChildHeadIndex = E_INVALID_NODE;
+            this->mParentIndex = mPoolIndex;
+            this->mRootIndex = mPoolIndex;
         }
 
         inline void resetStatus()
@@ -226,6 +263,45 @@ namespace NodePool
     public:
         // changes: expose _lock
         std::mutex mlock;
+
+    public:
+        int addRef()
+        {
+            _mRef++;
+            return _mRef.load();
+        }
+
+        int rmRef()
+        {
+            _mRef--;
+            return _mRef.load();
+        }
+
+        bool checkZoreRef()
+        {
+            return _mRef.load() == 0;
+        }
+
+    public:
+        std::string ToString()
+        {
+            std::lock_guard<std::mutex> _safe(this->mlock);
+            char pbuf[1024] = {0};
+            int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentIndex:%d mRootIndex:%d mPoolIndex:%d \n"
+                                           "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
+                                           "_mRef:%d\n"
+                                           "_value:%s \n"
+                                           "_context size:%lu,_callback:%lu \n",
+                               (int)this->mNextId, (int)this->mChildHeadIndex, (int)this->mParentIndex, (int)this->mRootIndex, (int)this->mPoolIndex,
+                               this->start_time, this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp,
+                               this->_mRef.load(),
+                               this->_value.toStyledString().c_str(),
+                               this->_context.size(), this->_callback.size());
+            return std::string(pbuf, len);
+        }
+
+    private:
+        std::atomic<int> _mRef;
 
     private:
         Json::Value _value;

@@ -34,7 +34,7 @@ namespace Helper
     static ConnectionPool::SpanConnectionPool _con_pool;
     static std::once_flag _pool_init_flag;
     static Json::Value mergeChildren(TraceNode &node);
-    uint64_t get_current_msec_stamp()
+    uint64_t get_current_msec_stamp() noexcept
     {
         std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
         time_point<system_clock, milliseconds> current = time_point_cast<std::chrono::milliseconds>(now);
@@ -46,33 +46,39 @@ namespace Helper
         return _writer.write(value);
     }
 
-    static void reverseNodeList(Json::Value &parents, TraceNode &head)
+    static void gatcherChildDetailByReverse(Json::Value &detail, TraceNode &head)
     {
         if (head.mNextId != E_INVALID_NODE)
         {
-            TraceNode &next = PoolManager::getInstance().GetNode(head.mNextId);
-            reverseNodeList(parents, next);
+            TraceNode &next = PoolManager::getInstance().Take(head.mNextId);
+            gatcherChildDetailByReverse(detail, next);
         }
-
-        parents.append(mergeChildren(head));
+        Json::Value childrenDetail = mergeChildren(head);
+        if (!childrenDetail.empty())
+        {
+            detail.append(childrenDetail);
+        }
     }
 
     Json::Value mergeChildren(TraceNode &node)
     {
-        if (!node.isLeaf())
+        if (node.checkOpt() == false)
         {
-            Json::Value calls;
-            TraceNode &pstart = PoolManager::getInstance().GetNode(node.mChildListHeaderId);
-            reverseNodeList(calls, pstart);
-            // only a none leaf node has calls nodes
-            node.setNodeValue("calls", calls);
+            return Json::Value();
+        }
+        else if (!node.isLeaf())
+        {
+            TraceNode &child = PoolManager::getInstance().Take(node.mChildHeadIndex);
+            Json::Value childTraceDetail;
+            gatcherChildDetailByReverse(childTraceDetail, child);
+            node.AddTraceDetail("calls", childTraceDetail);
         }
         return node.getJsValue();
     }
 
-    Json::Value mergeTraceNodeTree(NodeID &Id)
+    Json::Value mergeTraceNodeTree(NodeID &Id) noexcept
     {
-        return mergeTraceNodeTree(PoolManager::getInstance().GetNode(Id));
+        return mergeTraceNodeTree(PoolManager::getInstance().Take(Id));
     }
 
     Json::Value mergeTraceNodeTree(TraceNode &root)
