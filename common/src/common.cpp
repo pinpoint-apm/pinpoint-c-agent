@@ -45,6 +45,13 @@ using NodePool::WrapperTraceNode;
 
 const static char *CLUSE = "clues";
 static thread_local NodeID __tls_id = E_ROOT_NODE;
+PPAgentT global_agent_info = {
+    "unix:./pinpoint_test.sock",
+    1,
+    10,
+    1500,
+    1,
+    nullptr, nullptr, nullptr};
 // send current span with timeout
 static thread_local int _span_timeout = global_agent_info.timeout_ms;
 static std::function<void(const char *)> _SpanHandler_;
