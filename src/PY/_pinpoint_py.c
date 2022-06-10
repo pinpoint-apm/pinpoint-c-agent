@@ -17,7 +17,6 @@
 #include <string.h>
 #include "_pinpoint_py.h"
 
-PPAgentT global_agent_info;
 static PyObject *py_obj_msg_callback;
 // global g_collector_host is suck
 // static char* g_collector_host;

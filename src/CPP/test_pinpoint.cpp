@@ -25,8 +25,6 @@
 thread_local NodeID id = E_ROOT_NODE;
 const char *app_id = "cpp_test_app";
 const char *app_name = "cpp_test_name";
-PPAgentT global_agent_info = {
-    "tcp:localhost:9999", 1000, -1, 1300, 1, nullptr, nullptr, nullptr};
 
 std::string get_sid()
 {
@@ -118,6 +116,9 @@ void test_req()
 
 int main(int argc, char const *argv[])
 {
+    PPAgentT agent_info = {
+        "tcp:127.0.0.1:9999", 1000, -1, 1700, 0, NULL, NULL, NULL};
+    global_agent_info = agent_info;
     srand(time(nullptr));
     int i = 0;
     for (; i < 3; i++)

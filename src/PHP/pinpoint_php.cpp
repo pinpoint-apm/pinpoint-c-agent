@@ -72,7 +72,6 @@ PHP_FUNCTION(pinpoint_get_func_ref_args);
 
 ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
 
-PPAgentT global_agent_info;
 static void pinpoint_log(char *msg);
 
 /* {{{ PHP_INI
@@ -295,7 +294,7 @@ PHP_FUNCTION(pinpoint_get_context)
     if (len > 0)
     {
 #if PHP_VERSION_ID < 70000
-        RETURN_STRINGL(value, len,1);
+        RETURN_STRINGL(value, len, 1);
 #else
         RETURN_STRINGL(value, len);
 #endif

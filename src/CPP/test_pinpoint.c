@@ -25,8 +25,6 @@
 int32_t id = 0;
 const char *app_id = "c_test_app";
 const char *app_name = "c_test_name";
-PPAgentT global_agent_info = {
-    "tcp:127.0.0.1:9999", 1000, -1, 1700, 0, NULL, NULL, NULL};
 
 char *get_sid()
 {
@@ -117,6 +115,9 @@ void test_req()
 
 int main(int argc, char const *argv[])
 {
+    PPAgentT agent_info = {
+        "tcp:127.0.0.1:9999", 1000, -1, 1700, 0, NULL, NULL, NULL};
+    global_agent_info = agent_info;
     char appid[] = "appid-c";
     char appname[] = "appid-c";
     app_id = getenv("APPID");
