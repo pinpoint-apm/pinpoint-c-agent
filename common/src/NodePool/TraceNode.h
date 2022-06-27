@@ -41,12 +41,6 @@ namespace NodePool
     using Context::StringContextType;
     class TraceNode;
 
-    typedef enum
-    {
-        E_RET_CHILD_ID,
-        E_RET_NEXT_ID,
-    } E_OUT_TYPE;
-
     class WrapperTraceNode
     {
     public:
@@ -191,20 +185,6 @@ namespace NodePool
             std::lock_guard<std::mutex> _safe(this->mlock);
             _ContextType_ context(std::make_shared<LongContextType>(l));
             this->_context[key] = context;
-        }
-
-        NodeID fetchOutType(E_OUT_TYPE type)
-        {
-            switch (type)
-            {
-            case E_RET_CHILD_ID:
-                return this->mChildHeadId;
-            case E_RET_NEXT_ID:
-                return this->mNextId;
-            default:
-                pp_trace("[🐛]fetchOutType node:%d unknow type ", this->mPoolIndex);
-                return E_INVALID_NODE;
-            }
         }
 
     public:
