@@ -13,8 +13,11 @@ TEST(poolManger, get_and_give_back)
     TraceNode &_node = pool.Take();
     void *p = &_node;
     NodeID id = _node.getId();
+    NodeID child, next;
     // give back
-    pool.Restore(id);
+    pool.Restore(id, child, next);
+    EXPECT_EQ(child, E_INVALID_NODE);
+    EXPECT_EQ(next, E_INVALID_NODE);
     TraceNode &_node_01 = pool.Take();
 
     // ref current

@@ -149,7 +149,7 @@ NodeID do_end_trace(NodeID Id)
     {
         r_node->endTimer();
         r_node->convertToSpanEvent();
-        return r_node->mParentIndex;
+        return r_node->mParentId;
         // check opt
         // if (r_node->checkOpt() == true)
         // {

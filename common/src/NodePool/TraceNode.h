@@ -40,6 +40,13 @@ namespace NodePool
     using Context::LongContextType;
     using Context::StringContextType;
     class TraceNode;
+
+    typedef enum
+    {
+        E_RET_CHILD_ID,
+        E_RET_NEXT_ID,
+    } E_OUT_TYPE;
+
     class WrapperTraceNode
     {
     public:
@@ -67,11 +74,11 @@ namespace NodePool
     class TraceNode
     {
     public:
-        NodeID mNextId;         // equal brother node
-        NodeID mChildHeadIndex; // subtree/child tree
+        NodeID mNextId;      // equal brother node
+        NodeID mChildHeadId; // subtree/child tree
 
-        NodeID mParentIndex; // parent Id [end_trace] avoiding re-add
-        NodeID mRootIndex;   // highway to root node
+        NodeID mParentId;  // parent Id [end_trace] avoiding re-add
+        NodeID mRootIndex; // highway to root node
         NodeID mPoolIndex;
         // int64_t mUID;
         // int64_t mParentUID;
@@ -103,23 +110,23 @@ namespace NodePool
 
         inline bool isLeaf() const
         {
-            return this->mChildHeadIndex == E_INVALID_NODE;
+            return this->mChildHeadId == E_INVALID_NODE;
         }
 
         // private:
-        //     inline bool isRelated(NodeID mParentIndex)
+        //     inline bool isRelated(NodeID mParentId)
         //     {
-        //         assert(mParentIndex != mPoolIndex);
+        //         assert(mParentId != mPoolIndex);
         //         assert(this->mStartParentId != E_INVALID_NODE);
-        //         assert(mParentIndex != E_INVALID_NODE);
-        //         if (this->mParentIndex == this->mStartParentId)
+        //         assert(mParentId != E_INVALID_NODE);
+        //         if (this->mParentId == this->mStartParentId)
         //         {
-        //             assert(this->mParentIndex == mParentIndex);
+        //             assert(this->mParentId == mParentId);
         //             return true;
         //         }
         //         else
         //         {
-        //             assert(this->mParentIndex == mPoolIndex);
+        //             assert(this->mParentId == mPoolIndex);
         //             return false;
         //         }
         //     }
@@ -186,6 +193,20 @@ namespace NodePool
             this->_context[key] = context;
         }
 
+        NodeID fetchOutType(E_OUT_TYPE type)
+        {
+            switch (type)
+            {
+            case E_RET_CHILD_ID:
+                return this->mChildHeadId;
+            case E_RET_NEXT_ID:
+                return this->mNextId;
+            default:
+                pp_trace("[🐛]fetchOutType node:%d unknow type ", this->mPoolIndex);
+                return E_INVALID_NODE;
+            }
+        }
+
     public:
         TraceNode &operator=(const TraceNode &) = delete;
         TraceNode(const TraceNode &) = delete;
@@ -245,8 +266,8 @@ namespace NodePool
         inline void resetRelative()
         {
             this->mNextId = E_INVALID_NODE;
-            this->mChildHeadIndex = E_INVALID_NODE;
-            this->mParentIndex = mPoolIndex;
+            this->mChildHeadId = E_INVALID_NODE;
+            this->mParentId = mPoolIndex;
             this->mRootIndex = mPoolIndex;
         }
 
@@ -287,12 +308,12 @@ namespace NodePool
         {
             std::lock_guard<std::mutex> _safe(this->mlock);
             char pbuf[1024] = {0};
-            int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentIndex:%d mRootIndex:%d mPoolIndex:%d \n"
+            int len = snprintf(pbuf, 1024, "mNextId:%d mChildListHeaderId:%d mParentId:%d mRootIndex:%d mPoolIndex:%d \n"
                                            "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
                                            "_mRef:%d\n"
                                            "_value:%s \n"
                                            "_context size:%lu,_callback:%lu \n",
-                               (int)this->mNextId, (int)this->mChildHeadIndex, (int)this->mParentIndex, (int)this->mRootIndex, (int)this->mPoolIndex,
+                               (int)this->mNextId, (int)this->mChildHeadId, (int)this->mParentId, (int)this->mRootIndex, (int)this->mPoolIndex,
                                this->start_time, this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp,
                                this->_mRef.load(),
                                this->_value.toStyledString().c_str(),

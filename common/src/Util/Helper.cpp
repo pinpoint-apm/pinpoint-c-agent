@@ -30,10 +30,11 @@ namespace Helper
     namespace Json = AliasJson;
     using Cache::NodeTreeWriter;
     using NodePool::PoolManager;
+
     static NodeTreeWriter _writer;
     static ConnectionPool::SpanConnectionPool _con_pool;
     static std::once_flag _pool_init_flag;
-    static Json::Value mergeChildren(TraceNode &node);
+    static Json::Value mergeChildren(WrapperTraceNode &node);
     uint64_t get_current_msec_stamp() noexcept
     {
         std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
@@ -46,11 +47,12 @@ namespace Helper
         return _writer.write(value);
     }
 
-    static void gatcherChildDetailByReverse(Json::Value &detail, TraceNode &head)
+    static void gatcherChildDetailByReverse(Json::Value &detail, WrapperTraceNode &head)
     {
-        if (head.mNextId != E_INVALID_NODE)
+        if (head->mNextId != E_INVALID_NODE)
         {
-            TraceNode &next = PoolManager::getInstance().Take(head.mNextId);
+            // TraceNode &next = PoolManager::getInstance().Take(head.mNextId);
+            WrapperTraceNode next = PoolManager::getInstance().GetWrapperNode(head->mNextId);
             gatcherChildDetailByReverse(detail, next);
         }
         Json::Value childrenDetail = mergeChildren(head);
@@ -60,30 +62,39 @@ namespace Helper
         }
     }
 
-    Json::Value mergeChildren(TraceNode &node)
+    Json::Value mergeChildren(WrapperTraceNode &node)
     {
-        if (node.checkOpt() == false)
+        if (node->checkOpt() == false)
         {
             return Json::Value();
         }
-        else if (!node.isLeaf())
+        else if (!node->isLeaf())
         {
-            TraceNode &child = PoolManager::getInstance().Take(node.mChildHeadIndex);
+            // TraceNode &child = PoolManager::getInstance().Take(node.mChildHeadIndex);
+            WrapperTraceNode child = PoolManager::getInstance().GetWrapperNode(node->mChildHeadId);
+
             Json::Value childTraceDetail;
             gatcherChildDetailByReverse(childTraceDetail, child);
-            node.AddTraceDetail("calls", childTraceDetail);
+            node->AddTraceDetail("calls", childTraceDetail);
         }
-        return node.getJsValue();
+        return node->getJsValue();
     }
 
-    Json::Value mergeTraceNodeTree(NodeID &Id) noexcept
+    Json::Value mergeTraceNodeTree(NodeID Id) noexcept
     {
-        return mergeTraceNodeTree(PoolManager::getInstance().Take(Id));
+        WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(Id);
+        return mergeTraceNodeTree(root);
+    }
+
+    Json::Value mergeTraceNodeTree(WrapperTraceNode &root)
+    {
+        return mergeChildren(root);
     }
 
     Json::Value mergeTraceNodeTree(TraceNode &root)
     {
-        return mergeChildren(root);
+        WrapperTraceNode wroot(&root);
+        return mergeChildren(wroot);
     }
 
     TransConnection getConnection()

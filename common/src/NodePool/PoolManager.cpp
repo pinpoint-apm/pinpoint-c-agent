@@ -32,40 +32,55 @@
 
 namespace NodePool
 {
-    void freeNodeTree(NodeID rootId)
+
+    void freeNodeTree(NodeID nodeId)
     {
-        if (rootId == E_INVALID_NODE || rootId == E_ROOT_NODE)
+        if (nodeId == E_INVALID_NODE || nodeId == E_ROOT_NODE)
         {
             return;
         }
 
-        NodeID child_id = PoolManager::getInstance().Restore(rootId);
-        while (child_id != E_INVALID_NODE)
-        {
-            TraceNode &child = PoolManager::getInstance().Take(child_id);
-            child_id = child.mNextId;
-            freeNodeTree(child.mPoolIndex);
-        }
-    }
+        NodeID child_id, next_id;
 
-    NodeID PoolManager::Restore(NodeID id)
+        if (PoolManager::getInstance().Restore(nodeId, child_id, next_id))
+        {
+            if (next_id != E_INVALID_NODE)
+            {
+                freeNodeTree(next_id);
+            }
+
+            if (child_id != E_INVALID_NODE)
+            {
+                freeNodeTree(child_id);
+            }
+        }
+
+        // while (child_id != E_INVALID_NODE)
+        // {
+        //     WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(child_id);
+        //     next_id = r_node->mNextId;
+        //     freeNodeTree(child_id);
+        //     child_id = next_id;
+        // }
+
+        // PoolManager::getInstance().Restore(rootId);
+    }
+    bool PoolManager::Restore(NodeID id, NodeID &child_id, NodeID &next_id)
     {
-        NodeID child = E_INVALID_NODE;
         for (int i = 0; i < 1000; i++)
         {
-            if (this->_restore(id, child, false))
+            if (this->_restore(id, child_id, next_id, false))
             {
-                return child;
+                return true;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
         pp_trace("[🐛]Restore node failed: #%d; node restore forcefully", id);
-        this->_restore(id, child, true);
-        return child;
+        return this->_restore(id, child_id, next_id, true);
     }
 
     // avoiding `locking and waitting`
-    bool PoolManager::_restore(NodeID id, NodeID &child, bool force)
+    bool PoolManager::_restore(NodeID id, NodeID &child_id, NodeID &next_id, bool force)
     {
         std::lock_guard<std::mutex> _safe(this->_lock);
 
@@ -74,7 +89,8 @@ namespace NodePool
         if (this->indexInAliveVec(index) == false)
         {
             pp_trace("%d not alive !!!", id);
-            child = E_INVALID_NODE;
+            child_id = E_INVALID_NODE;
+            next_id = E_INVALID_NODE;
             return true;
         }
 
@@ -83,12 +99,14 @@ namespace NodePool
 
         if (node.checkZoreRef() == false && force == false)
         {
+            // DO NOT TOUCH out id
             return false;
         }
         else
         {
             this->_aliveNodeSet[index] = false;
-            child = node.mChildHeadIndex;
+            child_id = node.mChildHeadId;
+            next_id = node.mNextId;
             this->_freeNodeList.push(index);
             return true;
         }
