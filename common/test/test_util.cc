@@ -124,12 +124,12 @@ TEST(util, mergeTraceNodeTree)
     TraceNode &n3 = PoolManager::getInstance().Take();
     TraceNode &n4 = PoolManager::getInstance().Take();
 
-    n2.mParentIndex = n1.mPoolIndex;
-    n1.mChildHeadIndex = n2.mPoolIndex;
-    n3.mParentIndex = n2.mPoolIndex;
-    n4.mParentIndex = n2.mPoolIndex;
+    n2.mParentId = n1.mPoolIndex;
+    n1.mChildHeadId = n2.mPoolIndex;
+    n3.mParentId = n2.mPoolIndex;
+    n4.mParentId = n2.mPoolIndex;
     n3.mNextId = n4.mPoolIndex;
-    n2.mChildHeadIndex = n3.mPoolIndex;
+    n2.mChildHeadId = n3.mPoolIndex;
 
     Json::Value var = Helper::mergeTraceNodeTree(n1);
     std::cout << var.toStyledString();

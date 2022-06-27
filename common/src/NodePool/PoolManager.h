@@ -31,6 +31,7 @@
 
 namespace NodePool
 {
+
     class PoolManager
     {
     private:
@@ -40,9 +41,15 @@ namespace NodePool
 
         TraceNode &_take(NodeID id);
 
-        bool _restore(NodeID id, NodeID &child, bool force);
+        bool _restore(NodeID id, NodeID &child_id, NodeID &next_id, bool force);
 
     public:
+        /**
+         * @brief take is not safe, you should avoid use under MT
+         * note: try PoolManager::getInstance().GetWrapperNode
+         * @param id
+         * @return TraceNode&
+         */
         inline TraceNode &Take(NodeID id = E_ROOT_NODE)
         {
             std::lock_guard<std::mutex> _safe(this->_lock);
@@ -55,12 +62,21 @@ namespace NodePool
             TraceNode &e = this->_take(id);
             return WrapperTraceNode(&e);
         }
+        /**
+         * @brief restore id->traceNode to pool
+         *
+         * @param id
+         * @param child_id child id of `id`, if exist
+         * @param next_id next id of `id`, if exist
+         * @return true
+         * @return false
+         */
+        bool Restore(NodeID id, NodeID &child_id, NodeID &next_id);
 
-        NodeID Restore(NodeID id);
-
-        inline void Restore(TraceNode &node)
+        inline bool Restore(TraceNode &node)
         {
-            this->Restore(node.getId());
+            NodeID node1, node2;
+            return this->Restore(node.getId(), node1, node2);
         }
 
         uint32_t totoalNodesCount()

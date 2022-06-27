@@ -42,6 +42,7 @@ namespace Helper
     namespace Json = AliasJson;
     using ConnectionPool::TransConnection;
     using NodePool::TraceNode;
+    using NodePool::WrapperTraceNode;
     using std::chrono::duration;
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
@@ -70,8 +71,9 @@ namespace Helper
     std::string node_tree_to_string(const Json::Value &value);
 
     Json::Value mergeTraceNodeTree(TraceNode &root);
+    Json::Value mergeTraceNodeTree(WrapperTraceNode &root);
 
-    Json::Value mergeTraceNodeTree(NodeID &Id) noexcept;
+    Json::Value mergeTraceNodeTree(NodeID Id) noexcept;
     TransConnection getConnection();
 
     void freeConnection(TransConnection &);

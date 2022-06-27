@@ -67,12 +67,12 @@ namespace NodePool
     {
         std::lock_guard<std::mutex> _safe(this->mlock);
 
-        if (this->mChildHeadIndex != E_INVALID_NODE)
-            child->mNextId = this->mChildHeadIndex;
+        if (this->mChildHeadId != E_INVALID_NODE)
+            child->mNextId = this->mChildHeadId;
 
-        this->mChildHeadIndex = child->mPoolIndex;
+        this->mChildHeadId = child->mPoolIndex;
 
-        child->mParentIndex = this->mPoolIndex;
+        child->mParentId = this->mPoolIndex;
         child->mRootIndex = this->mRootIndex;
         child->root_start_time = this->root_start_time;
     }
@@ -108,7 +108,7 @@ namespace NodePool
     // {
     //     std::lock_guard<std::mutex> _safe(this->mlock);
     //     this->mRootIndex = root->mPoolIndex;
-    //     this->mParentIndex = parent->mPoolIndex;
+    //     this->mParentId = parent->mPoolIndex;
     //     this->root_start_time = root->root_start_time;
     // }
 
@@ -127,7 +127,7 @@ namespace NodePool
             int64_t min = std::stoll(value);
             auto cb = [=]() -> bool
             {
-                pp_trace("checkOpt: TraceMinTimeMs:%ld cumulative_time:%lu", min, this->cumulative_time);
+                pp_trace("checkOpt: #%d TraceMinTimeMs:%ld cumulative_time:%lu", this->mPoolIndex, min, this->cumulative_time);
                 if ((int64_t)this->cumulative_time >= min)
                     return true;
                 return false;
