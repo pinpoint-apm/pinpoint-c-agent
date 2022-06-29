@@ -65,16 +65,16 @@ middleware = [
     Middleware(PinPointMiddleWare)
 ]
 asyn_monkey_patch_for_pinpoint()
-set_agent("fastapi-redis", "fastapi-redis", 'tcp:10.34.130.152:9999', -1, True)
+set_agent("fastapi-redis", "fastapi-redis", 'tcp:collect-agent:9999', -1, True)
 ##############################################
 ```
 Example: [fastapi-redis-pinpoint](https://github.com/EyelynSu/fastapi-redis-pinpoint)
 
-#### 1.3 Tornado
+#### 1.4 Tornado
 
 Todo....
 
-#### 1.4 pyramid
+#### 1.5 pyramid
 
 > Add pinpoint_tween middleware
 
@@ -87,24 +87,24 @@ Todo....
 
 Example [pinpoint-in-pyramid](https://github.com/eeliu/pinpoint-in-pyramid)
 
-#### 1.5 bottle
+#### 1.6 bottle
 
 > Loading pinpint.Bottle before application run
 
 Example [pinpoint-in-bottle](https://github.com/eeliu/pinpoint-in-bottle)
 
-#### 1.6 aiohttp
+#### 1.7 aiohttp
 
 Todo....
 
-#### 1.7 web.py
+#### 1.8 web.py
 
 > Add pinpoint middleware
 
 > Example [py-web](https://github.com/eeliu/pinpoint-in-pyweb)
 
 
-#### 1.8 web2.py (synchronize)
+#### 1.9 web2.py (synchronize)
 
 > Add pinpoint middleware
 
