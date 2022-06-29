@@ -51,6 +51,29 @@ MIDDLEWARE = [
 
 ```
 
+#### 1.3 Fastapi
+在 app/main.py 中添加 pinpoint 的配置:
+```
+# pinpoint
+##############################################
+from starlette_context.middleware import ContextMiddleware
+from starlette_context import context, plugins
+
+from pinpointPy import set_agent
+from pinpointPy.Fastapi import asyn_monkey_patch_for_pinpoint
+from starlette.middleware import Middleware
+from pinpointPy.Fastapi import PinPointMiddleWare
+
+middleware = [
+    Middleware(ContextMiddleware),
+    Middleware(PinPointMiddleWare)
+]
+asyn_monkey_patch_for_pinpoint()
+set_agent("fastapi-redis", "fastapi-redis", 'tcp:10.34.130.152:9999', -1, True)
+##############################################
+```
+例子: [fastapi-redis-pinpoint](https://github.com/EyelynSu/fastapi-redis-pinpoint)
+
 #### 1.3 Tornado
 
 Todo....
