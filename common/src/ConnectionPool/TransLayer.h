@@ -43,19 +43,29 @@ namespace ConnectionPool {
 
 using Cache::Chunks;
 
-class TransLayer{
+// note update chunk watermark size
+// for keep large span.
+// BIG span is not friendly to pinpoint-web, show everything equals nothing
 
-enum E_STATE{S_WRITING=0x1,S_READING=0x2,S_ERROR=0x4};
+const uint32_t _chunk_max_size = 10 * 1024 * 1024; // 10M
+const uint32_t _chunk_hold_size = 40 * 1024;       // 40k
 
+class TransLayer
+{
 
+    enum E_STATE
+    {
+        S_WRITING = 0x1,
+        S_READING = 0x2,
+        S_ERROR = 0x4
+    };
 
 public:
-    explicit TransLayer(const std::string& co_host):
-    co_host(co_host),
-    chunks(1024*1024,1024*40),
-    _state(0),
-    lastConnectTime(0),
-    c_fd(-1)
+    explicit TransLayer(const std::string &co_host) : co_host(co_host),
+                                                      chunks(_chunk_max_size, _chunk_hold_size),
+                                                      _state(0),
+                                                      lastConnectTime(0),
+                                                      c_fd(-1)
     {
     }
 
