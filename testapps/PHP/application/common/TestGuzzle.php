@@ -15,9 +15,9 @@ class TestGuzzle
         $this->client = new Client([
             // Base URI is used with relative requests
 //            'base_uri' => 'http://localhost:8088/',
-            'base_uri' => 'http://www.baidu.com/',
+            'base_uri' => 'https://example.com/',
             // You can set any number of default request options.
-            'timeout'  => 5.0,
+            'timeout'  => 9.0,
         ]);
     }
 
