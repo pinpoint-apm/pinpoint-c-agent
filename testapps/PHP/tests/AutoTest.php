@@ -204,7 +204,7 @@ class AutoTest extends TestCase
         $this->assertResponseOk();
         $log = $this->util->get_log();
         $this->assertTrue($this->util->check_error($log), $log);
-        $this->assertTrue($this->util->check_span($log,["GuzzleHttp\Client::request","key:dst value:https://example.com/", "nsid"]), $log);
+        $this->assertTrue($this->util->check_span($log,["GuzzleHttp\Client::request","key:dst value:example.com", "nsid"]), $log);
     }
 
     public function testPDO()
