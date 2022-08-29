@@ -51,7 +51,7 @@ string(1) "c"
 bool(false)
 [pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d})
 [pinpoint] [%d] [%d]agent try to connect:(tcp:127.0.0.1:9999)
-[pinpoint] [%d] [%d]_do_write_data@215 send data error:(Connection refused) fd:(%d)
+[pinpoint] [%d] [%d]_do_write_data@%d send data error:(Connection refused) fd:(%d)
 [pinpoint] [%d] [%d]reset peer:%d
 [pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]#0 pinpoint_start child #128

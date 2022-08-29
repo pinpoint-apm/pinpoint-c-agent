@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(common VERSION 0.4.21 DESCRIPTION  "pinpoint common library")
+project(common VERSION 0.4.22 DESCRIPTION  "pinpoint common library")
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -22,7 +22,7 @@ add_definitions( -DAGENT_VERSION="${PROJECT_VERSION}")
 option (WITH_TEST_CASE "Enable Gtest" OFF)
 option (WITH_CODECOVERAGE "Enable CodeCoverage" OFF)
 
- if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE)
     set(LINUX_ TRUE)
 endif()
 
