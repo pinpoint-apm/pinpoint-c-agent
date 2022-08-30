@@ -20,7 +20,6 @@ import (
 )
 
 type SpanServer struct {
-	clientCount int
 	listener    net.Listener
 	quit        chan bool
 	wg          sync.WaitGroup
@@ -41,7 +40,7 @@ var info = ServerInfo{
 
 const CLIENT_HEADER_SIZE = 8
 
-const CLIENT_MAX_PACKET_SIZE = 4096*100 + CLIENT_HEADER_SIZE
+// const CLIENT_MAX_PACKET_SIZE = 4096*100 + CLIENT_HEADER_SIZE
 
 func (server *SpanServer) init() {
 	server.quit = make(chan bool)
@@ -144,7 +143,7 @@ func (server *SpanServer) searchPacket(buffer []byte, start int32, total int32, 
 		return 0, CLIENT_HEADER_SIZE - total
 	}
 	bodyLen, Type := ParseHeader(buffer[start : start+total])
-	if bodyLen > CLIENT_MAX_PACKET_SIZE {
+	if bodyLen > uint32(Setting.RecvBufSize) {
 		return 0, 0
 	}
 
@@ -192,9 +191,9 @@ func (server *SpanServer) handleClient(con net.Conn) {
 	}
 
 	// fetch data
-	clientInBuf := make([]byte, CLIENT_MAX_PACKET_SIZE)
-	inOffset := int32(0)
-	packetOffset := int32(0)
+	clientInBuf := make([]byte, Setting.RecvBufSize) 
+	inOffset := 0
+	packetOffset := 0
 
 	for {
 
@@ -206,7 +205,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 		}
 
 		if size > 0 {
-			inOffset += int32(size)
+			inOffset += size
 		}
 
 		if size == 0 {
@@ -219,7 +218,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 		var body []byte = nil
 		var packetLen, packetType int32
 
-		token, needs := server.searchPacket(clientInBuf, packetOffset, inOffset-packetOffset, &packetLen, &packetType, &body)
+		token, needs := server.searchPacket(clientInBuf, int32(packetOffset), int32(inOffset-packetOffset), &packetLen, &packetType, &body)
 
 		if token == 0 {
 			if needs == 0 {
@@ -227,11 +226,10 @@ func (server *SpanServer) handleClient(con net.Conn) {
 				break
 			}
 
-			if CLIENT_MAX_PACKET_SIZE-inOffset < needs {
+			if Setting.RecvBufSize -inOffset < int(needs){
 				// not enough space to hold income
-				if needs > (CLIENT_MAX_PACKET_SIZE / 2) {
-					msg := fmt.Sprintf("packet overflow and overlap.Reason packet_offset：%d,in_offset:%d", packetOffset, inOffset)
-					log.Error(msg)
+				if int(needs) > Setting.RecvBufSize / 2 {
+					log.Errorf("packet overflow and overlap.Reason packet_offset:%d,in_offset:%d", packetOffset, inOffset)
 					break
 				}
 				unParsedSize := inOffset - packetOffset
@@ -242,7 +240,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 			continue
 		}
 
-		packetOffset += token
+		packetOffset += int(token)
 
 		// get a packet
 		err = server.parseInComePacket(uint32(packetLen), uint32(packetType), body)
