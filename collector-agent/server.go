@@ -3,12 +3,28 @@ package main
 import (
 	// _ "net/http/pprof"
 
+	"flag"
+
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server"
 
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	server_recv_buf=flag.Int("RecvBufSize", server.RECV_BUF_SIZE_DEF, "Set recv buf; eg: -RecvBufSize=409600")
+)
+
+func initServerSetting(){
+	if *server_recv_buf > server.RECV_BUF_SIZE_DEF{
+		server.Setting.RecvBufSize = *server_recv_buf
+	}
+}
+
 func main() {
+	flag.Parse()
+
+	initServerSetting()
+	
 	server.InitServerConfig()
 	spanServer := server.SpanServer{}
 	// disable performance profile
