@@ -216,7 +216,7 @@ namespace ConnectionPool
         return -1;
     }
 
-    void TransLayer::copy_into_send_buffer(const std::string &data)
+    bool TransLayer::copy_into_send_buffer(const std::string &data)
     {
         Header header;
         header.length = htonl(data.size());
@@ -225,7 +225,7 @@ namespace ConnectionPool
         if (this->chunks.checkCapacity(sizeof(header) + data.size()) == false)
         {
             pp_trace("Send buffer is full. size:[%ld]", data.size() + sizeof(header));
-            return;
+            return false;
         }
         // copy header
         this->chunks.copyDataIntoChunks((const char *)&header, sizeof(header));
@@ -233,6 +233,7 @@ namespace ConnectionPool
         this->chunks.copyDataIntoChunks(data.data(), data.size());
         // enable write event
         this->_state |= S_WRITING;
+        return true;
     }
 
     const char *TransLayer::UNIX_SOCKET = "unix:";

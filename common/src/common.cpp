@@ -81,6 +81,13 @@ static NodeID do_start_trace(NodeID id, const char *opt = nullptr, va_list *args
     else
     {
         WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(id);
+
+        // get root node
+        WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(parent->mRootIndex);
+
+        root->updateRootSubTraceSize();
+
+        // todo check subnode limit
         WrapperTraceNode trace = PoolManager::getInstance().GetWrapperNode();
         trace->startTimer();
         parent->addChild(trace);
@@ -97,11 +104,7 @@ static void flush_to_agent(std::string &span)
 {
     TransConnection trans = Helper::getConnection();
 
-    if (span.length() < MAX_SPAN_SIZE)
-    {
-        trans->copy_into_send_buffer(span);
-    }
-    else
+    if (!trans->copy_into_send_buffer(span))
     {
         pp_trace("drop current span as it's too heavy! size:%lu", span.length());
     }
