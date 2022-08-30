@@ -54,8 +54,8 @@ namespace NodePool
         if (!this->_context.empty())
             this->_context.clear();
 
-        if (!this->_callback.empty())
-            this->_callback.clear();
+        if (!this->_endTraceCallback.empty())
+            this->_endTraceCallback.clear();
     }
 
     void TraceNode::initId(NodeID &id)
@@ -132,7 +132,7 @@ namespace NodePool
                     return true;
                 return false;
             };
-            this->_callback.push_back(cb);
+            this->_endTraceCallback.push_back(cb);
         }
         else if (key == "TraceOnlyException")
         {
@@ -141,14 +141,14 @@ namespace NodePool
                 return this->mHasExp;
             };
 
-            this->_callback.push_back(cb);
+            this->_endTraceCallback.push_back(cb);
         }
     }
 
     bool TraceNode::checkOpt()
     {
         bool ret = true;
-        for (auto &cb : this->_callback)
+        for (auto &cb : this->_endTraceCallback)
         {
             if ((ret = cb()) == true)
                 return ret;

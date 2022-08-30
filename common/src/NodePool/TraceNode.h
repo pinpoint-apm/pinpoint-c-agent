@@ -40,7 +40,7 @@ namespace NodePool
     using Context::LongContextType;
     using Context::StringContextType;
     class TraceNode;
-
+    const static int MAX_SUB_TRACE_NODES_LIMIT = 2048;
     class WrapperTraceNode
     {
     public:
@@ -106,24 +106,6 @@ namespace NodePool
         {
             return this->mChildHeadId == E_INVALID_NODE;
         }
-
-        // private:
-        //     inline bool isRelated(NodeID mParentId)
-        //     {
-        //         assert(mParentId != mPoolIndex);
-        //         assert(this->mStartParentId != E_INVALID_NODE);
-        //         assert(mParentId != E_INVALID_NODE);
-        //         if (this->mParentId == this->mStartParentId)
-        //         {
-        //             assert(this->mParentId == mParentId);
-        //             return true;
-        //         }
-        //         else
-        //         {
-        //             assert(this->mParentId == mPoolIndex);
-        //             return false;
-        //         }
-        //     }
 
     public:
         TraceNode()
@@ -249,6 +231,7 @@ namespace NodePool
             this->mChildHeadId = E_INVALID_NODE;
             this->mParentId = mPoolIndex;
             this->mRootIndex = mPoolIndex;
+            this->_subTraceNodeMaxSize = MAX_SUB_TRACE_NODES_LIMIT;
         }
 
         inline void resetStatus()
@@ -292,22 +275,37 @@ namespace NodePool
                                            "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
                                            "_mRef:%d\n"
                                            "_value:%s \n"
-                                           "_context size:%lu,_callback:%lu \n",
+                                           "_context size:%lu,_endTraceCallback:%lu \n",
                                (int)this->mNextId, (int)this->mChildHeadId, (int)this->mParentId, (int)this->mRootIndex, (int)this->mPoolIndex,
                                this->start_time, this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp,
                                this->_mRef.load(),
                                this->_value.toStyledString().c_str(),
-                               this->_context.size(), this->_callback.size());
+                               this->_context.size(), this->_endTraceCallback.size());
             return std::string(pbuf, len);
         }
 
     private:
         std::atomic<int> _mRef;
+        int _subTraceNodeMaxSize;
+
+    public:
+        // note: not tls, not a force limitation
+        inline void updateRootSubTraceSize()
+        {
+            if (this->_subTraceNodeMaxSize < 0)
+            {
+                throw std::out_of_range("current span reached max sub node limitation");
+            }
+            else
+            {
+                this->_subTraceNodeMaxSize--;
+            }
+        }
 
     private:
         Json::Value _value;
         std::map<std::string, _ContextType_> _context;
-        std::vector<std::function<bool()>> _callback;
+        std::vector<std::function<bool()>> _endTraceCallback;
     };
 }
 #endif /* COMMON_SRC_TRACENODE_H_ */

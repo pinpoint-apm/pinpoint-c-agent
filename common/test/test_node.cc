@@ -407,3 +407,20 @@ TEST(node, end_trace_in_mt)
         thread.join();
     EXPECT_EQ(count, usedNode());
 }
+// ./bin/TestCommon --gtest_filter=node.max_sub_nodes
+TEST(node, max_sub_nodes)
+{
+    auto count = usedNode();
+    NodeID root = pinpoint_start_trace(E_ROOT_NODE);
+    while (true)
+    {
+        NodeID next = pinpoint_start_trace(root);
+        if (next == E_INVALID_NODE)
+        {
+            break;
+        }
+        pinpoint_end_trace(next);
+    }
+    pinpoint_end_trace(root);
+    EXPECT_EQ(count, usedNode());
+}
