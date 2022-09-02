@@ -27,95 +27,91 @@ class AsyRequestPlugin(AsynPinTrace):
     def __init__(self, name):
         super().__init__(name)
 
-    def onBefore(self, *args, **kwargs):
-        super().onBefore(*args, **kwargs)
-        pinpoint.add_trace_header(Defines.PP_APP_NAME, pinpoint.app_name(), self.traceId)
-        pinpoint.add_trace_header(Defines.PP_APP_ID, pinpoint.app_id(), self.traceId)
-        pinpoint.add_context(Defines.PP_APP_NAME, pinpoint.app_name(), self.traceId)
+    def onBefore(self,parentId, *args, **kwargs):
+        traceId,args,kwargs = super().onBefore(parentId,*args, **kwargs)
+        pinpoint.add_trace_header(Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+        pinpoint.add_trace_header(Defines.PP_APP_ID, pinpoint.app_id(), traceId)
+        pinpoint.add_context(Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
         ###############################################################
         request = args[0]
-        # pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'fastapi.RequestHandler',self.traceId)
-        # pinpoint.add_trace_header(Defines.PP_REQ_URI, request.uri, self.traceId)
-        # pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request.remote_ip, self.traceId)
-        # pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request.host_name, self.traceId)
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PYTHON, self.traceId)
-        pinpoint.add_context(Defines.PP_SERVER_TYPE, Defines.PYTHON, self.traceId)
+
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
+        pinpoint.add_context(Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
 
         # nginx add http
         if Defines.PP_HTTP_PINPOINT_PSPANID in request.headers:
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HTTP_PINPOINT_PSPANID], self.traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HTTP_PINPOINT_PSPANID], traceId)
         if Defines.PP_HTTP_PINPOINT_SPANID in request.headers:
-            self.sid = request.headers[Defines.PP_HTTP_PINPOINT_SPANID]
+            sid = request.headers[Defines.PP_HTTP_PINPOINT_SPANID]
         elif Defines.PP_HEADER_PINPOINT_SPANID in request.headers:
-            self.sid = request.headers[Defines.PP_HEADER_PINPOINT_SPANID]
+            sid = request.headers[Defines.PP_HEADER_PINPOINT_SPANID]
         else:
-            self.sid = pinpoint.gen_sid()
-        pinpoint.add_context(Defines.PP_SPAN_ID, self.sid, self.traceId)
+            sid = pinpoint.gen_sid()
+        pinpoint.add_context(Defines.PP_SPAN_ID, sid, traceId)
 
         if Defines.PP_HTTP_PINPOINT_TRACEID in request.headers:
-            self.tid = request.headers[Defines.PP_HTTP_PINPOINT_TRACEID]
+            tid = request.headers[Defines.PP_HTTP_PINPOINT_TRACEID]
         elif Defines.PP_HEADER_PINPOINT_TRACEID in request.headers:
-            self.tid = request.headers[Defines.PP_HEADER_PINPOINT_TRACEID]
+            tid = request.headers[Defines.PP_HEADER_PINPOINT_TRACEID]
         else:
-            self.tid = pinpoint.gen_tid()
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, self.traceId)
+            tid = pinpoint.gen_tid()
+        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, traceId)
 
         if Defines.PP_HTTP_PINPOINT_PAPPNAME in request.headers:
-            self.pname = request.headers[Defines.PP_HTTP_PINPOINT_PAPPNAME]
-            pinpoint.add_context(Defines.PP_PARENT_NAME, self.pname, self.traceId)
-            pinpoint.add_trace_header(Defines.PP_PARENT_NAME, self.pname, self.traceId)
+            pname = request.headers[Defines.PP_HTTP_PINPOINT_PAPPNAME]
+            pinpoint.add_context(Defines.PP_PARENT_NAME, pname, traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_NAME, pname, traceId)
 
         if Defines.PP_HTTP_PINPOINT_PAPPTYPE in request.headers:
-            self.ptype = request.headers[Defines.PP_HTTP_PINPOINT_PAPPTYPE]
-            pinpoint.add_context(Defines.PP_PARENT_TYPE, self.ptype, self.traceId)
-            pinpoint.add_trace_header(Defines.PP_PARENT_TYPE, self.ptype, self.traceId)
+            ptype = request.headers[Defines.PP_HTTP_PINPOINT_PAPPTYPE]
+            pinpoint.add_context(Defines.PP_PARENT_TYPE, ptype, traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_TYPE, ptype, traceId)
 
         if Defines.PP_HTTP_PINPOINT_HOST in request.headers:
-            self.Ah = request.headers[Defines.PP_HTTP_PINPOINT_HOST]
-            pinpoint.add_context(Defines.PP_PARENT_HOST, self.Ah, self.traceId)
-            pinpoint.add_trace_header(Defines.PP_PARENT_HOST, self.Ah, self.traceId)
+            Ah = request.headers[Defines.PP_HTTP_PINPOINT_HOST]
+            pinpoint.add_context(Defines.PP_PARENT_HOST, Ah, traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_HOST, Ah, traceId)
 
         # Not nginx, no http
         if Defines.PP_HEADER_PINPOINT_PSPANID in request.headers:
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HEADER_PINPOINT_PSPANID], self.traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HEADER_PINPOINT_PSPANID], traceId)
 
         if Defines.PP_HEADER_PINPOINT_PAPPNAME in request.headers:
-            self.pname = request.headers[Defines.PP_HEADER_PINPOINT_PAPPNAME]
-            pinpoint.add_context(Defines.PP_PARENT_NAME, self.pname, self.traceId)
-            pinpoint.add_trace_header(Defines.PP_PARENT_NAME, self.pname, self.traceId)
+            pname = request.headers[Defines.PP_HEADER_PINPOINT_PAPPNAME]
+            pinpoint.add_context(Defines.PP_PARENT_NAME, pname, traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_NAME, pname, traceId)
 
         if Defines.PP_HEADER_PINPOINT_PAPPTYPE in request.headers:
-            self.ptype = request.headers[Defines.PP_HEADER_PINPOINT_PAPPTYPE]
-            pinpoint.add_context(Defines.PP_PARENT_TYPE, self.ptype, self.traceId)
-            pinpoint.add_trace_header(Defines.PP_PARENT_TYPE, self.ptype, self.traceId)
+            ptype = request.headers[Defines.PP_HEADER_PINPOINT_PAPPTYPE]
+            pinpoint.add_context(Defines.PP_PARENT_TYPE, ptype, traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_TYPE, ptype, traceId)
 
         if Defines.PP_HEADER_PINPOINT_HOST in request.headers:
-            self.Ah = request.headers[Defines.PP_HEADER_PINPOINT_HOST]
-            pinpoint.add_context(Defines.PP_PARENT_HOST, self.Ah, self.traceId)
-            pinpoint.add_trace_header(Defines.PP_PARENT_HOST, self.Ah, self.traceId)
+            Ah = request.headers[Defines.PP_HEADER_PINPOINT_HOST]
+            pinpoint.add_context(Defines.PP_PARENT_HOST, Ah, traceId)
+            pinpoint.add_trace_header(Defines.PP_PARENT_HOST, Ah, traceId)
 
         if Defines.PP_NGINX_PROXY in request.headers:
-            pinpoint.add_trace_header(Defines.PP_NGINX_PROXY, request.headers[Defines.PP_NGINX_PROXY], self.traceId)
+            pinpoint.add_trace_header(Defines.PP_NGINX_PROXY, request.headers[Defines.PP_NGINX_PROXY], traceId)
 
         if Defines.PP_APACHE_PROXY in request.headers:
-            pinpoint.add_trace_header(Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY], self.traceId)
+            pinpoint.add_trace_header(Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY], traceId)
 
-        pinpoint.add_context("Pinpoint-Sampled", "s1", self.traceId)
+        pinpoint.add_context("Pinpoint-Sampled", "s1", traceId)
         if (Defines.PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or (Defines.PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HEADER_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
-            pinpoint.drop_trace(self.traceId)
-            pinpoint.add_context("Pinpoint-Sampled", "s0", self.traceId)
+            pinpoint.drop_trace(traceId)
+            pinpoint.add_context("Pinpoint-Sampled", "s0", traceId)
 
-        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, self.tid, self.traceId)
-        pinpoint.add_trace_header(Defines.PP_SPAN_ID, self.sid, self.traceId)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, self.traceId)
-        pinpoint.add_context(Defines.PP_SPAN_ID, self.sid, self.traceId)
-        return args, kwargs
+        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid, traceId)
+        pinpoint.add_trace_header(Defines.PP_SPAN_ID, sid, traceId)
+        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, traceId)
+        pinpoint.add_context(Defines.PP_SPAN_ID, sid, traceId)
+        return traceId,args,kwargs
 
-    def onEnd(self, ret):
-        super().onEnd(ret)
-        self.isLimit = False
+    def onEnd(self,traceId, ret):
+        super().onEnd(traceId,ret)
         return ret
 
-    def onException(self, e):
-        pinpoint.mark_as_error(str(e), "", 0, self.traceId)
+    def onException(self,traceId, e):
+        pinpoint.mark_as_error(str(e), "", 0, traceId)
         raise e

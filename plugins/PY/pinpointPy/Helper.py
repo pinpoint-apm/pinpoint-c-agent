@@ -24,16 +24,16 @@ from . import pinpoint
 def generateNextSid():
    return pinpoint.gen_sid()
 
-def generatePinpointHeader(host, headers):
+def generatePinpointHeader(host, headers,traceId=-1):
     headers[Defines.PP_HEADER_PINPOINT_SAMPLED] = Defines.PP_SAMPLED
-    headers[Defines.PP_HEADER_PINPOINT_PAPPTYPE] = pinpoint.get_context(Defines.PP_SERVER_TYPE)
-    headers[Defines.PP_HEADER_PINPOINT_PAPPNAME] = pinpoint.get_context(Defines.PP_APP_NAME)
+    headers[Defines.PP_HEADER_PINPOINT_PAPPTYPE] = pinpoint.get_context(Defines.PP_SERVER_TYPE,traceId)
+    headers[Defines.PP_HEADER_PINPOINT_PAPPNAME] = pinpoint.get_context(Defines.PP_APP_NAME,traceId)
     headers['Pinpoint-Flags'] = "0"
     headers[Defines.PP_HEADER_PINPOINT_HOST] = host
-    headers[Defines.PP_HEADER_PINPOINT_TRACEID] = pinpoint.get_context(Defines.PP_TRANSCATION_ID)
-    headers[Defines.PP_HEADER_PINPOINT_PSPANID] = pinpoint.get_context(Defines.PP_SPAN_ID)
+    headers[Defines.PP_HEADER_PINPOINT_TRACEID] = pinpoint.get_context(Defines.PP_TRANSCATION_ID,traceId)
+    headers[Defines.PP_HEADER_PINPOINT_PSPANID] = pinpoint.get_context(Defines.PP_SPAN_ID,traceId)
     nsid = pinpoint.gen_sid()
-    pinpoint.add_context(Defines.PP_NEXT_SPAN_ID, nsid)
+    pinpoint.add_context(Defines.PP_NEXT_SPAN_ID, nsid,traceId)
     headers[Defines.PP_HEADER_PINPOINT_SPANID] = nsid
 
 

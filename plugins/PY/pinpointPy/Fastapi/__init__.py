@@ -25,10 +25,10 @@ def __monkey_patch(*args, **kwargs):
             monkey_patch = getattr(module, 'monkey_patch')
             if callable(monkey_patch):
                 monkey_patch()
-                print("try to install pinpointPy.asynlibs.%s module" % (key))
+                print("try to install pinpointPy.Fastapi.%s module" % (key))
 
-def asyn_monkey_patch_for_pinpoint(AioRedis=True):
-    __monkey_patch(aioredis=AioRedis)
+def asyn_monkey_patch_for_pinpoint(AioRedis=True,MotorMongo=True,httpx=True):
+    __monkey_patch(aioredis=AioRedis,MotorMongo=MotorMongo,httpx=httpx)
 
 
 from .middleware import PinPointMiddleWare
