@@ -19,6 +19,7 @@
 
 
 
+from ast import Assert
 import asyncio
 
 from starlette_context import context
@@ -30,27 +31,39 @@ class AsynPinTrace(object):
 
     def __init__(self,name):
         self.name = name
-        self.traceId = -1
 
-    def onBefore(self,*args, **kwargs):
-        id = context.get('_pinpoint_id_', default=0)
-        traceId = pinpoint.with_trace(id)
+    def getCurrentId(self):
+        id = context['_pinpoint_id_']
+        if not id:
+            raise 'not found traceId'
+        else:
+            return id 
+
+    def onBefore(self,parentId,*args, **kwargs):
+        traceId = pinpoint.with_trace(parentId)
+        # update global id
         context['_pinpoint_id_'] = traceId
-        self.traceId = traceId
-        return (args,kwargs)
+        return traceId,args,kwargs
 
-    def isSample(args,kwargs):
+    @staticmethod
+    def isSample(*args, **kwargs):
         try:
-            context.get('_pinpoint_id_', default=0)
-            return True
+            parentid = context.get('_pinpoint_id_',0)
+            if parentid == 0:
+                return False,None
+            return True,parentid
         except Exception as e:
-            return False
+            return False,None
 
-    def onEnd(self,ret):
-        traceId = pinpoint.end_trace(self.traceId)
-        context['_pinpoint_id_'] = traceId
+    @classmethod
+    def _isSample(cls,*args, **kwargs):
+        return cls.isSample(*args, **kwargs)
 
-    def onException(self,e):
+    def onEnd(self,parentId,ret):
+        parentId = pinpoint.end_trace(parentId)
+        context['_pinpoint_id_'] = parentId
+
+    def onException(self,traceId,e):
         raise NotImplementedError()
     
     def __call__(self, func):
@@ -58,18 +71,19 @@ class AsynPinTrace(object):
 
         async def pinpointTrace(*args, **kwargs):
             ret = None
-            if not self.isSample((args,kwargs)):
+            sampled,parentId = self._isSample(args, kwargs)
+            if not sampled:
                 return await func(*args, **kwargs)
 
-            self.onBefore(*args, **kwargs)
+            traceId,args,kwargs = self.onBefore(parentId,*args, **kwargs)
             try:
                 ret = await func(*args, **kwargs)
                 return ret
             except Exception as e:
-                self.onException(e)
+                self.onException(traceId,e)
                 raise e
             finally:
-                self.onEnd(ret)
+                self.onEnd(traceId,ret)
 
         return pinpointTrace
 

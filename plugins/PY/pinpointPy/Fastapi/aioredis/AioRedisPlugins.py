@@ -28,25 +28,24 @@ class AioRedisPlugins(AsyCommon.AsynPinTrace):
 
     def __init__(self, name):
         super().__init__(name)
-        self.dst = ''
 
-    def onBefore(self, *args, **kwargs):
-        super().onBefore(*args, **kwargs)
+    def onBefore(self,parentId, *args, **kwargs):
+        traceId,args,kwargs= super().onBefore(parentId,*args, **kwargs)
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), self.traceId)
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REDIS, self.traceId)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REDIS, traceId)
         dst = (str(args[0]).split("<")[3]).strip(">")
-        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst, self.traceId)
-        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(args[1:]), self.traceId)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst, traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(args[1:]), traceId)
         ###############################################################
-        return args, kwargs
+        return traceId,args, kwargs
 
-    def onEnd(self, ret):
+    def onEnd(self,traceId, ret):
         ###############################################################
         # add_trace_header_v2(PP_RETURN,str(ret))
         ###############################################################
-        super().onEnd(ret)
+        super().onEnd(traceId,ret)
         return ret
 
-    def onException(self, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e),self.traceId)
+    def onException(self,traceId, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e),traceId)

@@ -24,8 +24,9 @@ from .FastAPIRequestPlugin import FastAPIRequestPlugin
 
 class PinPointMiddleWare(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        #  todo create Root traceId
         plugin = FastAPIRequestPlugin("")
-        plugin.onBefore(request)
+        traceId,_,_= plugin.onBefore(0,request)
         response = await call_next(request)
-        plugin.onEnd(response)
+        plugin.onEnd(traceId,response)
         return response

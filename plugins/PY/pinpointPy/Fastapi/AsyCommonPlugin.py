@@ -22,26 +22,25 @@ from .. import pinpoint
 
 class CommonPlugin(AsynPinTrace):
 
-    def onBefore(self, *args, **kwargs):
-        super().onBefore(*args, **kwargs)
+    def onBefore(self,traceId, *args, **kwargs):
+        traceId,args,kwargs = super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), self.traceId)
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, self.traceId)
+        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
+        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, traceId)
         arg = self.get_arg(*args, **kwargs)
-        pinpoint.add_trace_header_v2(Defines.PP_ARGS, arg, self.traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_ARGS, arg, traceId)
         ###############################################################
-        # print( threading.currentThread().ident)
-        return args, kwargs
+        return traceId,args,kwargs
 
-    def onEnd(self, ret):
+    def onEnd(self,traceId, ret):
         ###############################################################
-        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), self.traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), traceId)
         ###############################################################
-        super().onEnd(ret)
-        return ret
+        super().onEnd(traceId,ret)
+        
 
-    def onException(self, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), self.traceId)
+    def onException(self,traceId, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}

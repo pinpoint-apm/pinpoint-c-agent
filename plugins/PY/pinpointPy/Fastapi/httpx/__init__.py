@@ -17,26 +17,24 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
+# create by eelu
 
-from .AsyRequestPlugin import *
-from .. import pinpoint
-from .. import Defines
-from .. import pinpoint
+from ...Interceptor import Interceptor,intercept_once
 
+@intercept_once
+def monkey_patch():
+    try:
+        from httpx import AsyncClient
+        from .httpxPlugins import HttpxRequestPlugins
+        Interceptors = [
+            Interceptor(AsyncClient, 'request',HttpxRequestPlugins)
+        ]
 
-class FastAPIRequestPlugin(AsyRequestPlugin):
-    def __init__(self, name):
-        super().__init__(name)
+        for interceptor in Interceptors:
+            interceptor.enable()
 
-    def onBefore(self,parentId,*args, **kwargs):
-        traceId,args,kwargs=super().onBefore(parentId,*args, **kwargs)
-        request = args[0].scope
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'fastapi-middleware',traceId)
-        pinpoint.add_trace_header(Defines.PP_REQ_URI, request["path"], traceId)
-        pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request["client"][0], traceId)
-        pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request["server"][0] + ":" + str(request["server"][1]), traceId)
-        return traceId,args,kwargs
+    except ImportError as e:
+        # do nothing
+        print(e)
 
-    def onEnd(self,traceId, ret):
-        return super().onEnd(traceId,ret)
-
+__all__=['monkey_patch']
