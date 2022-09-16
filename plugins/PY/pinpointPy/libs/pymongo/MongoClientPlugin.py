@@ -32,7 +32,10 @@ class MongoClientPlugin(Common.PinTrace):
     def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         collection = args[0]
-        self.dst = str(collection.__database.address)
+        try:
+            self.dst = str(collection.__database.address)
+        except AttributeError:
+            self.dst = collection.name
         ###############################################################
         pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
         pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MONGDB_EXE_QUERY)
