@@ -22,8 +22,8 @@ from .. import pinpoint
 
 class CommonPlugin(AsynPinTrace):
 
-    def onBefore(self,traceId, *args, **kwargs):
-        traceId,args,kwargs = super().onBefore(*args, **kwargs)
+    def onBefore(self,parentId, *args, **kwargs):
+        traceId,args,kwargs = super().onBefore(parentId,*args, **kwargs)
         ###############################################################
         pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
         pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, traceId)
