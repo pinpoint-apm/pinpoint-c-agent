@@ -4,12 +4,14 @@ on:
   release:
     types: [workflow_dispatch]
   workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
 
 jobs:
 
   golang-build-env-1-13:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
 
@@ -22,12 +24,18 @@ jobs:
 
     - name: Build the golang-build-env Docker image
       run: |
-        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest -f common/Dockerfile .
-        docker push ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.13:latest
+        IMAGE_NAME=golang-build-env-1.13
+        IMAGE_TAG=$(echo "${GITHUB_REF##*/} " | sed -e 's,.*/\(.*\),\1,')
+        IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
+
+        docker build --pull --no-cache . --file common/Dockerfile --tag $IMAGE_NAME
+
+        docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
+        docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:latest
+        docker push --all-tags $IMAGE_ID/$IMAGE_NAME
 
   golang-build-env-1-16:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
 
@@ -40,5 +48,12 @@ jobs:
 
     - name: Build the golang-build-env Docker image
       run: |
-        docker build -t ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest -f common/Go1.16.Dockerfile .
-        docker push ghcr.io/$GITHUB_REPOSITORY/golang-build-env-1.16:latest
+        IMAGE_NAME=golang-build-env-1.16
+        IMAGE_TAG=$(echo "${GITHUB_REF##*/}" | sed -e 's,.*/\(.*\),\1,')
+        IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
+
+        docker build --pull --no-cache . --file common/Go1.16.Dockerfile --tag $IMAGE_NAME
+
+        docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
+        docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:latest
+        docker push --all-tags $IMAGE_ID/$IMAGE_NAME
