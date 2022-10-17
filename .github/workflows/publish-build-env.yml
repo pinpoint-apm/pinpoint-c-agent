@@ -7,6 +7,9 @@ on:
   push:
     tags:
       - 'v*.*.*'
+      
+env:
+  IMAGE_TAG:$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
 jobs:
 
@@ -24,11 +27,12 @@ jobs:
 
     - name: Build the golang-build-env Docker image
       run: |
-        IMAGE_NAME=golang-build-env-1.13
-        IMAGE_TAG=$(echo "${GITHUB_REF##*/} " | sed -e 's,.*/\(.*\),\1,')
         IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
-
+        IMAGE_NAME=golang-build-env-1.13
         docker build --pull --no-cache . --file common/Dockerfile --tag $IMAGE_NAME
+
+        IMAGE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG=$(echo $IMAGE_TAG | sed -e 's/^v//')
 
         docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
         docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:latest
@@ -48,11 +52,12 @@ jobs:
 
     - name: Build the golang-build-env Docker image
       run: |
-        IMAGE_NAME=golang-build-env-1.16
-        IMAGE_TAG=$(echo "${GITHUB_REF##*/}" | sed -e 's,.*/\(.*\),\1,')
         IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
-
+        IMAGE_NAME=golang-build-env-1.16
         docker build --pull --no-cache . --file common/Go1.16.Dockerfile --tag $IMAGE_NAME
+
+        IMAGE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG=$(echo $IMAGE_TAG | sed -e 's/^v//')
 
         docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
         docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:latest
