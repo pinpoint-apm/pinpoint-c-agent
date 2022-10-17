@@ -24,7 +24,8 @@ jobs:
     - name: Build the collector-agent Docker image
       run: |
         IMAGE_NAME=collector-agent
-        IMAGE_TAG=$(echo "${GITHUB_REF##*/} " | sed -e 's,.*/\(.*\),\1,')
+        IMAGE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG=$(echo $IMAGE_TAG | sed -e 's/^v//')
         IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
 
         docker build --pull --no-cache . --file collector-agent/Dockerfile --tag $IMAGE_NAME
