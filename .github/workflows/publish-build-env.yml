@@ -7,9 +7,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
-      
-env:
-  IMAGE_TAG:$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
 
 jobs:
 
