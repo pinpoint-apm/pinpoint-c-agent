@@ -3,7 +3,7 @@ name: publish-pypitest
 on: [workflow_dispatch]
 
 jobs:
-  pinpointPy:
+  pinpointPy-manylinux2014_x86_64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -29,3 +29,4 @@ jobs:
           user: __token__
           password: ${{ secrets.EELIUTEST }}
           repository_url: https://test.pypi.org/legacy/
+  # pinpointPy-macosx_10_15_x86_64.whl:
