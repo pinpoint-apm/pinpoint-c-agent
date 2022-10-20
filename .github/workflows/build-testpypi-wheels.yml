@@ -19,18 +19,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-latest, macos-latest]
+        python-version: [3.7] #, 3.8, 3.9]
+        os: [ubuntu-latest] #, macos-latest]
         platform: [x64]
-        MB_ML_VER: [1, 2010]
+        MB_ML_VER: [1] #, 2010]
         PLAT: [x86_64] # [i686, x86_64]
         include:
-          - python-version: '3.10'
-            os: ubuntu-latest
-            MB_ML_VER: 2014
-          - python-version: '3.10'
-            os: macos-latest
-            MB_ML_VER: 2014
+          # - python-version: '3.10'
+          #   os: ubuntu-latest
+          #   MB_ML_VER: 2014
+          # - python-version: '3.10'
+          #   os: macos-latest
+          #   MB_ML_VER: 2014
           # - python-version: '3.9'
           #   os: macos-latest
           #   MB_ML_VER: 2014
@@ -45,7 +45,7 @@ jobs:
             PLAT: universal2
 
     env:
-      # REPO_DIR: dipy
+      REPO_DIR: .
       # PKG_NAME: dipy
       # BUILD_COMMIT: 1.5.0
       UNICODE_WIDTH: 32
@@ -69,7 +69,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-
     - name: Setup Environment variables
       run: |
         if [ "schedule" == "${{ github.event_name }}" ] || [ "master" == "$BUILD_COMMIT" ]; then echo "ANACONDA_ORG=scipy-wheels-nightly" >> $GITHUB_ENV; else echo "ANACONDA_ORG=multibuild-wheels-staging" >> $GITHUB_ENV; fi
@@ -101,21 +100,21 @@ jobs:
     - name: Install VirtualEnv
       run: |
         python -m pip install --upgrade pip
-        pip install virtualenv
+        pip install virtualenv 
     - name: Build and Install Wheels
       run: |
         source multibuild/common_utils.sh
-        # source multibuild/travis_steps.sh
+        source multibuild/travis_steps.sh
         # echo "------- BEFORE INSTALL --------"
-        # before_install
+        before_install
         # echo "------- CLEAN CODE --------"
-        # clean_code $REPO_DIR $BUILD_COMMIT
+        clean_code $REPO_DIR $BUILD_COMMIT
         # echo "------- BUILD WHEEL --------"
         rm setup.py
         ln -s setup_pypi_test.py setup.py
         build_wheel . $PLAT
         # echo "------- INSTALL_RUN --------"
-        # install_run $PLAT
+        install_run $PLAT
         ls -l
 
     # - name: Upload wheels
