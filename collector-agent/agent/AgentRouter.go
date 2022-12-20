@@ -80,14 +80,16 @@ func GetAgentInfo(span map[string]interface{}) (id, name string, ft int32, start
 	}
 
 	// new feat: get current startTime
+	startTime = strconv.FormatInt(common.GetConfig().StartTime, 10) + "000"
 	if value, OK := span["tid"].(string); OK {
 		holder := strings.Split(value, "^")
 		if len(holder) < 3 {
 			log.Warn("tid in wrong format")
+		}else if len(holder[1]) == 10 { // seconds format
+			startTime = holder[1] + "000"
+		}else { // miliseconds format
+			startTime = holder[1]
 		}
-		startTime = holder[1] + "000"
-	} else {
-		startTime = strconv.FormatInt(common.GetConfig().StartTime, 10) + "000"
 	}
 
 	return id, name, ft, startTime, nil
