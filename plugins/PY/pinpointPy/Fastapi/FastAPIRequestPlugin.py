@@ -19,7 +19,6 @@
 
 
 from .AsyRequestPlugin import *
-from .. import pinpoint
 from .. import Defines
 from .. import pinpoint
 
