@@ -33,4 +33,7 @@ def asyn_monkey_patch_for_pinpoint(AioRedis=True,MotorMongo=True,httpx=True):
 
 from .middleware import PinPointMiddleWare
 from .AsyCommonPlugin import CommonPlugin
-__all__ = ['asyn_monkey_patch_for_pinpoint', 'PinPointMiddleWare', 'CommonPlugin']
+from .PinTranscation import PinTransaction,PinHeader,GenPinHeader,PinStarlettePlugin
+
+__all__ = ['asyn_monkey_patch_for_pinpoint', 'PinPointMiddleWare',
+           'CommonPlugin','PinTransaction','PinHeader','GenPinHeader','PinStarlettePlugin']

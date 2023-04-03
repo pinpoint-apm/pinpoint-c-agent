@@ -20,6 +20,6 @@
 __version__ = "0.1.0"
 
 from .libs import monkey_patch_for_pinpoint
-from .pinpoint import set_agent
+from .pinpoint import set_agent,app_id,app_name,gen_tid
 
-__all__ = ['monkey_patch_for_pinpoint', 'set_agent']
+__all__ = ['monkey_patch_for_pinpoint', 'set_agent','app_id','app_name','gen_tid']
