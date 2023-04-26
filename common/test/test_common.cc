@@ -163,6 +163,12 @@ TEST(common, force_end_trace)
     EXPECT_NE(id, 0);
     int ret = pinpoint_force_end_trace(id, 300);
     EXPECT_EQ(ret, 0);
+    id = NodeID(809999);
+    pinpoint_force_end_trace(id, 300);
+    pinpoint_force_end_trace(NodeID(-1235), 300);
+    pinpoint_force_end_trace(NodeID(0), 300);
+    pinpoint_force_end_trace(NodeID(1), 300);
+    pinpoint_force_end_trace(NodeID(-1), 300);
 }
 
 TEST(common, version)
