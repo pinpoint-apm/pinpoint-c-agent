@@ -253,6 +253,8 @@ int pinpoint_force_end_trace(NodeID id, int32_t timeout)
         while (id != E_ROOT_NODE)
         {
             id = pinpoint_end_trace(id);
+            if (id == E_INVALID_NODE)
+                break;
         }
         // back to normal
         _span_timeout = global_agent_info.timeout_ms;
