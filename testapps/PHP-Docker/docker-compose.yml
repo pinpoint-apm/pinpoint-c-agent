@@ -1,0 +1,9 @@
+version: '3.3'
+services:
+    pinpoint-php-testapp:
+        ports:
+            - '8000:8000'
+        container_name: pinpoint-php-testapp
+        network_mode: pinpoint-docker_pinpoint
+        image: 'xxcanxx13/pinpoint-php-testapp:latest'
+        tty: true
