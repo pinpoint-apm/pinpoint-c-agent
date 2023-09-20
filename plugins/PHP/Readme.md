@@ -28,21 +28,25 @@
     When you add clue(clues), DO NOT assignment with large string or string included some special characters(https://www.freeformatter.com/json-escape.html)
 3. Add the function that you care about such as "///@hook:app\User::adduser" before ClassName(XXXPlugins), onBefore, onEnd or onException. If you care about all cases, please call before&after&around function.
 
-4. Remove the "__class_index_table" file under AOP_CACHE_DIR.
-
-5. Copy your plugins files into source tree/plugins_dir, and add this directory into composer.json{"autoload"}.
+4. Inject plugin into your project: 
+    $ cd your_project_folder
+    $ mkdir Plugins/AutoGen
+    $ cp your_xxxplugins.php Plugins/AutoGen
+    
+5. Enable autoloading Plugins/ into composer.json 
    
     ```
     "autoload": {
             "psr-4": {
                 ......
-                "Plugins\\": "your source tree/plugins_dir"
+                # location for your Plugins
+                "Plugins\\": "Plugins" 
             }
         },
     ```
     
-6. Update your autoload. $ composer update.
-7. Enjoy the pinpoint-php-aop.
+6. Update your autoload. $composer update.
+
 ## Protocol
 
 > Json -> Thrift/GRPC

@@ -4,6 +4,7 @@ from multiprocessing import Process
 import time
 import _pinpointPy
 import random
+import platform
 
 class TestUnderProcessMode(TestCase):
 
@@ -27,6 +28,7 @@ class TestUnderProcessMode(TestCase):
             _pinpointPy.force_flush_trace()
             _pinpointPy.drop_trace()
 
+    @unittest.skipIf(platform.system() == "Darwin","skip Darwin")
     def test_process(self):
         p1 = Process(target=self._test_api_flow)
         p1.start()
