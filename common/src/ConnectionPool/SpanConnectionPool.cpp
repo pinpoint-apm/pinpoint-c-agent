@@ -26,82 +26,68 @@
 
 namespace ConnectionPool
 {
-    using Cache::SafeSharedState;
-    namespace Json = AliasJson;
-    SpanConnectionPool::SpanConnectionPool(const char *co_host) : co_host(co_host),
-                                                                  con_counter(0)
-    {
-        this->_cPool.push(this->createTrans());
-    }
+using Cache::SafeSharedState;
+namespace Json = AliasJson;
+SpanConnectionPool::SpanConnectionPool(const char *co_host) : co_host(co_host), con_counter(0) { this->_cPool.push(this->createTrans()); }
 
-    TransConnection SpanConnectionPool::createTrans()
-    {
-        TransConnection _connect(new TransLayer(this->co_host));
-        using namespace std::placeholders;
-        // _connect->registerPeerMsgCallback(
-        //     std::bind(&SpanConnectionPool::_handleMsgFromCollector,this,_1,_2,_3),
-        //     std::bind(&SpanConnectionPool::_handleTransLayerState,this,_1));
+TransConnection SpanConnectionPool::createTrans()
+{
+  TransConnection _connect(new TransLayer(this->co_host));
+  using namespace std::placeholders;
+  // _connect->registerPeerMsgCallback(
+  //     std::bind(&SpanConnectionPool::_handleMsgFromCollector,this,_1,_2,_3),
+  //     std::bind(&SpanConnectionPool::_handleTransLayerState,this,_1));
 
-        _connect->registerPeerMsgCallback(
-            std::bind(&SpanConnectionPool::_handleMsgFromCollector, this, _1, _2, _3),
-            nullptr);
-        this->con_counter++;
+  _connect->registerPeerMsgCallback(std::bind(&SpanConnectionPool::_handleMsgFromCollector, this, _1, _2, _3), nullptr);
+  this->con_counter++;
 
-        return _connect;
-    }
+  return _connect;
+}
 
-    //@obsoleted
-    // void SpanConnectionPool::_handleTransLayerState(int state)
-    // {
-    //     if(state == E_OFFLINE)
-    //     {
-    //         if(global_agent_info.inter_flag & E_UTEST){
-    //             SafeSharedState::instance().markONLine();
-    //         }
-    //         else{
-    //             SafeSharedState::instance().markOFFLine();
-    //         }
-    //     }
-    // }
+//@obsoleted
+// void SpanConnectionPool::_handleTransLayerState(int state)
+// {
+//     if(state == E_OFFLINE)
+//     {
+//         if(global_agent_info.inter_flag & E_UTEST){
+//             SafeSharedState::instance().markONLine();
+//         }
+//         else{
+//             SafeSharedState::instance().markOFFLine();
+//         }
+//     }
+// }
 
-    void SpanConnectionPool::_handleMsgFromCollector(int type, const char *buf, size_t len)
-    {
-        switch (type)
-        {
+void SpanConnectionPool::_handleMsgFromCollector(int type, const char *buf, size_t len)
+{
+  switch (type) {
+    case RESPONSE_AGENT_INFO:
+      this->_handle_agent_info(type, buf, len);
+      break;
 
-        case RESPONSE_AGENT_INFO:
-            this->_handle_agent_info(type, buf, len);
-            break;
+    default:
+      break;
+  }
+}
 
-        default:
-            break;
-        }
-    }
+void SpanConnectionPool::_handle_agent_info(int type, const char *buf, size_t len)
+{
+  Json::Value root;
+  (void) type;
+  Json::CharReaderBuilder builder;
+  builder["collectComments"] = false;
 
-    void SpanConnectionPool::_handle_agent_info(int type, const char *buf, size_t len)
-    {
-        Json::Value root;
-        (void)type;
-        Json::CharReaderBuilder builder;
-        builder["collectComments"] = false;
+  std::istringstream inss(std::string(buf, len));
+  JSONCPP_STRING errs;
+  bool ok = parseFromStream(builder, inss, &root, &errs);
 
-        std::istringstream inss(std::string(buf, len));
-        JSONCPP_STRING errs;
-        bool ok = parseFromStream(builder, inss, &root, &errs);
+  if (ok) {
+    // pp_trace("collector-agent say:%s",root.toStyledString().c_str());
 
-        if (ok)
-        {
-            // pp_trace("collector-agent say:%s",root.toStyledString().c_str());
-
-            if (root.isMember("time"))
-            {
-                SafeSharedState::instance().updateStartTime(atoll(root["time"].asCString()));
-            }
-        }
-        else
-        {
-            pp_trace("Recieve invalid msg: %.*s from Collector-agent, reason: %s", (int)len, buf, errs.c_str());
-        }
-    }
+    if (root.isMember("time")) { SafeSharedState::instance().updateStartTime(atoll(root["time"].asCString())); }
+  } else {
+    pp_trace("Recieve invalid msg: %.*s from Collector-agent, reason: %s", (int) len, buf, errs.c_str());
+  }
+}
 
 } /* namespace ConnectionPool */

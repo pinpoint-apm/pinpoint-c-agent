@@ -70,3 +70,6 @@ src/PHP/pinpoint_php.dep
 testapps/PHP/composer.phar
 collector-agent/collector-agent
 common/include/common.h
+.cache
+compile_commands.json
+wheelhouse/
