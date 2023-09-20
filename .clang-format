@@ -1,0 +1,17 @@
+# Format Style Options - Created with Clang Power Tools
+---
+BasedOnStyle: Google
+AlignAfterOpenBracket: DontAlign
+AllowAllArgumentsOnNextLine: false
+AllowShortBlocksOnASingleLine: Always
+BreakBeforeBraces: Linux
+BreakStringLiterals: false
+ColumnLimit: 150
+ContinuationIndentWidth: 2
+IncludeBlocks: Preserve
+MaxEmptyLinesToKeep: 2
+ReflowComments: false
+SortIncludes: false
+SpaceAfterCStyleCast: true
+UseTab: Always
+...

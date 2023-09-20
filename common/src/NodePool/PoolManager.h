@@ -31,38 +31,37 @@
 
 namespace NodePool
 {
+class PoolManager
+{
+ private:
+  TraceNode &_fetchNodeBy(NodeID id);
 
-    class PoolManager
-    {
-    private:
-        TraceNode &_fetchNodeBy(NodeID id);
+  TraceNode &_getInitNode(void) noexcept;
 
-        TraceNode &_getInitNode(void) noexcept;
+  TraceNode &_take(NodeID id);
 
-        TraceNode &_take(NodeID id);
+  bool _restore(NodeID id, NodeID &child_id, NodeID &next_id, bool force);
 
-        bool _restore(NodeID id, NodeID &child_id, NodeID &next_id, bool force);
-
-    public:
-        /**
+ public:
+  /**
          * @brief take is not safe, you should avoid use under MT
          * note: try PoolManager::getInstance().GetWrapperNode
          * @param id
          * @return TraceNode&
          */
-        inline TraceNode &Take(NodeID id = E_ROOT_NODE)
-        {
-            std::lock_guard<std::mutex> _safe(this->_lock);
-            return this->_take(id);
-        }
+  inline TraceNode &Take(NodeID id = E_ROOT_NODE)
+  {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return this->_take(id);
+  }
 
-        inline WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE)
-        {
-            std::lock_guard<std::mutex> _safe(this->_lock);
-            TraceNode &e = this->_take(id);
-            return WrapperTraceNode(&e);
-        }
-        /**
+  inline WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE)
+  {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    TraceNode &e = this->_take(id);
+    return WrapperTraceNode(&e);
+  }
+  /**
          * @brief restore id->traceNode to pool
          *
          * @param id
@@ -71,91 +70,79 @@ namespace NodePool
          * @return true
          * @return false
          */
-        bool Restore(NodeID id, NodeID &child_id, NodeID &next_id);
+  bool Restore(NodeID id, NodeID &child_id, NodeID &next_id);
 
-        inline bool Restore(TraceNode &node)
-        {
-            NodeID node1, node2;
-            return this->Restore(node.getId(), node1, node2);
-        }
+  inline bool Restore(TraceNode &node)
+  {
+    NodeID node1, node2;
+    return this->Restore(node.getId(), node1, node2);
+  }
 
-        uint32_t totoalNodesCount()
-        {
-            std::lock_guard<std::mutex> _safe(this->_lock);
-            return nodeIndexVec.size() * CELL_SIZE;
-        }
+  uint32_t totoalNodesCount()
+  {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return nodeIndexVec.size() * CELL_SIZE;
+  }
 
-        uint32_t freeNodesCount()
-        {
-            std::lock_guard<std::mutex> _safe(this->_lock);
-            return this->_freeNodeList.size();
-        }
+  uint32_t freeNodesCount()
+  {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return this->_freeNodeList.size();
+  }
 
-        void foreachAliveNode(std::function<void(TraceNode &node)> func)
-        {
-            std::lock_guard<std::mutex> _safe(this->_lock);
-            for (int32_t index = 0; index < this->maxId; index++)
-            {
-                if (this->indexInAliveVec(index))
-                {
-                    func(this->_fetchNodeBy((NodeID)(index + 1)));
-                }
-            }
-        }
+  void foreachAliveNode(std::function<void(TraceNode &node)> func)
+  {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    for (int32_t index = 0; index < this->maxId; index++) {
+      if (this->indexInAliveVec(index)) { func(this->_fetchNodeBy((NodeID)(index + 1))); }
+    }
+  }
 
 #ifdef COMMON_DEBUG
-        inline bool NoNodeLeak()
-        {
-            std::lock_guard<std::mutex> _safe(this->_lock);
-            return this->_freeNodeList.size() == nodeIndexVec.size() * CELL_SIZE;
-        }
+  inline bool NoNodeLeak()
+  {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return this->_freeNodeList.size() == nodeIndexVec.size() * CELL_SIZE;
+  }
 #endif
-        virtual ~PoolManager()
-        {
-        }
+  virtual ~PoolManager() {}
 
-    public:
-        static PoolManager &getInstance()
-        {
-            static PoolManager _instance;
-            return _instance;
-        }
+ public:
+  static PoolManager &getInstance()
+  {
+    static PoolManager _instance;
+    return _instance;
+  }
 #ifndef COMMON_DEBUG
-    private:
+ private:
 #endif
-        PoolManager() : maxId(E_ROOT_NODE)
-        {
-            this->_emptyAliveSet.reserve(CELL_SIZE);
-            for (int i = 0; i < CELL_SIZE; i++)
-            {
-                this->_emptyAliveSet.push_back(false);
-            }
-            this->expandOnce();
-        }
+  PoolManager() : maxId(E_ROOT_NODE)
+  {
+    this->_emptyAliveSet.reserve(CELL_SIZE);
+    for (int i = 0; i < CELL_SIZE; i++) { this->_emptyAliveSet.push_back(false); }
+    this->expandOnce();
+  }
 
-    private:
-        inline bool indexInAliveVec(int32_t index)
-        {
-            if (index >= 0 && index < this->maxId)
-            {
-                return this->_aliveNodeSet.at(index);
-            }
-            return false;
-        }
+ private:
+  inline bool indexInAliveVec(int32_t index)
+  {
+    if (index >= 0 && index < this->maxId) { return this->_aliveNodeSet.at(index); }
+    return false;
+  }
 
-        void expandOnce();
+  void expandOnce();
 
-    private:
-        std::mutex _lock;
-        // std::set<NodeID> _aliveNodeSet;
-        std::vector<bool> _aliveNodeSet;
-        std::vector<bool> _emptyAliveSet;
-        int32_t maxId;
-        std::stack<int32_t> _freeNodeList;
-        static const int CELL_SIZE = 128;
-        std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
-    };
-    void freeNodeTree(NodeID root);
-}
+ private:
+  std::mutex _lock;
+  // std::set<NodeID> _aliveNodeSet;
+  std::vector<bool> _aliveNodeSet;
+  std::vector<bool> _emptyAliveSet;
+  int32_t maxId;
+  std::stack<int32_t> _freeNodeList;
+  static const int CELL_SIZE = 128;
+  std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
+};
+void freeNodeTree(NodeID root);
+}  // namespace NodePool
 
 #endif /* COMMON_SRC_NODEPOOL_POOLMANAGER_H_ */
