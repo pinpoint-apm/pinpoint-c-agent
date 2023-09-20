@@ -2,12 +2,13 @@
     "name": "PINPOINT php Dev",
     "dockerFile": "Dockerfile",
     "runArgs": [
-        // "--user=vscode",
+        "--user=pinpoint",
         "--cap-add=SYS_PTRACE",
         "--cap-add=NET_RAW",
         "--cap-add=NET_ADMIN",
         "--security-opt=seccomp=unconfined",
         "--volume=${env:HOME}:${env:HOME}",
+        "--volume=/var/run/docker.sock:/var/run/docker.sock",
         // "--volume=envoy-build:/build",
         "--network=host",
         // Uncomment next line if you have devcontainer.env
@@ -16,26 +17,22 @@
     "containerEnv": {
         "ENVOY_SRCDIR": "${containerWorkspaceFolder}",
     },
-    // "settings": {
-    //     "terminal.integrated.shell.linux": "/bin/bash",
-    //     "bazel.buildifierFixOnFormat": true,
-    //     "clangd.path": "/opt/llvm/bin/clangd",
-    //     "python.pythonPath": "/usr/bin/python3",
-    //     "python.formatting.provider": "yapf",
-    //     "python.formatting.yapfArgs": [
-    //         "--style=${workspaceFolder}/.style.yapf"
-    //     ],
-    //     "files.exclude": {
-    //         "**/.clangd/**": true,
-    //         "**/bazel-*/**": true
-    //     },
-    //     "files.watcherExclude": {
-    //         "**/.clangd/**": true,
-    //         "**/bazel-*/**": true
-    //     }
-    // },
-    // "remoteUser": "vscode",
-    // "containerUser": "vscode",
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "bazel.buildifierFixOnFormat": true,
+        "clangd.path": "/usr/bin/clangd",
+        "python.pythonPath": "/usr/bin/python3",
+        "files.exclude": {
+            "**/.clangd/**": true,
+            "**/bazel-*/**": true
+        },
+        "files.watcherExclude": {
+            "**/.clangd/**": true,
+            "**/bazel-*/**": true
+        }
+    },
+    "remoteUser": "pinpoint",
+    "containerUser": "pinpoint",
     "postCreateCommand": ".devcontainer/setup.sh",
     "extensions": [
         "github.vscode-pull-request-github",
