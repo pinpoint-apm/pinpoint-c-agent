@@ -34,6 +34,12 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
+    publish-pypitest:
+      needs: build_wheels
+      runs-on: ubuntu-latest
+      - uses: actions/download-artifact@v3
+        with: ./wheelhouse/
+
       - name: Publish package to pypitest
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
