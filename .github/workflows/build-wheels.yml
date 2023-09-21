@@ -41,11 +41,15 @@ jobs:
       - uses: actions/download-artifact@v3
         with: 
           path: ./wheelhouse/
+
+      - name: show all artifact
+        run: |
+          ls -al ./wheelhouse/artifact/
   
       - name: Publish package to pypitest
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.EELIUTEST }}
-          packages_dir: ./wheelhouse/   
+          packages_dir: ./wheelhouse/artifact  
           repository_url: https://test.pypi.org/legacy/  
