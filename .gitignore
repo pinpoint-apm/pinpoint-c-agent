@@ -73,3 +73,4 @@ common/include/common.h
 .cache
 compile_commands.json
 wheelhouse/
+.clangd

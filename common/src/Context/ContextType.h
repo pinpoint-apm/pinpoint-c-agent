@@ -27,67 +27,44 @@
 #include <string>
 #include <stdexcept>
 
-namespace Context
-{
+namespace Context {
+typedef const char* ctype;
 
-    typedef const char *ctype;
+class ContextType {
+public:
+  ContextType() {}
+  virtual ~ContextType() {}
 
-    class ContextType
-    {
-    public:
-        ContextType() {}
-        virtual ~ContextType() {}
+  virtual ctype typeIs() { throw std::logic_error("not implementation"); }
+  virtual std::string asStringValue() { throw std::logic_error("not implementation"); }
+  virtual long asLongValue() { throw std::logic_error("not implementation"); }
+};
 
-        virtual ctype typeIs() { throw std::logic_error("not implementation"); }
-        virtual std::string asStringValue() { throw std::logic_error("not implementation"); }
-        virtual long asLongValue() { throw std::logic_error("not implementation"); }
-    };
+class StringContextType : public ContextType {
+public:
+  StringContextType(std::string&& value) : _value(std::move(value)) {}
 
-    class StringContextType : public ContextType
-    {
-    public:
-        StringContextType(std::string &&value) : _value(std::move(value))
-        {
-        }
+  virtual ctype typeIs() override { return "String"; }
 
-        virtual ctype typeIs() override
-        {
-            return "String";
-        }
+  virtual std::string asStringValue() override { return this->_value; }
 
-        virtual std::string asStringValue() override
-        {
-            return this->_value;
-        }
+  virtual ~StringContextType() {}
 
-        virtual ~StringContextType()
-        {
-        }
+private:
+  std::string _value;
+};
 
-    private:
-        std::string _value;
-    };
+class LongContextType : public ContextType {
+public:
+  LongContextType(long l) : l(l) {}
 
-    class LongContextType : public ContextType
-    {
-    public:
-        LongContextType(long l) : l(l)
-        {
-        }
+  virtual ctype typeIs() override { return "Long"; }
 
-        virtual ctype typeIs() override
-        {
-            return "Long";
-        }
+  virtual long asLongValue() override { return this->l; }
 
-        virtual long asLongValue() override
-        {
-            return this->l;
-        }
-
-    private:
-        long l;
-    };
+private:
+  long l;
+};
 
 } /* namespace Context */
 

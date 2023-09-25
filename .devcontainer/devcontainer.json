@@ -35,13 +35,13 @@
     "containerUser": "pinpoint",
     "postCreateCommand": ".devcontainer/setup.sh",
     "extensions": [
-        "github.vscode-pull-request-github",
         "zxh404.vscode-proto3",
         "llvm-vs-code-extensions.vscode-clangd",
         "vadimcn.vscode-lldb",
         "webfreak.debug",
         "ms-python.python",
         "xaver.clang-format",
-        "zxh404.vscode-proto3"
+        "zxh404.vscode-proto3",
+        "Gruntfuggly.todo-tree"
     ]
 }

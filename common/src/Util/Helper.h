@@ -37,48 +37,44 @@
 #include "NodePool/TraceNode.h"
 #include "ConnectionPool/SpanConnectionPool.h"
 
-namespace Helper
-{
-    namespace Json = AliasJson;
-    using ConnectionPool::TransConnection;
-    using NodePool::TraceNode;
-    using NodePool::WrapperTraceNode;
-    using std::chrono::duration;
-    using std::chrono::duration_cast;
-    using std::chrono::milliseconds;
-    using std::chrono::steady_clock;
-    using std::chrono::system_clock;
-    using std::chrono::time_point;
-    using std::chrono::time_point_cast;
-    typedef struct scope_time_trace
-    {
-        steady_clock::time_point _start_time;
-        std::string _funcName;
-        scope_time_trace(const char *cfunc)
-        {
-            _start_time = steady_clock::now();
-            _funcName = cfunc;
-        }
-        ~scope_time_trace()
-        {
-            milliseconds elapsed = duration_cast<milliseconds>(steady_clock::now() - _start_time);
-            pp_trace(" [%s] it's take [%ld] miliseconds", _funcName.c_str(), elapsed.count());
-        }
-    } STT;
+namespace Helper {
+namespace Json = AliasJson;
+using ConnectionPool::TransConnection;
+using NodePool::TraceNode;
+using NodePool::WrapperTraceNode;
+using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+using std::chrono::system_clock;
+using std::chrono::time_point;
+using std::chrono::time_point_cast;
+typedef struct scope_time_trace {
+  steady_clock::time_point _start_time;
+  std::string _funcName;
+  scope_time_trace(const char* cfunc) {
+    _start_time = steady_clock::now();
+    _funcName = cfunc;
+  }
+  ~scope_time_trace() {
+    milliseconds elapsed = duration_cast<milliseconds>(steady_clock::now() - _start_time);
+    pp_trace(" [%s] it's take [%ld] miliseconds", _funcName.c_str(), elapsed.count());
+  }
+} STT;
 
-    uint64_t get_current_msec_stamp() noexcept;
+uint64_t get_current_msec_stamp() noexcept;
 
-    std::string node_tree_to_string(const Json::Value &value);
+std::string node_tree_to_string(const Json::Value& value);
 
-    Json::Value mergeTraceNodeTree(TraceNode &root);
-    Json::Value mergeTraceNodeTree(WrapperTraceNode &root);
+Json::Value mergeTraceNodeTree(TraceNode& root);
+Json::Value mergeTraceNodeTree(WrapperTraceNode& root);
 
-    Json::Value mergeTraceNodeTree(NodeID Id) noexcept;
-    TransConnection getConnection();
+Json::Value mergeTraceNodeTree(NodeID Id) noexcept;
+TransConnection getConnection();
 
-    void freeConnection(TransConnection &);
+void freeConnection(TransConnection&);
 
-}
+} // namespace Helper
 
 #ifndef NDEBUG
 

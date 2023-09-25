@@ -15,13 +15,11 @@
  ******************************************************************************/
 #include "TransLayer.h"
 #include <netdb.h>
-namespace ConnectionPool
-{
+namespace ConnectionPool {
 /**
-     * remote: localhost:port
-     */
-int TransLayer::connect_stream_remote(const char *remote)
-{
+ * remote: localhost:port
+ */
+int TransLayer::connect_stream_remote(const char* remote) {
   int offset = strlen(remote) - 1;
 
   while (remote[offset] != ':') {
@@ -33,13 +31,13 @@ int TransLayer::connect_stream_remote(const char *remote)
   }
 
   std::string hostname(remote, offset);
-  const char *port_str = remote + offset + 1;
+  const char* port_str = remote + offset + 1;
   // int port = atoi(remote+offset+1);
 
   struct addrinfo hints;
   struct addrinfo *result, *rp;
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;	   /* Allow IPv4 or IPv6 */
+  hints.ai_family = AF_UNSPEC;     /* Allow IPv4 or IPv6 */
   hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
   hints.ai_flags = 0;
   hints.ai_protocol = 0; /* Any protocol */
@@ -54,17 +52,19 @@ int TransLayer::connect_stream_remote(const char *remote)
   for (rp = result; rp != NULL; rp = rp->ai_next) {
     sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
-    struct linger fd_linger = {1, 1};  // open and 1 second
+    struct linger fd_linger = {1, 1}; // open and 1 second
     // mark it as nonblock
     fcntl(sfd, F_SETFL, fcntl(sfd, F_GETFL, 0) | O_NONBLOCK);
     setsockopt(sfd, SOL_SOCKET, SO_LINGER, &fd_linger, sizeof(fd_linger));
 
-    if (sfd == -1) continue;
+    if (sfd == -1)
+      continue;
     int ret = connect(sfd, rp->ai_addr, rp->ai_addrlen);
     if (ret == 0) {
       break;
     } else if (ret == -1) {
-      if (errno == EALREADY || errno == EINPROGRESS) break;
+      if (errno == EALREADY || errno == EINPROGRESS)
+        break;
     }
 
     close(sfd);
@@ -75,15 +75,14 @@ int TransLayer::connect_stream_remote(const char *remote)
   return sfd;
 }
 
-int TransLayer::connect_unix_remote(const char *remote)
-{
+int TransLayer::connect_unix_remote(const char* remote) {
   int fd = -1;
 #if defined(__APPLE__)
   struct sockaddr_un u_sock = {0, 0, {0}};
 #else
   struct sockaddr_un u_sock = {0, {0}};
 #endif
-  struct linger fd_linger = {1, 1};  // open and 1 second
+  struct linger fd_linger = {1, 1}; // open and 1 second
   if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
     pp_trace(" get socket error,(%s)", strerror(errno));
     goto ERROR;
@@ -97,7 +96,7 @@ int TransLayer::connect_unix_remote(const char *remote)
 
   setsockopt(fd, SOL_SOCKET, SO_LINGER, &fd_linger, sizeof(fd_linger));
 
-  if (connect(fd, (struct sockaddr *) &u_sock, sizeof(u_sock)) != 0) {
+  if (connect(fd, (struct sockaddr*)&u_sock, sizeof(u_sock)) != 0) {
     if (errno != EALREADY || errno != EINPROGRESS) {
       pp_trace("connect:(%s) failed as (%s)", remote, strerror(errno));
       goto ERROR;
@@ -108,18 +107,21 @@ int TransLayer::connect_unix_remote(const char *remote)
   return fd;
 
 ERROR:
-  if (fd > 0) { close(fd); }
+  if (fd > 0) {
+    close(fd);
+  }
 
   return -1;
 }
 
-size_t TransLayer::trans_layer_pool(uint32_t timeout)
-{
+size_t TransLayer::trans_layer_pool(uint32_t timeout) {
   if (c_fd == -1) {
     pp_trace("agent try to connect:(%s)", this->co_host.c_str());
     connect_remote(this->co_host.c_str());
 
-    if (c_fd == -1) { return -1; }
+    if (c_fd == -1) {
+      return -1;
+    }
   }
 
   int fd = c_fd;
@@ -129,13 +131,19 @@ size_t TransLayer::trans_layer_pool(uint32_t timeout)
   FD_ZERO(&wfds);
   FD_ZERO(&rfds);
 
-  if (this->_state & S_ERROR) { FD_SET(fd, &efds); }
+  if (this->_state & S_ERROR) {
+    FD_SET(fd, &efds);
+  }
 
-  if (this->_state & S_WRITING) { FD_SET(fd, &wfds); }
+  if (this->_state & S_WRITING) {
+    FD_SET(fd, &wfds);
+  }
 
-  if (this->_state & S_READING) { FD_SET(fd, &rfds); }
+  if (this->_state & S_READING) {
+    FD_SET(fd, &rfds);
+  }
 
-  struct timeval tv = {0, (int) timeout * 1000};
+  struct timeval tv = {0, (int)timeout * 1000};
 
   int retval = select(fd + 1, &rfds, &wfds, &efds, &tv);
   if (retval == -1) {
@@ -149,13 +157,15 @@ size_t TransLayer::trans_layer_pool(uint32_t timeout)
     }
 
     if ((this->_state & S_WRITING) && FD_ISSET(fd, &wfds)) {
-      if (_send_msg_to_collector() == -1) { goto ERROR; }
+      if (_send_msg_to_collector() == -1) {
+        goto ERROR;
+      }
     }
 
     if ((this->_state & S_READING) && FD_ISSET(fd, &rfds)) {
       if (_recv_msg_from_collector() == -1) {
-	pp_trace("recv_msg_from_collector error");
-	goto ERROR;
+        pp_trace("recv_msg_from_collector error");
+        goto ERROR;
       }
     }
   } else {
@@ -173,8 +183,7 @@ ERROR:
   return -1;
 }
 
-bool TransLayer::copy_into_send_buffer(const std::string &data)
-{
+bool TransLayer::copy_into_send_buffer(const std::string& data) {
   Header header;
   header.length = htonl(data.size());
   header.type = htonl(REQ_UPDATE_SPAN);
@@ -184,7 +193,7 @@ bool TransLayer::copy_into_send_buffer(const std::string &data)
     return false;
   }
   // copy header
-  this->chunks.copyDataIntoChunks((const char *) &header, sizeof(header));
+  this->chunks.copyDataIntoChunks((const char*)&header, sizeof(header));
   // copy body
   this->chunks.copyDataIntoChunks(data.data(), data.size());
   // enable write event
@@ -192,6 +201,6 @@ bool TransLayer::copy_into_send_buffer(const std::string &data)
   return true;
 }
 
-const char *TransLayer::UNIX_SOCKET = "unix:";
-const char *TransLayer::TCP_SOCKET = "tcp:";
-}  // namespace ConnectionPool
+const char* TransLayer::UNIX_SOCKET = "unix:";
+const char* TransLayer::TCP_SOCKET = "tcp:";
+} // namespace ConnectionPool
