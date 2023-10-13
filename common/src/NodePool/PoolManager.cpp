@@ -56,7 +56,7 @@ bool PoolManager::Restore(NodeID id, NodeID& child_id, NodeID& next_id) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
-  pp_trace("[🐛]Restore node failed: #%d; node restore forcefully", id);
+  pp_trace("[🐛]Restore node failed:  [%d]; node restore forcefully", id);
   return this->_restore(id, child_id, next_id, true);
 }
 

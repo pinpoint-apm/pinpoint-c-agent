@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
-	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/protocol"
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl/proto/v1"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -30,19 +30,18 @@ type GrpcAgent struct {
 	AgentOnLine    bool
 	requestCounter RequestProfiler
 	tasksGroup     sync.WaitGroup
-	jsonSpan       chan map[string]interface{}
+	tSpanCh        chan *TSpan
 	ExitCh         chan bool
 	log            *log.Entry
 }
 
-func (agent *GrpcAgent) SendSpan(span map[string]interface{}) {
+func (agent *GrpcAgent) SendSpan(span *TSpan) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Warnf("sendSpan met:%s", r)
 		}
 	}()
-
-	agent.jsonSpan <- span
+	agent.tSpanCh <- span
 }
 
 func (agent *GrpcAgent) GetLastBusyTime() int64 {
@@ -51,7 +50,7 @@ func (agent *GrpcAgent) GetLastBusyTime() int64 {
 
 func (agent *GrpcAgent) Stop() {
 	agent.log.Warn("I'm exiting")
-	close(agent.jsonSpan)
+	close(agent.tSpanCh)
 	close(agent.ExitCh)
 	agent.tasksGroup.Wait()
 	agent.log.Warn("I'm exit")
@@ -61,7 +60,10 @@ func (agent *GrpcAgent) AddFilter(filter Filter) {
 	agent.spanFilter = append(agent.spanFilter, filter)
 }
 
-func (agent *GrpcAgent) Interceptor(map[string]interface{}) bool {
+func (agent *GrpcAgent) Interceptor(_ *TSpan) bool {
+	if !agent.AgentOnLine {
+		agent.log.Debugf("span dropped,as agent offline")
+	}
 	return agent.AgentOnLine
 }
 
@@ -95,7 +97,7 @@ func (agent *GrpcAgent) agentOnline() error {
 	defer cancel()
 	pbAgentInfo := common.GetPBAgentInfo(agent.agentType)
 	agent.log.Debugf("RequestAgentInfo pbAgentInfo:%v", pbAgentInfo)
-	if res, err := client.RequestAgentInfo(ctx, &pbAgentInfo); err != nil {
+	if res, err := client.RequestAgentInfo(ctx, pbAgentInfo); err != nil {
 		errorMsg := fmt.Sprintf("RequestAgentInfo failed. %s", err)
 		agent.log.Warn(errorMsg)
 		return errors.New(errorMsg)
@@ -108,9 +110,7 @@ func (agent *GrpcAgent) agentOnline() error {
 
 	stream, err := client.PingSession(pingCtx)
 	if err != nil {
-		errorMsg := fmt.Sprintf("Get PingSession Failed:%s", err)
-		agent.log.Error(errorMsg)
-		return errors.New(errorMsg)
+		return err
 	}
 
 	defer func() {
@@ -129,7 +129,7 @@ func (agent *GrpcAgent) agentOnline() error {
 	ping := v1.PPing{}
 	for {
 		// send ping
-		agent.log.Infof("ping  %s %v", agent, agent.pingMd)
+		agent.log.Infof("ping  %s %v", agent.AgentId, agent.pingMd)
 		if err := stream.Send(&ping); err != nil {
 			agent.log.Warnf("agentOnline Send  ping failed. %s", err)
 			return err
@@ -260,7 +260,7 @@ func (agent *GrpcAgent) Init(id, _name string, _type int32, StartTime string) {
 
 	config := common.GetConfig()
 
-	agent.jsonSpan = make(chan map[string]interface{}, config.AgentChannelSize)
+	agent.tSpanCh = make(chan *TSpan, config.AgentChannelSize)
 	agent.ExitCh = make(chan bool)
 	agent.spanSender = SpanSender{Md: agent.BaseMD, ExitCh: agent.ExitCh}
 	agent.spanSender.Init()
@@ -347,15 +347,6 @@ func (agent *GrpcAgent) handleCommand(conn *grpc.ClientConn, wg *sync.WaitGroup)
 	cmdWg := sync.WaitGroup{}
 	defer cmdWg.Wait()
 
-	//
-	//config := common.GetConfig()
-	//agent.log.Debugf("connect AgentChannel:%s for agentOnline", config.AgentAddress)
-	//conn, err := grpc.Dial(config.AgentAddress, common.GetDialOption()...)
-	//if err != nil {
-	//	errorMsg := fmt.Sprintf("Dail %s failed", config.AgentAddress)
-	//	agent.log.Warn(errorMsg)
-	//}
-
 	client := v1.NewProfilerCommandServiceClient(conn)
 	//config.AgentReTryTimeout
 	ctx, _ := common.BuildPinpointCtx(-1, agent.pingMd)
@@ -422,13 +413,14 @@ func (agent *GrpcAgent) consumeJsonSpan() {
 	defer agent.tasksGroup.Done()
 	agent.tasksGroup.Add(1)
 
-	for span := range agent.jsonSpan {
+	for span := range agent.tSpanCh {
 		if span == nil {
 			agent.log.Infof("agent:%v get EOF", agent)
 			return
 		}
-		for i := range agent.spanFilter {
-			if !agent.spanFilter[i].Interceptor(span) {
+
+		for _, filter := range agent.spanFilter {
+			if !filter.Interceptor(span) {
 				break
 			}
 		}

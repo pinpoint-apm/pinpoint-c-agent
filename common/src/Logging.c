@@ -32,7 +32,7 @@
 #include <sys/syscall.h>
 #include <stdarg.h>
 #include <unistd.h>
-#define gettid() (long) getpid()
+#define gettid() (long)getpid()
 #define getOSPid getpid
 #endif
 
@@ -43,8 +43,7 @@
 
 static log_msg_cb _error_cb;
 
-static void log_format_out(const char *format, va_list *args)
-{
+static void log_format_out(const char* format, va_list* args) {
   char buf[LOG_SIZE] = {0};
   int n = snprintf(buf, LOG_SIZE, "[pinpoint] [%d] [%ld]", getOSPid(), gettid());
   vsnprintf(buf + n, LOG_SIZE - n - 1, format, *args);
@@ -59,9 +58,10 @@ static void log_format_out(const char *format, va_list *args)
 /**
  *  Note: the logging should be disable when in Real env
  */
-void pp_trace(const char *format, ...)
-{
-  if ((global_agent_info.inter_flag & E_LOGGING) == 0) { return; }
+void pp_trace(const char* format, ...) {
+  if ((global_agent_info.inter_flag & E_LOGGING) == 0) {
+    return;
+  }
   va_list args;
   va_start(args, format);
   // there is no need to create a LOG_SIZE in every call

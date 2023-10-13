@@ -6,8 +6,7 @@ import (
 	"os"
 	"time"
 
-	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/protocol"
-
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl/proto/v1"
 	"google.golang.org/grpc"
 )
 
@@ -116,8 +115,8 @@ func GetDialOption() []grpc.DialOption {
 	return opts
 }
 
-func GetPBAgentInfo(serverType int32) v1.PAgentInfo {
-	agentInfo := v1.PAgentInfo{
+func GetPBAgentInfo(serverType int32) *v1.PAgentInfo {
+	agentInfo := &v1.PAgentInfo{
 		Hostname:     config.HostName,
 		Ip:           config.HostIp,
 		Pid:          config.Pid,

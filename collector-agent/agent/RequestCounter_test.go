@@ -11,19 +11,19 @@ func TestRequestProfiler_Interceptor(t *testing.T) {
 	profiler := RequestProfiler{}
 	config := common.GetConfig()
 	config.StatInterval = 30
-	spans := []map[string]interface{}{
-		{"E": 10.0},
-		{"E": 2568.0},
-		{"E": 100.0},
-		{"E": 520.0},
-		{"E": 0.0},
+	spans := []TSpan{
+		{ElapsedTime: 10},
+		{ElapsedTime: 2568},
+		{ElapsedTime: 100},
+		{ElapsedTime: 520},
+		{ElapsedTime: 0},
 	}
 	for _, v := range spans {
-		profiler.Interceptor(v)
+		profiler.Interceptor(&v)
 	}
 
 	time.Sleep(1 * time.Second)
-	profiler.Interceptor(spans[2])
+	profiler.Interceptor(&spans[2])
 
 	targ := profiler.GetReqTimeProfiler()
 	if targ[0] != 1 {
@@ -39,11 +39,11 @@ func TestRequestProfiler_Interceptor(t *testing.T) {
 }
 
 func BenchmarkRequestProfiler_Interceptor(b *testing.B) {
-	spanMap := map[string]interface{}{
-		"E": float64(234),
+	spanMap := TSpan{
+		ElapsedTime: 234,
 	}
 	req := RequestProfiler{}
 	for i := 0; i < b.N; i++ {
-		req.Interceptor(spanMap)
+		req.Interceptor(&spanMap)
 	}
 }

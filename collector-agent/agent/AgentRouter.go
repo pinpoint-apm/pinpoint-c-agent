@@ -32,6 +32,114 @@ type AgentRouter struct {
 	rwMutex  sync.RWMutex
 }
 
+type TSpanEvent struct {
+	Name           string       `json:"name"`
+	ExceptionInfo  string       `json:"EXP,omitempty"`
+	DestinationId  string       `json:"dst,omitempty"`
+	NextSpanId     int64        `json:"nsid,string,omitempty"`
+	EndPoint       string       `json:"server,omitempty"`
+	StartElapsed   int32        `json:"S"`
+	EndElapsed     int32        `json:"E"`
+	StartElapsedV2 int32        `json:":S"`
+	EndElapsedV2   int32        `json:":E"`
+	ServiceType    int32        `json:"stp,string"`
+	Clues          []string     `json:"clues,omitempty"`
+	Calls          []TSpanEvent `json:"calls,omitempty"`
+	SqlMeta        string       `json:"SQL,omitempty"`
+}
+
+func (spanEv *TSpanEvent) GetEndElapsed() int32 {
+	if spanEv.EndElapsedV2 != 0 {
+		return spanEv.EndElapsedV2
+	} else {
+		return spanEv.EndElapsed
+	}
+}
+
+func (spanEv *TSpanEvent) GetStartElapsed() int32 {
+	if spanEv.StartElapsedV2 != 0 {
+		return spanEv.StartElapsedV2
+	} else {
+		return spanEv.StartElapsed
+	}
+}
+
+type TErrorInfo struct {
+	Msg  string `json:"msg"`
+	File string `json:"file"`
+	Line int    `json:"line"`
+}
+
+type TSpan struct {
+	AppServerType         int32        `json:"FT"`
+	AppServerTypeV2       int32        `json:":FT"`
+	ParentAppServerType   int          `json:"ptype"`
+	ParentSpanId          int64        `json:"psid,string"`
+	ParentApplicationName string       `json:"pname"`
+	StartTime             int64        `json:"S"`
+	StartTimeV2           int64        `json:":S"`
+	ElapsedTime           int32        `json:"E"`
+	ElapsedTimeV2         int32        `json:":E"`
+	AppId                 string       `json:"appid"`
+	AppIdV2               string       `json:":appid"`
+	AppName               string       `json:"appname"`
+	AppNameV2             string       `json:":appname"`
+	Calls                 []TSpanEvent `json:"calls"`
+	Clues                 []string     `json:"clues,omitempty"`
+	SpanName              string       `json:"name"`
+	SpanId                int64        `json:"sid,string"`
+	ServerType            int32        `json:"stp,string"`
+	TransactionId         string       `json:"tid"`
+	Uri                   string       `json:"uri"`
+	EndPoint              string       `json:"server"`
+	RemoteAddr            string       `json:"client"`
+	AcceptorHost          string       `json:"Ah"`
+	ExceptionInfo         string       `json:"EXP,omitempty"`
+	ErrorInfo             *TErrorInfo  `json:"ERR,omitempty"`
+	NginxHeader           string       `json:"NP,omitempty"`
+	ApacheHeader          string       `json:"AP,omitempty"`
+}
+
+func (span *TSpan) GetAppServerType() int32 {
+	if span.AppServerTypeV2 != 0 {
+		return span.AppServerTypeV2
+	} else {
+		return span.AppServerType
+	}
+}
+
+func (span *TSpan) GetElapsedTime() int32 {
+	if span.ElapsedTimeV2 != 0 {
+		return span.ElapsedTimeV2
+	} else {
+		return span.ElapsedTime
+	}
+}
+
+func (span *TSpan) GetStartTime() int64 {
+	if span.StartTimeV2 != 0 {
+		return span.StartTimeV2
+	} else {
+		return span.StartTime
+	}
+}
+
+func (span *TSpan) GetAppid() string {
+	if len(span.AppIdV2) > 0 {
+		return span.AppIdV2
+	} else {
+		return span.AppId
+	}
+}
+
+func (span *TSpan) GetAppname() string {
+	if len(span.AppNameV2) > 0 {
+		return span.AppNameV2
+	} else {
+		return span.AppName
+	}
+}
+
 func (manager *AgentRouter) Clean() {
 	config := common.GetConfig()
 	ctime := time.Now().Unix()
@@ -50,7 +158,8 @@ func (manager *AgentRouter) Clean() {
 	manager.rwMutex.RUnlock()
 }
 
-func (manager *AgentRouter) _createAgent(id, name string, agentType int32, startTime string) *GrpcAgent {
+//todo rename createAgent
+func (manager *AgentRouter) createAgent(id, name string, agentType int32, startTime string) *GrpcAgent {
 	agent := GrpcAgent{PingId: manager.PingId, AgentOnLine: false}
 	manager.PingId += 1
 	agent.Init(id, name, agentType, startTime)
@@ -60,66 +169,67 @@ func (manager *AgentRouter) _createAgent(id, name string, agentType int32, start
 	return &agent
 }
 
-func GetAgentInfo(span map[string]interface{}) (id, name string, ft int32, startTime string, err error) {
-	if value, OK := span["appid"].(string); !OK {
-		return "", "", 0, "", errors.New("no appid")
-	} else {
-		id = value
-	}
-
-	if value, OK := span["appname"].(string); !OK {
-		return "", "", 0, "", errors.New("no appname")
-	} else {
-		name = value
-	}
-
-	if value, OK := span["FT"].(float64); !OK {
-		return "", "", 0, "", errors.New("no FT")
-	} else {
-		ft = int32(value)
-	}
+func GetAgentInfo(span *TSpan) (appid, appname string, appServerType int32, startTime string, err error) {
 
 	// new feat: get current startTime
 	startTime = strconv.FormatInt(common.GetConfig().StartTime, 10) + "000"
-	if value, OK := span["tid"].(string); OK {
-		holder := strings.Split(value, "^")
-		if len(holder) < 3 {
-			log.Warn("tid in wrong format")
-		}else if len(holder[1]) == 10 { // seconds format
-			startTime = holder[1] + "000"
-		}else { // miliseconds format
-			startTime = holder[1]
-		}
+	holder := strings.Split(span.TransactionId, "^")
+	if len(holder) < 3 {
+		log.Warn("tid in wrong format")
+	} else if len(holder[1]) == 10 { // seconds format
+		startTime = holder[1] + "000"
+	} else { // miliseconds format
+		startTime = holder[1]
 	}
 
-	return id, name, ft, startTime, nil
+	appid = span.GetAppid()
+	if len(appid) == 0 {
+		return "", "", 0, "", errors.New("no appid")
+	}
+
+	appname = span.GetAppname()
+
+	if len(appname) == 0 {
+		return "", "", 0, "", errors.New("no appname")
+	}
+
+	appServerType = span.GetAppServerType()
+
+	if appServerType == 0 {
+		return "", "", 0, "", errors.New("no AppServerType(FT)")
+	}
+
+	return appid, appname, appServerType, startTime, nil
 }
 
 func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
-	var span map[string]interface{}
-	if err := json.Unmarshal(packet.RawData, &span); err != nil {
-		log.Warnf("Catches unjson-serialized data %s", packet.RawData)
+	//note: set default var of TSpan
+	span := &TSpan{
+		// ParentSpanId: -1,
+	}
+
+	if err := json.Unmarshal(packet.RawData, span); err != nil {
+		log.Warnf("json.Unmarshal err:%v", err)
 		goto PACKET_INVALIED
 	}
 
-	if id, name, ft, startTime, err := GetAgentInfo(span); err == nil {
+	if appid, appname, serverType, startTime, err := GetAgentInfo(span); err == nil {
 		manager.rwMutex.RLock()
 		log.Debug("Read-lock is holding")
-		agent, OK := manager.AgentMap[id]
+		agent, OK := manager.AgentMap[appid]
 		if !OK {
 			// create a new agent
 			manager.rwMutex.RUnlock()
-			log.Infof("agent:%s not find, create a new agent.", id)
+			log.Infof("agent:%s not find, create a new agent.", appid)
 			log.Debug("Try to get write-lock")
 			manager.rwMutex.Lock()
 			log.Debug("Write-lock is holding")
-			if _t, OK := manager.AgentMap[id]; OK {
+			if _t, OK := manager.AgentMap[appid]; OK {
 				agent = _t
 			} else {
-				agent = manager._createAgent(id, name, ft, startTime)
+				agent = manager.createAgent(appid, appname, serverType, startTime)
 			}
-			manager.AgentMap[id] = agent
-
+			manager.AgentMap[appid] = agent
 			manager.rwMutex.Unlock()
 			log.Debug("Write-lock is release")
 		} else {
@@ -127,7 +237,7 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 			log.Debug("Read-lock is release")
 		}
 
-		agent.CheckValid(name, ft) // CA just checking the name and ft
+		agent.CheckValid(appname, serverType) // CA just checking the name and ft
 		agent.SendSpan(span)
 		return nil
 
@@ -137,5 +247,5 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 	}
 
 PACKET_INVALIED:
-	return errors.New(fmt.Sprintf("input packet invalid %s", packet.RawData))
+	return fmt.Errorf("input packet invalid %s", packet.RawData)
 }

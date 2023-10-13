@@ -45,22 +45,22 @@ pinpoint_add_clue("name","Foo",$id);
 $id = pinpoint_end_trace($id);
 
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start child #128
-[pinpoint] [%d] [%d]#128 add clue key:name value:Foo
-[pinpoint] [%d] [%d]#128 pinpoint_start child #127
-[pinpoint] [%d] [%d]#127 add clues:name:Foo1
-[pinpoint] [%d] [%d]#127 pinpoint_start child #126
-[pinpoint] [%d] [%d]#126 add clue key:name value:Foo2
-[pinpoint] [%d] [%d]#126 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]#127 pinpoint_start child #125
-[pinpoint] [%d] [%d]#125 add clues:name:Foo3
-[pinpoint] [%d] [%d]#125 add clue key:name value:Foo4
-[pinpoint] [%d] [%d]#125 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]#127 add clues:name:Foo5
-[pinpoint] [%d] [%d]#127 add clue key:EXP value:too heavy, throw it
-[pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d,"calls":[{"E":%d,"EXP":"too heavy, throw it","S":%d,"calls":[{"E":%d,"S":%d,"name":"Foo2"},{"E":%d,"S":%d,"clues":["name:Foo3"],"name":"Foo4"}],"clues":["name:Foo1","name:Foo5"]}],"name":"Foo"})
+[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
+[pinpoint] [%d] [%d] [128] add clue key:name value:Foo
+[pinpoint] [%d] [%d] [128] pinpoint_start child  [127]
+[pinpoint] [%d] [%d] [127] add clues:name:Foo1
+[pinpoint] [%d] [%d] [127] pinpoint_start child  [126]
+[pinpoint] [%d] [%d] [126] add clue key:name value:Foo2
+[pinpoint] [%d] [%d] [126] pinpoint_end_trace Done!
+[pinpoint] [%d] [%d] [127] pinpoint_start child  [125]
+[pinpoint] [%d] [%d] [125] add clues:name:Foo3
+[pinpoint] [%d] [%d] [125] add clue key:name value:Foo4
+[pinpoint] [%d] [%d] [125] pinpoint_end_trace Done!
+[pinpoint] [%d] [%d] [127] add clues:name:Foo5
+[pinpoint] [%d] [%d] [127] add clue key:EXP value:too heavy, throw it
+[pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
+[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d,"EXP":"too heavy, throw it","calls":[{":E":%d,":S":%d,"name":"Foo2"},{":E":%d,":S":%d,"clues":["name:Foo3"],"name":"Foo4"}],"clues":["name:Foo1","name:Foo5"]}],"name":"Foo"})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
-[pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
+[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 Uncaught exception: too heavy, throw it

@@ -1,5 +1,5 @@
 package agent
 
 type Filter interface {
-	Interceptor(map[string]interface{}) bool
+	Interceptor(span *TSpan) bool
 }

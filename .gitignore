@@ -74,3 +74,4 @@ common/include/common.h
 compile_commands.json
 wheelhouse/
 .clangd
+collector-agent/pinpoint-grpc-idl/
