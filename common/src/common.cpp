@@ -55,6 +55,15 @@ NodeID pinpoint_get_per_thread_id() { return __tls_id; }
 
 void pinpoint_update_per_thread_id(NodeID id) { __tls_id = id; }
 
+static inline void _verify_key(const char* key) {
+  if (key == nullptr || key[0] == ':') {
+    std::string reason = "key:";
+    reason += key;
+    reason += "is invalid";
+    throw std::invalid_argument(reason);
+  }
+}
+
 static NodeID do_start_trace(NodeID id, const char* opt = nullptr, va_list* args = nullptr) {
   if (id <= E_INVALID_NODE) {
     throw std::out_of_range("invalid node id");
@@ -112,9 +121,9 @@ NodeID do_end_trace(NodeID Id) {
       r_node->convertToSpan();
       sendSpan(Id);
     } else if (r_node->limit == E_TRACE_BLOCK) {
-      pp_trace("current#%d span dropped,due to TRACE_BLOCK", r_node->getId());
+      pp_trace("current [%d] span dropped,due to TRACE_BLOCK", r_node->getId());
     } else {
-      pp_trace("current#%d span dropped,due to limit=%ld", r_node->getId(), r_node->limit);
+      pp_trace("current [%d] span dropped,due to limit=%ld", r_node->getId(), r_node->limit);
     }
   } else {
     r_node->endTimer();
@@ -128,14 +137,14 @@ NodeID do_end_trace(NodeID Id) {
 NodeID pinpoint_start_trace(NodeID parentId) {
   try {
     NodeID childId = do_start_trace(parentId);
-    pp_trace("#%d pinpoint_start child #%d", parentId, childId);
+    pp_trace(" [%d] pinpoint_start child  [%d]", parentId, childId);
     return childId;
   } catch (const std::out_of_range& ex) {
-    pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
   } catch (const std::exception& ex) {
-    pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
   }
   return E_INVALID_NODE;
 }
@@ -149,7 +158,7 @@ static NodeID do_wake_trace(NodeID& id) {
   WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(id);
 
   if (w_node->isRoot()) {
-    pp_trace("#%d wake_trace failed, it's a root node", id);
+    pp_trace(" [%d] wake_trace failed, it's a root node", id);
     return E_INVALID_NODE;
   }
 
@@ -160,14 +169,14 @@ static NodeID do_wake_trace(NodeID& id) {
 
 int pinpoint_wake_trace(NodeID traceId) {
   try {
-    pp_trace("wake_trace #%d ", traceId);
+    pp_trace("wake_trace  [%d] ", traceId);
     return do_wake_trace(traceId);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" wake_trace#%d failed with %s", traceId, ex.what());
+    pp_trace(" wake_trace [%d] failed with %s", traceId, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" wake_trace#%d failed with %s", traceId, ex.what());
+    pp_trace(" wake_trace [%d] failed with %s", traceId, ex.what());
   } catch (...) {
-    pp_trace(" wake_trace#%d failed with unkonw reason", traceId);
+    pp_trace(" wake_trace [%d] failed with unkonw reason", traceId);
   }
   return 0;
 }
@@ -184,9 +193,9 @@ int pinpoint_force_end_trace(NodeID id, int32_t timeout) {
     _span_timeout = global_agent_info.timeout_ms;
     return 0;
   } catch (const std::out_of_range&) {
-    pp_trace("#%d not found", id);
+    pp_trace(" [%d] not found", id);
   } catch (const std::exception& ex) {
-    pp_trace("#%d end trace failed. %s", id, ex.what());
+    pp_trace(" [%d] end trace failed. %s", id, ex.what());
   }
   return -1;
 }
@@ -196,9 +205,9 @@ int pinpoint_trace_is_root(NodeID _id) {
     WrapperTraceNode node = PoolManager::getInstance().GetWrapperNode(_id);
     return node->isRoot() ? (1) : (0);
   } catch (const std::out_of_range&) {
-    pp_trace("#%d not found", _id);
+    pp_trace(" [%d] not found", _id);
   } catch (const std::exception& ex) {
-    pp_trace("#%d end trace failed. %s", _id, ex.what());
+    pp_trace(" [%d] end trace failed. %s", _id, ex.what());
   }
   return -1;
 }
@@ -209,14 +218,14 @@ NodeID pinpoint_end_trace(NodeID traceId) {
     if (ret == E_ROOT_NODE) {
       freeNodeTree(traceId);
     }
-    pp_trace("#%d pinpoint_end_trace Done!", traceId);
+    pp_trace(" [%d] pinpoint_end_trace Done!", traceId);
     return ret;
   } catch (const std::out_of_range& ex) {
     pp_trace("end_trace %d out_of_range exception: %s", traceId, ex.what());
   } catch (const std::runtime_error& ex) {
     pp_trace("end_trace %d runtime_error: %s", traceId, ex.what());
   } catch (const std::exception& ex) {
-    pp_trace("end_trace #%d end trace failed. %s", traceId, ex.what());
+    pp_trace("end_trace  [%d] end trace failed. %s", traceId, ex.what());
   }
 
   return E_INVALID_NODE;
@@ -234,13 +243,13 @@ NodeID pinpoint_end_trace(NodeID traceId) {
 //     try
 //     {
 //         NodeID ret = do_remove_trace(traceId);
-//         pp_trace("#%d pinpoint_remove_trace Done!",traceId);
+//         pp_trace(" [%d] pinpoint_remove_trace Done!",traceId);
 //         return ret;
 //     }catch(const std::out_of_range&){
-//         pp_trace("#%d not found",traceId);
+//         pp_trace(" [%d] not found",traceId);
 //         return -1;
 //     }catch(const std::exception &ex){
-//         pp_trace("#%d end trace failed. %s",traceId,ex.what());
+//         pp_trace(" [%d] end trace failed. %s",traceId,ex.what());
 //         return -1;
 //     }
 // }
@@ -254,7 +263,8 @@ void reset_unique_id(void) { return SafeSharedState::instance().resetUniqueId();
 uint64_t inline do_mark_current_trace_status(NodeID& _id, E_AGENT_STATUS status) {
   WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
   WrapperTraceNode w_root = PoolManager::getInstance().GetWrapperNode(w_node->mRootIndex);
-  pp_trace("change current#%d status, before:%lld,now:%d", w_root->getId(), w_root->limit, status);
+  pp_trace("change current [%d] status, before:%lld,now:%d", w_root->getId(), w_root->limit,
+           status);
   return __sync_lock_test_and_set(&w_root->limit, status);
 }
 
@@ -262,11 +272,11 @@ uint64_t mark_current_trace_status(NodeID _id, int status) {
   try {
     return do_mark_current_trace_status(_id, (E_AGENT_STATUS)status);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (...) {
-    pp_trace(" %s#%d failed with unkonw reason", __func__, _id);
+    pp_trace(" %s [%d] failed with unkonw reason", __func__, _id);
   }
   return 0;
 }
@@ -287,7 +297,7 @@ static inline WrapperTraceNode locate_node_by_loc(NodeID _id, E_NODE_LOC flag) {
 static void do_add_clue(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
   WrapperTraceNode w_node = locate_node_by_loc(_id, flag);
   w_node->AddTraceDetail(key, value);
-  pp_trace("#%d add clue key:%s value:%s", _id, key, value);
+  pp_trace(" [%d] add clue key:%s value:%s", _id, key, value);
 }
 
 static void do_add_clues(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
@@ -298,30 +308,32 @@ static void do_add_clues(NodeID _id, const char* key, const char* value, E_NODE_
   cvalue += ':';
   cvalue += value;
   w_node->appendNodeValue(CLUSE, cvalue.c_str());
-  pp_trace("#%d add clues:%s:%s", _id, key, value);
+  pp_trace(" [%d] add clues:%s:%s", _id, key, value);
 }
 
 void pinpoint_add_clues(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
   try {
+    _verify_key(key);
     do_add_clues(_id, key, value, flag);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed.Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+    pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed.Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  } catch (...) {
-    pp_trace(" %s#%d failed.Reason: unknown reason,parameters:%s:%s", __func__, _id, key, value);
+    pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+  } catch (const std::exception& ex) {
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
   }
 }
 
 void pinpoint_add_clue(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
   try {
+    _verify_key(key);
     do_add_clue(_id, key, value, flag);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  } catch (...) {
-    pp_trace(" %s#%d failed. Reason: unknow reason,parameters:%s:%s", __func__, _id, key, value);
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+  } catch (const std::exception& ex) {
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
   }
 }
 
@@ -338,22 +350,23 @@ static int do_get_context_key(NodeID _id, const char* key, char* pbuf, int buf_s
     strncpy(pbuf, value.c_str(), buf_size);
     return (int)value.size();
   } else {
-    pp_trace("#%d get context key:%s failed. buffer is not enough", _id, key);
+    pp_trace(" [%d] get context key:%s failed. buffer is not enough", _id, key);
     return -1;
   }
 }
 
 void pinpoint_set_context_key(NodeID _id, const char* key, const char* value) {
   try {
+    _verify_key(key);
     do_set_context_key(_id, key, value);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed with out_of_range. %s,parameters:%s:%s", __func__, _id, ex.what(), key,
-             value);
+    pp_trace(" %s [%d] failed with out_of_range. %s,parameters:%s:%s", __func__, _id, ex.what(),
+             key, value);
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed with runtime_error. %s,parameters:%s:%s", __func__, _id, ex.what(), key,
-             value);
+    pp_trace(" %s [%d] failed with runtime_error. %s,parameters:%s:%s", __func__, _id, ex.what(),
+             key, value);
   } catch (const std::exception& ex) {
-    pp_trace(" %s#%d failed with %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
+    pp_trace(" %s [%d] failed with %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
   }
 }
 
@@ -364,13 +377,14 @@ static void do_set_long_key(NodeID id, const char* key, long l) {
 
 void pinpoint_set_context_long(NodeID _id, const char* key, long l) {
   try {
+    _verify_key(key);
     do_set_long_key(_id, key, l);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::exception& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   }
 }
 
@@ -386,27 +400,29 @@ static int do_get_long_key(NodeID _id, const char* key, long* l) {
 
 int pinpoint_get_context_long(NodeID _id, const char* key, long* l) {
   try {
+    _verify_key(key);
     do_get_long_key(_id, key, l);
     return 0;
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::exception& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   }
   return 1;
 }
 
 int pinpoint_get_context_key(NodeID _id, const char* key, char* pbuf, int buf_size) {
   try {
+    _verify_key(key);
     return do_get_context_key(_id, key, pbuf, buf_size);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
+    pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, _id, ex.what(), key);
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
+    pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, _id, ex.what(), key);
   } catch (const std::exception& ex) {
-    pp_trace(" %s#%d failed with %s, parameters:%s", __func__, _id, ex.what(), key);
+    pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, _id, ex.what(), key);
   }
   return -1;
 }
@@ -426,11 +442,11 @@ void catch_error(NodeID _id, const char* msg, const char* error_filename, uint32
   try {
     do_catch_error(_id, msg, error_filename, error_lineno);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   } catch (const std::exception& ex) {
-    pp_trace(" %s#%d failed with %s", __func__, _id, ex.what());
+    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   }
 }
 
@@ -449,14 +465,14 @@ NodeID pinpoint_start_traceV1(NodeID parentId, const char* opt, ...) {
     va_start(args, opt);
     NodeID childId = do_start_trace(parentId, opt, &args);
     va_end(args);
-    pp_trace("#%d pinpoint_start_traceV1 child #%d", parentId, childId);
+    pp_trace(" [%d] pinpoint_start_traceV1 child  [%d]", parentId, childId);
     return childId;
   } catch (const std::out_of_range& ex) {
-    pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
   } catch (const std::runtime_error& ex) {
-    pp_trace(" start_trace#%d failed with %s", parentId, ex.what());
+    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
   } catch (...) {
-    pp_trace(" start_trace#%d failed with unkonw reason", parentId);
+    pp_trace(" start_trace [%d] failed with unkonw reason", parentId);
   }
   return E_INVALID_NODE;
 }
@@ -465,18 +481,18 @@ static void do_add_exp(NodeID _id, const char* value) {
   WrapperTraceNode w_root = locate_node_by_loc(_id, E_LOC_CURRENT);
   w_root->AddTraceDetail("EXP", value);
   w_root->mHasExp = true;
-  pp_trace("#%d add exp value:%s", _id, value);
+  pp_trace(" [%d] add exp value:%s", _id, value);
 }
 
 void pinpoint_add_exception(NodeID traceId, const char* exp) {
   try {
     do_add_exp(traceId, exp);
   } catch (const std::out_of_range& ex) {
-    pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
   } catch (const std::runtime_error& ex) {
-    pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
   } catch (const std::exception& ex) {
-    pp_trace(" %s#%d failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
+    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
   }
 }
 
@@ -502,8 +518,8 @@ void show_status(void) {
 void debug_nodeid(NodeID id) {
   try {
     WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
-    fprintf(stderr, "nodeid#%d: { value:%s }", id, r_node->ToString().c_str());
+    fprintf(stderr, "nodeid [%d]: { value:%s }", id, r_node->ToString().c_str());
   } catch (const std::exception& ex) {
-    pp_trace(" debug_nodeid:#%d Reason: %s", id, ex.what());
+    pp_trace(" debug_nodeid: [%d] Reason: %s", id, ex.what());
   }
 }

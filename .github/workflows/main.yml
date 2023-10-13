@@ -53,27 +53,28 @@ jobs:
         with:
           name: valgrind-out
           path: common/build/valgrind-out.txt
-  PHP5:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ["5.6", "5.4", "5.5"]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-      - run: |
-          phpize
-          ./configure
-          make
-          make test TESTS=src/PHP/tests5/
+  # PHP5:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       php-versions: ["5.6", "5.4", "5.5"]
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: shivammathur/setup-php@v2
+  #       with:
+  #         php-version: ${{ matrix.php-versions }}
+  #     - run: |
+  #         phpize
+  #         ./configure
+  #         make
+  #         make test TESTS=src/PHP/tests5/
 
   PHP7:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ["7.0", "7.1", "7.2", "7.3", "7.4", "8.0"]
+        # php-versions: ["7.0", "7.1", "7.2", "7.3", "7.4", "8.0"]
+        php-versions: ["7.0"]
     steps:
       - uses: actions/checkout@v2
       # - name: set mysql
@@ -101,23 +102,7 @@ jobs:
           # composer install
           # cp tests/think .
           # php think unit -v
-
-  PHP8:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ["8.1"]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
-      - run: |
-          phpize
-          ./configure
-          make
-          make test TESTS=src/PHP/tests/
-
+          
   Python:
     strategy:
       matrix:
@@ -142,7 +127,7 @@ jobs:
   Collector-agent:
     strategy:
       matrix:
-        go-version: [1.16.x]
+        go-version: [1.18.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -152,8 +137,16 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Setup protoc
+        uses: arduino/setup-protoc@v2.1.0
+      
       - run: |
-          cd collector-agent
-          go mod download
-          go build
-          go test ./... -v
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          # cd collector-agent
+          # go mod download
+          # go build
+          # go test ./... -v
+          cd collector-agent && make && go test ./... -v

@@ -23,108 +23,96 @@
 #include <unistd.h>
 
 thread_local NodeID id = E_ROOT_NODE;
-const char *app_id = "cpp_test_app";
-const char *app_name = "cpp_test_name";
+const char* app_id = "cd.dev.test.cpp";
+const char* app_name = "cd.dev.test.cpp";
 
-std::string get_sid()
-{
-    return std::to_string(rand() % 100000000l);
+std::string get_sid() { return std::to_string(rand() % 100000000l); }
+
+std::string get_tid() {
+  std::string sid = "";
+  return sid + app_id + "^" + std::to_string(pinpoint_start_time()) + "^" +
+         std::to_string(generate_unique_id());
 }
 
-std::string get_tid()
-{
-    std::string sid = "";
-    return sid + app_id + "^" + std::to_string(pinpoint_start_time()) + "^" + std::to_string(generate_unique_id());
+void random_sleep() {
+  int32_t delay = rand() % 10;
+  usleep(delay * 1000);
 }
 
-void random_sleep()
-{
-    int32_t delay = rand() % 10;
-    usleep(delay * 1000);
+void test_httpclient() {
+  id = pinpoint_start_trace(id);
+  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "httpclient", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_DESTINATION, "www.pinpoint-wonderful.com", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD, E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_NEXT_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
+  pinpoint_add_clues(id, PP_HTTP_URL, "/support/c-cpp-php-python", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_ADD_EXCEPTION, "test this exception", E_LOC_CURRENT);
+  pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
+
+  random_sleep();
+
+  id = pinpoint_end_trace(id);
 }
 
-void test_httpclient()
-{
-    id = pinpoint_start_trace(id);
-    pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "httpclient", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_DESTINATION, "www.pinpoint-wonderful.com", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD, E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_NEXT_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
-    pinpoint_add_clues(id, PP_HTTP_URL, "/support/c-cpp-php-python", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_ADD_EXCEPTION, "test this exception", E_LOC_CURRENT);
-    pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
-
-    random_sleep();
-
-    id = pinpoint_end_trace(id);
+void test_mysql() {
+  id = pinpoint_start_trace(id);
+  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "mysql::excute", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_MYSQL, E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_SQL_FORMAT, "select 1*3;", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_DESTINATION, "localhost:3307", E_LOC_CURRENT);
+  random_sleep();
+  id = pinpoint_end_trace(id);
 }
 
-void test_mysql()
-{
-    id = pinpoint_start_trace(id);
-    pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "mysql::excute", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_SERVER_TYPE, PP_MYSQL, E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_SQL_FORMAT, "select 1*3;", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_DESTINATION, "localhost:3307", E_LOC_CURRENT);
-    random_sleep();
-    id = pinpoint_end_trace(id);
+void test_func() {
+  id = pinpoint_start_trace(id);
+  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "test_func", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_METHOD, E_LOC_CURRENT);
+  pinpoint_add_clues(id, PP_PHP_ARGS, "I'm the parameters", E_LOC_CURRENT);
+  random_sleep();
+  id = pinpoint_end_trace(id);
 }
 
-void test_func()
-{
-    id = pinpoint_start_trace(id);
-    pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "test_func", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_METHOD, E_LOC_CURRENT);
-    pinpoint_add_clues(id, PP_PHP_ARGS, "I'm the parameters", E_LOC_CURRENT);
-    random_sleep();
-    id = pinpoint_end_trace(id);
+void test_kafka() {
+  id = pinpoint_start_trace(id);
+  pinpoint_add_clue(id, "name", "kafka", E_LOC_CURRENT);
+  pinpoint_add_clue(id, "stp", PP_KAFKA, E_LOC_CURRENT);
+  pinpoint_add_clues(id, "140", "xxxxx", E_LOC_CURRENT);
+  pinpoint_add_clue(id, "dst", "xxxx", E_LOC_CURRENT);
+  id = pinpoint_end_trace(id);
 }
 
-void test_kafka()
-{
-    id = pinpoint_start_trace(id);
-    pinpoint_add_clue(id, "name", "kafka", E_LOC_CURRENT);
-    pinpoint_add_clue(id, "stp", PP_KAFKA, E_LOC_CURRENT);
-    pinpoint_add_clues(id, "140", "xxxxx", E_LOC_CURRENT);
-    pinpoint_add_clue(id, "dst", "xxxx", E_LOC_CURRENT);
-    id = pinpoint_end_trace(id);
+void test_req() {
+  id = pinpoint_start_trace(id);
+  pinpoint_add_clue(id, PP_REQ_URI, "test_url", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_REQ_CLIENT, "127.0.0.1", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_REQ_SERVER, "HTTP_HOST", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP, E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "C_CPP Request", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_APP_NAME, "cpp_app", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_APP_ID, "CPP_APP", E_LOC_CURRENT);
+
+  random_sleep();
+
+  test_func();
+  test_mysql();
+  test_httpclient();
+  test_kafka();
+  pinpoint_add_clue(id, PP_TRANSCATION_ID, get_tid().c_str(), E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
+  pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "200", E_LOC_CURRENT);
+  catch_error(id, "msg", __FILE__, 100);
+  id = pinpoint_end_trace(id);
 }
 
-void test_req()
-{
-    id = pinpoint_start_trace(id);
-    pinpoint_add_clue(id, PP_REQ_URI, "test_url", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_REQ_CLIENT, "127.0.0.1", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_REQ_SERVER, "HTTP_HOST", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP, E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "C_CPP Request", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_APP_NAME, "cpp_app", E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_APP_ID, "CPP_APP", E_LOC_CURRENT);
-
-    random_sleep();
-
-    test_func();
-    test_mysql();
-    test_httpclient();
-    test_kafka();
-    pinpoint_add_clue(id, PP_TRANSCATION_ID, get_tid().c_str(), E_LOC_CURRENT);
-    pinpoint_add_clue(id, PP_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
-    pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "200", E_LOC_CURRENT);
-    catch_error(id, "msg", __FILE__, 100);
-    id = pinpoint_end_trace(id);
-}
-
-int main(int argc, char const *argv[])
-{
-    PPAgentT agent_info = {
-        "tcp:127.0.0.1:9999", 1000, -1, 1700, 0, NULL, NULL, NULL};
-    global_agent_info = agent_info;
-    srand(time(nullptr));
-    int i = 0;
-    for (; i < 3; i++)
-    {
-        test_req();
-        sleep(1);
-    }
-    return 0;
+int main(int argc, char const* argv[]) {
+  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1700, 0, NULL, NULL, NULL};
+  global_agent_info = agent_info;
+  srand(time(nullptr));
+  int i = 0;
+  for (; i < 3; i++) {
+    test_req();
+    sleep(1);
+  }
+  return 0;
 }

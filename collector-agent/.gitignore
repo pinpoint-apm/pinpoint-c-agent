@@ -4,3 +4,5 @@
 *.exe
 *.log
 CollectorAgent
+collector-agent
+pinpoint-grpc-idl

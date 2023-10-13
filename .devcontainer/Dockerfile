@@ -28,12 +28,12 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN apt update && apt install -y gcc g++ gdb  pkg-config  libxml2-dev libsqlite3-dev libcurl4-openssl-dev zlib1g-dev make cmake wget autoconf git clangd python3-pip clang-format
+RUN apt update && apt install -y gcc g++ gdb  pkg-config  libxml2-dev libsqlite3-dev libcurl4-openssl-dev zlib1g-dev make cmake wget autoconf git clangd python3-pip clang-format protobuf-compiler vim
 ## enable php-7.4
 ENV PHP_VESION=php-7.4.33
 RUN cd ~ && wget https://www.php.net/distributions/${PHP_VESION}.tar.gz && tar xvf ${PHP_VESION}.tar.gz && cd ${PHP_VESION} && ./configure --prefix=/opt/${PHP_VESION} --enable-fpm   --enable-opcache   --enable-debug && make -j && make install
 ENV PATH="$PATH:/opt/php/bin/:/opt/php/sbin/"
-COPY php.ini /opt/
+COPY php.ini /opt/$PHP_VESION/lib
 
 ### Build php module 
 ### curl 
@@ -58,3 +58,12 @@ COPY php.ini /opt/
 
 # ENV PHP_VESION=php-8.2.10
 # RUN cd ~ && wget https://www.php.net/distributions/${PHP_VESION}.tar.gz && tar xvf ${PHP_VESION}.tar.gz && cd ${PHP_VESION} && ./configure --prefix=/opt/${PHP_VESION} --enable-fpm   --enable-opcache   --enable-debug && make -j && make install
+
+
+# install golang 1.18
+
+RUN wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz && rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GO_PATH=~/go
+ENV PATH=$PATH:/$GO_PATH/bin
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest

@@ -21,17 +21,17 @@ $id = pinpoint_end_trace($id);
 $id = pinpoint_end_trace($id);
 $id = pinpoint_end_trace($id);
 --EXPECTF--
-[pinpoint] [%d] [%d]#0 pinpoint_start child #128
-[pinpoint] [%d] [%d]#128 add clue key:name value:Foo
-[pinpoint] [%d] [%d]#128 pinpoint_start child #127
-[pinpoint] [%d] [%d]#127 add clues:global:global_value
-[pinpoint] [%d] [%d]#127 add clue key:global value:global_value
-[pinpoint] [%d] [%d]#127 add clues:name:Foo1
-[pinpoint] [%d] [%d]#127 pinpoint_start child #126
-[pinpoint] [%d] [%d]#126 add clue key:name value:Foo2
-[pinpoint] [%d] [%d]#126 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]#127 pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({"E":%d,"FT":1500,"S":%d,"calls":[{"E":%d,"S":%d,"calls":[{"E":%d,"S":%d,"name":"Foo2"}],"clues":["name:Foo1"]}],"clues":["global:global_value"],"global":"global_value","name":"Foo"})
+[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
+[pinpoint] [%d] [%d] [128] add clue key:name value:Foo
+[pinpoint] [%d] [%d] [128] pinpoint_start child  [127]
+[pinpoint] [%d] [%d] [127] add clues:global:global_value
+[pinpoint] [%d] [%d] [127] add clue key:global value:global_value
+[pinpoint] [%d] [%d] [127] add clues:name:Foo1
+[pinpoint] [%d] [%d] [127] pinpoint_start child  [126]
+[pinpoint] [%d] [%d] [126] add clue key:name value:Foo2
+[pinpoint] [%d] [%d] [126] pinpoint_end_trace Done!
+[pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
+[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d,"calls":[{":E":0,":S":%d,"name":"Foo2"}],"clues":["name:Foo1"]}],"clues":["global:global_value"],"global":"global_value","name":"Foo"})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
-[pinpoint] [%d] [%d]#128 pinpoint_end_trace Done!
+[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!

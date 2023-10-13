@@ -76,7 +76,7 @@ public:
   // {
   //     if ( this->chunks.copyDataIntoChunks(pbuf,len) != 0)
   //     {
-  //         pp_trace("Send buffer is full. size:[%d]",len);
+  //         pp_trace("Send buffer is full. size: [%d]",len);
   //         return ;
   //     }
   //     this->_state |=  S_WRITING;

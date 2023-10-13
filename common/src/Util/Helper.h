@@ -58,7 +58,7 @@ typedef struct scope_time_trace {
   }
   ~scope_time_trace() {
     milliseconds elapsed = duration_cast<milliseconds>(steady_clock::now() - _start_time);
-    pp_trace(" [%s] it's take [%ld] miliseconds", _funcName.c_str(), elapsed.count());
+    // pp_trace(" [%s] it's take [%ld] miliseconds", _funcName.c_str(), elapsed.count());
   }
 } STT;
 

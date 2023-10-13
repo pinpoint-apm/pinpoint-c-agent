@@ -87,16 +87,22 @@ func (server *SpanServer) Run() (code int, err error) {
 }
 
 func (server *SpanServer) parseInComePacket(size, packetType uint32, body []byte) (err error) {
-	log.Debugf("size: %d  packetType: %d body:%s ", size, packetType, string(body[:]))
+	log.Debugf("size:%d  packetType:%d body:%s ", size, packetType, string(body[:]))
 
+	//todo parse packetType
 	data := make([]byte, size)
 	copy(data, body)
 	rawPacket := agent.RawPacket{Type: packetType, RawData: data}
 
-	err = server.agentRouter.DispatchPacket(&rawPacket)
-	if err != nil {
-		log.Warnf("dispather packet with an exception: %s", err)
-		return err
+	switch packetType {
+	case 1: //REQ_UPDATE_SPAN
+		err = server.agentRouter.DispatchPacket(&rawPacket)
+		if err != nil {
+			log.Warnf("dispather packet with an exception: %s", err)
+			return err
+		}
+	default:
+		log.Warnf("unspport type:%d", packetType)
 	}
 
 	return nil
@@ -191,7 +197,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 	}
 
 	// fetch data
-	clientInBuf := make([]byte, Setting.RecvBufSize) 
+	clientInBuf := make([]byte, Setting.RecvBufSize)
 	inOffset := 0
 	packetOffset := 0
 
@@ -226,9 +232,9 @@ func (server *SpanServer) handleClient(con net.Conn) {
 				break
 			}
 
-			if Setting.RecvBufSize -inOffset < int(needs){
+			if Setting.RecvBufSize-inOffset < int(needs) {
 				// not enough space to hold income
-				if int(needs) > Setting.RecvBufSize / 2 {
+				if int(needs) > Setting.RecvBufSize/2 {
 					log.Errorf("packet overflow and overlap.Reason packet_offset:%d,in_offset:%d", packetOffset, inOffset)
 					break
 				}

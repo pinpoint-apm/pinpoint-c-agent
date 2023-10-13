@@ -8,10 +8,9 @@
 using namespace testing;
 
 std::string ouputMsg;
-void cc_log_error_cb(char *msg) { ouputMsg += msg; }
+void cc_log_error_cb(char* msg) { ouputMsg += msg; }
 
-TEST(common, uid_all_in_one)
-{
+TEST(common, uid_all_in_one) {
   // register_error_cb(cc_log_error_cb);
   // test_trace();
   int64_t startId = generate_unique_id();
@@ -24,18 +23,19 @@ TEST(common, uid_all_in_one)
 
   pid_t pid = fork();
   if (pid == 0) {
-    for (int i = 0; i < _100K; i++) generate_unique_id();
+    for (int i = 0; i < _100K; i++)
+      generate_unique_id();
     exit(0);
   }
 
-  for (int i = 0; i < _100K; i++) generate_unique_id();
+  for (int i = 0; i < _100K; i++)
+    generate_unique_id();
   waitpid(pid, NULL, 0);
   //[0~9999]
   EXPECT_EQ(generate_unique_id(), (startId + 2 * _100K + 5));
 }
 
-TEST(common, start_end_trace)
-{
+TEST(common, start_end_trace) {
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   mark_current_trace_status(id, E_OFFLINE);
   EXPECT_EQ(pinpoint_trace_is_root(id), 1);
@@ -56,8 +56,7 @@ TEST(common, start_end_trace)
   EXPECT_EQ(id, 0);
 }
 
-TEST(common, context_check)
-{
+TEST(common, context_check) {
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   std::string str = "fdafadf";
   pinpoint_add_clues(id, "fasdfas", str.c_str(), E_LOC_CURRENT);
@@ -89,11 +88,28 @@ TEST(common, context_check)
   long value;
   EXPECT_EQ(pinpoint_get_context_long(id, "1024", &value), 0);
   EXPECT_EQ(value, 1024);
+
+  pinpoint_set_context_key(id, ":interl", "abc");
+  pinpoint_add_clue(id, ":internal", "abc", E_LOC_CURRENT);
+  pinpoint_add_clue(id, ":internal-1", "abc", E_LOC_ROOT);
+
+  pinpoint_add_clues(id, ":internal-abc", "abc", E_LOC_CURRENT);
+  pinpoint_add_clues(id, ":internal-abc-1", "abc", E_LOC_ROOT);
+
+  pinpoint_set_context_long(id, ":internal-abc-2", 12563);
+
+  long out;
+
+  EXPECT_NE(pinpoint_get_context_long(id, ":internal-abc-2", &out), 0);
+
+  char outBuf[128] = {0};
+
+  EXPECT_EQ(pinpoint_get_context_key(id, ":interl", outBuf, sizeof(outBuf)), -1);
+
   pinpoint_end_trace(id);
 }
 
-TEST(common, error_checking)
-{
+TEST(common, error_checking) {
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   EXPECT_EQ(pinpoint_trace_is_root(id), 1);
   id = pinpoint_end_trace(id);
@@ -103,13 +119,12 @@ TEST(common, error_checking)
   EXPECT_EQ(id, E_INVALID_NODE);
 }
 
-static void test_per_thread_id_odd()
-{
+static void test_per_thread_id_odd() {
   NodeID id = pinpoint_get_per_thread_id();
   EXPECT_EQ(id, 0);
   id = NodeID(1);
   for (int i = 1; i < 10000; i++) {
-    int index = (int) id;
+    int index = (int)id;
     index += 2;
     id = NodeID(index);
     pinpoint_update_per_thread_id(id);
@@ -118,15 +133,14 @@ static void test_per_thread_id_odd()
   }
 }
 
-static void test_per_thread_id_even()
-{
+static void test_per_thread_id_even() {
   NodeID id = pinpoint_get_per_thread_id();
   EXPECT_EQ(id, 0);
 
   for (int i = 1; i < 10000; i++) {
-    int index = (int) id;
+    int index = (int)id;
     index += 2;
-    id = (NodeID) index;
+    id = (NodeID)index;
 
     pinpoint_update_per_thread_id(id);
     std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -134,16 +148,14 @@ static void test_per_thread_id_even()
   }
 }
 
-TEST(common, per_threadid)
-{
+TEST(common, per_threadid) {
   std::thread f1(test_per_thread_id_odd);
   std::thread f2(test_per_thread_id_even);
   f1.join();
   f2.join();
 }
 
-TEST(common, force_end_trace)
-{
+TEST(common, force_end_trace) {
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   id = pinpoint_end_trace(id);
   id = pinpoint_start_trace(id);
@@ -166,9 +178,10 @@ TEST(common, force_end_trace)
 TEST(common, version) { EXPECT_STREQ(pinpoint_agent_version(), AGENT_VERSION); }
 
 //./bin/unittest --gtest_filter=common.id_1
-TEST(common, id_1)
-{
+TEST(common, id_1) {
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
-  for (int i = 0; i < 1280; i++) { id = pinpoint_start_trace(id); }
+  for (int i = 0; i < 1280; i++) {
+    id = pinpoint_start_trace(id);
+  }
   pinpoint_set_context_long(id, "1024", 1024);
 }
