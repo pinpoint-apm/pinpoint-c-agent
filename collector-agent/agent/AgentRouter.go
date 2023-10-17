@@ -91,6 +91,7 @@ type TSpan struct {
 	ServerType            int32        `json:"stp,string"`
 	TransactionId         string       `json:"tid"`
 	Uri                   string       `json:"uri"`
+	UT                    string       `json:"UT,omitempty"`
 	EndPoint              string       `json:"server"`
 	RemoteAddr            string       `json:"client"`
 	AcceptorHost          string       `json:"Ah"`
@@ -98,6 +99,35 @@ type TSpan struct {
 	ErrorInfo             *TErrorInfo  `json:"ERR,omitempty"`
 	NginxHeader           string       `json:"NP,omitempty"`
 	ApacheHeader          string       `json:"AP,omitempty"`
+}
+
+func (span *TSpan) IsFailed() bool {
+	if span.ErrorInfo != nil || len(span.ExceptionInfo) > 0 {
+		return true
+	}
+	return false
+}
+
+//note
+// FindHistogramLevel must come with histogramSize
+func (span *TSpan) FindHistogramLevel() int {
+	if span.GetElapsedTime() <= 100 {
+		return 0
+	} else if span.GetElapsedTime() <= 300 {
+		return 1
+	} else if span.GetElapsedTime() <= 500 {
+		return 2
+	} else if span.GetElapsedTime() <= 1000 {
+		return 3
+	} else if span.GetElapsedTime() <= 3000 {
+		return 4
+	} else if span.GetElapsedTime() <= 5000 {
+		return 5
+	} else if span.GetElapsedTime() <= 8000 {
+		return 6
+	} else {
+		return 7
+	}
 }
 
 func (span *TSpan) GetAppServerType() int32 {
@@ -237,7 +267,7 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 			log.Debug("Read-lock is release")
 		}
 
-		agent.CheckValid(appname, serverType) // CA just checking the name and ft
+		agent.CheckValid(span)
 		agent.SendSpan(span)
 		return nil
 
