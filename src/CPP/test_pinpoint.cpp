@@ -35,8 +35,8 @@ std::string get_tid() {
 }
 
 void random_sleep() {
-  int32_t delay = rand() % 10;
-  usleep(delay * 1000);
+  int32_t delay = rand() % 100;
+  usleep(delay * 10000);
 }
 
 void test_httpclient() {
@@ -106,13 +106,12 @@ void test_req() {
 }
 
 int main(int argc, char const* argv[]) {
-  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1700, 0, NULL, NULL, NULL};
+  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1300, 0, NULL, NULL, NULL};
   global_agent_info = agent_info;
   srand(time(nullptr));
   int i = 0;
   for (; i < 3; i++) {
     test_req();
-    sleep(1);
   }
   return 0;
 }

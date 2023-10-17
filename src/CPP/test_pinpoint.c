@@ -39,9 +39,8 @@ char* get_tid() {
 }
 
 void random_sleep() {
-  // int32_t delay = rand()%10;
-  // usleep(delay* 1000);
-  // sleep(3);
+  int32_t delay = rand() % 10;
+  usleep(delay * 10000);
 }
 
 void test_httpclient() {
@@ -89,7 +88,9 @@ void test_req() {
   pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "C_CPP Request", E_LOC_CURRENT);
   pinpoint_add_clue(id, PP_APP_NAME, app_name, E_LOC_CURRENT);
   pinpoint_add_clue(id, PP_APP_ID, app_id, E_LOC_CURRENT);
-
+  char ut[64] = {0};
+  snprintf(ut, 64, "/user/?/add/%d", rand() % 10);
+  pinpoint_add_clue(id, PP_UT, ut, E_LOC_CURRENT);
   random_sleep();
 
   test_func();
@@ -107,7 +108,7 @@ void test_req() {
 }
 
 int main(int argc, char const* argv[]) {
-  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1700, 1, NULL, NULL, NULL};
+  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1300, 1, NULL, NULL, NULL};
   global_agent_info = agent_info;
   char appid[] = "cd.dev.test";
   char appname[] = "cd.dev.test";
@@ -121,7 +122,6 @@ int main(int argc, char const* argv[]) {
   int i = 0;
   for (; i < 10; i++) {
     test_req();
-    sleep(1);
   }
   return 0;
 }
