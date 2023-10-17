@@ -15,9 +15,9 @@ import (
 type GetMaxAvg func() (max, avg uint32)
 type GetReqTimeCounter func() [4]uint16
 
-func CollectPStateMessage(getMacAvr GetMaxAvg, getReqTimeCounter GetReqTimeCounter) *v1.PStatMessage {
+func CollectPStateMessage(getMaxAvr GetMaxAvg, getReqTimeCounter GetReqTimeCounter) *v1.PStatMessage {
 	config := common.GetConfig()
-	max, avg := getMacAvr()
+	max, avg := getMaxAvr()
 	responseTime := v1.PResponseTime{
 		Max: int64(max),
 		Avg: int64(avg),
@@ -35,6 +35,7 @@ func CollectPStateMessage(getMacAvr GetMaxAvg, getReqTimeCounter GetReqTimeCount
 		JvmGcOldTime:         0,
 		JvmGcDetailed:        &v1.PJvmGcDetailed{},
 	}
+	// cpu.Percent calcuate cpu in config.StatInterval
 	totalPer, _ := cpu.Percent(config.StatInterval*time.Second, false)
 	totalCpuUsage := totalPer[0] / 100
 	cpuload := v1.PCpuLoad{

@@ -29,6 +29,7 @@ type GrpcAgent struct {
 	spanSender     SpanSender
 	AgentOnLine    bool
 	requestCounter RequestProfiler
+	utReport       *UrlTemplateReport
 	tasksGroup     sync.WaitGroup
 	tSpanCh        chan *TSpan
 	ExitCh         chan bool
@@ -64,6 +65,9 @@ func (agent *GrpcAgent) Interceptor(_ *TSpan) bool {
 	if !agent.AgentOnLine {
 		agent.log.Debugf("span dropped,as agent offline")
 	}
+
+	//note log url templated
+
 	return agent.AgentOnLine
 }
 
@@ -171,6 +175,9 @@ func (agent *GrpcAgent) registerFilter() {
 	agent.log.Debug("register requestCounter filter")
 	agent.AddFilter(&agent.requestCounter)
 
+	// req UrlTemplateReport
+	agent.log.Debug("register UrlTemplate Report filter")
+	agent.AddFilter(agent.utReport)
 	// send span
 	agent.log.Debug("register spanSender filter")
 	agent.AddFilter(&agent.spanSender)
@@ -206,20 +213,45 @@ func (agent *GrpcAgent) sendStat() {
 		return
 	}
 
-	for {
-		msg := CollectPStateMessage(agent.requestCounter.GetMaxAvg, agent.requestCounter.GetReqTimeProfiler)
+	// todo send agentstat
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		for {
+			msg := CollectPStateMessage(agent.requestCounter.GetMaxAvg, agent.requestCounter.GetReqTimeProfiler)
 
-		agent.log.Infof("%v", msg)
-		if err := stream.Send(msg); err != nil {
-			agent.log.Warn(err)
-			return
+			agent.log.Debugf("%v", msg)
+			if err := stream.Send(msg); err != nil {
+				agent.log.Warn(err)
+				break
+			}
+			//config.StatInterval
+			if common.WaitChannelEvent(agent.ExitCh, 0) == common.E_AGENT_STOPPING {
+				break
+			}
 		}
-		//config.StatInterval
-		if common.WaitChannelEvent(agent.ExitCh, 0) == common.E_AGENT_STOPPING {
-			return
-		}
-	}
+		wg.Done()
+	}()
+	// wg.Add(1)
+	// todo send uri templated
+	wg.Add(1)
+	go func() {
+		for {
+			msg := agent.utReport.MoveUtReprot()
 
+			agent.log.Debugf("%v", msg)
+			if err := stream.Send(msg); err != nil {
+				agent.log.Warn(err)
+				break
+			}
+			//config.StatInterval
+			if common.WaitChannelEvent(agent.ExitCh, 30) == common.E_AGENT_STOPPING {
+				break
+			}
+		}
+		wg.Done()
+	}()
+	wg.Wait()
 }
 
 func (agent *GrpcAgent) uploadStatInfo() {
@@ -257,6 +289,8 @@ func (agent *GrpcAgent) Init(id, _name string, _type int32, StartTime string) {
 		"applicationname": agent.agentName,
 		"socketid":        pingIdStr,
 	})
+
+	agent.utReport = CreateUrlTemplateReport()
 
 	config := common.GetConfig()
 
@@ -308,15 +342,15 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 			res.TimeStamp = time.Now().Unix()
 			res.HistogramSchemaType = 2
 
-			agent.log.Infof("try to send PCmdActiveThreadCountRes:%v", res)
+			agent.log.Debugf("try to send PCmdActiveThreadCountRes:%v", res)
 
 			if err := activeThreadCountClient.Send(&res); err != nil {
-				agent.log.Infof("collectorActiveThreadCount:responseId:%d end with:%s", responseId, err)
+				agent.log.Warnf("collectorActiveThreadCount:responseId:%d end with:%s", responseId, err)
 				break
 			}
 
 			if common.WaitChannelEvent(agent.ExitCh, interval) == common.E_AGENT_STOPPING {
-				agent.log.Info("catch exit during send collectorActiveThreadCount")
+				agent.log.Warnf("catch exit during send collectorActiveThreadCount")
 				break
 			}
 		}
@@ -351,6 +385,7 @@ func (agent *GrpcAgent) handleCommand(conn *grpc.ClientConn, wg *sync.WaitGroup)
 	//config.AgentReTryTimeout
 	ctx, _ := common.BuildPinpointCtx(-1, agent.pingMd)
 
+	//todo update HandleCommand to HandleCommandV2
 	commandClient, err := client.HandleCommand(ctx)
 
 	if err != nil {
@@ -427,8 +462,8 @@ func (agent *GrpcAgent) consumeJsonSpan() {
 	}
 }
 
-func (agent *GrpcAgent) CheckValid(name string, ft int32) bool {
-	if name != agent.agentName || ft != agent.agentType {
+func (agent *GrpcAgent) CheckValid(span *TSpan) bool {
+	if span.GetAppname() != agent.agentName || span.GetAppServerType() != agent.agentType {
 		agent.log.Warn("name or FT not equal")
 		return false
 	} else {

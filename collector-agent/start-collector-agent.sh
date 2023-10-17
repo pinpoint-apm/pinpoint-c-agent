@@ -9,4 +9,6 @@ export PP_COLLECTOR_AGENT_ISDOCKER=false
 # export PP_LOG_DIR=/tmp/
 export PP_Log_Level=DEBUG
 export PP_ADDRESS=0.0.0.0@9999
+export GO_PATH=~/go
+export PATH=$PATH:$GO_PATH/bin
 make && ./collector-agent
