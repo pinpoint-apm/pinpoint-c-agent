@@ -1,22 +1,10 @@
 {
     "name": "PINPOINT php Dev",
-    "dockerFile": "Dockerfile",
-    "runArgs": [
-        "--user=pinpoint",
-        "--cap-add=SYS_PTRACE",
-        "--cap-add=NET_RAW",
-        "--cap-add=NET_ADMIN",
-        "--security-opt=seccomp=unconfined",
-        "--volume=${env:HOME}:${env:HOME}",
-        "--volume=/var/run/docker.sock:/var/run/docker.sock",
-        // "--volume=envoy-build:/build",
-        "--network=host",
-        // Uncomment next line if you have devcontainer.env
-        // "--env-file=.devcontainer/devcontainer.env"
+    "service": "pinpoint",
+    "dockerComposeFile": [
+        "docker-compose.yaml"
     ],
-    "containerEnv": {
-        "ENVOY_SRCDIR": "${containerWorkspaceFolder}",
-    },
+    "workspaceFolder": "/workspace",
     "settings": {
         "terminal.integrated.shell.linux": "/bin/bash",
         "bazel.buildifierFixOnFormat": true,
@@ -33,22 +21,24 @@
     },
     "remoteUser": "pinpoint",
     "containerUser": "pinpoint",
-    "postCreateCommand": ".devcontainer/setup.sh",
+    // "postCreateCommand": ".devcontainer/setup.sh",
     "extensions": [
-		"zxh404.vscode-proto3",
-		"llvm-vs-code-extensions.vscode-clangd",
-		"vadimcn.vscode-lldb",
-		"webfreak.debug",
-		"ms-python.python",
-		"xaver.clang-format",
-		"zxh404.vscode-proto3",
-		"Gruntfuggly.todo-tree",
-		"msyrus.go-doc",
-		"golang.go",
-		"bierner.github-markdown-preview",
-		"bierner.markdown-emoji",
-		"ms-vscode.cmake-tools",
-		"matepek.vscode-catch2-test-adapter",
-		"adam-bender.commit-message-editor"
-	]
+        "zxh404.vscode-proto3",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "vadimcn.vscode-lldb",
+        "webfreak.debug",
+        "ms-python.python",
+        "xaver.clang-format",
+        "zxh404.vscode-proto3",
+        "Gruntfuggly.todo-tree",
+        "msyrus.go-doc",
+        "golang.go",
+        "bierner.github-markdown-preview",
+        "bierner.markdown-emoji",
+        "ms-vscode.cmake-tools",
+        "matepek.vscode-catch2-test-adapter",
+        "adam-bender.commit-message-editor",
+        "formulahendry.vscode-mysql",
+        "ms-python.autopep8"
+    ]
 }

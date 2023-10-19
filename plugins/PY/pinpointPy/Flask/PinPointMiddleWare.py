@@ -17,14 +17,15 @@
 
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from ..Defines import PP_HTTP_STATUS_CODE
-from ..pinpoint import add_trace_header_v2
+from ..Defines import PP_HTTP_STATUS_CODE, PP_URL_TEMPLATED
+from ..pinpoint import add_trace_header_v2, add_trace_header
 from .FlaskPlugins import BaseFlaskPlugins
+from flask import request
 
 
 class PinPointMiddleWare():
 
-    def __init__(self, app,wsgi_app):
+    def __init__(self, app, wsgi_app):
         self.app = app
         self.wsgi_app = wsgi_app
 
@@ -34,7 +35,11 @@ class PinPointMiddleWare():
                 add_trace_header_v2(PP_HTTP_STATUS_CODE, str(response.status))
             return response
 
+        @app.before_request
+        def add_ut():
+            if not request.url_rule:
+                add_trace_header(PP_URL_TEMPLATED, str(request.url_rule))
+
     @BaseFlaskPlugins("Flask Web App")
     def __call__(self, environ, start_response):
         return self.wsgi_app(environ, start_response)
-

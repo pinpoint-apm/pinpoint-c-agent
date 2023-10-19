@@ -19,9 +19,9 @@
 # Created by eeliu at 2/4/21
 __version__ = "1.0.15"
 
-from .libs import monkey_patch_for_pinpoint
-from .pinpoint import set_agent, app_id, app_name, gen_tid
+from pinpointPy.libs import monkey_patch_for_pinpoint
+from pinpointPy.pinpoint import set_agent, app_id, app_name, gen_tid
 # from .PinTranscation import PinHeader,GenPinHeader,PinTranscation
 
 __all__ = ['monkey_patch_for_pinpoint',
-           'set_agent', 'app_id', 'app_name','gen_tid']
+           'set_agent', 'app_id', 'app_name', 'gen_tid']

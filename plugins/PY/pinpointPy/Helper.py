@@ -18,22 +18,28 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 11/10/20
-from . import Defines
-from . import pinpoint
+from pinpointPy import Defines
+from pinpointPy import pinpoint
+
 
 def generateNextSid():
-   return pinpoint.gen_sid()
+    return pinpoint.gen_sid()
 
-def generatePinpointHeader(host, headers,traceId=-1):
+
+def generatePinpointHeader(host, headers, traceId=-1):
     headers[Defines.PP_HEADER_PINPOINT_SAMPLED] = Defines.PP_SAMPLED
-    headers[Defines.PP_HEADER_PINPOINT_PAPPTYPE] = pinpoint.get_context(Defines.PP_SERVER_TYPE,traceId)
-    headers[Defines.PP_HEADER_PINPOINT_PAPPNAME] = pinpoint.get_context(Defines.PP_APP_NAME,traceId)
+    headers[Defines.PP_HEADER_PINPOINT_PAPPTYPE] = pinpoint.get_context(
+        Defines.PP_SERVER_TYPE, traceId)
+    headers[Defines.PP_HEADER_PINPOINT_PAPPNAME] = pinpoint.get_context(
+        Defines.PP_APP_NAME, traceId)
     headers['Pinpoint-Flags'] = "0"
     headers[Defines.PP_HEADER_PINPOINT_HOST] = host
-    headers[Defines.PP_HEADER_PINPOINT_TRACEID] = pinpoint.get_context(Defines.PP_TRANSCATION_ID,traceId)
-    headers[Defines.PP_HEADER_PINPOINT_PSPANID] = pinpoint.get_context(Defines.PP_SPAN_ID,traceId)
+    headers[Defines.PP_HEADER_PINPOINT_TRACEID] = pinpoint.get_context(
+        Defines.PP_TRANSCATION_ID, traceId)
+    headers[Defines.PP_HEADER_PINPOINT_PSPANID] = pinpoint.get_context(
+        Defines.PP_SPAN_ID, traceId)
     nsid = pinpoint.gen_sid()
-    pinpoint.add_context(Defines.PP_NEXT_SPAN_ID, nsid,traceId)
+    pinpoint.add_context(Defines.PP_NEXT_SPAN_ID, nsid, traceId)
     headers[Defines.PP_HEADER_PINPOINT_SPANID] = nsid
 
 
@@ -71,7 +77,8 @@ def startPinpointByEnviron(environ):
     pinpoint.add_context(Defines.PP_SERVER_TYPE, Defines.PYTHON)
     # nginx add http
     if Defines.PP_HTTP_PINPOINT_PSPANID in environ:
-        pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, environ[Defines.PP_HTTP_PINPOINT_PSPANID])
+        pinpoint.add_trace_header(
+            Defines.PP_PARENT_SPAN_ID, environ[Defines.PP_HTTP_PINPOINT_PSPANID])
 
     if Defines.PP_HTTP_PINPOINT_SPANID in environ:
         sid = environ[Defines.PP_HTTP_PINPOINT_SPANID]
@@ -104,7 +111,8 @@ def startPinpointByEnviron(environ):
 
     # Not nginx, no http
     if Defines.PP_HEADER_PINPOINT_PSPANID in environ:
-        pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, environ[Defines.PP_HEADER_PINPOINT_PSPANID])
+        pinpoint.add_trace_header(
+            Defines.PP_PARENT_SPAN_ID, environ[Defines.PP_HEADER_PINPOINT_PSPANID])
         # print("PINPOINT_PSPANID:", environ[PP_HEADER_PINPOINT_PSPANID])
 
     if Defines.PP_HEADER_PINPOINT_PAPPNAME in environ:
@@ -123,14 +131,16 @@ def startPinpointByEnviron(environ):
         pinpoint.add_trace_header(Defines.PP_PARENT_HOST, Ah)
 
     if Defines.PP_NGINX_PROXY in environ:
-        pinpoint.add_trace_header(Defines.PP_NGINX_PROXY, environ[Defines.PP_NGINX_PROXY])
+        pinpoint.add_trace_header(
+            Defines.PP_NGINX_PROXY, environ[Defines.PP_NGINX_PROXY])
 
     if Defines.PP_APACHE_PROXY in environ:
-        pinpoint.add_trace_header(Defines.PP_APACHE_PROXY, environ[Defines.PP_APACHE_PROXY])
+        pinpoint.add_trace_header(
+            Defines.PP_APACHE_PROXY, environ[Defines.PP_APACHE_PROXY])
 
     pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1")
     if (Defines.PP_HTTP_PINPOINT_SAMPLED in environ and environ[
-        Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
+            Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
         pinpoint.drop_trace()
         pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s0")
 

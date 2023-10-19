@@ -19,23 +19,25 @@
 
 # Created by eeliu at 3/5/20
 
-from . import Common
-from . import Defines
-from . import pinpoint
+from pinpointPy import Common
+from pinpointPy import Defines
+from pinpointPy import pinpoint
+
 
 class RequestPlugin(Common.PinTrace):
-    def __init__(self,name):
+    def __init__(self, name):
         super().__init__(name)
 
-    def onBefore(self,*args, **kwargs):
+    def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         pinpoint.add_trace_header(Defines.PP_APP_NAME, pinpoint.app_name())
         pinpoint.add_trace_header(Defines.PP_APP_ID, pinpoint.app_id())
         pinpoint.add_context(Defines.PP_APP_NAME, pinpoint.app_name())
-        request =args[0]
+        request = args[0]
         ###############################################################
         # print("------------------- call before -----------------------")
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskrequest')
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskrequest')
         pinpoint.add_trace_header(Defines.PP_REQ_URI, request.path)
         pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request.remote_addr)
         pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request.host)
@@ -44,8 +46,10 @@ class RequestPlugin(Common.PinTrace):
 
         # nginx add http
         if Defines.PP_HTTP_PINPOINT_PSPANID in request.headers:
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HTTP_PINPOINT_PSPANID])
-            print("PINPOINT_PSPANID:", request.headers[Defines.PP_HTTP_PINPOINT_PSPANID])
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HTTP_PINPOINT_PSPANID])
+            print("PINPOINT_PSPANID:",
+                  request.headers[Defines.PP_HTTP_PINPOINT_PSPANID])
 
         if Defines.PP_HTTP_PINPOINT_SPANID in request.headers:
             self.sid = request.headers[Defines.PP_HTTP_PINPOINT_SPANID]
@@ -80,7 +84,8 @@ class RequestPlugin(Common.PinTrace):
 
         # Not nginx, no http
         if Defines.PP_HEADER_PINPOINT_PSPANID in request.headers:
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HEADER_PINPOINT_PSPANID])
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HEADER_PINPOINT_PSPANID])
             # print("PINPOINT_PSPANID:", request.headers[PP_HEADER_PINPOINT_PSPANID])
 
         if Defines.PP_HEADER_PINPOINT_PAPPNAME in request.headers:
@@ -99,10 +104,12 @@ class RequestPlugin(Common.PinTrace):
             pinpoint.add_trace_header(Defines.PP_PARENT_HOST, self.Ah)
 
         if Defines.PP_NGINX_PROXY in request.headers:
-            pinpoint.add_trace_header(Defines.PP_NGINX_PROXY, request.headers[Defines.PP_NGINX_PROXY])
+            pinpoint.add_trace_header(
+                Defines.PP_NGINX_PROXY, request.headers[Defines.PP_NGINX_PROXY])
 
         if Defines.PP_APACHE_PROXY in request.headers:
-            pinpoint.add_trace_header(Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY])
+            pinpoint.add_trace_header(
+                Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY])
 
         pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1")
         if (Defines.PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
@@ -115,13 +122,10 @@ class RequestPlugin(Common.PinTrace):
         pinpoint.add_context(Defines.PP_SPAN_ID, self.sid)
         return args, kwargs
 
-    def onEnd(self,ret):
+    def onEnd(self, ret):
         super().onEnd(ret)
         return ret
 
     def onException(self, e):
         pinpoint.mark_as_error(str(e), "", 0)
         raise e
-
-
-

@@ -1,0 +1,57 @@
+services:
+  dev-mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'      
+    expose:
+      - '3306'
+  dev-mysql-setup:
+    image: mysql:5.7 
+    depends_on:
+      dev-mysql:
+        condition: service_completed_successfully
+    # restart: "always"      
+    entrypoint: [ "bash", "-c", "cd /app/ && mysql -uroot -ppassword -hdev-mysql <employees.sql"]
+    # entrypoint: ["bash","-c","sleep 10000000"]
+    volumes:
+      - "./test_db:/app/"
+      
+  redis:
+    image: redis:alpine
+    command: redis-server --port 6379
+    container_name: redis_boot
+    hostname: redis_boot
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - 6379:6379
+      
+  testapp-flask:
+    restart: always
+    build:
+      dockerfile: flask.dockerfile
+    ports:
+      - 8184:8184
+    
+  dev-collector:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ../collector-agent/
+
+    environment:
+      - PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
+      - PP_COLLECTOR_AGENT_SPAN_PORT=9993
+      - PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
+      - PP_COLLECTOR_AGENT_AGENT_PORT=9991
+      - PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
+      - PP_COLLECTOR_AGENT_STAT_PORT=9992
+      - PP_COLLECTOR_AGENT_ISDOCKER=false
+      - PP_Log_Level=DEBUG
+      - PP_ADDRESS=0.0.0.0@9999
+    ports:
+      - 9999:9999

@@ -321,7 +321,7 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 	if activeThreadCountClient, err := client.CommandStreamActiveThreadCount(ctx); err == nil {
 		sequenceId := int32(1)
 		for {
-			agent.log.Infof("ResponseId %d", responseId)
+			agent.log.Debugf("ResponseId %d", responseId)
 			response := v1.PCmdStreamResponse{
 				ResponseId: responseId,
 				SequenceId: sequenceId,

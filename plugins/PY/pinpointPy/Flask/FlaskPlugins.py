@@ -19,38 +19,41 @@
 
 # Created by eeliu at 3/5/20
 
-from flask import Flask,Request
+from flask import Request
 
 from .. import Common
 from .. import pinpoint
 from .. import Defines
+
 
 class BaseFlaskPlugins(Common.PinTrace):
     def __init__(self, name):
         super().__init__(name)
         self.isLimit = False
 
-    def isSample(self,args):
+    def isSample(self, args):
         return True
 
-    def onBefore(self,*args, **kwargs):
+    def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
+        print(args)
         request = Request(args[1])
         pinpoint.add_trace_header(Defines.PP_APP_NAME, pinpoint.app_name())
         pinpoint.add_trace_header(Defines.PP_APP_ID, pinpoint.app_id())
         pinpoint.add_context(Defines.PP_APP_NAME, pinpoint.app_name())
         ###############################################################
         # print("------------------- call before -----------------------")
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskrequest')
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskrequest')
         pinpoint.add_trace_header(Defines.PP_REQ_URI, request.path)
         pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request.remote_addr)
         pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request.host)
         pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PYTHON)
         pinpoint.add_context(Defines.PP_SERVER_TYPE, Defines.PYTHON)
-
         # nginx add http
         if Defines.PP_HTTP_PINPOINT_PSPANID in request.headers:
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HTTP_PINPOINT_PSPANID])
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HTTP_PINPOINT_PSPANID])
 
         if Defines.PP_HTTP_PINPOINT_SPANID in request.headers:
             self.sid = request.headers[Defines.PP_HTTP_PINPOINT_SPANID]
@@ -59,7 +62,6 @@ class BaseFlaskPlugins(Common.PinTrace):
         else:
             self.sid = pinpoint.gen_sid()
         pinpoint.add_context(Defines.PP_SPAN_ID, self.sid)
-
 
         if Defines.PP_HTTP_PINPOINT_TRACEID in request.headers:
             self.tid = request.headers[Defines.PP_HTTP_PINPOINT_TRACEID]
@@ -86,7 +88,8 @@ class BaseFlaskPlugins(Common.PinTrace):
 
         # Not nginx, no http
         if Defines.PP_HEADER_PINPOINT_PSPANID in request.headers:
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HEADER_PINPOINT_PSPANID])
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_SPAN_ID, request.headers[Defines.PP_HEADER_PINPOINT_PSPANID])
             # print("PINPOINT_PSPANID:", request.headers[PP_HEADER_PINPOINT_PSPANID])
 
         if Defines.PP_HEADER_PINPOINT_PAPPNAME in request.headers:
@@ -103,18 +106,19 @@ class BaseFlaskPlugins(Common.PinTrace):
             self.Ah = request.headers[Defines.PP_HEADER_PINPOINT_HOST]
             pinpoint.add_context(Defines.PP_PARENT_HOST, self.Ah)
             pinpoint.add_trace_header(Defines.PP_PARENT_HOST, self.Ah)
-        
+
         if Defines.PP_NGINX_PROXY in request.headers:
-            pinpoint.add_trace_header(Defines.PP_NGINX_PROXY, request.headers[Defines.PP_NGINX_PROXY])
-        
+            pinpoint.add_trace_header(
+                Defines.PP_NGINX_PROXY, request.headers[Defines.PP_NGINX_PROXY])
+
         if Defines.PP_APACHE_PROXY in request.headers:
-            pinpoint.add_trace_header(Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY])
+            pinpoint.add_trace_header(
+                Defines.PP_APACHE_PROXY, request.headers[Defines.PP_APACHE_PROXY])
 
         pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1")
         if (Defines.PP_HTTP_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HTTP_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or (Defines.PP_HEADER_PINPOINT_SAMPLED in request.headers and request.headers[Defines.PP_HEADER_PINPOINT_SAMPLED] == Defines.PP_NOT_SAMPLED) or pinpoint.check_trace_limit():
             pinpoint.drop_trace()
             pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s0")
-
 
         pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, self.tid)
         pinpoint.add_trace_header(Defines.PP_SPAN_ID, self.sid)
@@ -124,7 +128,7 @@ class BaseFlaskPlugins(Common.PinTrace):
         ###############################################################
         return args, kwargs
 
-    def onEnd(self,ret):
+    def onEnd(self, ret):
         ###############################################################
 
         ###############################################################
@@ -133,5 +137,5 @@ class BaseFlaskPlugins(Common.PinTrace):
         return ret
 
     def onException(self, e):
-        pinpoint.mark_as_error(str(e),"",0)
+        pinpoint.mark_as_error(str(e), "", 0)
         raise e

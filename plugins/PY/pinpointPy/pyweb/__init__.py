@@ -17,6 +17,6 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-from .middleware import PinPointMiddleWare
-from .RequestPlugin import RequestPlugin
-__all__=['PinPointMiddleWare','RequestPlugin']
+from pinpointPy.pyweb.middleware import PinPointMiddleWare
+from pinpointPy.pyweb.RequestPlugin import RequestPlugin
+__all__ = ['PinPointMiddleWare', 'RequestPlugin']
