@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  dev-mysql:
+    image: mysql:5.7
+    restart: always
+    container_name: dev-mysql
+    hostname: dev-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'      
+    expose:
+      - '3306'
+    volumes:
+      - ..:/workspace:cached
+  redis:
+    image: redis:alpine
+    command: redis-server --port 6379
+    container_name: redis_boot
+    hostname: redis_boot
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - 6379:6379
+      
+  pinpoint:
+    container_name: pinpoint
+    command: sleep infinity
+    hostname: pinpoint
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      # args:
+    volumes:
+      - ..:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+      # - ${env:HOME}:/workspace
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - SYS_PTRACE
+      - NET_RAW
+      - NET_ADMIN
+    user: pinpoint
+
+      
+    

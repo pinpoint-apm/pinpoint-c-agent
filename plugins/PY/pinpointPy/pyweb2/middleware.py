@@ -19,7 +19,7 @@
 
 # Created by eeliu at 11/12/20
 
-from .RequestPlugin import RequestPlugin
+from pinpointPy.pyweb2.RequestPlugin import RequestPlugin
 
 def PinPointMiddleWare(application):
     def handler(environ,start_response):

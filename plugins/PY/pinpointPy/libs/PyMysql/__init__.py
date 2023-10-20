@@ -14,7 +14,7 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from ...Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor,intercept_once
 
 @intercept_once
 def monkey_patch():
@@ -36,3 +36,6 @@ def monkey_patch():
         print(e)
 
 __all__=['monkey_patch']
+
+__version__ = '0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

@@ -20,10 +20,10 @@
 # Created by eeliu at 8/20/20
 from urllib.parse import urlparse
 
-from ... import Common
-from ... import Defines
-from ... import pinpoint
-from ... import Helper
+from pinpointPy import Common
+from pinpointPy import Defines
+from pinpointPy import pinpoint
+from pinpointPy import Helper
 
 class UrlOpenPlugin(Common.PinTrace):
 

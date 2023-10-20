@@ -18,11 +18,13 @@
 # Created by eeliu at 4/19/22
 
 import random
+import logging
 import _pinpointPy
-from collections.abc import Callable
 
 __app_id = 'app_id_str'
 __app_name = 'app_name_str'
+
+logger = logging.Logger('pinpointPy')
 
 
 def app_id():
@@ -56,7 +58,7 @@ def add_context(key: str, value: str, trace_id: int = -1):
 
 
 def get_context(key: str, trace_id: int = -1):
-    return _pinpointPy.get_context_key(key,trace_id)
+    return _pinpointPy.get_context_key(key, trace_id)
 
 
 def gen_tid():
@@ -80,7 +82,7 @@ def drop_trace(trace_id: int = -1):
     _pinpointPy.drop_trace(trace_id)
 
 
-def check_trace_limit(time: int=-1) -> bool:
+def check_trace_limit(time: int = -1) -> bool:
     return _pinpointPy.check_tracelimit(time)
 
 

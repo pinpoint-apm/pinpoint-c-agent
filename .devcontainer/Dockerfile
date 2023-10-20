@@ -3,7 +3,7 @@ USER root
 ## install developmental env
 ENV TZ=Asia/Shanghai
 ENV LC_CTYPE=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+# ENV LC_ALL=en_US.UTF-8
 # referr from https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
 ARG USERNAME=pinpoint
 ARG USER_UID=1000
@@ -28,10 +28,11 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN apt update && apt install -y gcc g++ gdb  pkg-config  libxml2-dev libsqlite3-dev libcurl4-openssl-dev zlib1g-dev make cmake wget autoconf git clangd python3-pip clang-format protobuf-compiler vim
-## enable php-7.4
+RUN apt update && apt install -y apt-utils gcc g++ gdb  pkg-config  libxml2-dev libsqlite3-dev libcurl4-openssl-dev zlib1g-dev make cmake wget autoconf git clangd iputils-ping python3 python3.8-venv python3-pip clang-format protobuf-compiler vim
+# enable php-7.4
 ENV PHP_VESION=php-7.4.33
-RUN cd ~ && wget https://www.php.net/distributions/${PHP_VESION}.tar.gz && tar xvf ${PHP_VESION}.tar.gz && cd ${PHP_VESION} && ./configure --prefix=/opt/${PHP_VESION} --enable-fpm   --enable-opcache   --enable-debug && make -j && make install
+COPY ${PHP_VESION}.tar.gz /repo/${PHP_VESION}.tar.gz
+RUN cd /repo && tar xvf ${PHP_VESION}.tar.gz && cd ${PHP_VESION} && ./configure --prefix=/opt/${PHP_VESION} --enable-fpm   --enable-opcache   --enable-debug && make -j && make install
 ENV PATH="$PATH:/opt/php/bin/:/opt/php/sbin/"
 COPY php.ini /opt/$PHP_VESION/lib
 
@@ -61,8 +62,8 @@ COPY php.ini /opt/$PHP_VESION/lib
 
 
 # install golang 1.18
-
-RUN wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz && rm -rf /usr/local/go && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
+COPY go1.18.10.linux-amd64.tar.gz /repo/go1.18.10.linux-amd64.tar.gz
+RUN rm -rf /usr/local/go && cd /repo/ && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin
 ENV GO_PATH=~/go
 ENV PATH=$PATH:/$GO_PATH/bin

@@ -3,13 +3,18 @@ name: build-wheels
 on: 
   workflow_dispatch:
     inputs:
+      release-testpypi:
+        description: Do you want to release to test-pypi
+        required: true
+        default: "true"
       release:
-        description: Do you want to release to pipy
+        description: Do you want to release to pypi
         required: true
         default: "false"
 
 jobs:
   build_wheels_pypitest:
+    if: ${{ github.event.inputs.release-testpypi }} == "true"
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -58,7 +63,6 @@ jobs:
   publish-pypitest:
     needs: build_wheels_pypitest
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.release }} == "true"
     steps:
       - uses: actions/download-artifact@v3
         with: 
@@ -78,6 +82,7 @@ jobs:
           repository_url: https://test.pypi.org/legacy/          
 
   build_wheels:
+    if: ${{ github.event.inputs.release }} == "true"
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -121,7 +126,6 @@ jobs:
   publish:
     needs: build_wheels
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.release }} == "true"
     steps:
       - uses: actions/download-artifact@v3
         with: 

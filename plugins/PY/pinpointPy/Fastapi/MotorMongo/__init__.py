@@ -19,7 +19,8 @@
 
 # create by eelu
 
-from ...Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import intercept_once
+
 
 @intercept_once
 def monkey_patch():
@@ -31,4 +32,5 @@ def monkey_patch():
         # do nothing
         print(e)
 
-__all__=['monkey_patch']
+
+__all__ = ['monkey_patch']

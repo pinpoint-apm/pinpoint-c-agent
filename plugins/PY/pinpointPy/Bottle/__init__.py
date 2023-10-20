@@ -19,7 +19,7 @@
 
 # Created by eeliu at 11/9/20
 
-from .RequestPlugin import RequestPlugin
+from pinpointPy.Bottle.RequestPlugin import RequestPlugin
 
 def PinPointMiddleWare(application):
     def handler(environ,start_response):
@@ -29,3 +29,7 @@ def PinPointMiddleWare(application):
         plugin.onEnd(response)
         return response
     return handler
+
+__all__=['PinPointMiddleWare']
+__version__ ='0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

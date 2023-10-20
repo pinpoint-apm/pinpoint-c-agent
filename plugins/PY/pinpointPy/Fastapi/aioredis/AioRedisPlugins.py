@@ -19,9 +19,8 @@
 # ******************************************************************************
 
 
-from .. import AsyCommon
-from ... import pinpoint
-from ... import Defines
+from pinpointPy.Fastapi import AsyCommon
+from pinpointPy import pinpoint, Defines
 
 
 class AioRedisPlugins(AsyCommon.AsynPinTrace):

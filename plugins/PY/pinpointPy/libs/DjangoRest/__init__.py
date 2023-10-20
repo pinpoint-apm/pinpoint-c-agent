@@ -14,24 +14,21 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from ...Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor, intercept_once
+
 
 @intercept_once
 def monkey_patch():
-    try:
-        from rest_framework.views import APIView
-        from .ViewsPlugin import ViewsPlugin
+    from rest_framework.views import APIView
+    from .ViewsPlugin import ViewsPlugin
+
+    Interceptors = [
+        Interceptor(APIView, 'dispatch', ViewsPlugin),
+    ]
+    for interceptor in Interceptors:
+        interceptor.enable()
 
 
-        Interceptors = [
-            Interceptor(APIView, 'dispatch', ViewsPlugin),
-        ]
-        for interceptor in Interceptors:
-            interceptor.enable()
-
-
-    except ImportError as e:
-        # do nothing
-        print(e)
-
-__all__=['monkey_patch']
+__all__ = ['monkey_patch']
+__version__ = '0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

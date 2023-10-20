@@ -16,8 +16,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ------------------------------------------------------------------------------
-import json
-from flask import Flask,request,Response
+from RedisControl import RedisControl
+from DBControl import DBControl
+import test_returns
+import test_args
+from test_exception import UserDefineException
+import test_exception
+from test_static_class_method import Method
+import test_abstract
+import test_private
+import test_special
+import test_mixin
+from test_band import BandClass
+from flask import Flask, request, Response
 from flask import render_template
 
 from datetime import datetime
@@ -26,7 +37,10 @@ import requests
 
 import test_function
 from app1 import user_function
-import person, student, teacher, doctor
+import person
+import student
+import teacher
+import doctor
 import test_recursion
 import test_generatior
 import test_higher_order
@@ -36,32 +50,20 @@ import test_decorator
 import test_partial
 import test_band
 from pinpointPy.Flask.PinPointMiddleWare import PinPointMiddleWare
-from pinpointPy import set_agent,monkey_patch_for_pinpoint
+from pinpointPy import set_agent, monkey_patch_for_pinpoint
 monkey_patch_for_pinpoint()
-from test_band import BandClass
-import test_mixin
-import test_special
-import test_private
-import test_abstract
-from test_static_class_method import Method
-import test_exception
-from test_exception import UserDefineException
-import test_args
-import test_returns
-from DBControl import DBControl
-from RedisControl import RedisControl
 
 
 app = Flask(__name__)
 
-set_agent("flask-agent","FLASK-AGENT",'tcp:dev-collector:9999',-1)
+set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:9999', -1)
 
-app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
+app.wsgi_app = PinPointMiddleWare(app, app.wsgi_app)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template("index.html")
-
 
 
 GREETING = "Hello World!"
@@ -83,6 +85,12 @@ def date_form():
 def test_func1_form():
     func1 = test_function.test_func1("hello", "world")
     return '''<h3>%s</h3>''' % func1
+
+
+@app.route('/test_ut/<username>', methods=['GET'])
+def test_ut(username):
+
+    return f'{username}->{request.url_rule}\'s profile'
 
 
 @app.route('/test_user_func2', methods=['GET'])
@@ -121,6 +129,7 @@ def test_inherit_form():
 
 @app.route('/test_recursion', methods=['GET'])
 def test_recursion_form():
+    print(request.url_rule)
     r = test_recursion.fact(3)
     return '''<h3>%s</h3>''' % r
 
@@ -147,6 +156,7 @@ def test_generator_form():
 @app.route('/test_higher_order', methods=['GET'])
 def test_higher_order_form():
     from pinpointPy.CommonPlugin import PinpointCommonPlugin
+
     @PinpointCommonPlugin(__name__)
     def f(x):
         return x * x
@@ -171,7 +181,7 @@ def test_return_form():
 
 @app.route('/test_lambda', methods=['GET'])
 def test_lambda_form():
-    lambda_f = lambda x: x * x
+    def lambda_f(x): return x * x
     h1 = lambda_f(3)
     l = test_lambda.return_lambda(3)
     h2 = l()
@@ -208,7 +218,6 @@ def test_band_form():
     return '''<h3>%s</h3>
               <h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2, h3)
-
 
 
 @app.route('/test_mixin', methods=['GET'])
@@ -261,9 +270,6 @@ def test_classmethod_form():
 
 @app.route('/test_exception', methods=['GET'])
 def test_exception_form():
-    # h1 = test_exception.test_syntaxerror("Hello")
-    # h1 = test_exception.test_nameerror("Hello")
-    # h1 = test_exception.test_ZeroDivisionError(0)
     h1 = test_exception.test_userexception("Evy")
     return '''<h3>%s</h3>''' % h1
 
@@ -295,13 +301,15 @@ def test_exception_in_recursion_form():
 def test_arguments_form():
     i1 = Method()
     f = open("app.py", 'r')
-    l1 = [None, 123, 3.1415, True, "abc", (123, "abc"), [456, "def"], {"a":1, "b":2}, set("abc"), i1, str(UserDefineException("Evy")), f, GREETING, lambda x:x*x]
+    l1 = [None, 123, 3.1415, True, "abc", (123, "abc"), [456, "def"], {"a": 1, "b": 2}, set(
+        "abc"), i1, str(UserDefineException("Evy")), f, GREETING, lambda x: x*x]
     l2 = []
     for i in l1:
         l2.append(test_args.test_args1(i))
     f.close()
-    h1 = "<br>".join('%s' %str(id) for id in l2)
-    h2 = test_args.test_args2("Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
+    h1 = "<br>".join('%s' % str(id) for id in l2)
+    h2 = test_args.test_args2("Hello", "Evy", "a", "b",
+                              "c", a="A", b="B", c="C")
     return '''<h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2)
 
@@ -310,32 +318,34 @@ def test_arguments_form():
 def test_returns_form():
     i1 = Method()
     f = open("app.py", 'r')
-    l1 = [None, 123, 3.1415, True, "abc", (123, "abc"), [456, "def"], {"a":1, "b":2}, set("abc"), i1, str(UserDefineException("Evy")), f, GREETING, lambda x:x*x]
+    l1 = [None, 123, 3.1415, True, "abc", (123, "abc"), [456, "def"], {"a": 1, "b": 2}, set(
+        "abc"), i1, str(UserDefineException("Evy")), f, GREETING, lambda x: x*x]
     # l1 = [[456, "def"]]
     l2 = []
     for i in l1:
         l2.append(str(type(test_returns.test_returns1(i)))[8:-2])
     f.close()
-    h1 = "<br>".join('%s' %str(id) for id in l2)
-    h2 = test_returns.test_returns2("Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
+    h1 = "<br>".join('%s' % str(id) for id in l2)
+    h2 = test_returns.test_returns2(
+        "Hello", "Evy", "a", "b", "c", a="A", b="B", c="C")
     return '''<h3>%s</h3>
               <h3>%s</h3>''' % (h1, h2)
 
 
 @app.route('/test_mysql', methods=['GET'])
 def test_mysql_form():
-    mysql = DBControl("localhost", "root", "root", "DBTest")
+    mysql = DBControl("dev-mysql", "root", "password", "employees")
     mysql.con_db()
-    h1 = mysql.db_select("select * from user;")
+    h1 = mysql.db_select("select * from employees limit 128")
     mysql.db_close()
-    return "<br>".join('%s' %str(id) for id in h1)
+    return "<br>".join('%s' % str(id) for id in h1)
 
 
 @app.route('/test_redis', methods=['GET'])
 def test_redis_form():
     r = RedisControl("localhost", "6379")
     r.connection()
-    h1 = r.set("name","Evy")
+    h1 = r.set("name", "Evy")
     r.delete("name")
     return '''<h3>%s</h3>''' % h1
 
@@ -358,44 +368,10 @@ def signin_form():
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    if request.form['username']=='admin' and request.form['password']=='password':
+    if request.form['username'] == 'admin' and request.form['password'] == 'password':
         return '<h3>Hello, admin!</h3>'
     return '<h3>Bad username or password.</h3>'
 
-@app.route('/shopping/orders/<orderId>',methods=['GET'])
-def getOrder(orderId):
-    #h1 = requests.get('http://order.demo.pinpoint.com:8182/orders/'+orderId)
-    #print(h1.content)
-    return Response('{"orderId":"3a8b5c33-575e-42d0-bd2c-335d1917297d","orderStatus":"OPEN","paymentAmount":2300}',mimetype='application/json')
-
-@app.route('/shopping/orders/<orderId>',methods=['PATCH'])
-def processOrder(orderId):
-    h1 = requests.get('http://py.backend.com:8184/shopping/products')
-    print(h1.status_code)
-    return h1.content
-
-@app.route('/shopping/products',methods=['GET'])
-def getProducts():
-    #h1 = requests.get('http://product.demo.pinpoint.com:8181/products')
-    h1 = requests.get('http://shopping.demo.pinpoint.com:8180/shopping/products')
-    products = json.loads(s=h1.content)
-    print(h1.content)
-    valid_products(products)
-    return Response('[{"productId":1,"productName":"ITEM_1","productPrice":500}]', mimetype='application/json')
-
-@app.route('/shopping/orders',methods=['POST'])
-def createOrders():
-    content = request.json
-    requests.post('http://php.backend.com:8185/shopping/orders',json=content)
-
-    return Response('{"orderId":"3a8b5c33-575e-42d0-bd2c-335d1917297d","orderStatus":"OPEN","paymentAmount":2300}',mimetype='application/json')
-def valid_products(products):
-    db = DBControl('localhost', 'pinpoint', 'pinpoint', 'product')
-    db.con_db()
-    product_list = db.db_select('select product_name, product_price from t_product')
-
-
-
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=8184,processes=4,threaded=False)
+    app.run(host='0.0.0.0', port=8184, processes=4, threaded=False)

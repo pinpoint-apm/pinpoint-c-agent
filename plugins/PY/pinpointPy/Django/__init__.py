@@ -18,5 +18,7 @@
 #   limitations under the License.
 # ******************************************************************************
 
-from .DjangoMiddleWare import DjangoMiddleWare
+from pinpointPy.Django.DjangoMiddleWare import DjangoMiddleWare
 __all__=['DjangoMiddleWare']
+__version__ ='0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

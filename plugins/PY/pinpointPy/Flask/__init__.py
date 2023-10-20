@@ -20,3 +20,9 @@
 from .PinPointMiddleWare import PinPointMiddleWare
 from .FlaskPlugins import BaseFlaskPlugins
 __all__=['PinPointMiddleWare','BaseFlaskPlugins']
+
+__version__="0.0.1"
+__author__ = 'liu.mingyi@navercorp.com'
+# Changes
+# ## 0.0.1
+# start support UT https://github.com/pinpoint-apm/pinpoint-c-agent/issues/534

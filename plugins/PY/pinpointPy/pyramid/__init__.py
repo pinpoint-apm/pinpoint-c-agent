@@ -17,8 +17,11 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from .PyRequestPlugin import PyRequestPlugin
+from pinpointPy.pyramid.PyRequestPlugin import PyRequestPlugin
 # Created by suwei at 4/15/22
-from .tween import *
+from pinpointPy.pyramid.tween import *
 
 __all__=['pinpoint_tween','PyRequestPlugin']
+
+__version__ ='0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

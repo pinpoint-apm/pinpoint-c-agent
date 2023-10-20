@@ -14,14 +14,20 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 import importlib
+from pinpointPy.pinpoint import logger
+
+
 def __monkey_patch(*args, **kwargs):
     for key in kwargs:
         if kwargs[key]:
             module = importlib.import_module('pinpointPy.libs.' + key)
             monkey_patch = getattr(module, 'monkey_patch')
             if callable(monkey_patch):
-                monkey_patch()
-                print("try to install pinpointPy.lib.%s module" % (key))
+                try:
+                    monkey_patch()
+                except Exception as e:
+                    logger.info("exception at {}", e)
+
 
 def monkey_patch_for_pinpoint(pymongo=True,
                               PyMysql=True,
@@ -33,7 +39,9 @@ def monkey_patch_for_pinpoint(pymongo=True,
                               DjangoRest=True,
                               MysqlConnector=True):
     __monkey_patch(pymongo=pymongo, PyMysql=PyMysql, pyRedis=pyRedis, requests=requests, urllib=urllib,
-                   sqlalchemy=sqlalchemy, MySQLdb=MySQLdb, DjangoRest=DjangoRest,MysqlConnector=MysqlConnector)
+                   sqlalchemy=sqlalchemy, MySQLdb=MySQLdb, DjangoRest=DjangoRest, MysqlConnector=MysqlConnector)
 
 
 __all__ = ['monkey_patch_for_pinpoint']
+__version__ = '0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

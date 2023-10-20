@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 
-from .AsyRequestPlugin import *
-from .. import Defines
-from .. import pinpoint
+from pinpointPy.Fastapi.AsyRequestPlugin import *
+from pinpointPy import Defines
+from pinpointPy import pinpoint
 
 
 class FastAPIRequestPlugin(AsyRequestPlugin):
