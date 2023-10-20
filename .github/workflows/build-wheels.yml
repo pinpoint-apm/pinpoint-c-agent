@@ -6,17 +6,19 @@ on:
       release-testpypi:
         description: Do you want to release to test-pypi
         required: true
-        default: "true"
+        default: true
+        type: boolean
       release:
         description: Do you want to release to pypi
         required: true
-        default: "false"
+        default: false
+        type: boolean
 
 jobs:
   build_wheels_pypitest:
-    if: ${{ github.event.inputs.release-testpypi }} == "true"
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: ${{ inputs.release-testpypi }}
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-latest]
@@ -82,9 +84,9 @@ jobs:
           repository_url: https://test.pypi.org/legacy/          
 
   build_wheels:
-    if: ${{ github.event.inputs.release }} == "true"
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: ${{ inputs.release }}
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-latest]
