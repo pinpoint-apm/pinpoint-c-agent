@@ -24,7 +24,7 @@ import asyncio
 
 from starlette_context import context
 
-from .. import pinpoint
+from pinpointPy import pinpoint
 
 
 class AsynPinTrace(object):

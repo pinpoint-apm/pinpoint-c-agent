@@ -28,7 +28,6 @@ import test_private
 import test_special
 import test_mixin
 from test_band import BandClass
-import json
 from flask import Flask, request, Response
 from flask import render_template
 
@@ -90,7 +89,8 @@ def test_func1_form():
 
 @app.route('/test_ut/<username>', methods=['GET'])
 def test_ut(username):
-    return f'{username}\'s profile'
+
+    return f'{username}->{request.url_rule}\'s profile'
 
 
 @app.route('/test_user_func2', methods=['GET'])

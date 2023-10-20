@@ -1,0 +1,10 @@
+bottle==0.12.25
+Django==4.2.6
+djangorestframework==3.14.0
+fastapi==0.104.0
+Flask==3.0.0
+mysql_connector_repackaged==0.3.1
+pymysql==1.1.0
+redis==5.0.1
+starlette==0.31.1
+starlette_context==0.3.6

@@ -17,11 +17,11 @@
 
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-from ..Defines import PP_HTTP_STATUS_CODE, PP_URL_TEMPLATED
-from ..pinpoint import add_trace_header_v2, add_trace_header
-from .FlaskPlugins import BaseFlaskPlugins
+from pinpointPy.Defines import PP_HTTP_STATUS_CODE, PP_URL_TEMPLATED
+from pinpointPy.pinpoint import add_trace_header_v2, add_trace_header
+from pinpointPy.Flask.FlaskPlugins import BaseFlaskPlugins
 from flask import request
-
+import sys
 
 class PinPointMiddleWare():
 
@@ -31,14 +31,13 @@ class PinPointMiddleWare():
 
         @app.after_request
         def mark_status_code(response):
+            if request.url_rule:
+                add_trace_header(PP_URL_TEMPLATED, str(request.url_rule))
+                if 'unittest' in sys.modules.keys():
+                    response.headers["UT"] = str(request.url_rule)
             if response:
                 add_trace_header_v2(PP_HTTP_STATUS_CODE, str(response.status))
             return response
-
-        @app.before_request
-        def add_ut():
-            if not request.url_rule:
-                add_trace_header(PP_URL_TEMPLATED, str(request.url_rule))
 
     @BaseFlaskPlugins("Flask Web App")
     def __call__(self, environ, start_response):

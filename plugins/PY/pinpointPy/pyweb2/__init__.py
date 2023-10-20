@@ -21,3 +21,6 @@ from pinpointPy.pyweb2.RequestPlugin import RequestPlugin
 from pinpointPy.pyweb2.middleware import PinPointMiddleWare
 
 __all__ = ['PinPointMiddleWare', 'RequestPlugin']
+
+__version__ ='0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

@@ -17,10 +17,9 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from .AsyCommon import AsynPinTrace
-from .. import Defines
-from .. import pinpoint
-from ..Common import GenPinHeader
+from pinpointPy.Fastapi.AsyCommon import AsynPinTrace
+from pinpointPy import Defines,pinpoint
+from pinpointPy.Common import GenPinHeader
 from starlette_context import request_cycle_context
 
 

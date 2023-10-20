@@ -77,13 +77,6 @@ jobs:
         php-versions: ["7.0"]
     steps:
       - uses: actions/checkout@v2
-      # - name: set mysql
-      #   run: |
-      #     sudo service mysql start
-      #     sudo mysql --host='127.0.0.1' --user='root' --password='root' < '/home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/script.sql'
-      # - name: set redis
-      #   run: |
-      #     sudo apt-get install redis-server
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
@@ -117,13 +110,13 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - run: |
+      - name: run unittest
+        run: |
           pip install -r requirements.txt 
           python setup.py install || echo "failed, but ignore"
-          # nosetests does not support python3 anymore
-          # nosetests src/PY/test --ignore-files="TestCoroutines.*"
-          python -m unittest discover -s src/PY/test -p 'Test*.py'
-
+          python -m unittest discover -s src/PY/test
+          pip install -r plugins/PY/requirements.txt
+          python -m unittest discover -s plugins/PY/pinpointPy
   Collector-agent:
     strategy:
       matrix:
@@ -145,8 +138,4 @@ jobs:
       
       - run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-          # cd collector-agent
-          # go mod download
-          # go build
-          # go test ./... -v
           cd collector-agent && make && go test ./... -v

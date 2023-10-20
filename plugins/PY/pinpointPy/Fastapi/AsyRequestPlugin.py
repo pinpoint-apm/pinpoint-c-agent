@@ -18,9 +18,9 @@
 # ------------------------------------------------------------------------------
 
 
-from .AsyCommon import AsynPinTrace
-from .. import pinpoint
-from .. import Defines
+from pinpointPy.Fastapi.AsyCommon import AsynPinTrace
+from pinpointPy import pinpoint
+from pinpointPy import Defines
 
 
 class AsyRequestPlugin(AsynPinTrace):

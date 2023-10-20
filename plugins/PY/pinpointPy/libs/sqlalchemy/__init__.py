@@ -19,7 +19,7 @@
 
 # Created by eeliu at 7/31/20
 
-from ...Interceptor import intercept_once
+from pinpointPy.Interceptor import intercept_once
 
 @intercept_once
 def monkey_patch():
@@ -28,3 +28,6 @@ def monkey_patch():
     except ImportError:
         pass
 __all__=['monkey_patch']
+
+__version__ = '0.0.1'
+__author__ = 'liu.mingyi@navercorp.com'

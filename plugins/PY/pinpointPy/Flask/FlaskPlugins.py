@@ -21,9 +21,9 @@
 
 from flask import Request
 
-from .. import Common
-from .. import pinpoint
-from .. import Defines
+from pinpointPy import Common
+from pinpointPy import pinpoint
+from pinpointPy import Defines
 
 
 class BaseFlaskPlugins(Common.PinTrace):
@@ -36,7 +36,6 @@ class BaseFlaskPlugins(Common.PinTrace):
 
     def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
-        print(args)
         request = Request(args[1])
         pinpoint.add_trace_header(Defines.PP_APP_NAME, pinpoint.app_name())
         pinpoint.add_trace_header(Defines.PP_APP_ID, pinpoint.app_id())

@@ -19,7 +19,7 @@
 
 # Created by eeliu at 11/12/20
 
-from .PyRequestPlugin import PyRequestPlugin
+from pinpointPy.pyramid.PyRequestPlugin import PyRequestPlugin
 
 def pinpoint_tween(handler,registry):
 
