@@ -19,7 +19,7 @@ else:
 ###############################################
 
 extFiles = [
-    'src/PY/_pinpoint_py.c',
+    'src/PY/_pinpoint_py.cpp',
 ]
 
 # add pinpoint-common
@@ -43,11 +43,11 @@ setup(name='pinpointPy',
                     extFiles,
                     include_dirs=['common/include',
                                   'common/jsoncpp/include', 'common/src'],
-                    libraries=agent_libraries
+                    libraries=agent_libraries,
+                    extra_compile_args=['-std=c++11']
                     )
       ],
       package_dir={'': 'plugins/PY'},
-      #   packages=find_packages('plugins/PY'),
       packages=find_namespace_packages(
           'plugins/PY', include=['pinpointPy.*', 'pinpointPy']),
       )

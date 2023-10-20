@@ -112,8 +112,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: run unittest
         run: |
-          pip install -r requirements.txt 
-          python setup.py install || echo "failed, but ignore"
+          # ref https://github.com/pypa/setuptools/issues/3198
+          pip install -e .
           python -m unittest discover -s src/PY/test
           pip install -r plugins/PY/requirements.txt
           python -m unittest discover -s plugins/PY/pinpointPy
