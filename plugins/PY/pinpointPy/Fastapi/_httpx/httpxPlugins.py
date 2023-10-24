@@ -22,12 +22,10 @@
 from os import stat
 from pickle import FALSE
 from random import sample
-from .. import AsyCommon
-from ... import pinpoint
-from ... import Defines
-from ... import Helper
-
+from pinpointPy.Fastapi import AsyCommon
+from pinpointPy import pinpoint, Defines, Helper
 from urllib.parse import urlparse
+
 
 class HttpxRequestPlugins(AsyCommon.AsynPinTrace):
 
@@ -40,46 +38,50 @@ class HttpxRequestPlugins(AsyCommon.AsynPinTrace):
         if not root, no trace
         :return:
         '''
-        sampled,parentId= AsyCommon.AsynPinTrace.isSample(*args,**kwargs)
+        sampled, parentId = AsyCommon.AsynPinTrace.isSample(*args, **kwargs)
         if not sampled:
-            return False,None
-    
+            return False, None
+
         url = args[0][2]
         target = urlparse(url).netloc
         if "headers" not in kwargs or not kwargs['headers']:
             kwargs["headers"] = {}
 
-        if pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED,parentId) == "s1":
-            Helper.generatePinpointHeader(target, kwargs['headers'],parentId)
-            return True,parentId
+        if pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED, parentId) == "s1":
+            Helper.generatePinpointHeader(target, kwargs['headers'], parentId)
+            return True, parentId
         else:
             kwargs['headers'][Defines.PP_HEADER_PINPOINT_SAMPLED] = Defines.PP_NOT_SAMPLED
-            return False ,None
+            return False, None
 
-    def onBefore(self,parentId, *args, **kwargs):
+    def onBefore(self, parentId, *args, **kwargs):
         url = args[2]
         target = urlparse(url).netloc
-        traceId,args,kwargs = super().onBefore(parentId,*args, **kwargs)
+        traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(),traceId)
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD,traceId)
-        pinpoint.add_trace_header_v2(Defines.PP_ARGS, url,traceId)
-        pinpoint.add_trace_header_v2(Defines.PP_HTTP_URL, url,traceId)
-        pinpoint.add_trace_header(Defines.PP_DESTINATION, target,traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_ARGS, url, traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_HTTP_URL, url, traceId)
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, target, traceId)
         ###############################################################
-        return traceId,args, kwargs
+        return traceId, args, kwargs
 
-    def onEnd(self,traceId, ret):
+    def onEnd(self, traceId, ret):
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_NEXT_SPAN_ID, pinpoint.get_context(Defines.PP_NEXT_SPAN_ID,traceId),traceId)
-        pinpoint.add_trace_header_v2(Defines.PP_HTTP_STATUS_CODE, str(ret.status_code),traceId)
-        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret),traceId)
+        pinpoint.add_trace_header(Defines.PP_NEXT_SPAN_ID, pinpoint.get_context(
+            Defines.PP_NEXT_SPAN_ID, traceId), traceId)
+        pinpoint.add_trace_header_v2(
+            Defines.PP_HTTP_STATUS_CODE, str(ret.status_code), traceId)
+        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), traceId)
         ###############################################################
-        super().onEnd(traceId,ret)
+        super().onEnd(traceId, ret)
         return ret
 
-    def onException(self,traceId, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e),traceId)
+    def onException(self, traceId, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
 
     def get_arg(self, *args, **kwargs):
         args_tmp = {}

@@ -18,8 +18,6 @@
 # ------------------------------------------------------------------------------
 
 
-
-from ast import Assert
 import asyncio
 
 from starlette_context import context
@@ -29,7 +27,7 @@ from pinpointPy import pinpoint
 
 class AsynPinTrace(object):
 
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
 
     def getCurrentId(self):
@@ -37,58 +35,59 @@ class AsynPinTrace(object):
         if not id:
             raise 'not found traceId'
         else:
-            return id 
+            return id
 
-    def onBefore(self,parentId,*args, **kwargs):
+    def onBefore(self, parentId, *args, **kwargs):
         traceId = pinpoint.with_trace(parentId)
         # update global id
         context['_pinpoint_id_'] = traceId
-        return traceId,args,kwargs
+        return traceId, args, kwargs
 
     @staticmethod
     def isSample(*args, **kwargs):
         try:
-            parentid = context.get('_pinpoint_id_',0)
+            parentid = context.get('_pinpoint_id_', 0)
             if parentid == 0:
-                return False,None
-            return True,parentid
+                return False, None
+            return True, parentid
         except Exception as e:
-            return False,None
+            return False, None
 
     @classmethod
-    def _isSample(cls,*args, **kwargs):
+    def _isSample(cls, *args, **kwargs):
         return cls.isSample(*args, **kwargs)
 
-    def onEnd(self,parentId,ret):
+    def onEnd(self, parentId, ret):
         parentId = pinpoint.end_trace(parentId)
         context['_pinpoint_id_'] = parentId
 
-    def onException(self,traceId,e):
+    def onException(self, traceId, e):
         raise NotImplementedError()
-    
+
     def __call__(self, func):
-        self.func_name=func.__name__
+        self.func_name = func.__name__
 
         async def pinpointTrace(*args, **kwargs):
             ret = None
-            sampled,parentId = self._isSample(args, kwargs)
+            sampled, parentId = self._isSample(args, kwargs)
             if not sampled:
                 return await func(*args, **kwargs)
 
-            traceId,args,kwargs = self.onBefore(parentId,*args, **kwargs)
+            traceId, args, kwargs = self.onBefore(parentId, *args, **kwargs)
             try:
                 ret = await func(*args, **kwargs)
                 return ret
             except Exception as e:
-                self.onException(traceId,e)
+                self.onException(traceId, e)
                 raise e
             finally:
-                self.onEnd(traceId,ret)
+                self.onEnd(traceId, ret)
 
         return pinpointTrace
 
     def getFuncUniqueName(self):
         return self.name
+
 
 if __name__ == '__main__':
 

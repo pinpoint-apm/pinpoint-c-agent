@@ -19,22 +19,24 @@
 
 # create by eelu
 
-from pinpointPy.Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor, intercept_once
+from pinpointPy import logger
+
 
 @intercept_once
 def monkey_patch():
     try:
-        from httpx import AsyncClient
+        from _httpx import AsyncClient
         from .httpxPlugins import HttpxRequestPlugins
         Interceptors = [
-            Interceptor(AsyncClient, 'request',HttpxRequestPlugins)
+            Interceptor(AsyncClient, 'request', HttpxRequestPlugins)
         ]
 
         for interceptor in Interceptors:
             interceptor.enable()
 
     except ImportError as e:
-        # do nothing
-        print(e)
+        logger.debug(f"import httpx:{e}")
 
-__all__=['monkey_patch']
+
+__all__ = ['monkey_patch']

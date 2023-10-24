@@ -18,8 +18,7 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 11/10/20
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from pinpointPy import Defines, pinpoint
 
 
 def generateNextSid():

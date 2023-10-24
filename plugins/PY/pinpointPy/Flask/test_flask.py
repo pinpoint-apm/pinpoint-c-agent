@@ -1,7 +1,7 @@
 import unittest
-from flask import Flask, request
+from flask import Flask
 from pinpointPy.Flask.PinPointMiddleWare import PinPointMiddleWare
-from pinpointPy import set_agent, monkey_patch_for_pinpoint
+from pinpointPy import set_agent
 
 
 class Test_Flask(unittest.TestCase):
