@@ -55,13 +55,13 @@ pinpoint_start_trace();
 [pinpoint] [%d] [%d] [127] add clue key:name value:Foo
 [pinpoint] [%d] [%d]apm_error_cb called
 
-Fatal error: Uncaught Exception: I am testting in /workspaces/pinpoint-c-agent/src/PHP/tests/stack_fetal_error.php:27
+Fatal error: Uncaught Exception: I am testting in %s:27
 Stack trace:
-#0 /workspaces/pinpoint-c-agent/src/PHP/tests/stack_fetal_error.php(34): Test()
+#0 %s(34): Test()
 #1 {main}
-  thrown in /workspaces/pinpoint-c-agent/src/PHP/tests/stack_fetal_error.php on line 27
+  thrown in %s on line 27
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"/workspaces/pinpoint-c-agent/src/PHP/tests/stack_fetal_error.php","line":27,"msg":"Uncaught Exception: I am testting in /workspaces/pinpoint-c-agent/src/PHP/tests/stack_fetal_error.php:27\nStack trace:\n#0 /workspaces/pinpoint-c-agent/src/PHP/tests/stack_fetal_error.php(34): Test()\n#1 {main}\n  thrown"},"calls":[{":E":%d,":S":%d,"name":"Foo"}]})
+[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"%s","line":27,"msg":"Uncaught Exception: I am testting in %s:27\nStack trace:\n#0 %s(34): Test()\n#1 {main}\n  thrown"},"calls":[{":E":%d,":S":%d,"name":"Foo"}]})
 [pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
 [pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!

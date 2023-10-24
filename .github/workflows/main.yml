@@ -67,7 +67,7 @@ jobs:
   #         phpize
   #         ./configure
   #         make
-  #         make test TESTS=src/PHP/tests5/
+  #         make test TESTS=tests5/
 
   PHP7:
     runs-on: ubuntu-latest
@@ -86,7 +86,7 @@ jobs:
           phpize
           ./configure
           make
-          make test TESTS=src/PHP/tests/
+          make test
           # sudo make install
           # sudo echo "extension=pinpoint_php.so" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini
           # sudo echo "error_log = /home/runner/work/pinpoint-c-agent/pinpoint-c-agent/testapps/PHP/tests/php_error.log" >> /etc/php/${{ matrix.php-versions }}/cli/php.ini

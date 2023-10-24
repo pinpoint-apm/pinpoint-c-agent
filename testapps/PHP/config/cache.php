@@ -16,5 +16,5 @@
 return [
     // 驱动方式
     'type'   => 'redis',
-    'host'   => 'localhost'
+    'host'   => 'redis'
 ];

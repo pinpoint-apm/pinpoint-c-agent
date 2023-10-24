@@ -13,20 +13,46 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   PHP_SUBST(PINPOINT_PHP_SHARED_LIBADD)
   PHP_ADD_LIBRARY(stdc++, 1, PINPOINT_PHP_SHARED_LIBADD)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/include)
+  PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
+  PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
+  PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/src)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/src/PHP)
   AC_DEFINE(HAVE_PINPOINT_PHP, 1, [Whether you have pinpoint])
 
-  echo "------Build common libraries------------"
-  mkdir -p PHP_EXT_SRCDIR()/build
-  cd build 
-  cmake PHP_EXT_SRCDIR()/common -DCMAKE_BUILD_TYPE=Release
-  make
-  cd PHP_EXT_SRCDIR()
-  PINPOINT_COMMON_LIB=PHP_EXT_SRCDIR()/build/lib
-  echo "----------------------------------------"
+  # echo "------Build common libraries------------"
+  # mkdir -p PHP_EXT_SRCDIR()/build
+  # cd build 
+  # cmake PHP_EXT_SRCDIR()/common -DCMAKE_BUILD_TYPE=Release
+  # make
+  # cd PHP_EXT_SRCDIR()
+  # PINPOINT_COMMON_LIB=PHP_EXT_SRCDIR()/build/lib
+  # echo "----------------------------------------"
 
-  PINPOINT_PHP_SHARED_LIBADD="-l:libpinpoint_common.a $PINPOINT_PHP_SHARED_LIBADD -L$PINPOINT_COMMON_LIB -lrt"
+  EXTRA_PHP_SRCS="src/PHP/pinpoint_php.cpp"
+
+  PINPOINT_SRCS="$EXTRA_PHP_SRCS \
+    common/src/common.cpp \
+    common/src/Logging.cpp \
+    common/src/Util/Helper.cpp \
+    common/src/NodePool/TraceNode.cpp \
+    common/src/NodePool/PoolManager.cpp \
+    common/src/Context/ContextType.cpp \
+    common/src/ConnectionPool/TransLayer.cpp \
+    common/src/ConnectionPool/SpanConnectionPool.cpp \
+    common/src/Cache/SafeSharedState.cpp \
+    common/src/Cache/SharedObj.cpp \
+    common/src/Cache/NodeTreeWriter.cpp \
+    common/src/Cache/Chunk.cpp \
+    "
+  PINPOINT_SRCS="$PINPOINT_SRCS \
+    common/jsoncpp/lib_json/json_writer.cpp \
+    common/jsoncpp/lib_json/json_value.cpp \
+    common/jsoncpp/lib_json/json_reader.cpp \
+  "
+
+
+  PINPOINT_PHP_SHARED_LIBADD="$PINPOINT_PHP_SHARED_LIBADD -L$PINPOINT_COMMON_LIB -lrt"
   
-  PHP_NEW_EXTENSION(pinpoint_php,src/PHP/pinpoint_php.cpp, $ext_shared)
+  PHP_NEW_EXTENSION(pinpoint_php,$PINPOINT_SRCS, $ext_shared)
   PHP_ADD_BUILD_DIR($ext_builddir/src/PHP)
 fi
