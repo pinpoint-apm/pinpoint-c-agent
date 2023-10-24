@@ -20,7 +20,7 @@
 import importlib
 from pinpointPy.Fastapi.PinTranscation import PinTransaction, PinStarlettePlugin
 from pinpointPy.Fastapi.AsyCommonPlugin import CommonPlugin
-from pinpointPy.Fastapi.middleware import PinPointMiddleWare
+from pinpointPy.Fastapi.middleware import PinPointMiddleWare, FastAPIRequestPlugin
 from pinpointPy.Common import PinHeader, GenPinHeader
 
 
@@ -38,7 +38,7 @@ def asyn_monkey_patch_for_pinpoint(AioRedis=True, MotorMongo=True, httpx=True):
     __monkey_patch(aioredis=AioRedis, MotorMongo=MotorMongo, httpx=httpx)
 
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'
-__all__ = ['asyn_monkey_patch_for_pinpoint', 'PinPointMiddleWare',
+__all__ = ['asyn_monkey_patch_for_pinpoint', 'FastAPIRequestPlugin', 'PinPointMiddleWare',
            'CommonPlugin', 'PinTransaction', 'PinHeader', 'GenPinHeader', 'PinStarlettePlugin']

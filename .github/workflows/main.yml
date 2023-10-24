@@ -115,6 +115,8 @@ jobs:
           # ref https://github.com/pypa/setuptools/issues/3198
           pip install -e .
           python -m unittest discover -s src/PY/test
+      - if: matrix.python-version == '3.8'
+        run : |
           pip install -r plugins/PY/requirements.txt
           python -m unittest discover -s plugins/PY/pinpointPy
   Collector-agent:
@@ -137,5 +139,7 @@ jobs:
         uses: arduino/setup-protoc@v2.1.0
       
       - run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+          export PATH="$PATH:$(go env GOPATH)/bin"
           cd collector-agent && make && go test ./... -v
