@@ -46,6 +46,6 @@ starlette-context==0.3.6
 tomli==2.0.1
 typing-extensions==4.8.0
 urllib3==2.0.7
-werkzeug==3.0.0
+werkzeug==3.0.1
 yarg==0.1.9
 zipp==3.17.0
