@@ -22,16 +22,15 @@
 extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
-#define PHP_PINPOINT_PHP_VERSION "0.2.0"
+#define PHP_PINPOINT_PHP_VERSION "0.2.1"
 
 #ifdef PHP_WIN32
-#	define PHP_PINPOINT_PHP_API __declspec(dllexport)
+#define PHP_PINPOINT_PHP_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#	define PHP_PINPOINT_PHP_API __attribute__ ((visibility("default")))
+#define PHP_PINPOINT_PHP_API __attribute__((visibility("default")))
 #else
-#	define PHP_PINPOINT_PHP_API
+#define PHP_PINPOINT_PHP_API
 #endif
-
 
 #ifdef ZTS
 #include "TSRM.h"
@@ -39,23 +38,23 @@ extern zend_module_entry pinpoint_php_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint_php)
 
-    char*  co_host; // tcp:ip:port should support dns
-    zend_bool   utest_flag;
+char* co_host; // tcp:ip:port should support dns
+zend_bool utest_flag;
 //    zend_bool   limit;
-    zend_bool    debug_report;
+zend_bool debug_report;
 #if PHP_VERSION_ID >= 70000
-     zend_long   tracelimit;
-     zend_long  w_timeout_ms;
+zend_long tracelimit;
+zend_long w_timeout_ms;
 #else
-     int   tracelimit;
-     int  w_timeout_ms;
+int tracelimit;
+int w_timeout_ms;
 #endif
 ZEND_END_MODULE_GLOBALS(pinpoint_php)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php);
 
 #ifdef ZTS
-#define PPG(v) TSRMG(pinpoint_php_globals_id, zend_pinpoint_php_globals *, v)
+#define PPG(v) TSRMG(pinpoint_php_globals_id, zend_pinpoint_php_globals*, v)
 #else
 #define PPG(v) (pinpoint_php_globals.v)
 #endif
@@ -71,4 +70,4 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint_php);
 PHP_RINIT_FUNCTION(pinpoint_php);
 PHP_RSHUTDOWN_FUNCTION(pinpoint_php);
 PHP_MINFO_FUNCTION(pinpoint_php);
-#endif	/* PHP_PINPOINT_PHP_H */
+#endif /* PHP_PINPOINT_PHP_H */
