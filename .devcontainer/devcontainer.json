@@ -39,6 +39,8 @@
         "matepek.vscode-catch2-test-adapter",
         "adam-bender.commit-message-editor",
         "formulahendry.vscode-mysql",
-        "ms-python.autopep8"
+        "ms-python.autopep8",
+        "streetsidesoftware.code-spell-checker",
+        "jeff-hykin.better-dockerfile-syntax"
     ]
 }

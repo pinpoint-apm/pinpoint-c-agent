@@ -235,7 +235,8 @@ func GetAgentInfo(span *TSpan) (appid, appname string, appServerType int32, star
 func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 	//note: set default var of TSpan
 	span := &TSpan{
-		// ParentSpanId: -1,
+		// ParentSpanId:-1 is part of logic in pinpoint
+		ParentSpanId: -1,
 	}
 
 	if err := json.Unmarshal(packet.RawData, span); err != nil {
