@@ -58,6 +58,15 @@ python3|[English](DOC/PY/Readme.md) [中文](DOC/PY/Readme-CN.md) [한국어](DO
 c/cpp|[English](DOC/C-CPP/Readme.md)
 golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) 
 
+####  how to use testapps
+
+```
+$ cd testapps && docker compose up --build
+```
+
+
+
+
 ## Contact Us
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)

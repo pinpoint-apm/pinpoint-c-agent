@@ -1,3 +1,6 @@
 [submodule "collector-agent/pinpoint-grpc-idl"]
 	path = collector-agent/pinpoint-grpc-idl
 	url = https://github.com/pinpoint-apm/pinpoint-grpc-idl.git
+[submodule "testapps/test_db"]
+	path = testapps/test_db
+	url = https://github.com/datacharmer/test_db.git

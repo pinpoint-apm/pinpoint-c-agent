@@ -39,7 +39,7 @@ services:
     build:
       dockerfile: flask.dockerfile
     ports:
-      - 8184:8184
+      - 8184:80
     
   dev-collector:
     restart: always
