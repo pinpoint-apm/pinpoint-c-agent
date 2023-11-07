@@ -73,7 +73,7 @@ type TErrorInfo struct {
 type TSpan struct {
 	AppServerType         int32        `json:"FT"`
 	AppServerTypeV2       int32        `json:":FT"`
-	ParentAppServerType   int          `json:"ptype"`
+	ParentAppServerType   int32        `json:"ptype,string"`
 	ParentSpanId          int64        `json:"psid,string"`
 	ParentApplicationName string       `json:"pname"`
 	StartTime             int64        `json:"S"`

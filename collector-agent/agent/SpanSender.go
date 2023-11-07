@@ -217,7 +217,7 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 
 	parentInfo := v1.PParentInfo{
 		ParentApplicationName: span.ParentApplicationName,
-		ParentApplicationType: int32(span.ParentAppServerType),
+		ParentApplicationType: span.ParentAppServerType,
 		AcceptorHost:          span.AcceptorHost,
 	}
 
