@@ -197,14 +197,14 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 	pbSpan.ParentSpanId = span.ParentSpanId
 
 	tidFormat := strings.Split(span.TransactionId, "^")
-	agentId, startTime, seqenceid := tidFormat[0], tidFormat[1], tidFormat[2]
+	agentId, startTime, sequenceId := tidFormat[0], tidFormat[1], tidFormat[2]
 	transactionId := v1.PTransactionId{AgentId: agentId}
 
 	if value, err := strconv.ParseInt(startTime, 10, 64); err == nil {
 		transactionId.AgentStartTime = value
 	}
 
-	if value, err := strconv.ParseInt(seqenceid, 10, 64); err == nil {
+	if value, err := strconv.ParseInt(sequenceId, 10, 64); err == nil {
 		transactionId.Sequence = value
 	}
 	pbSpan.TransactionId = &transactionId
@@ -221,8 +221,7 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 		AcceptorHost:          span.AcceptorHost,
 	}
 
-	acceptEv := v1.PAcceptEvent{Rpc: span.Uri, EndPoint: span.EndPoint, RemoteAddr: span.RemoteAddr,
-		ParentInfo: &parentInfo}
+	acceptEv := v1.PAcceptEvent{Rpc: span.Uri, EndPoint: span.EndPoint, RemoteAddr: span.RemoteAddr, ParentInfo: &parentInfo}
 
 	pbSpan.AcceptEvent = &acceptEv
 	// changes: ERRs's priority bigger EXP, so ERR will replace EXP
