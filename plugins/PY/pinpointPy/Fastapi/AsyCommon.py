@@ -16,8 +16,6 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-
-
 import asyncio
 
 from starlette_context import context
@@ -25,33 +23,37 @@ from starlette_context import context
 from pinpointPy import pinpoint
 
 
-class AsynPinTrace(object):
+class TraceContext:
+    @staticmethod
+    def get_parent_id():
+        id = context.get('_pinpoint_id_', 0)
+        if id == 0:
+            return False, None
+        else:
+            return True, id
+
+    @staticmethod
+    def set_parent_id(id: int):
+        context['_pinpoint_id_'] = id
+
+
+class AsyncPinTrace:
 
     def __init__(self, name):
         self.name = name
 
-    def getCurrentId(self):
-        id = context['_pinpoint_id_']
-        if not id:
-            raise 'not found traceId'
-        else:
-            return id
-
     def onBefore(self, parentId, *args, **kwargs):
         traceId = pinpoint.with_trace(parentId)
-        # update global id
-        context['_pinpoint_id_'] = traceId
+        TraceContext.set_parent_id(traceId)
         return traceId, args, kwargs
 
     @staticmethod
     def isSample(*args, **kwargs):
-        try:
-            parentid = context.get('_pinpoint_id_', 0)
-            if parentid == 0:
-                return False, None
-            return True, parentid
-        except Exception as e:
-            return False, None
+        ret, id = TraceContext.get_parent_id()
+        if ret:
+            return True, id, args, kwargs
+        else:
+            return False, None, args, kwargs
 
     @classmethod
     def _isSample(cls, *args, **kwargs):
@@ -59,7 +61,7 @@ class AsynPinTrace(object):
 
     def onEnd(self, parentId, ret):
         parentId = pinpoint.end_trace(parentId)
-        context['_pinpoint_id_'] = parentId
+        TraceContext.set_parent_id(parentId)
 
     def onException(self, traceId, e):
         raise NotImplementedError()
@@ -69,20 +71,21 @@ class AsynPinTrace(object):
 
         async def pinpointTrace(*args, **kwargs):
             ret = None
-            sampled, parentId = self._isSample(args, kwargs)
+            # avoiding variable missing
+            # use and return
+            sampled, parentId, nArgs, nKwargs = self._isSample(*args, **kwargs)
             if not sampled:
-                return await func(*args, **kwargs)
-
-            traceId, args, kwargs = self.onBefore(parentId, *args, **kwargs)
+                return await func(*nArgs, **nKwargs)
+            traceId, nArgs, nKwargs = self.onBefore(
+                parentId, *nArgs, **nKwargs)
             try:
-                ret = await func(*args, **kwargs)
+                ret = await func(*nArgs, **nKwargs)
                 return ret
             except Exception as e:
                 self.onException(traceId, e)
                 raise e
             finally:
                 self.onEnd(traceId, ret)
-
         return pinpointTrace
 
     def getFuncUniqueName(self):
@@ -91,7 +94,7 @@ class AsynPinTrace(object):
 
 if __name__ == '__main__':
 
-    @AsynPinTrace('main')
+    @AsyncPinTrace('main')
     async def run(i):
         if i == 0:
             return

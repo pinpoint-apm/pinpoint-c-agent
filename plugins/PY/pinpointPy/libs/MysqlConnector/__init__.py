@@ -14,7 +14,9 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pinpointPy.Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor, intercept_once
+from pinpointPy import logger
+
 
 @intercept_once
 def monkey_patch():
@@ -23,7 +25,6 @@ def monkey_patch():
         from mysql.connector.cursor_cext import CMySQLCursor, CMySQLCursorPrepared
         from .MysqlPlugin import MysqlPlugin
         from .CMysqlPlugin import CMysqlPlugin
-
 
         Interceptors = [
             Interceptor(MySQLCursor, 'execute', MysqlPlugin),
@@ -34,11 +35,11 @@ def monkey_patch():
         for interceptor in Interceptors:
             interceptor.enable()
 
-
     except ImportError as e:
         # do nothing
-        print(e)
+        logger.debug(f'import mysql.connector.* {e}')
 
-__all__=['monkey_patch']
-__version__ = '0.0.1'
+
+__all__ = ['monkey_patch']
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'

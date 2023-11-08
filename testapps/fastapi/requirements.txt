@@ -1,0 +1,9 @@
+aioredis==2.0.1
+fastapi
+httpx==0.25.1
+pydantic==2.4.2
+SQLAlchemy==2.0.23
+starlette
+starlette_context
+uvicorn
+pymysql

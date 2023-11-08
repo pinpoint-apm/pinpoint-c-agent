@@ -18,7 +18,9 @@
 # ------------------------------------------------------------------------------
 
 # Created by eeliu at 8/20/20
-from pinpointPy.Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor, intercept_once
+from pinpointPy import logger
+
 
 @intercept_once
 def monkey_patch():
@@ -28,7 +30,7 @@ def monkey_patch():
         from .MongoClientPlugin import MongoClientPlugin
         # print(pymongo.collection)
         Interceptors = [
-            Interceptor(Collection,'find', MongoClientPlugin),
+            Interceptor(Collection, 'find', MongoClientPlugin),
             # Interceptor(Collection, 'insert', MongoClientPlugin),
             # Interceptor(Collection, 'update', MongoClientPlugin),
             Interceptor(Collection, 'update_many', MongoClientPlugin),
@@ -37,14 +39,15 @@ def monkey_patch():
             Interceptor(Collection, 'insert_many', MongoClientPlugin),
             Interceptor(Collection, 'insert_one', MongoClientPlugin),
         ]
-        
+
         for interceptor in Interceptors:
             interceptor.enable()
 
-    except ImportError:
-        pass
+    except ImportError as e:
+        logger.info(f'exception at {e}')
 
-__all__=['monkey_patch']
 
-__version__ = '0.0.1'
+__all__ = ['monkey_patch']
+
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'

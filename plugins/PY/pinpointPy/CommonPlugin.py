@@ -15,24 +15,24 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy import Common
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from pinpointPy import Common, Defines, pinpoint
 
 
 class PinpointCommonPlugin(Common.PinTrace):
 
-    def onBefore(self,*args, **kwargs):
+    def onBefore(self, *args, **kwargs):
         super().onBefore(*args, **kwargs)
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL)
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+        pinpoint.add_trace_header(
+            Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL)
         arg = self.get_arg(*args, **kwargs)
         pinpoint.add_trace_header_v2(Defines.PP_ARGS, arg)
         ###############################################################
-        return args,kwargs
+        return args, kwargs
 
-    def onEnd(self,ret):
+    def onEnd(self, ret):
         ###############################################################
         pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret))
         ###############################################################

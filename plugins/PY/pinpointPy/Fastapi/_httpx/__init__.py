@@ -26,7 +26,7 @@ from pinpointPy import logger
 @intercept_once
 def monkey_patch():
     try:
-        from _httpx import AsyncClient
+        from httpx import AsyncClient
         from .httpxPlugins import HttpxRequestPlugins
         Interceptors = [
             Interceptor(AsyncClient, 'request', HttpxRequestPlugins)
@@ -34,9 +34,10 @@ def monkey_patch():
 
         for interceptor in Interceptors:
             interceptor.enable()
-
     except ImportError as e:
         logger.debug(f"import httpx:{e}")
+    except:
+        logger.info(f"unknown error in httpx module")
 
 
 __all__ = ['monkey_patch']

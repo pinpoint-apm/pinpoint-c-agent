@@ -21,59 +21,63 @@
 
 from pymongo import monitoring
 
-from pinpointPy.Fastapi  import AsyCommon
-from pinpointPy import pinpoint,Defines
+from pinpointPy.Fastapi import AsyCommon
+from pinpointPy import pinpoint, Defines
 
-class MotorComandPlugins(AsyCommon.AsynPinTrace):
+
+class MotorCommandPlugins(AsyCommon.AsyncPinTrace):
 
     def __init__(self, name):
         super().__init__(name)
 
-    def onBefore(self,parentId,*args, **kwargs):
-        traceId,_,_=super().onBefore(parentId,*args,**kwargs)
+    def onBefore(self, parentId, *args, **kwargs):
+        traceId, _, _ = super().onBefore(parentId, *args, **kwargs)
         event = args[0]
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, event.command_name, traceId)
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_MONGDB_EXE_QUERY,traceId)
-        pinpoint.add_trace_header(Defines.PP_DESTINATION, event.connection_id[0], traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, event.command_name, traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_SERVER_TYPE, Defines.PP_MONGDB_EXE_QUERY, traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_DESTINATION, event.connection_id[0], traceId)
         ###############################################################
         return event
 
-    def onEnd(self,traceId, ret):
-        super().onEnd(traceId,ret)
+    def onEnd(self, traceId, ret):
+        super().onEnd(traceId, ret)
         return ret
 
-    def onException(self,traceId, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e),traceId)
+    def onException(self, traceId, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
 
 
 class CommandLogger(monitoring.CommandListener):
     def __init__(self) -> None:
-        self.CommandPlugins={}
+        self.CommandPlugins = {}
 
     def started(self, event):
-        sampled,parentId = MotorComandPlugins.isSample()
+        sampled, parentId = MotorCommandPlugins.isSample()
         if not sampled:
-            return 
+            return
 
         if event.command_name not in self.CommandPlugins:
-            self.CommandPlugins[event.command_name] = MotorComandPlugins(event.command_name)
+            self.CommandPlugins[event.command_name] = MotorCommandPlugins(
+                event.command_name)
 
         plugin = self.CommandPlugins[event.command_name]
-        plugin.onBefore(parentId,event)
+        plugin.onBefore(parentId, event)
 
     def succeeded(self, event):
-        sampled,traceId= MotorComandPlugins.isSample()
+        sampled, traceId = MotorCommandPlugins.isSample()
         if not sampled:
-            return 
+            return
         plugin = self.CommandPlugins[event.command_name]
-        plugin.onEnd(traceId,None)
-        
+        plugin.onEnd(traceId, None)
 
     def failed(self, event):
-        sampled,traceId= MotorComandPlugins.isSample()
+        sampled, traceId = MotorCommandPlugins.isSample()
         if not sampled:
-            return 
+            return
         plugin = self.CommandPlugins[event.command_name]
-        plugin.onException(traceId,None)  
-        plugin.onEnd(traceId,None)
+        plugin.onException(traceId, None)
+        plugin.onEnd(traceId, None)

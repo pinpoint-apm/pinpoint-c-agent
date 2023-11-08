@@ -20,8 +20,7 @@
 # Created by eeliu at 11/9/20
 
 from pinpointPy.Common import PinTrace
-from pinpointPy import Helper
-from pinpointPy import pinpoint
+from pinpointPy import Helper, pinpoint
 
 
 class WSGIPlugin(PinTrace):

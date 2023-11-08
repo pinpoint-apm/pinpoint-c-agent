@@ -19,16 +19,38 @@
 
 # Created by eeliu at 3/5/20
 
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from pinpointPy import Defines, pinpoint, logger
 from abc import ABCMeta, abstractmethod
 
-class PinTrace(object):
-    E_PER_REQ = 1
-    E_FUNCTION = 2
 
+class Trace:
     def __init__(self, name):
         self.name = name
+
+    def onBefore(self, *args, **kwargs):
+        raise NotImplementedError("onBefore")
+
+    def onEnd(self, ret):
+        raise NotImplementedError("onEnd")
+
+    def __call__(self, func):
+
+        def pinpointTrace(*args, **kwargs):
+            try:
+                args, kwargs = self.onBefore(*args, **kwargs)
+                ret = func(*args, **kwargs)
+            except Exception as e:
+                self.onException(e)
+                logger.info(f"{func.__name__} catch {e}")
+                raise e
+            finally:
+                return self.onEnd(ret)
+        return pinpointTrace
+
+
+class PinTrace(Trace):
+    E_PER_REQ = 1
+    E_FUNCTION = 2
 
     def isSample(self, args):
         '''
@@ -42,13 +64,13 @@ class PinTrace(object):
 
     def onBefore(self, *args, **kwargs):
         pinpoint.with_trace()
-        return args,kwargs
+        return args, kwargs
 
     def onEnd(self, ret):
         pinpoint.end_trace()
 
     def onException(self, e):
-        raise NotImplementedError()
+        raise NotImplementedError("onException")
 
     def __call__(self, func):
         self.func_name = func.__name__
@@ -56,14 +78,13 @@ class PinTrace(object):
         def pinpointTrace(*args, **kwargs):
             if not self.isSample((args, kwargs)):
                 return func(*args, **kwargs)
-
-            ret = None
             try:
                 args, kwargs = self.onBefore(*args, **kwargs)
                 ret = func(*args, **kwargs)
                 return ret
             except Exception as e:
                 self.onException(e)
+                logger.info(f"{func.__name__} catch {e}")
                 raise e
             finally:
                 self.onEnd(ret)
@@ -71,6 +92,7 @@ class PinTrace(object):
 
     def getFuncUniqueName(self):
         return self.name
+
 
 class PinHeader:
     def __init__(self) -> None:
@@ -117,7 +139,8 @@ class GenPinHeader(metaclass=ABCMeta):
     @abstractmethod
     def GetHeader(self, *args, **kwargs) -> PinHeader:
         return PinHeader()
-    
+
+
 class PinTransaction(PinTrace):
 
     def __init__(self, name: str, userGenHeaderCb: GenPinHeader):

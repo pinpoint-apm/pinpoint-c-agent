@@ -8,7 +8,7 @@ export PP_COLLECTOR_AGENT_STAT_PORT=9992
 export PP_COLLECTOR_AGENT_ISDOCKER=false
 # export PP_LOG_DIR=/tmp/
 export PP_Log_Level=DEBUG
-export PP_ADDRESS=0.0.0.0@9999
+export PP_ADDRESS=0.0.0.0@10000
 export GO_PATH=/home/pinpoint/go/bin
 export PATH=$PATH:$GO_PATH
 make && ./collector-agent

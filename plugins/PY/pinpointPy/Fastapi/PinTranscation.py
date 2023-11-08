@@ -17,7 +17,7 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pinpointPy.Fastapi.AsyCommon import AsynPinTrace
+from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
 from pinpointPy import Defines,pinpoint
 from pinpointPy.Common import GenPinHeader
 from starlette_context import request_cycle_context
@@ -36,7 +36,7 @@ class PinStarlettePlugin:
         return pinpointTrace
 
 
-class PinTransaction(AsynPinTrace):
+class PinTransaction(AsyncPinTrace):
 
     def __init__(self, name: str, userGenHeaderCb: GenPinHeader):
         """pinpointPy user entry point

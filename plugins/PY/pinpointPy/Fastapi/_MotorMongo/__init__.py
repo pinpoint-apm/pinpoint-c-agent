@@ -20,17 +20,18 @@
 # create by eelu
 
 from pinpointPy.Interceptor import intercept_once
+from pinpointPy import logger
 
 
 @intercept_once
 def monkey_patch():
     try:
         from pymongo import monitoring
-        from .motorComandPlugins import CommandLogger
+        from .motorCommandPlugins import CommandLogger
         monitoring.register(CommandLogger())
     except ImportError as e:
         # do nothing
-        print(e)
+        logger.debug(f"not found pymongo. {e}")
 
 
 __all__ = ['monkey_patch']

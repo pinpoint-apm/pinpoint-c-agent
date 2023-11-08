@@ -18,12 +18,12 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy.Fastapi.AsyCommon import AsynPinTrace
+from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
 from pinpointPy import pinpoint
 from pinpointPy import Defines
 
 
-class AsyRequestPlugin(AsynPinTrace):
+class AsyRequestPlugin(AsyncPinTrace):
     def __init__(self, name):
         super().__init__(name)
 

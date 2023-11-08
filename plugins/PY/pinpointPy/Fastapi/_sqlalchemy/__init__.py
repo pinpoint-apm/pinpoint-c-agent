@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -14,25 +17,29 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-from pinpointPy.Interceptor import Interceptor, intercept_once
+# Created by eeliu at 11/8/23
+
+from pinpointPy.Interceptor import intercept_once, Interceptor
 from pinpointPy import logger
+from .sqlalchemyPlugin import CreateEnginePlugin
 
 
 @intercept_once
 def monkey_patch():
     try:
-        from rest_framework.views import APIView
-        from .ViewsPlugin import ViewsPlugin
+        import sqlalchemy
 
         Interceptors = [
-            Interceptor(APIView, 'dispatch', ViewsPlugin),
+            Interceptor(sqlalchemy, 'create_engine', CreateEnginePlugin)
         ]
+
         for interceptor in Interceptors:
             interceptor.enable()
-    except ImportError as e:
-        logger.debug(f'import DjangoRest {e}')
+    except ImportError:
+        logger.debug("")
 
 
 __all__ = ['monkey_patch']
-__version__ = '0.0.2'
+
+__version__ = '0.0.1'
 __author__ = 'liu.mingyi@navercorp.com'

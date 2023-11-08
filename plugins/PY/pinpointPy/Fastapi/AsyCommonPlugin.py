@@ -15,12 +15,12 @@
 # ------------------------------------------------------------------------------
 
 
-from pinpointPy.Fastapi.AsyCommon import AsynPinTrace
+from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
 from pinpointPy import Defines
 from pinpointPy import pinpoint
 
 
-class CommonPlugin(AsynPinTrace):
+class CommonPlugin(AsyncPinTrace):
 
     def onBefore(self,parentId, *args, **kwargs):
         traceId,args,kwargs = super().onBefore(parentId,*args, **kwargs)

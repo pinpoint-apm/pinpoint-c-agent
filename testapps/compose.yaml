@@ -17,14 +17,6 @@ services:
     volumes:
       - "./test_db:/app/"
   
-  testapp-php:
-    restart: always
-    build:
-      dockerfile: testapps/php.dockerfile
-      context: ../
-    ports:
-      - 8185:80
-      
   redis:
     image: redis:alpine
     command: redis-server --port 6379
@@ -37,9 +29,26 @@ services:
   testapp-flask:
     restart: always
     build:
-      dockerfile: flask.dockerfile
+      dockerfile: testapps/flask.dockerfile
+      context: ../
     ports:
       - 8184:80
+
+  testapp-php:
+    restart: always
+    build:
+      dockerfile: testapps/php.dockerfile
+      context: ../
+    ports:
+      - 8185:80
+
+  testapp-fastapi:
+    restart: always
+    build:
+      dockerfile: testapps/fastapi.dockerfile
+      context: ../
+    ports:
+      - 8186:8000
     
   dev-collector:
     restart: always

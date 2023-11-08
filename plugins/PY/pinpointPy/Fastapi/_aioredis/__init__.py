@@ -19,7 +19,9 @@
 
 # Created by suwei at 8/20/20
 
-from pinpointPy.Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor, intercept_once
+from pinpointPy import logger
+
 
 @intercept_once
 def monkey_patch():
@@ -34,7 +36,7 @@ def monkey_patch():
             interceptor.enable()
 
     except ImportError as e:
-        # do nothing
-        print(e)
+        logger.debug(f"not found aioredis. {e}")
 
-__all__=['monkey_patch']
+
+__all__ = ['monkey_patch']
