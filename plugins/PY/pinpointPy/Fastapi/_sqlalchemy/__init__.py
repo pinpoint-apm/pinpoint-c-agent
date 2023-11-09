@@ -21,14 +21,13 @@
 
 from pinpointPy.Interceptor import intercept_once, Interceptor
 from pinpointPy import logger
-from .sqlalchemyPlugin import CreateEnginePlugin
 
 
 @intercept_once
 def monkey_patch():
     try:
         import sqlalchemy
-
+        from .sqlalchemyPlugin import CreateEnginePlugin
         Interceptors = [
             Interceptor(sqlalchemy, 'create_engine', CreateEnginePlugin)
         ]
