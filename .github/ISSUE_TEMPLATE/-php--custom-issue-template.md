@@ -19,6 +19,6 @@ assignees: eeliu
 
 > why we need this 
 
-## Disscuss 
+## Discuss 
 
 > I need some help ...
