@@ -19,7 +19,9 @@
 
 # Created by eeliu at 8/20/20
 
-from pinpointPy.Interceptor import Interceptor,intercept_once
+from pinpointPy.Interceptor import Interceptor, intercept_once
+from pinpointPy import logger
+
 
 @intercept_once
 def monkey_patch():
@@ -28,16 +30,17 @@ def monkey_patch():
         from .UrlOpenPlugin import UrlOpenPlugin
 
         Interceptors = [
-            Interceptor(urllib.request,'urlopen', UrlOpenPlugin)
+            Interceptor(urllib.request, 'urlopen', UrlOpenPlugin)
         ]
 
         for interceptor in Interceptors:
             interceptor.enable()
 
-    except ImportError:
-        pass
+    except ImportError as e:
+        logger.info(f'exception at {e}')
 
-__all__=['monkey_patch']
 
-__version__ = '0.0.1'
+__all__ = ['monkey_patch']
+
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'

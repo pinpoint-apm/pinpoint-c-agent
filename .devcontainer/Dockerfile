@@ -72,5 +72,6 @@ USER root
 COPY go1.18.10.linux-amd64.tar.gz /home/pinpoint/go1.18.10.linux-amd64.tar.gz
 RUN rm -rf /usr/local/go && cd /home/pinpoint/ && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin
-ENV PATH=$PATH:$GO_PATH/bin
+ENV 
+ENV PATH=$PATH:/home/pinpoint/go/bin
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2

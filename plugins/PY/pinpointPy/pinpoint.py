@@ -20,11 +20,24 @@
 import random
 import logging
 import _pinpointPy
+import sys
 
 __app_id = 'app_id_str'
 __app_name = 'app_name_str'
 
-logger = logging.Logger('pinpointPy')
+
+def __default_logger():
+    logger = logging.Logger('pinpoint')
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    return logger
+
+
+logger = __default_logger()
 
 
 def app_id():
@@ -74,8 +87,8 @@ def trace_has_root(trace_id=-1):
     return _pinpointPy.trace_has_root(trace_id)
 
 
-def mark_as_error(message: str, filename: str = '', line: int = 0):
-    _pinpointPy.mark_as_error(message, filename, line)
+def mark_as_error(message: str, filename: str = '', line: int = 0, trace_id: int = -1):
+    _pinpointPy.mark_as_error(message, filename, line, trace_id)
 
 
 def drop_trace(trace_id: int = -1):
@@ -86,13 +99,16 @@ def check_trace_limit(time: int = -1) -> bool:
     return _pinpointPy.check_tracelimit(time)
 
 
-def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str, trace_limit: int = -1, debug_callback=True):
+def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trace_limit: int = -1, log_level=logging.DEBUG):
     global __app_id, __app_name
     __app_id = app_id_str
     __app_name = app_name_str
     _pinpointPy.set_agent(collect_agent_host, trace_limit)
-    if type(debug_callback) == bool and debug_callback:
-        _pinpointPy.enable_debug(debug_callback)
-    elif callable(debug_callback):
-        # todo : check type is [[str]->]
-        _pinpointPy.enable_debug(debug_callback)
+    global logger
+    logger.setLevel(log_level)
+    if log_level == logging.DEBUG:
+        def debug_func(msg: str):
+            logger.debug(msg)
+        _pinpointPy.enable_debug(debug_func)
+    logger.debug(
+        f"appid:{app_id_str} appname:{app_name_str} collector_agent:{collect_agent_host} trace_limit:{trace_limit} log_level:{log_level}")

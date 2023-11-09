@@ -20,7 +20,6 @@
 
 from pinpointPy.libs import monkey_patch_for_pinpoint
 from pinpointPy.pinpoint import set_agent, app_id, app_name, gen_tid, logger
-# from .PinTranscation import PinHeader,GenPinHeader,PinTranscation
 
 __all__ = ['monkey_patch_for_pinpoint',
            'set_agent', 'app_id', 'app_name', 'gen_tid', 'logger']

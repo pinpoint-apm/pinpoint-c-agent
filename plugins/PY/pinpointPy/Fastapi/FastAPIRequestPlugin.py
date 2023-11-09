@@ -21,6 +21,7 @@
 from pinpointPy.Fastapi.AsyRequestPlugin import AsyRequestPlugin
 from pinpointPy import Defines, pinpoint
 import sys
+from fastapi import Response
 
 
 class FastAPIRequestPlugin(AsyRequestPlugin):
@@ -40,11 +41,24 @@ class FastAPIRequestPlugin(AsyRequestPlugin):
         self.request = request
         return traceId, args, kwargs
 
-    def onEnd(self, traceId, response):
-        ut = self.request.scope['root_path'] + self.request.scope['route'].path
+    def onEnd(self, traceId, response: Response):
+        # fix bug in in fastapi/docs
+        ut = '/'
+        if 'root_path' in self.request.scope:
+            ut += self.request.scope['root_path']
+        if 'route' in self.request.scope:
+            ut += self.request.scope['route'].path
+
         pinpoint.add_trace_header(Defines.PP_URL_TEMPLATED, ut, traceId)
 
         if 'unittest' in sys.modules.keys():
             response.headers["UT"] = ut
+
+        if response:
+            pinpoint.add_trace_header_v2(Defines.PP_HTTP_STATUS_CODE, str(
+                response.status_code), traceId)
+            if response.status_code >= 400:
+                pinpoint.mark_as_error(
+                    f'status_code:{response.status_code}', 'FastAPIRequestPlugin', 0, traceId)
 
         return super().onEnd(traceId, response)

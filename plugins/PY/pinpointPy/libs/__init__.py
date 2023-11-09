@@ -26,7 +26,7 @@ def __monkey_patch(*args, **kwargs):
                 try:
                     monkey_patch()
                 except Exception as e:
-                    logger.info("exception at {}", e)
+                    logger.info(f'exception at {e}')
 
 
 def monkey_patch_for_pinpoint(pymongo=True,
@@ -43,5 +43,5 @@ def monkey_patch_for_pinpoint(pymongo=True,
 
 
 __all__ = ['monkey_patch_for_pinpoint']
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'

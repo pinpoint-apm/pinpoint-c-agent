@@ -30,7 +30,7 @@ func TestGetAgentInfo(t *testing.T) {
 }
 
 func TestTspan(t *testing.T) {
-	msg := `{"E":1,"FT":1500,":FT":1500,"ptype":1500,"pname":"abc_d","psid":"23563","NP":"t=1617083759.535 D=0.000","S":1617083759798,"appid":"app-2",":appid":"app-2",
+	msg := `{"E":1,"FT":1500,":FT":1500,"ptype":"1500","pname":"abc_d","psid":"23563","NP":"t=1617083759.535 D=0.000","S":1617083759798,"appid":"app-2",":appid":"app-2",
 	":appname":"APP-2","appname":"APP-2","calls":[{"E":1,"calls":[{"E":1,"S":0,"clues":["-1:input parameters","14:return value"],"name":"abc"}],"S":0,"clues":["-1:input parameters","14:return value"],"name":"app\\AppDate::abc","SQL":"select* from abc"}],"client":"10.34.135.145","clues":["46:200"],"name":"PHP Request: fpm-fcgi","server":"10.34.130.152:8000","sid":"726125302","stp":"1500","tid":"app-2^1617083747^5506","uri":"/index.php?type=get_date","Ah":"123.35.36.3/host","EXP":"exp","ERR":{"msg":"error_msg","file":"file.cc","line":123}}`
 	var tspan TSpan
 
@@ -79,5 +79,4 @@ func TestTspan(t *testing.T) {
 
 	}
 
-	t.Log(tspan)
 }

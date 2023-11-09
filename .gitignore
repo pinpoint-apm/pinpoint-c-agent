@@ -75,3 +75,4 @@ testapps/PHP/composer.phar
 wheelhouse/
 .clangd
 collector-agent/pinpoint-grpc-idl/
+*.so

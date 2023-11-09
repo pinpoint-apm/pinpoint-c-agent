@@ -14,3 +14,4 @@ COPY common /pinpoint-c-agent/common
 COPY tests /pinpoint-c-agent/tests
 
 RUN cd /pinpoint-c-agent/ && phpize && ./configure && make && make install
+EXPOSE 80
