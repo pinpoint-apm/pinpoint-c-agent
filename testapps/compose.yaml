@@ -49,6 +49,14 @@ services:
       context: ../
     ports:
       - 8186:8000
+
+  backend:
+    restart: always
+    build:
+      dockerfile: testapps/backend.dockerfile
+      context: ../
+    ports:
+      - 8187:8000      
     
   dev-collector:
     restart: always

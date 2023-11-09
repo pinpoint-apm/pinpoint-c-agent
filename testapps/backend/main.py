@@ -35,7 +35,7 @@ middleware = [
 
 async_monkey_patch_for_pinpoint()
 
-set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000')
+set_agent("cd.dev.test.py.backend", "cd.dev.test.py.backend", 'tcp:dev-collector:10000')
 
 
 @asynccontextmanager
@@ -85,14 +85,6 @@ async def test_redis(uid: str = "default"):
 
 @app.get("/httpx/example", tags=["httpx"])
 async def test_httpx(request: Request, url='http://www.example.com/'):
-    requests_client = request.app.requests_client
-    print(request.headers)
-    response = await requests_client.get(url)
-    return {"response": response.status_code}
-
-
-@app.get("/httpx/backend", tags=["httpx"])
-async def test_httpx_backend(request: Request, url='http://backend:8000/'):
     requests_client = request.app.requests_client
     print(request.headers)
     response = await requests_client.get(url)
