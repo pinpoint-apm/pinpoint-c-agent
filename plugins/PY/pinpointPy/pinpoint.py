@@ -17,27 +17,40 @@
 # -*- coding: UTF-8 -*-
 # Created by eeliu at 4/19/22
 
+from tempfile import mkstemp
 import random
 import logging
 import _pinpointPy
-import sys
-
 __app_id = 'app_id_str'
 __app_name = 'app_name_str'
 
 
-def __default_logger():
+__logger__ = None
+
+
+def get_logger() -> logging.Logger:
+    global __logger__
+    if __logger__:
+        return __logger__
+
     logger = logging.Logger('pinpoint')
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.INFO)
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
-    return logger
-
-
-logger = __default_logger()
+        '%(asctime)s %(levelname)s %(message)s')
+    _, filepath = mkstemp(prefix="pinpoint")
+    import sys
+    if 'unittest' in sys.modules.keys():
+        file_handler = logging.FileHandler(filepath)
+        print(filepath)
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.DEBUG)
+        logger.addHandler(file_handler)
+    else:
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.ERROR)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+    __logger__ = logger
+    return __logger__
 
 
 def app_id():
@@ -50,36 +63,36 @@ def app_name():
     return __app_name
 
 
-def with_trace(trace_id=-1):
+def with_trace(trace_id: int) -> int:
     return _pinpointPy.start_trace(trace_id)
 
 
-def end_trace(trace_id=-1):
+def end_trace(trace_id: int) -> int:  # -> Any:
     return _pinpointPy.end_trace(trace_id)
 
 
-def add_trace_header(key: str, value: str, trace_id: int = -1, location: int = 0):
+def add_trace_header(key: str, value: str, trace_id: int, location: int = 0):
     _pinpointPy.add_clue(key, value, trace_id, location)
 
 
-def add_trace_header_v2(key: str, value: str, trace_id: int = -1, location: int = 0):
+def add_trace_header_v2(key: str, value: str, trace_id: int, location: int = 0):
     _pinpointPy.add_clues(key, value, trace_id, location)
 
 
-def add_context(key: str, value: str, trace_id: int = -1):
+def add_context(key: str, value: str, trace_id: int):
     _pinpointPy.set_context_key(key, value, trace_id)
 
 
-def get_context(key: str, trace_id: int = -1):
+def get_context(key: str, trace_id: int):
     return _pinpointPy.get_context_key(key, trace_id)
 
 
-def gen_tid():
+def gen_tid() -> str:
     global __app_id
     return '%s^%s^%s' % (__app_id, str(_pinpointPy.start_time()), str(_pinpointPy.unique_id()))
 
 
-def gen_sid():
+def gen_sid() -> str:
     return str(random.randint(0, 2147483647))
 
 
@@ -87,11 +100,11 @@ def trace_has_root(trace_id=-1):
     return _pinpointPy.trace_has_root(trace_id)
 
 
-def mark_as_error(message: str, filename: str = '', line: int = 0, trace_id: int = -1):
+def mark_as_error(message: str, filename: str = '', trace_id: int = -1, line: int = 0):
     _pinpointPy.mark_as_error(message, filename, line, trace_id)
 
 
-def drop_trace(trace_id: int = -1):
+def drop_trace(trace_id: int):
     _pinpointPy.drop_trace(trace_id)
 
 
@@ -99,16 +112,15 @@ def check_trace_limit(time: int = -1) -> bool:
     return _pinpointPy.check_tracelimit(time)
 
 
-def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trace_limit: int = -1, log_level=logging.DEBUG):
+def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trace_limit: int = -1, log_level=logging.INFO):
     global __app_id, __app_name
     __app_id = app_id_str
     __app_name = app_name_str
     _pinpointPy.set_agent(collect_agent_host, trace_limit)
-    global logger
-    logger.setLevel(log_level)
+    get_logger().setLevel(log_level)
     if log_level == logging.DEBUG:
         def debug_func(msg: str):
-            logger.debug(msg)
+            get_logger().debug(msg=msg)
         _pinpointPy.enable_debug(debug_func)
-    logger.debug(
+    get_logger().debug(
         f"appid:{app_id_str} appname:{app_name_str} collector_agent:{collect_agent_host} trace_limit:{trace_limit} log_level:{log_level}")

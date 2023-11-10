@@ -21,15 +21,9 @@
 
 from pinpointPy.pyramid.PyRequestPlugin import PyRequestPlugin
 
-def pinpoint_tween(handler,registry):
 
+def pinpoint_tween(handler, registry):# -> _Wrapped[Callable[..., Any], Any, Callable[..., Any], Any]:
+    @PyRequestPlugin("pinpoint_tween")
     def tween(request):
-        plugin = PyRequestPlugin("pinpoint_tween")
-        plugin.onBefore(request)
-
-        response = handler(request)
-        plugin.onEnd(response)
-
-        return response
-
+        return handler(request)
     return tween

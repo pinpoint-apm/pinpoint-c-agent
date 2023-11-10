@@ -23,16 +23,21 @@
 from pinpointPy import pinpoint
 from pinpointPy import Defines
 from pinpointPy.RequestPlugins import RequestPlugin
+
+
 class PyRequestPlugin(RequestPlugin):
-    def onBefore(self,*args, **kwargs):
-        super().onBefore(*args, **kwargs)
+    # -> tuple[int, tuple[Any, ...], dict[str, Any]]:
+    def onBefore(self, parentId, *args, **kwargs):
+        trace_id, _, _ = super().onBefore(parentId, *args, **kwargs)
         request = args[0]
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, 'Pyramid-middleware')
-        pinpoint.add_trace_header(Defines.PP_REQ_URI, request.path)
-        pinpoint.add_trace_header(Defines.PP_REQ_CLIENT, request.remote_addr)
-        pinpoint.add_trace_header(Defines.PP_REQ_SERVER, request.host)
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, 'Pyramid-middleware', trace_id)
+        pinpoint.add_trace_header(Defines.PP_REQ_URI, request.path, trace_id)
+        pinpoint.add_trace_header(
+            Defines.PP_REQ_CLIENT, request.remote_addr, trace_id)
+        pinpoint.add_trace_header(
+            Defines.PP_REQ_SERVER, request.host, trace_id)
+        return trace_id, args, kwargs
 
-
-    def onEnd(self, ret):
-        response  = ret
-        return super().onEnd(response)
+    def onEnd(self, trace_id, ret):
+        return super().onEnd(trace_id, ret)

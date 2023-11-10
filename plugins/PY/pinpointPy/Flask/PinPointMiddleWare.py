@@ -22,6 +22,8 @@ from pinpointPy.pinpoint import add_trace_header_v2, add_trace_header
 from pinpointPy.Flask.FlaskPlugins import BaseFlaskPlugins
 from flask import request
 import sys
+from pinpointPy.TraceContext import get_trace_context
+
 
 class PinPointMiddleWare():
 
@@ -31,12 +33,16 @@ class PinPointMiddleWare():
 
         @app.after_request
         def mark_status_code(response):
-            if request.url_rule:
-                add_trace_header(PP_URL_TEMPLATED, str(request.url_rule))
-                if 'unittest' in sys.modules.keys():
-                    response.headers["UT"] = str(request.url_rule)
-            if response:
-                add_trace_header_v2(PP_HTTP_STATUS_CODE, str(response.status))
+            status, trace_id = get_trace_context().get_parent_id()
+            if status:
+                if request.url_rule:
+                    add_trace_header(PP_URL_TEMPLATED, str(
+                        request.url_rule), trace_id)
+                    if 'unittest' in sys.modules.keys():
+                        response.headers["UT"] = str(request.url_rule)
+                if response:
+                    add_trace_header_v2(PP_HTTP_STATUS_CODE,
+                                        str(response.status), trace_id)
             return response
 
     @BaseFlaskPlugins("Flask Web App")

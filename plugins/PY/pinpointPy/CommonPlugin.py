@@ -20,38 +20,19 @@ from pinpointPy import Common, Defines, pinpoint
 
 class PinpointCommonPlugin(Common.PinTrace):
 
-    def onBefore(self, *args, **kwargs):
-        super().onBefore(*args, **kwargs)
-        ###############################################################
+    def onBefore(self, parentId, *args, **kwargs):
+        parentId, args, kwargs = super().onBefore(*args, **kwargs)
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName())
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), parentId)
         pinpoint.add_trace_header(
-            Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL)
-        arg = self.get_arg(*args, **kwargs)
-        pinpoint.add_trace_header_v2(Defines.PP_ARGS, arg)
-        ###############################################################
+            Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL, parentId)
         return args, kwargs
 
-    def onEnd(self, ret):
-        ###############################################################
-        pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret))
-        ###############################################################
-        super().onEnd(ret)
+    def onEnd(self, traceId, ret):
+        # pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), traceId)
+        super().onEnd(traceId, ret)
         return ret
 
-    def onException(self, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e))
+    def onException(self, traceId, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
         raise e
-
-    def get_arg(self, *args, **kwargs):
-        args_tmp = {}
-        j = 0
-
-        for i in args:
-            args_tmp["arg["+str(j)+"]"] = (str(i))
-            j += 1
-
-        for k in kwargs:
-            args_tmp[k] = kwargs[k]
-
-        return str(args_tmp)

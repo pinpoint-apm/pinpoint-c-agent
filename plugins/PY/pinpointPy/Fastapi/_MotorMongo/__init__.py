@@ -20,7 +20,7 @@
 # create by eelu
 
 from pinpointPy.Interceptor import intercept_once
-from pinpointPy import logger
+from pinpointPy import get_logger
 
 
 @intercept_once
@@ -31,7 +31,7 @@ def monkey_patch():
         monitoring.register(CommandLogger())
     except ImportError as e:
         # do nothing
-        logger.debug(f"not found pymongo. {e}")
+        get_logger().debug(f"not found pymongo. {e}")
 
 
 __all__ = ['monkey_patch']

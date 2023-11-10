@@ -19,9 +19,17 @@
 # Created by eeliu at 2/4/21
 
 from pinpointPy.libs import monkey_patch_for_pinpoint
-from pinpointPy.pinpoint import set_agent, app_id, app_name, gen_tid, logger
+from pinpointPy.pinpoint import set_agent, app_id, app_name, gen_tid, get_logger
+from pinpointPy.TraceContext import set_trace_context, thread_local_context
+from pinpointPy.Common import PinTransaction, GenPinHeader, PinHeader
 
-__all__ = ['monkey_patch_for_pinpoint',
-           'set_agent', 'app_id', 'app_name', 'gen_tid', 'logger']
+
+def use_thread_local_context():
+    get_logger().debug("use_thread_local_context")
+    set_trace_context(thread_local_context())
+
+
+__all__ = ['monkey_patch_for_pinpoint', 'use_thread_local_context'
+           'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader']
 __version__ = "1.0.15"
 __author__ = 'liu.mingyi@navercorp.com'

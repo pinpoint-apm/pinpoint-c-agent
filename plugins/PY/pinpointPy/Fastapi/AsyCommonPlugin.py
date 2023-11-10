@@ -16,30 +16,31 @@
 
 
 from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
-from pinpointPy import Defines
-from pinpointPy import pinpoint
+from pinpointPy import Defines, pinpoint
 
 
 class CommonPlugin(AsyncPinTrace):
 
-    def onBefore(self,parentId, *args, **kwargs):
-        traceId,args,kwargs = super().onBefore(parentId,*args, **kwargs)
+    # -> tuple[int, Any, dict[str, Any]]:
+    def onBefore(self, parentId, *args, **kwargs):
+        traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         ###############################################################
-        pinpoint.add_trace_header(Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
-        pinpoint.add_trace_header(Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, traceId)
         arg = self.get_arg(*args, **kwargs)
         pinpoint.add_trace_header_v2(Defines.PP_ARGS, arg, traceId)
         ###############################################################
-        return traceId,args,kwargs
+        return traceId, args, kwargs
 
-    def onEnd(self,traceId, ret):
+    def onEnd(self, traceId, ret):
         ###############################################################
         pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), traceId)
         ###############################################################
-        super().onEnd(traceId,ret)
-        
+        super().onEnd(traceId, ret)
 
-    def onException(self,traceId, e):
+    def onException(self, traceId, e):
         pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
 
     def get_arg(self, *args, **kwargs):

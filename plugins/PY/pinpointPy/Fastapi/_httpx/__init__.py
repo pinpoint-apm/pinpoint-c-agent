@@ -20,7 +20,7 @@
 # create by eelu
 
 from pinpointPy.Interceptor import Interceptor, intercept_once
-from pinpointPy import logger
+from pinpointPy import get_logger
 
 
 @intercept_once
@@ -35,9 +35,9 @@ def monkey_patch():
         for interceptor in Interceptors:
             interceptor.enable()
     except ImportError as e:
-        logger.debug(f"import httpx:{e}")
+        get_logger().debug(f"import httpx:{e}")
     except:
-        logger.info(f"unknown error in httpx module")
+        get_logger().info(f"unknown error in httpx module")
 
 
 __all__ = ['monkey_patch']

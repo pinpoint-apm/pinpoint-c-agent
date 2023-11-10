@@ -130,8 +130,8 @@ NodeID do_end_trace(NodeID Id) {
     r_node->convertToSpanEvent();
     return r_node->mParentId;
   }
-  // free current ndde tree
-  return E_ROOT_NODE;
+  // free current node tree
+  return E_INVALID_NODE;
 }
 
 NodeID pinpoint_start_trace(NodeID parentId) {

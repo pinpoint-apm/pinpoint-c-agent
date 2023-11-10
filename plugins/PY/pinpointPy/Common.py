@@ -19,8 +19,9 @@
 
 # Created by eeliu at 3/5/20
 
-from pinpointPy import Defines, pinpoint, logger
-from abc import ABCMeta, abstractmethod
+from pinpointPy import Defines, pinpoint, get_logger
+from pinpointPy.TraceContext import get_trace_context
+from functools import wraps
 
 
 class Trace:
@@ -33,64 +34,80 @@ class Trace:
     def onEnd(self, ret):
         raise NotImplementedError("onEnd")
 
-    def __call__(self, func):
+    def onException(self, ret):
+        raise NotImplementedError("onException")
 
+    def __call__(self, func):
+        @wraps(func)
         def pinpointTrace(*args, **kwargs):
+            ret = None
             try:
                 args, kwargs = self.onBefore(*args, **kwargs)
                 ret = func(*args, **kwargs)
             except Exception as e:
                 self.onException(e)
-                logger.info(f"{func.__name__} catch {e}")
+                get_logger().info(f"{func.__name__} catch {e}")
                 raise e
             finally:
                 return self.onEnd(ret)
         return pinpointTrace
 
 
-class PinTrace(Trace):
-    E_PER_REQ = 1
-    E_FUNCTION = 2
+class PinTrace:
 
-    def isSample(self, args):
-        '''
-        if not root, no trace
-        :return:
-        '''
-        if pinpoint.trace_has_root() and pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED) == "s1":
-            return True
+    def __init__(self, name):
+        self.name = name
+
+    def onBefore(self, parentId: int, *args, **kwargs):
+        traceId = pinpoint.with_trace(parentId)
+        get_trace_context().set_parent_id(traceId)
+        return traceId, args, kwargs
+
+    @staticmethod
+    def isSample(*args, **kwargs):
+        ret, parentId = get_trace_context().get_parent_id()
+        if ret:
+            return True, parentId, args, kwargs
         else:
-            return False
+            return False, -1, args, kwargs
 
-    def onBefore(self, *args, **kwargs):
-        pinpoint.with_trace()
-        return args, kwargs
+    @classmethod
+    def _isSample(cls, *args, **kwargs):
+        return cls.isSample(*args, **kwargs)
 
-    def onEnd(self, ret):
-        pinpoint.end_trace()
+    def onEnd(self, traceId, ret):
+        parentId: int = pinpoint.end_trace(trace_id=traceId)
+        get_trace_context().set_parent_id(parentId)
 
-    def onException(self, e):
-        raise NotImplementedError("onException")
+    def onException(self, traceId, e):
+        raise NotImplementedError()
 
     def __call__(self, func):
         self.func_name = func.__name__
 
+        @wraps(func)
         def pinpointTrace(*args, **kwargs):
-            if not self.isSample((args, kwargs)):
-                return func(*args, **kwargs)
+            sampled, parentId, nArgs, nKwargs = self._isSample(*args, **kwargs)
+            if not sampled:
+                return func(*nArgs, **nKwargs)
+            ret = None
+            get_logger().debug(f"call {self.func_name}.onBefore")
+            traceId, nArgs, nKwargs = self.onBefore(
+                parentId, *nArgs, **nKwargs)
             try:
-                args, kwargs = self.onBefore(*args, **kwargs)
-                ret = func(*args, **kwargs)
+                get_logger().debug(f"call {self.func_name}")
+                ret = func(*nArgs, **nKwargs)
                 return ret
             except Exception as e:
-                self.onException(e)
-                logger.info(f"{func.__name__} catch {e}")
+                get_logger().debug(f"call {self.func_name}.onException")
+                self.onException(traceId, e)
                 raise e
             finally:
-                self.onEnd(ret)
+                get_logger().debug(f"call {self.func_name}.onEnd")
+                self.onEnd(traceId, ret)
         return pinpointTrace
 
-    def getFuncUniqueName(self):
+    def getUniqueName(self):
         return self.name
 
 
@@ -118,17 +135,17 @@ class PinHeader:
         self.Error = ''
 
 
-class GenPinHeader(metaclass=ABCMeta):
+class GenPinHeader:
     """GenPinHeader
 
     Args:
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     Example:
         ```
-        def GetHeader(self,parenthost,parentname,url,...)->PinHeader:
+        def GetHeader(self,parent_host,parent_name,url,...)->PinHeader:
             header = PinHeader()
-            header.ParentHost= parenthost
-            header.ParentName= ParentName
+            header.ParentHost= parent_host
+            header.ParentName= parent_name
             header.Url = url
             ...
             return header
@@ -136,13 +153,12 @@ class GenPinHeader(metaclass=ABCMeta):
     Returns:
         _type_: _description_
     """
-    @abstractmethod
+
     def GetHeader(self, *args, **kwargs) -> PinHeader:
-        return PinHeader()
+        raise NotImplemented("GetHeader")
 
 
 class PinTransaction(PinTrace):
-
     def __init__(self, name: str, userGenHeaderCb: GenPinHeader):
         """pinpointPy user entry point
 
@@ -165,67 +181,70 @@ class PinTransaction(PinTrace):
             userGenHeaderCb (GenPinHeader): This helps getting header from current function 
         """
         super().__init__(name)
-        self.name = name
+        self.name: str = name
         self.getHeader = userGenHeaderCb
 
     @staticmethod
     def isSample(*args, **kwargs):
-        return True, 0
+        return True, -1, args, kwargs
 
-    def onBefore(self, *args, **kwargs):
-        args, kwargs = super().onBefore(*args, **kwargs)
-        header = self.getHeader.GetHeader(*args, **kwargs)
+    def onBefore(self, parentId: int, *args, **kwargs):
+        traceId, args_n, kwargs_n = super().onBefore(parentId, *args, **kwargs)
+        header = self.getHeader.GetHeader(*args_n, **kwargs_n)
 
         sid = pinpoint.gen_sid()
-        pinpoint.add_context(Defines.PP_SPAN_ID, sid)
-        pinpoint.add_trace_header(Defines.PP_SPAN_ID, sid)
+        pinpoint.add_trace_header(Defines.PP_SPAN_ID, sid, traceId)
+        pinpoint.add_context(Defines.PP_SPAN_ID, sid, traceId)
 
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.name)
+            Defines.PP_INTERCEPTOR_NAME, self.name, traceId)
         pinpoint.add_trace_header(
-            Defines.PP_APP_NAME, pinpoint.app_name())
+            Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+        pinpoint.add_context(
+            Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
         pinpoint.add_trace_header(
-            Defines.PP_APP_ID, pinpoint.app_id())
+            Defines.PP_APP_ID, pinpoint.app_id(), traceId)
 
-        pinpoint.add_trace_header(Defines.PP_REQ_URI, header.Url)
-        pinpoint.add_trace_header(Defines.PP_REQ_SERVER, header.Host)
+        pinpoint.add_trace_header(Defines.PP_REQ_URI, header.Url, traceId)
+        pinpoint.add_trace_header(Defines.PP_REQ_SERVER, header.Host, traceId)
         pinpoint.add_trace_header(
-            Defines.PP_REQ_CLIENT, header.RemoteAddr)
+            Defines.PP_REQ_CLIENT, header.RemoteAddr, traceId)
         pinpoint.add_trace_header(
-            Defines.PP_SERVER_TYPE, Defines.PYTHON)
-        pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1")
+            Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
+        pinpoint.add_context(Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
+
+        pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1", traceId)
 
         if header.ParentType != '':
             pinpoint.add_trace_header(
-                Defines.PP_PARENT_TYPE, header.ParentType)
-
+                Defines.PP_PARENT_TYPE, header.ParentType, traceId)
         if header.ParentName != '':
             pinpoint.add_trace_header(
-                Defines.PP_PARENT_NAME, header.ParentName)
-
+                Defines.PP_PARENT_NAME, header.ParentName, traceId)
         if header.ParentHost != '':
             pinpoint.add_trace_header(
-                Defines.PP_PARENT_HOST, header.ParentHost)
+                Defines.PP_PARENT_HOST, header.ParentHost, traceId)
 
         tid = ''
         if header.ParentTid != '':
             tid = header.ParentTid
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, tid)
-            pinpoint.add_trace_header(Defines.PP_NEXT_SPAN_ID, sid)
+            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, tid, traceId)
+            pinpoint.add_trace_header(Defines.PP_NEXT_SPAN_ID, sid, traceId)
         else:
             tid = pinpoint.gen_tid()
 
-        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid)
+        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid, traceId)
+
+        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, traceId)
 
         if header.Error:
-            pinpoint.mark_as_error(header.Error, header.Error, 0)
+            pinpoint.mark_as_error(header.Error, header.Error, traceId, 0)
 
-        return args, kwargs
+        return traceId, args, kwargs
 
-    def onEnd(self, ret):
-        super().onEnd(ret)
+    def onEnd(self, traceId, ret):
+        super().onEnd(traceId, ret)
 
-    def onException(self, e):
-        pinpoint.mark_as_error(str(e), "", 0)
+    def onException(self, traceId, e):
+        pinpoint.mark_as_error(str(e), "", traceId)
         raise e

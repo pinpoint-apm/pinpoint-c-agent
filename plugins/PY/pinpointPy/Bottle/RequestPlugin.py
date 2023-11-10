@@ -26,8 +26,10 @@ from pinpointPy.pinpoint import add_trace_header_v2, add_trace_header
 
 class RequestPlugin(WSGIPlugin):
 
-    def onEnd(self, ret):
-        add_trace_header_v2(PP_HTTP_STATUS_CODE, str(response.status_code))
+    def onEnd(self, trace_id, ret):
+        add_trace_header_v2(PP_HTTP_STATUS_CODE, str(
+            response.status_code), trace_id)
         if response.status_code != 200:
-            add_trace_header(PP_ADD_EXCEPTION, "status code not 200")
-        return super().onEnd(ret)
+            add_trace_header(PP_ADD_EXCEPTION,
+                             "status code isn't 200", trace_id)
+        return super().onEnd(trace_id, ret)

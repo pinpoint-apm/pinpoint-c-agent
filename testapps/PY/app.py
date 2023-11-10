@@ -50,9 +50,10 @@ import test_decorator
 import test_partial
 import test_band
 from pinpointPy.Flask.PinPointMiddleWare import PinPointMiddleWare
-from pinpointPy import set_agent, monkey_patch_for_pinpoint
-monkey_patch_for_pinpoint()
+from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context
 
+use_thread_local_context()
+monkey_patch_for_pinpoint()
 
 app = Flask(__name__)
 

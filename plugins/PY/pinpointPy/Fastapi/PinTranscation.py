@@ -18,7 +18,7 @@
 # ------------------------------------------------------------------------------
 
 from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
-from pinpointPy import Defines,pinpoint
+from pinpointPy import Defines, pinpoint
 from pinpointPy.Common import GenPinHeader
 from starlette_context import request_cycle_context
 
@@ -75,6 +75,8 @@ class PinTransaction(AsyncPinTrace):
             Defines.PP_INTERCEPTOR_NAME, self.name, traceId)
         pinpoint.add_trace_header(
             Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+        pinpoint.add_context(
+            Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
         pinpoint.add_trace_header(
             Defines.PP_APP_ID, pinpoint.app_id(), traceId)
 
@@ -84,6 +86,7 @@ class PinTransaction(AsyncPinTrace):
             Defines.PP_REQ_CLIENT, header.RemoteAddr, traceId)
         pinpoint.add_trace_header(
             Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
+        pinpoint.add_context(Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
         pinpoint.add_context(Defines.PP_HEADER_PINPOINT_SAMPLED, "s1", traceId)
 
         if header.ParentType != '':

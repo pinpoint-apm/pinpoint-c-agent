@@ -19,27 +19,32 @@
 
 # Created by eeliu at 8/20/20
 
+from pinpointPy import get_logger
+
+
 class Interceptor:
     def __init__(self, scope, point, WrapperClass):
-        assert isinstance(point,str)
+        assert isinstance(point, str)
         self.scope_name = scope.__name__
         self.point = point
         # new a handle and bind on full_name
         self.wrapper = WrapperClass(self.scope_name+'.'+self.point)
         self.scope = scope
-        self.origin_point = getattr(scope,point)
+        self.origin_point = getattr(scope, point)
 
     def enable(self):
         assert callable(self.wrapper)
         setattr(self.scope, self.point, self.wrapper(self.origin_point))
+        get_logger().debug(f'enable interceptor on {self.scope}.{self.point}')
 
     def disable(self):
         setattr(self.scope, self.point, self.origin_point)
 
+
 def intercept_once(point):
-    def func(*args,**kwargs):
+    def func(*args, **kwargs):
         if not func.already_intercept:
-            func.already_intercept=True
-            return point(*args,**kwargs)
-    func.already_intercept=False
+            func.already_intercept = True
+            return point(*args, **kwargs)
+    func.already_intercept = False
     return func

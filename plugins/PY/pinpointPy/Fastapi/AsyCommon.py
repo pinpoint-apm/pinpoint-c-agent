@@ -16,56 +16,24 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-import asyncio
-
 from starlette_context import context
+from pinpointPy.TraceContext import TraceContext
+from pinpointPy.Common import PinTrace
 
-from pinpointPy import pinpoint
-
-
-class TraceContext:
-    @staticmethod
-    def get_parent_id():
+class AsyncTraceContext (TraceContext):
+    def get_parent_id(self):
         id = context.get('_pinpoint_id_', 0)
         if id == 0:
-            return False, None
+            return False, -1
         else:
             return True, id
 
-    @staticmethod
-    def set_parent_id(id: int):
+    def set_parent_id(self, id: int):
         context['_pinpoint_id_'] = id
 
 
-class AsyncPinTrace:
-
-    def __init__(self, name):
-        self.name = name
-
-    def onBefore(self, parentId, *args, **kwargs):
-        traceId = pinpoint.with_trace(parentId)
-        TraceContext.set_parent_id(traceId)
-        return traceId, args, kwargs
-
-    @staticmethod
-    def isSample(*args, **kwargs):
-        ret, id = TraceContext.get_parent_id()
-        if ret:
-            return True, id, args, kwargs
-        else:
-            return False, None, args, kwargs
-
-    @classmethod
-    def _isSample(cls, *args, **kwargs):
-        return cls.isSample(*args, **kwargs)
-
-    def onEnd(self, parentId, ret):
-        parentId = pinpoint.end_trace(parentId)
-        TraceContext.set_parent_id(parentId)
-
-    def onException(self, traceId, e):
-        raise NotImplementedError()
-
+class AsyncPinTrace(PinTrace):
+    
     def __call__(self, func):
         self.func_name = func.__name__
 
@@ -87,20 +55,3 @@ class AsyncPinTrace:
             finally:
                 self.onEnd(traceId, ret)
         return pinpointTrace
-
-    def getFuncUniqueName(self):
-        return self.name
-
-
-if __name__ == '__main__':
-
-    @AsyncPinTrace('main')
-    async def run(i):
-        if i == 0:
-            return
-        print("run")
-        await asyncio.sleep(0.1)
-        await run(i-1)
-
-    asyncio.run(run(2))
-    asyncio.run(run(2))

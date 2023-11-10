@@ -1,7 +1,7 @@
 import unittest
 
 
-from pinpointPy.Fastapi import PinPointMiddleWare
+from pinpointPy.Fastapi import PinPointMiddleWare, use_starlette_context
 from pinpointPy import set_agent
 
 from starlette_context.middleware import RawContextMiddleware
@@ -21,7 +21,9 @@ class Test_UT(unittest.TestCase):
             ),
             Middleware(PinPointMiddleWare)
         ]
+        use_starlette_context()
         app = FastAPI(title='pinpointpy test', middleware=middlewares)
+
         set_agent("cd.dev.test.py", "cd.dev.test.py",
                   'tcp:dev-collector:9999', -1)
 
