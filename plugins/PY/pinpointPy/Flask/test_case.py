@@ -5,7 +5,7 @@ from pinpointPy import PinTransaction, GenPinHeader, PinHeader, use_thread_local
 import logging
 
 
-class Test_Flask(unittest.TestCase):
+class Test_case(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         use_thread_local_context()

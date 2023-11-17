@@ -14,7 +14,7 @@ class Test_Case(TestCase):
     @PinTransaction("testcase", GenTestHeader())
     def test_str_url(self):
         import urllib.request
-        with urllib.request.urlopen('http://httpbin:8999/anything') as response:
+        with urllib.request.urlopen('http://httpbin/anything') as response:
             body = response.read()
             httpbin = create_http_bin_response(body)
             self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
@@ -24,7 +24,7 @@ class Test_Case(TestCase):
         import urllib.parse
         import urllib.request
 
-        url = 'http://httpbin:8999/anything'
+        url = 'http://httpbin/anything'
         user_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'
         values = {'name': 'Michael Foord',
                   'location': 'Northampton',

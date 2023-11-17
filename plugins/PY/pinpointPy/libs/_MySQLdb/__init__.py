@@ -36,7 +36,7 @@ def monkey_patch():
             interceptor.enable()
 
     except ImportError as e:
-        get_logger.debug(f'exception at {e}')
+        get_logger().debug(f'exception at {e}')
 
 
 __all__ = ['monkey_patch']

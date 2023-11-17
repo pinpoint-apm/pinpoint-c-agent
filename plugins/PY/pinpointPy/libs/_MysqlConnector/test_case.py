@@ -55,6 +55,7 @@ class Test_Case(TestCase):
 
         # Select the employees getting a raise
         curA.execute(query, (date(2000, 1, 1), date(2000, 12, 31)))
+        print(curA)
         self.assertTrue(curA._pinpoint_)
         now = datetime.now()
         tomorrow = now + timedelta(1)

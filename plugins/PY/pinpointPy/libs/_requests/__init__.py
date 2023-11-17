@@ -34,7 +34,7 @@ def monkey_patch():
         for interceptor in Interceptors:
             interceptor.enable()
 
-    except ImportError:
+    except ImportError as e:
         get_logger().info(f'exception at {e}')
 
 

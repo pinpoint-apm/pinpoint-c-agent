@@ -22,15 +22,15 @@ from pinpointPy import get_logger
 def monkey_patch():
     try:
         from mysql.connector.cursor import MySQLCursor, MySQLCursorPrepared
-        # from mysql.connector.cursor_cext import CMySQLCursor, CMySQLCursorPrepared
+        from mysql.connector.cursor_cext import CMySQLCursor, CMySQLCursorPrepared
         from .MysqlPlugin import MysqlPlugin
-        # from .CMysqlPlugin import CMysqlPlugin
+        from .CMysqlPlugin import CMysqlPlugin
 
         Interceptors = [
             Interceptor(MySQLCursor, 'execute', MysqlPlugin),
             Interceptor(MySQLCursorPrepared, 'execute', MysqlPlugin),
-            # Interceptor(CMySQLCursor, 'execute', CMysqlPlugin),
-            # Interceptor(CMySQLCursorPrepared, 'execute', CMysqlPlugin),
+            Interceptor(CMySQLCursor, 'execute', CMysqlPlugin),
+            Interceptor(CMySQLCursorPrepared, 'execute', CMysqlPlugin),
         ]
         for interceptor in Interceptors:
             interceptor.enable()

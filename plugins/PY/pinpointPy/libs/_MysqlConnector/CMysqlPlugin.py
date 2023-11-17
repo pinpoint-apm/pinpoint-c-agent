@@ -22,18 +22,23 @@ class CMysqlPlugin(Common.PinTrace):
     def __init__(self, name):
         super().__init__(name)
 
+    # -> tuple[Any, tuple[Any, ...], dict[str, Any]]:
     def onBefore(self, parentId, *args, **kwargs):
-        parentId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
-        ###############################################################
+        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), parentId)
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), trace_id)
         pinpoint.add_trace_header(
-            Defines.PP_SERVER_TYPE, Defines.PP_MYSQL, parentId)
-        pinpoint.add_trace_header(Defines.PP_SQL_FORMAT, args[1], parentId)
-        ###############################################################
+            Defines.PP_SERVER_TYPE, Defines.PP_MYSQL, trace_id)
+        pinpoint.add_trace_header(Defines.PP_SQL_FORMAT, args[1], trace_id)
+        import sys
+        if 'unittest' in sys.modules.keys():
+            from mysql.connector.cursor_cext import CMySQLCursor
+            if isinstance(args[0], CMySQLCursor):
+                cursor = args[0]
+                cursor._pinpoint_ = True
         dst = self.get_cursor_host(args[0])
-        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst, parentId)
-        return args, kwargs
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst, trace_id)
+        return trace_id, args, kwargs
 
     def onEnd(self, traceId, ret):
         super().onEnd(traceId, ret)

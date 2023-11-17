@@ -15,7 +15,7 @@ class Test_Case(TestCase):
     @PinTransaction("testcase", GenTestHeader())
     def test_post(self):
         import requests
-        url = 'http://httpbin:8999/anything'
+        url = 'http://httpbin/anything'
         proto = {'a': 'proto'}
         body = requests.post(url, json=proto)
         httpbin = create_http_bin_response(body.text)
@@ -24,14 +24,14 @@ class Test_Case(TestCase):
     @PinTransaction("testcase", GenTestHeader())
     def test_get(self):
         import requests
-        body = requests.get('http://httpbin:8999/anything')
+        body = requests.get('http://httpbin/anything')
         httpbin = create_http_bin_response(body.text)
         self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
 
     @PinTransaction("testcase", GenTestHeader())
     def test_patch(self):
         import requests
-        body = requests.patch('http://httpbin:8999/anything')
+        body = requests.patch('http://httpbin/anything')
         httpbin = create_http_bin_response(body.text)
         self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
 
