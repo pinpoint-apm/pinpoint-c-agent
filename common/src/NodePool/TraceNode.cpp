@@ -64,6 +64,7 @@ void TraceNode::addChild(WrapperTraceNode& child) {
   child->mParentId = this->mPoolIndex;
   child->mRootIndex = this->mRootIndex;
   child->root_start_time = this->root_start_time;
+  child->parent_start_time = this->start_time;
 }
 
 void TraceNode::endTimer() {
@@ -83,7 +84,7 @@ void TraceNode::convertToSpan() {
 
 void TraceNode::convertToSpanEvent() {
   this->AddTraceDetail(":E", this->cumulative_time);
-  this->AddTraceDetail(":S", this->start_time - this->root_start_time);
+  this->AddTraceDetail(":S", this->start_time - this->parent_start_time);
 }
 
 // void TraceNode::setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root)
