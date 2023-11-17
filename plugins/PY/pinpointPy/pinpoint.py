@@ -38,15 +38,21 @@ def get_logger() -> logging.Logger:
         '%(asctime)s %(levelname)s %(message)s')
     _, filepath = mkstemp(prefix="pinpoint")
     import sys
+    import os
     if 'unittest' in sys.modules.keys():
         file_handler = logging.FileHandler(filepath)
         print(filepath)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)
         logger.addHandler(file_handler)
+    elif 'pinpoint-debug' in os.environ and os.environ['pinpoint-debug']:
+        ch = logging.StreamHandler(sys.stdout)
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
     else:
         ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.ERROR)
+        ch.setLevel(logging.INFO)
         ch.setFormatter(formatter)
         logger.addHandler(ch)
     __logger__ = logger

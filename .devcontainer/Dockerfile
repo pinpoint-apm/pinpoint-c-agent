@@ -28,7 +28,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN apt update && apt install -y apt-utils gcc g++ gdb  pkg-config  libxml2-dev libsqlite3-dev libcurl4-openssl-dev zlib1g-dev make cmake wget autoconf git clangd iputils-ping python3 python3.8-venv python3-pip clang-format protobuf-compiler vim locales curl libssl-dev
+RUN apt update && apt install -y apt-utils gcc g++ gdb  pkg-config  libxml2-dev libsqlite3-dev libcurl4-openssl-dev zlib1g-dev make cmake wget autoconf git clangd iputils-ping python3 python3.8-venv python3-pip clang-format protobuf-compiler vim locales curl libssl-dev libmysqlclient-dev
 # https://github.com/git-lfs/git-lfs/blob/main/INSTALLING.md
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash 
 RUN apt-get install git-lfs
@@ -36,11 +36,11 @@ USER pinpoint
 # enable php-7.4
 ENV PHP_VESION=php-7.4.33
 ENV PHP_HOME=/home/pinpoint/local/
-COPY ${PHP_VESION}.tar.gz /home/pinpoint/${PHP_VESION}.tar.gz
+RUN wget https://github.com/eeliu/pinpoint-c-agent/files/13371519/${PHP_VESION}.tar.gz  -O /home/pinpoint/${PHP_VESION}.tar.gz
 RUN cd /home/pinpoint/ && tar xvf ${PHP_VESION}.tar.gz && cd ${PHP_VESION} && ./configure --prefix=${PHP_HOME}/${PHP_VESION} --with-curl=shared --with-mysqli=shared --with-openssl=shared --with-pdo-sqlite=shared --enable-pdo=shared --with-zlib=shared --enable-fpm --enable-opcache --enable-debug && make -j && make install
 
 ENV PATH="$PATH:${PHP_HOME}/php/bin/:${PHP_HOME}/php/sbin/"
-COPY php.ini ${PHP_HOME}/php/lib
+# COPY php.ini ${PHP_HOME}/php/lib
 
 ### Build php module 
 ### curl 
@@ -69,9 +69,8 @@ COPY php.ini ${PHP_HOME}/php/lib
 
 # install golang 1.18
 USER root
-COPY go1.18.10.linux-amd64.tar.gz /home/pinpoint/go1.18.10.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz -O /home/pinpoint/go1.18.10.linux-amd64.tar.gz
 RUN rm -rf /usr/local/go && cd /home/pinpoint/ && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin
-ENV 
 ENV PATH=$PATH:/home/pinpoint/go/bin
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2

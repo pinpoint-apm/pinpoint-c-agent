@@ -30,7 +30,7 @@ class RequestPlugin(Common.PinTrace):
 
     @staticmethod
     def isSample(*args, **kwargs):
-        return True, -1, args, kwargs
+        return True, 0, args, kwargs
 
     def onBefore(self, parentId, *args, **kwargs):
         trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)

@@ -13,34 +13,38 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-import importlib
-from pinpointPy.pinpoint import get_logger
+
+from MySQLdb.cursors import BaseCursor
+from pinpointPy import Common, pinpoint, Defines
+
+# reference from https://github.com/PyMySQL/mysqlclient/blob/3805b28abc24cc985ffe7c8a05dd4bd6530aefe8/src/MySQLdb/cursors.py#L162
 
 
-def __monkey_patch(*args, **kwargs):
-    for key in kwargs:
-        if kwargs[key]:
-            module = importlib.import_module('pinpointPy.libs.' + key)
-            monkey_patch = getattr(module, 'monkey_patch')
-            if callable(monkey_patch):
-                try:
-                    monkey_patch()
-                except Exception as e:
-                    get_logger().info(f'exception at {e}')
+class BaseCursorPlugins(Common.PinTrace):
+    def __init__(self, name):
+        super().__init__(name)
 
+    def onBefore(self, parentId, *args, **kwargs):
+        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
 
-def monkey_patch_for_pinpoint(pymongo=True,
-                              PyMysql=True,
-                              pyRedis=True,
-                              requests=True,
-                              urllib=True,
-                              sqlalchemy=True,
-                              MySQLdb=True,
-                              MysqlConnector=True):
-    __monkey_patch(_pymongo=pymongo, _MySQLdb=MySQLdb, _PyMysql=PyMysql, _pyRedis=pyRedis, _requests=requests,
-                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector)
+        assert isinstance(args[0], BaseCursor)
 
+        dst = args[0].connection.get_host_info()
 
-__all__ = ['monkey_patch_for_pinpoint']
-__version__ = '0.0.3'
-__author__ = 'liu.mingyi@navercorp.com'
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), trace_id)
+        pinpoint.add_trace_header(
+            Defines.PP_SERVER_TYPE, Defines.PP_MYSQL, trace_id)
+        query = args[1]
+        pinpoint.add_trace_header(
+            Defines.PP_SQL_FORMAT, query, trace_id)
+
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst, trace_id)
+        return trace_id, args, kwargs
+
+    def onEnd(self, trace_id, ret):
+        super().onEnd(trace_id, ret)
+        return ret
+
+    def onException(self, trace_id, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), trace_id)

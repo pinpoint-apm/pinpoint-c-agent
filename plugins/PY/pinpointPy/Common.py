@@ -186,7 +186,7 @@ class PinTransaction(PinTrace):
 
     @staticmethod
     def isSample(*args, **kwargs):
-        return True, -1, args, kwargs
+        return True, 0, args, kwargs
 
     def onBefore(self, parentId: int, *args, **kwargs):
         traceId, args_n, kwargs_n = super().onBefore(parentId, *args, **kwargs)

@@ -26,8 +26,12 @@ class BaseDjangoRequestPlugins(Common.PinTrace):
     def __init__(self, name):
         super().__init__(name)
 
-    def onBefore(self, *args, **kwargs):
-        trace_id, args, kwargs = super().onBefore(*args, **kwargs)
+    @staticmethod
+    def isSample(*args, **kwargs):
+        return True, 0, args, kwargs
+
+    def onBefore(self, parentId, *args, **kwargs):
+        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         pinpoint.add_trace_header(
             Defines.PP_APP_NAME, pinpoint.app_name(), trace_id)
         pinpoint.add_trace_header(
@@ -35,7 +39,7 @@ class BaseDjangoRequestPlugins(Common.PinTrace):
         pinpoint.add_context(Defines.PP_APP_NAME,
                              pinpoint.app_name(), trace_id)
         ###############################################################
-        request = args[1]
+        request = args[0]
         headers = request.META
 
         # assert isinstance(request,BaseHTTPRequestHandler)

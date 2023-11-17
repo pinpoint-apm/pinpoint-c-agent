@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -13,34 +16,29 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
-import importlib
-from pinpointPy.pinpoint import get_logger
+from pinpointPy.Interceptor import Interceptor, intercept_once
+from pinpointPy import get_logger
 
 
-def __monkey_patch(*args, **kwargs):
-    for key in kwargs:
-        if kwargs[key]:
-            module = importlib.import_module('pinpointPy.libs.' + key)
-            monkey_patch = getattr(module, 'monkey_patch')
-            if callable(monkey_patch):
-                try:
-                    monkey_patch()
-                except Exception as e:
-                    get_logger().info(f'exception at {e}')
+@intercept_once
+def monkey_patch():
+    try:
+        from MySQLdb.connections import Connection
+        from MySQLdb.cursors import BaseCursor
+        from .MySQLdbPlugin import MySQLdbPlugin
+        from .BaseCursorPlugins import BaseCursorPlugins
+
+        Interceptors = [
+            Interceptor(Connection, 'query', MySQLdbPlugin),
+            Interceptor(BaseCursor, 'execute', BaseCursorPlugins)
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
+
+    except ImportError as e:
+        get_logger.debug(f'exception at {e}')
 
 
-def monkey_patch_for_pinpoint(pymongo=True,
-                              PyMysql=True,
-                              pyRedis=True,
-                              requests=True,
-                              urllib=True,
-                              sqlalchemy=True,
-                              MySQLdb=True,
-                              MysqlConnector=True):
-    __monkey_patch(_pymongo=pymongo, _MySQLdb=MySQLdb, _PyMysql=PyMysql, _pyRedis=pyRedis, _requests=requests,
-                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector)
-
-
-__all__ = ['monkey_patch_for_pinpoint']
+__all__ = ['monkey_patch']
 __version__ = '0.0.3'
 __author__ = 'liu.mingyi@navercorp.com'

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+# Created by eeliu at 12/16/20
+
 # ------------------------------------------------------------------------------
 #  Copyright  2020. NAVER Corp.                                                -
 #                                                                              -
@@ -13,14 +17,35 @@
 #  See the License for the specific language governing permissions and         -
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
+from pinpointPy import Common, pinpoint, Defines
 
 
-from pinpointPy.Django.BaseDjangoRequestPlugins import BaseDjangoRequestPlugins
+class MySQLdbPlugin(Common.PinTrace):
+    def __init__(self, name):
+        super().__init__(name)
 
+    def onBefore(self, parentId, *args, **kwargs):
+        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
+        connection = args[0]
+        self.dst = connection.get_host_info()
 
-def DjangoMiddleWare(get_response):
-    @BaseDjangoRequestPlugins("Django Web App")
-    def middleware(request):
-        response = get_response(request)
-        return response
-    return middleware
+        pinpoint.add_trace_header(
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), trace_id)
+        pinpoint.add_trace_header(
+            Defines.PP_SERVER_TYPE, Defines.PP_MYSQL, trace_id)
+        query = args[1]
+        # copy from MySQLdb  def query(self, query):
+        if isinstance(query, bytearray):
+            query = bytes(query)
+        pinpoint.add_trace_header(
+            Defines.PP_SQL_FORMAT, query.decode('utf-8'), trace_id)
+
+        pinpoint.add_trace_header(Defines.PP_DESTINATION, self.dst, trace_id)
+        return trace_id, args, kwargs
+
+    def onEnd(self, trace_id, ret):
+        super().onEnd(trace_id, ret)
+        return ret
+
+    def onException(self, trace_id, e):
+        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), trace_id)

@@ -19,6 +19,6 @@
 # ******************************************************************************
 
 from pinpointPy.Django.DjangoMiddleWare import DjangoMiddleWare
-__all__=['DjangoMiddleWare']
-__version__ ='0.0.1'
-__author__ = 'liu.mingyi@navercorp.com'
+__all__ = ['DjangoMiddleWare']
+__version__ = '0.0.2'
+__author__ = ['liu.mingyi@navercorp.com']

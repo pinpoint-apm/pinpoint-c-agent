@@ -7,26 +7,47 @@ services:
       MYSQL_TCP_PORT: 3306  
     ports:
       - '33060:3306' 
+    volumes:
+      - ..:/workspace:cached
+       
+    healthcheck:
+      test: ["CMD", "mysqladmin","-uroot","-ppassword" ,"ping", "-h", "localhost"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+  
   dev-mysql-setup:
     image: mysql:5.7 
     depends_on:
       dev-mysql:
-        condition: service_completed_successfully
-    # restart: "always"      
-    entrypoint: [ "bash", "-c", "cd /app/ && mysql -uroot -ppassword -hdev-mysql <employees.sql"]
+        condition: service_healthy
     volumes:
-      - "./test_db:/app/"
-  
+      - ..:/workspace:cached    
+    # todo load all data 
+    entrypoint: [ "bash", "-c", "cd /workspace/testapps/ && sh load_sample_db.sh"]
+
   redis:
     image: redis:alpine
     command: redis-server --port 6379
+    depends_on:
+      dev-mysql-setup:
+        condition: service_completed_successfully
     labels:
       - "name=redis"
       - "mode=standalone"
     ports:
       - 6389:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 10s
+      retries: 100
 
   testapp-flask:
+    container_name: flask
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: always
     build:
       dockerfile: testapps/flask.dockerfile
@@ -35,6 +56,10 @@ services:
       - 8184:80
 
   testapp-php:
+    container_name: yii2
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: always
     build:
       dockerfile: testapps/php.dockerfile
@@ -43,6 +68,10 @@ services:
       - 8185:80
 
   testapp-fastapi:
+    container_name: fastapi
+    depends_on:
+      redis:
+        condition: service_healthy    
     restart: always
     build:
       dockerfile: testapps/fastapi.dockerfile
@@ -50,13 +79,38 @@ services:
     ports:
       - 8186:8000
 
+  # test call self
   backend:
     restart: always
+    container_name: backend
+    depends_on:
+      redis:
+        condition: service_healthy    
     build:
       dockerfile: testapps/backend.dockerfile
       context: ../
     ports:
-      - 8187:8000      
+      - 8187:8000  
+  
+  testapp-django:
+    container_name: django
+    depends_on:
+      redis:
+        condition: service_healthy    
+    restart: always
+    build:
+      dockerfile: testapps/django.dockerfile
+      context: ../
+    ports:
+      - 8188:8000  
+
+  httpbin:
+    image: kennethreitz/httpbin:latest
+    restart: always
+    # container_name: httpbin
+    # hostname: httpbin
+    # ports:
+      # - 8999:80
     
   dev-collector:
     restart: always

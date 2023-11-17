@@ -58,39 +58,13 @@ python3|[English](DOC/PY/Readme.md) [中文](DOC/PY/Readme-CN.md) [한국어](DO
 c/cpp|[English](DOC/C-CPP/Readme.md)
 golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) 
 
-####  How to use testapps(playground)
-
-##### Requirement
-
-- [ ] [docker compose plugin](https://docs.docker.com/compose/install/linux/)
-- [ ] pinpoint platform [Quick-start guide](https://pinpoint-apm.gitbook.io/pinpoint/getting-started/quickstart)
-- [ ] map `dev-pinpoint` host to your pinpoint-collector address
-    ```
-    pinpoint@pinpoint:~$ cat /etc/hosts
-    # 192.168.10.11 is the address of pinpoint-collector
-    192.168.10.11 dev-pinpoint 
-    ```
-##### Playground
-
-```
-$ git clone --recurse-submodules https://github.com/pinpoint-apm/pinpoint-c-agent.git 
-$ git checkout dev
-$ cd pinpoint-c-agent/testapps && docker compose up --build
-$ ## testapp-fastapi
-$ curl http://localhost:8186/docs#/
-$ ## testapp-php yii2 framework
-$ curl http://localhost:8185/index.php
-$ ## testapp-flask
-$ curl http://localhost:8184/index.php
-```
-
-
-
+> [Try playground](/testapps/readme.md)
 
 ## Contact Us
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
 * [Gitter char room](https://gitter.im/naver/pinpoint-c-agent)
+* dl_cd_pinpoint@navercorp.com
 * Chinese Community (QQ Group: 882020485)
     <details>
     <summary> show more 

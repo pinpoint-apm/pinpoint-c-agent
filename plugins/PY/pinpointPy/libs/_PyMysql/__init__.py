@@ -21,7 +21,7 @@ from pinpointPy import get_logger
 @intercept_once
 def monkey_patch():
     try:
-        import pymysql
+        import MySQLdb
         from pymysql.cursors import Cursor
         from .PyMysqlPlugin import PyMysqlPlugin
 
