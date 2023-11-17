@@ -37,7 +37,7 @@ class HttpxRequestPlugins(AsyCommon.AsyncPinTrace):
         sampled, parentId, _, _ = AsyCommon.AsyncPinTrace.isSample(
             *args, **kwargs)
         if not sampled:
-            return False, None
+            return False, None, args, kwargs
         url = args[2]
         target = urlparse(url).netloc
         if "headers" not in kwargs or not kwargs['headers']:
@@ -56,7 +56,7 @@ class HttpxRequestPlugins(AsyCommon.AsyncPinTrace):
         traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         ###############################################################
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), traceId)
         pinpoint.add_trace_header(
             Defines.PP_SERVER_TYPE, Defines.PP_REMOTE_METHOD, traceId)
         pinpoint.add_trace_header_v2(Defines.PP_ARGS, url, traceId)

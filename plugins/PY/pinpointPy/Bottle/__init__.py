@@ -21,15 +21,14 @@
 
 from pinpointPy.Bottle.RequestPlugin import RequestPlugin
 
+
 def PinPointMiddleWare(application):
-    def handler(environ,start_response):
-        plugin = RequestPlugin("pyweb-request")
-        plugin.onBefore(environ,start_response)
-        response = application(environ,start_response)
-        plugin.onEnd(response)
-        return response
+    @RequestPlugin("pyweb-request")
+    def handler(environ, start_response):
+        return application(environ, start_response)
     return handler
 
-__all__=['PinPointMiddleWare']
-__version__ ='0.0.1'
+
+__all__ = ['PinPointMiddleWare']
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'

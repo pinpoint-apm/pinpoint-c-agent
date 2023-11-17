@@ -68,9 +68,9 @@ static NodeID do_start_trace(NodeID id, const char* opt = nullptr, va_list* args
   if (id <= E_INVALID_NODE) {
     throw std::out_of_range("invalid node id");
   } else if (id == E_ROOT_NODE) {
-    TraceNode& r_node = PoolManager::getInstance().Take();
-    r_node.startTimer();
-    return r_node.mPoolIndex;
+    TraceNode& trace = PoolManager::getInstance().Take();
+    trace.startTimer();
+    return trace.mPoolIndex;
   } else {
     WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(id);
 
@@ -130,7 +130,7 @@ NodeID do_end_trace(NodeID Id) {
     r_node->convertToSpanEvent();
     return r_node->mParentId;
   }
-  // free current ndde tree
+  // free current node tree
   return E_ROOT_NODE;
 }
 

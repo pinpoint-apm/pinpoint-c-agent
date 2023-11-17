@@ -23,10 +23,7 @@ from pinpointPy.pyweb.RequestPlugin import RequestPlugin
 
 
 def PinPointMiddleWare(application):
+    @RequestPlugin("pyweb-request")
     def handler(environ, start_response):
-        plugin = RequestPlugin("pyweb-request")
-        plugin.onBefore(environ, start_response)
-        response = application(environ, start_response)
-        plugin.onEnd(response)
-        return response
+        return application(environ, start_response)
     return handler

@@ -27,17 +27,21 @@ class WSGIPlugin(PinTrace):
     def __init__(self, name):
         super().__init__(name)
 
-    def onBefore(self, *args, **kwargs):
-        super().onBefore(*args, **kwargs)
+    @staticmethod
+    def isSample(*args, **kwargs):
+        return True, 0, args, kwargs
+
+    def onBefore(self, parentId, *args, **kwargs):
+        trace_id, _, _ = super().onBefore(parentId, *args, **kwargs)
         environ = args[0]
-        Helper.startPinpointByEnviron(environ)
+        Helper.startPinpointByEnviron(environ, trace_id)
 
-        return (args, kwargs)
+        return trace_id, args, kwargs
 
-    def onEnd(self, ret):
-        Helper.endPinpointByEnviron(ret)
-        super().onEnd(ret)
+    def onEnd(self, trace_id, ret):
+        Helper.endPinpointByEnviron(ret, trace_id)
+        super().onEnd(ret, trace_id)
         return ret
 
-    def onException(self, e):
-        pinpoint.mark_as_error(str(e), "", 0)
+    def onException(self, traceId, e):
+        pinpoint.mark_as_error(str(e), "", traceId)

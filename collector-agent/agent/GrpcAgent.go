@@ -321,7 +321,7 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 	if activeThreadCountClient, err := client.CommandStreamActiveThreadCount(ctx); err == nil {
 		sequenceId := int32(1)
 		for {
-			agent.log.Debugf("ResponseId %d", responseId)
+			// agent.log.Debugf("ResponseId %d", responseId)
 			response := v1.PCmdStreamResponse{
 				ResponseId: responseId,
 				SequenceId: sequenceId,
@@ -342,7 +342,7 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 			res.TimeStamp = time.Now().Unix()
 			res.HistogramSchemaType = 2
 
-			agent.log.Debugf("try to send PCmdActiveThreadCountRes:%v", res)
+			// agent.log.Debugf("try to send PCmdActiveThreadCountRes:%v", res)
 
 			if err := activeThreadCountClient.Send(&res); err != nil {
 				agent.log.Warnf("collectorActiveThreadCount:responseId:%d end with:%s", responseId, err)

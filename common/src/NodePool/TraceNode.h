@@ -32,40 +32,39 @@
 #include <mutex>
 #include <stdarg.h>
 
-namespace NodePool
-{
+namespace NodePool {
 namespace Json = AliasJson;
 using Context::ContextType;
 using Context::LongContextType;
 using Context::StringContextType;
 class TraceNode;
 const static int MAX_SUB_TRACE_NODES_LIMIT = 2048;
-class WrapperTraceNode
-{
- public:
+class WrapperTraceNode {
+public:
   WrapperTraceNode() = delete;
-  WrapperTraceNode(const WrapperTraceNode &other) = delete;
-  WrapperTraceNode(WrapperTraceNode &&other) : _traceNode(std::move(other._traceNode)) { other._traceNode = nullptr; }
+  WrapperTraceNode(const WrapperTraceNode& other) = delete;
+  WrapperTraceNode(WrapperTraceNode&& other) : _traceNode(std::move(other._traceNode)) {
+    other._traceNode = nullptr;
+  }
 
-  WrapperTraceNode &operator=(const WrapperTraceNode &other) = delete;
+  WrapperTraceNode& operator=(const WrapperTraceNode& other) = delete;
 
-  WrapperTraceNode(TraceNode *node);
-  TraceNode *operator->() { return _traceNode; }
+  WrapperTraceNode(TraceNode* node);
+  TraceNode* operator->() { return _traceNode; }
   ~WrapperTraceNode();
 
- private:
-  TraceNode *_traceNode;
+private:
+  TraceNode* _traceNode;
 };
 
 typedef std::shared_ptr<ContextType> _ContextType_;
-class TraceNode
-{
- public:
-  NodeID mNextId;	// equal brother node
-  NodeID mChildHeadId;	// subtree/child tree
+class TraceNode {
+public:
+  NodeID mNextId;      // equal brother node
+  NodeID mChildHeadId; // subtree/child tree
 
-  NodeID mParentId;   // parent Id [end_trace] avoiding re-add
-  NodeID mRootIndex;  // highway to root node
+  NodeID mParentId;  // parent Id [end_trace] avoiding re-add
+  NodeID mRootIndex; // highway to root node
   NodeID mPoolIndex;
   // int64_t mUID;
   // int64_t mParentUID;
@@ -76,9 +75,10 @@ class TraceNode
   uint64_t limit;
   uint64_t cumulative_time;
   uint64_t root_start_time;
+  uint64_t parent_start_time;
   bool mHasExp;
 
- public:
+public:
   void startTimer();
   void endTimer();
   void wakeUp();
@@ -86,17 +86,16 @@ class TraceNode
   void convertToSpanEvent();
   void convertToSpan();
 
- public:
-  void addChild(WrapperTraceNode &child);
+public:
+  void addChild(WrapperTraceNode& child);
   void remove();
 
   inline bool isRoot() const { return this->mRootIndex == mPoolIndex; }
 
   inline bool isLeaf() const { return this->mChildHeadId == E_INVALID_NODE; }
 
- public:
-  TraceNode()
-  {
+public:
+  TraceNode() {
     this->mPoolIndex = E_INVALID_NODE;
     this->mRootIndex = E_INVALID_NODE;
     this->resetRelative();
@@ -106,8 +105,7 @@ class TraceNode
 
   virtual ~TraceNode();
 
-  TraceNode &reset(NodeID id)
-  {
+  TraceNode& reset(NodeID id) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     this->clearAttach();
     this->initId(id);
@@ -119,92 +117,81 @@ class TraceNode
 
   NodeID getId() const { return this->mPoolIndex; }
 
-  Json::Value getJsValue()
-  {
+  Json::Value getJsValue() {
     std::lock_guard<std::mutex> _safe(this->mlock);
     return this->_value;
   }
 
-  void getContext(const char *key, std::string &value)
-  {
+  void getContext(const char* key, std::string& value) {
     std::lock_guard<std::mutex> _safe(this->mlock);
-    _ContextType_ &ctx = this->_context.at(key);
+    _ContextType_& ctx = this->_context.at(key);
     value = ctx->asStringValue();
   }
 
-  void getContext(const char *key, long &value)
-  {
+  void getContext(const char* key, long& value) {
     std::lock_guard<std::mutex> _safe(this->mlock);
-    _ContextType_ &ctx = this->_context.at(key);
+    _ContextType_& ctx = this->_context.at(key);
     value = ctx->asLongValue();
   }
 
-  void setContext(const char *key, const char *buf)
-  {
+  void setContext(const char* key, const char* buf) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     _ContextType_ context(std::make_shared<StringContextType>(buf));
     this->_context[key] = context;
   }
 
-  void setContext(const char *key, long l)
-  {
+  void setContext(const char* key, long l) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     _ContextType_ context(std::make_shared<LongContextType>(l));
     this->_context[key] = context;
   }
 
- public:
-  TraceNode &operator=(const TraceNode &) = delete;
-  TraceNode(const TraceNode &) = delete;
+public:
+  TraceNode& operator=(const TraceNode&) = delete;
+  TraceNode(const TraceNode&) = delete;
 
-  bool operator==(TraceNode const &_node) const { return this->mPoolIndex == _node.mPoolIndex; }
+  bool operator==(TraceNode const& _node) const { return this->mPoolIndex == _node.mPoolIndex; }
 
-  bool operator!=(TraceNode const &_node) const { return this->mPoolIndex != _node.mPoolIndex; }
+  bool operator!=(TraceNode const& _node) const { return this->mPoolIndex != _node.mPoolIndex; }
 
- public:
-  void AddTraceDetail(const char *key, const char *v)
-  {
+public:
+  void AddTraceDetail(const char* key, const char* v) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     this->_value[key] = v;
   }
 
-  void AddTraceDetail(const char *key, int v)
-  {
+  void AddTraceDetail(const char* key, int v) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     this->_value[key] = v;
   }
 
-  void AddTraceDetail(const char *key, uint64_t v)
-  {
+  void AddTraceDetail(const char* key, uint64_t v) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     this->_value[key] = v;
   }
 
-  void AddTraceDetail(const char *key, Json::Value &v)
-  {
+  void AddTraceDetail(const char* key, Json::Value& v) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     this->_value[key] = v;
   }
 
-  void appendNodeValue(const char *key, const char *v)
-  {
+  void appendNodeValue(const char* key, const char* v) {
     std::lock_guard<std::mutex> _safe(this->mlock);
     this->_value[key].append(v);
   }
 
- public:
-  void setOpt(const char *opt, va_list *args);
+public:
+  void setOpt(const char* opt, va_list* args);
   bool checkOpt();
 
- private:
+private:
   void parseOpt(std::string key, std::string value);
 
   void clearAttach();
 
-  void initId(NodeID &id);
+  void initId(NodeID& id);
 
-  inline void resetRelative()
-  {
+  inline void resetRelative() {
     this->mNextId = E_INVALID_NODE;
     this->mChildHeadId = E_INVALID_NODE;
     this->mParentId = mPoolIndex;
@@ -212,60 +199,60 @@ class TraceNode
     this->_subTraceNodeMaxSize = MAX_SUB_TRACE_NODES_LIMIT;
   }
 
-  inline void resetStatus()
-  {
+  inline void resetStatus() {
     this->fetal_error_time = 0;
     this->root_start_time = 0;
+    this->parent_start_time = 0;
     this->start_time = 0;
     this->limit = E_TRACE_PASS;
     this->cumulative_time = 0;
     this->mHasExp = false;
   }
 
- public:
+public:
   // changes: expose _lock
   std::mutex mlock;
 
- public:
-  int addRef()
-  {
+public:
+  int addRef() {
     _mRef++;
     return _mRef.load();
   }
 
-  int rmRef()
-  {
+  int rmRef() {
     _mRef--;
     return _mRef.load();
   }
 
   bool checkZoreRef() { return _mRef.load() == 0; }
 
- public:
-  std::string ToString()
-  {
+public:
+  std::string ToString() {
     std::lock_guard<std::mutex> _safe(this->mlock);
     char pbuf[1024] = {0};
-    int len = snprintf(pbuf, 1024,
-      "mNextId:%d mChildListHeaderId:%d mParentId:%d mRootIndex:%d mPoolIndex:%d \n"
-      "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_time:%lu,mHasExp:%d \n"
-      "_mRef:%d\n"
-      "_value:%s \n"
-      "_context size:%lu,_endTraceCallback:%lu \n",
-      (int) this->mNextId, (int) this->mChildHeadId, (int) this->mParentId, (int) this->mRootIndex, (int) this->mPoolIndex, this->start_time,
-      this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time, this->mHasExp, this->_mRef.load(),
-      this->_value.toStyledString().c_str(), this->_context.size(), this->_endTraceCallback.size());
+    int len =
+        snprintf(pbuf, 1024,
+                 "mNextId:%d mChildListHeaderId:%d mParentId:%d mRootIndex:%d mPoolIndex:%d \n"
+                 "start_time:%lu,fetal_error_time:%lu,limit:%lu,cumulative_time:%lu,root_start_"
+                 "time:%lu,mHasExp:%d \n"
+                 "_mRef:%d\n"
+                 "_value:%s \n"
+                 "_context size:%lu,_endTraceCallback:%lu \n",
+                 (int)this->mNextId, (int)this->mChildHeadId, (int)this->mParentId,
+                 (int)this->mRootIndex, (int)this->mPoolIndex, this->start_time,
+                 this->fetal_error_time, this->limit, this->cumulative_time, this->root_start_time,
+                 this->mHasExp, this->_mRef.load(), this->_value.toStyledString().c_str(),
+                 this->_context.size(), this->_endTraceCallback.size());
     return std::string(pbuf, len);
   }
 
- private:
+private:
   std::atomic<int> _mRef;
   int _subTraceNodeMaxSize;
 
- public:
+public:
   // note: not tls, not a force limitation
-  inline void updateRootSubTraceSize()
-  {
+  inline void updateRootSubTraceSize() {
     if (this->_subTraceNodeMaxSize < 0) {
       throw std::out_of_range("current span reached max sub node limitation");
     } else {
@@ -273,10 +260,10 @@ class TraceNode
     }
   }
 
- private:
+private:
   Json::Value _value;
   std::map<std::string, _ContextType_> _context;
   std::vector<std::function<bool()>> _endTraceCallback;
 };
-}  // namespace NodePool
+} // namespace NodePool
 #endif /* COMMON_SRC_TRACENODE_H_ */

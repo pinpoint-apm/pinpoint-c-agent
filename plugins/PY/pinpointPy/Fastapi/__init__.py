@@ -20,9 +20,11 @@
 import importlib
 from pinpointPy.Fastapi.PinTranscation import PinTransaction, PinStarlettePlugin
 from pinpointPy.Fastapi.AsyCommonPlugin import CommonPlugin
-from pinpointPy.Fastapi.middleware import PinPointMiddleWare, FastAPIRequestPlugin
+from pinpointPy.Fastapi.AsyCommon import AsyncTraceContext
+from pinpointPy.Fastapi.middleware import PinPointMiddleWare
 from pinpointPy.Common import PinHeader, GenPinHeader
-from pinpointPy.pinpoint import logger
+from pinpointPy.pinpoint import get_logger
+from pinpointPy.TraceContext import set_trace_context
 
 
 def __monkey_patch(*args, **kwargs):
@@ -32,17 +34,19 @@ def __monkey_patch(*args, **kwargs):
             monkey_patch = getattr(module, 'monkey_patch')
             if callable(monkey_patch):
                 monkey_patch()
-                logger.debug(
-                    "try to install pinpointPy.Fastapi.%s module" % (key))
+                get_logger().debug(
+                    f"try to install pinpointPy.Fastapi.{key} module")
 
 
-def async_monkey_patch_for_pinpoint(AioRedis=True, MotorMongo=True, httpx=True,
-                                    sqlalchemy=True):
-    __monkey_patch(_aioredis=AioRedis, _MotorMongo=MotorMongo, _httpx=httpx,
-                   _sqlalchemy=sqlalchemy)
+def async_monkey_patch_for_pinpoint(AioRedis=True, MotorMongo=True, httpx=True):
+    __monkey_patch(_aioredis=AioRedis, _MotorMongo=MotorMongo, _httpx=httpx)
+
+
+def use_starlette_context():
+    set_trace_context(new_trace_context=AsyncTraceContext())
 
 
 __version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'
-__all__ = ['async_monkey_patch_for_pinpoint', 'FastAPIRequestPlugin', 'PinPointMiddleWare',
+__all__ = ['async_monkey_patch_for_pinpoint', 'use_starlette_context', 'PinPointMiddleWare',
            'CommonPlugin', 'PinTransaction', 'PinHeader', 'GenPinHeader', 'PinStarlettePlugin']

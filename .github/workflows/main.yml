@@ -104,9 +104,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: jwlawson/actions-setup-cmake@v1.6
-        with:
-          cmake-version: "3.16.x"
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
@@ -115,10 +112,21 @@ jobs:
           # ref https://github.com/pypa/setuptools/issues/3198
           pip install -e .
           python -m unittest discover -s src/PY/test
-      - if: matrix.python-version == '3.8'
-        run : |
-          pip install -r plugins/PY/requirements.txt
-          python -m unittest discover -s plugins/PY/pinpointPy
+  python-plugins:
+    # timeout-minutes: 20
+    needs: Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      # - name: build python-plugins
+        # run: docker-compose  -f "testapps/compose.yaml" build python-plugins
+      - name: start test environment
+        run: docker-compose -f "testapps/compose.yaml" up python-plugins
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "testapps/compose.yaml" down  
   Collector-agent:
     strategy:
       matrix:

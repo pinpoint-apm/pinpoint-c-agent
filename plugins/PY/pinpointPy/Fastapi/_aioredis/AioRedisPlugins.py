@@ -32,7 +32,7 @@ class AioRedisPlugins(AsyCommon.AsyncPinTrace):
         traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         ###############################################################
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getFuncUniqueName(), traceId)
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), traceId)
         pinpoint.add_trace_header(
             Defines.PP_SERVER_TYPE, Defines.PP_REDIS, traceId)
         dst = (str(args[0]).split("<")[3]).strip(">")

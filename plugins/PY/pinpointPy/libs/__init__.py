@@ -14,7 +14,7 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 import importlib
-from pinpointPy.pinpoint import logger
+from pinpointPy.pinpoint import get_logger
 
 
 def __monkey_patch(*args, **kwargs):
@@ -26,7 +26,7 @@ def __monkey_patch(*args, **kwargs):
                 try:
                     monkey_patch()
                 except Exception as e:
-                    logger.info(f'exception at {e}')
+                    get_logger().info(f'exception at {e}')
 
 
 def monkey_patch_for_pinpoint(pymongo=True,
@@ -36,12 +36,11 @@ def monkey_patch_for_pinpoint(pymongo=True,
                               urllib=True,
                               sqlalchemy=True,
                               MySQLdb=True,
-                              DjangoRest=True,
                               MysqlConnector=True):
-    __monkey_patch(pymongo=pymongo, PyMysql=PyMysql, pyRedis=pyRedis, requests=requests, urllib=urllib,
-                   sqlalchemy=sqlalchemy, MySQLdb=MySQLdb, DjangoRest=DjangoRest, MysqlConnector=MysqlConnector)
+    __monkey_patch(_pymongo=pymongo, _MySQLdb=MySQLdb, _PyMysql=PyMysql, _pyRedis=pyRedis, _requests=requests,
+                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector)
 
 
 __all__ = ['monkey_patch_for_pinpoint']
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __author__ = 'liu.mingyi@navercorp.com'

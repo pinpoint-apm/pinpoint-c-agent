@@ -15,26 +15,12 @@
 # ------------------------------------------------------------------------------
 
 
-from django.utils.deprecation import MiddlewareMixin
-
 from pinpointPy.Django.BaseDjangoRequestPlugins import BaseDjangoRequestPlugins
 
 
-class DjangoMiddleWare(MiddlewareMixin):
-    def __init__(self, get_response=None):
-        self.get_response = get_response
-        super().__init__(self.get_response)
-        self.request_plugin = BaseDjangoRequestPlugins("Django Web App")
-
-    def process_request(self,request):
-        self.request_plugin.onBefore(self,request)
-
-
-    def process_response(self,request,response):
-        self.request_plugin.onEnd(response)
-        #todo add reponse status-code
+def DjangoMiddleWare(get_response):
+    @BaseDjangoRequestPlugins("Django Web App")
+    def middleware(request):
+        response = get_response(request)
         return response
-
-
-    def process_exception(self, request, exception):
-        self.request_plugin.onException(exception)
+    return middleware
