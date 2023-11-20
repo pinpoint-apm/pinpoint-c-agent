@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context
 from pathlib import Path
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,8 +45,8 @@ INSTALLED_APPS = [
 
 use_thread_local_context()
 monkey_patch_for_pinpoint()
-set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000', -1)
-
+set_agent("cd.dev.test.py", "cd.dev.test.py",
+          'tcp:dev-collector:10000', -1, logging.DEBUG)
 
 MIDDLEWARE = [
     'pinpointPy.Django.DjangoMiddleWare',
