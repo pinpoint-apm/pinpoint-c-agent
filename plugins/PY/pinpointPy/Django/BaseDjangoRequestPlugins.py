@@ -22,7 +22,7 @@
 from pinpointPy import Common, Defines, pinpoint
 
 
-class BaseDjangoRequestPlugins(Common.PinTrace):
+class BaseDjangoRequestPlugins(Common.PinTraceV1):
     def __init__(self, name):
         super().__init__(name)
 
@@ -30,8 +30,10 @@ class BaseDjangoRequestPlugins(Common.PinTrace):
     def isSample(*args, **kwargs):
         return True, 0, args, kwargs
 
+    # -> tuple[TraceIdObject, tuple[Any, ...], dict[str, Any]]:
     def onBefore(self, parentId, *args, **kwargs):
-        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
+        trace_id_object, args, kwargs = super().onBefore(parentId, *args, **kwargs)
+        trace_id = trace_id_object.traceId
         pinpoint.add_trace_header(
             Defines.PP_APP_NAME, pinpoint.app_name(), trace_id)
         pinpoint.add_trace_header(
@@ -40,6 +42,7 @@ class BaseDjangoRequestPlugins(Common.PinTrace):
                              pinpoint.app_name(), trace_id)
         ###############################################################
         request = args[0]
+        trace_id_object._request_ = request
         headers = request.META
 
         # assert isinstance(request,BaseHTTPRequestHandler)
@@ -138,17 +141,24 @@ class BaseDjangoRequestPlugins(Common.PinTrace):
             Defines.PP_HTTP_METHOD, headers["REQUEST_METHOD"], trace_id)
 
         ###############################################################
-        return trace_id, args, kwargs
+        return trace_id_object, args, kwargs
 
-    def onEnd(self, trace_id, ret):
+    def onEnd(self, traceIdOjb: Common.TraceIdObject, ret):
+        trace_id = traceIdOjb.traceId
         ###############################################################
         if ret:
             pinpoint.add_trace_header_v2(
                 Defines.PP_HTTP_STATUS_CODE, str(ret.status_code), trace_id)
+        self._add_ut(trace_id, traceIdOjb._request_, ret)
         ###############################################################
-        super().onEnd(trace_id, ret)
+        super().onEnd(traceIdOjb, ret)
         return ret
 
-    def onException(self, trace_id, e):
-        pinpoint.mark_as_error(str(e), "", trace_id)
+    def onException(self, traceIdOjb: Common.TraceIdObject, e):
+        pinpoint.mark_as_error(str(e), "", traceIdOjb.trace_id)
         raise e
+
+    def _add_ut(self, traceId, request, response):
+        if request.resolver_match:
+            pinpoint.add_trace_header(Defines.PP_URL_TEMPLATED, str(
+                request.resolver_match.route), trace_id=traceId)

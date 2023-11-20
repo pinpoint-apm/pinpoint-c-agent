@@ -28,7 +28,7 @@ __app_name = 'app_name_str'
 __logger__ = None
 
 
-def get_logger() -> logging.Logger:
+def get_logger(level=logging.INFO) -> logging.Logger:
     global __logger__
     if __logger__:
         return __logger__
@@ -38,14 +38,13 @@ def get_logger() -> logging.Logger:
         '%(asctime)s %(levelname)s %(message)s')
     _, filepath = mkstemp(prefix="pinpoint")
     import sys
-    import os
     if 'unittest' in sys.modules.keys():
         file_handler = logging.FileHandler(filepath)
         print(filepath)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)
         logger.addHandler(file_handler)
-    elif 'pinpoint-debug' in os.environ and os.environ['pinpoint-debug']:
+    elif level == logging.DEBUG:
         ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
@@ -128,5 +127,8 @@ def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trac
         def debug_func(msg: str):
             get_logger().debug(msg=msg)
         _pinpointPy.enable_debug(debug_func)
+    global __logger__
+    __logger__ = None
+    get_logger(log_level)
     get_logger().debug(
         f"appid:{app_id_str} appname:{app_name_str} collector_agent:{collect_agent_host} trace_limit:{trace_limit} log_level:{log_level}")

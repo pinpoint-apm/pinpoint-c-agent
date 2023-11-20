@@ -111,6 +111,23 @@ class PinTrace:
         return self.name
 
 
+class TraceIdObject:
+    def __init__(self, id: int) -> None:
+        self.traceId = id
+
+
+class PinTraceV1(PinTrace):
+    def onBefore(self, parentId: int, *args, **kwargs):
+        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
+        return TraceIdObject(trace_id), args, kwargs
+
+    def onEnd(self, traceIdObj: TraceIdObject, ret):
+        return super().onEnd(traceIdObj.traceId, ret)
+
+    def onException(self, traceId: TraceIdObject, e):
+        raise NotImplementedError()
+
+
 class PinHeader:
     def __init__(self) -> None:
         # Path field in pinpoint-web
