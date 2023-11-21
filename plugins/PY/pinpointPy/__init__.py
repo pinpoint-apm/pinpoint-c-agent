@@ -31,5 +31,5 @@ def use_thread_local_context():
 
 __all__ = ['monkey_patch_for_pinpoint', 'use_thread_local_context'
            'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader']
-__version__ = "1.0.15"
+__version__ = "1.1.0"
 __author__ = 'liu.mingyi@navercorp.com'
