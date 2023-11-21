@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from starlette.middleware import Middleware
-from pinpointPy.Fastapi import PinPointMiddleWare, async_monkey_patch_for_pinpoint
-from pinpointPy import set_agent
+from pinpointPy.Fastapi import PinPointMiddleWare, async_monkey_patch_for_pinpoint, use_starlette_context
+from pinpointPy import set_agent, monkey_patch_for_pinpoint
 from sqlalchemy.orm import Session
 from starlette_context.middleware import ContextMiddleware
 import aioredis
@@ -33,9 +33,11 @@ middleware = [
     Middleware(UserMiddleWare)
 ]
 
+use_starlette_context()
+monkey_patch_for_pinpoint()
 async_monkey_patch_for_pinpoint()
 
-set_agent("cd.dev.test.py.backend", "cd.dev.test.py.backend", 'tcp:dev-collector:10000')
+set_agent("cd.dev.test.py.backends", "cd.dev.test.backends", 'tcp:dev-collector:10000')
 
 
 @asynccontextmanager
@@ -67,16 +69,48 @@ async def db_session_middleware(request: Request, call_next):
     return response
 
 
-def get_db(request: Request):
-    return request.state.db
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/test-redis/set/{uid}", tags=["redis"])
+@app.get("/test-requests", tags=['sync-libraries'])
+async def test_requests(request: Request, url='http://www.example.com'):
+    import requests
+    x = requests.get(url)
+    return {"response": x.status_code}
+
+
+@app.get("/test-mysql-connector", tags=['sync-libraries'])
+async def test_mysql_connector(request: Request):
+    import datetime
+    import mysql.connector
+
+    cnx = mysql.connector.connect(
+        user='root',
+        password='password',
+        host='dev-mysql',
+        database='employees')
+    cursor = cnx.cursor()
+
+    query = ("SELECT first_name, last_name, hire_date FROM employees "
+             "WHERE hire_date BETWEEN %s AND %s")
+
+    hire_start = datetime.date(1999, 1, 1)
+    hire_end = datetime.date(1999, 12, 31)
+
+    cursor.execute(query, (hire_start, hire_end))
+
+    for (first_name, last_name, hire_date) in cursor:
+        print("{}, {} was hired on {:%d %b %Y}".format(
+            last_name, first_name, hire_date))
+
+    cursor.close()
+    cnx.close()
+    return {"response": 200}
+
+
+@app.get("/test-redis/set/{uid}", tags=["aioredis"])
 async def test_redis(uid: str = "default"):
     await redis.set(uid, "50fdf310-7d3b-11ee-b962-0242ac120002", ex=1)
     in_value = await redis.get(uid)
@@ -91,8 +125,16 @@ async def test_httpx(request: Request, url='http://www.example.com/'):
     return {"response": response.status_code}
 
 
+@app.get("/httpx/backend", tags=["httpx"])
+async def test_httpx_backend(request: Request, url='http://backend:8000/'):
+    requests_client = request.app.requests_client
+    print(request.headers)
+    response = await requests_client.get(url)
+    return {"response": response.status_code}
+
+
 @app.get("/httpx-self/", tags=["httpx"])
-async def test_httpx(request: Request):
+async def test_httpx_self(request: Request):
     requests_client = request.app.requests_client
     response = await requests_client.get('http://127.0.0.1:8000/httpx/example')
     return {"response": response.status_code}
@@ -100,7 +142,7 @@ async def test_httpx(request: Request):
 # thanks guide from https://fastapi.tiangolo.com/tutorial/sql-databases/
 
 
-@app.post("/users/", response_model=schemas.User, tags=["mysql"])
+@app.post("/users/", response_model=schemas.User, tags=["sqlalchemy"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
@@ -108,13 +150,13 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@app.get("/users/", response_model=List[schemas.User], tags=["mysql"])
+@app.get("/users/", response_model=List[schemas.User], tags=["sqlalchemy"])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
 
-@app.get("/users/{user_id}", response_model=schemas.User, tags=["mysql"])
+@app.get("/users/{user_id}", response_model=schemas.User, tags=["sqlalchemy"])
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
@@ -122,14 +164,14 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.post("/users/{user_id}/items/", response_model=schemas.Item, tags=["mysql"])
+@app.post("/users/{user_id}/items/", response_model=schemas.Item, tags=["sqlalchemy"])
 def create_item_for_user(
     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
 ):
     return crud.create_user_item(db=db, item=item, user_id=user_id)
 
 
-@app.get("/items/", response_model=List[schemas.Item], tags=["mysql"])
+@app.get("/items/", response_model=List[schemas.Item], tags=["sqlalchemy"])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items

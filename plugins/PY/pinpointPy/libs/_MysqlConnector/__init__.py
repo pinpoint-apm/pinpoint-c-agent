@@ -22,21 +22,33 @@ from pinpointPy import get_logger
 def monkey_patch():
     try:
         from mysql.connector.cursor import MySQLCursor, MySQLCursorPrepared
-        from mysql.connector.cursor_cext import CMySQLCursor, CMySQLCursorPrepared
         from .MysqlPlugin import MysqlPlugin
-        from .CMysqlPlugin import CMysqlPlugin
 
         Interceptors = [
             Interceptor(MySQLCursor, 'execute', MysqlPlugin),
             Interceptor(MySQLCursorPrepared, 'execute', MysqlPlugin),
-            Interceptor(CMySQLCursor, 'execute', CMysqlPlugin),
-            Interceptor(CMySQLCursorPrepared, 'execute', CMysqlPlugin),
         ]
         for interceptor in Interceptors:
             interceptor.enable()
 
     except ImportError as e:
         get_logger().warning(f'import _MysqlConnector {e}')
+        import sys
+        if 'unittest' in sys.modules.keys():
+            raise e
+
+    try:
+        from mysql.connector.cursor_cext import CMySQLCursor, CMySQLCursorPrepared
+        from .CMysqlPlugin import CMysqlPlugin
+
+        Interceptors = [
+            Interceptor(CMySQLCursor, 'execute', CMysqlPlugin),
+            Interceptor(CMySQLCursorPrepared, 'execute', CMysqlPlugin),
+        ]
+        for interceptor in Interceptors:
+            interceptor.enable()
+    except ImportError as e:
+        get_logger().warning(f'import _mysql_connector {e}')
         import sys
         if 'unittest' in sys.modules.keys():
             raise e

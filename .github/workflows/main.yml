@@ -120,13 +120,18 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: 'true'
+      - name: update docker compose
+        run: |
+          wget "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+          chmod +x docker-compose-linux-x86_64
+          ./docker-compose-linux-x86_64 version
       # - name: build python-plugins
         # run: docker-compose  -f "testapps/compose.yaml" build python-plugins
       - name: start test environment
-        run: docker-compose -f "testapps/compose.yaml" up python-plugins
+        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up python-plugins --exit-code-from python-plugins
       - name: Stop containers
-        if: always()
-        run: docker-compose -f "testapps/compose.yaml" down  
+        # if: always()
+        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down python-plugins
   Collector-agent:
     strategy:
       matrix:

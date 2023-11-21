@@ -33,9 +33,9 @@ def __monkey_patch(*args, **kwargs):
             module = importlib.import_module('pinpointPy.Fastapi.' + key)
             monkey_patch = getattr(module, 'monkey_patch')
             if callable(monkey_patch):
-                monkey_patch()
                 get_logger().debug(
                     f"try to install pinpointPy.Fastapi.{key} module")
+                monkey_patch()
 
 
 def async_monkey_patch_for_pinpoint(AioRedis=True, MotorMongo=True, httpx=True):

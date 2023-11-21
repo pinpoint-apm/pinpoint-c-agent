@@ -69,10 +69,6 @@ async def db_session_middleware(request: Request, call_next):
     return response
 
 
-def get_db(request: Request):
-    return request.state.db
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}

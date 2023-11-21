@@ -40,7 +40,7 @@ def generatePinpointHeader(host, headers, traceId=-1):
     nextSeqId = pinpoint.gen_sid()
     pinpoint.add_context(Defines.PP_NEXT_SPAN_ID, nextSeqId, traceId)
     headers[Defines.PP_HEADER_PINPOINT_SPANID] = nextSeqId
-    get_logger().debug(f'headers:{headers}')
+    get_logger().debug(f'append PinpointHeader header:{headers}')
 
 
 def startPinpointByEnviron(environ, trace_id: int):

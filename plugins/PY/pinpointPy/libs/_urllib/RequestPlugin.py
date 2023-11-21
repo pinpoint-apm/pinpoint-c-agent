@@ -24,6 +24,16 @@ from pinpointPy import Common, Defines, pinpoint, Helper
 
 class RequestPlugin(Common.PinTrace):
 
+    @staticmethod
+    def get_url(*args, **kwargs):
+        url = "/"
+        if 'url' in kwargs:
+            url = kwargs['url']
+        else:
+            if len(args) >= 2:
+                url = args[1]
+        return url
+
     def __init__(self, name):
         super().__init__(name)
 
@@ -41,7 +51,7 @@ class RequestPlugin(Common.PinTrace):
             return False, parentId, args, kwargs
         # pull out headers
         if sampled:
-            url = args[1]
+            url = RequestPlugin.get_url(*args, **kwargs)
             target = urlparse(url).netloc
             if pinpoint.get_context(Defines.PP_HEADER_PINPOINT_SAMPLED, parentId) == "s1":
                 Helper.generatePinpointHeader(
@@ -60,7 +70,7 @@ class RequestPlugin(Common.PinTrace):
 
     def onBefore(self, parentId, *args, **kwargs):
         traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
-        url = args[1]
+        url = RequestPlugin.get_url(*args, **kwargs)
         target = urlparse(url).netloc
 
         ###############################################################
