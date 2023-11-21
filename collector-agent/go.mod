@@ -10,11 +10,9 @@ require (
 	github.com/shirou/gopsutil v3.21.2+incompatible
 	github.com/shirou/gopsutil/v3 v3.21.2
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.8.3
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98 // indirect
-	google.golang.org/grpc v1.36.0
+	google.golang.org/grpc v1.56.3
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
-	gopkg.in/yaml.v3 v3.0.0 // indirect
 )
