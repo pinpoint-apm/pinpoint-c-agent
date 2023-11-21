@@ -8,10 +8,10 @@ services:
     hostname: dev-mysql
     environment:
       MYSQL_ROOT_PASSWORD: 'password'
-    ports:
-      - '3306:3306'      
-    expose:
-      - '3306'
+    # ports:
+      # - '3306:3306'      
+    # expose:
+      # - '3306'
     volumes:
       - ..:/workspace:cached
 
@@ -23,8 +23,8 @@ services:
     labels:
       - "name=redis"
       - "mode=standalone"
-    ports:
-      - 6379:6379
+    # ports:
+      # - 6379:6379
     volumes:
       - ..:/workspace:cached
   mongodb:
@@ -34,15 +34,15 @@ services:
     # environment:
     #   MONGO_INITDB_ROOT_USERNAME: root
     #   MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - 27017:27017
+    # ports:
+      # - 27017:27017
 
   httpbin:
     image: kennethreitz/httpbin:latest
     container_name: httpbin
     hostname: httpbin
-    ports:
-      - 8999:80
+    # ports:
+      # - 8999:80
     volumes:
       - ..:/workspace:cached      
       
