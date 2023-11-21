@@ -7,3 +7,5 @@ starlette
 starlette_context
 uvicorn
 pymysql
+requests
+mysql-connector-python==8.0.31

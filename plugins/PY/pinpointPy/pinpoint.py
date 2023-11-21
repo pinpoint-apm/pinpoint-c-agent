@@ -28,7 +28,7 @@ __app_name = 'app_name_str'
 __logger__ = None
 
 
-def get_logger(level=logging.INFO) -> logging.Logger:
+def get_logger() -> logging.Logger:
     global __logger__
     if __logger__:
         return __logger__
@@ -42,20 +42,19 @@ def get_logger(level=logging.INFO) -> logging.Logger:
         file_handler = logging.FileHandler(filepath)
         print(filepath)
         file_handler.setFormatter(formatter)
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(level=logging.DEBUG)
         logger.addHandler(file_handler)
-    elif level == logging.DEBUG:
+    else:
         ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
         logger.addHandler(ch)
-    else:
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
     __logger__ = logger
     return __logger__
+
+
+def _set_logger_level(level=logging.INFO):
+    get_logger().setLevel(level)
 
 
 def app_id():
@@ -122,13 +121,10 @@ def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trac
     __app_id = app_id_str
     __app_name = app_name_str
     _pinpointPy.set_agent(collect_agent_host, trace_limit)
-    get_logger().setLevel(log_level)
     if log_level == logging.DEBUG:
         def debug_func(msg: str):
             get_logger().debug(msg=msg)
         _pinpointPy.enable_debug(debug_func)
-    global __logger__
-    __logger__ = None
-    get_logger(log_level)
+    _set_logger_level(log_level)
     get_logger().debug(
         f"appid:{app_id_str} appname:{app_name_str} collector_agent:{collect_agent_host} trace_limit:{trace_limit} log_level:{log_level}")
