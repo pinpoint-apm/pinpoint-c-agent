@@ -26,7 +26,7 @@ def __monkey_patch(*args, **kwargs):
                 try:
                     monkey_patch()
                 except Exception as e:
-                    get_logger().info(f'exception at {e}')
+                    get_logger().info(f'monkey_patch exception:{e}')
 
 
 def monkey_patch_for_pinpoint(pymongo=True,

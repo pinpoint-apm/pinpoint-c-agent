@@ -18,6 +18,8 @@
 # ------------------------------------------------------------------------------
 
 import importlib
+import warnings
+
 from pinpointPy.Fastapi.PinTranscation import PinTransaction, PinStarlettePlugin
 from pinpointPy.Fastapi.AsyCommonPlugin import CommonPlugin
 from pinpointPy.Fastapi.AsyCommon import AsyncTraceContext
@@ -38,8 +40,15 @@ def __monkey_patch(*args, **kwargs):
                 monkey_patch()
 
 
-def async_monkey_patch_for_pinpoint(AioRedis=True, MotorMongo=True, httpx=True):
-    __monkey_patch(_aioredis=AioRedis, _MotorMongo=MotorMongo, _httpx=httpx)
+def async_monkey_patch_for_pinpoint(AioRedis=True, httpx=True):
+    __monkey_patch(_aioredis=AioRedis, _httpx=httpx)
+
+
+def asyn_monkey_patch_for_pinpoint(
+        AioRedis=True, httpx=True):
+    warnings.warn(
+        "deprecated try to use `async_monkey_patch_for_pinpoint`", DeprecationWarning)
+    async_monkey_patch_for_pinpoint(AioRedis, httpx)
 
 
 def use_starlette_context():
@@ -48,5 +57,5 @@ def use_starlette_context():
 
 __version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'
-__all__ = ['async_monkey_patch_for_pinpoint', 'use_starlette_context', 'PinPointMiddleWare',
+__all__ = ['async_monkey_patch_for_pinpoint', 'asyn_monkey_patch_for_pinpoint', 'use_starlette_context', 'PinPointMiddleWare',
            'CommonPlugin', 'PinTransaction', 'PinHeader', 'GenPinHeader', 'PinStarlettePlugin']

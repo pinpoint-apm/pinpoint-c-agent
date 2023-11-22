@@ -26,27 +26,14 @@ from pinpointPy import get_logger
 def monkey_patch():
 
     try:
-        from pymongo.collection import Collection
-        from .MongoClientPlugin import MongoClientPlugin
-        Interceptors = [
-            Interceptor(Collection, 'find', MongoClientPlugin),
-            # Interceptor(Collection, 'insert', MongoClientPlugin),
-            # Interceptor(Collection, 'update', MongoClientPlugin),
-            Interceptor(Collection, 'update_many', MongoClientPlugin),
-            Interceptor(Collection, 'delete_one', MongoClientPlugin),
-            Interceptor(Collection, 'delete_many', MongoClientPlugin),
-            Interceptor(Collection, 'insert_many', MongoClientPlugin),
-            Interceptor(Collection, 'insert_one', MongoClientPlugin),
-        ]
-
-        for interceptor in Interceptors:
-            interceptor.enable()
-
+        from pymongo import monitoring
+        from .MongoClientPlugin import CommandLogger
+        monitoring.register(CommandLogger())
     except ImportError as e:
         get_logger().info(f'exception at {e}')
 
 
 __all__ = ['monkey_patch']
 
-__version__ = '0.0.2'
+__version__ = '0.0.4'
 __author__ = 'liu.mingyi@navercorp.com'

@@ -35,9 +35,7 @@ def monkey_patch():
         for interceptor in Interceptors:
             interceptor.enable()
     except ImportError as e:
-        get_logger().debug(f"import httpx:{e}")
-    except:
-        get_logger().info(f"unknown error in httpx module")
+        get_logger().info(f"exception at {e}")
 
 
 __all__ = ['monkey_patch']
