@@ -1,6 +1,7 @@
+import logging
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from starlette.middleware import Middleware
-from pinpointPy.Fastapi import PinPointMiddleWare, async_monkey_patch_for_pinpoint, use_starlette_context
+from pinpointPy.Fastapi import PinPointMiddleWare, async_monkey_patch_for_pinpoint, use_starlette_context, asyn_monkey_patch_for_pinpoint
 from pinpointPy import set_agent, monkey_patch_for_pinpoint
 from sqlalchemy.orm import Session
 from starlette_context.middleware import ContextMiddleware
@@ -9,15 +10,28 @@ from contextlib import asynccontextmanager
 import httpx
 from typing import List
 
+import motor.motor_asyncio
+
+
 import crud
 import models
 import schemas
 
 from database import SessionLocal, engine
 
+
 models.Base.metadata.create_all(bind=engine)
 
 redis = aioredis.from_url('redis://redis:6379', decode_responses=True)
+
+MONGO_DETAILS = "mongodb://mongodb:27017"
+
+
+def span_helper(id, start_time) -> dict:
+    return {
+        "id": id,
+        "start_time": start_time
+    }
 
 
 class UserMiddleWare(PinPointMiddleWare):
@@ -33,11 +47,21 @@ middleware = [
     Middleware(UserMiddleWare)
 ]
 
+
+set_agent("cd.dev.test.py", "cd.dev.test.py",
+          'tcp:dev-collector:10000', -1, logging.DEBUG)
+
 use_starlette_context()
 monkey_patch_for_pinpoint()
+# asyn_monkey_patch_for_pinpoint(False, False)
 async_monkey_patch_for_pinpoint()
 
-set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000')
+
+client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+
+database = client.pinpoint
+
+span_collection = database.get_collection("span_collection")
 
 
 @asynccontextmanager
@@ -175,3 +199,11 @@ def create_item_for_user(
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
+
+
+@app.get("/add_span/", tags=["motor"])
+async def add_span(request: Request, id: int, start_time: int):
+    span = span_helper(id, start_time)
+    newSpan = await span_collection.insert_one(span)
+    new_student = await span_collection.find_one({"id": id})
+    return {"response": 200}

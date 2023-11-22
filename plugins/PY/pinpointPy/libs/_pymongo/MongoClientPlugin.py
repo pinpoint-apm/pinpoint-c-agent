@@ -19,37 +19,67 @@
 
 # Created by eeliu at 8/20/20
 
-from pinpointPy import Common
-from pinpointPy import pinpoint
-from pinpointPy import Defines
+from pinpointPy import Common, pinpoint, Defines, get_logger
+from pymongo import monitoring
 
 
 class MongoClientPlugin(Common.PinTrace):
     def __init__(self, name):
         super().__init__(name)
+        self.trace_id = -1
 
     def onBefore(self, parentId, *args, **kwargs):
         traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
-        collection = args[0]
-        try:
-            dst = str(collection.__database.address)
-        except AttributeError:
-            dst = collection.name
+        event = args[0]
+        assert isinstance(event, monitoring.CommandStartedEvent)
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), traceId)
+            Defines.PP_INTERCEPTOR_NAME, event.command_name, traceId)
         pinpoint.add_trace_header(
             Defines.PP_SERVER_TYPE, Defines.PP_MONGDB_EXE_QUERY, traceId)
-        pinpoint.add_trace_header(Defines.PP_DESTINATION, dst, traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_DESTINATION, event.database_name, traceId)
+        self.trace_id = traceId
         return traceId, args, kwargs
 
     def onEnd(self, traceId, ret):
-        # disable PP_RETURN
-        # unreadable format
-        # pymongo.cursor.Cursor object at 0x7f9dc76adaf0
-        # InsertManyResult([ObjectId('6553441f7ef332013afc40a2'), ObjectId('6553441f7ef332013afc40a3')], acknowledged=True)
-        # pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), traceId)
-        super().onEnd(traceId, ret)
+        super().onEnd(self.trace_id, ret)
         return ret
 
     def onException(self, traceId, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
+        pinpoint.add_trace_header(
+            Defines.PP_ADD_EXCEPTION, str(e), self.trace_id)
+
+
+class CommandLogger(monitoring.CommandListener):
+
+    def __init__(self) -> None:
+        self.request_id_map = {}
+
+    def started(self, event):
+        sampled, parentId, _, _ = MongoClientPlugin.isSample()
+        if not sampled:
+            return
+        request_id = event.request_id
+
+        if request_id in self.request_id_map:
+            get_logger().info("started listener called with wrong order, maybe a bug")
+            return
+
+        watcher = MongoClientPlugin("monitoring.CommandListener")
+        watcher.onBefore(parentId, event)
+        self.request_id_map[request_id] = watcher
+
+    def succeeded(self, event):
+        request_id = event.request_id
+        if request_id in self.request_id_map:
+            watcher = self.request_id_map[request_id]
+            watcher.onEnd(0, None)
+            del self.request_id_map[request_id]
+
+    def failed(self, event):
+        request_id = event.request_id
+        if request_id in self.request_id_map:
+            watcher = self.request_id_map[request_id]
+            watcher.onException(0, event.failure)
+            watcher.onEnd(0, None)
+            del self.request_id_map[request_id]

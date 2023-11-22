@@ -48,7 +48,7 @@ def monkey_patch():
         for interceptor in Interceptors:
             interceptor.enable()
     except ImportError as e:
-        get_logger().warning(f'import _mysql_connector {e}')
+        get_logger().info(f"exception at {e}")
         import sys
         if 'unittest' in sys.modules.keys():
             raise e

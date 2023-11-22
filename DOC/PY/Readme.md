@@ -6,10 +6,9 @@
 
 Dependency| Version| More
 ---|----|---
-python |2.7,3+ | (async must 3.7.1+)
+python |3+ | (async must 3.7.1+)
 GO | | 
 gcc|gcc 4.7+| c++11
-cmake| 3.1+| 
 *inux|  | `windows` is on the way
 pinpoint| 2.0+(GRPC)|
 collector-agent| [installed ?](../collector-agent/readme.md)
@@ -40,6 +39,11 @@ app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
 settings.py
 
 ```python
+from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context
+use_thread_local_context()
+monkey_patch_for_pinpoint()
+set_agent("cd.dev.test.py", "cd.dev.test.py",
+          'tcp:dev-collector:10000', -1)
 
 MIDDLEWARE = [
     'pinpointPy.Django.DjangoMiddleWare',
@@ -50,8 +54,6 @@ MIDDLEWARE = [
 #### 1.3 Fastapi
 Settings in app/main.py:
 ```
-# pinpoint
-##############################################
 from starlette_context.middleware import ContextMiddleware
 from starlette_context import context, plugins
 
@@ -64,9 +66,12 @@ middleware = [
     Middleware(ContextMiddleware),
     Middleware(PinPointMiddleWare)
 ]
-asyn_monkey_patch_for_pinpoint()
-set_agent("fastapi-redis", "fastapi-redis", 'tcp:collect-agent:9999', -1, True)
-##############################################
+set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000')
+use_starlette_context()
+## patch for synchronous libraries, such as requests,myql-connector-python ...
+# support lists https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/plugins/PY/pinpointPy/libs
+monkey_patch_for_pinpoint()
+async_monkey_patch_for_pinpoint()
 ```
 Example: [fastapi-redis-pinpoint](https://github.com/EyelynSu/fastapi-redis-pinpoint)
 
@@ -109,19 +114,6 @@ Todo....
 > Add pinpoint middleware
 
 > Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
-
-
-### 2. Configuration
-
-
-```py
-
-# enable auto-interceptor plugins
-monkey_patch_for_pinpoint()
-# set pinpoint related environment
-set_agent("flask-agent","FLASK-AGENT",'tcp:dev-collector:9999',-1)
-
-```
 
 
 ## Performance Test Result
