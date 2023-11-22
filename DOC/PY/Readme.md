@@ -27,6 +27,11 @@ $ pip install pinpointPy
 > include middleware
 
 ```
+from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context
+use_thread_local_context()
+monkey_patch_for_pinpoint()
+set_agent("cd.dev.test.py", "cd.dev.test.py",
+          'tcp:dev-collector:10000', -1)
 app = Flask(__name__)
 app.wsgi_app = PinPointMiddleWare(app,app.wsgi_app)
 ```

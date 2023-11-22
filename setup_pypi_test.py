@@ -31,7 +31,7 @@ for a_file in Path("common").glob('**/*.c'):
     extFiles.append(str(a_file))
 
 setup(name='pinpointPy',
-      version="1.1.0",  # don't forget update __version__ in pinpointPy/__init__.py
+      version="1.1.1",  # don't forget update __version__ in pinpointPy/__init__.py
       author="cd_pinpoint members",
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',

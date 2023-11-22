@@ -1,4 +1,4 @@
-![Pinpoint](images/logo.png)
+![pinpoint](images/logo.png)
 
 [![Build](https://github.com/pinpoint-apm/pinpoint-c-agent/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-c-agent/actions) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent) [![License](https://img.shields.io/github/license/pinpoint-apm/pinpoint-c-agent)](LICENSE)
 
@@ -42,7 +42,7 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 * Collector-Agent (**Required**)
 * PHP-Agent
 * Python-Agent
-* c/cpp=Agent
+* c/cpp Agent
 * Golang-Agent
 
 ### Install Collector-Agent
@@ -77,67 +77,10 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
 </details>
 
 ## Contributing
+
 We are looking forward to your contributions via pull requests.
 
-### Contributors
-
-<table>
-<tr>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/eeliu>
-            <img src=https://avatars.githubusercontent.com/u/27064129?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=eeliu/>
-            <br />
-            <sub style="font-size:7px"><b>eeliu</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/EyelynSu>
-            <img src=https://avatars.githubusercontent.com/u/41946743?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Evelyn/>
-            <br />
-            <sub style="font-size:7px"><b>Evelyn</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/Zoey-dot>
-            <img src=https://avatars.githubusercontent.com/u/59548335?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Zoey/>
-            <br />
-            <sub style="font-size:7px"><b>Zoey</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/ChenGXQQ>
-            <img src=https://avatars.githubusercontent.com/u/20234781?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=chenguoxi/>
-            <br />
-            <sub style="font-size:7px"><b>chenguoxi</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/marty-macfly>
-            <img src=https://avatars.githubusercontent.com/u/12715929?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Macfly/>
-            <br />
-            <sub style="font-size:7px"><b>Macfly</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/mayingping-Bella>
-            <img src=https://avatars.githubusercontent.com/u/72844069?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=mayingping-Bella/>
-            <br />
-            <sub style="font-size:7px"><b>mayingping-Bella</b></sub>
-        </a>
-    </td>
-</tr>
-<tr>
-    <td align="center" style="word-wrap: break-word; width: 75.0; height: 75.0">
-        <a href=https://github.com/emeroad>
-            <img src=https://avatars.githubusercontent.com/u/7564547?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Woonduk Kang/>
-            <br />
-            <sub style="font-size:7px"><b>Woonduk Kang</b></sub>
-        </a>
-    </td>
-</tr>
-</table>
-
-
+https://github.com/pinpoint-apm/pinpoint-c-agent/graphs/contributors
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
