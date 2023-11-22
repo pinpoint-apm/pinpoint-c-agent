@@ -9,3 +9,4 @@ uvicorn
 pymysql
 requests
 mysql-connector-python==8.0.31
+motor==2.5.1
