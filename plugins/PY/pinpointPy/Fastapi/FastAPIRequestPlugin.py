@@ -45,9 +45,9 @@ class FastAPIRequestPlugin(AsyRequestPlugin):
         # fix bug in in fastapi/docs
         ut = '/'
         if 'root_path' in self.request.scope:
-            ut += self.request.scope['root_path']
+            ut = self.request.scope['root_path']
         if 'route' in self.request.scope:
-            ut += self.request.scope['route'].path
+            ut = self.request.scope['route'].path
 
         pinpoint.add_trace_header(Defines.PP_URL_TEMPLATED, ut, traceId)
 
