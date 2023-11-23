@@ -18,11 +18,13 @@ std::mutex cv_m;
 std::condition_variable cv;
 NodeID rootId = E_ROOT_NODE;
 
-int usedNode() { return PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount(); }
+int usedNode() {
+  return PoolManager::getInstance().totoalNodesCount() -
+         PoolManager::getInstance().freeNodesCount();
+}
 
 // note: as it known, there may leak some node
-void func()
-{
+void func() {
   std::unique_lock<std::mutex> lk(cv_m);
   cv.wait(lk);
   pinpoint_add_clues(rootId, "xxxx", "bbbbbbss", E_LOC_CURRENT);
@@ -45,26 +47,28 @@ void func()
   pinpoint_add_clue(rootId, "xxx", "bbbbbb", E_LOC_CURRENT);
 }
 
-TEST(node, multipleThread)
-{
+TEST(node, multipleThread) {
   // no crash, works fine
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);
 
   std::vector<std::thread> threads;
 
-  for (int i = 0; i < 10; i++) { threads.push_back(std::thread(func)); }
+  for (int i = 0; i < 10; i++) {
+    threads.push_back(std::thread(func));
+  }
 
   sleep(2);
   cv.notify_all();
 
-  for (int i = 0; i < 10; i++) { threads[i].join(); }
+  for (int i = 0; i < 10; i++) {
+    threads[i].join();
+  }
   pinpoint_end_trace(root);
   pinpoint_end_trace(root);
   // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
-TEST(node, wakeTrace)
-{
+TEST(node, wakeTrace) {
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);
   NodeID child1 = pinpoint_start_trace(root);
 
@@ -82,17 +86,15 @@ TEST(node, wakeTrace)
   // EXPECT_TRUE(PoolManager::getInstance().NoNodeLeak());
 }
 
-void test_opt(TraceNode &node, const char *opt, ...)
-{
+void test_opt(TraceNode& node, const char* opt, ...) {
   va_list args;
   va_start(args, opt);
   node.setOpt(opt, &args);
   va_end(args);
 }
 
-TEST(node, opt)
-{
-  TraceNode &node = PoolManager::getInstance().Take();
+TEST(node, opt) {
+  TraceNode& node = PoolManager::getInstance().Take();
 
   test_opt(node, "TraceMinTimeMs:23", "TraceOnlyException", nullptr);
 
@@ -112,10 +114,9 @@ TEST(node, opt)
 }
 
 static std::string span;
-void capture(const char *msg) { span = msg; }
+void capture(const char* msg) { span = msg; }
 //./bin/TestCommon --gtest_filter=node.pinpoint_start_traceV1
-TEST(node, pinpoint_start_traceV1)
-{
+TEST(node, pinpoint_start_traceV1) {
   auto count = usedNode();
   register_span_handler(capture);
   NodeID root, child1;
@@ -124,7 +125,9 @@ TEST(node, pinpoint_start_traceV1)
   pinpoint_add_clue(child1, "name", "Take1sec", E_LOC_CURRENT);
   sleep(1);
   pinpoint_end_trace(child1);
-
+  check_tracelimit(-1);
+  check_tracelimit(0);
+  check_tracelimit(time(nullptr));
   child1 = pinpoint_start_traceV1(root, "TraceOnlyException", nullptr);
   pinpoint_add_clue(child1, "name", "Exception", E_LOC_CURRENT);
   pinpoint_add_exception(child1, "xxxxxxxxx");
@@ -168,8 +171,7 @@ TEST(node, pinpoint_start_traceV1)
   EXPECT_EQ(count, usedNode());
 }
 
-TEST(node, leak_node)
-{
+TEST(node, leak_node) {
   auto count = PoolManager::getInstance().freeNodesCount();
   NodeID root, child1, child2;
   root = pinpoint_start_trace(E_ROOT_NODE);
@@ -185,9 +187,9 @@ TEST(node, leak_node)
   show_status();
 }
 
-TEST(node, tons_of_nodes_01)
-{
-  auto count = usedNode();  // PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+TEST(node, tons_of_nodes_01) {
+  auto count = usedNode(); // PoolManager::getInstance().totoalNodesCount() -
+                           // PoolManager::getInstance().freeNodesCount();
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);
   for (int i = 0; i < 1000; i++) {
     NodeID child1 = pinpoint_start_trace(root);
@@ -195,7 +197,7 @@ TEST(node, tons_of_nodes_01)
   }
   pinpoint_end_trace(root);
 
-  EXPECT_EQ(count, usedNode());	 //);
+  EXPECT_EQ(count, usedNode()); //);
 
   count = usedNode();
   root = pinpoint_start_trace(E_ROOT_NODE);
@@ -212,23 +214,24 @@ TEST(node, tons_of_nodes_01)
   EXPECT_EQ(count, usedNode());
 }
 
-TEST(node, tons_of_nodes_2k)
-{
-  auto count = usedNode();  // PoolManager::getInstance().totoalNodesCount() - PoolManager::getInstance().freeNodesCount();
+TEST(node, tons_of_nodes_2k) {
+  auto count = usedNode(); // PoolManager::getInstance().totoalNodesCount() -
+                           // PoolManager::getInstance().freeNodesCount();
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);
   NodeID next = root;
   for (int i = 0; i < 2000; i++) {
     NodeID child = pinpoint_start_trace(next);
     pinpoint_end_trace(child);
-    if (i % 2 == 0) { next = child; }
+    if (i % 2 == 0) {
+      next = child;
+    }
   }
   pinpoint_end_trace(root);
 
   EXPECT_EQ(count, usedNode());
 }
 
-TEST(node, tons_of_nodes_leak)
-{
+TEST(node, tons_of_nodes_leak) {
   auto count = usedNode();
 
   NodeID root, child_1, child_2;
@@ -244,8 +247,7 @@ TEST(node, tons_of_nodes_leak)
   EXPECT_EQ(count, usedNode());
 }
 
-TEST(node, tons_of_nodes_free_all)
-{
+TEST(node, tons_of_nodes_free_all) {
   auto count = usedNode();
 
   NodeID root, child_1, child_2;
@@ -261,8 +263,7 @@ TEST(node, tons_of_nodes_free_all)
   EXPECT_EQ(count, usedNode());
 }
 //./bin/TestCommon --gtest_filter=node.free_when_add
-TEST(node, free_when_add)
-{
+TEST(node, free_when_add) {
   auto count = usedNode();
   NodeID root;
   auto make_it_busy = [&]() {
@@ -287,8 +288,7 @@ TEST(node, free_when_add)
 }
 
 //./bin/TestCommon --gtest_filter=node.orphan_node
-TEST(node, orphan_node)
-{
+TEST(node, orphan_node) {
   auto count = usedNode();
   NodeID root, child_1, orphan;
   root = pinpoint_start_trace(E_ROOT_NODE);
@@ -307,8 +307,7 @@ TEST(node, orphan_node)
   EXPECT_EQ(count, usedNode());
 }
 //./bin/TestCommon --gtest_filter=node.orphan_node_01
-TEST(node, orphan_node_01)
-{
+TEST(node, orphan_node_01) {
   auto count = usedNode();
   NodeID root, child_1, orphan;
   root = pinpoint_start_trace(E_ROOT_NODE);
@@ -322,8 +321,7 @@ TEST(node, orphan_node_01)
   EXPECT_EQ(count, usedNode());
 }
 //./bin/TestCommon --gtest_filter=node.orphan_root_parent_end
-TEST(node, orphan_parent_root_end)
-{
+TEST(node, orphan_parent_root_end) {
   auto count = usedNode();
   NodeID root, child_1, orphan;
   root = pinpoint_start_trace(E_ROOT_NODE);
@@ -337,8 +335,7 @@ TEST(node, orphan_parent_root_end)
   EXPECT_EQ(count, usedNode());
 }
 
-TEST(node, orphan_root_parent_end)
-{
+TEST(node, orphan_root_parent_end) {
   auto count = usedNode();
   NodeID root, child_1, orphan;
   root = pinpoint_start_trace(E_ROOT_NODE);
@@ -352,12 +349,13 @@ TEST(node, orphan_root_parent_end)
   EXPECT_EQ(count, usedNode());
 }
 // ./bin/TestCommon --gtest_filter=node.end_trace_in_mt
-TEST(node, end_trace_in_mt)
-{
+TEST(node, end_trace_in_mt) {
   auto count = usedNode();
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);
   NodeID next = root;
-  // limit size 100; due to https://github.com/pinpoint-apm/pinpoint-c-agent/runs/6806024797?check_suite_focus=true bus error under macos
+  // limit size 100; due to
+  // https://github.com/pinpoint-apm/pinpoint-c-agent/runs/6806024797?check_suite_focus=true bus
+  // error under macos
   for (int i = 0; i < 100; i++) {
     next = pinpoint_start_trace(next);
     pinpoint_end_trace(next);
@@ -380,17 +378,19 @@ TEST(node, end_trace_in_mt)
   // wait for all threads running
   sleep(2);
   cv.notify_all();
-  for (auto &thread : threads) thread.join();
+  for (auto& thread : threads)
+    thread.join();
   EXPECT_EQ(count, usedNode());
 }
 // ./bin/TestCommon --gtest_filter=node.max_sub_nodes
-TEST(node, max_sub_nodes)
-{
+TEST(node, max_sub_nodes) {
   auto count = usedNode();
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);
   while (true) {
     NodeID next = pinpoint_start_trace(root);
-    if (next == E_INVALID_NODE) { break; }
+    if (next == E_INVALID_NODE) {
+      break;
+    }
     pinpoint_end_trace(next);
   }
   pinpoint_end_trace(root);
