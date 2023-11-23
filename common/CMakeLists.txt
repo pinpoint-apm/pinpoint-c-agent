@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(common VERSION 0.4.24 DESCRIPTION  "pinpoint common library")
+project(pinpoint VERSION 0.4.24 DESCRIPTION  "pinpoint common library")
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -45,18 +45,26 @@ link_directories(${CMAKE_BINARY_DIR}/lib)
 add_subdirectory(jsoncpp)
 add_subdirectory(src)
 
+add_library(pinpoint_common_static STATIC $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)
+
+target_include_directories(pinpoint_common_static PUBLIC
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+)
+
 if(UNIX AND NOT APPLE)
     include(GNUInstallDirs)
     add_library(pinpoint_common_shared SHARED $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)  
     install(DIRECTORY include/ DESTINATION include/pinpoint_common
             FILES_MATCHING PATTERN "*.h")
 
-    set_target_properties(pinpoint_common_shared pinpoint_common PROPERTIES 
+    set_target_properties(pinpoint_common_shared pinpoint_common_static PROPERTIES 
             VERSION ${PROJECT_VERSION}
             SOVERSION 1
             PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/common.h")      
 
-    install(TARGETS pinpoint_common_shared pinpoint_common ${INSTALL_EXPORT}
+    install(TARGETS pinpoint_common_shared pinpoint_common_static ${INSTALL_EXPORT}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
