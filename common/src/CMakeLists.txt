@@ -4,4 +4,4 @@ foreach(dir  ${src_dir})
 endforeach()
 
 add_library(pinpoint_common_obj OBJECT ${SRC_FILES})
-add_library(pinpoint_common STATIC $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)
+# add_library(pinpoint_common STATIC $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)
