@@ -182,22 +182,15 @@ int pinpoint_wake_trace(NodeID traceId) {
 }
 
 int pinpoint_force_end_trace(NodeID id, int32_t timeout) {
-  try {
-    _span_timeout = timeout;
-    while (id != E_ROOT_NODE) {
-      id = pinpoint_end_trace(id);
-      if (id == E_INVALID_NODE)
-        break;
-    }
-    // back to normal
-    _span_timeout = global_agent_info.timeout_ms;
-    return 0;
-  } catch (const std::out_of_range&) {
-    pp_trace(" [%d] not found", id);
-  } catch (const std::exception& ex) {
-    pp_trace(" [%d] end trace failed. %s", id, ex.what());
+  _span_timeout = timeout;
+  while (id != E_ROOT_NODE) {
+    id = pinpoint_end_trace(id);
+    if (id == E_INVALID_NODE)
+      break;
   }
-  return -1;
+  // back to normal
+  _span_timeout = global_agent_info.timeout_ms;
+  return 0;
 }
 
 int pinpoint_trace_is_root(NodeID _id) {

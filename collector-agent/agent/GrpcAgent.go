@@ -237,7 +237,7 @@ func (agent *GrpcAgent) sendStat() {
 	wg.Add(1)
 	go func() {
 		for {
-			msg := agent.utReport.MoveUtReprot()
+			msg := agent.utReport.MoveUtReport()
 
 			agent.log.Debugf("%v", msg)
 			if err := stream.Send(msg); err != nil {

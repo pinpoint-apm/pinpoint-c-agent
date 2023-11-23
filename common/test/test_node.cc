@@ -78,6 +78,7 @@ TEST(node, wakeTrace) {
   pinpoint_wake_trace(root);
   pinpoint_wake_trace(NodeID(159));
   pinpoint_wake_trace(NodeID(1027));
+  pinpoint_wake_trace(-1);
   // do something
   sleep(1);
   pinpoint_end_trace(child1);
