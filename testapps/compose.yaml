@@ -90,7 +90,7 @@ services:
       dockerfile: testapps/backend.dockerfile
       context: ../
     ports:
-      - 8187:8000  
+      - 8187:80  
   
   testapp-django:
     container_name: django

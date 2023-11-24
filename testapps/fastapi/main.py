@@ -150,7 +150,7 @@ async def test_httpx(request: Request, url='http://www.example.com/'):
 
 
 @app.get("/httpx/backend", tags=["httpx"])
-async def test_httpx_backend(request: Request, url='http://backend:8000/'):
+async def test_httpx_backend(request: Request, url='http://backend/'):
     requests_client = request.app.requests_client
     print(request.headers)
     response = await requests_client.get(url)

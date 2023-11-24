@@ -27,11 +27,8 @@
 ### Use docker images
 
 ```sh
-docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:latest
+docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.4.25
 ```
 
-> Collector Agent Span Specification
-
-[Json string map to Pinpoint item](../API/collector-agent/Readme.md)
 
 

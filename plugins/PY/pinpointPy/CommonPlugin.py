@@ -21,12 +21,12 @@ from pinpointPy import Common, Defines, pinpoint
 class PinpointCommonPlugin(Common.PinTrace):
 
     def onBefore(self, parentId, *args, **kwargs):
-        parentId, args, kwargs = super().onBefore(*args, **kwargs)
+        trace_id, args, kwargs = super().onBefore(parentId, *args, **kwargs)
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), parentId)
+            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), trace_id)
         pinpoint.add_trace_header(
-            Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL, parentId)
-        return args, kwargs
+            Defines.PP_SERVER_TYPE, Defines.PP_METHOD_CALL, trace_id)
+        return trace_id, args, kwargs
 
     def onEnd(self, traceId, ret):
         # pinpoint.add_trace_header_v2(Defines.PP_RETURN, str(ret), traceId)

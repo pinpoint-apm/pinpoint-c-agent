@@ -1,6 +1,6 @@
 ![pinpoint](images/logo.png)
 
-[![Build](https://github.com/pinpoint-apm/pinpoint-c-agent/workflows/Build/badge.svg?branch=master)](https://github.com/pinpoint-apm/pinpoint-c-agent/actions) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent) [![License](https://img.shields.io/github/license/pinpoint-apm/pinpoint-c-agent)](LICENSE)
+[![CI](https://github.com/pinpoint-apm/pinpoint-c-agent/actions/workflows/main.yml/badge.svg)](https://github.com/pinpoint-apm/pinpoint-c-agent/actions/workflows/main.yml) [![Gitter](https://badges.gitter.im/naver/pinpoint-c-agent.svg)](https://gitter.im/naver/pinpoint-c-agent?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![codecov](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent/branch/master/graph/badge.svg?token=KswbmFvWp3)](https://codecov.io/gh/pinpoint-apm/pinpoint-c-agent) [![License](https://img.shields.io/github/license/pinpoint-apm/pinpoint-c-agent)](LICENSE)
 
 
 
@@ -9,41 +9,17 @@
 
 The current stable version is [the Latest](https://github.com/pinpoint-apm/pinpoint-c-agent/releases).
 
-# Pinpoint Common Agent
+# Pinpoint Agent
 
 It is an agent written by C++, PHP and Python languages. And we hope to support other languages by this agent. Until now, it supports **_PHP_**, **_C/CPP_** and **_PYTHON_**.
 
-## Overview Pinpoint Common Agent
+## Overview Pinpoint Agent
 
 ### How does it work
 
 ![How does it work](images/pinpoint_v0.5.x.png)
 
-### Distributed Tracking system
-
-![php_agent_example](images/php_agent_example.png)
-
-### Call Stack
-
-![php_agent_example_detail](images/php_agent_example_detail.png) | ![php_agent_example_memcached](images/callstack-memcached.png)
---- | ---
-![php_agent_example_pdo](images/callstack-pdo.png) | ![php_agent_example_redis](images/callstack-redis.png)
-
-### Real-time Tracking Chart
-
- CPU | Response Time
- --- | ---
- ![php_agent_example_pdo](images/cpu.png) | ![php_agent_example_redis](images/responsetime.png)
-
-
 ## Installation guide
-
-**Components:**
-* Collector-Agent (**Required**)
-* PHP-Agent
-* Python-Agent
-* c/cpp Agent
-* Golang-Agent
 
 ### Install Collector-Agent
 
@@ -79,8 +55,6 @@ golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent)
 ## Contributing
 
 We are looking forward to your contributions via pull requests.
-
-https://github.com/pinpoint-apm/pinpoint-c-agent/graphs/contributors
 
 ## License
 This project is licensed under the Apache License, Version 2.0.
