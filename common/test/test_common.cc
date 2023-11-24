@@ -54,6 +54,10 @@ TEST(common, start_end_trace) {
 
   id = pinpoint_end_trace(id);
   EXPECT_EQ(id, 0);
+  mark_current_trace_status(-1024, E_TRACE_BLOCK);
+  mark_current_trace_status(1024, E_TRACE_BLOCK);
+  catch_error(-1024, "sdfasfas", "fsafdsfasd", 234);
+  catch_error(0, "sdfasfas", "fsafdsfasd", 234);
 }
 
 TEST(common, context_check) {

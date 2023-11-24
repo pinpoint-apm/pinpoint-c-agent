@@ -26,7 +26,7 @@ func (ust *uriStatHistogram) Update(span *TSpan) {
 	ust.TimestampHistogram[span.FindHistogramLevel()] += 1
 }
 
-func (ust *uriStatHistogram) ToUriHistogrm() *v1.PUriHistogram {
+func (ust *uriStatHistogram) ToUriHistogram() *v1.PUriHistogram {
 	pbUriHistogram := &v1.PUriHistogram{
 		Total:     ust.Total,
 		Max:       ust.Max,
@@ -35,12 +35,12 @@ func (ust *uriStatHistogram) ToUriHistogrm() *v1.PUriHistogram {
 	return pbUriHistogram
 }
 
-type statHisograms struct {
+type statHistograms struct {
 	TotalHistogram  uriStatHistogram
 	FailedHistogram uriStatHistogram
 }
 
-func (st *statHisograms) Update(span *TSpan) {
+func (st *statHistograms) Update(span *TSpan) {
 	st.TotalHistogram.Update(span)
 	if span.IsFailed() {
 		st.FailedHistogram.Update(span)
@@ -48,7 +48,7 @@ func (st *statHisograms) Update(span *TSpan) {
 }
 
 type UrlTemplateReport struct {
-	uriMap        map[string]*statHisograms
+	uriMap        map[string]*statHistograms
 	BucketVersion int32
 	mu            sync.Mutex
 }
@@ -65,16 +65,16 @@ func (utr *UrlTemplateReport) updateUriSnapshot(span *TSpan) {
 	utr.mu.Lock()
 	defer utr.mu.Unlock()
 	ut := span.UT
-	var st *statHisograms
+	var st *statHistograms
 	var ok bool
 	if st, ok = utr.uriMap[ut]; !ok {
-		st = &statHisograms{}
+		st = &statHistograms{}
 		utr.uriMap[ut] = st
 	}
 	st.Update(span)
 }
 
-func (utr *UrlTemplateReport) MoveUtReprot() *v1.PStatMessage {
+func (utr *UrlTemplateReport) MoveUtReport() *v1.PStatMessage {
 	utr.mu.Lock()
 	defer utr.mu.Unlock()
 
@@ -85,14 +85,14 @@ func (utr *UrlTemplateReport) MoveUtReprot() *v1.PStatMessage {
 	for url, st := range utr.uriMap {
 		eachUriStat := &v1.PEachUriStat{
 			Uri:             url,
-			TotalHistogram:  st.TotalHistogram.ToUriHistogrm(),
-			FailedHistogram: st.FailedHistogram.ToUriHistogrm(),
+			TotalHistogram:  st.TotalHistogram.ToUriHistogram(),
+			FailedHistogram: st.FailedHistogram.ToUriHistogram(),
 			Timestamp:       time.Now().UnixMilli(),
 		}
 		agentUriStat.EachUriStat = append(agentUriStat.EachUriStat, eachUriStat)
 	}
 	//note: create a new one
-	utr.uriMap = make(map[string]*statHisograms)
+	utr.uriMap = make(map[string]*statHistograms)
 	pbStat := &v1.PStatMessage{
 		Field: &v1.PStatMessage_AgentUriStat{
 			AgentUriStat: agentUriStat,
@@ -104,7 +104,7 @@ func (utr *UrlTemplateReport) MoveUtReprot() *v1.PStatMessage {
 
 func CreateUrlTemplateReport() *UrlTemplateReport {
 	ut := &UrlTemplateReport{
-		uriMap:        make(map[string]*statHisograms),
+		uriMap:        make(map[string]*statHistograms),
 		BucketVersion: bucketVersion,
 	}
 	return ut

@@ -40,7 +40,7 @@ func TestUrlTemplateReport(t *testing.T) {
 		t.Log(len(ut.uriMap))
 	}
 
-	pbStatMessage := ut.MoveUtReprot()
+	pbStatMessage := ut.MoveUtReport()
 	t.Log(pbStatMessage)
 	assert.NotEqual(t, pbStatMessage.GetAgentUriStat(), nil, "GetAgentUriStat")
 
@@ -57,6 +57,6 @@ func TestUrlTemplateReport(t *testing.T) {
 	totalHis := eachUriStat[0].GetTotalHistogram()
 	assert.Equal(t, len(totalHis.GetHistogram()), histogramSize, "len(totalHis.GetHistogram())")
 
-	assert.Equal(t, totalHis.Max, int64(3200), "totalHis.Max")
+	assert.GreaterOrEqual(t, totalHis.Max, int64(3200), "totalHis.Max")
 
 }

@@ -37,6 +37,7 @@ class Test_UT(unittest.TestCase):
     def test_request_example(self):
         response = self.client.get("/cluster/abc")
         assert "ut" in response.headers
+        self.assertEqual(response.headers['ut'], "/cluster/{name}")
 
 
 if __name__ == '__main__':

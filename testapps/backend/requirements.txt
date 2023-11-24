@@ -1,11 +1,4 @@
-aioredis==2.0.1
-fastapi
-httpx==0.25.1
-pydantic==2.4.2
-SQLAlchemy==2.0.23
-starlette
-starlette_context
-uvicorn
-pymysql
-requests
-mysql-connector-python==8.0.31
+Flask==3.0.0
+PyMySQL==1.1.0
+redis==5.0.1
+Requests==2.31.0
