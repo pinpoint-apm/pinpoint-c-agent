@@ -32,7 +32,7 @@ language| tutorial
 php|[English](DOC/PHP/Readme.md) [中文](DOC/PHP/Readme-CN.md) [한국어](DOC/PHP/Readme-KR.md)
 python3|[English](DOC/PY/Readme.md) [中文](DOC/PY/Readme-CN.md) [한국어](DOC/PY/Readme-KR.md)
 c/cpp|[English](DOC/C-CPP/Readme.md)
-golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) 
+golang|[go-aop-agent](https://github.com/pinpoint-apm/go-aop-agent) (_experiment_)
 
 > [Try playground](/testapps/readme.md)
 

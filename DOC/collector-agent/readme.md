@@ -1,9 +1,9 @@
 ## Install Collector Agent
-`Collector-Agent`, who formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)
+`Collector-Agent` formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`.
 
-### Steps
+### 1. build from source
 1. Goto collector-agent(`pinpoint-c-agent/collector-agent`)
-2. Execute command `go build`
+2. Execute command `make`
 3. Add environment variables:
     ```
     export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
@@ -24,11 +24,38 @@
     5. `PP_ADDRESS`: Set the address of `Collector-Agent`, then `PHP/Python-Agent` will connect Collector-Agent through this address.
 4. Run `Collector-Agent` by executing command `./CollectorAgent`
    
-### Use docker images
+### 2. Use docker images
 
 ```sh
-docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.4.25
+docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.4.13
 ```
+### 3. K8s side car
 
+server.yaml sample
 
-
+``` yml
+- image: ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.4.13
+        name: collector-agent
+        args: ["-RecvBufSize=1048576"]
+        securityContext:
+          runAsUser: 0
+        env:
+          - name: "PP_COLLECTOR_AGENT_SPAN_IP"
+            value: "pinpoint-collector.hostname"
+          - name: "PP_COLLECTOR_AGENT_SPAN_PORT"
+            value: "9993"
+          - name: "PP_COLLECTOR_AGENT_AGENT_IP"
+            value: "pinpoint-collector.hostname"
+          - name: "PP_COLLECTOR_AGENT_AGENT_PORT"
+            value: "9991"
+          - name: "PP_COLLECTOR_AGENT_STAT_IP"
+            value: "pinpoint-collector.hostname"
+          - name: "PP_COLLECTOR_AGENT_STAT_PORT"
+            value: "9992"
+          - name: "PP_Log_Level"
+            value: "INFO"
+          - name: "PP_ADDRESS"
+            value: "localhost@9999"
+          - name: "PP_COLLECTOR_AGENT_ISDOCKER"
+            value: "true"
+```
