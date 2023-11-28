@@ -55,6 +55,11 @@ services:
     ports:
       - 8184:80
 
+    healthcheck:
+      test: curl -f http://testapp-flask
+      interval: 5s 
+      timeout: 1s       
+
   testapp-php:
     container_name: yii2
     depends_on:
@@ -67,6 +72,11 @@ services:
     ports:
       - 8185:80
 
+    healthcheck:
+      test: curl -f http://testapp-php
+      interval: 5s 
+      timeout: 1s       
+
   testapp-fastapi:
     container_name: fastapi
     depends_on:
@@ -78,6 +88,10 @@ services:
       context: ../
     ports:
       - 8186:8000
+    healthcheck:
+      test: curl -f http://testapp-fastapi:8000
+      interval: 5s 
+      timeout: 1s        
 
   # test call self
   backend:
@@ -91,6 +105,11 @@ services:
       context: ../
     ports:
       - 8187:80  
+
+    healthcheck:
+      test: curl -f http://backend
+      interval: 5s 
+      timeout: 1s       
   
   testapp-django:
     container_name: django
@@ -103,6 +122,10 @@ services:
       context: ../
     ports:
       - 8188:8000  
+    healthcheck:
+      test: curl -f http://testapp-django:8000/polls
+      interval: 5s 
+      timeout: 1s     
 
   httpbin:
     build:
@@ -110,7 +133,7 @@ services:
       context: ../
     restart: always
     healthcheck:
-      test: curl -f http://localhost
+      test: curl -f http://httpbin
       interval: 5s
       timeout: 10s
       retries: 50

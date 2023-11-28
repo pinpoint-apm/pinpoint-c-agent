@@ -7,16 +7,13 @@
 Dependency| Version| More
 ---|----|---
 python |3+ | (async must 3.7.1+)
-GO | | 
-gcc|gcc 4.7+| c++11
 *inux|  | `windows` is on the way
-pinpoint| 2.0+(GRPC)|
 collector-agent| [installed ?](../collector-agent/readme.md)
 
 ### Installation
 
 ```shell
-$ pip install pinpointPy
+$ pip install pinpointPy==1.1.0
 ```
 
 ### How to Use

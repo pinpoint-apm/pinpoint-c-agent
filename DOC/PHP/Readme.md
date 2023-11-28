@@ -49,7 +49,7 @@ collector-agent| [installed ?](../collector-agent/readme.md)
 
    1. Use `composer require`
         ```
-        composer require pinpoint-apm/pinpoint-php-aop
+        composer require pinpoint-apm/pinpoint-php-aop:v2.1.0
         ```
    2. Add the following constants in the index file of your project:
    
