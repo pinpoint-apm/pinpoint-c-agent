@@ -8,4 +8,7 @@ RUN make
 
 FROM alpine:3.17
 COPY --from=builder /apps/collector-agent /usr/local/bin/CollectorAgent
+LABEL org.opencontainers.image.source=https://github.com/pinpoint-apm/pinpoint-c-agent.git
+LABEL org.opencontainers.image.description="collector agent for pinpoint-collector"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
 ENTRYPOINT [ "CollectorAgent" ]

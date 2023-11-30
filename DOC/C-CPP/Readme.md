@@ -34,7 +34,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/pinpoint-c-agent/pinpoint-c-agent.git
   # GIT_TAG        74bc39d813d664cb56b78b1506d91932c8131396 
   # not recommended, please use hash key like `74bc39d813d664cb56b78b1506d91932c8131396`
-  GIT_TAG        origin/v0.4.13
+  GIT_TAG        origin/v0.4.15
 )
 
 FetchContent_GetProperties(pinpoint)
