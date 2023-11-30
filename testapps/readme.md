@@ -14,14 +14,14 @@
 
 ```
 $ git clone --recurse-submodules https://github.com/pinpoint-apm/pinpoint-c-agent.git 
-$ git checkout dev
-$ cd pinpoint-c-agent/testapps && docker compose up --build
+$ cd pinpoint-c-agent && git checkout dev
+$ cd testapps && docker compose up --build
 $ ## testapp-fastapi
 $ curl http://localhost:8186/docs#/
 $ ## testapp-php yii2 framework
 $ curl http://localhost:8185/index.php
 $ ## testapp-flask
-$ curl http://localhost:8184/index.php
+$ curl http://localhost:8184/
 $ ## testapp-django
 $ curl http://localhost:8188/admin
 ```

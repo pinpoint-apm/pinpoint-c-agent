@@ -51,13 +51,13 @@ import test_partial
 import test_band
 from pinpointPy.Flask.PinPointMiddleWare import PinPointMiddleWare
 from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context
-
+import logging
 use_thread_local_context()
 monkey_patch_for_pinpoint()
 
 app = Flask(__name__)
 
-set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000', -1)
+set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000', -1,logging.DEBUG)
 
 app.wsgi_app = PinPointMiddleWare(app, app.wsgi_app)
 
