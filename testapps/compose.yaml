@@ -156,6 +156,9 @@ services:
       - PP_ADDRESS=0.0.0.0@10000
     ports:
       - 10000:10000
+    volumes:
+      - /etc/hosts:/etc/hosts
+
 
   mongodb:
     image: 'mongo'
