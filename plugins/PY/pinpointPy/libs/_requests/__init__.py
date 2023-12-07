@@ -28,7 +28,8 @@ def monkey_patch():
         from .NextSpanPlugin import NextSpanPlugin
 
         Interceptors = [
-            Interceptor(requests.api, 'request', NextSpanPlugin)
+            Interceptor(requests.api, 'request', NextSpanPlugin),
+            Interceptor(requests, 'request', NextSpanPlugin)
         ]
 
         for interceptor in Interceptors:

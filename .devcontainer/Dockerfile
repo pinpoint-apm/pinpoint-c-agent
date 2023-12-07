@@ -73,4 +73,5 @@ RUN wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz -O /home/pinpoint/go1.18
 RUN rm -rf /usr/local/go && cd /home/pinpoint/ && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin
 ENV PATH=$PATH:/home/pinpoint/go/bin
+ENV GO111MODULE="on" 
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
