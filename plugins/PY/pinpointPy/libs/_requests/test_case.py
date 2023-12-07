@@ -35,6 +35,13 @@ class Test_Case(TestCase):
         httpbin = create_http_bin_response(body.text)
         self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
 
+    @PinTransaction("testcase", GenTestHeader())
+    def test_request(self):
+        import requests
+        body = requests.request("POST", 'http://httpbin/anything', data='abc')
+        httpbin = create_http_bin_response(body.text)
+        self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
+
 
 if __name__ == '__main__':
     unittest.main()

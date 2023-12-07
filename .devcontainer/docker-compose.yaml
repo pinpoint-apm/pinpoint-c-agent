@@ -41,8 +41,6 @@ services:
     image: kennethreitz/httpbin:latest
     container_name: httpbin
     hostname: httpbin
-    # ports:
-      # - 8999:80
     volumes:
       - ..:/workspace:cached      
       
