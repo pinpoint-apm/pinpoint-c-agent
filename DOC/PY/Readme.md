@@ -75,7 +75,6 @@ use_starlette_context()
 monkey_patch_for_pinpoint()
 async_monkey_patch_for_pinpoint()
 ```
-Example: [fastapi-redis-pinpoint](https://github.com/EyelynSu/fastapi-redis-pinpoint)
 
 #### 1.4 Tornado
 
@@ -92,13 +91,13 @@ Todo....
 
 ```
 
-Example [pinpoint-in-pyramid](https://github.com/eeliu/pinpoint-in-pyramid)
+~Example [pinpoint-in-pyramid](https://github.com/eeliu/pinpoint-in-pyramid)~
 
 #### 1.6 bottle
 
 > Loading pinpint.Bottle before application run
 
-Example [pinpoint-in-bottle](https://github.com/eeliu/pinpoint-in-bottle)
+~Example [pinpoint-in-bottle](https://github.com/eeliu/pinpoint-in-bottle)~
 
 #### 1.7 aiohttp
 
@@ -108,14 +107,14 @@ Todo....
 
 > Add pinpoint middleware
 
-> Example [py-web](https://github.com/eeliu/pinpoint-in-pyweb)
+~Example [py-web](https://github.com/eeliu/pinpoint-in-pyweb)~
 
 
 #### 1.9 web2.py (synchronize)
 
 > Add pinpoint middleware
 
-> Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)
+~ Example [py-web2](https://github.com/eeliu/pinpoint-in-pyweb2)~
 
 
 ## Performance Test Result
