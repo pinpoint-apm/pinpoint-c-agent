@@ -2,7 +2,7 @@ FROM yiisoftware/yii2-php:7.4-fpm-nginx
 
 
 RUN composer create-project --prefer-dist yiisoft/yii2-app-basic /app
-RUN composer require pinpoint-apm/pinpoint-php-aop:v2.1.0
+RUN composer require -w pinpoint-apm/pinpoint-php-aop:v2.1.0
 RUN chown -R www-data:www-data /app
 # Copy index.php
 COPY testapps/PHP/index.php /app/web/index.php
