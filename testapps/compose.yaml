@@ -65,6 +65,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      dev-collector:
+        condition: service_started        
     restart: always
     build:
       dockerfile: testapps/php.dockerfile
@@ -81,7 +83,10 @@ services:
     container_name: fastapi
     depends_on:
       redis:
-        condition: service_healthy    
+        condition: service_healthy  
+      dev-collector:
+        condition: service_started
+        
     restart: always
     build:
       dockerfile: testapps/fastapi.dockerfile
