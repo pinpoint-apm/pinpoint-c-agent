@@ -1,6 +1,7 @@
-aux_source_directory(. TEST_SRC)
-
-add_executable(TestCommon ${TEST_SRC})
+file(GLOB_RECURSE TEST_SRC
+  "${PROJECT_SOURCE_DIR}/src/test_*.cc"
+)
+add_executable(TestCommon ${TEST_SRC} test_main.cc)
 target_compile_definitions(TestCommon PRIVATE "-DUTEST -DCOMMON_DEBUG")
 
 # message("${CMAKE_BINARY_DIR}/lib")

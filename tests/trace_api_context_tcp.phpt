@@ -4,7 +4,7 @@ Check  call statck
 <?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
 --INI--
 pinpoint_php.CollectorHost=tcp:127.0.0.1:9999
-pinpoint_php.SendSpanTimeOutMs=200
+pinpoint_php.SendSpanTimeOutMs=0
 pinpoint_php.UnitTest=true
 ;pinpoint_php._limit for internal use. User do not use it
 pinpoint_php._limit=yes
@@ -51,7 +51,7 @@ string(1) "c"
 bool(false)
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d})
 [pinpoint] [%d] [%d]agent try to connect:(tcp:127.0.0.1:9999)
-[pinpoint] [%d] [%d]_do_write_data@198 send data error:(Connection refused) fd:(3)
+[pinpoint] [%d] [%d]_do_write_data@%d send data error:(Connection refused) fd:(3)
 [pinpoint] [%d] [%d]reset peer:3
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]

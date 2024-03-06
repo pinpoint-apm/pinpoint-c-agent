@@ -16,6 +16,7 @@
 #include "TransLayer.h"
 #include <netdb.h>
 namespace ConnectionPool {
+
 /**
  * remote: localhost:port
  */
@@ -114,7 +115,51 @@ ERROR:
   return -1;
 }
 
-size_t TransLayer::trans_layer_pool(uint32_t timeout) {
+int TransLayer::connect_remote(const char* statement) {
+  int fd = -1;
+  const char* substring = NULL;
+  if (statement == NULL || statement[0] == '\0') {
+    goto ERROR;
+  }
+
+  // check last connect time
+  if (time(NULL) < this->lastConnectTime + RECONNECT_TIME_SEC) {
+    goto RECONNECT_WAITING;
+  } else {
+    this->lastConnectTime = time(NULL);
+  }
+
+  /// unix
+  substring = strcasestr(statement, UNIX_SOCKET);
+  if (substring == statement) {
+    // sizeof = len +1, so substring -> /tmp/collector.sock
+    substring = substring + strlen(UNIX_SOCKET);
+    fd = connect_unix_remote(substring);
+    c_fd = fd;
+    goto DONE;
+  }
+
+  ///  tcp tcp:localhost:port
+  substring = strcasestr(statement, TCP_SOCKET);
+  if (substring == statement) {
+    // sizeof = len +1, so substring -> /tmp/collector.sock
+    substring = substring + strlen(TCP_SOCKET);
+    fd = TransLayer::connect_stream_remote(substring);
+    c_fd = fd;
+    goto DONE;
+  }
+
+ERROR:
+  pp_trace("remote is not valid:%s", statement);
+  return -1;
+RECONNECT_WAITING:
+  return -1;
+DONE:
+  this->_state |= (S_ERROR | S_READING | S_WRITING);
+  return fd;
+}
+
+size_t TransLayer::PoolEventOnce(uint32_t timeout) {
   if (c_fd == -1) {
     pp_trace("agent try to connect:(%s)", this->co_host.c_str());
     connect_remote(this->co_host.c_str());
@@ -143,7 +188,7 @@ size_t TransLayer::trans_layer_pool(uint32_t timeout) {
     FD_SET(fd, &rfds);
   }
 
-  struct timeval tv = {0, (int)timeout * 1000};
+  struct timeval tv = {timeout / 1000, timeout % 1000};
 
   int retval = select(fd + 1, &rfds, &wfds, &efds, &tv);
   if (retval == -1) {
@@ -163,16 +208,13 @@ size_t TransLayer::trans_layer_pool(uint32_t timeout) {
     }
 
     if ((this->_state & S_READING) && FD_ISSET(fd, &rfds)) {
-      if (_recv_msg_from_collector() == -1) {
+      if (RecvByteStream() == -1) {
         pp_trace("recv_msg_from_collector error");
         goto ERROR;
       }
     }
-  } else {
-    // timeout do nothing
-    // total =0  ,timeout
   }
-
+  // timeout
   return 0;
 
 ERROR:

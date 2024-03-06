@@ -22,42 +22,27 @@
 
 #ifndef COMMON_SRC_TRACENODE_H_
 #define COMMON_SRC_TRACENODE_H_
-#include "common.h"
 #include "json/json.h"
+#include "common.h"
 #include "Context/ContextType.h"
 #include <atomic>
-#include <map>
-#include <iostream>
 #include <functional>
+#include <map>
 #include <mutex>
 #include <stdarg.h>
+#include <memory>
+#include <vector>
 
 namespace NodePool {
 namespace Json = AliasJson;
 using Context::ContextType;
 using Context::LongContextType;
 using Context::StringContextType;
-class TraceNode;
+class WrapperTraceNode;
 const static int MAX_SUB_TRACE_NODES_LIMIT = 2048;
-class WrapperTraceNode {
-public:
-  WrapperTraceNode() = delete;
-  WrapperTraceNode(const WrapperTraceNode& other) = delete;
-  WrapperTraceNode(WrapperTraceNode&& other) : _traceNode(std::move(other._traceNode)) {
-    other._traceNode = nullptr;
-  }
-
-  WrapperTraceNode& operator=(const WrapperTraceNode& other) = delete;
-
-  WrapperTraceNode(TraceNode* node);
-  TraceNode* operator->() { return _traceNode; }
-  ~WrapperTraceNode();
-
-private:
-  TraceNode* _traceNode;
-};
-
 typedef std::shared_ptr<ContextType> _ContextType_;
+using EndTraceCallBackFunc = std::function<bool()>;
+using EndTraceCallBackFuncVec = std::vector<EndTraceCallBackFunc>;
 class TraceNode {
 public:
   NodeID mNextId;      // equal brother node
@@ -224,7 +209,7 @@ public:
     return _mRef.load();
   }
 
-  bool checkZoreRef() { return _mRef.load() == 0; }
+  bool checkZeroRef() { return _mRef.load() == 0; }
 
 public:
   std::string ToString() {
@@ -263,7 +248,29 @@ public:
 private:
   Json::Value _value;
   std::map<std::string, _ContextType_> _context;
-  std::vector<std::function<bool()>> _endTraceCallback;
+  EndTraceCallBackFuncVec _endTraceCallback;
+};
+
+class WrapperTraceNode {
+public:
+  WrapperTraceNode() = delete;
+  WrapperTraceNode(const WrapperTraceNode& other) = delete;
+  WrapperTraceNode(WrapperTraceNode&& other) : traceNode_(std::move(other.traceNode_)) {
+    other.traceNode_ = nullptr;
+  }
+
+  WrapperTraceNode& operator=(const WrapperTraceNode& other) = delete;
+
+  WrapperTraceNode(TraceNode* node) : traceNode_(node) { traceNode_->addRef(); }
+  TraceNode* operator->() { return traceNode_; }
+  ~WrapperTraceNode() {
+    if (traceNode_ != nullptr) {
+      traceNode_->rmRef();
+    }
+  }
+
+private:
+  TraceNode* traceNode_;
 };
 } // namespace NodePool
 #endif /* COMMON_SRC_TRACENODE_H_ */

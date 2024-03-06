@@ -21,22 +21,8 @@
  */
 
 #include "TraceNode.h"
-#include "Util/Helper.h"
-#include "PoolManager.h"
 #include "header.h"
-
 namespace NodePool {
-// static std::atomic<int64_t> _uid_;
-WrapperTraceNode::WrapperTraceNode(TraceNode* node) : _traceNode(node) {
-  assert(_traceNode != nullptr);
-  _traceNode->addRef();
-}
-
-WrapperTraceNode::~WrapperTraceNode() {
-  if (_traceNode != nullptr) {
-    _traceNode->rmRef();
-  }
-}
 TraceNode::~TraceNode() {}
 
 void TraceNode::clearAttach() {
@@ -68,18 +54,16 @@ void TraceNode::addChild(WrapperTraceNode& child) {
 }
 
 void TraceNode::endTimer() {
-  uint64_t end_time = Helper::get_current_msec_stamp();
+  uint64_t end_time = get_unix_time_ms();
 
   this->cumulative_time += (end_time - this->start_time);
 }
 
-void TraceNode::wakeUp() { this->start_time = Helper::get_current_msec_stamp(); }
+void TraceNode::wakeUp() { this->start_time = get_unix_time_ms(); }
 
 void TraceNode::convertToSpan() {
   this->AddTraceDetail(":E", this->cumulative_time);
   this->AddTraceDetail(":S", this->start_time);
-
-  this->AddTraceDetail(":FT", global_agent_info.agent_type);
 }
 
 void TraceNode::convertToSpanEvent() {
@@ -87,16 +71,8 @@ void TraceNode::convertToSpanEvent() {
   this->AddTraceDetail(":S", this->start_time - this->parent_start_time);
 }
 
-// void TraceNode::setTraceParent(WrapperTraceNode &parent, WrapperTraceNode &root)
-// {
-//     std::lock_guard<std::mutex> _safe(this->mlock);
-//     this->mRootIndex = root->mPoolIndex;
-//     this->mParentId = parent->mPoolIndex;
-//     this->root_start_time = root->root_start_time;
-// }
-
 void TraceNode::startTimer() {
-  uint64_t time_in_ms = Helper::get_current_msec_stamp();
+  uint64_t time_in_ms = get_unix_time_ms();
   this->start_time = time_in_ms;
   this->root_start_time = time_in_ms;
 }

@@ -24,103 +24,96 @@
 #include <stdlib.h>
 #include <list>
 #include <string.h>
-#include <json/json.h>
+
 #include <assert.h>
 #include <functional>
 #include <iostream>
 
-namespace Cache{
-    
+namespace Cache {
 /// Readme:
 /// 1. not thread safe
-/// 2. check the capacity before copy data  
-class Chunks
-{
+/// 2. check the capacity before copy data
+class Chunks {
 
-    typedef struct chunk_
-    {
-        uint32_t block_size;
-        /**
-         * @brief 
-         * The continuous buffer left offset in data ***(l_ofs)--------------(r_ofs)*****
-         *   for read data from ck
-         */
-        uint32_t l_ofs; 
-
-        /**
-         * @brief  The continuous buffer right offset in data
-         * for write data into ck
-         */
-        uint32_t r_ofs; 
-        char data[0];
-    } Chunk;
-
-    typedef std::list<Chunk*> CKList;
-    typedef CKList::iterator CkIter;
-
-private:
-
-    CkIter iter;
-    CKList ready_cks;  //Wait to send
-    CKList free_cks;  //already send, can be reuse
-
-    const uint32_t c_resident_size;
-    const uint32_t c_max_size;    // if  ck_alloc_size > c_max_size buffer is full
-    uint32_t threshold;
-
-    uint32_t ck_alloc_size;
-    uint32_t ck_free_ck_capacity;
-
-private:
-
-    uint32_t ck_ceil_to_k(uint32_t i);
+  typedef struct chunk_ {
+    uint32_t block_size;
     /**
-     *
-     * @param data
-     * @param length
-     * @return rest size of data
+     * @brief
+     * The continuous buffer left offset in data ***(l_ofs)--------------(r_ofs)*****
+     *   for read data from ck
      */
-    int copyDataIntoReadyCK(const void* data, uint32_t length);
+    uint32_t l_ofs;
 
-    int copyDataIntoFreeCK(const void*data, uint32_t length);
+    /**
+     * @brief  The continuous buffer right offset in data
+     * for write data into ck
+     */
+    uint32_t r_ofs;
+    char data[0];
+  } Chunk;
 
-    int copyDataIntoNewChunk(const void* data, uint32_t length);
+  typedef std::list<Chunk*> CKList;
+  typedef CKList::iterator CkIter;
 
-    void reduceFreeCK();
+private:
+  CkIter iter;
+  CKList ready_cks; // Wait to send
+  CKList free_cks;  // already send, can be reuse
 
-    void checkWaterLevel();
-    // try to use the ready and free list
-    bool useExistingChunk(uint32_t length) const;
+  const uint32_t c_resident_size;
+  const uint32_t c_max_size; // if  ck_alloc_size > c_max_size buffer is full
+  uint32_t threshold;
+
+  uint32_t ck_alloc_size;
+  uint32_t ck_free_ck_capacity;
+
+private:
+  uint32_t ck_ceil_to_k(uint32_t i);
+  /**
+   *
+   * @param data
+   * @param length
+   * @return rest size of data
+   */
+  int copyDataIntoReadyCK(const void* data, uint32_t length);
+
+  int copyDataIntoFreeCK(const void* data, uint32_t length);
+
+  int copyDataIntoNewChunk(const void* data, uint32_t length);
+
+  void reduceFreeCK();
+
+  void checkWaterLevel();
+  // try to use the ready and free list
+  bool useExistingChunk(uint32_t length) const;
 
 public:
+  uint32_t getAllocSize() const;
 
-    uint32_t getAllocSize() const;
+  Chunks(uint32_t max_size, uint32_t resident_size);
 
-    Chunks(uint32_t max_size, uint32_t resident_size);
+  virtual ~Chunks();
 
-    virtual ~Chunks();
+  int copyDataIntoChunks(const void* data, uint32_t length);
 
-    int copyDataIntoChunks(const void*data, uint32_t length);
-
-    /**
-     * If you want use the chunk safety, check capacity before use it.
-     * @param length
-     * @return true: chunk can hold length data
-     *              false: length is too large according to max_size
-     */
-    inline bool checkCapacity(uint32_t length) const 
-    {
-        // existing chunk is full and the threshold is reached
-        if( this->useExistingChunk(length) == false && this->ck_alloc_size+ length > this->c_max_size  ){
-           return false;
-        }    
-        return true;
+  /**
+   * If you want use the chunk safety, check capacity before use it.
+   * @param length
+   * @return true: chunk can hold length data
+   *              false: length is too large according to max_size
+   */
+  inline bool checkCapacity(uint32_t length) const {
+    // existing chunk is full and the threshold is reached
+    if (this->useExistingChunk(length) == false &&
+        this->ck_alloc_size + length > this->c_max_size) {
+      return false;
     }
+    return true;
+  }
 
-    int drainOutWithPipe(std::function<int(const char*, uint32_t)> in_pipe_cb);
+  int drainOutWithPipe(std::function<int(const char*, uint32_t)> in_pipe_cb);
 
-    void resetChunks();
-
+  void resetChunks();
 };
-}
+} // namespace Cache
 #endif

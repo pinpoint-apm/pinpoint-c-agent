@@ -19,36 +19,35 @@
  *  Created on: Aug 19, 2020
  *      Author: eeliu
  */
-#include <utility>
 
 #include "PoolManager.h"
 
-#include "../Util/Helper.h"
 #include "common.h"
+#include <cassert>
 #include <thread>
 #ifndef UINT32_MAX
 #define UINT32_MAX (0xfffffff)
 #endif
 
 namespace NodePool {
-void freeNodeTree(NodeID nodeId) {
+void PoolManager::FreeNodeTree(NodeID nodeId) {
   if (nodeId == E_INVALID_NODE || nodeId == E_ROOT_NODE) {
     return;
   }
 
   NodeID child_id, next_id;
 
-  if (PoolManager::getInstance().Restore(nodeId, child_id, next_id)) {
+  if (ReturnNode(nodeId, child_id, next_id)) {
     if (next_id != E_INVALID_NODE) {
-      freeNodeTree(next_id);
+      FreeNodeTree(next_id);
     }
 
     if (child_id != E_INVALID_NODE) {
-      freeNodeTree(child_id);
+      FreeNodeTree(child_id);
     }
   }
 }
-bool PoolManager::Restore(NodeID id, NodeID& child_id, NodeID& next_id) {
+bool PoolManager::ReturnNode(NodeID id, NodeID& child_id, NodeID& next_id) {
   for (int i = 0; i < 1000; i++) {
     // this node was in using: ref is not zero
     if (this->_restore(id, child_id, next_id, false)) {
@@ -60,7 +59,7 @@ bool PoolManager::Restore(NodeID id, NodeID& child_id, NodeID& next_id) {
   return this->_restore(id, child_id, next_id, true);
 }
 
-// avoiding `locking and waitting`
+// avoiding `locking and waiting`
 bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool force) {
   std::lock_guard<std::mutex> _safe(this->_lock);
 
@@ -76,7 +75,7 @@ bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool fo
   // check refcount
   TraceNode& node = this->_fetchNodeBy(id);
 
-  if (node.checkZoreRef() == false && force == false) {
+  if (node.checkZeroRef() == false && force == false) {
     // DO NOT TOUCH THis Node
     return false;
   } else {
@@ -125,7 +124,6 @@ TraceNode& PoolManager::_take(NodeID id) {
 }
 
 void PoolManager::expandOnce() {
-  ADDTRACE();
   // pp_trace("Node pool expanding self! Old size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
   // append new nodes into nodeIndexVec
   this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
@@ -140,4 +138,30 @@ void PoolManager::expandOnce() {
   // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
   assert(this->nodeIndexVec.size() * CELL_SIZE == this->_aliveNodeSet.size());
 }
+
+Json::Value PoolManager::mergeChildren(WrapperTraceNode& node) {
+  if (node->checkOpt() == false) {
+    return Json::Value();
+  } else if (!node->isLeaf()) {
+    // TraceNode &child = PoolManager::getInstance().Take(node.mChildHeadIndex);
+    WrapperTraceNode child = GetWrapperNode(node->mChildHeadId);
+
+    Json::Value childTraceDetail;
+    gatherChildDetailByReverse(childTraceDetail, child);
+    node->AddTraceDetail("calls", childTraceDetail);
+  }
+  return node->getJsValue();
+}
+
+void PoolManager::gatherChildDetailByReverse(Json::Value& detail, WrapperTraceNode& head) {
+  if (head->mNextId != E_INVALID_NODE) {
+    WrapperTraceNode next = GetWrapperNode(head->mNextId);
+    gatherChildDetailByReverse(detail, next);
+  }
+  Json::Value childrenDetail = mergeChildren(head);
+  if (!childrenDetail.empty()) {
+    detail.append(childrenDetail);
+  }
+}
+
 } // namespace NodePool

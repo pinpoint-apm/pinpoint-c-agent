@@ -9,7 +9,8 @@ with open("README", "r") as fh:
 name = platform.system().lower()
 agent_libraries = []
 if name == 'windows':
-    raise RuntimeError('pinpoint-c-agent currently not support MS')
+    pass
+    # agent_libraries: ['stdc++']
 elif name == 'darwin':
     agent_libraries = ['stdc++']
 elif name == 'linux':
@@ -24,14 +25,14 @@ extFiles = [
 
 # add pinpoint-common
 
-for a_file in Path("common").glob('**/*.cpp'):
+for a_file in Path("common/src").glob('**/*.cpp'):
     extFiles.append(str(a_file))
 
-for a_file in Path("common").glob('**/*.c'):
+for a_file in Path("common/jsoncpp").glob('**/*.cpp'):
     extFiles.append(str(a_file))
 
 setup(name='pinpointPy',
-      version="1.1.1",  # don't forget update __version__ in pinpointPy/__init__.py
+      version="1.2.1",  # don't forget update __version__ in pinpointPy/__init__.py
       author="cd_pinpoint members",
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',

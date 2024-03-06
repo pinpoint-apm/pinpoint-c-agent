@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"net"
 	"os"
-	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -58,23 +58,31 @@ func generateUnvaalidPacket01() (buf []byte) {
 	return buf
 }
 
-func generateUnvaalidPacket02() (buf []byte) {
+func genUniqueIdBody() []byte {
+	msg := make([]byte, 8)
+	binary.BigEndian.PutUint32(msg[0:4], (uint32(2)))
+	binary.BigEndian.PutUint32(msg[4:8], (0))
+	return msg
+}
+
+func generateInvalidPacket02() (buf []byte) {
 	buf = make([]byte, 8)
 	binary.BigEndian.PutUint32(buf[0:4], (uint32(5220154)))
 	binary.BigEndian.PutUint32(buf[4:8], (1))
 	return buf
 }
 
-func generateUnvaalidPacket03() (buf []byte) {
+func generateInvalidPacket03() (buf []byte) {
 	buffer := make([]byte, 8)
 	binary.BigEndian.PutUint32(buffer[0:4], uint32(0))
 	binary.BigEndian.PutUint32(buffer[4:8], (1))
 	return buffer
 }
 
-func handleWrite(t *testing.T, conn net.Conn, done chan string) {
+func handleWrite(t *testing.T, conn net.Conn) {
 	defer conn.Close()
-
+	conn.Write(genUniqueIdBody())
+	readId(t, conn)
 	for i := 0; i < 5; i++ {
 		// _time := time.Now().Unix()
 		// msg := `{"E":17,"FT":1500,"S":` + strconv.FormatInt(_time, 10) + `,"AppId":"c_test_app_01","Appname":"c_test_name_01","calls":[{"E":7,"S":4,"clues":["-1:I'mthe parameters"],"name":"test_func","stp":"1301"},{"E":2,"S":11,"SQL":"select 1*3;","dst":"localhost:3307","name":"mysql::excute","stp":"2101"},{"E":4,"EXP":"test this exception","S":13,"clues":["40:/support/c-cpp-php-python","46:300"],"dst":"www.pinpoint-wonderful.com","name":"httpclient","nsid":"87969596","stp":"9800"}],"client":"127.0.0.1","clues":["46:200"],"name":"C_CPP Request","server":"HTTP_HOST","sid":"53562116","stp":"1500","tid":"c_test_app^1614586481657^5801","uri":"test_url"}`
@@ -88,21 +96,35 @@ func handleWrite(t *testing.T, conn net.Conn, done chan string) {
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
+	conn.Write(genUniqueIdBody())
+	readId(t, conn)
 
-	conn.Write(generateUnvaalidPacket03())
-	conn.Write(generateUnvaalidPacket02())
-
-	done <- "done"
+	conn.Write(generateInvalidPacket03())
+	conn.Write(generateInvalidPacket02())
 }
 
-func handleRead(t *testing.T, conn net.Conn, done chan string) {
-	buf := make([]byte, 128)
-	reqLen, err := conn.Read(buf)
-	if err != nil {
-		t.Error("Error to read message because of ", err)
-		return
+func readHello(t *testing.T, conn net.Conn) {
+	time.Sleep(5 * time.Second)
+	buf := make([]byte, 1280)
+	conn.Read(buf)
+	// if err != nil {
+	// 	t.Error("Error to read message because of ", err)
+	// 	return
+	// }
+	hello := string(buf[8:])
+	if !strings.HasPrefix(hello, "{\"appid\":\"") {
+		t.Error(hello)
 	}
-	done <- strconv.Itoa(reqLen)
+}
+
+func readId(t *testing.T, conn net.Conn) {
+	time.Sleep(5 * time.Second)
+	buf := make([]byte, 1280)
+	conn.Read(buf)
+	id := string(buf[8:])
+	if !strings.HasPrefix(id, "{\"uid\"") {
+		t.Error(id)
+	}
 }
 
 func TestJsonServer(t *testing.T) {
@@ -113,14 +135,8 @@ func TestJsonServer(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	done := make(chan string)
-
-	go handleWrite(t, conn, done)
-	go handleRead(t, conn, done)
-
-	<-done
-	<-done
-	//time.Sleep(5 * time.Second)
+	readHello(t, conn)
+	handleWrite(t, conn)
 }
 
 func TestMain(m *testing.M) {

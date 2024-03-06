@@ -3,13 +3,14 @@ package server
 import (
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"math"
 	"net"
 	"os"
 	"os/signal"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -19,28 +20,30 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var Version = "v0.0.0"
+
 type SpanServer struct {
 	listener    net.Listener
 	quit        chan bool
 	wg          sync.WaitGroup
 	agentRouter agent.I_PacketRouter
+	createTime  int64
+	index_st    int64
+	lastTime    int64
 }
 
 type ServerInfo struct {
 	AppId     string `json:"appid"`
 	AppName   string `json:"appname"`
 	StartTime string `json:"time"`
+	Version   string `json:"version"`
 }
 
-var info = ServerInfo{
-	AppId:     "no",
-	AppName:   "no",
-	StartTime: strconv.FormatInt(time.Now().Unix(), 10),
+type ServerUniqueId struct {
+	UID int64 `json:"uid"`
 }
 
 const CLIENT_HEADER_SIZE = 8
-
-// const CLIENT_MAX_PACKET_SIZE = 4096*100 + CLIENT_HEADER_SIZE
 
 func (server *SpanServer) init() {
 	server.quit = make(chan bool)
@@ -51,6 +54,8 @@ func (server *SpanServer) init() {
 	}
 
 	server.agentRouter = manager
+	server.createTime = time.Now().Unix()
+	server.index_st = 0
 }
 
 func (server *SpanServer) Run() (code int, err error) {
@@ -79,30 +84,43 @@ func (server *SpanServer) Run() (code int, err error) {
 		select {
 		case sig := <-sig:
 			log.Warnf("catch signal %s", sig)
-			return 0, errors.New(fmt.Sprintf("SpanServer exit with signal %s", sig))
+			return 0, fmt.Errorf("SpanServer exit with signal %s", sig)
 		case <-time.After(config.AgentFreeOnlineSurvivalTimeSec * time.Second):
 			server.agentRouter.Clean()
 		}
 	}
 }
 
-func (server *SpanServer) parseInComePacket(size, packetType uint32, body []byte) (err error) {
+func (server *SpanServer) genUniqueId() *ServerUniqueId {
+	return &ServerUniqueId{
+		UID: server.createTime + atomic.AddInt64(&server.index_st, 1),
+	}
+}
+
+func (server *SpanServer) parsePacket(con net.Conn, size, packetType uint32, body []byte) (err error) {
 	log.Debugf("size:%d  packetType:%d body:%s ", size, packetType, string(body[:]))
 
 	//todo parse packetType
-	data := make([]byte, size)
-	copy(data, body)
-	rawPacket := agent.RawPacket{Type: packetType, RawData: data}
+	// data := make([]byte, size)
+	// copy(data, body)
+	rawPacket := agent.RawPacket{Type: packetType, RawData: body}
 
 	switch packetType {
 	case 1: //REQ_UPDATE_SPAN
 		err = server.agentRouter.DispatchPacket(&rawPacket)
 		if err != nil {
-			log.Warnf("dispather packet with an exception: %s", err)
+			log.Warnf("dispatcher packet with an exception: %s", err)
 			return err
 		}
+	case 2: //REQ_UNIQUE_ID
+		uniqueBody, err := json.Marshal(server.genUniqueId())
+		if err == nil {
+			err = server.respToClient(con, 2, uniqueBody)
+		}
+		log.Infof("get genUniqueId")
+		return err
 	default:
-		log.Warnf("unspport type:%d", packetType)
+		log.Warnf("unsupported type:%d", packetType)
 	}
 
 	return nil
@@ -143,7 +161,7 @@ func ParseHeader(buffer []byte) (packetLen, packetType uint32) {
 	return packetLen, packetType
 }
 
-func (server *SpanServer) searchPacket(buffer []byte, start int32, total int32, packetLen, packetType *int32, body *[]byte) (token, needs int32) {
+func (server *SpanServer) matchFullPacket(buffer []byte, start int32, total int32, packetLen, packetType *int32, body *[]byte) (token, needs int32) {
 	// fetch header
 	if total < CLIENT_HEADER_SIZE {
 		return 0, CLIENT_HEADER_SIZE - total
@@ -164,6 +182,44 @@ func (server *SpanServer) searchPacket(buffer []byte, start int32, total int32, 
 	return int32(bodyLen) + CLIENT_HEADER_SIZE, 0
 }
 
+func (server *SpanServer) respToClient(con net.Conn, msgType uint32, msgBody []byte) error {
+	if len(msgBody) > math.MaxInt32 {
+		log.Warnf("gets large message(=%d),server skip send to client", len(msgBody))
+		return nil
+	}
+
+	buffer := make([]byte, 8)
+	binary.BigEndian.PutUint32(buffer[0:4], msgType)
+	binary.BigEndian.PutUint32(buffer[4:8], (uint32(len(msgBody))))
+	buffer = append(buffer, msgBody...)
+	totalSize := 8 + len(msgBody)
+	// send handshake message
+	for offset := 0; offset < totalSize; {
+		size, err := con.Write(buffer[offset:])
+		if err != nil {
+			return fmt.Errorf("client:%s channel error:%s", con.RemoteAddr(), err)
+		}
+		offset += size
+	}
+
+	return nil
+}
+
+func (server *SpanServer) genHello() *ServerInfo {
+	info := &ServerInfo{
+		AppId:   "no",
+		AppName: "no",
+		Version: Version,
+	}
+	now_in_ms := time.Now().UnixMilli()
+	if now_in_ms == server.lastTime {
+		now_in_ms = now_in_ms*10 + 1
+	}
+	server.lastTime = now_in_ms
+	info.StartTime = strconv.FormatInt(now_in_ms, 10)
+	return info
+}
+
 func (server *SpanServer) handleClient(con net.Conn) {
 	defer func() {
 		if err := con.Close(); err != nil {
@@ -172,29 +228,14 @@ func (server *SpanServer) handleClient(con net.Conn) {
 	}()
 
 	log.Infof("client:%s is online", con.RemoteAddr())
-	handshake, err := json.Marshal(&info)
+	handshake, err := json.Marshal(server.genHello())
 	if err != nil {
 		log.Warnf("generate handshake failed.reason:%s", err)
 		return
 	}
 	log.Infof("send handshake msg:%s", handshake)
-	msgSize := len(handshake)
-
-	buffer := make([]byte, 8)
-	binary.BigEndian.PutUint32(buffer[0:4], (0))
-	binary.BigEndian.PutUint32(buffer[4:8], (uint32(msgSize)))
-
-	buffer = append(buffer, handshake...)
-
-	// send handshake message
-	for offset := 0; offset < msgSize; {
-
-		size, err := con.Write(buffer[offset:])
-		if err != nil {
-			log.Warnf("client:%s channel error:%s", con.RemoteAddr(), err)
-		}
-		offset += size
-	}
+	//skip error checking,as con.Read does
+	server.respToClient(con, 0, handshake)
 
 	// fetch data
 	clientInBuf := make([]byte, Setting.RecvBufSize)
@@ -219,13 +260,12 @@ func (server *SpanServer) handleClient(con net.Conn) {
 			break
 		}
 
-	ParseAgin:
+	ParseAgain:
 
 		var body []byte = nil
 		var packetLen, packetType int32
 
-		token, needs := server.searchPacket(clientInBuf, int32(packetOffset), int32(inOffset-packetOffset), &packetLen, &packetType, &body)
-
+		token, needs := server.matchFullPacket(clientInBuf, int32(packetOffset), int32(inOffset-packetOffset), &packetLen, &packetType, &body)
 		if token == 0 {
 			if needs == 0 {
 				log.Error("needs cannot be 0")
@@ -248,10 +288,10 @@ func (server *SpanServer) handleClient(con net.Conn) {
 
 		packetOffset += int(token)
 
-		// get a packet
-		err = server.parseInComePacket(uint32(packetLen), uint32(packetType), body)
+		// gets a packet
+		err = server.parsePacket(con, uint32(packetLen), uint32(packetType), body)
 		if err != nil {
-			log.Warnf("parseInComePacket catches error:%s,client:%s", err, con.RemoteAddr())
+			log.Warnf("parsePacket catches error:%s,client:%s", err, con.RemoteAddr())
 			break
 		}
 
@@ -262,7 +302,7 @@ func (server *SpanServer) handleClient(con net.Conn) {
 			continue
 		}
 
-		goto ParseAgin
+		goto ParseAgain
 
 	}
 

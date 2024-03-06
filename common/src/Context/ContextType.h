@@ -23,7 +23,6 @@
 #ifndef COMMON_SRC_CONTEXTTYPE_H_
 #define COMMON_SRC_CONTEXTTYPE_H_
 
-#include <stdint.h>
 #include <string>
 #include <stdexcept>
 

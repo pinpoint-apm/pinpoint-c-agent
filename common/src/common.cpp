@@ -17,429 +17,545 @@
 // Created by eeliu on 1/3/2020.
 //
 
+#include <cstddef>
+#include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <functional>
-#include <iostream>
-#include <map>
 #include <memory>
-#include <thread>
 #include <stdexcept>
 #include <stdarg.h>
+#include <functional>
+#include <chrono>
 #include "common.h"
-
-#include "Cache/SafeSharedState.h"
 #include "NodePool/PoolManager.h"
-#include "Util/Helper.h"
 #include "ConnectionPool/SpanConnectionPool.h"
 #include "header.h"
-namespace Json = AliasJson;
+#include "Cache/State.h"
+#include "Cache/NodeTreeWriter.h"
 
-using Cache::SafeSharedState;
-using ConnectionPool::TransConnection;
-using Helper::get_current_msec_stamp;
-// using NodePool::PContextType;
-using NodePool::freeNodeTree;
-using NodePool::PoolManager;
+using std::chrono::milliseconds;
+using std::chrono::system_clock;
+using std::chrono::time_point;
+using std::chrono::time_point_cast;
+
+namespace PP {
+namespace Json = AliasJson;
+using Cache::NodeTreeWriter;
+using ConnectionPool::TransLayerPtr;
 using NodePool::TraceNode;
 using NodePool::WrapperTraceNode;
 
-const static char* CLUSE = "clues";
-static thread_local NodeID __tls_id = E_ROOT_NODE;
-PPAgentT global_agent_info = {
-    "unix:./pinpoint_test.sock", 1, 10, 1500, 1, nullptr, nullptr, nullptr};
-// send current span with timeout
-static thread_local int _span_timeout = global_agent_info.timeout_ms;
-static std::function<void(const char*)> _SpanHandler_;
+typedef struct {
+  int agent_type;
+} PPAgentT;
 
-NodeID pinpoint_get_per_thread_id() { return __tls_id; }
+static std::function<void(const char*)> _raw_span_watcher_cb = {nullptr};
+class Agent {
+public:
+  Agent() = delete;
+  Agent(const Agent&) = delete;
+  Agent(Agent&&) = delete;
 
-void pinpoint_update_per_thread_id(NodeID id) { __tls_id = id; }
-
-static inline void _verify_key(const char* key) {
-  if (key == nullptr || key[0] == ':') {
-    std::string reason = "key:";
-    reason += key;
-    reason += "is invalid";
-    throw std::invalid_argument(reason);
+public:
+  Agent(const char* cl_host, long timeout_ms, long trace_limit, int agent_type)
+      : span_timeout_(timeout_ms),
+        connection_pool_(cl_host,
+                         {{0, std::bind(&Agent::HandleHelloMsg, this, std::placeholders::_1,
+                                        std::placeholders::_2, std::placeholders::_3)}}),
+        agent_type_(agent_type) {
+    statePtr_ = std::unique_ptr<ProcessState>(new ProcessState(trace_limit));
+    builder["collectComments"] = false;
   }
-}
+  ~Agent() {}
 
-static NodeID do_start_trace(NodeID id, const char* opt = nullptr, va_list* args = nullptr) {
-  if (id <= E_INVALID_NODE) {
-    throw std::out_of_range("invalid node id");
-  } else if (id == E_ROOT_NODE) {
-    TraceNode& trace = PoolManager::getInstance().Take();
-    trace.startTimer();
-    return trace.mPoolIndex;
-  } else {
-    WrapperTraceNode parent = PoolManager::getInstance().GetWrapperNode(id);
+private:
+  void TrySendSpan(const std::string& span, int span_timeout) {
+    TransLayerPtr trans = connection_pool_.get();
 
-    // get root node
-    WrapperTraceNode root = PoolManager::getInstance().GetWrapperNode(parent->mRootIndex);
-
-    // check subnode limit
-    root->updateRootSubTraceSize();
-
-    WrapperTraceNode trace = PoolManager::getInstance().GetWrapperNode();
-    trace->startTimer();
-    parent->addChild(trace);
-    // pass opt
-    if (opt != nullptr) {
-      trace->setOpt(opt, args);
+    if (!trans->copy_into_send_buffer(span)) {
+      pp_trace("drop current span as it's too heavy! size:%lu", span.length());
     }
-    return trace->mPoolIndex;
-  }
-}
-
-static void flush_to_agent(std::string& span) {
-  TransConnection trans = Helper::getConnection();
-
-  if (!trans->copy_into_send_buffer(span)) {
-    pp_trace("drop current span as it's too heavy! size:%lu", span.length());
-  }
-  trans->trans_layer_pool(_span_timeout);
-  // if network not ready, span will send in next time.
-  Helper::freeConnection(trans);
-}
-
-void sendSpan(NodeID rootId) {
-  const Json::Value trace = Helper::mergeTraceNodeTree(rootId);
-  std::string spanStr = Helper::node_tree_to_string(trace);
-  if (unlikely(_SpanHandler_ != nullptr)) {
-    _SpanHandler_(spanStr.c_str());
-  } else {
-    pp_trace("this span:(%s)", spanStr.c_str());
-    flush_to_agent(spanStr);
-  }
-}
-
-NodeID do_end_trace(NodeID Id) {
-  WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(Id);
-  if (r_node->isRoot()) {
-    if (r_node->limit == E_TRACE_PASS) {
-      r_node->endTimer();
-      r_node->convertToSpan();
-      sendSpan(Id);
-    } else if (r_node->limit == E_TRACE_BLOCK) {
-      pp_trace("current [%d] span dropped,due to TRACE_BLOCK", r_node->getId());
+    if (span_timeout > 0) {
+      trans->SyncSendAll(span_timeout);
     } else {
-      pp_trace("current [%d] span dropped,due to limit=%ld", r_node->getId(), r_node->limit);
+      trans->PoolEventOnce(0);
     }
-  } else {
-    r_node->endTimer();
-    r_node->convertToSpanEvent();
-    return r_node->mParentId;
+    // if network not ready, span will send in next time.
+    connection_pool_.free(trans);
   }
-  // free current node tree
-  return E_ROOT_NODE;
+  void SendSpanTrace(NodeID root, int timeout) {
+    const Json::Value trace = nodePool_.ExpandTraceTreeNodes(root);
+    std::string spanStr = node_tree_to_string(trace);
+    pp_trace("this span:(%s)", spanStr.c_str());
+
+    TrySendSpan(spanStr, timeout);
+
+    if (unlikely(rawSpanHandler_ != nullptr)) {
+      rawSpanHandler_(spanStr.c_str());
+    }
+  }
+
+  void HandleHelloMsg(int type, const char* buf, size_t len) {
+    if (statePtr_->GetStartTime() > 0) {
+      return;
+    }
+
+    Json::Value root;
+    (void)type;
+
+    using Json::parseFromStream;
+    std::istringstream in_stream(std::string(buf, len));
+    bool ok = parseFromStream(builder, in_stream, &root, nullptr);
+    if (!ok) {
+      pp_trace("Receive invalid msg: %.*s from Collector-agent", (int)len, buf);
+    }
+
+    if (root["Version"] || root["Version"].isString()) {
+      std::string version = root["Version"].asString();
+      std::string lowest_version = "v0.5.0";
+      if (version < lowest_version) {
+        pp_trace("collector-agent should be >=v0.5.0, please upgrade it");
+        return;
+      }
+    }
+
+    if (root["time"] && root["time"].isString()) {
+      statePtr_->SetStartTime(std::stoll(root["time"].asString()));
+    }
+  }
+
+public:
+  NodeID StartTrace(NodeID id, const char* opt = nullptr, va_list* args = nullptr) {
+    if (id <= E_INVALID_NODE) {
+      throw std::out_of_range("invalid node id");
+    } else if (id == E_ROOT_NODE) {
+      TraceNode& trace = nodePool_.Take();
+      trace.startTimer();
+      // HACK, set :FT into agent,as only agent knowns.
+      trace.AddTraceDetail(":FT", agent_type_);
+      return trace.mPoolIndex;
+    } else {
+      WrapperTraceNode parent = nodePool_.GetWrapperNode(id);
+
+      // get root node
+      WrapperTraceNode root = nodePool_.GetWrapperNode(parent->mRootIndex);
+
+      // check subnode limit
+      root->updateRootSubTraceSize();
+
+      WrapperTraceNode trace = nodePool_.GetWrapperNode();
+      trace->startTimer();
+      parent->addChild(trace);
+      // pass opt
+      if (opt != nullptr) {
+        trace->setOpt(opt, args);
+      }
+      return trace->mPoolIndex;
+    }
+  }
+  NodeID EndTrace(NodeID ID, int timeout = 0) {
+    // HACK use cpp scope management
+    {
+      WrapperTraceNode w_trace = nodePool_.GetWrapperNode(ID);
+      if (w_trace->isRoot()) {
+        if (w_trace->limit == E_TRACE_PASS) {
+          w_trace->endTimer();
+          w_trace->convertToSpan();
+          if (timeout == 0) {
+            timeout = span_timeout_;
+          }
+          SendSpanTrace(ID, timeout);
+        } else if (w_trace->limit == E_TRACE_BLOCK) {
+          pp_trace("current [%d] span dropped,due to TRACE_BLOCK", w_trace->getId());
+        } else {
+          pp_trace("current [%d] span dropped,due to limit=%ld", w_trace->getId(), w_trace->limit);
+        }
+      } else {
+        w_trace->endTimer();
+        w_trace->convertToSpanEvent();
+        return w_trace->mParentId;
+      }
+    }
+    // it already is a ful trace, every thing is done.
+    nodePool_.FreeNodeTree(ID);
+    return E_ROOT_NODE;
+  }
+
+  bool IsRootTrace(NodeID id) {
+    WrapperTraceNode w_node = nodePool_.GetWrapperNode(id);
+    return w_node->isRoot();
+  }
+  uint64_t ChangeTraceStatus(NodeID id, int status) {
+    WrapperTraceNode w_node = nodePool_.GetWrapperNode(id);
+    WrapperTraceNode w_root = nodePool_.GetWrapperNode(w_node->mRootIndex);
+    pp_trace("change current [%d] status, before:%lld,now:%d", w_root->getId(), w_root->limit,
+             status);
+    w_root->limit = status;
+    return w_root->limit;
+  }
+  void AnnotateTrace_V1(NodeID id, const char* key, const char* value, E_NODE_LOC flag) {
+    NotInternalKey(key);
+
+    WrapperTraceNode w_node = GetWrapperTraceNode(id, flag);
+    w_node->AddTraceDetail(key, value);
+    pp_trace(" [%d] add clue key:%s value:%s", id, key, value);
+  }
+  void AnnotateTrace_V2(NodeID id, const char* key, const char* value, E_NODE_LOC flag) {
+    NotInternalKey(key);
+
+    WrapperTraceNode w_node = GetWrapperTraceNode(id, flag);
+    std::string cvalue = "";
+    cvalue += key;
+    cvalue += ':';
+    cvalue += value;
+    w_node->appendNodeValue("clues", cvalue.c_str());
+    pp_trace(" [%d] add clues:%s:%s", id, key, value);
+  }
+  void AnnotateErrorTrace(NodeID id, const char* msg, const char* error_filename,
+                          uint32_t error_lineno) {
+    WrapperTraceNode w_root = GetWrapperTraceNode(id, E_LOC_ROOT);
+    Json::Value eMsg;
+    eMsg["msg"] = msg;
+    eMsg["file"] = error_filename;
+    eMsg["line"] = error_lineno;
+    w_root->AddTraceDetail("ERR", eMsg);
+  }
+  void AnnotateExceptionTrace(NodeID id, const char* exception) {
+    WrapperTraceNode w_root = GetWrapperTraceNode(id, E_LOC_CURRENT);
+    w_root->AddTraceDetail("EXP", exception);
+    w_root->mHasExp = true;
+    pp_trace(" [%d] add exp value:%s", id, exception);
+  }
+
+  void AddTraceContext(NodeID id, const char* key, const char* value) {
+    WrapperTraceNode w_node = GetWrapperTraceNode(id, E_LOC_ROOT);
+    w_node->setContext(key, value);
+  }
+  int GetTraceContext(NodeID id, const char* key, char* pbuf, int buf_size) {
+    WrapperTraceNode w_node = GetWrapperTraceNode(id, E_LOC_ROOT);
+    std::string value;
+    w_node->getContext(key, value);
+    if (pbuf != nullptr && buf_size > (int)value.size()) {
+      strncpy(pbuf, value.c_str(), buf_size);
+      return (int)value.size();
+    } else {
+      pp_trace(" [%d] get context key:%s failed. buffer is not enough", id, key);
+      return -1;
+    }
+  }
+
+  uint64_t GetStartTime() { return statePtr_->GetStartTime(); }
+
+  int64_t GetUniqueID() { return statePtr_->GetUniqueId(); }
+
+  void ResetUniqueID() { statePtr_->ResetUniqueID(); }
+
+  bool CheckTraceLimit(int64_t timestamp) { return statePtr_->CheckTraceLimit(timestamp); }
+
+  using SpanHandler = void (*)(const char*);
+  void RegisterRawSpanHandler(SpanHandler user_handler) { rawSpanHandler_ = user_handler; }
+
+  std::string GetNodePoolStatus() { return nodePool_.Status(); }
+  void DebugNodeId(NodeID id) {
+    try {
+      WrapperTraceNode w_node = nodePool_.GetWrapperNode(id);
+      fprintf(stderr, "nodeid [%d]: { value:%s }", id, w_node->ToString().c_str());
+    } catch (const std::exception& ex) {
+      pp_trace(" debug_nodeid: [%d] Reason: %s", id, ex.what());
+    }
+  }
+
+private:
+  static inline void NotInternalKey(const char* key) {
+    if (key == nullptr || key[0] == ':') {
+      std::string reason = "key:";
+      reason += key;
+      reason += "is invalid";
+      throw std::invalid_argument(reason);
+    }
+  }
+
+  std::string node_tree_to_string(const Json::Value& value) { return _writer.write(value); }
+
+  inline WrapperTraceNode GetWrapperTraceNode(NodeID id, E_NODE_LOC flag) {
+    WrapperTraceNode w_node = nodePool_.GetWrapperNode(id);
+    if (flag == E_LOC_ROOT) {
+      return nodePool_.GetWrapperNode(w_node->mRootIndex);
+    } else {
+      return w_node;
+    }
+  }
+
+private:
+  int span_timeout_;
+  ConnectionPool::SpanConnectionPool connection_pool_;
+  NodePool::PoolManager nodePool_;
+  StatePtr statePtr_;
+  int agent_type_;
+  SpanHandler rawSpanHandler_ = {nullptr};
+  Json::CharReaderBuilder builder;
+
+public:
+  static thread_local NodeID per_thread_current_id;
+  NodeTreeWriter _writer;
+};
+
+thread_local NodeID Agent::per_thread_current_id = E_ROOT_NODE;
+
+using AgentPtr = std::unique_ptr<Agent>;
+AgentPtr _agentPtr = {nullptr};
+
+} // namespace PP
+
+using PP::_agentPtr;
+using PP::Agent;
+using PP::AgentPtr;
+
+NodeID pinpoint_get_per_thread_id() { return Agent::per_thread_current_id; }
+
+void pinpoint_update_per_thread_id(NodeID id) { Agent::per_thread_current_id = id; }
+
+bool pinpoint_set_agent(const char* collector_agent_address, long timeout_ms, long trace_limit,
+                        int agent_type) {
+#ifdef UTEST
+  _agentPtr = AgentPtr(new Agent(collector_agent_address, timeout_ms, trace_limit, agent_type));
+  return true;
+#else
+  if (_agentPtr == nullptr) {
+    _agentPtr = AgentPtr(new Agent(collector_agent_address, timeout_ms, trace_limit, agent_type));
+    return true;
+  }
+  return false;
+#endif
 }
 
-NodeID pinpoint_start_trace(NodeID parentId) {
-  try {
-    NodeID childId = do_start_trace(parentId);
-    pp_trace(" [%d] pinpoint_start child  [%d]", parentId, childId);
-    return childId;
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
-  } catch (const std::exception& ex) {
-    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
+NodeID pinpoint_start_trace(NodeID parentId) { return pinpoint_start_traceV1(parentId, nullptr); }
+
+NodeID pinpoint_start_traceV1(NodeID parentId, const char* opt, ...) {
+  if (_agentPtr) {
+    try {
+      va_list args;
+      va_start(args, opt);
+      NodeID child = _agentPtr->StartTrace(parentId, opt, &args);
+      pp_trace(" [%d] pinpoint_start child  [%d]", parentId, child);
+      va_end(args);
+      return child;
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
+    } catch (const std::exception& ex) {
+      pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
+    }
   }
   return E_INVALID_NODE;
 }
 
-static NodeID do_wake_trace(NodeID& id) {
-  // routine
-  // 1. check id alive
-  // 2. check if it's a root node
-  // 3. update start time
-
-  WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(id);
-
-  if (w_node->isRoot()) {
-    pp_trace(" [%d] wake_trace failed, it's a root node", id);
-    return E_INVALID_NODE;
+void pinpoint_add_exception(NodeID id, const char* exp) {
+  if (_agentPtr) {
+    try {
+      return _agentPtr->AnnotateExceptionTrace(id, exp);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, id, ex.what(), exp);
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, id, ex.what(), exp);
+    } catch (const std::exception& ex) {
+      pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, id, ex.what(), exp);
+    }
   }
-
-  w_node->wakeUp();
-
-  return id;
 }
 
-int pinpoint_wake_trace(NodeID traceId) {
-  try {
-    pp_trace("wake_trace  [%d] ", traceId);
-    return do_wake_trace(traceId);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" wake_trace [%d] failed with %s", traceId, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" wake_trace [%d] failed with %s", traceId, ex.what());
-  } catch (...) {
-    pp_trace(" wake_trace [%d] failed with unkonw reason", traceId);
+ParentNodeId pinpoint_end_trace(NodeID id) {
+  if (_agentPtr) {
+    try {
+      NodeID ret = _agentPtr->EndTrace(id);
+      pp_trace(" [%d] pinpoint_end_trace Done!", id);
+      return ret;
+    } catch (const std::out_of_range& ex) {
+      pp_trace("end_trace %d out_of_range exception: %s", id, ex.what());
+    } catch (const std::runtime_error& ex) {
+      pp_trace("end_trace %d runtime_error: %s", id, ex.what());
+    } catch (const std::exception& ex) {
+      pp_trace("end_trace  [%d] end trace failed. %s", id, ex.what());
+    }
   }
-  return 0;
+  return E_INVALID_NODE;
+}
+
+int pinpoint_trace_is_root(NodeID id) {
+  if (_agentPtr) {
+    try {
+      return _agentPtr->IsRootTrace(id) ? (1) : (0);
+    } catch (const std::out_of_range&) {
+      pp_trace(" [%d] not found", id);
+    } catch (const std::exception& ex) {
+      pp_trace(" [%d] end trace failed. %s", id, ex.what());
+    }
+  }
+  return -1;
 }
 
 int pinpoint_force_end_trace(NodeID id, int32_t timeout) {
-  _span_timeout = timeout;
-  while (id != E_ROOT_NODE) {
-    id = pinpoint_end_trace(id);
-    if (id == E_INVALID_NODE)
-      break;
-  }
-  // back to normal
-  _span_timeout = global_agent_info.timeout_ms;
-  return 0;
-}
-
-int pinpoint_trace_is_root(NodeID _id) {
-  try {
-    WrapperTraceNode node = PoolManager::getInstance().GetWrapperNode(_id);
-    return node->isRoot() ? (1) : (0);
-  } catch (const std::out_of_range&) {
-    pp_trace(" [%d] not found", _id);
-  } catch (const std::exception& ex) {
-    pp_trace(" [%d] end trace failed. %s", _id, ex.what());
-  }
-  return -1;
-}
-
-NodeID pinpoint_end_trace(NodeID traceId) {
-  try {
-    NodeID ret = do_end_trace(traceId);
-    if (ret == E_ROOT_NODE) {
-      freeNodeTree(traceId);
+  if (_agentPtr) {
+    try {
+      while (id != E_ROOT_NODE) {
+        id = _agentPtr->EndTrace(id, timeout);
+        if (id == E_INVALID_NODE)
+          break;
+      }
+      pp_trace(" [%d] pinpoint_end_trace Done!", id);
+      return E_ROOT_NODE;
+    } catch (const std::out_of_range& ex) {
+      pp_trace("end_trace %d out_of_range exception: %s", id, ex.what());
+    } catch (const std::runtime_error& ex) {
+      pp_trace("end_trace %d runtime_error: %s", id, ex.what());
+    } catch (const std::exception& ex) {
+      pp_trace("end_trace  [%d] end trace failed. %s", id, ex.what());
     }
-    pp_trace(" [%d] pinpoint_end_trace Done!", traceId);
-    return ret;
-  } catch (const std::out_of_range& ex) {
-    pp_trace("end_trace %d out_of_range exception: %s", traceId, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace("end_trace %d runtime_error: %s", traceId, ex.what());
-  } catch (const std::exception& ex) {
-    pp_trace("end_trace  [%d] end trace failed. %s", traceId, ex.what());
   }
-
   return E_INVALID_NODE;
 }
 
-// static int do_remove_trace(NodeID traceId)
-// {
-//     TraceNode&  node = PoolManager::getInstance().getNodeById(traceId);
-//     node.remove();
-//     return 0;
-// }
+void pinpoint_add_clues(NodeID id, const char* key, const char* value, E_NODE_LOC flag) {
+  if (_agentPtr) {
 
-// int pinpoint_remove_trace(NodeID traceId)
-// {
-//     try
-//     {
-//         NodeID ret = do_remove_trace(traceId);
-//         pp_trace(" [%d] pinpoint_remove_trace Done!",traceId);
-//         return ret;
-//     }catch(const std::out_of_range&){
-//         pp_trace(" [%d] not found",traceId);
-//         return -1;
-//     }catch(const std::exception &ex){
-//         pp_trace(" [%d] end trace failed. %s",traceId,ex.what());
-//         return -1;
-//     }
-// }
-
-uint64_t pinpoint_start_time(void) { return (uint64_t)SafeSharedState::instance().getStartTime(); }
-
-int64_t generate_unique_id() { return SafeSharedState::instance().generateUniqueId(); }
-
-void reset_unique_id(void) { return SafeSharedState::instance().resetUniqueId(); }
-
-uint64_t inline do_mark_current_trace_status(NodeID& _id, E_AGENT_STATUS status) {
-  WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
-  WrapperTraceNode w_root = PoolManager::getInstance().GetWrapperNode(w_node->mRootIndex);
-  pp_trace("change current [%d] status, before:%lld,now:%d", w_root->getId(), w_root->limit,
-           status);
-  return __sync_lock_test_and_set(&w_root->limit, status);
+    try {
+      _agentPtr->AnnotateTrace_V2(id, key, value, flag);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    } catch (const std::exception& ex) {
+      pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    }
+  }
 }
 
-uint64_t mark_current_trace_status(NodeID _id, int status) {
-  try {
-    return do_mark_current_trace_status(_id, (E_AGENT_STATUS)status);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (...) {
-    pp_trace(" %s [%d] failed with unkonw reason", __func__, _id);
+void pinpoint_add_clue(NodeID id, const char* key, const char* value, E_NODE_LOC flag) {
+  if (_agentPtr) {
+    try {
+      _agentPtr->AnnotateTrace_V1(id, key, value, flag);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    } catch (const std::exception& ex) {
+      pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    }
+  }
+}
+
+void pinpoint_set_context_key(NodeID id, const char* key, const char* value) {
+  if (_agentPtr) {
+    try {
+      _agentPtr->AddTraceContext(id, key, value);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed with out_of_range. %s,parameters:%s:%s", __func__, id, ex.what(),
+               key, value);
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed with runtime_error. %s,parameters:%s:%s", __func__, id, ex.what(),
+               key, value);
+    } catch (const std::exception& ex) {
+      pp_trace(" %s [%d] failed with %s,parameters:%s:%s", __func__, id, ex.what(), key, value);
+    }
+  }
+}
+
+int pinpoint_get_context_key(NodeID id, const char* key, char* pbuf, int buf_size) {
+  if (_agentPtr) {
+    try {
+      return _agentPtr->GetTraceContext(id, key, pbuf, buf_size);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, id, ex.what(), key);
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, id, ex.what(), key);
+    } catch (const std::exception& ex) {
+      pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, id, ex.what(), key);
+    }
   }
   return 0;
 }
 
-int check_tracelimit(int64_t timestamp) {
-  return SafeSharedState::instance().checkTraceLimit(timestamp) ? (1) : (0);
-}
-
-static inline WrapperTraceNode locate_node_by_loc(NodeID _id, E_NODE_LOC flag) {
-  WrapperTraceNode w_node = PoolManager::getInstance().GetWrapperNode(_id);
-  if (flag == E_LOC_ROOT) {
-    return PoolManager::getInstance().GetWrapperNode(w_node->mRootIndex);
+int check_trace_limit(int64_t timestamp) {
+  if (_agentPtr) {
+    return _agentPtr->CheckTraceLimit(timestamp) ? 1 : 0;
   } else {
-    return w_node;
-  }
-}
-
-static void do_add_clue(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
-  WrapperTraceNode w_node = locate_node_by_loc(_id, flag);
-  w_node->AddTraceDetail(key, value);
-  pp_trace(" [%d] add clue key:%s value:%s", _id, key, value);
-}
-
-static void do_add_clues(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
-  WrapperTraceNode w_node = locate_node_by_loc(_id, flag);
-
-  std::string cvalue = "";
-  cvalue += key;
-  cvalue += ':';
-  cvalue += value;
-  w_node->appendNodeValue(CLUSE, cvalue.c_str());
-  pp_trace(" [%d] add clues:%s:%s", _id, key, value);
-}
-
-void pinpoint_add_clues(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
-  try {
-    _verify_key(key);
-    do_add_clues(_id, key, value, flag);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed. Reason %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  }
-}
-
-void pinpoint_add_clue(NodeID _id, const char* key, const char* value, E_NODE_LOC flag) {
-  try {
-    _verify_key(key);
-    do_add_clue(_id, key, value, flag);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  }
-}
-
-static inline void do_set_context_key(NodeID _id, const char* key, const char* value) {
-  WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
-  w_node->setContext(key, value);
-}
-
-static int do_get_context_key(NodeID _id, const char* key, char* pbuf, int buf_size) {
-  WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
-  std::string value;
-  w_node->getContext(key, value);
-  if (pbuf != nullptr && buf_size > (int)value.size()) {
-    strncpy(pbuf, value.c_str(), buf_size);
-    return (int)value.size();
-  } else {
-    pp_trace(" [%d] get context key:%s failed. buffer is not enough", _id, key);
-    return -1;
-  }
-}
-
-void pinpoint_set_context_key(NodeID _id, const char* key, const char* value) {
-  try {
-    _verify_key(key);
-    do_set_context_key(_id, key, value);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed with out_of_range. %s,parameters:%s:%s", __func__, _id, ex.what(),
-             key, value);
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed with runtime_error. %s,parameters:%s:%s", __func__, _id, ex.what(),
-             key, value);
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed with %s,parameters:%s:%s", __func__, _id, ex.what(), key, value);
-  }
-}
-
-static void do_set_long_key(NodeID id, const char* key, long l) {
-  WrapperTraceNode w_node = locate_node_by_loc(id, E_LOC_ROOT);
-  w_node->setContext(key, l);
-}
-
-void pinpoint_set_context_long(NodeID _id, const char* key, long l) {
-  try {
-    _verify_key(key);
-    do_set_long_key(_id, key, l);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  }
-}
-
-static int do_get_long_key(NodeID _id, const char* key, long* l) {
-  WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
-  if (l != nullptr) {
-    long v;
-    w_node->getContext(key, v);
-    *l = v;
-  }
-  return 0;
-}
-
-int pinpoint_get_context_long(NodeID _id, const char* key, long* l) {
-  try {
-    _verify_key(key);
-    do_get_long_key(_id, key, l);
     return 0;
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
   }
-  return 1;
 }
 
-int pinpoint_get_context_key(NodeID _id, const char* key, char* pbuf, int buf_size) {
-  try {
-    _verify_key(key);
-    return do_get_context_key(_id, key, pbuf, buf_size);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, _id, ex.what(), key);
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, _id, ex.what(), key);
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed with %s, parameters:%s", __func__, _id, ex.what(), key);
+int check_tracelimit(int64_t timestamp) { return check_trace_limit(timestamp); }
+
+uint64_t change_trace_status(NodeID id, int status) {
+  if (_agentPtr) {
+    try {
+      return _agentPtr->ChangeTraceStatus(id, status);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed with %s", __func__, id, ex.what());
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed with %s", __func__, id, ex.what());
+    } catch (...) {
+      pp_trace(" %s [%d] failed with unkonw reason", __func__, id);
+    }
   }
-  return -1;
+  return 0;
 }
 
-void do_catch_error(NodeID _id, const char* msg, const char* error_filename,
-                    uint32_t error_lineno) {
-  WrapperTraceNode w_node = locate_node_by_loc(_id, E_LOC_ROOT);
-
-  Json::Value eMsg;
-  eMsg["msg"] = msg;
-  eMsg["file"] = error_filename;
-  eMsg["line"] = error_lineno;
-  w_node->AddTraceDetail("ERR", eMsg);
+uint64_t mark_current_trace_status(NodeID id, int status) {
+  return change_trace_status(id, status);
 }
 
-void catch_error(NodeID _id, const char* msg, const char* error_filename, uint32_t error_lineno) {
-  try {
-    do_catch_error(_id, msg, error_filename, error_lineno);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed with %s", __func__, _id, ex.what());
+int64_t generate_unique_id(void) {
+  if (_agentPtr) {
+    return _agentPtr->GetUniqueID();
+  } else {
+    return 0;
+  }
+}
+
+uint64_t pinpoint_start_time(void) {
+  if (_agentPtr && _agentPtr->GetStartTime() != 0) {
+    return _agentPtr->GetStartTime();
+  }
+  return get_unix_time_ms();
+}
+
+void catch_error(NodeID id, const char* msg, const char* error_filename, uint32_t error_lineno) {
+  if (_agentPtr) {
+    try {
+      _agentPtr->AnnotateErrorTrace(id, msg, error_filename, error_lineno);
+    } catch (const std::out_of_range& ex) {
+      pp_trace(" %s [%d] failed with %s", __func__, id, ex.what());
+    } catch (const std::runtime_error& ex) {
+      pp_trace(" %s [%d] failed with %s", __func__, id, ex.what());
+    } catch (const std::exception& ex) {
+      pp_trace(" %s [%d] failed with %s", __func__, id, ex.what());
+    }
+  }
+}
+
+void register_span_handler(void (*handler)(const char*)) {
+  if (_agentPtr) {
+    _agentPtr->RegisterRawSpanHandler(handler);
+  }
+}
+
+void reset_unique_id(void) {
+  if (_agentPtr) {
+    _agentPtr->ResetUniqueID();
+  }
+}
+
+void show_status(void) {
+  if (_agentPtr) {
+    fprintf(stderr, "%s\n", _agentPtr->GetNodePoolStatus().c_str());
+  }
+}
+
+void debug_nodeid(NodeID id) {
+  if (_agentPtr) {
+    _agentPtr->DebugNodeId(id);
   }
 }
 
@@ -452,67 +568,8 @@ const char* pinpoint_agent_version() {
   return _version_;
 }
 
-NodeID pinpoint_start_traceV1(NodeID parentId, const char* opt, ...) {
-  try {
-    va_list args;
-    va_start(args, opt);
-    NodeID childId = do_start_trace(parentId, opt, &args);
-    va_end(args);
-    pp_trace(" [%d] pinpoint_start_traceV1 child  [%d]", parentId, childId);
-    return childId;
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" start_trace [%d] failed with %s", parentId, ex.what());
-  } catch (...) {
-    pp_trace(" start_trace [%d] failed with unkonw reason", parentId);
-  }
-  return E_INVALID_NODE;
-}
-
-static void do_add_exp(NodeID _id, const char* value) {
-  WrapperTraceNode w_root = locate_node_by_loc(_id, E_LOC_CURRENT);
-  w_root->AddTraceDetail("EXP", value);
-  w_root->mHasExp = true;
-  pp_trace(" [%d] add exp value:%s", _id, value);
-}
-
-void pinpoint_add_exception(NodeID traceId, const char* exp) {
-  try {
-    do_add_exp(traceId, exp);
-  } catch (const std::out_of_range& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
-  } catch (const std::runtime_error& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
-  } catch (const std::exception& ex) {
-    pp_trace(" %s [%d] failed. Reason: %s,parameters:%s", __func__, traceId, ex.what(), exp);
-  }
-}
-
-void register_span_handler(void (*handler)(const char*)) {
-  if (likely(handler != nullptr)) {
-    _SpanHandler_ = std::bind(handler, std::placeholders::_1);
-  }
-}
-
-void show_status(void) {
-  Json::Value status;
-  status["pool_total_node"] = PoolManager::getInstance().totoalNodesCount();
-  status["pool_free_node"] = PoolManager::getInstance().freeNodesCount();
-  status["common_libary_version"] = pinpoint_agent_version();
-  auto add_alive_node_fun = [&status](TraceNode& node) {
-    status["pool_alive_nodes"].append(node.mPoolIndex);
-  };
-  PoolManager::getInstance().foreachAliveNode(std::bind(add_alive_node_fun, std::placeholders::_1));
-
-  fprintf(stderr, "%s\n", status.toStyledString().c_str());
-}
-
-void debug_nodeid(NodeID id) {
-  try {
-    WrapperTraceNode r_node = PoolManager::getInstance().GetWrapperNode(id);
-    fprintf(stderr, "nodeid [%d]: { value:%s }", id, r_node->ToString().c_str());
-  } catch (const std::exception& ex) {
-    pp_trace(" debug_nodeid: [%d] Reason: %s", id, ex.what());
-  }
+uint64_t get_unix_time_ms() {
+  std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+  time_point<system_clock, milliseconds> current = time_point_cast<std::chrono::milliseconds>(now);
+  return current.time_since_epoch().count();
 }

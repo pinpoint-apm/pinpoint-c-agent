@@ -21,55 +21,14 @@
  */
 
 #include <gtest/gtest.h>
-#include <thread>
-#include "common.h"
-#include "Util/Helper.h"
-#include "Cache/SafeSharedState.h"
 #include "NodePool/PoolManager.h"
-#include <stdarg.h>
-using Cache::SafeSharedState;
-using Helper::STT;
 using std::chrono::seconds;
 namespace Json = AliasJson;
+
 using NodePool::PoolManager;
 using NodePool::TraceNode;
-TEST(util, sst)
-{
-  ADDTRACE();
 
-  std::this_thread::sleep_for(seconds(1));
-}
-
-TEST(util, onOFFline)
-{
-  SafeSharedState &_state = SafeSharedState::instance();
-  EXPECT_FALSE(_state.isReady());
-  _state.updateStartTime(1316615272);
-  // EXPECT_EQ(1316615272, _state.getStartTime());
-  EXPECT_TRUE(_state.isReady());
-}
-
-TEST(util, time_in_msec)
-{
-  uint64_t time = Helper::get_current_msec_stamp();
-  std::this_thread::sleep_for(seconds(1));
-  EXPECT_GE(Helper::get_current_msec_stamp(), time + 1000);
-}
-// restrict typeva_start
-TEST(util, test_node_to_string)
-{
-  Json::Value _value;
-
-  _value["a"] = 1;
-  _value["b"] = 1;
-  _value["d"] = 1;
-
-  std::string str = Helper::node_tree_to_string(_value);
-  EXPECT_STREQ(str.c_str(), "{\"a\":1,\"b\":1,\"d\":1}");
-}
-
-int sum(int n_args, ...)
-{
+int sum(int n_args, ...) {
   va_list ap;
   va_start(ap, n_args);
   int var = n_args;
@@ -85,23 +44,21 @@ int sum(int n_args, ...)
   return total;
 }
 //./bin/unittest --gtest_filter=util.variadic_func
-TEST(util, variadic_func_int)
-{
+TEST(util, variadic_func_int) {
   EXPECT_EQ(sum(1, 2, 3, 4, 5, 6, 0), 21);
   EXPECT_EQ(sum(1, 2, 3, 5, 0), 11);
 }
 
-int opt(const char *start, ...)
-{
+int opt(const char* start, ...) {
   va_list ap;
   va_start(ap, start);
-  const char *var = start;
+  const char* var = start;
 
   int total = 0;
   while (var != nullptr) {
     printf("%s\n", var);
     total++;
-    var = va_arg(ap, const char *);
+    var = va_arg(ap, const char*);
   }
 
   va_end(ap);
@@ -109,18 +66,17 @@ int opt(const char *start, ...)
   return total;
 }
 //./bin/unittest --gtest_filter=util.variadic_func_str
-TEST(util, variadic_func_str)
-{
+TEST(util, variadic_func_str) {
   EXPECT_EQ(opt("a", "b", "c", "d", nullptr), 4);
   EXPECT_EQ(opt("a", "b", "c", nullptr), 3);
 }
 
-TEST(util, mergeTraceNodeTree)
-{
-  TraceNode &n1 = PoolManager::getInstance().Take();
-  TraceNode &n2 = PoolManager::getInstance().Take();
-  TraceNode &n3 = PoolManager::getInstance().Take();
-  TraceNode &n4 = PoolManager::getInstance().Take();
+TEST(util, mergeTraceNodeTree) {
+  PoolManager node_pool;
+  TraceNode& n1 = node_pool.Take();
+  TraceNode& n2 = node_pool.Take();
+  TraceNode& n3 = node_pool.Take();
+  TraceNode& n4 = node_pool.Take();
 
   n2.mParentId = n1.mPoolIndex;
   n1.mChildHeadId = n2.mPoolIndex;
@@ -129,16 +85,16 @@ TEST(util, mergeTraceNodeTree)
   n3.mNextId = n4.mPoolIndex;
   n2.mChildHeadId = n3.mPoolIndex;
 
-  Json::Value var = Helper::mergeTraceNodeTree(n1);
+  Json::Value var = node_pool.ExpandTraceTreeNodes(n1);
   std::cout << var.toStyledString();
 }
 
 std::string span;
 
-void captureSpan(const char *s) { span = s; }
+void captureSpan(const char* s) { span = s; }
 
-TEST(util, mergeTraceNodeTree_1)
-{
+TEST(util, mergeTraceNodeTree_1) {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
   register_span_handler(captureSpan);
 
   NodeID id1, id2, id3, id4;

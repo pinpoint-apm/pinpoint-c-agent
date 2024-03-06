@@ -73,6 +73,6 @@ compile_commands.json
 testapps/PHP/composer-setup.php
 testapps/PHP/composer.phar
 wheelhouse/
-.clangd
 collector-agent/pinpoint-grpc-idl/
 *.so
+.clangd

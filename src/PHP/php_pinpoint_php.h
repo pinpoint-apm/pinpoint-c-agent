@@ -22,7 +22,7 @@
 extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
-#define PHP_PINPOINT_PHP_VERSION "0.2.1"
+#define PHP_PINPOINT_PHP_VERSION "0.5.0"
 
 #ifdef PHP_WIN32
 #define PHP_PINPOINT_PHP_API __declspec(dllexport)
@@ -38,7 +38,7 @@ extern zend_module_entry pinpoint_php_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(pinpoint_php)
 
-char* co_host; // tcp:ip:port should support dns
+char *co_host; // tcp:ip:port should support dns
 zend_bool utest_flag;
 //    zend_bool   limit;
 zend_bool debug_report;
@@ -54,7 +54,7 @@ ZEND_END_MODULE_GLOBALS(pinpoint_php)
 extern ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php);
 
 #ifdef ZTS
-#define PPG(v) TSRMG(pinpoint_php_globals_id, zend_pinpoint_php_globals*, v)
+#define PPG(v) TSRMG(pinpoint_php_globals_id, zend_pinpoint_php_globals *, v)
 #else
 #define PPG(v) (pinpoint_php_globals.v)
 #endif
