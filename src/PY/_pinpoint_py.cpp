@@ -21,14 +21,6 @@ static PyObject *py_obj_msg_callback;
 // global g_collector_host is suck
 // static char* g_collector_host;
 
-#if defined(__linux__) || defined(_UNIX) || defined(__APPLE__)
-
-#else
-
-#error "your platform not support"
-
-#endif
-
 #define MODNAME "_pinpointPy"
 
 #ifndef CYTHON_UNUSED
@@ -74,8 +66,9 @@ static PyObject *py_pinpoint_add_clue(PyObject *self, PyObject *args) {
   int id = -1;
   int loc = 0;
   if (PyArg_ParseTuple(args, "ss|ii", &key, &value, &id, &loc)) {
-    if (id == -1)
+    if (id == -1) {
       id = pinpoint_get_per_thread_id();
+    }
 
     pinpoint_add_clue(id, key, value, loc);
   }
@@ -146,36 +139,34 @@ static PyObject *py_force_flush_span(PyObject *self, PyObject *args) {
     id = pinpoint_get_per_thread_id();
   }
 
-  Py_BEGIN_ALLOW_THREADS pinpoint_force_end_trace(id, timeout);
-  Py_END_ALLOW_THREADS
+  pinpoint_force_end_trace(id, timeout);
 
-      return Py_BuildValue("O", Py_True);
+  return Py_BuildValue("O", Py_True);
 }
 
-static inline uint32_t startTraceWithPerThreadId(void) {
-  uint32_t id = pinpoint_start_trace(pinpoint_get_per_thread_id());
+static inline int start_thread_local_trace(void) {
+  int id = pinpoint_start_trace(pinpoint_get_per_thread_id());
   pinpoint_update_per_thread_id(id);
   return id;
 }
 
 static PyObject *py_pinpoint_start_trace(PyObject *self, PyObject *args) {
-  int ret = 0;
   int32_t id = -1;
 
   if (!PyArg_ParseTuple(args, "|i", &id)) {
     return NULL;
   }
-
-  Py_BEGIN_ALLOW_THREADS if (id == -1) { ret = startTraceWithPerThreadId(); }
-  else {
-    ret = pinpoint_start_trace(id);
+  int new_id = -1;
+  if (id == -1) {
+    new_id = start_thread_local_trace();
+  } else {
+    new_id = pinpoint_start_trace(id);
   }
-  Py_END_ALLOW_THREADS
 
-      return Py_BuildValue("i", ret);
+  return Py_BuildValue("i", new_id);
 }
 
-static inline int endTraceWithPerThreadId(void) {
+static inline int end_thread_local_trace(void) {
   NodeID cid = pinpoint_get_per_thread_id();
   NodeID id = pinpoint_end_trace(cid);
   pinpoint_update_per_thread_id(id);
@@ -189,18 +180,13 @@ static PyObject *py_pinpoint_end_trace(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  Py_BEGIN_ALLOW_THREADS
-
-      if (id == -1) {
-    ret = endTraceWithPerThreadId();
-  }
-  else {
+  if (id == -1) {
+    ret = end_thread_local_trace();
+  } else {
     ret = pinpoint_end_trace(id);
   }
 
-  Py_END_ALLOW_THREADS
-
-      return Py_BuildValue("i", ret);
+  return Py_BuildValue("i", ret);
 }
 
 static PyObject *py_generate_unique_id(PyObject *self,
@@ -239,8 +225,9 @@ static PyObject *py_pinpoint_drop_trace(PyObject *self, PyObject *args) {
     return NULL;
   }
 
-  if (id == -1)
+  if (id == -1) {
     id = pinpoint_get_per_thread_id();
+  }
 
   mark_current_trace_status(id, E_TRACE_BLOCK);
 
@@ -285,14 +272,6 @@ static PyObject *py_pinpoint_enable_debug(PyObject *self, PyObject *args) {
   return Py_BuildValue("O", Py_True);
 }
 
-bool check_host_format(const char *host) {
-  if (strcasestr(host, "unix") || strcasestr(host, "tcp")) {
-    return true;
-  }
-  PyErr_SetString(PyExc_TypeError, "collector_host must start with unix/tcp");
-  return false;
-}
-
 /**
  * def set_agent(collector_host=, trace_limit=,enable_coroutines=)
  */
@@ -309,21 +288,11 @@ static PyObject *py_set_agent(PyObject *self, PyObject *args,
   long timeout_ms = 0;
   if (PyArg_ParseTupleAndKeywords(args, keywds, "s|ll", kwlist, &collector_host,
                                   &trace_limit, &timeout_ms)) {
-    ret = check_host_format(collector_host);
-    if (!ret) {
-      goto END_OF_PARSE;
-    }
 
     pp_trace("collector_host:%s", collector_host);
     pp_trace("trace_limit:%ld", trace_limit);
     pinpoint_set_agent(collector_host, timeout_ms, trace_limit, 1700);
-
-  END_OF_PARSE:
-
-    if (ret == true) {
-      return Py_BuildValue("O", Py_True);
-    }
-    return NULL;
+    return Py_BuildValue("O", Py_True);
   } else {
     return NULL;
   }

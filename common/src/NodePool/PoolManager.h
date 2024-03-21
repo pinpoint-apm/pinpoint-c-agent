@@ -26,7 +26,7 @@
 #include "json/value.h"
 #include <vector>
 #include <mutex>
-
+namespace PP {
 namespace NodePool {
 class PoolManager {
 private:
@@ -38,8 +38,9 @@ private:
 
   bool _restore(NodeID id, NodeID& child_id, NodeID& next_id, bool force);
 
-  Json::Value mergeChildren(WrapperTraceNode& node);
-  void gatherChildDetailByReverse(Json::Value& detail, WrapperTraceNode& head);
+  Json::Value& getRootNodeValue(WrapperTraceNodePtr& node);
+
+  // void gatherChildrenValues(WrapperTraceNodePtr& parent, NodeID child_header);
 
 public:
   /**
@@ -53,10 +54,10 @@ public:
     return this->_take(id);
   }
 
-  inline WrapperTraceNode GetWrapperNode(NodeID id = E_ROOT_NODE) {
+  inline WrapperTraceNodePtr GetWrapperNode(NodeID id = E_ROOT_NODE) {
     std::lock_guard<std::mutex> _safe(this->_lock);
     TraceNode& e = this->_take(id);
-    return WrapperTraceNode(&e);
+    return WrapperTraceNodePtr(e);
   }
   /**
    * @brief restore id->traceNode to pool
@@ -69,19 +70,19 @@ public:
    */
   bool ReturnNode(NodeID id, NodeID& child_id, NodeID& next_id);
 
-  inline bool ReturnNode(TraceNode& node) {
+  inline bool ReturnNode(const TraceNode& node) {
     NodeID node1, node2;
     return this->ReturnNode(node.getId(), node1, node2);
   }
 
   uint32_t totalNodesCount() {
     std::lock_guard<std::mutex> _safe(this->_lock);
-    return nodeIndexVec.size() * CELL_SIZE;
+    return (uint32_t)nodeIndexVec.size() * CELL_SIZE;
   }
 
   uint32_t freeNodesCount() {
     std::lock_guard<std::mutex> _safe(this->_lock);
-    return this->_freeNodeList.size();
+    return (uint32_t)this->_freeNodeList.size();
   }
 
   void foreachAliveNode(std::function<void(TraceNode& node)> func) {
@@ -93,14 +94,17 @@ public:
     }
   }
 
-  Json::Value ExpandTraceTreeNodes(NodeID id) {
-    WrapperTraceNode root = GetWrapperNode(id);
+  Json::Value& ExpandTraceTreeNodes(NodeID id) {
+    WrapperTraceNodePtr root = GetWrapperNode(id);
     return ExpandTraceTreeNodes(root);
   }
-  Json::Value ExpandTraceTreeNodes(WrapperTraceNode& w_root) { return mergeChildren(w_root); }
-  Json::Value ExpandTraceTreeNodes(TraceNode& root) {
-    WrapperTraceNode w_root(&root);
-    return mergeChildren(w_root);
+
+  Json::Value& ExpandTraceTreeNodes(WrapperTraceNodePtr& w_root) {
+    return getRootNodeValue(w_root);
+  }
+  Json::Value& ExpandTraceTreeNodes(TraceNode& root) {
+    WrapperTraceNodePtr w_root(root);
+    return getRootNodeValue(w_root);
   }
 
   void FreeNodeTree(NodeID nodeId);
@@ -112,7 +116,7 @@ public:
     status["common_libary_version"] = pinpoint_agent_version();
 
     auto add_alive_node_fun = [&status](TraceNode& node) {
-      status["pool_alive_nodes"].append(node.mPoolIndex);
+      status["pool_alive_nodes"].append(node.id_);
     };
 
     foreachAliveNode(std::bind(add_alive_node_fun, std::placeholders::_1));
@@ -157,5 +161,5 @@ private:
   std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
 };
 } // namespace NodePool
-
+} // namespace PP
 #endif /* COMMON_SRC_NODEPOOL_POOLMANAGER_H_ */

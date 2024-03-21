@@ -62,6 +62,6 @@ Stack trace:
   thrown in %s on line 27
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"%s","line":27,"msg":"Uncaught Exception: I am testting in %s:27\nStack trace:\n#0 %s(34): Test()\n#1 {main}\n  thrown"},"calls":[{":E":%d,":S":%d,"name":"Foo"}]})
-[pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
-[pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
+[pinpoint] [%d] [%d]agent try to connect:(:/unexist_file.sock)
+[pinpoint] [%d] [%d]connect:(:/unexist_file.sock) failed error_code: 2
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!

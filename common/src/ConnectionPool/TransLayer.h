@@ -23,19 +23,12 @@
 #ifndef INCLUDE_PPTRANSLAYER_H_
 #define INCLUDE_PPTRANSLAYER_H_
 #include <cstdint>
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <arpa/inet.h>
 #include <functional>
 #include <map>
 #include <memory>
 #include "common.h"
 #include "Cache/Chunk.h"
+#include "sockets.h"
 
 namespace ConnectionPool {
 using Cache::Chunks;
@@ -85,7 +78,7 @@ public:
 
   ~TransLayer() {
     if (this->c_fd != -1) {
-      close(this->c_fd);
+      close_socket(this->c_fd);
     }
   }
 
@@ -93,11 +86,11 @@ public:
 private:
 #endif
 
-  static int connect_stream_remote(const char* remote);
-
+  static SOCKET connect_stream_remote(const char* remote);
+#ifdef __linux__
   static int connect_unix_remote(const char* remote);
-
-  int connect_remote(const char* statement);
+#endif
+  SOCKET connect_remote(const char* statement);
 
   int _send_msg_to_collector() {
     return chunks.drainOutWithPipe(
@@ -107,7 +100,7 @@ private:
   void _reset_remote() {
     if (c_fd > 0) {
       pp_trace("reset peer:%d", c_fd);
-      close(c_fd);
+      close_socket(c_fd);
       c_fd = -1;
       this->_state = 0;
     }
@@ -123,25 +116,24 @@ private:
     const char* buf = data;
     uint32_t buf_ofs = 0;
     while (buf_ofs < length) {
-#ifdef __APPLE__
-      ssize_t ret = send(c_fd, buf + buf_ofs, length - buf_ofs, 0);
+#if defined(__APPLE__) || defined(_WIN32)
+      int ret = send(c_fd, buf + buf_ofs, length - buf_ofs, 0);
 #else
       ssize_t ret = send(c_fd, buf + buf_ofs, length - buf_ofs, MSG_NOSIGNAL);
 #endif
-
       if (ret > 0) {
         buf_ofs += (uint32_t)ret;
         pp_trace("fd %d send size %ld", c_fd, ret);
       } else if (ret == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+        if (nonblock_error(err_code())) {
           this->_state |= S_WRITING;
           return buf_ofs;
         }
-        pp_trace("_do_write_data@%d send data error:(%s) fd:(%d)", __LINE__, strerror(errno), c_fd);
+        pp_trace("_do_write_data@%d send data error:(%d) fd:(%d)", __LINE__, err_code(), c_fd);
         return -1;
       } else {
-        pp_trace("_do_write_data@%d send data return 0 error:(%s) fd:(%d)", __LINE__,
-                 strerror(errno), c_fd);
+        pp_trace("_do_write_data@%d send data return 0 error:(%d) fd:(%d)", __LINE__, err_code(),
+                 c_fd);
         return -1;
       }
     }
@@ -150,7 +142,7 @@ private:
     return length;
   }
 
-  int RecvByteStream() {
+  int recvByteStream() {
     int next_size = 0;
     while (next_size < IN_MSG_BUF_SIZE) {
       int ret = recv(c_fd, in_buf + next_size, IN_MSG_BUF_SIZE - next_size, 0);
@@ -164,35 +156,38 @@ private:
           next_size = 0;
         }
       } else if (ret == 0) {
-        // peer close
+        pp_trace("server closed. error:%d", err_code());
         return -1;
       } else {
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+        if (nonblock_error(err_code())) {
           return 0;
+        } else {
+          pp_trace("recv failed. error:%d", err_code());
+          return -1;
         }
-        pp_trace("recv with error:%s", strerror(errno));
-        return -1;
       }
     }
+    pp_trace("recv buf full,maybe a bug");
     return 0;
   }
 
-  int HandleMsgStream(const char* buf, size_t len) {
-    size_t offset = 0;
+  int HandleMsgStream(const char* buf, int len) {
+    int offset = 0;
     while (offset + 8 <= len) {
       Header* header = (Header*)buf;
 
-      uint32_t body_len = ntohl(header->length);
+      int body_len = (int)ntohl(header->length);
 
       if (8 + body_len > len) {
         return offset;
       }
 
       uint32_t type = ntohl(header->type);
-      // if (peerMsgCallback) {
       auto has = msgRouteMap_.find(type);
       if (has != msgRouteMap_.end()) {
         msgRouteMap_[type](type, buf + 8, len - 8);
+      } else {
+        pp_trace("unsupported message type:%d from server", type);
       }
       offset += (8 + body_len);
     }
@@ -217,7 +212,7 @@ private:
   time_t lastConnectTime;
 
 public:
-  int c_fd;
+  SOCKET c_fd;
 };
 using TransLayerPtr = std::unique_ptr<TransLayer>;
 } // namespace ConnectionPool

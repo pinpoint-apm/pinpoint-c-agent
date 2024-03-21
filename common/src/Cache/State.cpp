@@ -21,6 +21,14 @@ namespace PP {
 ProcessState::ProcessState(int64_t trace_limit)
     : starttime_(get_unix_time_ms()), trace_limit_(trace_limit) {}
 
+void ProcessState::SetStartTime(uint64_t start_time) {
+  pp_trace("set start time:%lld", start_time);
+  if (!ready_) {
+    starttime_ = start_time;
+    ready_ = true;
+  }
+}
+
 bool ProcessState::CheckTraceLimit(int64_t timestamp) {
   time_t now = (timestamp != -1) ? (timestamp) : (std::time(NULL));
   if (trace_limit_ == -1) {

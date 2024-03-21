@@ -28,7 +28,6 @@
 #endif
 
 #define MAX_VEC 512
-#define LOG_SIZE 4096
 #define NAMING_SIZE 128
 static const int RECONNECT_TIME_SEC = 5;
 typedef enum { RESPONSE_AGENT_INFO = 0, REQ_UPDATE_SPAN = 1 } MSG_TYPE;
@@ -54,7 +53,6 @@ typedef struct collector_agent_s {
   char* appname;
 } CollectorAgentInfo;
 
-#define LOG_SIZE 4096
 #define MAX_ADDRESS_SIZE 256
 
 typedef enum {

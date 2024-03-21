@@ -22,6 +22,7 @@
 
 #include "TraceNode.h"
 #include "header.h"
+namespace PP {
 namespace NodePool {
 TraceNode::~TraceNode() {}
 
@@ -30,59 +31,60 @@ void TraceNode::clearAttach() {
   if (!this->_value.empty())
     this->_value.clear(); // Json::Value();
 
-  if (!this->_context.empty())
-    this->_context.clear();
+  if (!this->context_.empty())
+    this->context_.clear();
 
   if (!this->_endTraceCallback.empty())
     this->_endTraceCallback.clear();
 }
 
-void TraceNode::initId(NodeID& id) { this->mPoolIndex = id; }
+void TraceNode::initId(const NodeID& id) { this->id_ = id; }
 
-void TraceNode::addChild(WrapperTraceNode& child) {
+void TraceNode::AddChildTraceNode(WrapperTraceNodePtr& child) {
   std::lock_guard<std::mutex> _safe(this->mlock);
+  assert(id_ != child->id_);
 
-  if (this->mChildHeadId != E_INVALID_NODE)
-    child->mNextId = this->mChildHeadId;
+  if (this->last_child_id_ != E_INVALID_NODE) {
+    child->sibling_id_ = this->last_child_id_;
+  }
 
-  this->mChildHeadId = child->mPoolIndex;
+  this->last_child_id_ = child->id_;
 
-  child->mParentId = this->mPoolIndex;
-  child->mRootIndex = this->mRootIndex;
+  child->parent_id_ = this->id_;
+  child->root_id_ = this->root_id_;
   child->root_start_time = this->root_start_time;
   child->parent_start_time = this->start_time;
 }
 
-void TraceNode::endTimer() {
+void TraceNode::EndTimer() {
   uint64_t end_time = get_unix_time_ms();
-
   this->cumulative_time += (end_time - this->start_time);
 }
 
-void TraceNode::wakeUp() { this->start_time = get_unix_time_ms(); }
+void TraceNode::WakeUpTimer() { this->start_time = get_unix_time_ms(); }
 
-void TraceNode::convertToSpan() {
+void TraceNode::EndSpan() {
   this->AddTraceDetail(":E", this->cumulative_time);
   this->AddTraceDetail(":S", this->start_time);
 }
 
-void TraceNode::convertToSpanEvent() {
+void TraceNode::EndSpanEvent() {
   this->AddTraceDetail(":E", this->cumulative_time);
   this->AddTraceDetail(":S", this->start_time - this->parent_start_time);
 }
 
-void TraceNode::startTimer() {
+void TraceNode::StartTimer() {
   uint64_t time_in_ms = get_unix_time_ms();
   this->start_time = time_in_ms;
   this->root_start_time = time_in_ms;
 }
 
 void TraceNode::parseOpt(std::string key, std::string value) {
-  pp_trace(" [%d] add opt: key:%s value:%s", mPoolIndex, key.c_str(), value.c_str());
+  pp_trace(" [%d] add opt: key:%s value:%s", id_, key.c_str(), value.c_str());
   if (key == "TraceMinTimeMs") {
     int64_t min = std::stoll(value);
     auto cb = [=]() -> bool {
-      pp_trace("checkOpt:  [%d] TraceMinTimeMs:%ld cumulative_time:%lu", this->mPoolIndex, min,
+      pp_trace("checkOpt:  [%d] TraceMinTimeMs:%ld cumulative_time:%lu", this->id_, min,
                this->cumulative_time);
       if ((int64_t)this->cumulative_time >= min)
         return true;
@@ -90,7 +92,7 @@ void TraceNode::parseOpt(std::string key, std::string value) {
     };
     this->_endTraceCallback.push_back(cb);
   } else if (key == "TraceOnlyException") {
-    auto cb = [=]() -> bool { return this->mHasExp; };
+    auto cb = [=]() -> bool { return this->set_exp_; };
 
     this->_endTraceCallback.push_back(cb);
   }
@@ -121,3 +123,4 @@ void TraceNode::setOpt(const char* opt, va_list* args) {
   }
 }
 } // namespace NodePool
+} // namespace  PP

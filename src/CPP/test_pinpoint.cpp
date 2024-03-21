@@ -16,15 +16,16 @@
 
 #include "common.h"
 #include "pinpoint_define.h"
+#include <chrono>
 #include <iostream>
-#include <string>
-#include <time.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string>
+#include <thread>
+#include <time.h>
 
 thread_local NodeID id = E_ROOT_NODE;
-const char* app_id = "cd.dev.test.cpp";
-const char* app_name = "cd.dev.test.cpp";
+const char *app_id = "cd.dev.test.cpp";
+const char *app_name = "cd.dev.test.cpp";
 
 std::string get_sid() { return std::to_string(rand() % 100000000l); }
 
@@ -36,16 +37,18 @@ std::string get_tid() {
 
 void random_sleep() {
   int32_t delay = rand() % 100;
-  usleep(delay * 10000);
+  std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 }
 
 void test_httpclient() {
   id = pinpoint_start_trace(id);
   pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "httpclient", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_DESTINATION, "www.pinpoint-wonderful.com", E_LOC_CURRENT);
+  pinpoint_add_clue(id, PP_DESTINATION, "www.pinpoint-wonderful.com",
+                    E_LOC_CURRENT);
   pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD, E_LOC_CURRENT);
   pinpoint_add_clue(id, PP_NEXT_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_HTTP_URL, "/support/c-cpp-php-python", E_LOC_CURRENT);
+  pinpoint_add_clues(id, PP_HTTP_URL, "/support/c-cpp-php-python",
+                     E_LOC_CURRENT);
   pinpoint_add_clue(id, PP_ADD_EXCEPTION, "test this exception", E_LOC_CURRENT);
   pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
 
@@ -105,9 +108,9 @@ void test_req() {
   id = pinpoint_end_trace(id);
 }
 
-int main(int argc, char const* argv[]) {
-  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1300, 0, NULL, NULL, NULL};
-  global_agent_info = agent_info;
+int main(int argc, char const *argv[]) {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 1300);
+  register_logging_cb(nullptr, 1);
   srand(time(nullptr));
   int i = 0;
   for (; i < 3; i++) {

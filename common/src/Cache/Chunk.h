@@ -35,7 +35,7 @@ namespace Cache {
 /// 2. check the capacity before copy data
 class Chunks {
 
-  typedef struct chunk_ {
+  typedef struct {
     uint32_t block_size;
     /**
      * @brief
@@ -49,10 +49,9 @@ class Chunks {
      * for write data into ck
      */
     uint32_t r_ofs;
-    char data[0];
-  } Chunk;
+    } DataChunk;
 
-  typedef std::list<Chunk*> CKList;
+  typedef std::list<DataChunk*> CKList;
   typedef CKList::iterator CkIter;
 
 private:

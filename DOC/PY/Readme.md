@@ -4,16 +4,15 @@
 
 > Requirement
 
-Dependency| Version| More
----|----|---
-python |3+ | (async must 3.7.1+)
-*inux|  | `windows` is on the way
-collector-agent| [installed ?](../collector-agent/readme.md)
+| Dependency      | Version                                     | More                |
+| --------------- | ------------------------------------------- | ------------------- |
+| python          | 3+                                          | (async must 3.7.1+) |
+| collector-agent | [installed ?](../collector-agent/readme.md) |
 
 ### Installation
 
 ```shell
-$ pip install pinpointPy==1.1.0
+$ pip install pinpointPy
 ```
 
 ### How to Use
@@ -68,7 +67,7 @@ middleware = [
     Middleware(ContextMiddleware),
     Middleware(PinPointMiddleWare)
 ]
-set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000')
+set_agent("cd.dev.test.py", "cd.dev.test.py",0, 'tcp:dev-collector:10000')
 use_starlette_context()
 ## patch for synchronous libraries, such as requests,myql-connector-python ...
 # support lists https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/plugins/PY/pinpointPy/libs
@@ -121,15 +120,15 @@ Todo....
 
 ### Case: flask/test_mysql
 
--|TPR(ms)|RPS(#/sec)
-----|-----|----
-pinpointPy|4.487|445.73|
--|4.498 |444.69
--|4.526 |441.88
-pure|4.440|450.44
--|4.479|446.51
--|4.425|451.96
-Result|+0.05ms|-1%
+| -          | TPR(ms) | RPS(#/sec) |
+| ---------- | ------- | ---------- |
+| pinpointPy | 4.487   | 445.73     |
+| -          | 4.498   | 444.69     |
+| -          | 4.526   | 441.88     |
+| pure       | 4.440   | 450.44     |
+| -          | 4.479   | 446.51     |
+| -          | 4.425   | 451.96     |
+| Result     | +0.05ms | -1%        |
 
 > TPR: time per request         
 > RPS: requests per second

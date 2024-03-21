@@ -1,6 +1,6 @@
-﻿#include <gtest/gtest.h>
-#include <locale.h>
-#include <regex.h>
+﻿#include "gtest/gtest.h"
+// #include <locale.h>
+// #include <regex.h>
 #include <thread>
 #include <chrono>
 #include "common.h"
@@ -165,3 +165,9 @@ TEST(common, force_end_trace) {
 }
 
 TEST(common, version) { EXPECT_STREQ(pinpoint_agent_version(), AGENT_VERSION); }
+
+TEST(common, invalid_host) {
+  pinpoint_set_agent("tcp:0.0.0.0.0:9999", 7000, -1, 7000);
+  NodeID id = pinpoint_start_trace(E_ROOT_NODE);
+  id = pinpoint_end_trace(id);
+}

@@ -115,15 +115,15 @@ def check_trace_limit(time: int = -1) -> bool:
     return _pinpointPy.check_tracelimit(time)
 
 
-def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trace_limit: int = -1, log_level=logging.INFO):
+def set_agent(app_id_str: str, app_name_str: str, collect_agent_host: str,  trace_limit: int = -1, time_out: int = 0, log_level=logging.INFO):
     global __app_id, __app_name
     __app_id = app_id_str
     __app_name = app_name_str
-    _pinpointPy.set_agent(collect_agent_host, trace_limit)
     if log_level == logging.DEBUG:
         def debug_func(msg: str):
             get_logger().debug(msg=msg)
         _pinpointPy.enable_debug(debug_func)
+    _pinpointPy.set_agent(collect_agent_host, trace_limit, time_out)
     set_logger_level(log_level)
     get_logger().debug(
-        f"appid:{app_id_str} appname:{app_name_str} collector_agent:{collect_agent_host} trace_limit:{trace_limit} log_level:{log_level}")
+        f"appid:{app_id_str} appname:{app_name_str} collector_agent:{collect_agent_host} trace_limit:{trace_limit} timeout:{time_out}ms log_level:{log_level}")

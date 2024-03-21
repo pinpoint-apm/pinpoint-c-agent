@@ -1,12 +1,15 @@
 #include "PoolManager.h"
 #include "common.h"
+#include "header.h"
 #include <thread>
 #include <gtest/gtest.h>
+
 using namespace testing;
-using NodePool::TraceNode;
+using PP::NodePool::PoolManager;
+using PP::NodePool::TraceNode;
 
 TEST(poolManger, get_and_give_back) {
-  NodePool::PoolManager pool;
+  PoolManager pool;
   // new
   TraceNode& _node = pool.Take();
   void* p = &_node;
@@ -29,7 +32,7 @@ TEST(poolManger, get_and_give_back) {
   EXPECT_THROW(pool.Take(NodeID(10000)), std::out_of_range);
 }
 
-static NodePool::PoolManager g_pool;
+static PoolManager g_pool;
 
 void test_node_pool(bool& result) {
   NodeID it = E_INVALID_NODE;

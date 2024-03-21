@@ -50,8 +50,9 @@ string(1) "c"
 [pinpoint] [%d] [%d] pinpoint_get_context_key [128] failed with map::at, parameters:not exist
 bool(false)
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d})
-[pinpoint] [%d] [%d]agent try to connect:(tcp:127.0.0.1:9999)
-[pinpoint] [%d] [%d]_do_write_data@%d send data error:(Connection refused) fd:(3)
+[pinpoint] [%d] [%d]agent try to connect:(127.0.0.1:9999)
+[pinpoint] [%d] [%d]write event
+[pinpoint] [%d] [%d]_do_write_data@%d send data error:(%d) fd:(3)
 [pinpoint] [%d] [%d]reset peer:3
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
@@ -63,5 +64,4 @@ string(1) "a"
 bool(false)
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d}]})
-[pinpoint] [%d] [%d]agent try to connect:(tcp:127.0.0.1:9999)
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!

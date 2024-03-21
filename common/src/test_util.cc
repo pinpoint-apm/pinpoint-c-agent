@@ -25,8 +25,8 @@
 using std::chrono::seconds;
 namespace Json = AliasJson;
 
-using NodePool::PoolManager;
-using NodePool::TraceNode;
+using PP::NodePool::PoolManager;
+using PP::NodePool::TraceNode;
 
 int sum(int n_args, ...) {
   va_list ap;
@@ -78,15 +78,15 @@ TEST(util, mergeTraceNodeTree) {
   TraceNode& n3 = node_pool.Take();
   TraceNode& n4 = node_pool.Take();
 
-  n2.mParentId = n1.mPoolIndex;
-  n1.mChildHeadId = n2.mPoolIndex;
-  n3.mParentId = n2.mPoolIndex;
-  n4.mParentId = n2.mPoolIndex;
-  n3.mNextId = n4.mPoolIndex;
-  n2.mChildHeadId = n3.mPoolIndex;
+  n2.parent_id_ = n1.id_;
+  n1.last_child_id_ = n2.id_;
+  n3.parent_id_ = n2.id_;
+  n4.parent_id_ = n2.id_;
+  n3.sibling_id_ = n4.id_;
+  n2.last_child_id_ = n3.id_;
 
-  Json::Value var = node_pool.ExpandTraceTreeNodes(n1);
-  std::cout << var.toStyledString();
+  // Json::Value var = node_pool.ExpandTraceTreeNodes(n1);
+  // std::cout << var.toStyledString();
 }
 
 std::string span;
@@ -94,11 +94,10 @@ std::string span;
 void captureSpan(const char* s) { span = s; }
 
 TEST(util, mergeTraceNodeTree_1) {
-  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 7000);
   register_span_handler(captureSpan);
 
   NodeID id1, id2, id3, id4;
-  Json::Value var;
   id1 = pinpoint_start_trace(E_ROOT_NODE);
   pinpoint_add_clue(id1, "name", "id1", E_LOC_CURRENT);
   id2 = pinpoint_start_trace(id1);

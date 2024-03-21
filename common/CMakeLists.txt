@@ -5,20 +5,19 @@ set(CMAKE_CXX_STANDARD 11)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-option(AGENT_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" ON)
+option(AGENT_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" OFF)
 
 
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -fPIC")
-set(CMAKE_CXX_FLAGS   "${CMAKE_CXX_FLAGS}  -Wall -Wextra -fPIC")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}   -g3 -O0 -DCOMMON_DEBUG")   
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNDEBUG  -O2")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -g3 -O0 -DCOMMON_DEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG  -O2")
+# set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}   -g3 -O0 -DCOMMON_DEBUG")   
+# set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNDEBUG  -O2")
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -g3 -O0 -DCOMMON_DEBUG")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG  -O2")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_definitions( -DAGENT_VERSION="${PROJECT_VERSION}")
 
 option (WITH_TEST_CASE "Enable Gtest" OFF)
@@ -29,49 +28,28 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if (WITH_CODECOVERAGE AND LINUX_)
-    # message("WITH_CODECOVERAGE = ON")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_CXX_FLAGS   "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/common.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/include/common.h" @ONLY)
-    
-include_directories("include"
-                    "src"
-                    "jsoncpp/include")
-                  
-link_directories(${CMAKE_BINARY_DIR}/lib)
-
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic  -fPIC -Wall -Wextra")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic  -fPIC -Wall -Wextra")
+endif(CMAKE_COMPILER_IS_GNUCXX)
 add_subdirectory(jsoncpp)
-add_subdirectory(src)
 
-add_library(pinpoint_common_static STATIC $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include)                
 
-target_include_directories(pinpoint_common_static PUBLIC
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-)
-
-if(UNIX AND NOT APPLE)
-    include(GNUInstallDirs)
-    add_library(pinpoint_common_shared SHARED $<TARGET_OBJECTS:pinpoint_common_obj> $<TARGET_OBJECTS:jsoncppObj>)  
-    install(DIRECTORY include/ DESTINATION include/pinpoint_common
-            FILES_MATCHING PATTERN "*.h")
-
-    set_target_properties(pinpoint_common_shared pinpoint_common_static PROPERTIES 
-            VERSION ${PROJECT_VERSION}
-            SOVERSION 1
-            PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/common.h")      
-
-    install(TARGETS pinpoint_common_shared pinpoint_common_static ${INSTALL_EXPORT}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pinpoint_common
-    )
-endif()
+if (WITH_TEST_CASE)
+    include (CTest)
+    enable_testing()
+    find_package(GTest REQUIRED)
+    add_definitions(-DUTEST)
+    add_subdirectory(src)
+    add_subdirectory(test)
+else()
+    add_subdirectory(src)
+endif(WITH_TEST_CASE)
 
 if(AGENT_WITH_PKGCONFIG_SUPPORT)
     include(JoinPaths)
@@ -83,10 +61,3 @@ if(AGENT_WITH_PKGCONFIG_SUPPORT)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pkg-config/pinpoint_common.pc"
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
-
-if (WITH_TEST_CASE)
-    include (CTest)
-    enable_testing()
-    find_package(GTest REQUIRED)
-    add_subdirectory(test)
-endif(WITH_TEST_CASE)

@@ -16,7 +16,24 @@
 #pragma once
 #include "common.h"
 
+#ifdef __linux__
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
+#else
+#define likely(x) (x)
+#define unlikely(x) (x)
+#endif
+
+#ifdef __linux__
+
+#elif defined(_WIN32)
+#include <windows.h>
+
+#define sleep(x) Sleep(x * 1000)
+#define usleep(x) Sleep(x / 1000)
+#else
+#endif
+
 void debug_nodeid(NodeID id);
 uint64_t get_unix_time_ms();
+void pinpoint_stop_agent();

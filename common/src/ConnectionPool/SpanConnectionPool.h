@@ -42,8 +42,8 @@ public:
 
 public:
   SpanConnectionPool(const char* co_host, RouteMapValueVec&& value_vec)
-      : co_host(co_host), con_counter(0) {
-    this->_pool.push(this->createConnection(std::move(value_vec)));
+      : co_host(co_host), con_counter(0), routeVec_(value_vec) {
+    this->_pool.push(this->createConnection(routeVec_));
   }
 
   virtual ~SpanConnectionPool() {}
@@ -51,7 +51,7 @@ public:
   TransLayerPtr get() {
     std::lock_guard<std::mutex> _safe(this->_lock);
     if (this->_pool.empty()) {
-      return TransLayerPtr(new TransLayer(this->co_host));
+      return createConnection(routeVec_);
     } else {
       TransLayerPtr _con = std::move(_pool.top());
       _pool.pop();
@@ -66,11 +66,7 @@ public:
   }
 
 private:
-  void _handleMsgFromCollector(int type, const char* buf, size_t len);
-
-  void _handle_agent_info(int type, const char* buf, size_t len);
-
-  TransLayerPtr createConnection(RouteMapValueVec&& value_vec) {
+  TransLayerPtr createConnection(const RouteMapValueVec& value_vec) {
     TransLayerPtr _connect(new TransLayer(this->co_host));
     using namespace std::placeholders;
 
@@ -88,6 +84,7 @@ private:
   uint32_t con_counter;
   std::stack<TransLayerPtr> _pool;
   std::mutex _lock;
+  RouteMapValueVec routeVec_;
 };
 
 } /* namespace ConnectionPool */

@@ -623,12 +623,6 @@ PHP_MINIT_FUNCTION(pinpoint_php) {
 
   old_error_cb = zend_error_cb;
   zend_error_cb = apm_error_cb;
-  // global_agent_info.
-  // strncpy(global_agent_info.co_host, PPG(co_host), MAX_ADDRESS_SIZE);
-  // global_agent_info.inter_flag = PPG(debug_report);
-  // global_agent_info.timeout_ms = PPG(w_timeout_ms);
-  // global_agent_info.trace_limit = PPG(tracelimit);
-  // global_agent_info.agent_type = 1500; // PHP
 
   pinpoint_set_agent(PPG(co_host), PPG(w_timeout_ms), PPG(tracelimit), 1500);
   if (PPG(utest_flag) == 1) {

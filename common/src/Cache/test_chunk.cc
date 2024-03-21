@@ -3,7 +3,7 @@
 using namespace testing;
 using Cache::Chunks;
 
-static int checkData(const void* buf, uint length, void* dst) {
+static int checkData(const void* buf, uint32_t length, void* dst) {
   int ret = 0;
   if (length < 25) {
     ret = length;

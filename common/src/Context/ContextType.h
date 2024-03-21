@@ -35,7 +35,7 @@ public:
   virtual ~ContextType() {}
 
   virtual ctype typeIs() { throw std::logic_error("not implementation"); }
-  virtual std::string asStringValue() { throw std::logic_error("not implementation"); }
+  virtual std::string& asStringValue() { throw std::logic_error("not implementation"); }
   virtual long asLongValue() { throw std::logic_error("not implementation"); }
 };
 
@@ -45,7 +45,7 @@ public:
 
   virtual ctype typeIs() override { return "String"; }
 
-  virtual std::string asStringValue() override { return this->_value; }
+  virtual std::string& asStringValue() override { return this->_value; }
 
   virtual ~StringContextType() {}
 

@@ -129,7 +129,7 @@ echo pinpoint_end_trace()."\n";
 [pinpoint] [%d] [%d] [128] add clue key:args value:a,$b
 [pinpoint] [%d] [%d] [128] add clue key:ret value:a,$b
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"args":"a,$b","calls":[{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"},{":E":%d,":S":%d,"clues":["1:234,3432","2:234"],"name":"Foo"}],"name":"ouput_234","ret":"a,$b"})
-[pinpoint] [%d] [%d]agent try to connect:(unix:/unexist_file.sock)
-[pinpoint] [%d] [%d]connect:(/unexist_file.sock) failed as (No such file or directory)
+[pinpoint] [%d] [%d]agent try to connect:(:/unexist_file.sock)
+[pinpoint] [%d] [%d]connect:(:/unexist_file.sock) failed error_code: 2
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 0

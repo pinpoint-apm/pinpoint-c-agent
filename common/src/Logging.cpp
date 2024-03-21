@@ -17,36 +17,38 @@
 #include "common.h"
 
 #include <stdio.h>
-
+#include <stdarg.h>
 #if defined(__linux__) || defined(_UNIX)
 #include <sys/types.h>
 #include <sys/syscall.h>
-#include <stdarg.h>
 #include <unistd.h>
-#define gettid() syscall(SYS_gettid)
-#define getOSPid getpid
+inline int get_os_pid() { return syscall(SYS_gettid); }
+inline long get_tid() { return getpid(); }
 #endif
 
 #if defined(__APPLE__)
 #include <sys/types.h>
 #include <sys/syscall.h>
-#include <stdarg.h>
 #include <unistd.h>
-#define gettid() (long)getpid()
-#define getOSPid getpid
+
+inline int get_os_pid() { return getpid(); }
+inline long get_tid() { return getpid(); }
 #endif
 
 #if defined(_WIN32)
+#include <windows.h>
 #include <processthreadsapi.h>
-#define getOSPid GetCurrentProcessId
+inline int get_os_pid() { return GetCurrentProcessId(); }
+inline long get_tid() { return GetCurrentThreadId(); }
 #endif
 
 static log_msg_cb log_call_back_;
 static bool enable_trace_ = 0;
+#define LOG_SIZE 40960
+thread_local char buf[LOG_SIZE] = {0};
 
 static void log_format_out(const char* format, va_list* args) {
-  char buf[LOG_SIZE] = {0};
-  int n = snprintf(buf, LOG_SIZE, "[pinpoint] [%d] [%ld]", getOSPid(), gettid());
+  int n = snprintf(buf, LOG_SIZE, "[pinpoint] [%d] [%ld]", get_os_pid(), get_tid());
   vsnprintf(buf + n, LOG_SIZE - n - 1, format, *args);
 
   if (log_call_back_) {

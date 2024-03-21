@@ -28,7 +28,7 @@
 #ifndef UINT32_MAX
 #define UINT32_MAX (0xfffffff)
 #endif
-
+namespace PP {
 namespace NodePool {
 void PoolManager::FreeNodeTree(NodeID nodeId) {
   if (nodeId == E_INVALID_NODE || nodeId == E_ROOT_NODE) {
@@ -80,8 +80,8 @@ bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool fo
     return false;
   } else {
     this->_aliveNodeSet[index] = false;
-    child_id = node.mChildHeadId;
-    next_id = node.mNextId;
+    child_id = node.last_child_id_;
+    next_id = node.sibling_id_;
     this->_freeNodeList.push(index);
     return true;
   }
@@ -138,30 +138,31 @@ void PoolManager::expandOnce() {
   // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
   assert(this->nodeIndexVec.size() * CELL_SIZE == this->_aliveNodeSet.size());
 }
+Json::Value empty(Json::nullValue);
+Json::Value& PoolManager::getRootNodeValue(WrapperTraceNodePtr& node) {
 
-Json::Value PoolManager::mergeChildren(WrapperTraceNode& node) {
+  if (node->sibling_id_ != E_INVALID_NODE) {
+    WrapperTraceNodePtr sibling = GetWrapperNode(node->sibling_id_);
+    getRootNodeValue(sibling);
+  }
+
+  if (node->last_child_id_ != E_INVALID_NODE) {
+
+    WrapperTraceNodePtr child = GetWrapperNode(node->last_child_id_);
+    getRootNodeValue(child);
+  }
+
   if (node->checkOpt() == false) {
-    return Json::Value();
-  } else if (!node->isLeaf()) {
-    // TraceNode &child = PoolManager::getInstance().Take(node.mChildHeadIndex);
-    WrapperTraceNode child = GetWrapperNode(node->mChildHeadId);
+    return empty;
+  }
 
-    Json::Value childTraceDetail;
-    gatherChildDetailByReverse(childTraceDetail, child);
-    node->AddTraceDetail("calls", childTraceDetail);
+  if (node->parent_id_ != E_INVALID_NODE) {
+    WrapperTraceNodePtr parent = GetWrapperNode(node->parent_id_);
+    parent->appendNodeValue("calls", node->EncodeProtocol());
   }
-  return node->getJsValue();
-}
 
-void PoolManager::gatherChildDetailByReverse(Json::Value& detail, WrapperTraceNode& head) {
-  if (head->mNextId != E_INVALID_NODE) {
-    WrapperTraceNode next = GetWrapperNode(head->mNextId);
-    gatherChildDetailByReverse(detail, next);
-  }
-  Json::Value childrenDetail = mergeChildren(head);
-  if (!childrenDetail.empty()) {
-    detail.append(childrenDetail);
-  }
+  return node->EncodeProtocol();
 }
 
 } // namespace NodePool
+} // namespace PP

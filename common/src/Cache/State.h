@@ -32,20 +32,15 @@ public:
 
 class ProcessState : public State {
 public:
-  int64_t GetUniqueId() { return uuid_++; }
-  bool IsReady() { return ready_; }
-  bool CheckTraceLimit(int64_t timestamp);
-  void ResetUniqueID() { uuid_ = 0; }
-  uint64_t GetStartTime() { return starttime_; }
-  void SetStartTime(uint64_t start_time) {
-    if (start_time > 0) {
-      starttime_ = start_time;
-      ready_ = true;
-    }
-  }
+  int64_t GetUniqueId() override { return uuid_++; }
+  bool IsReady() override { return ready_; }
+  bool CheckTraceLimit(int64_t timestamp) override;
+  void ResetUniqueID() override { uuid_ = 0; }
+  uint64_t GetStartTime() override { return starttime_; }
+  void SetStartTime(uint64_t start_time) override;
 
 public:
-  ProcessState(int64_t trace_limit);
+  explicit ProcessState(int64_t trace_limit);
   ProcessState(const ProcessState&) = delete;
   virtual ~ProcessState() = default;
 

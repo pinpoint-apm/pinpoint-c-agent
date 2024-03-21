@@ -20,8 +20,12 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#if defined(_WIN32)
+#include <windows.h>
+#define usleep(x) Sleep(x/1000)
+#elif defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
-
+#endif
 int32_t id = 0;
 const char* app_id = "c_test_app";
 const char* app_name = "c_test_name";
@@ -40,7 +44,7 @@ char* get_tid() {
 
 void random_sleep() {
   int32_t delay = rand() % 10;
-  usleep(delay * 10000);
+  usleep(delay * 1000);
 }
 
 void test_httpclient() {
@@ -108,8 +112,8 @@ void test_req() {
 }
 
 int main(int argc, char const* argv[]) {
-  PPAgentT agent_info = {"tcp:127.0.0.1:9999", 1000, -1, 1300, 1, NULL, NULL, NULL};
-  global_agent_info = agent_info;
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 1300);
+  register_logging_cb(NULL, 1);
   char appid[] = "cd.dev.test";
   char appname[] = "cd.dev.test";
   app_id = getenv("APPID");
