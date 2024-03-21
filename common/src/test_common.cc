@@ -31,6 +31,7 @@ TEST(common, start_end_trace) {
   mark_current_trace_status(id, E_OFFLINE);
   EXPECT_EQ(pinpoint_trace_is_root(NodeID(-1023)), -1);
   EXPECT_EQ(pinpoint_trace_is_root(NodeID(1023)), -1);
+  EXPECT_EQ(pinpoint_trace_is_root(NodeID(0)), -1);
   id = pinpoint_start_trace(id);
 
   mark_current_trace_status(id, E_TRACE_PASS);

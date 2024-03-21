@@ -40,7 +40,7 @@ var_dump(pinpoint_get_context('not exist',$id));
 
 $id = pinpoint_end_trace($id);
 pinpoint_end_trace($id);
-
+pinpoint_status();
 ?>
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
@@ -63,3 +63,8 @@ bool(false)
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d}]})
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
+{
+	"common_libary_version" : "0.5.0",
+	"pool_free_node" : 128,
+	"pool_total_node" : 128
+}

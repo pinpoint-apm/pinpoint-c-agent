@@ -167,10 +167,10 @@ static PyObject *py_pinpoint_start_trace(PyObject *self, PyObject *args) {
 }
 
 static inline int end_thread_local_trace(void) {
-  NodeID cid = pinpoint_get_per_thread_id();
-  NodeID id = pinpoint_end_trace(cid);
-  pinpoint_update_per_thread_id(id);
-  return id;
+  NodeID local_id = pinpoint_get_per_thread_id();
+  NodeID parent_id = pinpoint_end_trace(local_id);
+  pinpoint_update_per_thread_id(parent_id);
+  return parent_id;
 }
 
 static PyObject *py_pinpoint_end_trace(PyObject *self, PyObject *args) {
@@ -200,21 +200,14 @@ static PyObject *py_trace_has_root(PyObject *self, PyObject *args) {
   if (!PyArg_ParseTuple(args, "|i", &id)) {
     return NULL;
   }
-  if (id == -1) {
+  if (id == E_INVALID_NODE) {
     id = pinpoint_get_per_thread_id();
   }
-
-  if (id == 0) {
-    return Py_BuildValue("O", Py_False);
-  } else {
-    // check the input id
-    int ret = pinpoint_trace_is_root(id);
-    if (ret == -1) {
-      PyErr_SetString(PyExc_Exception, "input traceId is not exist");
-      return Py_BuildValue("O", Py_False);
-      ;
-    }
+  int ret = pinpoint_trace_is_root(id);
+  if (ret != -1) {
     return Py_BuildValue("O", Py_True);
+  } else {
+    return Py_BuildValue("O", Py_False);
   }
 }
 
@@ -250,11 +243,10 @@ static void msg_log_error_cb(char *msg) {
     arglist = Py_BuildValue("(s)", msg);
     result = PyObject_CallObject(py_obj_msg_callback, arglist);
     if (result == NULL) {
-      fprintf(stderr, "%s", msg);
-      PyErr_SetString(PyExc_TypeError, msg);
-      return;
+      fprintf(stderr, "callback with error:%s", msg);
+    } else {
+      Py_XDECREF(result); // I don't care return
     }
-    Py_XDECREF(result); // I don't care return
     Py_DECREF(arglist);
   }
 }

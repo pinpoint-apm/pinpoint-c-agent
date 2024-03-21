@@ -17,6 +17,7 @@
 // Created by eeliu on 1/3/2020.
 //
 
+#include "common.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -385,11 +386,14 @@ ParentNodeId pinpoint_end_trace(NodeID id) {
 int pinpoint_trace_is_root(NodeID id) {
   if (_agentPtr) {
     try {
+      if (id == E_ROOT_NODE) {
+        return -1;
+      }
       return _agentPtr->IsRootTrace(id) ? (1) : (0);
     } catch (const std::out_of_range&) {
-      pp_trace(" [%d] not found", id);
+      pp_trace("not found node=%d ", id);
     } catch (const std::exception& ex) {
-      pp_trace(" [%d] end trace failed. %s", id, ex.what());
+      pp_trace(" node=%d end trace failed: %s", id, ex.what());
     }
   }
   return -1;
@@ -562,7 +566,7 @@ const char* pinpoint_agent_version() {
 #ifdef AGENT_VERSION
   static const char* _version_ = AGENT_VERSION;
 #else
-  static const char* _version_ = "x.x.x";
+  static const char* _version_ = PINPOINT_C_AGENT_API_VERSION;
 #endif
   return _version_;
 }

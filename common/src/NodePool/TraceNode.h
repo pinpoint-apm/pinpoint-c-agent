@@ -205,7 +205,7 @@ private:
   inline void resetRelative() {
     this->sibling_id_ = E_INVALID_NODE;
     this->last_child_id_ = E_INVALID_NODE;
-    this->parent_id_ = E_INVALID_NODE;
+    this->parent_id_ = E_ROOT_NODE;
     this->root_id_ = id_;
     this->_subTraceNodeMaxSize = MAX_SUB_TRACE_NODES_LIMIT;
   }

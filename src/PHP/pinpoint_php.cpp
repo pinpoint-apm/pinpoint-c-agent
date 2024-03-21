@@ -69,7 +69,7 @@ PHP_FUNCTION(pinpoint_set_context);
 PHP_FUNCTION(pinpoint_get_context);
 PHP_FUNCTION(pinpoint_mark_as_error);
 PHP_FUNCTION(pinpoint_get_func_ref_args);
-
+PHP_FUNCTION(pinpoint_status);
 ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
 
 static void pinpoint_log(char *msg);
@@ -142,9 +142,13 @@ ZEND_END_ARG_INFO()
  * Every user visible function must have an entry in pinpioint_php_functions[].
  */
 const zend_function_entry pinpoint_php_functions[] = {
-  PHP_FE(pinpoint_start_trace, arginfo_add_id) PHP_FE(pinpoint_end_trace, arginfo_add_id)
-  PHP_FE(pinpoint_unique_id, arginfo_none) PHP_FE(pinpoint_get_func_ref_args, arginfo_none)
-  PHP_FE(pinpoint_drop_trace, arginfo_add_id) PHP_FE(pinpoint_start_time, arginfo_none)
+  PHP_FE(pinpoint_start_trace, arginfo_add_id) 
+  PHP_FE(pinpoint_end_trace, arginfo_add_id)
+  PHP_FE(pinpoint_unique_id, arginfo_none) 
+  PHP_FE(pinpoint_status, arginfo_none) 
+  PHP_FE(pinpoint_get_func_ref_args, arginfo_none)
+  PHP_FE(pinpoint_drop_trace, arginfo_add_id) 
+  PHP_FE(pinpoint_start_time, arginfo_none)
   PHP_FE(pinpoint_set_context, arginfo_add_id_key_value)
   PHP_FE(pinpoint_get_context, arginfo_add_id_value)
   PHP_FE(pinpoint_tracelimit, arginfo_add_timestamp)
@@ -237,7 +241,6 @@ PHP_FUNCTION(pinpoint_set_context) {
 
   if (_id == -1) {
     _id = pinpoint_get_per_thread_id();
-    ;
   }
 
   switch (Z_TYPE_P(zvalue)) {
@@ -385,6 +388,8 @@ PHP_FUNCTION(pinpoint_end_trace) {
     RETURN_LONG((long)cur_id);
   }
 }
+
+PHP_FUNCTION(pinpoint_status) { show_status(); }
 
 PHP_FUNCTION(pinpoint_add_clue) {
   std::string key;

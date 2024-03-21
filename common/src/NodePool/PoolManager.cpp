@@ -147,7 +147,6 @@ Json::Value& PoolManager::getRootNodeValue(WrapperTraceNodePtr& node) {
   }
 
   if (node->last_child_id_ != E_INVALID_NODE) {
-
     WrapperTraceNodePtr child = GetWrapperNode(node->last_child_id_);
     getRootNodeValue(child);
   }
@@ -156,7 +155,7 @@ Json::Value& PoolManager::getRootNodeValue(WrapperTraceNodePtr& node) {
     return empty;
   }
 
-  if (node->parent_id_ != E_INVALID_NODE) {
+  if (node->parent_id_ > E_ROOT_NODE) {
     WrapperTraceNodePtr parent = GetWrapperNode(node->parent_id_);
     parent->appendNodeValue("calls", node->EncodeProtocol());
   }
