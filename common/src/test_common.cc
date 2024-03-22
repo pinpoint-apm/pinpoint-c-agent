@@ -172,3 +172,10 @@ TEST(common, invalid_host) {
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   id = pinpoint_end_trace(id);
 }
+
+TEST(common, pp_trace) {
+  pp_trace("测试中文编码 \n");
+  pp_trace("한국어 인코딩 테스트 \n");
+  pp_trace("日本語エンコーディングをテストする \n");
+  pp_trace("%s %s \n", "日本語エンコーディングをテストする ", "combine");
+}

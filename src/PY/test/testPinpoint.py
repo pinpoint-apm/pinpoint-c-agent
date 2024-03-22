@@ -12,7 +12,6 @@ class TestAgent(TestCase):
 
     def setUp(self):
         def debug_func(msg: str):
-            # get_logger().debug(msg=msg)
             print(msg)
         _pinpointPy.enable_debug(debug_func)
         self.assertTrue(_pinpointPy.set_agent(
@@ -20,6 +19,13 @@ class TestAgent(TestCase):
 
     def test_invalid_input(self):
         id = _pinpointPy.start_trace()
+        _pinpointPy.end_trace()
+
+    def test_encode(self):
+        _pinpointPy.start_trace()
+        _pinpointPy.add_clues("CN", "测试中文编码")
+        _pinpointPy.add_clues("KR", "한국어 인코딩 테스트 ")
+        _pinpointPy.add_clues("JP", "日本語エンコーディングをテストする ")
         _pinpointPy.end_trace()
 
     def test_trace_life(self):
