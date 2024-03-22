@@ -83,7 +83,7 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    if: ${{ inputs.release-testpypi }}
+    if: ${{ inputs.release }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-14]
