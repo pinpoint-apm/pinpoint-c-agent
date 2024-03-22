@@ -65,7 +65,7 @@ bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool fo
 
   int32_t index = (int32_t)id - 1;
 
-  if (this->indexInAliveVec(index) == false) {
+  if (this->indexInUsedVec(index) == false) {
     pp_trace("%d not alive !!!", id);
     child_id = E_INVALID_NODE;
     next_id = E_INVALID_NODE;
@@ -73,13 +73,13 @@ bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool fo
   }
 
   // check refcount
-  TraceNode& node = this->_fetchNodeBy(id);
+  TraceNode& node = this->getUsedNode(id);
 
   if (node.checkZeroRef() == false && force == false) {
     // DO NOT TOUCH THis Node
     return false;
   } else {
-    this->_aliveNodeSet[index] = false;
+    this->usedNodeSet_[index] = false;
     child_id = node.last_child_id_;
     next_id = node.sibling_id_;
     this->_freeNodeList.push(index);
@@ -87,7 +87,7 @@ bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool fo
   }
 }
 
-TraceNode& PoolManager::_fetchNodeBy(NodeID id) {
+TraceNode& PoolManager::getUsedNode(NodeID id) {
   // assert(id != E_INVALID_NODE);
   if (id == E_ROOT_NODE) {
     throw std::out_of_range("id should not be 0");
@@ -95,7 +95,7 @@ TraceNode& PoolManager::_fetchNodeBy(NodeID id) {
 
   int32_t index = int32_t(id) - 1;
 
-  if (this->indexInAliveVec(index) == false) {
+  if (this->indexInUsedVec(index) == false) {
     std::string msg = "#";
     msg += std::to_string(id) + " is not alive";
     throw std::out_of_range(msg);
@@ -104,22 +104,22 @@ TraceNode& PoolManager::_fetchNodeBy(NodeID id) {
   return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
 }
 
-TraceNode& PoolManager::_getInitNode() noexcept { // create a new node
+TraceNode& PoolManager::getReadyNode() noexcept { // create a new node
   if (this->_freeNodeList.empty()) {
     this->expandOnce();
   }
   // as it holds a _lock, so no more _freeNodeList is empty
   int32_t index = this->_freeNodeList.top();
   this->_freeNodeList.pop();
-  this->_aliveNodeSet[index] = true;
+  this->usedNodeSet_[index] = true;
   return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE].reset(NodeID(index + 1));
 }
 
 TraceNode& PoolManager::_take(NodeID id) {
   if (id != E_ROOT_NODE) {
-    return this->_fetchNodeBy(id);
+    return this->getUsedNode(id);
   } else {
-    return this->_getInitNode();
+    return this->getReadyNode();
   }
 }
 
@@ -129,25 +129,25 @@ void PoolManager::expandOnce() {
   this->nodeIndexVec.push_back(std::unique_ptr<TraceNode[]>(new TraceNode[CELL_SIZE]));
   // this->nodeIndexVec.push_back(std::make_unique<TraceNode[]>(CELL_SIZE));
   // append new bitflag into aliveNodeSet
-  this->_aliveNodeSet.insert(this->_aliveNodeSet.end(), this->_emptyAliveSet.begin(),
-                             this->_emptyAliveSet.end());
+  this->usedNodeSet_.insert(this->usedNodeSet_.end(), this->readyNodeSet_.begin(),
+                            this->readyNodeSet_.end());
   for (int32_t id = this->maxId; id < (this->maxId + CELL_SIZE); id++) {
     this->_freeNodeList.push(id);
   }
   this->maxId += CELL_SIZE;
   // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
-  assert(this->nodeIndexVec.size() * CELL_SIZE == this->_aliveNodeSet.size());
+  assert(this->nodeIndexVec.size() * CELL_SIZE == this->usedNodeSet_.size());
 }
 Json::Value empty(Json::nullValue);
 Json::Value& PoolManager::getRootNodeValue(WrapperTraceNodePtr& node) {
 
   if (node->sibling_id_ != E_INVALID_NODE) {
-    WrapperTraceNodePtr sibling = GetWrapperNode(node->sibling_id_);
+    WrapperTraceNodePtr sibling = ReferNode(node->sibling_id_);
     getRootNodeValue(sibling);
   }
 
   if (node->last_child_id_ != E_INVALID_NODE) {
-    WrapperTraceNodePtr child = GetWrapperNode(node->last_child_id_);
+    WrapperTraceNodePtr child = ReferNode(node->last_child_id_);
     getRootNodeValue(child);
   }
 
@@ -156,7 +156,7 @@ Json::Value& PoolManager::getRootNodeValue(WrapperTraceNodePtr& node) {
   }
 
   if (node->parent_id_ > E_ROOT_NODE) {
-    WrapperTraceNodePtr parent = GetWrapperNode(node->parent_id_);
+    WrapperTraceNodePtr parent = ReferNode(node->parent_id_);
     parent->appendNodeValue("calls", node->EncodeProtocol());
   }
 

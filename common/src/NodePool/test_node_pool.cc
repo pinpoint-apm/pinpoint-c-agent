@@ -1,3 +1,4 @@
+#include "NodePool/TraceNode.h"
 #include "PoolManager.h"
 #include "common.h"
 #include "header.h"
@@ -20,6 +21,15 @@ TEST(poolManger, get_and_give_back) {
   EXPECT_EQ(child, E_INVALID_NODE);
   EXPECT_EQ(next, E_INVALID_NODE);
   TraceNode& _node_01 = pool.Take();
+
+  TraceNode& new_node = pool.NewNode();
+  NodeID new_id = new_node.id_;
+
+  auto ref_node = pool.ReferNode(new_id);
+  EXPECT_EQ(ref_node->id_, new_node.id_);
+
+  pool.ReturnNode(new_id, child, next);
+  EXPECT_THROW(pool.ReferNode(new_id), std::out_of_range);
 
   // ref current
   TraceNode& ref_new_node = pool.Take(_node_01.getId());

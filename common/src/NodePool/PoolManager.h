@@ -30,9 +30,9 @@ namespace PP {
 namespace NodePool {
 class PoolManager {
 private:
-  TraceNode& _fetchNodeBy(NodeID id);
+  TraceNode& getUsedNode(NodeID id);
 
-  TraceNode& _getInitNode(void) noexcept;
+  TraceNode& getReadyNode(void) noexcept;
 
   TraceNode& _take(NodeID id);
 
@@ -49,12 +49,23 @@ public:
    * @param id
    * @return TraceNode&
    */
-  inline TraceNode& Take(NodeID id = E_ROOT_NODE) {
+  DEPRECATED("") inline TraceNode& Take(NodeID id = E_ROOT_NODE) {
     std::lock_guard<std::mutex> _safe(this->_lock);
     return this->_take(id);
   }
 
-  inline WrapperTraceNodePtr GetWrapperNode(NodeID id = E_ROOT_NODE) {
+  inline TraceNode& NewNode() {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return this->getReadyNode();
+  }
+
+  inline WrapperTraceNodePtr ReferNode(NodeID id) {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    TraceNode& e = this->getUsedNode(id);
+    return WrapperTraceNodePtr(e);
+  }
+
+  DEPRECATED("") inline WrapperTraceNodePtr GetWrapperNode(NodeID id = E_ROOT_NODE) {
     std::lock_guard<std::mutex> _safe(this->_lock);
     TraceNode& e = this->_take(id);
     return WrapperTraceNodePtr(e);
@@ -88,14 +99,14 @@ public:
   void foreachAliveNode(std::function<void(TraceNode& node)> func) {
     std::lock_guard<std::mutex> _safe(this->_lock);
     for (int32_t index = 0; index < this->maxId; index++) {
-      if (this->indexInAliveVec(index)) {
-        func(this->_fetchNodeBy((NodeID)(index + 1)));
+      if (this->indexInUsedVec(index)) {
+        func(this->getUsedNode((NodeID)(index + 1)));
       }
     }
   }
 
   Json::Value& ExpandTraceTreeNodes(NodeID id) {
-    WrapperTraceNodePtr root = GetWrapperNode(id);
+    WrapperTraceNodePtr root = ReferNode(id);
     return ExpandTraceTreeNodes(root);
   }
 
@@ -133,17 +144,17 @@ public:
 
 public:
   PoolManager() : maxId(E_ROOT_NODE) {
-    this->_emptyAliveSet.reserve(CELL_SIZE);
+    this->readyNodeSet_.reserve(CELL_SIZE);
     for (int i = 0; i < CELL_SIZE; i++) {
-      this->_emptyAliveSet.push_back(false);
+      this->readyNodeSet_.push_back(false);
     }
     this->expandOnce();
   }
 
 private:
-  inline bool indexInAliveVec(int32_t index) {
+  inline bool indexInUsedVec(int32_t index) {
     if (index >= 0 && index < this->maxId) {
-      return this->_aliveNodeSet.at(index);
+      return this->usedNodeSet_.at(index);
     }
     return false;
   }
@@ -153,8 +164,8 @@ private:
 private:
   std::mutex _lock;
   // std::set<NodeID> _aliveNodeSet;
-  std::vector<bool> _aliveNodeSet;
-  std::vector<bool> _emptyAliveSet;
+  std::vector<bool> usedNodeSet_;
+  std::vector<bool> readyNodeSet_;
   int32_t maxId;
   std::stack<int32_t> _freeNodeList;
   static const int CELL_SIZE = 128;

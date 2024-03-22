@@ -56,6 +56,21 @@ void TraceNode::AddChildTraceNode(WrapperTraceNodePtr& child) {
   child->parent_start_time = this->start_time;
 }
 
+void TraceNode::AddChildTraceNode(TraceNode& child) {
+  std::lock_guard<std::mutex> _safe(this->mlock);
+  assert(id_ != child.id_);
+
+  if (this->last_child_id_ != E_INVALID_NODE) {
+    child.sibling_id_ = this->last_child_id_;
+  }
+  this->last_child_id_ = child.id_;
+
+  child.parent_id_ = this->id_;
+  child.root_id_ = this->root_id_;
+  child.root_start_time = this->root_start_time;
+  child.parent_start_time = this->start_time;
+}
+
 void TraceNode::EndTimer() {
   uint64_t end_time = get_unix_time_ms();
   this->cumulative_time += (end_time - this->start_time);

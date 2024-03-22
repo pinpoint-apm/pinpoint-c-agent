@@ -80,7 +80,8 @@ public:
   void EndSpan();
 
 public:
-  void AddChildTraceNode(WrapperTraceNodePtr& child);
+  void AddChildTraceNode(TraceNode& child);
+  DEPRECATED("") void AddChildTraceNode(WrapperTraceNodePtr& child);
   inline bool IsRootNode() const { return this->root_id_ == id_; }
 
 public:

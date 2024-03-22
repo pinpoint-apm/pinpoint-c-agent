@@ -128,34 +128,34 @@ public:
     if (id <= E_INVALID_NODE) {
       throw std::out_of_range("invalid node id");
     } else if (id == E_ROOT_NODE) {
-      TraceNode& trace = nodePool_.Take();
+      TraceNode& trace = nodePool_.NewNode();
       trace.StartTimer();
       // HACK, set :FT into agent,as only agent knowns.
       trace.AddTraceDetail(":FT", agent_type_);
       return trace.id_;
     } else {
-      WrapperTraceNodePtr parent = nodePool_.GetWrapperNode(id);
+      WrapperTraceNodePtr parent = nodePool_.ReferNode(id);
 
       // get root node
-      WrapperTraceNodePtr root = nodePool_.GetWrapperNode(parent->root_id_);
+      WrapperTraceNodePtr root = nodePool_.ReferNode(parent->root_id_);
 
       // check subnode limit
       root->updateRootSubTraceSize();
-
-      WrapperTraceNodePtr new_trace = nodePool_.GetWrapperNode();
-      new_trace->StartTimer();
+      // HACK: a new node only exist in one thread
+      TraceNode& new_trace = nodePool_.NewNode();
+      new_trace.StartTimer();
       parent->AddChildTraceNode(new_trace);
       // pass opt
       if (opt != nullptr) {
-        new_trace->setOpt(opt, args);
+        new_trace.setOpt(opt, args);
       }
-      return new_trace->id_;
+      return new_trace.id_;
     }
   }
   NodeID EndTrace(NodeID ID, int timeout = 0) {
     // HACK use cpp scope management
     {
-      WrapperTraceNodePtr w_trace = nodePool_.GetWrapperNode(ID);
+      WrapperTraceNodePtr w_trace = nodePool_.ReferNode(ID);
       if (w_trace->IsRootNode()) {
         if (w_trace->limit & E_TRACE_PASS) {
           w_trace->EndTimer();
@@ -181,12 +181,12 @@ public:
   }
 
   bool IsRootTrace(NodeID id) {
-    WrapperTraceNodePtr w_node = nodePool_.GetWrapperNode(id);
+    WrapperTraceNodePtr w_node = nodePool_.ReferNode(id);
     return w_node->IsRootNode();
   }
   uint64_t ChangeTraceStatus(NodeID id, int status) {
-    WrapperTraceNodePtr w_node = nodePool_.GetWrapperNode(id);
-    WrapperTraceNodePtr w_root = nodePool_.GetWrapperNode(w_node->root_id_);
+    WrapperTraceNodePtr w_node = nodePool_.ReferNode(id);
+    WrapperTraceNodePtr w_root = nodePool_.ReferNode(w_node->root_id_);
     pp_trace("change current [%d] status, before:%lld,now:%d", w_root->getId(), w_root->limit,
              status);
     w_root->limit = status;
@@ -257,7 +257,7 @@ public:
   std::string GetNodePoolStatus() { return nodePool_.Status(); }
   void DebugNodeId(NodeID id) {
     try {
-      WrapperTraceNodePtr w_node = nodePool_.GetWrapperNode(id);
+      WrapperTraceNodePtr w_node = nodePool_.ReferNode(id);
       fprintf(stderr, "nodeid [%d]: { value:%s }", id, w_node->ToString().c_str());
     } catch (const std::exception& ex) {
       pp_trace(" debug_nodeid: [%d] Reason: %s", id, ex.what());
@@ -277,9 +277,9 @@ private:
   std::string node_tree_to_string(const Json::Value& value) { return _writer.write(value); }
 
   inline WrapperTraceNodePtr GetWrapperTraceNode(NodeID id, E_NODE_LOC flag) {
-    WrapperTraceNodePtr w_node = nodePool_.GetWrapperNode(id);
+    WrapperTraceNodePtr w_node = nodePool_.ReferNode(id);
     if (flag == E_LOC_ROOT) {
-      return nodePool_.GetWrapperNode(w_node->root_id_);
+      return nodePool_.ReferNode(w_node->root_id_);
     } else {
       return w_node;
     }
