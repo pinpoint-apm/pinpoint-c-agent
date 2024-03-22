@@ -251,16 +251,10 @@ static void msg_log_error_cb(char *msg) {
   }
 }
 
-static PyObject *py_pinpoint_enable_debug(PyObject *self, PyObject *args) {
-  PyObject *temp;
-  if (PyArg_ParseTuple(args, "O:callback", &temp)) {
-    if (PyCallable_Check(temp)) {
-      Py_XINCREF(temp);
-      Py_XDECREF(py_obj_msg_callback);
-      py_obj_msg_callback = temp;
-      register_logging_cb(msg_log_error_cb, 1);
-    }
-  }
+static PyObject *py_pinpoint_enable_debug(PyObject *, PyObject *) {
+  // remove callback
+  // as https://oss.navercorp.com/pinpoint/pinpoint_c_agent/issues/569
+  register_logging_cb(nullptr, 1);
   return Py_BuildValue("O", Py_True);
 }
 
