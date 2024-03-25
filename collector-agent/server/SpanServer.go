@@ -211,12 +211,17 @@ func (server *SpanServer) genHello() *ServerInfo {
 		AppName: "no",
 		Version: Version,
 	}
-	now_in_ms := time.Now().UnixMilli()
-	if now_in_ms == server.lastTime {
-		now_in_ms = now_in_ms*10 + 1
+	for {
+		now_in_ms := time.Now().UnixMilli()
+		if now_in_ms == server.lastTime {
+			// force sleep 1ms,avoiding conflict
+			time.Sleep(1 * time.Microsecond)
+			continue
+		}
+		server.lastTime = now_in_ms
+		info.StartTime = strconv.FormatInt(now_in_ms, 10)
+		break
 	}
-	server.lastTime = now_in_ms
-	info.StartTime = strconv.FormatInt(now_in_ms, 10)
 	return info
 }
 
