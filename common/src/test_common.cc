@@ -7,7 +7,7 @@
 
 using namespace testing;
 std::string ouputMsg;
-void cc_log_error_cb(char* msg) { ouputMsg += msg; }
+void cc_log_error_cb(const char* msg) { ouputMsg = msg; }
 
 TEST(common, uid_all_in_one) {
 
@@ -21,8 +21,7 @@ TEST(common, uid_all_in_one) {
 }
 
 TEST(common, start_end_trace) {
-  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
-
+  register_span_handler(cc_log_error_cb);
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   mark_current_trace_status(id, E_OFFLINE);
   EXPECT_EQ(pinpoint_trace_is_root(id), 1);
@@ -46,6 +45,8 @@ TEST(common, start_end_trace) {
   mark_current_trace_status(1024, E_TRACE_BLOCK);
   catch_error(-1024, "sdfasfas", "fsafdsfasd", 234);
   catch_error(0, "sdfasfas", "fsafdsfasd", 234);
+  EXPECT_TRUE(ouputMsg.find("ERR") != std::string::npos);
+  // pp_trace("%s", ouputMsg.c_str());
 }
 
 TEST(common, context_check) {

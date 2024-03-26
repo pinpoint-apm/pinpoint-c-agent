@@ -103,7 +103,7 @@ def trace_has_root(trace_id=-1):
     return _pinpointPy.trace_has_root(trace_id)
 
 
-def mark_as_error(message: str, filename: str = '', trace_id: int = -1, line: int = 0):
+def mark_as_error(message: str, filename: str = '', line: int = 0, trace_id: int = -1):
     _pinpointPy.mark_as_error(message, filename, line, trace_id)
 
 
