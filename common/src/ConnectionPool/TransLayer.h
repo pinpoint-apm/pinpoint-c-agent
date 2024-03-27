@@ -22,21 +22,13 @@
 
 #ifndef INCLUDE_PPTRANSLAYER_H_
 #define INCLUDE_PPTRANSLAYER_H_
-#include <sys/stat.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <cstdint>
 #include <functional>
-#include <iostream>
-#include <arpa/inet.h>
-#include <iostream>
-#include <functional>
-
+#include <map>
+#include <memory>
 #include "common.h"
 #include "Cache/Chunk.h"
+#include "sockets.h"
 
 namespace ConnectionPool {
 using Cache::Chunks;
@@ -44,9 +36,13 @@ using Cache::Chunks;
 // note update chunk watermark size
 // for keep large span.
 // BIG span is not friendly to pinpoint-web, show everything equals nothing
-
+#define IN_MSG_BUF_SIZE 4096
 const uint32_t _chunk_max_size = 10 * 1024 * 1024; // 10M
 const uint32_t _chunk_hold_size = 40 * 1024;       // 40k
+
+using MsgHandleFunc = std::function<void(int type, const char* buf, size_t len)>;
+using RouterMsgMap = std::map<int, MsgHandleFunc>;
+using RouteMapValueType = RouterMsgMap::value_type;
 
 class TransLayer {
   enum E_STATE { S_WRITING = 0x1, S_READING = 0x2, S_ERROR = 0x4 };
@@ -56,106 +52,45 @@ public:
       : co_host(co_host), chunks(_chunk_max_size, _chunk_hold_size), _state(0), lastConnectTime(0),
         c_fd(-1) {}
 
-  void registerPeerMsgCallback(
-      std::function<void(int type, const char* buf, size_t len)> _peerMsgCallback,
-      std::function<void(int state)> chann_error_cb) {
-    if (_peerMsgCallback) {
-      this->peerMsgCallback = _peerMsgCallback;
-    }
-
-    if (chann_error_cb) {
-      this->chann_error_cb = chann_error_cb;
-    }
+  void RegPeerMsgCallback(int type, MsgHandleFunc call_back) { msgRouteMap_[type] = call_back; }
+  void RegStatusChangedCallBack(std::function<void(int)> call_back) {
+    statusChangedCallback_ = call_back;
   }
 
-  size_t trans_layer_pool(uint32_t);
+  size_t PoolEventOnce(uint32_t);
+
+  void Reset() { ResetMsgHandler(); }
 
   bool copy_into_send_buffer(const std::string& data);
-
-  // void sendMsgToAgent(const char* pbuf,uint32_t len)
-  // {
-  //     if ( this->chunks.copyDataIntoChunks(pbuf,len) != 0)
-  //     {
-  //         pp_trace("Send buffer is full. size: [%d]",len);
-  //         return ;
-  //     }
-  //     this->_state |=  S_WRITING;
-  // }
-
   /**
    * retry in three times
    * @param timeout
    */
-  void forceFlushMsg(uint32_t timeout) {
-#define MAX_RETRY_TIEMS 3
+  void SyncSendAll(uint32_t maxTimeout) {
+#define MAX_RETRY_ITEMS 20
     int retry = 0;
-    timeout = (timeout > 3) ? (timeout) : (3);
-    while ((this->_state & S_WRITING) && retry < MAX_RETRY_TIEMS) {
-      this->trans_layer_pool(timeout / 3);
+    while ((this->_state & S_WRITING) && retry < MAX_RETRY_ITEMS) {
+      this->PoolEventOnce(maxTimeout);
       retry++;
     }
-#undef MAX_RETRY_TIEMS
+#undef MAX_RETRY_ITEMS
   }
 
   ~TransLayer() {
     if (this->c_fd != -1) {
-      close(this->c_fd);
+      close_socket(this->c_fd);
     }
   }
 
-#ifdef UTEST
-
-#else
+#ifndef UTEST
 private:
 #endif
 
-  static int connect_stream_remote(const char* remote);
-
+  static SOCKET connect_stream_remote(const char* remote);
+#ifdef __linux__
   static int connect_unix_remote(const char* remote);
-
-  int connect_remote(const char* statement) {
-    int fd = -1;
-    const char* substring = NULL;
-    if (statement == NULL || statement[0] == '\0') {
-      goto ERROR;
-    }
-
-    // check last connect time
-    if (time(NULL) < this->lastConnectTime + RECONNECT_TIME_SEC) {
-      goto RECONNECT_WAITING;
-    } else {
-      this->lastConnectTime = time(NULL);
-    }
-
-    /// unix
-    substring = strcasestr(statement, UNIX_SOCKET);
-    if (substring == statement) {
-      // sizeof = len +1, so substring -> /tmp/collector.sock
-      substring = substring + strlen(UNIX_SOCKET);
-      fd = connect_unix_remote(substring);
-      c_fd = fd;
-      goto DONE;
-    }
-
-    ///  tcp tcp:localhost:port
-    substring = strcasestr(statement, TCP_SOCKET);
-    if (substring == statement) {
-      // sizeof = len +1, so substring -> /tmp/collector.sock
-      substring = substring + strlen(TCP_SOCKET);
-      fd = TransLayer::connect_stream_remote(substring);
-      c_fd = fd;
-      goto DONE;
-    }
-
-  ERROR:
-    pp_trace("remote is not valid:%s", statement);
-    return -1;
-  RECONNECT_WAITING:
-    return -1;
-  DONE:
-    this->_state |= (S_ERROR | S_READING | S_WRITING);
-    return fd;
-  }
+#endif
+  SOCKET connect_remote(const char* statement);
 
   int _send_msg_to_collector() {
     return chunks.drainOutWithPipe(
@@ -165,13 +100,13 @@ private:
   void _reset_remote() {
     if (c_fd > 0) {
       pp_trace("reset peer:%d", c_fd);
-      close(c_fd);
+      close_socket(c_fd);
       c_fd = -1;
       this->_state = 0;
     }
 
-    if (chann_error_cb) {
-      chann_error_cb(E_OFFLINE);
+    if (statusChangedCallback_) {
+      statusChangedCallback_(E_OFFLINE);
     }
 
     chunks.resetChunks();
@@ -181,25 +116,24 @@ private:
     const char* buf = data;
     uint32_t buf_ofs = 0;
     while (buf_ofs < length) {
-#ifdef __APPLE__
-      ssize_t ret = send(c_fd, buf + buf_ofs, length - buf_ofs, 0);
+#if defined(__APPLE__) || defined(_WIN32)
+      int ret = send(c_fd, buf + buf_ofs, length - buf_ofs, 0);
 #else
       ssize_t ret = send(c_fd, buf + buf_ofs, length - buf_ofs, MSG_NOSIGNAL);
 #endif
-
       if (ret > 0) {
         buf_ofs += (uint32_t)ret;
         pp_trace("fd %d send size %ld", c_fd, ret);
       } else if (ret == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+        if (nonblock_error(err_code())) {
           this->_state |= S_WRITING;
           return buf_ofs;
         }
-        pp_trace("_do_write_data@%d send data error:(%s) fd:(%d)", __LINE__, strerror(errno), c_fd);
+        pp_trace("_do_write_data@%d send data error:(%d) fd:(%d)", __LINE__, err_code(), c_fd);
         return -1;
       } else {
-        pp_trace("_do_write_data@%d send data return 0 error:(%s) fd:(%d)", __LINE__,
-                 strerror(errno), c_fd);
+        pp_trace("_do_write_data@%d send data return 0 error:(%d) fd:(%d)", __LINE__, err_code(),
+                 c_fd);
         return -1;
       }
     }
@@ -208,13 +142,13 @@ private:
     return length;
   }
 
-  int _recv_msg_from_collector() {
+  int recvByteStream() {
     int next_size = 0;
     while (next_size < IN_MSG_BUF_SIZE) {
       int ret = recv(c_fd, in_buf + next_size, IN_MSG_BUF_SIZE - next_size, 0);
       if (ret > 0) {
         int total = ret + next_size;
-        int msg_offset = handle_msg_from_collector(in_buf, total);
+        int msg_offset = HandleMsgStream(in_buf, total);
         if (msg_offset < total) {
           next_size = total - msg_offset;
           memcpy(in_buf, in_buf + msg_offset, next_size);
@@ -222,47 +156,48 @@ private:
           next_size = 0;
         }
       } else if (ret == 0) {
-        // peer close
+        pp_trace("server closed. error:%d", err_code());
         return -1;
       } else {
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+        if (nonblock_error(err_code())) {
           return 0;
+        } else {
+          pp_trace("recv failed. error:%d", err_code());
+          return -1;
         }
-        pp_trace("recv with error:%s", strerror(errno));
-        return -1;
       }
     }
+    pp_trace("recv buf full,maybe a bug");
     return 0;
   }
 
-  int handle_msg_from_collector(const char* buf, size_t len) {
-    size_t offset = 0;
+  int HandleMsgStream(const char* buf, int len) {
+    int offset = 0;
     while (offset + 8 <= len) {
       Header* header = (Header*)buf;
 
-      uint32_t body_len = ntohl(header->length);
+      int body_len = (int)ntohl(header->length);
 
       if (8 + body_len > len) {
         return offset;
       }
 
       uint32_t type = ntohl(header->type);
-      if (peerMsgCallback) {
-        peerMsgCallback(type, buf + 8, len - 8);
+      auto has = msgRouteMap_.find(type);
+      if (has != msgRouteMap_.end()) {
+        msgRouteMap_[type](type, buf + 8, len - 8);
+      } else {
+        pp_trace("unsupported message type:%d from server", type);
       }
-
-      // switch(type){
-      // case RESPONSE_AGENT_INFO:
-      // // TODO add agent_info update
-      //     // handle_agent_info(RESPONSE_AGENT_INFO, buf+8,len - 8);
-      //     break;
-      // default:
-      //     pp_trace("unsupport type:%d",type);
-      // }
-
       offset += (8 + body_len);
     }
     return offset;
+  }
+
+private:
+  void ResetMsgHandler() {
+    statusChangedCallback_ = nullptr;
+    msgRouteMap_.clear();
   }
 
 private:
@@ -270,15 +205,16 @@ private:
   Chunks chunks;
   int32_t _state;
   char in_buf[IN_MSG_BUF_SIZE] = {0};
-  std::function<void(int)> chann_error_cb;
-  std::function<void(int type, const char* buf, size_t len)> peerMsgCallback;
+  std::function<void(int)> statusChangedCallback_;
+  RouterMsgMap msgRouteMap_;
   const static char* UNIX_SOCKET;
   const static char* TCP_SOCKET;
   time_t lastConnectTime;
 
 public:
-  int c_fd;
+  SOCKET c_fd;
 };
+using TransLayerPtr = std::unique_ptr<TransLayer>;
 } // namespace ConnectionPool
 
 #endif /* INCLUDE_PPTRANSLAYER_H_ */

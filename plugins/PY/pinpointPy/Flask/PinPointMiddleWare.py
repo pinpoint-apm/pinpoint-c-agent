@@ -18,7 +18,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 from pinpointPy.Defines import PP_HTTP_STATUS_CODE, PP_URL_TEMPLATED
-from pinpointPy.pinpoint import add_trace_header_v2, add_trace_header
+from pinpointPy.pinpoint import add_trace_header_v2, add_trace_header, mark_as_error
 from pinpointPy.Flask.FlaskPlugins import BaseFlaskPlugins
 from flask import request
 import sys
@@ -42,7 +42,11 @@ class PinPointMiddleWare():
                         response.headers["UT"] = str(request.url_rule)
                 if response:
                     add_trace_header_v2(PP_HTTP_STATUS_CODE,
-                                        str(response.status), trace_id)
+                                        response.status, trace_id)
+                    # fix bug in https://oss.navercorp.com/pinpoint/pinpoint_c_agent/issues/570
+                    if response.status >= '400':
+                        mark_as_error(
+                            f'status_code:{response.status}', 'FastAPIRequestPlugin', 0, trace_id)
             return response
 
     @BaseFlaskPlugins("Flask Web App")

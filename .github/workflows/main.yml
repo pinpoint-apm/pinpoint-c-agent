@@ -1,6 +1,6 @@
 name: CI
 
-on: [pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch,push]
 
 jobs:
   cpp:
@@ -24,6 +24,26 @@ jobs:
           ./bin/TestCommon
       - name: Codecovage
         uses: codecov/codecov-action@v1
+
+  cpp-windows:
+    runs-on: [windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      # - name: actions-setup-cmake
+      #   uses: jwlawson/actions-setup-cmake@v1.14
+      #   with:
+      #     cmake-version: 'latest'
+
+      - name: powershell allow...
+        shell: cmd
+        run: powershell -Command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser"
+
+      - name: Build agent
+        run: |
+          cd common
+          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 17 2022" -T host=x86 -A win32
+          cmake --build build --target ALL_BUILD --config debug --
+          ./build/bin/Debug/TestCommon.exe
 
   memory-leak:
     runs-on: ubuntu-latest
@@ -74,7 +94,7 @@ jobs:
     strategy:
       matrix:
         # php-versions: ["7.0", "7.1", "7.2", "7.3", "7.4", "8.0"]
-        php-versions: ["7.4","8.0"]
+        php-versions: ["7.4", "8.0"]
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
@@ -95,12 +115,12 @@ jobs:
           # composer install
           # cp tests/think .
           # php think unit -v
-          
+
   Python:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python-version: ["3.8","3.9","3.10","3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -119,14 +139,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: update docker compose
         run: |
           wget "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
           chmod +x docker-compose-linux-x86_64
           ./docker-compose-linux-x86_64 version
-      # - name: build python-plugins
         # run: docker-compose  -f "testapps/compose.yaml" build python-plugins
+      # - name: build python-plugins
       - name: start test environment
         run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up python-plugins --exit-code-from python-plugins
       - name: Stop containers
@@ -146,11 +166,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          submodules: 'true'
+          submodules: "true"
 
       - name: Setup protoc
         uses: arduino/setup-protoc@v2.1.0
-      
+
       - run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2

@@ -142,5 +142,5 @@ class RequestPlugin(Common.PinTrace):
         return ret
 
     def onException(self, trace_id, e):
-        pinpoint.mark_as_error(str(e), "", trace_id)
+        pinpoint.mark_as_error(str(e), "", 0, trace_id)
         raise e
