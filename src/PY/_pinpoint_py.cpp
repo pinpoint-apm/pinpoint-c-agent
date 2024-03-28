@@ -230,7 +230,7 @@ static PyObject *py_pinpoint_drop_trace(PyObject *self, PyObject *args) {
 static PyObject *py_pinpoint_start_time(PyObject *self,
                                         CYTHON_UNUSED PyObject *unused) {
   uint64_t start_time = pinpoint_start_time();
-  return Py_BuildValue("l", start_time);
+  return Py_BuildValue("K", start_time);
 }
 
 // origin from

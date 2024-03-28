@@ -78,9 +78,13 @@ class TestAgent(TestCase):
         self.assertTrue(_pinpointPy.set_agent(
             collector_host='Tcp:dev-collector:11331', trace_limit=1000))
 
+    def test_set_collector_host(self):
+        self.assertGreater(_pinpointPy.start_time(), 0,
+                           "_pinpointPy.start_time() in wrong format")
 
 # _pinpointPy.start_trace()
 # _pinpointPy.end_trace()
+
 
 if __name__ == '__main__':
     unittest.main()
