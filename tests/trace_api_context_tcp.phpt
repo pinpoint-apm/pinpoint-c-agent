@@ -4,7 +4,7 @@ Check  call statck
 <?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
 --INI--
 pinpoint_php.CollectorHost=tcp:127.0.0.1:9999
-pinpoint_php.SendSpanTimeOutMs=200
+pinpoint_php.SendSpanTimeOutMs=0
 pinpoint_php.UnitTest=true
 ;pinpoint_php._limit for internal use. User do not use it
 pinpoint_php._limit=yes
@@ -40,7 +40,7 @@ var_dump(pinpoint_get_context('not exist',$id));
 
 $id = pinpoint_end_trace($id);
 pinpoint_end_trace($id);
-
+pinpoint_status();
 ?>
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
@@ -50,8 +50,9 @@ string(1) "c"
 [pinpoint] [%d] [%d] pinpoint_get_context_key [128] failed with map::at, parameters:not exist
 bool(false)
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d})
-[pinpoint] [%d] [%d]agent try to connect:(tcp:127.0.0.1:9999)
-[pinpoint] [%d] [%d]_do_write_data@198 send data error:(Connection refused) fd:(3)
+[pinpoint] [%d] [%d]agent try to connect:(127.0.0.1:9999)
+[pinpoint] [%d] [%d]write event
+[pinpoint] [%d] [%d]_do_write_data@%d send data error:(%d) fd:(3)
 [pinpoint] [%d] [%d]reset peer:3
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
@@ -63,5 +64,9 @@ string(1) "a"
 bool(false)
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d}]})
-[pinpoint] [%d] [%d]agent try to connect:(tcp:127.0.0.1:9999)
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
+{
+	"common_libary_version" : "0.5.0",
+	"pool_free_node" : 128,
+	"pool_total_node" : 128
+}

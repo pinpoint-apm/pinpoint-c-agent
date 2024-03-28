@@ -1,19 +1,15 @@
-aux_source_directory(. TEST_SRC)
-
-add_executable(TestCommon ${TEST_SRC})
-target_compile_definitions(TestCommon PRIVATE "-DUTEST -DCOMMON_DEBUG")
-
-# message("${CMAKE_BINARY_DIR}/lib")
+file(GLOB_RECURSE TEST_SRC
+  "${PROJECT_SOURCE_DIR}/src/test_*.cc"
+)
+add_executable(TestCommon ${TEST_SRC} test_main.cc)
+target_include_directories(TestCommon PUBLIC ${PROJECT_SOURCE_DIR}/jsoncpp/include)
 if (WITH_CODECOVERAGE AND LINUX_)
-    # message("enable -lgcov")
-    target_link_libraries(TestCommon pinpoint_common_static gtest_main rt gcov )
-elseif(APPLE)
-    target_link_libraries(TestCommon pinpoint_common_static gtest_main)
-elseif(MSVC)
-    message( FATAL_ERROR "pinpoint-c-agent not support windows, if you need create an issue https://github.com/pinpoint-apm/pinpoint-c-agent/issues" )
+# message("enable -lgcov")
+target_link_libraries(TestCommon pinpoint_common_static gtest_main rt gcov )
 else()
-    message("------------------------------")
-    target_link_libraries(TestCommon pinpoint_common_static gtest_main rt)
+target_link_libraries(TestCommon pinpoint_common_static gtest_main)
 endif()
 
 add_test(TestCommon TestCommon)
+add_executable(main test_main.cpp)
+target_link_libraries(main pinpoint_common_static)

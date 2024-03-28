@@ -33,15 +33,10 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   PINPOINT_SRCS="$EXTRA_PHP_SRCS \
     common/src/common.cpp \
     common/src/Logging.cpp \
-    common/src/Util/Helper.cpp \
     common/src/NodePool/TraceNode.cpp \
     common/src/NodePool/PoolManager.cpp \
-    common/src/Context/ContextType.cpp \
     common/src/ConnectionPool/TransLayer.cpp \
-    common/src/ConnectionPool/SpanConnectionPool.cpp \
-    common/src/Cache/SafeSharedState.cpp \
-    common/src/Cache/SharedObj.cpp \
-    common/src/Cache/NodeTreeWriter.cpp \
+    common/src/Cache/State.cpp \
     common/src/Cache/Chunk.cpp \
     "
   PINPOINT_SRCS="$PINPOINT_SRCS \

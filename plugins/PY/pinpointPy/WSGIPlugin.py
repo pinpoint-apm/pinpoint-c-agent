@@ -44,4 +44,4 @@ class WSGIPlugin(PinTrace):
         return ret
 
     def onException(self, traceId, e):
-        pinpoint.mark_as_error(str(e), "", traceId)
+        pinpoint.mark_as_error(str(e), "", 0, traceId)

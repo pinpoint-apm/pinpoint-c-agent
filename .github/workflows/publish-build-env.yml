@@ -2,7 +2,6 @@ name: publish-build-env
 
 on: 
   release:
-    types: [workflow_dispatch]
   workflow_dispatch:
 
 
