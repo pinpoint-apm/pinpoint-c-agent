@@ -41,6 +41,7 @@
         "formulahendry.vscode-mysql",
         "ms-python.autopep8",
         "streetsidesoftware.code-spell-checker",
-        "jeff-hykin.better-dockerfile-syntax"
+        "jeff-hykin.better-dockerfile-syntax",
+        "cschlosser.doxdocgen"
     ]
 }

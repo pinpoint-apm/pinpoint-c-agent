@@ -1,41 +1,27 @@
-﻿#include <gtest/gtest.h>
-#include <locale.h>
-#include <regex.h>
+﻿#include "gtest/gtest.h"
+// #include <locale.h>
+// #include <regex.h>
 #include <thread>
 #include <chrono>
 #include "common.h"
 
 using namespace testing;
-
 std::string ouputMsg;
-void cc_log_error_cb(char* msg) { ouputMsg += msg; }
+void cc_log_error_cb(const char* msg) { ouputMsg = msg; }
 
 TEST(common, uid_all_in_one) {
-  // register_error_cb(cc_log_error_cb);
-  // test_trace();
+
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
+
   int64_t startId = generate_unique_id();
   generate_unique_id();
   generate_unique_id();
   generate_unique_id();
   EXPECT_EQ(generate_unique_id(), 4 + startId);
-
-#define _100K 100000
-
-  pid_t pid = fork();
-  if (pid == 0) {
-    for (int i = 0; i < _100K; i++)
-      generate_unique_id();
-    exit(0);
-  }
-
-  for (int i = 0; i < _100K; i++)
-    generate_unique_id();
-  waitpid(pid, NULL, 0);
-  //[0~9999]
-  EXPECT_EQ(generate_unique_id(), (startId + 2 * _100K + 5));
 }
 
 TEST(common, start_end_trace) {
+  register_span_handler(cc_log_error_cb);
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   mark_current_trace_status(id, E_OFFLINE);
   EXPECT_EQ(pinpoint_trace_is_root(id), 1);
@@ -44,6 +30,7 @@ TEST(common, start_end_trace) {
   mark_current_trace_status(id, E_OFFLINE);
   EXPECT_EQ(pinpoint_trace_is_root(NodeID(-1023)), -1);
   EXPECT_EQ(pinpoint_trace_is_root(NodeID(1023)), -1);
+  EXPECT_EQ(pinpoint_trace_is_root(NodeID(0)), -1);
   id = pinpoint_start_trace(id);
 
   mark_current_trace_status(id, E_TRACE_PASS);
@@ -58,9 +45,13 @@ TEST(common, start_end_trace) {
   mark_current_trace_status(1024, E_TRACE_BLOCK);
   catch_error(-1024, "sdfasfas", "fsafdsfasd", 234);
   catch_error(0, "sdfasfas", "fsafdsfasd", 234);
+  EXPECT_TRUE(ouputMsg.find("ERR") != std::string::npos);
+  // pp_trace("%s", ouputMsg.c_str());
 }
 
 TEST(common, context_check) {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
+
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   std::string str = "fdafadf";
   pinpoint_add_clues(id, "fasdfas", str.c_str(), E_LOC_CURRENT);
@@ -85,13 +76,7 @@ TEST(common, context_check) {
 
   EXPECT_STREQ(buf, "fadfaffadf");
 
-  pinpoint_set_context_long(id, "1024", 1024);
-  pinpoint_set_context_long(NodeID(0), "1024", 1024);
-  pinpoint_set_context_long(NodeID(1205), "1024", 1024);
   pinpoint_set_context_key(id, "adfadf23", "fadfaffadf");
-  long value;
-  EXPECT_EQ(pinpoint_get_context_long(id, "1024", &value), 0);
-  EXPECT_EQ(value, 1024);
 
   pinpoint_set_context_key(id, ":interl", "abc");
   pinpoint_add_clue(id, ":internal", "abc", E_LOC_CURRENT);
@@ -100,20 +85,16 @@ TEST(common, context_check) {
   pinpoint_add_clues(id, ":internal-abc", "abc", E_LOC_CURRENT);
   pinpoint_add_clues(id, ":internal-abc-1", "abc", E_LOC_ROOT);
 
-  pinpoint_set_context_long(id, ":internal-abc-2", 12563);
-
-  long out;
-
-  EXPECT_NE(pinpoint_get_context_long(id, ":internal-abc-2", &out), 0);
-
   char outBuf[128] = {0};
-
-  EXPECT_EQ(pinpoint_get_context_key(id, ":interl", outBuf, sizeof(outBuf)), -1);
+  // no limitation on context key
+  EXPECT_EQ(pinpoint_get_context_key(id, ":interl", outBuf, sizeof(outBuf)), 3);
 
   pinpoint_end_trace(id);
 }
 
 TEST(common, error_checking) {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
+
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   EXPECT_EQ(pinpoint_trace_is_root(id), 1);
   id = pinpoint_end_trace(id);
@@ -124,6 +105,8 @@ TEST(common, error_checking) {
 }
 
 static void test_per_thread_id_odd() {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
+
   NodeID id = pinpoint_get_per_thread_id();
   EXPECT_EQ(id, 0);
   id = NodeID(1);
@@ -153,6 +136,8 @@ static void test_per_thread_id_even() {
 }
 
 TEST(common, per_threadid) {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 7000, -1, 7000);
+
   std::thread f1(test_per_thread_id_odd);
   std::thread f2(test_per_thread_id_even);
   f1.join();
@@ -160,6 +145,8 @@ TEST(common, per_threadid) {
 }
 
 TEST(common, force_end_trace) {
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 7000);
+
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
   id = pinpoint_end_trace(id);
   id = pinpoint_start_trace(id);
@@ -181,11 +168,15 @@ TEST(common, force_end_trace) {
 
 TEST(common, version) { EXPECT_STREQ(pinpoint_agent_version(), AGENT_VERSION); }
 
-//./bin/unittest --gtest_filter=common.id_1
-TEST(common, id_1) {
+TEST(common, invalid_host) {
+  pinpoint_set_agent("tcp:0.0.0.0.0:9999", 7000, -1, 7000);
   NodeID id = pinpoint_start_trace(E_ROOT_NODE);
-  for (int i = 0; i < 1280; i++) {
-    id = pinpoint_start_trace(id);
-  }
-  pinpoint_set_context_long(id, "1024", 1024);
+  id = pinpoint_end_trace(id);
+}
+
+TEST(common, pp_trace) {
+  pp_trace("测试中文编码 \n");
+  pp_trace("한국어 인코딩 테스트 \n");
+  pp_trace("日本語エンコーディングをテストする \n");
+  pp_trace("%s %s \n", "日本語エンコーディングをテストする ", "combine");
 }

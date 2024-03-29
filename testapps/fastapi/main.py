@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from starlette.middleware import Middleware
-from pinpointPy.Fastapi import PinPointMiddleWare, async_monkey_patch_for_pinpoint, use_starlette_context, asyn_monkey_patch_for_pinpoint
+from pinpointPy.Fastapi import PinPointMiddleWare, async_monkey_patch_for_pinpoint, use_starlette_context, asyn_monkey_patch_for_pinpoint, CommonPlugin
 from pinpointPy import set_agent, monkey_patch_for_pinpoint
 from sqlalchemy.orm import Session
 from starlette_context.middleware import ContextMiddleware
@@ -49,7 +49,7 @@ middleware = [
 
 
 set_agent("cd.dev.test.py", "cd.dev.test.py",
-          'tcp:dev-collector:10000', -1, logging.DEBUG)
+          'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
 use_starlette_context()
 monkey_patch_for_pinpoint()
@@ -98,10 +98,23 @@ async def root():
     return {"message": "Hello World"}
 
 
+@CommonPlugin("test1")
+async def test1():
+    pass
+
+
+@CommonPlugin("test")
+async def test():
+    await test1()
+    await test1()
+
+
 @app.get("/test-requests", tags=['sync-libraries'])
 async def test_requests(request: Request, url='http://www.example.com'):
     import requests
     x = requests.get(url)
+    await test()
+    await test()
     return {"response": x.status_code}
 
 

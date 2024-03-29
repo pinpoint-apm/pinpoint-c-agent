@@ -463,7 +463,7 @@ func (agent *GrpcAgent) consumeJsonSpan() {
 }
 
 func (agent *GrpcAgent) CheckValid(span *TSpan) bool {
-	if span.GetAppname() != agent.agentName || span.GetAppServerType() != agent.agentType {
+	if span.GetAppName() != agent.agentName || span.GetAppServerType() != agent.agentType {
 		agent.log.Warn("name or FT not equal")
 		return false
 	} else {

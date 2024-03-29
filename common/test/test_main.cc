@@ -1,17 +1,16 @@
 ﻿#include <gtest/gtest.h>
-#include <cstdlib>
-#include <iostream>
-#include <sys/mman.h>
-#include <sys/stat.h> /* For mode constants */
-#include <fcntl.h>
 #include "common.h"
-
-void remove_shm_file() { shm_unlink("pinpoint-php.shm"); }
-
-int main(int argc, char **argv)
-{
-  std::atexit(remove_shm_file);
-  register_error_cb(NULL);
+#include "ConnectionPool/sockets.h"
+#include "header.h"
+void log_msg_cb_(char* msg) { printf("%s", msg); }
+int main(int argc, char** argv) {
+  socket_init();
+  pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 7000);
+  register_logging_cb(log_msg_cb_, 1);
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  // initial_crash_collection();
+  auto ret = RUN_ALL_TESTS();
+  sock_cleanup();
+  pinpoint_stop_agent();
+  return ret;
 }

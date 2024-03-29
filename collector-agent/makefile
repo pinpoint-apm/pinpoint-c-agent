@@ -9,7 +9,7 @@ protoc:
 
 server: protoc
 	go mod tidy
-	go build .
+	go build -ldflags "-X 'github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server.Version=v0.5.0'" .
 
 clean:
 	rm -rf pinpoint-grpc-idl/proto/v1/*.go

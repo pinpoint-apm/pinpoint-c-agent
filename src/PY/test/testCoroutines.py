@@ -7,14 +7,15 @@ import sys
 
 pinpointId = contextvars.ContextVar('pinpoint_id')
 pinpointId.set(0)
+
+
 class TestInCoroutines(TestCase):
     @classmethod
     def setUpClass(cls):
         # _pinpointPy.enable_debug(None)
-        _pinpointPy.set_agent(collector_host="unix:/tmp/unexist.sock")
-    
+        _pinpointPy.set_agent(collector_host="tcp:127.0.0.1:9999")
 
-    @unittest.skipIf(hex(sys.hexversion) <'0x30701f0', "python version must 3.7.1+")
+    @unittest.skipIf(hex(sys.hexversion) < '0x30701f0', "python version must 3.7.1+")
     def testCoroFlow(self):
         def decorator_pinpoint(func):
             async def pinpoint_trace(*args, **kwargs):
@@ -22,14 +23,14 @@ class TestInCoroutines(TestCase):
                 id = _pinpointPy.start_trace(id)
                 pinpointId.set(id)
                 func_name = func.__name__
-                _pinpointPy.add_clue('name',func_name,id,0)
-                _pinpointPy.add_clues('start','3434',id)
-                _pinpointPy.set_context_key('sid','12345',id)
-                value = _pinpointPy.get_context_key('sid',id)
-                self.assertEqual(value,'12345')
+                _pinpointPy.add_clue('name', func_name, id, 0)
+                _pinpointPy.add_clues('start', '3434', id)
+                _pinpointPy.set_context_key('sid', '12345', id)
+                value = _pinpointPy.get_context_key('sid', id)
+                self.assertEqual(value, '12345')
 
                 ret = await func(*args, **kwargs)
-                _pinpointPy.add_clue('end','3434',id)
+                _pinpointPy.add_clue('end', '3434', id)
                 id = _pinpointPy.end_trace(id)
             return pinpoint_trace
 
@@ -61,7 +62,5 @@ class TestInCoroutines(TestCase):
         asyncio.run(main())
 
 
-
 if __name__ == '__main__':
     unittest.main()
-    

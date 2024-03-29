@@ -1,5 +1,4 @@
-from setuptools import setup, Extension, find_namespace_packages, find_packages
-from distutils.command.build_ext import build_ext
+from setuptools import setup, Extension, find_namespace_packages
 import platform
 from pathlib import Path
 
@@ -8,14 +7,17 @@ with open("README", "r") as fh:
 
 name = platform.system().lower()
 agent_libraries = []
+extra_compile_args_ = []
 if name == 'windows':
-    raise RuntimeError('pinpoint-c-agent currently not support MS')
+    pass
 elif name == 'darwin':
     agent_libraries = ['stdc++']
+    extra_compile_args_.append("-std=c++11")
 elif name == 'linux':
     agent_libraries = ['rt', 'stdc++']
+    extra_compile_args_.append("-std=c++11")
 else:
-    raise RuntimeError('Unknow platform to me: '+name)
+    raise RuntimeError('Unknown platform to us: ' + name)
 ###############################################
 
 extFiles = [
@@ -24,14 +26,18 @@ extFiles = [
 
 # add pinpoint-common
 
-for a_file in Path("common").glob('**/*.cpp'):
+for a_file in Path("common/src").glob('**/*.cpp'):
     extFiles.append(str(a_file))
 
-for a_file in Path("common").glob('**/*.c'):
+for a_file in Path("common/jsoncpp").glob('**/*.cpp'):
     extFiles.append(str(a_file))
+
+cwd = Path.cwd()
+include_dirs_ = [Path(cwd, './common/include'), Path(cwd, './common/jsoncpp/include'),
+                 Path(cwd, './common/src')]
 
 setup(name='pinpointPy',
-      version="1.1.1",  # don't forget update __version__ in pinpointPy/__init__.py
+      version="1.2.5",  # don't forget update __version__ in pinpointPy/__init__.py
       author="cd_pinpoint members",
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',
@@ -41,10 +47,9 @@ setup(name='pinpointPy',
       ext_modules=[
           Extension('_pinpointPy',
                     extFiles,
-                    include_dirs=['common/include',
-                                  'common/jsoncpp/include', 'common/src'],
+                    include_dirs=include_dirs_,
                     libraries=agent_libraries,
-                    extra_compile_args=['-std=c++11']
+                    extra_compile_args=extra_compile_args_
                     )
       ],
       package_dir={'': 'plugins/PY'},

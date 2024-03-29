@@ -23,7 +23,6 @@
 #ifndef COMMON_SRC_CONTEXTTYPE_H_
 #define COMMON_SRC_CONTEXTTYPE_H_
 
-#include <stdint.h>
 #include <string>
 #include <stdexcept>
 
@@ -36,7 +35,7 @@ public:
   virtual ~ContextType() {}
 
   virtual ctype typeIs() { throw std::logic_error("not implementation"); }
-  virtual std::string asStringValue() { throw std::logic_error("not implementation"); }
+  virtual std::string& asStringValue() { throw std::logic_error("not implementation"); }
   virtual long asLongValue() { throw std::logic_error("not implementation"); }
 };
 
@@ -46,7 +45,7 @@ public:
 
   virtual ctype typeIs() override { return "String"; }
 
-  virtual std::string asStringValue() override { return this->_value; }
+  virtual std::string& asStringValue() override { return this->_value; }
 
   virtual ~StringContextType() {}
 

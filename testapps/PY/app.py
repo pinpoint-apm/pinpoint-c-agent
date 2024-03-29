@@ -57,7 +57,8 @@ monkey_patch_for_pinpoint()
 
 app = Flask(__name__)
 
-set_agent("cd.dev.test.py", "cd.dev.test.py", 'tcp:dev-collector:10000', -1,logging.DEBUG)
+set_agent("cd.dev.test.py", "cd.dev.test.py",
+          'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
 app.wsgi_app = PinPointMiddleWare(app, app.wsgi_app)
 
@@ -375,4 +376,4 @@ def signin():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, processes=4, threaded=False)
+    app.run(host='0.0.0.0', port=80)

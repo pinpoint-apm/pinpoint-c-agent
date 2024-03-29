@@ -43,8 +43,8 @@ func TestTspan(t *testing.T) {
 		t.Error(tspan.GetStartTime())
 	}
 
-	if tspan.GetAppname() != "APP-2" {
-		t.Error(tspan.GetAppname())
+	if tspan.GetAppName() != "APP-2" {
+		t.Error(tspan.GetAppName())
 
 	}
 
