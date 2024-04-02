@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 
 use_thread_local_context()
 monkey_patch_for_pinpoint()
-set_agent("cd.dev.test.py", "cd.dev.test.py",
+set_agent("cd.dev.test.django", "cd.dev.test.py",
           'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
 MIDDLEWARE = [

@@ -4,27 +4,41 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 'password'
-      MYSQL_TCP_PORT: 3306  
+      MYSQL_TCP_PORT: 3306
     ports:
-      - '33060:3306' 
+      - '33060:3306'
     volumes:
       - ..:/workspace:cached
-       
+
     healthcheck:
-      test: ["CMD", "mysqladmin","-uroot","-ppassword" ,"ping", "-h", "localhost"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "-uroot",
+          "-ppassword",
+          "ping",
+          "-h",
+          "localhost"
+        ]
       interval: 15s
       timeout: 10s
       retries: 10
-  
+
   dev-mysql-setup:
-    image: mysql:5.7 
+    image: mysql:5.7
     depends_on:
       dev-mysql:
         condition: service_healthy
     volumes:
-      - ..:/workspace:cached    
+      - ..:/workspace:cached
     # todo load all data 
-    entrypoint: [ "bash", "-c", "cd /workspace/testapps/ && sh load_sample_db.sh"]
+    entrypoint:
+      [
+        "bash",
+        "-c",
+        "cd /workspace/testapps/ && sh load_sample_db.sh"
+      ]
 
   redis:
     image: redis:alpine
@@ -57,8 +71,8 @@ services:
 
     healthcheck:
       test: curl -f http://testapp-flask
-      interval: 5s 
-      timeout: 1s       
+      interval: 5s
+      timeout: 1s
 
   testapp-php:
     container_name: yii2
@@ -66,7 +80,7 @@ services:
       redis:
         condition: service_healthy
       dev-collector:
-        condition: service_started        
+        condition: service_started
     restart: always
     build:
       dockerfile: testapps/php.dockerfile
@@ -76,17 +90,17 @@ services:
 
     healthcheck:
       test: curl -f http://testapp-php
-      interval: 5s 
-      timeout: 1s       
+      interval: 5s
+      timeout: 1s
 
   testapp-fastapi:
     container_name: fastapi
     depends_on:
       redis:
-        condition: service_healthy  
+        condition: service_healthy
       dev-collector:
         condition: service_started
-        
+
     restart: always
     build:
       dockerfile: testapps/fastapi.dockerfile
@@ -95,8 +109,8 @@ services:
       - 8186:8000
     healthcheck:
       test: curl -f http://testapp-fastapi:8000
-      interval: 5s 
-      timeout: 1s        
+      interval: 5s
+      timeout: 1s
 
   # test call self
   backend:
@@ -104,33 +118,33 @@ services:
     container_name: backend
     depends_on:
       redis:
-        condition: service_healthy    
+        condition: service_healthy
     build:
       dockerfile: testapps/backend.dockerfile
       context: ../
     ports:
-      - 8187:80  
+      - 8187:80
 
     healthcheck:
       test: curl -f http://backend
-      interval: 5s 
-      timeout: 1s       
-  
+      interval: 5s
+      timeout: 1s
+
   testapp-django:
     container_name: django
     depends_on:
       redis:
-        condition: service_healthy    
+        condition: service_healthy
     restart: always
     build:
       dockerfile: testapps/django.dockerfile
       context: ../
     ports:
-      - 8188:8000  
+      - 8188:8000
     healthcheck:
       test: curl -f http://testapp-django:8000/polls
-      interval: 5s 
-      timeout: 1s     
+      interval: 5s
+      timeout: 1s
 
   httpbin:
     build:
@@ -142,7 +156,7 @@ services:
       interval: 5s
       timeout: 10s
       retries: 50
-    
+
   dev-collector:
     restart: always
     build:
@@ -164,20 +178,19 @@ services:
     volumes:
       - /etc/hosts:/etc/hosts
 
-
   mongodb:
     image: 'mongo'
     restart: always
     hostname: mongodb
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-    # ports:
+      # ports:
       # - 27017:27017
 
   python-plugins:
     build:
       dockerfile: testapps/python-plugins.dockerfile
-      context: ../     
+      context: ../
     profiles:
       - testing
     depends_on:
@@ -187,3 +200,31 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+
+  grpc-py:
+    container_name: grpc-py
+    restart: always
+    build:
+      dockerfile: testapps/grpc_py.dockerfile
+      context: ../
+    ports:
+      - 50050:50050
+    depends_on:
+      dev-collector:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  grpc-py-client:
+    container_name: grpc-py-client
+    depends_on:
+      grpc-py:
+        condition: service_started
+    restart: always
+    build:
+      dockerfile: testapps/grpc_py_client.dockerfile
+      context: ../
+    # healthcheck:
+    #   test: python /app/route_guide_client.py
+    #   interval: 5s
+    #   timeout: 1s

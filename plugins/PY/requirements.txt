@@ -10,3 +10,5 @@ requests==2.31.0
 SQLAlchemy==2.0.23
 starlette-context==0.3.6
 mysqlclient==2.2.0
+grpcio
+grpc-interceptor==0.15.4

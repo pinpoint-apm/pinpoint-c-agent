@@ -48,7 +48,7 @@ middleware = [
 ]
 
 
-set_agent("cd.dev.test.py", "cd.dev.test.py",
+set_agent("cd.dev.test.fastapi", "cd.dev.test.py",
           'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
 use_starlette_context()

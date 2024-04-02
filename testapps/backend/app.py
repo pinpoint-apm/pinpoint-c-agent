@@ -57,7 +57,7 @@ monkey_patch_for_pinpoint()
 
 app = Flask(__name__)
 
-set_agent("cd.dev.test.py.backend", "cd.dev.test.py.backend",
+set_agent("cd.dev.test.backend", "cd.dev.test.py.backend",
           'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
 app.wsgi_app = PinPointMiddleWare(app, app.wsgi_app)
