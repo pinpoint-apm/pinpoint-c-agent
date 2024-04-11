@@ -26,7 +26,7 @@ type GrpcAgent struct {
 	pingMd         metadata.MD
 	PingId         int32
 	spanFilter     []Filter
-	spanSender     SpanSender
+	spanSender     *SpanSender
 	AgentOnLine    bool
 	requestCounter RequestProfiler
 	utReport       *UrlTemplateReport
@@ -180,7 +180,7 @@ func (agent *GrpcAgent) registerFilter() {
 	agent.AddFilter(agent.utReport)
 	// send span
 	agent.log.Debug("register spanSender filter")
-	agent.AddFilter(&agent.spanSender)
+	agent.AddFilter(agent.spanSender)
 
 }
 
@@ -296,7 +296,7 @@ func (agent *GrpcAgent) Init(id, _name string, _type int32, StartTime string) {
 
 	agent.tSpanCh = make(chan *TSpan, config.AgentChannelSize)
 	agent.ExitCh = make(chan bool)
-	agent.spanSender = SpanSender{Md: agent.BaseMD, ExitCh: agent.ExitCh}
+	agent.spanSender = CreateSpanSender(agent.BaseMD, agent.ExitCh)
 	agent.spanSender.Init()
 	agent.requestCounter.CTime = time.Now().Unix()
 	agent.registerFilter()

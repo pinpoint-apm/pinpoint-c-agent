@@ -62,6 +62,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      dev-collector:
+        condition: service_started
     restart: always
     build:
       dockerfile: testapps/flask.dockerfile
