@@ -3,8 +3,13 @@ name: publish-collector-agent
 on: 
   workflow_dispatch:
     inputs:
+      tag:
+        description: "Give me a name: 1.2.3"
+        type: string
+        required: true
+        default: "0.0.0"
       push:
-        description: Do you want to push to ghcr.io
+        description: "Do you want to push to ghcr.io"
         required: true
         default: false
         type: boolean
@@ -27,14 +32,15 @@ jobs:
     - name: Build the collector-agent Docker image
       run: |
         IMAGE_NAME=collector-agent
-        IMAGE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG=$(echo $IMAGE_TAG | sed -e 's/^v//')
+        # IMAGE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        # [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG=$(echo $IMAGE_TAG | sed -e 's/^v//')
+        IMAGE_TAG=${{ inputs.tag }}
         IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
 
         # docker build --pull --no-cache . --file collector-agent/Dockerfile --tag $IMAGE_NAME
-        cd collector-agent && make docker TAG=$IMAGE_NAME
-        docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
-        docker tag $IMAGE_NAME $IMAGE_ID/$IMAGE_NAME:latest
+        cd collector-agent && make docker TAG=$IMAGE_TAG
+        docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
+        docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_ID/$IMAGE_NAME:latest
         if [[ ${{ inputs.push }} == "true" ]]; then
           echo ${{ inputs.push }}
           docker push --all-tags $IMAGE_ID/$IMAGE_NAME

@@ -1,5 +1,5 @@
 
-TAG=${tag}
+TAG ?=v0.5.1
 
 .PHONY: default
 default: server ;
@@ -9,11 +9,11 @@ protoc:
 
 server: protoc
 	go mod tidy
-	go build -ldflags "-X 'github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server.Version=v0.5.0'" .
+	go build -ldflags "-X 'github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server.Version=${TAG}'" .
 
 clean:
 	rm -rf pinpoint-grpc-idl/proto/v1/*.go
 	rm -rf collector-agent
 
 docker:
-	docker build -f Dockerfile -t ${TAG}  . 
+	docker build -f Dockerfile -t collector-agent:${TAG}  . 
