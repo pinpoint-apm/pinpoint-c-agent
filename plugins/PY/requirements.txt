@@ -12,3 +12,4 @@ starlette-context==0.3.6
 mysqlclient==2.2.0
 grpcio
 grpc-interceptor==0.15.4
+psycopg2

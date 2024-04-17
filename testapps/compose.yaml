@@ -137,6 +137,10 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
+      dev-collector:
+        condition: service_started
     restart: always
     build:
       dockerfile: testapps/django.dockerfile
@@ -202,6 +206,8 @@ services:
         condition: service_healthy
       mongodb:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   grpc-py:
     container_name: grpc-py
@@ -226,7 +232,21 @@ services:
     build:
       dockerfile: testapps/grpc_py_client.dockerfile
       context: ../
-    # healthcheck:
-    #   test: python /app/route_guide_client.py
-    #   interval: 5s
-    #   timeout: 1s
+
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pinpoint
+      - POSTGRES_USER=test
+      - POSTGRES_DB=test
+    # volumes:
+    #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql      
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 3s
+      timeout: 30s
+      retries: 5
+      start_period: 80s

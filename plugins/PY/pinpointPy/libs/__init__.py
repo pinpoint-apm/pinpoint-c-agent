@@ -36,11 +36,12 @@ def monkey_patch_for_pinpoint(pymongo=True,
                               urllib=True,
                               sqlalchemy=True,
                               MySQLdb=True,
-                              MysqlConnector=True):
+                              MysqlConnector=True,
+                              pyscopg2=True):
     __monkey_patch(_pymongo=pymongo, _MySQLdb=MySQLdb, _PyMysql=PyMysql, _pyRedis=pyRedis, _requests=requests,
-                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector)
+                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector, _psycopg2=pyscopg2)
 
 
 __all__ = ['monkey_patch_for_pinpoint']
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __author__ = 'liu.mingyi@navercorp.com'
