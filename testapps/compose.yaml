@@ -25,6 +25,25 @@ services:
       timeout: 10s
       retries: 10
 
+  dev-mariadb:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: test
+      # MYSQL_USER: root
+      # MYSQL_PASSWORD: password
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "33061:3306"
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      start_period: 1m
+      start_interval: 10s
+      interval: 1m
+      timeout: 5s
+      retries: 3  
+
   dev-mysql-setup:
     image: mysql:5.7
     depends_on:
@@ -190,8 +209,8 @@ services:
     hostname: mongodb
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      # ports:
-      # - 27017:27017
+    ports:
+    - 27017:27017
 
   python-plugins:
     build:
@@ -233,6 +252,22 @@ services:
       dockerfile: testapps/grpc_py_client.dockerfile
       context: ../
 
+  simple-php:
+    container_name: simple-php
+    depends_on:
+      dev-mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy   
+      mongodb:
+        condition: service_healthy   
+      dev-mariadb:
+        condition: service_healthy 
+    restart: always
+    build:
+      dockerfile: testapps/simplephp.dockerfile
+      context: ../      
+
   postgres:
     image: postgres:14-alpine
     ports:
@@ -241,8 +276,8 @@ services:
       - POSTGRES_PASSWORD=pinpoint
       - POSTGRES_USER=test
       - POSTGRES_DB=test
-    # volumes:
-    #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql      
+    volumes:
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql      
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]

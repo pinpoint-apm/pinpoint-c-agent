@@ -62,6 +62,7 @@ PHP_FUNCTION(pinpoint_end_trace);
 PHP_FUNCTION(pinpoint_add_clue);
 PHP_FUNCTION(pinpoint_add_clues);
 PHP_FUNCTION(pinpoint_unique_id);
+PHP_FUNCTION(pinpoint_get_this);
 PHP_FUNCTION(pinpoint_tracelimit);
 PHP_FUNCTION(pinpoint_drop_trace);
 PHP_FUNCTION(pinpoint_start_time);
@@ -145,6 +146,7 @@ const zend_function_entry pinpoint_php_functions[] = {
   PHP_FE(pinpoint_start_trace, arginfo_add_id) 
   PHP_FE(pinpoint_end_trace, arginfo_add_id)
   PHP_FE(pinpoint_unique_id, arginfo_none) 
+  PHP_FE(pinpoint_get_this, arginfo_none) 
   PHP_FE(pinpoint_status, arginfo_none) 
   PHP_FE(pinpoint_get_func_ref_args, arginfo_none)
   PHP_FE(pinpoint_drop_trace, arginfo_add_id) 
@@ -212,6 +214,17 @@ PHP_FUNCTION(pinpoint_drop_trace) {
   }
   change_trace_status(id, E_TRACE_BLOCK);
   RETURN_TRUE;
+}
+
+PHP_FUNCTION(pinpoint_get_this) {
+
+  // zend_execute_data *ex = EX(prev_execute_data);
+  // ex = ex->prev_execute_data;
+  // return_value = &ex->This;
+  // zend_weakref_get(execute_data->prev_execute_data->This, );
+  // zend_weakref_get(execute_data->prev_execute_data->This, return_value);
+  // RETURN_OBJ(&execute_data->prev_execute_data->This);
+  RETURN_ZVAL(&execute_data->prev_execute_data->This, 0, 0);
 }
 
 PHP_FUNCTION(pinpoint_set_context) {
@@ -630,7 +643,7 @@ PHP_MINIT_FUNCTION(pinpoint_php) {
   zend_error_cb = apm_error_cb;
 
   pinpoint_set_agent(PPG(co_host), PPG(w_timeout_ms), PPG(tracelimit), 1500);
-  if (PPG(utest_flag) == 1) {
+  if (PPG(debug_report) == 1) {
     register_logging_cb(pinpoint_log, 1);
   } else {
     register_logging_cb(pinpoint_log, 0);
