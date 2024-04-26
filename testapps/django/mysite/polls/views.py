@@ -21,7 +21,7 @@ def get_url(request):
 def get_postgres(request) -> HttpResponse:
     # ref to https://www.psycopg.org/docs/usage.html
     conn = psycopg2.connect(dbname="test", user="test",
-                            password="pinpoint", host="10.34.130.156", port=5432)
+                            password="pinpoint", host="postgres", port=5432)
     cur = conn.cursor()
     cur.execute("DROP TABLE IF EXISTS  test")
     cur.execute(

@@ -149,6 +149,9 @@ class BaseDjangoRequestPlugins(Common.PinTraceV1):
         if ret:
             pinpoint.add_trace_header_v2(
                 Defines.PP_HTTP_STATUS_CODE, str(ret.status_code), trace_id)
+            if ret.status_code >= 400:
+                pinpoint.mark_as_error(
+                    f'status code ={ret.status_code}', "", 0, trace_id)
         self._add_ut(trace_id, traceIdOjb._request_, ret)
         ###############################################################
         super().onEnd(traceIdOjb, ret)

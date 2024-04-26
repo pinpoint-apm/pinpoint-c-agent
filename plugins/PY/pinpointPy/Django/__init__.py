@@ -20,5 +20,12 @@
 
 from pinpointPy.Django.DjangoMiddleWare import DjangoMiddleWare
 __all__ = ['DjangoMiddleWare']
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __author__ = ['liu.mingyi@navercorp.com']
+
+"""
+## Changed
+###  v0.0.3
+- check PP_HTTP_STATUS_CODE #601
+
+"""
