@@ -1,49 +1,112 @@
 name: publish-collector-agent
 
-on: 
+on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Give me a name: 1.2.3"
-        type: string
-        required: true
-        default: "0.0.0"
-      push:
-        description: "Do you want to push to ghcr.io"
-        required: true
-        default: false
-        type: boolean
+
+env:
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
+
 jobs:
   collector-agent:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        platform: [linux/amd64, linux/arm64, linux/arm]
+        platform:
+          - linux/amd64
+          - linux/arm/v6
+          - linux/arm/v7
+          - linux/arm64
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'true'
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
 
-    - name: Build the collector-agent Docker image
-      run: |
-        IMAGE_NAME=collector-agent
-        # IMAGE_TAG=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-        # [[ "${{ github.ref }}" == "refs/tags/"* ]] && IMAGE_TAG=$(echo $IMAGE_TAG | sed -e 's/^v//')
-        IMAGE_TAG=${{ inputs.tag }}
-        IMAGE_ID=ghcr.io/$GITHUB_REPOSITORY
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
 
-        # docker build --pull --no-cache . --file collector-agent/Dockerfile --tag $IMAGE_NAME
-        cd collector-agent && make docker TAG=$IMAGE_TAG
-        docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_ID/$IMAGE_NAME:$IMAGE_TAG
-        docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_ID/$IMAGE_NAME:latest
-        if [[ ${{ inputs.push }} == "true" ]]; then
-          echo ${{ inputs.push }}
-          docker push --all-tags $IMAGE_ID/$IMAGE_NAME
-        fi
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: collector-agent
+          platforms: ${{ matrix.platform }}
+          # tags: |
+          #   ghcr.io/${{ github.repository }}/collector-agent:${{ inputs.tag }}
+          #   ghcr.io/${{ github.repository }}/collector-agent:latest
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs:
+      - collector-agent
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
