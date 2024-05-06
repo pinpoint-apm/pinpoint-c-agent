@@ -219,10 +219,18 @@ public:
     eMsg["line"] = error_lineno;
     w_root->AddTraceDetail("ERR", eMsg);
   }
+
   void AnnotateExceptionTrace(NodeID id, const char* exception) {
-    WrapperTraceNodePtr w_root = GetWrapperTraceNode(id, E_LOC_CURRENT);
-    w_root->AddTraceDetail("EXP", exception);
+    WrapperTraceNodePtr w_node = GetWrapperTraceNode(id, E_LOC_CURRENT);
+    w_node->set_exp_ = true;
+    WrapperTraceNodePtr w_root = GetWrapperTraceNode(id, E_LOC_ROOT);
     w_root->set_exp_ = true;
+    Json::Value exp;
+    exp["M"] = exception;
+    // TODO not support class
+    exp["C"] = "class";
+    exp[":S"] = get_unix_time_ms() - w_root->start_time;
+    w_node->AddTraceDetail("EXP_V2", exp);
     pp_trace(" [%d] add exp value:%s", id, exception);
   }
 

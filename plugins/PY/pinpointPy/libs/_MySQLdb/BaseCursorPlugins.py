@@ -47,4 +47,4 @@ class BaseCursorPlugins(Common.PinTrace):
         return ret
 
     def onException(self, trace_id, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), trace_id)
+        pinpoint.add_exception(str(e), trace_id)

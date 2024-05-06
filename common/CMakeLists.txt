@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(pinpoint VERSION 0.5.0 DESCRIPTION  "pinpoint common library")
+project(pinpoint VERSION 0.5.1 DESCRIPTION  "pinpoint common library")
 
 set(CMAKE_CXX_STANDARD 11)
 

@@ -58,3 +58,11 @@ setup(name='pinpointPy',
       packages=find_namespace_packages(
           'plugins/PY', include=['pinpointPy.*', 'pinpointPy']),
       )
+
+"""
+# Changed
+## 1.3.0
+- support error analysis
+## 1.2.1
+- windows build https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.5.0
+"""

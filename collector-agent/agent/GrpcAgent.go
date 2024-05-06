@@ -18,22 +18,32 @@ import (
 )
 
 type GrpcAgent struct {
-	AgentId        string
-	agentName      string
-	agentType      int32
-	StartTime      string
-	BaseMD         metadata.MD
-	pingMd         metadata.MD
-	PingId         int32
-	spanFilter     []Filter
-	spanSender     *SpanSender
-	AgentOnLine    bool
-	requestCounter RequestProfiler
-	utReport       *UrlTemplateReport
-	tasksGroup     sync.WaitGroup
-	tSpanCh        chan *TSpan
-	ExitCh         chan bool
-	log            *log.Entry
+	AgentId             string
+	agentName           string
+	agentType           int32
+	StartTime           string
+	BaseMD              metadata.MD
+	pingMd              metadata.MD
+	PingId              int32
+	spanFilters         []Filter
+	spanSender          *SpanSender
+	AgentOnLine         bool
+	requestCounter      RequestProfiler
+	utReport            *UrlTemplateReport
+	tasksGroup          sync.WaitGroup
+	tSpanCh             chan *TSpan
+	ExitCh              chan bool
+	log                 *log.Entry
+	errorAnalysisFilter *ErrorAnalysisFilter
+}
+
+func createGrpcAgent(id, name string, agentType, pingId int32, startTime string) *GrpcAgent {
+	agent := &GrpcAgent{PingId: pingId, AgentOnLine: false}
+	agent.Init(id, name, agentType, startTime)
+	agent.Start()
+
+	log.Infof("agent:%v is launched", agent)
+	return agent
 }
 
 func (agent *GrpcAgent) SendSpan(span *TSpan) {
@@ -58,7 +68,7 @@ func (agent *GrpcAgent) Stop() {
 }
 
 func (agent *GrpcAgent) AddFilter(filter Filter) {
-	agent.spanFilter = append(agent.spanFilter, filter)
+	agent.spanFilters = append(agent.spanFilters, filter)
 }
 
 func (agent *GrpcAgent) Interceptor(_ *TSpan) bool {
@@ -171,6 +181,7 @@ func (agent *GrpcAgent) registerFilter() {
 	// online/off
 	agent.log.Debug("register agent filter")
 	agent.AddFilter(agent)
+
 	// req count
 	agent.log.Debug("register requestCounter filter")
 	agent.AddFilter(&agent.requestCounter)
@@ -178,6 +189,11 @@ func (agent *GrpcAgent) registerFilter() {
 	// req UrlTemplateReport
 	agent.log.Debug("register UrlTemplate Report filter")
 	agent.AddFilter(agent.utReport)
+
+	// req  ErrorAnalysis
+	agent.log.Debug("register errorAnalysis Report error")
+	agent.AddFilter(agent.errorAnalysisFilter)
+
 	// send span
 	agent.log.Debug("register spanSender filter")
 	agent.AddFilter(agent.spanSender)
@@ -191,7 +207,7 @@ func (agent *GrpcAgent) sendStat() {
 
 	conn, err := common.CreateGrpcConnection(config.StatAddress)
 	if err != nil {
-		errorMsg := fmt.Sprintf("Dail %s failed err:%s", config.StatAddress, err)
+		errorMsg := fmt.Sprintf("Dial %s failed err:%s", config.StatAddress, err)
 		agent.log.Warn(errorMsg)
 		return
 	}
@@ -213,7 +229,6 @@ func (agent *GrpcAgent) sendStat() {
 		return
 	}
 
-	// todo send agentstat
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -296,9 +311,11 @@ func (agent *GrpcAgent) Init(id, _name string, _type int32, StartTime string) {
 
 	agent.tSpanCh = make(chan *TSpan, config.AgentChannelSize)
 	agent.ExitCh = make(chan bool)
-	agent.spanSender = CreateSpanSender(agent.BaseMD, agent.ExitCh)
-	agent.spanSender.Init()
+	agent.spanSender = createSpanSender(agent.BaseMD, agent.ExitCh)
 	agent.requestCounter.CTime = time.Now().Unix()
+
+	agent.errorAnalysisFilter = createErrorAnalysisFilter(agent.BaseMD)
+
 	agent.registerFilter()
 	// start agentOnline
 	go agent.keepAgentOnline()
@@ -454,7 +471,7 @@ func (agent *GrpcAgent) consumeJsonSpan() {
 			return
 		}
 
-		for _, filter := range agent.spanFilter {
+		for _, filter := range agent.spanFilters {
 			if !filter.Interceptor(span) {
 				break
 			}

@@ -45,7 +45,7 @@ class CMysqlPlugin(Common.PinTrace):
         return ret
 
     def onException(self, traceId, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, f'{e}', traceId)
+        pinpoint.add_exception(f'{e}', traceId)
 
     def get_cursor_host(self, cursor):
         return f'{cursor._cnx.server_host}:{cursor._cnx.server_port}'

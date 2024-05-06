@@ -33,19 +33,20 @@ type AgentRouter struct {
 }
 
 type TSpanEvent struct {
-	Name           string       `json:"name"`
-	ExceptionInfo  string       `json:"EXP,omitempty"`
-	DestinationId  string       `json:"dst,omitempty"`
-	NextSpanId     int64        `json:"nsid,string,omitempty"`
-	EndPoint       string       `json:"server,omitempty"`
-	StartElapsed   int32        `json:"S"`
-	EndElapsed     int32        `json:"E"`
-	StartElapsedV2 int32        `json:":S"`
-	EndElapsedV2   int32        `json:":E"`
-	ServiceType    int32        `json:"stp,string"`
-	Clues          []string     `json:"clues,omitempty"`
-	Calls          []TSpanEvent `json:"calls,omitempty"`
-	SqlMeta        string       `json:"SQL,omitempty"`
+	Name            string          `json:"name"`
+	ExceptionInfo   string          `json:"EXP,omitempty"`
+	ExceptionInfoV2 *TExceptionInfo `json:"EXP_V2,omitempty"`
+	DestinationId   string          `json:"dst,omitempty"`
+	NextSpanId      int64           `json:"nsid,string,omitempty"`
+	EndPoint        string          `json:"server,omitempty"`
+	StartElapsed    int32           `json:"S"`
+	EndElapsed      int32           `json:"E"`
+	StartElapsedV2  int32           `json:":S"`
+	EndElapsedV2    int32           `json:":E"`
+	ServiceType     int32           `json:"stp,string"`
+	Clues           []string        `json:"clues,omitempty"`
+	Calls           []*TSpanEvent   `json:"calls,omitempty"`
+	SqlMeta         string          `json:"SQL,omitempty"`
 }
 
 func (spanEv *TSpanEvent) GetEndElapsed() int32 {
@@ -70,35 +71,43 @@ type TErrorInfo struct {
 	Line int    `json:"line"`
 }
 
+type TExceptionInfo struct {
+	ClassName string `json:"C"`
+	Message   string `json:"M"`
+	StartTime int64  `json:":S"`
+}
+
 type TSpan struct {
-	AppServerType         int32        `json:"FT"`
-	AppServerTypeV2       int32        `json:":FT"`
-	ParentAppServerType   int32        `json:"ptype,string"`
-	ParentSpanId          int64        `json:"psid,string"`
-	ParentApplicationName string       `json:"pname"`
-	StartTime             int64        `json:"S"`
-	StartTimeV2           int64        `json:":S"`
-	ElapsedTime           int32        `json:"E"`
-	ElapsedTimeV2         int32        `json:":E"`
-	AppId                 string       `json:"appid"`
-	AppIdV2               string       `json:":appid"`
-	AppName               string       `json:"appname"`
-	AppNameV2             string       `json:":appname"`
-	Calls                 []TSpanEvent `json:"calls"`
-	Clues                 []string     `json:"clues,omitempty"`
-	SpanName              string       `json:"name"`
-	SpanId                int64        `json:"sid,string"`
-	ServerType            int32        `json:"stp,string"`
-	TransactionId         string       `json:"tid"`
-	Uri                   string       `json:"uri"`
-	UT                    string       `json:"UT,omitempty"`
-	EndPoint              string       `json:"server"`
-	RemoteAddr            string       `json:"client"`
-	AcceptorHost          string       `json:"Ah"`
-	ExceptionInfo         string       `json:"EXP,omitempty"`
-	ErrorInfo             *TErrorInfo  `json:"ERR,omitempty"`
-	NginxHeader           string       `json:"NP,omitempty"`
-	ApacheHeader          string       `json:"AP,omitempty"`
+	AppServerType         int32           `json:"FT"`
+	AppServerTypeV2       int32           `json:":FT"`
+	ParentAppServerType   int32           `json:"ptype,string"`
+	ParentSpanId          int64           `json:"psid,string"`
+	ParentApplicationName string          `json:"pname"`
+	StartTime             int64           `json:"S"`
+	StartTimeV2           int64           `json:":S"`
+	ElapsedTime           int32           `json:"E"`
+	ElapsedTimeV2         int32           `json:":E"`
+	AppId                 string          `json:"appid"`
+	AppIdV2               string          `json:":appid"`
+	AppName               string          `json:"appname"`
+	AppNameV2             string          `json:":appname"`
+	Calls                 []*TSpanEvent   `json:"calls"`
+	Clues                 []string        `json:"clues,omitempty"`
+	SpanName              string          `json:"name"`
+	SpanId                int64           `json:"sid,string"`
+	ServerType            int32           `json:"stp,string"`
+	TransactionId         string          `json:"tid"`
+	Uri                   string          `json:"uri"`
+	UT                    string          `json:"UT,omitempty"`
+	EndPoint              string          `json:"server"`
+	RemoteAddr            string          `json:"client"`
+	AcceptorHost          string          `json:"Ah"`
+	ExceptionInfo         string          `json:"EXP,omitempty"`
+	ExceptionInfoV2       *TExceptionInfo `json:"EXP_V2,omitempty"`
+	ErrorInfo             *TErrorInfo     `json:"ERR,omitempty"`
+	ErrorMarked           int32           `json:"EA,omitempty"`
+	NginxHeader           string          `json:"NP,omitempty"`
+	ApacheHeader          string          `json:"AP,omitempty"`
 }
 
 func (span *TSpan) IsFailed() bool {
@@ -188,17 +197,6 @@ func (manager *AgentRouter) Clean() {
 	manager.rwMutex.RUnlock()
 }
 
-//todo rename createAgent
-func (manager *AgentRouter) createAgent(id, name string, agentType int32, startTime string) *GrpcAgent {
-	agent := GrpcAgent{PingId: manager.PingId, AgentOnLine: false}
-	manager.PingId += 1
-	agent.Init(id, name, agentType, startTime)
-	agent.Start()
-
-	log.Infof("agent:%v is launched", &agent)
-	return &agent
-}
-
 func GetAgentInfo(span *TSpan) (appid, name string, appServerType int32, startTime string, err error) {
 
 	// new feat: get current startTime
@@ -237,6 +235,7 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 	span := &TSpan{
 		// ParentSpanId:-1 is part of logic in pinpoint
 		ParentSpanId: -1,
+		ErrorMarked:  0,
 	}
 
 	if err := json.Unmarshal(packet.RawData, span); err != nil {
@@ -258,7 +257,8 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 			if _t, OK := manager.AgentMap[appid]; OK {
 				agent = _t
 			} else {
-				agent = manager.createAgent(appid, appName, serverType, startTime)
+				agent = createGrpcAgent(appid, appName, serverType, manager.PingId, startTime)
+				manager.PingId += 1
 			}
 			manager.AgentMap[appid] = agent
 			manager.rwMutex.Unlock()

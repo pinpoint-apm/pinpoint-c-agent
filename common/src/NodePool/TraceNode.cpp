@@ -81,6 +81,9 @@ void TraceNode::WakeUpTimer() { this->start_time = get_unix_time_ms(); }
 void TraceNode::EndSpan() {
   this->AddTraceDetail(":E", this->cumulative_time);
   this->AddTraceDetail(":S", this->start_time);
+  if (this->set_exp_) {
+    this->AddTraceDetail("EA", 1);
+  }
 }
 
 void TraceNode::EndSpanEvent() {
