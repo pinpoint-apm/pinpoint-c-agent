@@ -1,5 +1,5 @@
 --TEST--
-pinpioint_php internal test case [pinpoint_test_main]
+pinpoint_php internal test case [pinpoint_test_main]
 --SKIPIF--
 <?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
 --INI--

@@ -75,6 +75,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
 
 static void pinpoint_log(char *msg);
 
+// clang-format off
 /* {{{ PHP_INI
  */
 
@@ -96,7 +97,6 @@ STD_PHP_INI_ENTRY("pinpoint_php.TraceLimit", "-1", PHP_INI_ALL, OnUpdateLong,
 
 STD_PHP_INI_ENTRY("pinpoint_php.DebugReport", "no", PHP_INI_ALL, OnUpdateBool,
                   debug_report, zend_pinpoint_php_globals, pinpoint_php_globals)
-
 PHP_INI_END()
 
 /* }}} */
@@ -137,7 +137,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-// clang-format off
 /* {{{ pinpioint_php_functions[]
  *
  * Every user visible function must have an entry in pinpioint_php_functions[].
@@ -217,14 +216,14 @@ PHP_FUNCTION(pinpoint_drop_trace) {
 }
 
 PHP_FUNCTION(pinpoint_get_this) {
+  if (EX(prev_execute_data)) {
+    zval *self = &EX(prev_execute_data)->This;
+    if (zval_get_type(self) != IS_UNDEF) {
+      RETURN_ZVAL(self, 0, 0);
+    }
+  }
 
-  // zend_execute_data *ex = EX(prev_execute_data);
-  // ex = ex->prev_execute_data;
-  // return_value = &ex->This;
-  // zend_weakref_get(execute_data->prev_execute_data->This, );
-  // zend_weakref_get(execute_data->prev_execute_data->This, return_value);
-  // RETURN_OBJ(&execute_data->prev_execute_data->This);
-  RETURN_ZVAL(&execute_data->prev_execute_data->This, 0, 0);
+  RETURN_FALSE;
 }
 
 PHP_FUNCTION(pinpoint_set_context) {
