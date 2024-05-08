@@ -3,7 +3,7 @@ app info
 --SKIPIF--
 <?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
 --INI--
-
+pinpoint_php.DebugReport=false
 --FILE--
 <?php 
 
