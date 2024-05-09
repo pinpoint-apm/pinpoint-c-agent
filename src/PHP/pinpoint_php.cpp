@@ -33,19 +33,24 @@
 
 /* $Id$ */
 
+#include "zend_API.h"
+#include "zend_types.h"
+#include <cstdint>
+#include <stdio.h>
+#include <strings.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+// clang-format off
 #include "php.h"
 #include "php_ini.h"
-// #include "php_var.h"
 #include "ext/standard/info.h"
 
 #include "common.h"
 #include "php_pinpoint_php.h"
-#include <iostream>
-
+#include <string>
+// clang-format on
 #ifdef COMPILE_DL_PINPOINT_PHP
 #ifdef ZTS
 #if PHP_VERSION_ID >= 70000 && PHP_VERSION_ID < 80000
@@ -57,22 +62,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(pinpoint_php)
 #endif
 
-PHP_FUNCTION(pinpoint_start_trace);
-PHP_FUNCTION(pinpoint_end_trace);
-PHP_FUNCTION(pinpoint_add_clue);
-PHP_FUNCTION(pinpoint_add_clues);
-PHP_FUNCTION(pinpoint_unique_id);
-PHP_FUNCTION(pinpoint_get_this);
-PHP_FUNCTION(pinpoint_tracelimit);
-PHP_FUNCTION(pinpoint_drop_trace);
-PHP_FUNCTION(pinpoint_start_time);
-PHP_FUNCTION(pinpoint_set_context);
-PHP_FUNCTION(pinpoint_get_context);
-PHP_FUNCTION(pinpoint_mark_as_error);
-PHP_FUNCTION(pinpoint_get_func_ref_args);
-PHP_FUNCTION(pinpoint_status);
-ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php)
-
+ZEND_DECLARE_MODULE_GLOBALS(pinpoint_php);
 static void pinpoint_log(char *msg);
 
 // clang-format off
@@ -112,6 +102,13 @@ ZEND_ARG_INFO(0, key)
 ZEND_ARG_INFO(0, value)
 ZEND_ARG_INFO(0, nodeid)
 ZEND_ARG_INFO(0, flag)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_add_join_cb_cb_cb, 0, 0, 4)
+ZEND_ARG_INFO(0, joinable)
+ZEND_ARG_INFO(0, onBefore)
+ZEND_ARG_INFO(0, onEnd)
+ZEND_ARG_INFO(0, onException)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_add_msg_filename_lineno_id, 0, 0, 2)
@@ -156,6 +153,7 @@ const zend_function_entry pinpoint_php_functions[] = {
   PHP_FE(pinpoint_mark_as_error, arginfo_add_msg_filename_lineno_id)
   PHP_FE(pinpoint_add_clue, arginfo_add_id_key_value_flag)
   PHP_FE(pinpoint_add_clues, arginfo_add_id_key_value_flag)
+  PHP_FE(pinpoint_join_cut,arginfo_add_join_cb_cb_cb)
   PHP_FE_END /* Must be the last line in pinpioint_php_functions[] */
 };
 /* }}} */
@@ -504,6 +502,191 @@ PHP_FUNCTION(pinpoint_add_clues) {
   pinpoint_add_clues(id, key.c_str(), value.c_str(), (E_NODE_LOC)_flag);
 }
 
+static zval *zend_array_index(zval *ar, int index) {
+  HashTable *__ht = Z_ARRVAL_P(ar);
+  Bucket *_p = __ht->arData;
+  Bucket *_end = _p + __ht->nNumUsed;
+  zval *val;
+  for (int i = 0; i < index && _p != _end; _p++, i++) {
+    val = &_p->val;
+  }
+  return val;
+}
+
+ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {}
+
+static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
+                                            zval *end, zval *exception,
+                                            zend_function *origin_func) {
+  pp_interceptor_v_t *interceptor =
+      (pp_interceptor_v_t *)malloc(sizeof(pp_interceptor_v_t));
+  bzero(interceptor, sizeof(*interceptor));
+  // TODO copy all zval
+  interceptor->name = zend_string_copy(name);
+  ZVAL_DUP(&interceptor->before, before);
+  ZVAL_DUP(&interceptor->end, end);
+  ZVAL_DUP(&interceptor->exception, exception);
+
+  return interceptor;
+}
+
+static inline void free_callback(zval *val) {
+  if (Z_TYPE_P(val) != IS_UNDEF) {
+    zval_ptr_dtor(val);
+  }
+}
+
+static void free_interceptor(pp_interceptor_v_t *interceptor) {
+  zend_string_free(interceptor->name);
+  free_callback(&interceptor->before);
+  free_callback(&interceptor->end);
+  free_callback(&interceptor->exception);
+  free(interceptor);
+}
+
+static void add_function_interceptor(zend_string *name, zval *before, zval *end,
+                                     zval *exception) {
+  zend_function *func = (zend_function *)zend_hash_str_find_ptr(
+      CG(function_table), ZSTR_VAL(name), ZSTR_LEN(name));
+  if (func != NULL) {
+    func->internal_function.handler = pinpoint_interceptor_handler_entry;
+    pp_interceptor_v_t *interceptor =
+        make_interceptor(name, before, end, exception, func);
+    // insert into hash
+    if (!zend_hash_add_ptr(PPG(interceptors), name, interceptor)) {
+      free_interceptor(interceptor);
+      pp_trace(
+          "added interceptor on `function`:%s failed. reason: already exist ",
+          ZSTR_VAL(name));
+      return;
+    }
+    pp_trace("added interceptor on `function`:%s success", ZSTR_VAL(name));
+  } else {
+    pp_trace("not found function:%s", ZSTR_VAL(name));
+  }
+}
+
+static void add_class_method_interceptor(zend_string *cls_name,
+                                         zend_string *method, zval *before,
+                                         zval *end, zval *exception) {
+
+  zend_class_entry *module = (zend_class_entry *)zend_hash_str_find_ptr(
+      CG(class_table), ZSTR_VAL(cls_name), ZSTR_LEN(cls_name));
+  if (module != NULL) {
+    zend_function *original = (zend_function *)zend_hash_str_find_ptr(
+        &module->function_table, ZSTR_VAL(method), ZSTR_LEN(method));
+
+    if (original != NULL) {
+      // overwrite with plugins eg: pinpoint_pdo_exec
+      original->internal_function.handler = pinpoint_interceptor_handler_entry;
+#define MAX_CLASS_METHOD_SIZE 128
+      char buf[MAX_CLASS_METHOD_SIZE] = {0};
+      int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s:%s",
+                          ZSTR_VAL(cls_name), ZSTR_VAL(method));
+
+      zend_string *name = zend_string_init(buf, size - 1, 0);
+
+      pp_interceptor_v_t *interceptor =
+          make_interceptor(name, before, end, exception, original);
+
+      if (!zend_hash_add_ptr(PPG(interceptors), name, interceptor)) {
+        free_interceptor(interceptor);
+        pp_trace("added interceptor on `module`:%s failed. reason: already "
+                 "exist ",
+                 ZSTR_VAL(name));
+        zend_string_free(name);
+        return;
+      }
+      pp_trace("added interceptor on `module`:%s success", ZSTR_VAL(name));
+      zend_string_free(name);
+    } else {
+      pp_trace("add interceptor on `module`:%s:%s failed: no such method",
+               ZSTR_VAL(cls_name), ZSTR_VAL(method));
+    }
+  } else {
+    pp_trace("add interceptor on `module`:%s failed: no such module",
+             ZSTR_VAL(cls_name));
+    // debug CG(class_table)
+    // zend_class_entry *ce;
+    // void *val;
+    // ZEND_HASH_FOREACH_PTR(CG(class_table), val) {
+    //   zend_class_entry *ce = (zend_class_entry *)val;
+    //   pp_trace("key:%s name: %s", ZSTR_VAL(_p->key), ZSTR_VAL(ce->name));
+    //   // if (ce->type == ZEND_INTERNAL_CLASS &&
+    //   //     ce->default_static_members_count > 0) {
+    //   //   class_cleanup_handlers[--class_count] = ce;
+    //   // }
+    // }
+    // ZEND_HASH_FOREACH_END();
+  }
+}
+
+static void add_interceptor(zval *joinable, zval *before, zval *end,
+                            zval *exception) {
+  uint32_t join_type = zend_hash_num_elements(Z_ARRVAL_P(joinable));
+
+  switch (join_type) {
+  case 2: {
+    zval *v = zend_array_index(joinable, 1);
+    zend_string *module = zend_string_tolower(Z_STR_P(v));
+    v = zend_array_index(joinable, 2);
+    zend_string *method = zend_string_tolower(Z_STR_P(v));
+    pp_trace("try to interceptor module(class)/function=%s:%s",
+             ZSTR_VAL(module), ZSTR_VAL(method));
+    add_class_method_interceptor(module, method, before, end, exception);
+    zend_string_release(module);
+    zend_string_release(method);
+    break;
+  }
+  case 1: {
+    zval *v = zend_array_index(joinable, 1);
+    zend_string *function = zend_string_tolower(Z_STR_P(v));
+    pp_trace("try to interceptor function=%s", ZSTR_VAL(function));
+    add_function_interceptor(function, before, end, exception);
+    zend_string_release(function);
+    break;
+  }
+  default:
+    pp_trace("not supported join_type:%d", join_type);
+    return;
+  }
+}
+
+PHP_FUNCTION(pinpoint_join_cut) {
+  zval *joinable, *before, *end, *exception;
+
+  ZEND_PARSE_PARAMETERS_START(4, 4)
+  Z_PARAM_ARRAY(joinable)
+  Z_PARAM_ZVAL(before)
+  Z_PARAM_ZVAL(end)
+  Z_PARAM_ZVAL(exception)
+  ZEND_PARSE_PARAMETERS_END();
+
+  // check input
+  if (Z_TYPE_P(joinable) != IS_ARRAY ||
+      zend_hash_num_elements(Z_ARRVAL_P(joinable)) == 0) {
+    goto PARAMETERS_ERROR;
+  }
+
+  if (!zend_is_callable(before, 0, NULL) || !zend_is_callable(end, 0, NULL) ||
+      !zend_is_callable(exception, 0, NULL)) {
+    goto PARAMETERS_ERROR;
+  }
+  add_interceptor(joinable, before, end, exception);
+
+  RETURN_TRUE
+
+PARAMETERS_ERROR:
+  php_error_docref(
+      NULL, E_WARNING,
+      "Parameters does not meet: joinable: %s size:%d, onBefore:%s,"
+      "onEnd:%s, onException:%s",
+      zend_zval_type_name(joinable),
+      zend_hash_num_elements(Z_ARRVAL_P(joinable)), zend_zval_type_name(before),
+      zend_zval_type_name(end), zend_zval_type_name(exception));
+  RETURN_FALSE;
+}
+
 /**
  * copy from php source zend_buildin_functions.c
  *                          ZEND_FUNCTION(func_get_args)
@@ -663,15 +846,24 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint_php) {
 }
 /* }}} */
 
+static void zend_interceptor_hash_dtor(zval *val) {
+  // pp_trace("test: zval:%p type:%d ", zv, Z_TYPE_P(zv));
+  if (Z_TYPE_P(val) == IS_PTR) {
+    pp_interceptor_v_t *interceptor = (pp_interceptor_v_t *)Z_PTR_P(val);
+    free_interceptor(interceptor);
+  }
+}
+
 /* Remove if there's nothing to do at request start */
 /* {{{ PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION(pinpoint_php) {
 
-#if defined(COMPILE_DL_PINPIOINT_PHP) && defined(ZTS)
+#if defined(COMPILE_DL_PINPOINT_PHP) && defined(ZTS)
   ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-
+  PPG(interceptors) = (HashTable *)malloc(sizeof(HashTable));
+  zend_hash_init(PPG(interceptors), 0, NULL, zend_interceptor_hash_dtor, 1);
   return SUCCESS;
 }
 /* }}} */
@@ -684,6 +876,13 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint_php) {
   while (_parent_id != E_INVALID_NODE && _parent_id != E_ROOT_NODE) {
     _parent_id = pinpoint_end_trace(_parent_id);
   }
+
+  if (PPG(interceptors)) {
+    zend_hash_destroy(PPG(interceptors));
+    free(PPG(interceptors));
+    PPG(interceptors) = nullptr;
+  }
+
   return SUCCESS;
 }
 /* }}} */
