@@ -34,7 +34,9 @@
 /* $Id$ */
 
 #include "zend_API.h"
+#include "zend_string.h"
 #include "zend_types.h"
+#include <cstddef>
 #include <cstdint>
 #include <stdio.h>
 #include <strings.h>
@@ -502,6 +504,22 @@ PHP_FUNCTION(pinpoint_add_clues) {
   pinpoint_add_clues(id, key.c_str(), value.c_str(), (E_NODE_LOC)_flag);
 }
 
+static inline zend_string *merge_pp_style_name(zend_string *scope,
+                                               zend_string *func) {
+#define MAX_CLASS_METHOD_SIZE 128
+  char buf[MAX_CLASS_METHOD_SIZE] = {0};
+  if (scope) {
+    int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s:%s", ZSTR_VAL(scope),
+                        ZSTR_VAL(func));
+    zend_string *name = zend_string_init(buf, size, 0);
+    zend_string *lower_name = zend_string_tolower(name);
+    zend_string_release(name);
+    return lower_name;
+  } else {
+    return zend_string_tolower(func);
+  }
+}
+
 static zval *zend_array_index(zval *ar, int index) {
   HashTable *__ht = Z_ARRVAL_P(ar);
   Bucket *_p = __ht->arData;
@@ -513,7 +531,62 @@ static zval *zend_array_index(zval *ar, int index) {
   return val;
 }
 
-ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {}
+static inline pp_interceptor_v_t *find_interceptor(zend_string *func_name) {
+  return (pp_interceptor_v_t *)zend_hash_str_find_ptr(
+      PPG(interceptors), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+}
+
+static zend_string *
+get_pp_style_function_name(zend_execute_data *execute_data) {
+  zend_function *func = execute_data->func;
+  zend_object *object = (Z_TYPE(execute_data->This) == IS_OBJECT)
+                            ? Z_OBJ(execute_data->This)
+                            : NULL;
+  zend_string *function_name =
+      (func->common.scope && func->common.scope->trait_aliases)
+          ? zend_resolve_method_name((object ? object->ce : func->common.scope),
+                                     func)
+          : func->common.function_name;
+
+  if (object) {
+    zend_string *scope;
+    if (func->common.scope) {
+      scope = func->common.scope->name;
+    } else if (object->handlers->get_class_name == zend_std_get_class_name) {
+      scope = object->ce->name;
+    } else {
+      scope = object->handlers->get_class_name(object);
+    }
+    return merge_pp_style_name(scope, function_name);
+  } else if (func->common.scope) {
+    zend_string *scope = func->common.scope->name;
+    return merge_pp_style_name(scope, function_name);
+  } else {
+    return merge_pp_style_name(nullptr, function_name);
+  }
+}
+
+ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
+  // 1. get function/method name
+  // ref zend_builtin_functions.c:2278
+  zend_string *function_name = get_pp_style_function_name(execute_data);
+  pp_trace("pinpoint_interceptor_handler_entry: handle func/method:%s",
+           ZSTR_VAL(function_name));
+  pp_interceptor_v_t *interceptor = find_interceptor(function_name);
+  zend_string_release(function_name);
+  if (interceptor == nullptr) {
+    pp_trace(" MUST be a bug 🐞🐞🐞 !!! please send us "
+             "email@dl_cd_pinpoint@navercorp.com");
+    return;
+  }
+
+  interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+  // 2. call before
+
+  // 3. call origin
+  // 4. call end
+  // 5. call exception if catch
+}
 
 static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
                                             zval *end, zval *exception,
@@ -522,7 +595,8 @@ static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
       (pp_interceptor_v_t *)malloc(sizeof(pp_interceptor_v_t));
   bzero(interceptor, sizeof(*interceptor));
   // TODO copy all zval
-  interceptor->name = zend_string_copy(name);
+  interceptor->name = zend_string_dup(name, 0);
+  interceptor->origin = origin_func->internal_function.handler;
   ZVAL_DUP(&interceptor->before, before);
   ZVAL_DUP(&interceptor->end, end);
   ZVAL_DUP(&interceptor->exception, exception);
@@ -537,7 +611,8 @@ static inline void free_callback(zval *val) {
 }
 
 static void free_interceptor(pp_interceptor_v_t *interceptor) {
-  zend_string_free(interceptor->name);
+  pp_trace("start free interceptor: %s", ZSTR_VAL(interceptor->name));
+  zend_string_release(interceptor->name);
   free_callback(&interceptor->before);
   free_callback(&interceptor->end);
   free_callback(&interceptor->exception);
@@ -549,20 +624,21 @@ static void add_function_interceptor(zend_string *name, zval *before, zval *end,
   zend_function *func = (zend_function *)zend_hash_str_find_ptr(
       CG(function_table), ZSTR_VAL(name), ZSTR_LEN(name));
   if (func != NULL) {
-    func->internal_function.handler = pinpoint_interceptor_handler_entry;
     pp_interceptor_v_t *interceptor =
         make_interceptor(name, before, end, exception, func);
     // insert into hash
     if (!zend_hash_add_ptr(PPG(interceptors), name, interceptor)) {
       free_interceptor(interceptor);
       pp_trace(
-          "added interceptor on `function`:%s failed. reason: already exist ",
+          "added interceptor on `function`: %s failed. reason: already exist ",
           ZSTR_VAL(name));
       return;
     }
-    pp_trace("added interceptor on `function`:%s success", ZSTR_VAL(name));
+
+    func->internal_function.handler = pinpoint_interceptor_handler_entry;
+    pp_trace("added interceptor on `function`: %s success", ZSTR_VAL(name));
   } else {
-    pp_trace("not found function:%s", ZSTR_VAL(name));
+    pp_trace("not found function: %s", ZSTR_VAL(name));
   }
 }
 
@@ -578,33 +654,33 @@ static void add_class_method_interceptor(zend_string *cls_name,
 
     if (original != NULL) {
       // overwrite with plugins eg: pinpoint_pdo_exec
-      original->internal_function.handler = pinpoint_interceptor_handler_entry;
 #define MAX_CLASS_METHOD_SIZE 128
       char buf[MAX_CLASS_METHOD_SIZE] = {0};
       int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s:%s",
                           ZSTR_VAL(cls_name), ZSTR_VAL(method));
 
-      zend_string *name = zend_string_init(buf, size - 1, 0);
+      zend_string *name = zend_string_init(buf, size, 0);
 
       pp_interceptor_v_t *interceptor =
           make_interceptor(name, before, end, exception, original);
 
       if (!zend_hash_add_ptr(PPG(interceptors), name, interceptor)) {
         free_interceptor(interceptor);
-        pp_trace("added interceptor on `module`:%s failed. reason: already "
+        pp_trace("added interceptor on `module`: %s failed. reason: already "
                  "exist ",
                  ZSTR_VAL(name));
-        zend_string_free(name);
+        zend_string_release(name);
         return;
       }
-      pp_trace("added interceptor on `module`:%s success", ZSTR_VAL(name));
-      zend_string_free(name);
+      original->internal_function.handler = pinpoint_interceptor_handler_entry;
+      pp_trace("added interceptor on `module`: %s success", ZSTR_VAL(name));
+      zend_string_release(name);
     } else {
       pp_trace("add interceptor on `module`:%s:%s failed: no such method",
                ZSTR_VAL(cls_name), ZSTR_VAL(method));
     }
   } else {
-    pp_trace("add interceptor on `module`:%s failed: no such module",
+    pp_trace("add interceptor on `module`: %s failed: no such module",
              ZSTR_VAL(cls_name));
     // debug CG(class_table)
     // zend_class_entry *ce;
