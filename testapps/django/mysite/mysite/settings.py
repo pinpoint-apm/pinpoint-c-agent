@@ -48,8 +48,9 @@ monkey_patch_for_pinpoint()
 set_agent("cd.dev.test.django", "cd.dev.test.py",
           'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
+
 MIDDLEWARE = [
-    'pinpointPy.Django.DjangoMiddleWare',
+    'polls.middleware.UserMiddleWare',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
