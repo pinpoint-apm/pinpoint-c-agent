@@ -216,13 +216,13 @@ PHP_FUNCTION(pinpoint_drop_trace) {
 }
 
 PHP_FUNCTION(pinpoint_get_this) {
-  if (EX(prev_execute_data)) {
-    zval *self = &EX(prev_execute_data)->This;
+  if (EX(prev_execute_data) && EX(prev_execute_data)->prev_execute_data) {
+    zval *self = &EX(prev_execute_data)->prev_execute_data->This;
     if (zval_get_type(self) != IS_UNDEF) {
-      RETURN_ZVAL(self, 0, 0);
+      RETURN_ZVAL(self, 1, 0);
     }
   }
-
+  pp_trace("pinpoint_get_this: not support, no this");
   RETURN_FALSE;
 }
 
@@ -566,6 +566,80 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
   }
 }
 
+static void call_callback_function(zval *callback, zval *params,
+                                   uint32_t params_count, int free_params) {
+  // ref SAPI.c:139
+  int error;
+  zend_fcall_info fcall_info;
+  char *callback_error = NULL;
+  zval retval;
+  zend_fcall_info_cache fcall_cache;
+  if (zend_fcall_info_init(callback, 0, &fcall_info, &fcall_cache, NULL,
+                           &callback_error) == SUCCESS) {
+    fcall_info.retval = &retval;
+    fcall_info.param_count = params_count;
+    fcall_info.params = params;
+    fcall_info.object = NULL;
+    fcall_info.no_separation = 0;
+
+    fcall_cache.function_handler = EG(autoload_func);
+    fcall_cache.called_scope = NULL;
+    fcall_cache.object = NULL;
+
+    error = zend_call_function(&fcall_info, &fcall_cache);
+    if (error == FAILURE) {
+      goto callback_failed;
+    } else {
+      zval_ptr_dtor(&retval);
+    }
+  } else {
+  callback_failed:
+    php_error_docref(NULL, E_WARNING, "Could not call the on_before callback");
+  }
+  if (callback_error) {
+    efree(callback_error);
+  }
+  if (free_params) {
+    zend_fcall_info_args_clear(&fcall_info, 1);
+  }
+}
+
+static void get_shadow_copy_current_parameters(int param_count,
+                                               zval *argument_array) {
+  // ref zend_API.c:46
+  // _zend_get_parameters_array_ex
+  zval *param_ptr;
+
+  param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+
+  while (param_count-- > 0) {
+    ZVAL_COPY(argument_array, param_ptr);
+    argument_array++;
+    param_ptr++;
+  }
+}
+
+static void call_interceptor_before(pp_interceptor_v_t *interceptor) {
+
+  uint32_t param_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
+  zval *params = (zval *)safe_emalloc(param_count, sizeof(zval), 0);
+
+  get_shadow_copy_current_parameters(param_count, params);
+  call_callback_function(&interceptor->before, params, param_count, 1);
+}
+
+static void call_interceptor_end(pp_interceptor_v_t *interceptor,
+                                 zval *return_value) {
+  uint32_t param_count = 1;
+  zval *params = (zval *)safe_emalloc(param_count, sizeof(zval), 0);
+  ZVAL_COPY(params, return_value);
+  call_callback_function(&interceptor->end, params, param_count, 1);
+}
+static void call_interceptor_exception(pp_interceptor_v_t *interceptor) {
+  zend_object *exception = EG(exception);
+  pp_trace(" exception: %p ", exception);
+}
+
 ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
   // 1. get function/method name
   // ref zend_builtin_functions.c:2278
@@ -579,13 +653,22 @@ ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
              "email@dl_cd_pinpoint@navercorp.com");
     return;
   }
-  zend_try { interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
-  zend_end_try();
-  // 2. call before
 
+  // 2. call before
   // 3. call origin
   // 4. call end
   // 5. call exception if catch
+
+  zend_try {
+    call_interceptor_before(interceptor);
+    interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    call_interceptor_end(interceptor, return_value);
+  }
+  zend_catch {
+    call_interceptor_exception(interceptor);
+    call_interceptor_end(interceptor, return_value);
+  }
+  zend_end_try();
 }
 
 static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
