@@ -9,14 +9,19 @@ pinpoint_php test get this
 
 class Foo{
     public function output(){
-      $f = pinpoint_get_this();
-      if($f instanceof  Foo){
-        var_dump($f->abc);
-        var_dump($f->abc_s);
-        echo " update foo members \n";
-        $f->abc = 1234;
-        $f->abc_s= "hello pinpoint";
-      }
+
+      $onBefore = function(){
+        $f = pinpoint_get_this();
+        if($f instanceof  Foo){
+          var_dump($f->abc);
+          var_dump($f->abc_s);
+          echo " update foo members \n";
+          $f->abc = 1234;
+          $f->abc_s= "hello pinpoint";
+        }
+      };
+
+      $onBefore();
     }
     public $abc = 123;
     public $abc_s = "123";
@@ -49,6 +54,8 @@ string(3) "123"
  update foo members 
 int(1234)
 string(14) "hello pinpoint"
+[pinpoint] [%d] [%d]pinpoint_get_this: not support, no this
 bool(false)
 test static method 
+[pinpoint] [%d] [%d]pinpoint_get_this: not support, no this
 bool(false)
