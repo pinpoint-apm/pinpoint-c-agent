@@ -579,8 +579,8 @@ ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
              "email@dl_cd_pinpoint@navercorp.com");
     return;
   }
-
-  interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+  zend_try { interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+  zend_end_try();
   // 2. call before
 
   // 3. call origin
