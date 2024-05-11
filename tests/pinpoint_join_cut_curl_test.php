@@ -20,7 +20,6 @@ pinpoint_join_cut(
     },
 );
 
-
 pinpoint_join_cut(
     ["curl_exec"],
     function ($a) {
@@ -43,18 +42,23 @@ pinpoint_join_cut(
     function ($ch, $option, $value) {
         assert(is_resource($ch));
         var_dump($option);
-        var_dump($value);
 
         if ($option == CURLOPT_HTTPHEADER && is_array($value)) {
             $value[] = "pinpoint_join_cut:xxxx";
             $value[] = "pinpoint_join_cu2t:agc";
             $value[] = "pinpoint_join_cus2t:agc";
-            $value[] = "pinpoint_join_cus2t:agc";
+            $value[] = "pinpoint_join_cus2t2:agc";
             echo "value must be affected\n";
+            return [$ch, $option, $value];
+        } else if ($option == CURLOPT_RETURNTRANSFER && is_bool($value)) {
+            echo "test CURLOPT_RETURNTRANSFER \n";
+            return [$ch, $option, 2];
+        } else if ($option == CURLOPT_URL && is_string($value)) {
+            echo "test CURLOPT_URL \n";
+            return [$ch, 2];
         } else {
             echo "not working";
         }
-
     },
     function ($ret) {
         echo "on_end \n";
@@ -69,7 +73,7 @@ pinpoint_join_cut(
 echo "case: curl_init() \n";
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://httpbin/anything");
+curl_setopt($ch, CURLOPT_URL, "http://httpbin.org/anything");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'user_header:"xxxx"',
@@ -82,7 +86,7 @@ echo "error:$error \n";
 curl_close($ch);
 
 echo "case : curl_init with variable \n";
-$ch = curl_init("http://httpbin/anything");
+$ch = curl_init("http://httpbin.org/anything");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'user_header:"xxxx"',
