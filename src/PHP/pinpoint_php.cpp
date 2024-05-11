@@ -36,6 +36,7 @@
 #include "zend_API.h"
 #include "zend_string.h"
 #include "zend_types.h"
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <stdio.h>
@@ -567,16 +568,21 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
 }
 
 static void call_callback_function(zval *callback, zval *params,
-                                   uint32_t params_count, int free_params) {
+                                   uint32_t params_count, int free_params,
+                                   zval *needs_retval = nullptr) {
   // ref SAPI.c:139
   int error;
   zend_fcall_info fcall_info;
   char *callback_error = NULL;
-  zval retval;
+  zval default_retval;
+  zval *retval = &default_retval;
+  if (needs_retval) {
+    retval = needs_retval;
+  }
   zend_fcall_info_cache fcall_cache;
   if (zend_fcall_info_init(callback, 0, &fcall_info, &fcall_cache, NULL,
                            &callback_error) == SUCCESS) {
-    fcall_info.retval = &retval;
+    fcall_info.retval = retval;
     fcall_info.param_count = params_count;
     fcall_info.params = params;
     fcall_info.object = NULL;
@@ -590,15 +596,20 @@ static void call_callback_function(zval *callback, zval *params,
     if (error == FAILURE) {
       goto callback_failed;
     } else {
-      zval_ptr_dtor(&retval);
+      if (!needs_retval) {
+        zval_ptr_dtor(retval);
+      }
     }
   } else {
   callback_failed:
-    php_error_docref(NULL, E_WARNING, "Could not call the on_before callback");
+    php_error_docref(NULL, E_WARNING,
+                     "Could not call the pinpoint_join_cut callback");
   }
+
   if (callback_error) {
     efree(callback_error);
   }
+
   if (free_params) {
     zend_fcall_info_args_clear(&fcall_info, 1);
   }
@@ -619,13 +630,70 @@ static void get_shadow_copy_current_parameters(int param_count,
   }
 }
 
+static void replace_ex_caller_parameters(zval *argv) {
+  if (zval_get_type(argv) != IS_ARRAY) {
+    pp_trace("replace_ex_caller_parameters return value must be `an array`");
+    return;
+  }
+
+  int size = zend_array_count(Z_ARRVAL_P(argv));
+  pp_trace("argv size:%d", size);
+  uint32_t param_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
+  if (size != param_count) {
+    pp_trace(
+        "error: replace_ex_caller_parameters return `size` does not matched");
+    return;
+  }
+
+  int i = 0;
+  zval *ex_param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+
+  // check old and new
+  while (i < size) {
+    zval *val = zend_array_index(argv, i + 1);
+    if (Z_TYPE_P(ex_param_ptr) != Z_TYPE_P(val)) {
+      pp_trace(
+          "error: replace_ex_caller_parameters return `type` does not matched "
+          "expected:%d give:%d",
+          Z_TYPE_P(ex_param_ptr), Z_TYPE_P(val));
+      return;
+    }
+    i++;
+    ex_param_ptr++;
+  }
+
+  i = 0;
+  ex_param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
+  while (i < size) {
+    zval *val = zend_array_index(argv, i + 1);
+
+    if (Z_TYPE_P(val) == IS_ARRAY) {
+      pp_trace("args[%d] type:%d in:%u va:%u", i, zval_get_type(val),
+               Z_REFCOUNT_P(val), Z_REFCOUNT_P(ex_param_ptr));
+    }
+
+    zval_ptr_dtor(ex_param_ptr);
+    ZVAL_COPY(ex_param_ptr, val);
+
+    i++;
+    ex_param_ptr++;
+  }
+}
+
 static void call_interceptor_before(pp_interceptor_v_t *interceptor) {
 
   uint32_t param_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
   zval *params = (zval *)safe_emalloc(param_count, sizeof(zval), 0);
 
   get_shadow_copy_current_parameters(param_count, params);
-  call_callback_function(&interceptor->before, params, param_count, 1);
+  zval retval;
+  call_callback_function(&interceptor->before, params, param_count, 1, &retval);
+  pp_trace(" call_callback_function on_before return type(%d) zval",
+           zval_get_type(&retval));
+
+  replace_ex_caller_parameters(&retval);
+
+  zval_ptr_dtor(&retval);
 }
 
 static void call_interceptor_end(pp_interceptor_v_t *interceptor,
