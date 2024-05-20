@@ -60,8 +60,10 @@ class PyRedisPipeLinePlugins(PyRedisPlugins):
         from redis.client import Pipeline
         if isinstance(args[0], Pipeline) and args[0]:
             pipeLine = args[0]
+            # fixed: Redis Collections Not release #612
+            # @quicksandznzn
             pinpoint.add_trace_header(
-                Defines.PP_DESTINATION, str(pipeLine.connection_pool.get_connection("")), trace_id)
+                Defines.PP_DESTINATION, str(pipeLine.connection), trace_id)
             import sys
             if 'unittest' in sys.modules.keys():
                 pipeLine._pinpoint_ = True
