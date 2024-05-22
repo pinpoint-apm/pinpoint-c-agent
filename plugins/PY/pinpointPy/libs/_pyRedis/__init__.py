@@ -42,11 +42,13 @@ def monkey_patch():
 
 
 __all__ = ['monkey_patch']
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __author__ = 'liu.mingyi@navercorp.com'
 
 """
 ## Changes
+### 0.0.4 5/22/2024
+- fix 0.0.3 : use format_host
 ### 0.0.3 5/21/2024
 - Redis Collections Not release #612
 """

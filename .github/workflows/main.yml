@@ -23,7 +23,7 @@ jobs:
           make
           ./bin/TestCommon
       - name: Codecovage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
 
   cpp-windows:
     runs-on: [windows-latest]
