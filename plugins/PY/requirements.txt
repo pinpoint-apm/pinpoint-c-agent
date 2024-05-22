@@ -4,7 +4,7 @@ flask==3.0.0
 httpx==0.25.1
 mysql-connector-python==8.0.31
 pymongo==4.6.3
-PyMySQL==1.1.0
+PyMySQL==1.1.1
 redis==5.0.1
 requests==2.31.0
 SQLAlchemy==2.0.23
