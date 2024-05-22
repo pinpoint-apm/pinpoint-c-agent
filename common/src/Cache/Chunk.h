@@ -23,11 +23,11 @@
 #define COMMON_SRC_CHUNK_H
 #include <stdlib.h>
 #include <list>
+#include <stdint.h>
 #include <string.h>
-
+#include <iostream>
 #include <assert.h>
 #include <functional>
-#include <iostream>
 
 namespace Cache {
 /// Readme:
@@ -49,7 +49,7 @@ class Chunks {
      * for write data into ck
      */
     uint32_t r_ofs;
-    } DataChunk;
+  } DataChunk;
 
   typedef std::list<DataChunk*> CKList;
   typedef CKList::iterator CkIter;
