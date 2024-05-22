@@ -1,19 +1,21 @@
 --TEST--
-pinpoint_php pinpoint_join_cut
+pinpoint_php pinpoint_join_cut_cut
 --SKIPIF--
 <?php
 if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (!extension_loaded("curl"))
-  print "skip";
-// if (!extension_loaded("pdo"))
-//   print "skip";
+   print "skip";
+
 ?>
 --INI--
+pinpoint_php.DebugReport=true
+
+--EXTENSIONS--
+json
 
 --FILE--
-<?php 
-
+<?php
 pinpoint_join_cut(
     ["curl_init"],
     function ($a = null) {
@@ -87,32 +89,42 @@ pinpoint_join_cut(
 echo "case: curl_init() \n";
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://httpbin/anything");
+curl_setopt($ch, CURLOPT_URL, "http://httpbin.org/anything");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'user_header:"xxxx"',
     'user_abc:2133'
 ]);
 $response = curl_exec($ch);
-echo "\n response= $response \n";
+
+$j_res = json_decode($response, true);
+
+assert($j_res["headers"]["Pinpoint-Join-Cu2T"] == "agc");
+assert($j_res["headers"]["Pinpoint-Join-Cus2T"] == "agc");
+assert($j_res["headers"]["Pinpoint-Join-Cus2T2"] == "agc");
+assert($j_res["headers"]["Pinpoint-Join-Cut"] == "xxxx");
+
 $error = curl_error($ch);
 echo "error:$error \n";
 curl_close($ch);
 
 echo "case : curl_init with variable \n";
-$ch = curl_init("http://httpbin/anything");
+$ch = curl_init("http://httpbin.org/anything");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'user_header:"xxxx"',
     'user_abc:2133'
 ]);
 $response = curl_exec($ch);
-echo "\n response= $response \n";
+$j_res = json_decode($response, true);
+
+assert($j_res["headers"]["Pinpoint-Join-Cu2T"] == "agc");
+assert($j_res["headers"]["Pinpoint-Join-Cus2T"] == "agc");
+assert($j_res["headers"]["Pinpoint-Join-Cus2T2"] == "agc");
+assert($j_res["headers"]["Pinpoint-Join-Cut"] == "xxxx");
 $error = curl_error($ch);
 echo "error:$error \n";
 curl_close($ch);
-
-
 
 --EXPECTF--
 [pinpoint] [%d] [%d]try to interceptor function=curl_init
@@ -126,13 +138,13 @@ case: curl_init()
 on_before 
 NULL
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
-[pinpoint] [%d] [%d]errro: replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 resource(4) of type (curl)
 get resource [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(42)
 not working[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
-[pinpoint] [%d] [%d]errro: replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10002)
@@ -158,45 +170,23 @@ on_end
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
 on_before 
 resource(4) of type (curl)
-request url: http://httpbin/anything
+request url: http://httpbin.org/anything
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
-[pinpoint] [%d] [%d]errro: replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
-
- response= {
-  "args": {}, 
-  "data": "", 
-  "files": {}, 
-  "form": {}, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin", 
-    "Pinpoint-Join-Cu2T": "agc", 
-    "Pinpoint-Join-Cus2T": "agc", 
-    "Pinpoint-Join-Cus2T2": "agc", 
-    "Pinpoint-Join-Cut": "xxxx", 
-    "User-Abc": "2133", 
-    "User-Header": "\"xxxx\""
-  }, 
-  "json": null, 
-  "method": "GET", 
-  "origin": %s, 
-  "url": "http://httpbin/anything"
-}
- 
 error: 
 case : curl_init with variable 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_init
 on_before 
-string(23) "http://httpbin/anything"
+string(27) "http://httpbin.org/anything"
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
-[pinpoint] [%d] [%d]errro: replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 resource(5) of type (curl)
 get resource [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(42)
 not working[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
-[pinpoint] [%d] [%d]errro: replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(19913)
@@ -215,32 +205,10 @@ on_end
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
 on_before 
 resource(5) of type (curl)
-request url: http://httpbin/anything
+request url: http://httpbin.org/anything
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
-[pinpoint] [%d] [%d]errro: replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
-
- response= {
-  "args": {}, 
-  "data": "", 
-  "files": {}, 
-  "form": {}, 
-  "headers": {
-    "Accept": "*/*", 
-    "Host": "httpbin", 
-    "Pinpoint-Join-Cu2T": "agc", 
-    "Pinpoint-Join-Cus2T": "agc", 
-    "Pinpoint-Join-Cus2T2": "agc", 
-    "Pinpoint-Join-Cut": "xxxx", 
-    "User-Abc": "2133", 
-    "User-Header": "\"xxxx\""
-  }, 
-  "json": null, 
-  "method": "GET", 
-  "origin": %s, 
-  "url": "http://httpbin/anything"
-}
- 
 error: 
 [pinpoint] [%d] [%d]start free interceptor: curl_init
 [pinpoint] [%d] [%d]start free interceptor: curl_exec
