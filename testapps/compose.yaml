@@ -285,3 +285,19 @@ services:
       timeout: 30s
       retries: 5
       start_period: 80s
+
+  php-compatible:
+    build:
+      dockerfile: testapps/php_compatible.dockerfile
+      context: ../
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+    depends_on:
+      dev-mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy   
+      mongodb:
+        condition: service_healthy   
+      dev-mariadb:
+        condition: service_healthy       

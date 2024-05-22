@@ -745,7 +745,6 @@ static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
   pp_interceptor_v_t *interceptor =
       (pp_interceptor_v_t *)malloc(sizeof(pp_interceptor_v_t));
   bzero(interceptor, sizeof(*interceptor));
-  // TODO copy all zval
   interceptor->name = zend_string_dup(name, 0);
   interceptor->origin = origin_func->internal_function.handler;
   ZVAL_DUP(&interceptor->before, before);

@@ -4,4 +4,4 @@ valgrind --leak-check=full \
          --track-origins=yes \
          --verbose \
          --log-file=valgrind-out.txt \
-         php test.php
+         php tests/pinpoint_join_cut_redis.php
