@@ -37,12 +37,18 @@ services:
     ports:
       - "33061:3306"
     healthcheck:
-      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
       start_period: 1m
-      start_interval: 10s
       interval: 1m
       timeout: 5s
-      retries: 3  
+      retries: 3
 
   dev-mysql-setup:
     image: mysql:5.7
@@ -210,7 +216,7 @@ services:
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
     ports:
-    - 27017:27017
+      - 27017:27017
 
   python-plugins:
     build:
@@ -258,15 +264,15 @@ services:
       dev-mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy   
+        condition: service_healthy
       mongodb:
-        condition: service_healthy   
+        condition: service_healthy
       dev-mariadb:
-        condition: service_healthy 
+        condition: service_healthy
     restart: always
     build:
       dockerfile: testapps/simplephp.dockerfile
-      context: ../      
+      context: ../
 
   postgres:
     image: postgres:14-alpine
@@ -277,7 +283,7 @@ services:
       - POSTGRES_USER=test
       - POSTGRES_DB=test
     volumes:
-        - ./init.sql:/docker-entrypoint-initdb.d/init.sql      
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
@@ -296,8 +302,8 @@ services:
       dev-mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy   
+        condition: service_healthy
       mongodb:
-        condition: service_healthy   
+        condition: service_healthy
       dev-mariadb:
-        condition: service_healthy       
+        condition: service_healthy

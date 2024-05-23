@@ -553,7 +553,13 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
     zend_string *scope;
     if (func->common.scope) {
       scope = func->common.scope->name;
+#if PHP_MAJOR_VERSION == 7 and                                                 \
+    (PHP_MINOR_VERSION == 4 or PHP_MINOR_VERSION == 3)
     } else if (object->handlers->get_class_name == zend_std_get_class_name) {
+#elif PHP_MAJOR_VERSION == 7 and PHP_MINOR_VERSION == 1
+    } else if (object->handlers->get_class_name ==
+               std_object_handlers.get_class_name) {
+#endif
       scope = object->ce->name;
     } else {
       scope = object->handlers->get_class_name(object);
@@ -588,7 +594,9 @@ static void call_callback_function(zval *callback, zval *params,
     fcall_info.object = NULL;
     fcall_info.no_separation = 0;
 
-    fcall_cache.function_handler = EG(autoload_func);
+    // fcall_cache.initialized = 1;
+    // fcall_cache.function_handler = EG(autoload_func);
+
     fcall_cache.called_scope = NULL;
     fcall_cache.object = NULL;
 
