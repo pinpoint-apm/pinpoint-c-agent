@@ -33,7 +33,7 @@ pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    },
+    }
 );
 
 pinpoint_join_cut(
@@ -50,7 +50,7 @@ pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    },
+    }
 );
 
 pinpoint_join_cut(
@@ -82,7 +82,7 @@ pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    },
+    }
 );
 
 

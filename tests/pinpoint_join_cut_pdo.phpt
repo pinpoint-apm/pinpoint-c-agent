@@ -32,7 +32,7 @@ pinpoint_join_cut(
     },
     function ($e) {
         echo "on_exception \n";
-    },
+    }
 );
 $pdo_exec = "PDO::exec";
 pinpoint_join_cut(
@@ -45,7 +45,7 @@ pinpoint_join_cut(
     },
     function ($e) use ($pdo_exec) {
         echo "on_exception \n";
-    },
+    }
 );
 
 
