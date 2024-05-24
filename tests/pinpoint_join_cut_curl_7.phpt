@@ -6,7 +6,8 @@ if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (!extension_loaded("curl"))
    print "skip";
-
+if (version_compare(phpversion(), '8.0.0', '>='))
+    print "skip";
 ?>
 --INI--
 pinpoint_php.DebugReport=true
@@ -33,7 +34,7 @@ pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    }
+    },
 );
 
 pinpoint_join_cut(
@@ -50,7 +51,7 @@ pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    }
+    },
 );
 
 pinpoint_join_cut(
@@ -82,7 +83,7 @@ pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    }
+    },
 );
 
 

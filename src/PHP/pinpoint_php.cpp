@@ -543,12 +543,19 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
   zend_object *object = (Z_TYPE(execute_data->This) == IS_OBJECT)
                             ? Z_OBJ(execute_data->This)
                             : NULL;
+
+#if PHP_MAJOR_VERSION == 8
+  zend_string *function_name = NULL;
+  if (func) {
+    function_name = func->common.function_name;
+  }
+#else
   zend_string *function_name =
       (func->common.scope && func->common.scope->trait_aliases)
           ? zend_resolve_method_name((object ? object->ce : func->common.scope),
                                      func)
           : func->common.function_name;
-
+#endif
   if (object) {
     zend_string *scope;
     if (func->common.scope) {
@@ -592,7 +599,10 @@ static void call_callback_function(zval *callback, zval *params,
     fcall_info.param_count = params_count;
     fcall_info.params = params;
     fcall_info.object = NULL;
+
+#if PHP_MAJOR_VERSION == 7
     fcall_info.no_separation = 0;
+#endif
 
     // fcall_cache.initialized = 1;
     // fcall_cache.function_handler = EG(autoload_func);
@@ -908,7 +918,7 @@ PHP_FUNCTION(pinpoint_join_cut) {
   }
   add_interceptor(joinable, before, end, exception);
 
-  RETURN_TRUE
+  RETURN_TRUE;
 
 PARAMETERS_ERROR:
   php_error_docref(
