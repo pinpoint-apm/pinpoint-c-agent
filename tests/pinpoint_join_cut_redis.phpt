@@ -5,7 +5,7 @@ pinpoint_php pinpoint_join_cut_redis
 if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (version_compare(phpversion(), '7.1.33', '<='))
-    print "skip";
+   print "skip";
 ?>
 --INI--
 pinpoint_php.DebugReport=true
