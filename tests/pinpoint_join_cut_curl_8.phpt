@@ -7,7 +7,9 @@ if (!extension_loaded("pinpoint_php"))
 if (!extension_loaded("curl"))
    print "skip";
 if (version_compare(phpversion(), '8.0.0', '<'))
-    print "skip";
+{    print "skip";
+    print "only works in php8";
+}
 ?>
 --INI--
 pinpoint_php.DebugReport=true

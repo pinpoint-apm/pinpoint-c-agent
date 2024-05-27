@@ -147,7 +147,7 @@ const zend_function_entry pinpoint_php_functions[] = {
   PHP_FE(pinpoint_unique_id, arginfo_none) 
   PHP_FE(pinpoint_get_this, arginfo_none) 
   PHP_FE(pinpoint_status, arginfo_none) 
-  PHP_FE(pinpoint_get_func_ref_args, arginfo_none)
+  // PHP_FE(pinpoint_get_func_ref_args, arginfo_none)
   PHP_FE(pinpoint_drop_trace, arginfo_add_id) 
   PHP_FE(pinpoint_start_time, arginfo_none)
   PHP_FE(pinpoint_set_context, arginfo_add_id_key_value)
@@ -520,7 +520,29 @@ static inline zend_string *merge_pp_style_name(zend_string *scope,
     return zend_string_tolower(func);
   }
 }
-
+#if PHP_MAJOR_VERSION == 8 and PHP_MINOR_VERSION >= 2
+// ref from php-8.2.19/ext/standard/var.c:137
+static zval *zend_array_index(zval *ar, int index) {
+  HashTable *__ht = Z_ARRVAL_P(ar);
+  uint32_t _idx = 0;
+  uint32_t _count = __ht->nNumUsed - _idx;
+  size_t _size = ZEND_HASH_ELEMENT_SIZE(__ht);
+  zval *__z = ZEND_HASH_ELEMENT_EX(__ht, _idx, _size);
+  zval *ret_zval = nullptr;
+  for (; _count > 0 && _idx < index; _count--) {
+    ret_zval = __z;
+    if (HT_IS_PACKED(__ht)) {
+      __z++;
+    } else {
+      Bucket *_p = (Bucket *)__z;
+      __z = &(_p + 1)->val;
+    }
+    _idx++;
+  }
+  return ret_zval;
+}
+#else
+// ref from php-8.1.25/ext/standard/var.c:137
 static zval *zend_array_index(zval *ar, int index) {
   HashTable *__ht = Z_ARRVAL_P(ar);
   Bucket *_p = __ht->arData;
@@ -531,6 +553,7 @@ static zval *zend_array_index(zval *ar, int index) {
   }
   return val;
 }
+#endif
 
 static inline pp_interceptor_v_t *find_interceptor(zend_string *func_name) {
   return (pp_interceptor_v_t *)zend_hash_str_find_ptr(
@@ -670,10 +693,10 @@ static void replace_ex_caller_parameters(zval *argv) {
   while (i < size) {
     zval *val = zend_array_index(argv, i + 1);
     if (Z_TYPE_P(ex_param_ptr) != Z_TYPE_P(val)) {
-      pp_trace(
-          "error: replace_ex_caller_parameters return `type` does not matched "
-          "expected:%d give:%d",
-          Z_TYPE_P(ex_param_ptr), Z_TYPE_P(val));
+      pp_trace("error: replace_ex_caller_parameters return `type` does not "
+               "matched "
+               "expected:%d give:%d",
+               Z_TYPE_P(ex_param_ptr), Z_TYPE_P(val));
       return;
     }
     i++;
@@ -797,9 +820,9 @@ static void add_function_interceptor(zend_string *name, zval *before, zval *end,
     // insert into hash
     if (!zend_hash_add_ptr(PPG(interceptors), name, interceptor)) {
       free_interceptor(interceptor);
-      pp_trace(
-          "added interceptor on `function`: %s failed. reason: already exist ",
-          ZSTR_VAL(name));
+      pp_trace("added interceptor on `function`: %s failed. reason: already "
+               "exist ",
+               ZSTR_VAL(name));
       return;
     }
 
@@ -930,7 +953,7 @@ PARAMETERS_ERROR:
       zend_zval_type_name(end), zend_zval_type_name(exception));
   RETURN_FALSE;
 }
-
+#if 0
 /**
  * copy from php source zend_buildin_functions.c
  *                          ZEND_FUNCTION(func_get_args)
@@ -1027,6 +1050,7 @@ PHP_FUNCTION(pinpoint_get_func_ref_args) {
   }
 #endif
 }
+#endif
 
 PHP_FUNCTION(pinpoint_tracelimit) {
   long timestamp = -1;

@@ -6,9 +6,10 @@ if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (!extension_loaded("pdo"))
   print "skip";
-if (version_compare(phpversion(), '8.2.0', '>='))
-   print "skip";
-   print phpversion() . ">= 8.2.0";
+if (version_compare(phpversion(), '8.2.0', '<'))
+{   print "skip";
+   print phpversion() ."< 8.2.0";
+   }
 ?>
 --INI--
 pinpoint_php.DebugReport=true
@@ -18,13 +19,15 @@ pdo_mysql
 --FILE--
 <?php
 
+$weakMap = new WeakMap();
+
 pinpoint_join_cut(
     ["PDO", "__construct"],
-    function ($dsn, $username = null, $password = null, $options = null) {
+    function ($dsn, $username = null, $password = null, $options = null) use ($weakMap) {
         echo "on_before: $dsn \n";
         $pdo = pinpoint_get_this();
         if ($pdo instanceof PDO) {
-            $pdo->dsn = $dsn;
+            $weakMap[$pdo] = $dsn;
             echo "attached dsn \n";
         }
     },
@@ -38,8 +41,15 @@ pinpoint_join_cut(
 $pdo_exec = "PDO::exec";
 pinpoint_join_cut(
     ["PDO", "exec"],
-    function ($statement) use ($pdo_exec) {
+    function ($statement) use ($pdo_exec, $weakMap) {
+
         echo "$pdo_exec: on_before: $statement \n";
+
+        $pdo = pinpoint_get_this();
+        if ($pdo instanceof PDO) {
+            echo "$weakMap[$pdo] \n";
+        }
+
     },
     function ($ret) use ($pdo_exec) {
         echo "$pdo_exec : on_end \n";
@@ -55,7 +65,6 @@ echo "case: pdo() \n";
 $dbname = "employees";
 $pdo = new PDO("mysql:host=dev-mysql;dbname=$dbname", 'root', 'password');
 $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-$pdo->abc = "123";
 $sql = "CREATE table IF NOT EXISTS pdo_test(
      ID INT( 11 ) AUTO_INCREMENT PRIMARY KEY,
      Name VARCHAR( 250 ) NOT NULL,
@@ -85,8 +94,7 @@ $ret = $sth->fetch();
 var_dump($ret);
 $ret = $sth->fetchAll();
 var_dump($ret);
-var_dump($pdo->abc);
-var_dump($pdo->dsn);
+var_dump($weakMap[$pdo]);
 $sql = 'DROP TABLE pdo_test';
 $ret = $pdo->exec($sql);
 
@@ -109,29 +117,31 @@ PDO::exec: on_before: CREATE table IF NOT EXISTS pdo_test(
      ID INT( 11 ) AUTO_INCREMENT PRIMARY KEY,
      Name VARCHAR( 250 ) NOT NULL,
      AGE tinyint(1) unsigned NOT NULL default '1' ); 
+mysql:host=dev-mysql;dbname=employees 
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 PDO::exec : on_end 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo:exec
 PDO::exec: on_before: INSERT INTO pdo_test (NAME, AGE)
 VALUES ('a',1),('b',1),('c',3),('d',1); 
+mysql:host=dev-mysql;dbname=employees 
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 PDO::exec : on_end 
 int(4)
-object(PDOStatement)#8 (1) {
+object(PDOStatement)#9 (1) {
   ["queryString"]=>
   string(22) "SELECT * FROM pdo_test"
 }
-object(PDOStatement)#8 (1) {
+object(PDOStatement)#9 (1) {
   ["queryString"]=>
   string(22) "SELECT * FROM pdo_test"
 }
-object(PDOStatement)#8 (1) {
+object(PDOStatement)#9 (1) {
   ["queryString"]=>
   string(22) "SELECT * FROM pdo_test"
 }
-object(PDOStatement)#8 (1) {
+object(PDOStatement)#9 (1) {
   ["queryString"]=>
   string(22) "SELECT * FROM pdo_test"
 }
@@ -158,10 +168,10 @@ array(2) {
     string(1) "d"
   }
 }
-string(3) "123"
 string(37) "mysql:host=dev-mysql;dbname=employees"
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo:exec
 PDO::exec: on_before: DROP TABLE pdo_test 
+mysql:host=dev-mysql;dbname=employees 
 [pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 PDO::exec : on_end 

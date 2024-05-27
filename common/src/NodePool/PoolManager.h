@@ -124,7 +124,7 @@ public:
     Json::Value status;
     status["pool_total_node"] = totalNodesCount();
     status["pool_free_node"] = freeNodesCount();
-    status["common_libary_version"] = pinpoint_agent_version();
+    status["common_library_version"] = pinpoint_agent_version();
 
     auto add_alive_node_fun = [&status](TraceNode& node) {
       status["pool_alive_nodes"].append(node.id_);

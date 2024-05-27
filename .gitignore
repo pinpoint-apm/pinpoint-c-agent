@@ -76,3 +76,4 @@ wheelhouse/
 *.so
 .clangd
 .vs
+*.dep
