@@ -9,11 +9,11 @@ pinpoint_php.UnitTest=true
 pinpoint_php.DebugReport=true
 --FILE--
 <?php 
-pinpoint_start_trace();
-pinpoint_drop_trace();
-pinpoint_add_clue("args",'a,$b');
-pinpoint_add_clue("ret",'a,$b');
-pinpoint_end_trace();
+_pinpoint_start_trace();
+_pinpoint_drop_trace();
+_pinpoint_add_clue("args",'a,$b');
+_pinpoint_add_clue("ret",'a,$b');
+_pinpoint_end_trace();
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
 [pinpoint] [%d] [%d]change current [128] status, before:2,now:4

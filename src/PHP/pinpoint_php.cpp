@@ -142,21 +142,21 @@ ZEND_END_ARG_INFO()
  * Every user visible function must have an entry in pinpioint_php_functions[].
  */
 const zend_function_entry pinpoint_php_functions[] = {
-  PHP_FE(pinpoint_start_trace, arginfo_add_id) 
-  PHP_FE(pinpoint_end_trace, arginfo_add_id)
-  PHP_FE(pinpoint_unique_id, arginfo_none) 
-  PHP_FE(pinpoint_get_this, arginfo_none) 
+  PHP_FE(_pinpoint_start_trace, arginfo_add_id) 
+  PHP_FE(_pinpoint_end_trace, arginfo_add_id)
+  PHP_FE(_pinpoint_unique_id, arginfo_none) 
+  PHP_FE(_pinpoint_get_this, arginfo_none) 
   PHP_FE(pinpoint_status, arginfo_none) 
-  // PHP_FE(pinpoint_get_func_ref_args, arginfo_none)
-  PHP_FE(pinpoint_drop_trace, arginfo_add_id) 
-  PHP_FE(pinpoint_start_time, arginfo_none)
-  PHP_FE(pinpoint_set_context, arginfo_add_id_key_value)
-  PHP_FE(pinpoint_get_context, arginfo_add_id_value)
-  PHP_FE(pinpoint_tracelimit, arginfo_add_timestamp)
-  PHP_FE(pinpoint_mark_as_error, arginfo_add_msg_filename_lineno_id)
-  PHP_FE(pinpoint_add_clue, arginfo_add_id_key_value_flag)
-  PHP_FE(pinpoint_add_clues, arginfo_add_id_key_value_flag)
-  PHP_FE(pinpoint_join_cut,arginfo_add_join_cb_cb_cb)
+  // PHP__FE(pinpoint_get_func_ref_args, arginfo_none)
+  PHP_FE(_pinpoint_drop_trace, arginfo_add_id) 
+  PHP_FE(_pinpoint_start_time, arginfo_none)
+  PHP_FE(_pinpoint_set_context, arginfo_add_id_key_value)
+  PHP_FE(_pinpoint_get_context, arginfo_add_id_value)
+  PHP_FE(_pinpoint_trace_limit, arginfo_add_timestamp)
+  PHP_FE(_pinpoint_mark_as_error, arginfo_add_msg_filename_lineno_id)
+  PHP_FE(_pinpoint_add_clue, arginfo_add_id_key_value_flag)
+  PHP_FE(_pinpoint_add_clues, arginfo_add_id_key_value_flag)
+  PHP_FE(_pinpoint_join_cut,arginfo_add_join_cb_cb_cb)
   PHP_FE_END /* Must be the last line in pinpioint_php_functions[] */
 };
 /* }}} */
@@ -198,7 +198,7 @@ void (*old_error_cb)(int type, const char *error_filename,
     (x) = NULL;                                                                \
   }
 
-PHP_FUNCTION(pinpoint_drop_trace) {
+PHP_FUNCTION(_pinpoint_drop_trace) {
   long _id = -1;
   NodeID id = E_ROOT_NODE, cur_id = E_ROOT_NODE;
 #if PHP_VERSION_ID < 70000
@@ -216,7 +216,7 @@ PHP_FUNCTION(pinpoint_drop_trace) {
   RETURN_TRUE;
 }
 
-PHP_FUNCTION(pinpoint_get_this) {
+PHP_FUNCTION(_pinpoint_get_this) {
   if (EX(prev_execute_data) && EX(prev_execute_data)->prev_execute_data) {
     zval *self = &EX(prev_execute_data)->prev_execute_data->This;
     if (zval_get_type(self) != IS_UNDEF) {
@@ -227,7 +227,7 @@ PHP_FUNCTION(pinpoint_get_this) {
   RETURN_FALSE;
 }
 
-PHP_FUNCTION(pinpoint_set_context) {
+PHP_FUNCTION(_pinpoint_set_context) {
   long _id = -1;
   std::string key;
   zval *zvalue;
@@ -271,7 +271,7 @@ PHP_FUNCTION(pinpoint_set_context) {
   RETURN_TRUE;
 }
 
-PHP_FUNCTION(pinpoint_get_context) {
+PHP_FUNCTION(_pinpoint_get_context) {
   long _id = -1;
   std::string key;
 #if PHP_VERSION_ID < 70000
@@ -310,9 +310,9 @@ PHP_FUNCTION(pinpoint_get_context) {
   }
 }
 
-PHP_FUNCTION(pinpoint_start_time) { RETURN_LONG(pinpoint_start_time()); }
+PHP_FUNCTION(_pinpoint_start_time) { RETURN_LONG(pinpoint_start_time()); }
 
-PHP_FUNCTION(pinpoint_start_trace) {
+PHP_FUNCTION(_pinpoint_start_trace) {
   long _id = -1;
   NodeID id = E_ROOT_NODE, cur_id = E_ROOT_NODE;
 #if PHP_VERSION_ID < 70000
@@ -380,7 +380,7 @@ void apm_error_cb(int type, const char *error_filename, const uint error_lineno,
 #endif
 }
 
-PHP_FUNCTION(pinpoint_end_trace) {
+PHP_FUNCTION(_pinpoint_end_trace) {
   long _id = -1;
   NodeID id = E_ROOT_NODE, cur_id = E_ROOT_NODE;
 
@@ -404,7 +404,7 @@ PHP_FUNCTION(pinpoint_end_trace) {
 
 PHP_FUNCTION(pinpoint_status) { show_status(); }
 
-PHP_FUNCTION(pinpoint_add_clue) {
+PHP_FUNCTION(_pinpoint_add_clue) {
   std::string key;
   std::string value;
   long _id = -1;
@@ -437,9 +437,9 @@ PHP_FUNCTION(pinpoint_add_clue) {
   pinpoint_add_clue(Id, key.c_str(), value.c_str(), (E_NODE_LOC)_flag);
 }
 
-PHP_FUNCTION(pinpoint_unique_id) { RETURN_LONG(generate_unique_id()); }
+PHP_FUNCTION(_pinpoint_unique_id) { RETURN_LONG(generate_unique_id()); }
 
-PHP_FUNCTION(pinpoint_mark_as_error) {
+PHP_FUNCTION(_pinpoint_mark_as_error) {
   std::string msg;
   std::string fileName;
   long _lineno = 0;
@@ -473,7 +473,7 @@ PHP_FUNCTION(pinpoint_mark_as_error) {
   catch_error(id, msg.c_str(), fileName.c_str(), _lineno);
 }
 
-PHP_FUNCTION(pinpoint_add_clues) {
+PHP_FUNCTION(_pinpoint_add_clues) {
   std::string key;
   std::string value;
   long _id = -1;
@@ -919,7 +919,7 @@ static void add_interceptor(zval *joinable, zval *before, zval *end,
   }
 }
 
-PHP_FUNCTION(pinpoint_join_cut) {
+PHP_FUNCTION(_pinpoint_join_cut) {
   zval *joinable, *before, *end, *exception;
 
   ZEND_PARSE_PARAMETERS_START(4, 4)
@@ -1052,7 +1052,7 @@ PHP_FUNCTION(pinpoint_get_func_ref_args) {
 }
 #endif
 
-PHP_FUNCTION(pinpoint_tracelimit) {
+PHP_FUNCTION(_pinpoint_trace_limit) {
   long timestamp = -1;
 
 #if PHP_VERSION_ID < 70000

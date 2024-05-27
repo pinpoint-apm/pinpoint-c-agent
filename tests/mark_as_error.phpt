@@ -11,11 +11,11 @@ pinpoint_php._limit=yes
 pinpoint_php.DebugReport=true
 --FILE--
 <?php 
-pinpoint_start_trace();
-pinpoint_add_clue("args",'a,$b');
-pinpoint_add_clue("ret",'a,$b');
-pinpoint_mark_as_error("message you cared","filename you cared",1023);
-echo pinpoint_end_trace()."\n";
+_pinpoint_start_trace();
+_pinpoint_add_clue("args",'a,$b');
+_pinpoint_add_clue("ret",'a,$b');
+_pinpoint_mark_as_error("message you cared","filename you cared",1023);
+echo _pinpoint_end_trace()."\n";
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
 [pinpoint] [%d] [%d] [128] add clue key:args value:a,$b

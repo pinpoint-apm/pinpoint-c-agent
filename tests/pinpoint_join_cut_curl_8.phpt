@@ -7,7 +7,8 @@ if (!extension_loaded("pinpoint_php"))
 if (!extension_loaded("curl"))
    print "skip";
 if (version_compare(phpversion(), '8.0.0', '<'))
-{    print "skip";
+{   
+    print "skip";
     print "only works in php8";
 }
 ?>
@@ -19,7 +20,7 @@ json
 
 --FILE--
 <?php
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["curl_init"],
     function ($a = null) {
         echo "on_before \n";
@@ -39,7 +40,7 @@ pinpoint_join_cut(
     },
 );
 
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["curl_exec"],
     function ($a) {
         echo "on_before \n";
@@ -56,14 +57,14 @@ pinpoint_join_cut(
     },
 );
 
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["curl_setopt"],
     function ($ch, $option, $value) {
         assert($ch instanceof CurlHandle);
         var_dump($option);
 
         if ($option == CURLOPT_HTTPHEADER && is_array($value)) {
-            $value[] = "pinpoint_join_cut:xxxx";
+            $value[] = "_pinpoint_join_cut:xxxx";
             $value[] = "pinpoint_join_cu2t:agc";
             $value[] = "pinpoint_join_cus2t:agc";
             $value[] = "pinpoint_join_cus2t2:agc";

@@ -1,5 +1,5 @@
 --TEST--
-pinpoint_php pinpoint_join_cut_pdo
+pinpoint_php pinpoint_join_cut_pdo_8
 --SKIPIF--
 <?php
 if (!extension_loaded("pinpoint_php"))
@@ -7,9 +7,10 @@ if (!extension_loaded("pinpoint_php"))
 if (!extension_loaded("pdo"))
   print "skip";
 if (version_compare(phpversion(), '8.2.0', '<'))
-{   print "skip";
-   print phpversion() ."< 8.2.0";
-   }
+{   
+    print "skip";
+  print phpversion() ."< 8.2.0";
+}
 ?>
 --INI--
 pinpoint_php.DebugReport=true
@@ -21,11 +22,11 @@ pdo_mysql
 
 $weakMap = new WeakMap();
 
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["PDO", "__construct"],
     function ($dsn, $username = null, $password = null, $options = null) use ($weakMap) {
         echo "on_before: $dsn \n";
-        $pdo = pinpoint_get_this();
+        $pdo = _pinpoint_get_this();
         if ($pdo instanceof PDO) {
             $weakMap[$pdo] = $dsn;
             echo "attached dsn \n";
@@ -39,13 +40,13 @@ pinpoint_join_cut(
     }
 );
 $pdo_exec = "PDO::exec";
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["PDO", "exec"],
     function ($statement) use ($pdo_exec, $weakMap) {
 
         echo "$pdo_exec: on_before: $statement \n";
 
-        $pdo = pinpoint_get_this();
+        $pdo = _pinpoint_get_this();
         if ($pdo instanceof PDO) {
             echo "$weakMap[$pdo] \n";
         }

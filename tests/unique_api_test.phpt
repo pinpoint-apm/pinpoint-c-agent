@@ -10,9 +10,9 @@ pinpoint_php.DebugReport=true
 --FILE--
 <?php
  
-$v1= pinpoint_unique_id();
-$v2= pinpoint_unique_id();
-$v3= pinpoint_unique_id();
+$v1= _pinpoint_unique_id();
+$v2= _pinpoint_unique_id();
+$v3= _pinpoint_unique_id();
 var_dump( $v2*2 === $v1+$v3 );
 
 --EXPECTF--

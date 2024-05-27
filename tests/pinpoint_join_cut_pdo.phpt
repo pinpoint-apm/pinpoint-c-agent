@@ -6,23 +6,25 @@ if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (!extension_loaded("pdo"))
   print "skip";
-if (version_compare(phpversion(), '8.2.0', '>='))
-   print "skip";
-   print phpversion() . ">= 8.2.0";
+if (version_compare(phpversion(), '8.2.0', '>=')){
+  //print "skip";
+  print phpversion() . ">= 8.2.0";
+}
+  
+   
 ?>
 --INI--
 pinpoint_php.DebugReport=true
 --EXTENSIONS--
 pdo_mysql
-
 --FILE--
 <?php
 
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["PDO", "__construct"],
     function ($dsn, $username = null, $password = null, $options = null) {
         echo "on_before: $dsn \n";
-        $pdo = pinpoint_get_this();
+        $pdo = _pinpoint_get_this();
         if ($pdo instanceof PDO) {
             $pdo->dsn = $dsn;
             echo "attached dsn \n";
@@ -36,7 +38,7 @@ pinpoint_join_cut(
     }
 );
 $pdo_exec = "PDO::exec";
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["PDO", "exec"],
     function ($statement) use ($pdo_exec) {
         echo "$pdo_exec: on_before: $statement \n";

@@ -15,19 +15,19 @@ pinpoint_php.DebugReport=true
 class Foo{
     public  function __construct()
     {
-        echo pinpoint_start_trace()."\n";
-        pinpoint_add_clue("name","Foo");
+        echo _pinpoint_start_trace()."\n";
+        _pinpoint_add_clue("name","Foo");
     }
 
     public function __destruct()
     {
-        echo pinpoint_end_trace()."\n";
+        echo _pinpoint_end_trace()."\n";
     }
 
     public function ouput($a,$b)
     {
-        pinpoint_add_clues("1","$a,$b");
-        pinpoint_add_clues("2","234");
+        _pinpoint_add_clues("1","$a,$b");
+        _pinpoint_add_clues("2","234");
     }
 }
 
@@ -39,16 +39,16 @@ function ouput_234($a,$b)
 }
 
 
-echo pinpoint_start_trace()."\n";
+echo _pinpoint_start_trace()."\n";
 
-pinpoint_add_clue("name","ouput_234");
+_pinpoint_add_clue("name","ouput_234");
 for($x = 0;$x <10;$x++){
     ouput_234(1,3);
 }
-pinpoint_add_clue("args",'a,$b');
-pinpoint_add_clue("ret",'a,$b');
+_pinpoint_add_clue("args",'a,$b');
+_pinpoint_add_clue("ret",'a,$b');
 
-echo pinpoint_end_trace()."\n";
+echo _pinpoint_end_trace()."\n";
 
 
 ?>
