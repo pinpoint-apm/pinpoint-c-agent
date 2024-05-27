@@ -13,25 +13,25 @@ pinpoint_php.DebugReport=true
 --FILE--
 <?php
 
-$id = pinpoint_start_trace(0);
-$id = pinpoint_start_trace($id);
-pinpoint_set_context('a','a',$id);
-pinpoint_set_context('b','b',$id);
-pinpoint_set_context('c','c',$id);
+$id = _pinpoint_start_trace(0);
+$id = _pinpoint_start_trace($id);
+_pinpoint_set_context('a','a',$id);
+_pinpoint_set_context('b','b',$id);
+_pinpoint_set_context('c','c',$id);
 
-var_dump(pinpoint_get_context('c',$id));
-var_dump(pinpoint_get_context('b',$id));
-var_dump(pinpoint_get_context('a',$id));
-var_dump(pinpoint_get_context('not exist',$id));
+var_dump(_pinpoint_get_context('c',$id));
+var_dump(_pinpoint_get_context('b',$id));
+var_dump(_pinpoint_get_context('a',$id));
+var_dump(_pinpoint_get_context('not exist',$id));
 
-$id = pinpoint_end_trace($id);
+$id = _pinpoint_end_trace($id);
 
-if(pinpoint_tracelimit())
+if(_pinpoint_trace_limit())
 {
-   pinpoint_drop_trace($id);
+   _pinpoint_drop_trace($id);
 }
 
-pinpoint_end_trace($id);
+_pinpoint_end_trace($id);
 
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]

@@ -12,17 +12,17 @@ pinpoint_php.DebugReport=true
 
 $unexist_node = 1024;
 
-pinpoint_start_trace($unexist_node);
+_pinpoint_start_trace($unexist_node);
 
-pinpoint_add_clue("adf","fdfd",$unexist_node,0);
-pinpoint_add_clue("adf","fdfd",$unexist_node,1);
-pinpoint_set_context('b','b',$unexist_node);
-pinpoint_add_clues(32,"fdfd",$unexist_node,1);
-pinpoint_add_clues(32,"fdfd",$unexist_node,0);
+_pinpoint_add_clue("adf","fdfd",$unexist_node,0);
+_pinpoint_add_clue("adf","fdfd",$unexist_node,1);
+_pinpoint_set_context('b','b',$unexist_node);
+_pinpoint_add_clues(32,"fdfd",$unexist_node,1);
+_pinpoint_add_clues(32,"fdfd",$unexist_node,0);
 
-pinpoint_get_context('b',$unexist_node);
+_pinpoint_get_context('b',$unexist_node);
 
-pinpoint_end_trace($unexist_node);
+_pinpoint_end_trace($unexist_node);
 
 --EXPECTF--
 [pinpoint] [%d] [%d] start_trace [1024] failed with #1024 is not alive

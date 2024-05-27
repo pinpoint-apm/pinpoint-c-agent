@@ -7,8 +7,9 @@ if (!extension_loaded("pinpoint_php"))
 if (!extension_loaded("curl"))
    print "skip";
 if (version_compare(phpversion(), '8.0.0', '>='))
-    print "skip";
+{    print "skip";
     print "only works in php7";
+}
 ?>
 --INI--
 pinpoint_php.DebugReport=true
@@ -18,7 +19,7 @@ json
 
 --FILE--
 <?php
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["curl_init"],
     function ($a = null) {
         echo "on_before \n";
@@ -38,7 +39,7 @@ pinpoint_join_cut(
     },
 );
 
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["curl_exec"],
     function ($a) {
         echo "on_before \n";
@@ -55,7 +56,7 @@ pinpoint_join_cut(
     },
 );
 
-pinpoint_join_cut(
+_pinpoint_join_cut(
     ["curl_setopt"],
     function ($ch, $option, $value) {
         assert(is_resource($ch));

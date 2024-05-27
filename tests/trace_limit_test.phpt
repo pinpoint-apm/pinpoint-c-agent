@@ -12,11 +12,11 @@ pinpoint_php._limit=yes
 pinpoint_php.DebugReport=true
 --FILE--
 <?php 
-if(pinpoint_tracelimit() || pinpoint_tracelimit() ||pinpoint_tracelimit() || pinpoint_tracelimit())
+if(_pinpoint_trace_limit() || _pinpoint_trace_limit() ||_pinpoint_trace_limit() || _pinpoint_trace_limit())
 {
     echo "pass";
 }else{
-    echo "pinpoint_tracelimit failed";
+    echo "_pinpoint_trace_limit failed";
 }
 --EXPECTF--
 [pinpoint] [%d] [%d]This span dropped. max_trace_limit:2 current_tick:2 onLine:0

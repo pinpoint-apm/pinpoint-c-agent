@@ -7,7 +7,13 @@
         }
     },
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "v2.2.0",
+        "pinpoint-apm/pinpoint-php-aop": "@dev",
         "mongodb/mongodb": "^1.18"
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/pinpoint/pinpoint-php-aop"
+        }
+    ]
 }

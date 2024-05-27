@@ -2,7 +2,7 @@
 
 /**
  * 1. if you have questions,please create an issue on https://github.com/pinpoint-apm/pinpoint-c-agent/issues
- * 2. if need more examples, please let us known by issue.
+ * 2. if need more examples, please let us known by creating an issue.
  * */
 
 require_once __DIR__ . '/vendor/autoload.php';
@@ -12,9 +12,6 @@ define('APPLICATION_NAME', 'cd.dev.test.php'); // your application name
 define('APPLICATION_ID', 'cd.dev.test.run');  // your application id
 define('PP_REQ_PLUGINS', SimplePHP\RequestPlugin::class);
 require_once __DIR__ . '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
-
-use Pinpoint\Plugins\Sys\PDO\PDO;
-use Pinpoint\Plugins\Sys\mysqli\Mysqli;
 
 $mysql_host = "dev-mysql";
 $mongodb_host = "mongodb";

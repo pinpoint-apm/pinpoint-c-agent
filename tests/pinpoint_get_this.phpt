@@ -11,7 +11,7 @@ class Foo{
     public function output(){
 
       $onBefore = function(){
-        $f = pinpoint_get_this();
+        $f = _pinpoint_get_this();
         if($f instanceof  Foo){
           var_dump($f->abc);
           var_dump($f->abc_s);
@@ -31,7 +31,7 @@ $f = new Foo();
 $f->output();
 var_dump($f->abc);
 var_dump($f->abc_s);
-var_dump(pinpoint_get_this());
+var_dump(_pinpoint_get_this());
 
 echo "test static method \n";
 class S_Foo
@@ -39,7 +39,7 @@ class S_Foo
     public static $my_static = 'foo';
 
     public static function staticValue() {
-      $f = pinpoint_get_this();
+      $f = _pinpoint_get_this();
       var_dump($f);
       return self::$my_static;
     }

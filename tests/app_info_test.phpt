@@ -9,8 +9,8 @@ pinpoint_php.UnitTest=true
 pinpoint_php.DebugReport=true
 --FILE--
 <?php 
-var_dump(pinpoint_start_time());
-var_dump("APP".'^'.strval(pinpoint_start_time()).'^'.strval(pinpoint_unique_id()));
+var_dump(_pinpoint_start_time());
+var_dump("APP".'^'.strval(_pinpoint_start_time()).'^'.strval(_pinpoint_unique_id()));
 --EXPECTF--
 int(%d)
 string(%d) "APP^%d^%d"

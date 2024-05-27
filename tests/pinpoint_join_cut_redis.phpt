@@ -11,6 +11,7 @@ if (version_compare(phpversion(), '7.1.33', '<='))
 pinpoint_php.DebugReport=true
 --EXTENSIONS--
 redis
+json
 --FILE--
 <?php
 function make_method_plugins_var_2($class_name, $method_name)
@@ -106,7 +107,7 @@ $points = [
 ];
 
 foreach ($points as $point) {
-    pinpoint_join_cut(
+    _pinpoint_join_cut(
         [$point[0], $point[1]],
         $point[2],
         $point[3],

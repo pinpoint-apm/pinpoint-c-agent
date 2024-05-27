@@ -9,17 +9,17 @@ pinpoint_php.UnitTest=true
 pinpoint_php.DebugReport=true
 --FILE--
 <?php
-$id = pinpoint_start_trace(0);
-pinpoint_add_clue("name","Foo",$id);
-$id = pinpoint_start_trace($id);
-pinpoint_add_clues("global","global_value",$id,1);
-pinpoint_add_clue("global","global_value",$id,1);
-pinpoint_add_clues("name","Foo1",$id);
-$id = pinpoint_start_trace($id);
-pinpoint_add_clue("name","Foo2",$id);
-$id = pinpoint_end_trace($id);
-$id = pinpoint_end_trace($id);
-$id = pinpoint_end_trace($id);
+$id = _pinpoint_start_trace(0);
+_pinpoint_add_clue("name","Foo",$id);
+$id = _pinpoint_start_trace($id);
+_pinpoint_add_clues("global","global_value",$id,1);
+_pinpoint_add_clue("global","global_value",$id,1);
+_pinpoint_add_clues("name","Foo1",$id);
+$id = _pinpoint_start_trace($id);
+_pinpoint_add_clue("name","Foo2",$id);
+$id = _pinpoint_end_trace($id);
+$id = _pinpoint_end_trace($id);
+$id = _pinpoint_end_trace($id);
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
 [pinpoint] [%d] [%d] [128] add clue key:name value:Foo
