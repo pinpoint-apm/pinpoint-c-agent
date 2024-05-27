@@ -8,6 +8,7 @@ if (!extension_loaded("curl"))
    print "skip";
 if (version_compare(phpversion(), '8.0.0', '>='))
     print "skip";
+    print "only works in php7";
 ?>
 --INI--
 pinpoint_php.DebugReport=true

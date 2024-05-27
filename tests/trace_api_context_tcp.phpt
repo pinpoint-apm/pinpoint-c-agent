@@ -53,7 +53,7 @@ bool(false)
 [pinpoint] [%d] [%d]agent try to connect:(127.0.0.1:9999)
 [pinpoint] [%d] [%d]write event
 [pinpoint] [%d] [%d]_do_write_data@%d send data error:(%d) fd:(%d)
-[pinpoint] [%d] [%d]reset peer:3
+[pinpoint] [%d] [%d]reset peer:%d
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
 [pinpoint] [%d] [%d] [128] pinpoint_start child  [127]
@@ -66,7 +66,7 @@ bool(false)
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d}]})
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 {
-	"common_libary_version" : "0.5.0",
+	"common_library_version" : "0.5.0",
 	"pool_free_node" : 128,
 	"pool_total_node" : 128
 }

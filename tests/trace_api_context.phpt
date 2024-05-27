@@ -64,7 +64,7 @@ bool(false)
 [pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d}]})
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
 {
-	"common_libary_version" : "0.5.0",
+	"common_library_version" : "0.5.0",
 	"pool_free_node" : 128,
 	"pool_total_node" : 128
 }

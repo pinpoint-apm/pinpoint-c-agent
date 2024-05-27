@@ -88,7 +88,7 @@ PHP_FUNCTION(pinpoint_set_context);
 PHP_FUNCTION(pinpoint_get_context);
 PHP_FUNCTION(pinpoint_mark_as_error);
 // DEPRECATED("pinpoint_get_func_ref_args only used for compatiblity")
-PHP_FUNCTION(pinpoint_get_func_ref_args);
+// PHP_FUNCTION(pinpoint_get_func_ref_args);
 PHP_FUNCTION(pinpoint_status);
 PHP_FUNCTION(pinpoint_join_cut);
 
