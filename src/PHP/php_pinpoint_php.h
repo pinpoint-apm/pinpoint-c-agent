@@ -21,7 +21,7 @@
 extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
-#define PHP_PINPOINT_PHP_VERSION "0.5.1"
+#define PHP_PINPOINT_PHP_VERSION "0.5.2"
 
 #ifdef PHP_WIN32
 #define PHP_PINPOINT_PHP_API __declspec(dllexport)
