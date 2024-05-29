@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -32,11 +33,12 @@ type SpanSender struct {
 	wg            sync.WaitGroup
 }
 
-func CreateSpanSender(base metadata.MD, exitCh chan bool) *SpanSender {
+func createSpanSender(base metadata.MD, exitCh chan bool) *SpanSender {
 	sender := &SpanSender{
 		Md: base, exitCh: exitCh,
 		idMap: make(ApiIdMap),
 	}
+	sender.Init()
 	return sender
 }
 
@@ -119,7 +121,7 @@ func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, spanEv *TSpa
 		pbSpanEv.Depth = depth
 		genSpan.SpanEvent = append(genSpan.SpanEvent, pbSpanEv)
 		for _, call := range spanEv.Calls {
-			spanSender.makePinpointSpanEv(genSpan, &call, depth+1)
+			spanSender.makePinpointSpanEv(genSpan, call, depth+1)
 		}
 		return nil
 	} else {
@@ -145,7 +147,8 @@ func (spanSender *SpanSender) getSqlUidMetaApiId(name string) []byte {
 		return id.([]byte)
 	} else {
 		h1, h2 := murmur3.Sum128([]byte(name))
-		id := []byte(strconv.FormatUint(h1, 16) + strconv.FormatUint(h2, 16))
+		// use %x to format hash
+		id := []byte(fmt.Sprintf("%x%x", h1, h2))
 		spanSender.idMap[name] = id
 		spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
 		return id
@@ -230,18 +233,7 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 
 	pbSpan.ParentSpanId = span.ParentSpanId
 
-	tidFormat := strings.Split(span.TransactionId, "^")
-	agentId, startTime, sequenceId := tidFormat[0], tidFormat[1], tidFormat[2]
-	transactionId := v1.PTransactionId{AgentId: agentId}
-
-	if value, err := strconv.ParseInt(startTime, 10, 64); err == nil {
-		transactionId.AgentStartTime = value
-	}
-
-	if value, err := strconv.ParseInt(sequenceId, 10, 64); err == nil {
-		transactionId.Sequence = value
-	}
-	pbSpan.TransactionId = &transactionId
+	pbSpan.TransactionId = common.TypeV1_String_TransactionId(span.TransactionId)
 
 	pbSpan.SpanId = span.SpanId
 
@@ -272,8 +264,9 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 		pbSpan.ExceptionInfo = &v1.PIntStringValue{
 			IntValue: id,
 			StringValue: &wrapperspb.StringValue{
-				Value: span.ErrorInfo.Msg}}
-
+				Value: span.ErrorInfo.Msg,
+			},
+		}
 	}
 
 	for _, annotation := range span.Clues {
@@ -361,11 +354,11 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 }
 
 func (spanSender *SpanSender) makeSpan(span *TSpan) (*v1.PSpan, error) {
-	if pspan, err := spanSender.makePinpointSpan(span); err == nil {
+	if pSpan, err := spanSender.makePinpointSpan(span); err == nil {
 		for _, call := range span.Calls {
-			spanSender.makePinpointSpanEv(pspan, &call, 1)
+			spanSender.makePinpointSpanEv(pSpan, call, 1)
 		}
-		return pspan, nil
+		return pSpan, nil
 	} else {
 		return nil, err
 	}

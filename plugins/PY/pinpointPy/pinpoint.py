@@ -74,6 +74,10 @@ def end_trace(trace_id: int) -> int:  # -> Any:
     return _pinpointPy.end_trace(trace_id)
 
 
+def add_exception(message: str, trace_id: int):
+    _pinpointPy.add_exception(message, trace_id)
+
+
 def add_trace_header(key: str, value: str, trace_id: int, location: int = 0):
     _pinpointPy.add_clue(key, value, trace_id, location)
 

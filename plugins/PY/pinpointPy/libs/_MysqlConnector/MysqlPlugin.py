@@ -48,7 +48,7 @@ class MysqlPlugin(Common.PinTrace):
         return ret
 
     def onException(self, traceId, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, f'{e}', traceId)
+        pinpoint.add_exception(f'{e}', traceId)
 
     def get_mysql_server_host(self, cursor):
         return f'{cursor._connection.server_host}:{cursor._connection.server_port}'

@@ -55,7 +55,7 @@ def use_starlette_context():
     set_trace_context(new_trace_context=AsyncTraceContext())
 
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __author__ = 'liu.mingyi@navercorp.com'
 __all__ = ['async_monkey_patch_for_pinpoint', 'asyn_monkey_patch_for_pinpoint', 'use_starlette_context', 'PinPointMiddleWare',
            'CommonPlugin', 'PinTransaction', 'PinHeader', 'GenPinHeader', 'PinStarlettePlugin']

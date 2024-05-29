@@ -14,6 +14,7 @@
  * the License.
  ******************************************************************************/
 #include "_pinpoint_py.h"
+#include "common.h"
 #include <Python.h>
 #include <string.h>
 
@@ -290,10 +291,24 @@ static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args) {
   uint32_t line_no = 0;
   NodeID id = -1;
   if (PyArg_ParseTuple(args, "ssi|i", &msg, &file_name, &line_no, &id)) {
-    if (id == -1)
+    if (id == -1) {
       id = pinpoint_get_per_thread_id();
+    }
 
     catch_error(id, msg, file_name, line_no);
+  }
+
+  return Py_BuildValue("O", Py_True);
+}
+
+static PyObject *py_pinpoint_add_exception(PyObject *self, PyObject *args) {
+  char *msg = NULL;
+  NodeID id = -1;
+  if (PyArg_ParseTuple(args, "s|i", &msg, &id)) {
+    if (id == -1) {
+      id = pinpoint_get_per_thread_id();
+    }
+    pinpoint_add_exception(id, msg);
   }
 
   return Py_BuildValue("O", Py_True);
@@ -302,7 +317,8 @@ static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args) {
 /* Module method table */
 static PyMethodDef PinpointMethods[] = {
     {"start_trace", py_pinpoint_start_trace, METH_VARARGS,
-     "def start_trace(int id=-1):# create a new trace and insert into trace "
+     "def start_trace(int id=-1):# create a new trace and insert into "
+     "trace "
      "chain"},
     {"end_trace", py_pinpoint_end_trace, METH_VARARGS,
      "def end_trace(int id=-1):# end currently matched trace"},
@@ -326,19 +342,25 @@ static PyMethodDef PinpointMethods[] = {
     {"get_context_key", py_pinpoint_get_key, METH_VARARGS,
      "def get_context_key(string key,int id=-1)->string "},
     {"check_tracelimit", py_check_trace_limit, METH_VARARGS,
-     "def check_tracelimit(long timestamp=-1): #check trace whether is limit"},
+     "def check_tracelimit(long timestamp=-1): #check trace whether is "
+     "limit"},
     {"enable_debug", py_pinpoint_enable_debug, METH_VARARGS,
      "def enable_debug(callback):#enable logging output(callback )"},
     {"force_flush_trace", py_force_flush_span, METH_VARARGS,
      "def force_flush_trace(timeout=3,int id=-1): #force flush span during "
      "timeout"},
     {"mark_as_error", py_pinpoint_mark_an_error, METH_VARARGS,
-     "def mark_as_error(string msg,string file_name,uint line_no,int id=-1): "
+     "def mark_as_error(string msg,string file_name,uint line_no,int "
+     "id=-1): "
      "#Found an error in "
      "this trace"},
+    {"add_exception", py_pinpoint_add_exception, METH_VARARGS,
+     "def add_exception(string message, int trace_id = -1) # add exception "
+     "information on current trace_id, default is thread_local"},
     {"set_agent", (PyCFunction)py_set_agent, METH_VARARGS | METH_KEYWORDS,
      "def set_agent(collector_host=\"unix:/tmp/collector-agent.sock or "
-     "tcp:host:port\",trace_limit=-1): # set pinpoint collector information"},
+     "tcp:host:port\",trace_limit=-1): # set pinpoint collector "
+     "information"},
     {NULL, NULL, 0, NULL}};
 
 #if PY_MAJOR_VERSION > 2

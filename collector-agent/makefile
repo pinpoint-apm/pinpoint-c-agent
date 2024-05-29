@@ -1,5 +1,5 @@
 
-TAG ?=v0.5.1
+TAG ?=v0.5.2
 
 .PHONY: default
 default: server ;
@@ -16,4 +16,4 @@ clean:
 	rm -rf collector-agent
 
 docker:
-	docker build -f Dockerfile -t collector-agent:${TAG}  . 
+	docker build  -f Dockerfile -t collector-agent:${TAG}  . 

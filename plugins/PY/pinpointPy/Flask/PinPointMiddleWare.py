@@ -42,11 +42,11 @@ class PinPointMiddleWare():
                         response.headers["UT"] = str(request.url_rule)
                 if response:
                     add_trace_header_v2(PP_HTTP_STATUS_CODE,
-                                        response.status, trace_id)
+                                        f'{response.status_code}', trace_id)
                     # fix bug in https://oss.navercorp.com/pinpoint/pinpoint_c_agent/issues/570
-                    if response.status >= '400':
+                    if response.status_code >= 400:
                         mark_as_error(
-                            f'status_code:{response.status}', 'FastAPIRequestPlugin', 0, trace_id)
+                            f'status_code:{response.status_code}', 'FastAPIRequestPlugin', 0, trace_id)
             return response
 
     @BaseFlaskPlugins("Flask Web App")

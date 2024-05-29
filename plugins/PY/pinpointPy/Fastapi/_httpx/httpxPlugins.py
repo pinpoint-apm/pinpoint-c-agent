@@ -78,4 +78,4 @@ class HttpxRequestPlugins(AsyCommon.AsyncPinTrace):
         return ret
 
     def onException(self, traceId, e):
-        pinpoint.add_trace_header(Defines.PP_ADD_EXCEPTION, str(e), traceId)
+        pinpoint.add_exception(str(e), traceId)

@@ -299,6 +299,33 @@ def test_exception_in_recursion_form():
     return '''<h3>%s</h3>''' % h1
 
 
+@app.route('/test_exception_in_Chain', methods=['GET'])
+def test_exception_in_Chain():
+
+    from pinpointPy.CommonPlugin import PinpointCommonPlugin
+
+    @PinpointCommonPlugin("call_exp_01")
+    def call_exp_01():
+        raise Exception("abc")
+
+    @PinpointCommonPlugin("call_exp_02")
+    def call_exp_02():
+        raise Exception("abcd")
+
+    @PinpointCommonPlugin("main")
+    def main():
+        try:
+            call_exp_01()
+        except Exception as e:
+            pass
+        try:
+            call_exp_02()
+        except Exception as e:
+            raise e
+    main()
+    return '''<h3>success </h3>'''
+
+
 @app.route('/test_arguments', methods=['GET'])
 def test_arguments_form():
     i1 = Method()

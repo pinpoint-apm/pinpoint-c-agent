@@ -37,5 +37,5 @@ def monkey_patch():
 
 __all__ = ['monkey_patch']
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 __author__ = 'liu.mingyi@navercorp.com'

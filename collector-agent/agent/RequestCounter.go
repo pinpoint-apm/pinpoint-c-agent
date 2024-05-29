@@ -28,7 +28,7 @@ func (*RequestProfiler) getReqLevel(exp uint32) int32 {
 
 func (reqProf *RequestProfiler) updateReqTimeProfile(exp uint32) {
 	if reqProf.reqProfileLastTime != reqProf.CTime {
-		for i, _ := range reqProf.reqProfiler {
+		for i := range reqProf.reqProfiler {
 			reqProf.reqProfiler[i] = 0
 		}
 	}
@@ -74,10 +74,10 @@ func (reqProf *RequestProfiler) GetReqTimeProfiler() [4]uint16 {
 
 func (reqProf *RequestProfiler) Interceptor(span *TSpan) bool {
 	reqProf.CTime = time.Now().Unix()
-	iexp := span.GetElapsedTime()
+	elapsed := span.GetElapsedTime()
 
-	reqProf.updateReqTop1TimeSummary(uint32(iexp))
-	exp := uint32(math.Ceil(float64(iexp) * 1.0 / 1000.0))
+	reqProf.updateReqTop1TimeSummary(uint32(elapsed))
+	exp := uint32(math.Ceil(float64(elapsed) * 1.0 / 1000.0))
 	reqProf.updateReqTimeProfile(exp)
 
 	return true

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl/proto/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -71,4 +72,22 @@ func CreateGrpcConnection(address string) (*grpc.ClientConn, error) {
 		return nil, err
 	}
 	return conn, nil
+}
+
+func TypeV1_String_TransactionId(tid_s string) *v1.PTransactionId {
+	tidFormat := strings.Split(tid_s, "^")
+	if len(tidFormat) < 3 {
+		return nil
+	}
+	agentId, startTime, sequenceId := tidFormat[0], tidFormat[1], tidFormat[2]
+	transactionId := &v1.PTransactionId{AgentId: agentId}
+
+	if value, err := strconv.ParseInt(startTime, 10, 64); err == nil {
+		transactionId.AgentStartTime = value
+	}
+
+	if value, err := strconv.ParseInt(sequenceId, 10, 64); err == nil {
+		transactionId.Sequence = value
+	}
+	return transactionId
 }
