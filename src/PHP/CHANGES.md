@@ -1,8 +1,8 @@
-## 0.5.2
-- add _pinpoint_join_cut API
+## 0.5.1 2024-05-29
+- add _pinpoint_join_cut and test case
 - rename api naming
-
-## 0.5.1
 - add pinpoint_get_this api and test case
+- remove php5 support
+
 ## 0.5.0
 - support common library v0.5.0
