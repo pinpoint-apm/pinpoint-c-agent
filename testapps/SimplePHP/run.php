@@ -16,6 +16,7 @@ require_once __DIR__ . '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.ph
 $mysql_host = "dev-mysql";
 $mongodb_host = "mongodb";
 $mariadb_host = "dev-mariadb";
+
 function call_mysql()
 {
     global $mysql_host;
@@ -23,11 +24,13 @@ function call_mysql()
     $password = "password";
     $dbname = "employees";
 
-    $conn = new PDO("mysql:host=$mysql_host;port=33060;dbname=$dbname", $username, $password);
+    $conn = new PDO("mysql:host=$mysql_host;port=3306;dbname=$dbname", $username, $password);
     $stmt = $conn->prepare("SELECT * FROM `dept_emp_latest_date` LIMIT 1000;");
     $stmt->execute();
+    $stmt->fetchAll();
+    $stmt->fetch();
 
-    $sql = 'SELECT name, dept_no, dept_name FROM departments ORDER BY dept_name LIMIT 10';
+    $sql = 'SELECT dept_no, dept_name FROM departments ORDER BY dept_name LIMIT 5';
     foreach ($conn->query($sql) as $row) {
         print $row['dept_no'] . "\t";
         print $row['dept_name'] . "\n";
@@ -40,7 +43,9 @@ function call_mysqli()
 {
     global $mysql_host;
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    $mysqli = new mysqli($mysql_host, "root", "password", "employees", 33060);
+    $mysqli = new mysqli();
+
+    $mysqli->connect($mysql_host, "root", "password", "employees", 3306);
 
     $result = $mysqli->query("SELECT * FROM `dept_emp_latest_date` LIMIT 1000;");
     printf("Select returned %d rows.\n", $result->num_rows);
@@ -57,7 +62,7 @@ function call_mariadb()
     global $mariadb_host;
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     // 33061 , is the port of mariadb server
-    $mysqli = new mysqli($mariadb_host, "root", "password", "test", 33061);
+    $mysqli = new mysqli($mariadb_host, "root", "password", "test", 3306);
 
     $result = $mysqli->query("SELECT * FROM `contacts` LIMIT 1000;");
     printf("Select returned %d rows.\n", $result->num_rows);
