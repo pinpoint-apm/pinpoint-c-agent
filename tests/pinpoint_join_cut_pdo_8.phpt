@@ -26,7 +26,7 @@ _pinpoint_join_cut(
     ["PDO", "__construct"],
     function ($dsn, $username = null, $password = null, $options = null) use ($weakMap) {
         echo "on_before: $dsn \n";
-        $pdo = _pinpoint_get_this();
+        $pdo = pinpoint_get_this();
         if ($pdo instanceof PDO) {
             $weakMap[$pdo] = $dsn;
             echo "attached dsn \n";
@@ -46,7 +46,7 @@ _pinpoint_join_cut(
 
         echo "$pdo_exec: on_before: $statement \n";
 
-        $pdo = _pinpoint_get_this();
+        $pdo = pinpoint_get_this();
         if ($pdo instanceof PDO) {
             echo "$weakMap[$pdo] \n";
         }

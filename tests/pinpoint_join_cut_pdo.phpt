@@ -24,7 +24,7 @@ _pinpoint_join_cut(
     ["PDO", "__construct"],
     function ($dsn, $username = null, $password = null, $options = null) {
         echo "on_before: $dsn \n";
-        $pdo = _pinpoint_get_this();
+        $pdo = pinpoint_get_this();
         if ($pdo instanceof PDO) {
             $pdo->dsn = $dsn;
             echo "attached dsn \n";

@@ -145,7 +145,7 @@ const zend_function_entry pinpoint_php_functions[] = {
   PHP_FE(_pinpoint_start_trace, arginfo_add_id) 
   PHP_FE(_pinpoint_end_trace, arginfo_add_id)
   PHP_FE(_pinpoint_unique_id, arginfo_none) 
-  PHP_FE(_pinpoint_get_this, arginfo_none) 
+  PHP_FE(pinpoint_get_this, arginfo_none) 
   PHP_FE(pinpoint_status, arginfo_none) 
   // PHP__FE(pinpoint_get_func_ref_args, arginfo_none)
   PHP_FE(_pinpoint_drop_trace, arginfo_add_id) 
@@ -216,7 +216,7 @@ PHP_FUNCTION(_pinpoint_drop_trace) {
   RETURN_TRUE;
 }
 
-PHP_FUNCTION(_pinpoint_get_this) {
+PHP_FUNCTION(pinpoint_get_this) {
   if (EX(prev_execute_data) && EX(prev_execute_data)->prev_execute_data) {
     zval *self = &EX(prev_execute_data)->prev_execute_data->This;
     if (zval_get_type(self) != IS_UNDEF) {
