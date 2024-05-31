@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl/proto/v1"
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
 	"google.golang.org/grpc"
 )
 

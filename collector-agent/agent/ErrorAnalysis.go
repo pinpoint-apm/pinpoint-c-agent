@@ -2,7 +2,7 @@ package agent
 
 import (
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
-	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl/proto/v1"
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/metadata"
 )

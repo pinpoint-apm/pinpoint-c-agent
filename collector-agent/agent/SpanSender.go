@@ -11,7 +11,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
-	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl/proto/v1"
+	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
 	"github.com/spaolacci/murmur3"
 
 	log "github.com/sirupsen/logrus"
