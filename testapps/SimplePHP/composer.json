@@ -7,7 +7,13 @@
         }
     },
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "dev-feat-join-cut-api",
+        "pinpoint-apm/pinpoint-php-aop": "@dev",
         "mongodb/mongodb": "^1.18"
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/pinpoint/pinpoint-php-aop"
+        }
+    ]
 }

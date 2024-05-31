@@ -125,6 +125,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_add_timestamp, 0, 0, 0)
 ZEND_ARG_INFO(0, timestamp)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_add_arg_index, 0, 0, 0)
+ZEND_ARG_INFO(0, index)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_add_id, 0, 0, 0)
 ZEND_ARG_INFO(0, nodeid)
 ZEND_END_ARG_INFO()
@@ -146,6 +150,7 @@ const zend_function_entry pinpoint_php_functions[] = {
   PHP_FE(_pinpoint_end_trace, arginfo_add_id)
   PHP_FE(_pinpoint_unique_id, arginfo_none) 
   PHP_FE(pinpoint_get_this, arginfo_none) 
+  PHP_FE(pinpoint_get_caller_arg,arginfo_add_arg_index)
   PHP_FE(pinpoint_status, arginfo_none) 
   // PHP__FE(pinpoint_get_func_ref_args, arginfo_none)
   PHP_FE(_pinpoint_drop_trace, arginfo_add_id) 
@@ -269,6 +274,72 @@ PHP_FUNCTION(_pinpoint_set_context) {
     return;
   }
   RETURN_TRUE;
+}
+
+// ref from ZEND_FUNCTION(func_get_arg)
+PHP_FUNCTION(pinpoint_get_caller_arg) {
+  uint32_t arg_count, first_extra_arg;
+  zval *arg;
+  zend_long requested_offset;
+  zend_execute_data *ex;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &requested_offset) ==
+      FAILURE) {
+    return;
+  }
+
+  if (requested_offset < 0) {
+    zend_error(
+        E_WARNING,
+        "pinpoint_get_caller_arg():  The argument number should be >= 0");
+    RETURN_FALSE;
+  }
+
+  // changes
+  // ex = EX(prev_execute_data)
+  ex = EX(prev_execute_data)->prev_execute_data;
+  if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+    zend_error(E_WARNING, "pinpoint_get_caller_arg():  Called from the global "
+                          "scope - no function context");
+    RETURN_FALSE;
+  }
+#if PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION >= 2
+  if (zend_forbid_dynamic_call() == FAILURE) {
+    RETURN_THROWS();
+  }
+#else
+  if (zend_forbid_dynamic_call("pinpoint_get_caller_arg()") == FAILURE) {
+    RETURN_FALSE;
+  }
+#endif
+  arg_count = ZEND_CALL_NUM_ARGS(ex);
+
+  if ((zend_ulong)requested_offset >= arg_count) {
+    zend_error(E_WARNING,
+               "pinpoint_get_caller_arg():  Argument " ZEND_LONG_FMT
+               " not passed to function",
+               requested_offset);
+    RETURN_FALSE;
+  }
+
+  first_extra_arg = ex->func->op_array.num_args;
+  if ((zend_ulong)requested_offset >= first_extra_arg &&
+      (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
+    arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var +
+                                    ex->func->op_array.T) +
+          (requested_offset - first_extra_arg);
+  } else {
+    arg = ZEND_CALL_ARG(ex, requested_offset + 1);
+  }
+  if (EXPECTED(!Z_ISUNDEF_P(arg))) {
+
+#if PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION <= 2
+    ZVAL_DEREF(arg);
+    ZVAL_COPY(return_value, arg);
+#else
+    ZVAL_COPY_DEREF(return_value, arg);
+#endif
+  }
 }
 
 PHP_FUNCTION(_pinpoint_get_context) {

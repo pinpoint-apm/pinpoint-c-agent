@@ -16,6 +16,13 @@ require_once __DIR__ . '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.ph
 $mysql_host = "dev-mysql";
 $mongodb_host = "mongodb";
 $mariadb_host = "dev-mariadb";
+$memcached_host = "memcached";
+
+// $host = "10.10.10.10";
+// $mysql_host = $host;
+// $mongodb_host = $host;
+// $mariadb_host = $host;
+// $memcached_host = $host;
 
 function call_mysql()
 {
@@ -62,7 +69,7 @@ function call_mariadb()
     global $mariadb_host;
     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     // 33061 , is the port of mariadb server
-    $mysqli = new mysqli($mariadb_host, "root", "password", "test", 3306);
+    $mysqli = new mysqli($mariadb_host, "root", "password", "test", 3307);
 
     $result = $mysqli->query("SELECT * FROM `contacts` LIMIT 1000;");
     printf("Select returned %d rows.\n", $result->num_rows);
@@ -92,12 +99,99 @@ function call_mongodb()
     var_dump($coll->findOne(['foo' => 'bar']));
 }
 
+function check_pinpoint_header($values)
+{
+    $headers = $values["headers"];
+    assert($headers["Pinpoint-Flags"] != "");
+    assert($headers["Pinpoint-Host"] != "");
+    assert($headers["Pinpoint-Pappname"] != "");
+    assert($headers["Pinpoint-Papptype"] != "");
+    assert($headers["Pinpoint-Pspanid"] != "");
+    assert($headers["Pinpoint-Sampled"] != "");
+    assert($headers["Pinpoint-Traceid"] != "");
+    assert($headers["Pinpoint-Spanid"] != "");
+    assert($headers["User-Abc"] === "xxxx");
+    assert($headers["User-Header"] == "2133");
+}
+
+function call_curl()
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "http://httpbin.org/anything");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'User-Abc:xxxx',
+        'User-Header:2133'
+    ]);
+    $response = curl_exec($ch);
+    $j_res = json_decode($response, true);
+    check_pinpoint_header($j_res);
+    $error = curl_error($ch);
+    echo curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+    // reuse $ch
+    curl_setopt($ch, CURLOPT_URL, "http://httpbin.org/get");
+    $response = curl_exec($ch);
+    $j_res = json_decode($response, true);
+    check_pinpoint_header($j_res);
+    $error = curl_error($ch);
+    echo curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+    echo "error:$error \n";
+    curl_close($ch);
+}
+
+function call_redis()
+{
+    echo "case: strings \n";
+    $redis = new Redis();
+    $redis->pconnect('redis', 6379);
+    $redis->get("a");
+    $redis->set("a", "b");
+    $redis->setNx("a", "10");
+    $redis->append("ar", "aa");
+    $redis->setRange("ar", 0, "bb");
+    $redis->get("ar");
+    $redis->getRange("ar", 0, 2);
+    $redis->strlen("ar");
+    $redis->getBit("ar", 1);
+    $redis->setBit("ar", 1, 3);
+    var_dump($redis->get("ar"));
+    $redis->mSet(['foo' => 'foo', 'bar' => 'bar', 'baz' => 'baz']);
+
+
+    $redis->multi()
+        ->set('key1', 'val1')
+        ->get('key1')
+        ->set('key2', 'val2')
+        ->get('key2')
+        ->exec();
+
+    var_dump($redis->exists('foo', 'bar', 'baz', 'not exists'));
+    $redis->flushdb();
+}
+
+function call_memcached()
+{
+    $Memcached = new Memcached();
+    global $memcached_host;
+    $Memcached->addServer($memcached_host, 11211);
+    $Memcached->set('key', "abc");
+    var_dump($Memcached->get('key'));       // boolean false
+    var_dump($Memcached->getResultCode());  // int 0 which is Memcached::RES_SUCCESS
+    var_dump($Memcached->add("test_add", 234));  // int 0 which is Memcached::RES_SUCCESS
+    // var_dump($Memcached->appendByKey("xxx", "test_add", 234));  // int 0 which is Memcached::RES_SUCCESS
+    var_dump($Memcached->delete("test_add"));  // int 0 which is Memcached::RES_SUCCESS
+    var_dump($Memcached->deleteMulti(["test_add", "a", "b", "c"]));  // int 0 which is Memcached::RES_SUCCESS
+}
+
 function main()
 {
     call_mysql();
     call_mysqli();
     call_mariadb();
     call_mongodb();
+    call_curl();
+    call_redis();
+    call_memcached();
 }
 
 main();
