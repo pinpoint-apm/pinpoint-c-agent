@@ -81,6 +81,7 @@ PHP_FUNCTION(_pinpoint_add_clue);
 PHP_FUNCTION(_pinpoint_add_clues);
 PHP_FUNCTION(_pinpoint_unique_id);
 PHP_FUNCTION(pinpoint_get_this);
+PHP_FUNCTION(pinpoint_get_caller_arg);
 PHP_FUNCTION(_pinpoint_trace_limit);
 PHP_FUNCTION(_pinpoint_drop_trace);
 PHP_FUNCTION(_pinpoint_start_time);
