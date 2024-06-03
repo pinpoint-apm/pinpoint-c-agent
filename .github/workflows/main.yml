@@ -2,6 +2,9 @@ name: CI
 
 on: [pull_request, workflow_dispatch, push]
 
+env:
+  MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}.tar.gz
+  
 jobs:
   cpp:
     strategy:
@@ -93,6 +96,18 @@ jobs:
       - name: Stop containers
         # if: always()
         run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down php-compatible
+
+  pack_php_module:
+    runs-on: ubuntu-latest
+    needs: PHP
+    steps:
+      - uses: actions/checkout@v2
+      - name: Package pinpoint_php
+        run: tar -czf ${{ env.MODULE_PAK }}   common/  src/PHP config.m4 tests LICENSE
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.MODULE_PAK }}
+          path: ${{ env.MODULE_PAK }}
 
   Python:
     strategy:
