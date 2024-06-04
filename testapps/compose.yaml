@@ -274,6 +274,8 @@ services:
         condition: service_healthy
       memcached:
         condition: service_healthy
+      dev-collector:
+        condition: service_started
 
     restart: always
     build:
@@ -330,3 +332,17 @@ services:
         limits:
           cpus: "0.5"
           memory: 50M
+  
+  php-wordpress:
+    build:
+      dockerfile: testapps/php-wordpress.dockerfile
+      context: ../
+    ports:
+      - "8080:80"     
+    cap_add:
+      - SYS_PTRACE 
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+      dev-collector:
+        condition: service_started        

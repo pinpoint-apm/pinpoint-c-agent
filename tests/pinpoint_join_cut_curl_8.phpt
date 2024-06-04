@@ -64,7 +64,7 @@ _pinpoint_join_cut(
         var_dump($option);
 
         if ($option == CURLOPT_HTTPHEADER && is_array($value)) {
-            $value[] = "_pinpoint_join_cut:xxxx";
+            $value[] = "pinpoint_join_cut:xxxx";
             $value[] = "pinpoint_join_cu2t:agc";
             $value[] = "pinpoint_join_cus2t:agc";
             $value[] = "pinpoint_join_cus2t2:agc";
@@ -96,13 +96,12 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "http://httpbin.org/anything");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'user_header:"xxxx"',
+    'user_header:xxxx',
     'user_abc:2133'
 ]);
 $response = curl_exec($ch);
 
 $j_res = json_decode($response, true);
-
 assert($j_res["headers"]["Pinpoint-Join-Cu2T"] == "agc");
 assert($j_res["headers"]["Pinpoint-Join-Cus2T"] == "agc");
 assert($j_res["headers"]["Pinpoint-Join-Cus2T2"] == "agc");
@@ -130,7 +129,6 @@ $error = curl_error($ch);
 echo "error:$error \n";
 curl_close($ch);
 
-
 --EXPECTF--
 [pinpoint] [%d] [%d]try to interceptor function=curl_init
 [pinpoint] [%d] [%d]added interceptor on `function`: curl_init success
@@ -142,82 +140,93 @@ case: curl_init()
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_init
 on_before 
 NULL
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_init return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 object(CurlHandle)#10 (0) {
 }
 get resource [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(42)
-not working[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+not working[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_init 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10002)
 test CURLOPT_URL 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:2
 [pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `size` does not matched
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(19913)
 test CURLOPT_RETURNTRANSFER 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not matched expected:3 give:4
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10023)
 value must be affected
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]args[2] type:7 in:1 va:2
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
 on_before 
 object(CurlHandle)#10 (0) {
 }
 request url: http://httpbin.org/anything
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_exec 
 error: 
 case : curl_init with variable 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_init
 on_before 
 string(27) "http://httpbin.org/anything"
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_init return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 object(CurlHandle)#11 (0) {
 }
 get resource [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(42)
-not working[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+not working[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_init 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(19913)
 test CURLOPT_RETURNTRANSFER 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not matched expected:3 give:4
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10023)
 value must be affected
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]args[2] type:7 in:1 va:2
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
 on_before 
 object(CurlHandle)#11 (0) {
 }
 request url: http://httpbin.org/anything
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_exec 
 error: 
 [pinpoint] [%d] [%d]start free interceptor: curl_init
 [pinpoint] [%d] [%d]start free interceptor: curl_exec

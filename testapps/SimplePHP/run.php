@@ -62,6 +62,13 @@ function call_mysqli()
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $stmt->fetch();
+    $stmt->free_result();
+    mysqli_query($mysqli, "SELECT * FROM `dept_emp_latest_date` LIMIT 1000;");
+
+    $s_stmt = mysqli_prepare($mysqli, "SELECT * FROM employees WHERE emp_no=?");
+    mysqli_stmt_bind_param($s_stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+
 }
 
 function call_mariadb()
@@ -185,13 +192,13 @@ function call_memcached()
 
 function main()
 {
-    call_mysql();
+    // call_mysql();
     call_mysqli();
-    call_mariadb();
-    call_mongodb();
-    call_curl();
-    call_redis();
-    call_memcached();
+    // call_mariadb();
+    // call_mongodb();
+    // call_curl();
+    // call_redis();
+    // call_memcached();
 }
 
 main();
