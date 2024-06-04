@@ -581,7 +581,7 @@ static inline zend_string *merge_pp_style_name(zend_string *scope,
 #define MAX_CLASS_METHOD_SIZE 128
   char buf[MAX_CLASS_METHOD_SIZE] = {0};
   if (scope) {
-    int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s:%s", ZSTR_VAL(scope),
+    int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s::%s", ZSTR_VAL(scope),
                         ZSTR_VAL(func));
     zend_string *name = zend_string_init(buf, size, 0);
     zend_string *lower_name = zend_string_tolower(name);
@@ -800,8 +800,8 @@ static void call_interceptor_before(pp_interceptor_v_t *interceptor) {
   get_shadow_copy_current_parameters(param_count, params);
   zval retval;
   call_callback_function(&interceptor->before, params, param_count, 1, &retval);
-  pp_trace(" call_callback_function on_before return type(%d) zval",
-           zval_get_type(&retval));
+  pp_trace(" call_interceptor_before:%s return type(%d) zval",
+           ZSTR_VAL(interceptor->name), zval_get_type(&retval));
 
   replace_ex_caller_parameters(&retval);
 
@@ -814,6 +814,7 @@ static void call_interceptor_end(pp_interceptor_v_t *interceptor,
   zval *params = (zval *)safe_emalloc(param_count, sizeof(zval), 0);
   ZVAL_COPY(params, return_value);
   call_callback_function(&interceptor->end, params, param_count, 1);
+  pp_trace("call_interceptor_end: %s ", ZSTR_VAL(interceptor->name));
 }
 static void call_interceptor_exception(pp_interceptor_v_t *interceptor) {
   zend_object *exception = EG(exception);
@@ -859,6 +860,7 @@ static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
   bzero(interceptor, sizeof(*interceptor));
   interceptor->name = zend_string_dup(name, 0);
   interceptor->origin = origin_func->internal_function.handler;
+  interceptor->origin_func = origin_func;
   ZVAL_DUP(&interceptor->before, before);
   ZVAL_DUP(&interceptor->end, end);
   ZVAL_DUP(&interceptor->exception, exception);
@@ -874,6 +876,8 @@ static inline void free_callback(zval *val) {
 
 static void free_interceptor(pp_interceptor_v_t *interceptor) {
   pp_trace("start free interceptor: %s", ZSTR_VAL(interceptor->name));
+  zend_function *origin_func = interceptor->origin_func;
+  origin_func->internal_function.handler = interceptor->origin;
   zend_string_release(interceptor->name);
   free_callback(&interceptor->before);
   free_callback(&interceptor->end);
@@ -885,7 +889,10 @@ static void add_function_interceptor(zend_string *name, zval *before, zval *end,
                                      zval *exception) {
   zend_function *func = (zend_function *)zend_hash_str_find_ptr(
       CG(function_table), ZSTR_VAL(name), ZSTR_LEN(name));
-  if (func != NULL) {
+  if (func != NULL &&
+      func->internal_function.handler == pinpoint_interceptor_handler_entry) {
+    pp_trace("function `%s` interceptor already added", ZSTR_VAL(name));
+  } else if (func != NULL) {
     pp_interceptor_v_t *interceptor =
         make_interceptor(name, before, end, exception, func);
     // insert into hash
@@ -896,7 +903,6 @@ static void add_function_interceptor(zend_string *name, zval *before, zval *end,
                ZSTR_VAL(name));
       return;
     }
-
     func->internal_function.handler = pinpoint_interceptor_handler_entry;
     pp_trace("added interceptor on `function`: %s success", ZSTR_VAL(name));
   } else {
@@ -918,7 +924,7 @@ static void add_class_method_interceptor(zend_string *cls_name,
       // overwrite with plugins eg: pinpoint_pdo_exec
 #define MAX_CLASS_METHOD_SIZE 128
       char buf[MAX_CLASS_METHOD_SIZE] = {0};
-      int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s:%s",
+      int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s::%s",
                           ZSTR_VAL(cls_name), ZSTR_VAL(method));
 
       zend_string *name = zend_string_init(buf, size, 0);
@@ -938,7 +944,7 @@ static void add_class_method_interceptor(zend_string *cls_name,
       pp_trace("added interceptor on `module`: %s success", ZSTR_VAL(name));
       zend_string_release(name);
     } else {
-      pp_trace("add interceptor on `module`:%s:%s failed: no such method",
+      pp_trace("add interceptor on `module`: %s::%s failed: no such method",
                ZSTR_VAL(cls_name), ZSTR_VAL(method));
     }
   } else {
@@ -1162,13 +1168,14 @@ PHP_MINIT_FUNCTION(pinpoint_php) {
 
   old_error_cb = zend_error_cb;
   zend_error_cb = apm_error_cb;
-
   pinpoint_set_agent(PPG(co_host), PPG(w_timeout_ms), PPG(tracelimit), 1500);
-  if (PPG(debug_report) == 1) {
-    register_logging_cb(pinpoint_log, 1);
-  } else {
-    register_logging_cb(pinpoint_log, 0);
-  }
+  register_logging_cb(nullptr, 1);
+
+  // if (PPG(debug_report) == 1) {
+  //   register_logging_cb(pinpoint_log, 1);
+  // } else {
+  //   register_logging_cb(pinpoint_log, 0);
+  // }
 
   return SUCCESS;
 }
@@ -1215,6 +1222,7 @@ PHP_RSHUTDOWN_FUNCTION(pinpoint_php) {
   while (_parent_id != E_INVALID_NODE && _parent_id != E_ROOT_NODE) {
     _parent_id = pinpoint_end_trace(_parent_id);
   }
+  pinpoint_update_per_thread_id(E_ROOT_NODE);
 
   if (PPG(interceptors)) {
     zend_hash_destroy(PPG(interceptors));

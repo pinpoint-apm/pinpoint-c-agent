@@ -140,78 +140,89 @@ case: curl_init()
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_init
 on_before 
 NULL
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_init return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 resource(4) of type (curl)
 get resource [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(42)
-not working[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+not working[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_init 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10002)
 test CURLOPT_URL 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:2
 [pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `size` does not matched
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(19913)
 test CURLOPT_RETURNTRANSFER 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not matched expected:3 give:4
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10023)
 value must be affected
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]args[2] type:7 in:1 va:2
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
 on_before 
 resource(4) of type (curl)
 request url: http://httpbin.org/anything
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_exec 
 error: 
 case : curl_init with variable 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_init
 on_before 
 string(27) "http://httpbin.org/anything"
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_init return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
 resource(5) of type (curl)
 get resource [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(42)
-not working[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+not working[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_init 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(19913)
 test CURLOPT_RETURNTRANSFER 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not matched expected:3 give:4
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
 int(10023)
 value must be affected
-[pinpoint] [%d] [%d] call_callback_function on_before return type(7) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
 [pinpoint] [%d] [%d]args[2] type:7 in:1 va:2
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
 on_before 
 resource(5) of type (curl)
 request url: http://httpbin.org/anything
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:curl_exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: curl_exec 
 error: 
 [pinpoint] [%d] [%d]start free interceptor: curl_init
 [pinpoint] [%d] [%d]start free interceptor: curl_exec

@@ -20,6 +20,7 @@
  *      Author: eeliu
  */
 
+#include <cstddef>
 #include <gtest/gtest.h>
 #include "NodePool/PoolManager.h"
 using std::chrono::seconds;
@@ -115,4 +116,9 @@ TEST(util, mergeTraceNodeTree_1) {
   EXPECT_TRUE(span.find("id2") != span.npos);
   EXPECT_TRUE(span.find("id3") != span.npos);
   EXPECT_TRUE(span.find("calls") != span.npos);
+}
+
+TEST(util, logger) {
+  pp_trace("abc:%d", 2);
+  pp_trace("abc:%s", nullptr);
 }

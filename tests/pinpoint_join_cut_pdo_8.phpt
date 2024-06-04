@@ -103,32 +103,35 @@ $ret = $pdo->exec($sql);
 
 --EXPECTF--
 [pinpoint] [%d] [%d]try to interceptor module(class)/function=pdo:__construct
-[pinpoint] [%d] [%d]added interceptor on `module`: pdo:__construct success
+[pinpoint] [%d] [%d]added interceptor on `module`: pdo::__construct success
 [pinpoint] [%d] [%d]try to interceptor module(class)/function=pdo:exec
-[pinpoint] [%d] [%d]added interceptor on `module`: pdo:exec success
+[pinpoint] [%d] [%d]added interceptor on `module`: pdo::exec success
 case: pdo() 
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo:__construct
+[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo::__construct
 on_before: mysql:host=dev-mysql;dbname=employees 
 attached dsn 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:pdo::__construct return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo:exec
+[pinpoint] [%d] [%d]call_interceptor_end: pdo::__construct 
+[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo::exec
 PDO::exec: on_before: CREATE table IF NOT EXISTS pdo_test(
      ID INT( 11 ) AUTO_INCREMENT PRIMARY KEY,
      Name VARCHAR( 250 ) NOT NULL,
      AGE tinyint(1) unsigned NOT NULL default '1' ); 
 mysql:host=dev-mysql;dbname=employees 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:pdo::exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 PDO::exec : on_end 
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo:exec
+[pinpoint] [%d] [%d]call_interceptor_end: pdo::exec 
+[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo::exec
 PDO::exec: on_before: INSERT INTO pdo_test (NAME, AGE)
 VALUES ('a',1),('b',1),('c',3),('d',1); 
 mysql:host=dev-mysql;dbname=employees 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:pdo::exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 PDO::exec : on_end 
+[pinpoint] [%d] [%d]call_interceptor_end: pdo::exec 
 int(4)
 object(PDOStatement)#9 (1) {
   ["queryString"]=>
@@ -170,11 +173,12 @@ array(2) {
   }
 }
 string(37) "mysql:host=dev-mysql;dbname=employees"
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo:exec
+[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo::exec
 PDO::exec: on_before: DROP TABLE pdo_test 
 mysql:host=dev-mysql;dbname=employees 
-[pinpoint] [%d] [%d] call_callback_function on_before return type(1) zval
+[pinpoint] [%d] [%d] call_interceptor_before:pdo::exec return type(1) zval
 [pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
 PDO::exec : on_end 
-[pinpoint] [%d] [%d]start free interceptor: pdo:__construct
-[pinpoint] [%d] [%d]start free interceptor: pdo:exec
+[pinpoint] [%d] [%d]call_interceptor_end: pdo::exec 
+[pinpoint] [%d] [%d]start free interceptor: pdo::__construct
+[pinpoint] [%d] [%d]start free interceptor: pdo::exec

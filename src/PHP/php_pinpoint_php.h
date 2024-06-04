@@ -60,6 +60,7 @@ typedef struct {
   zval end;
   zval exception;
   zif_handler origin;
+  zend_function *origin_func;
   zend_string *name;
 } pp_interceptor_v_t;
 
