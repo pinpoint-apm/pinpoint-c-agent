@@ -1169,13 +1169,14 @@ PHP_MINIT_FUNCTION(pinpoint_php) {
   old_error_cb = zend_error_cb;
   zend_error_cb = apm_error_cb;
   pinpoint_set_agent(PPG(co_host), PPG(w_timeout_ms), PPG(tracelimit), 1500);
-  register_logging_cb(nullptr, 1);
 
-  // if (PPG(debug_report) == 1) {
-  //   register_logging_cb(pinpoint_log, 1);
-  // } else {
-  //   register_logging_cb(pinpoint_log, 0);
-  // }
+  if (PPG(debug_report) == 1) {
+    register_logging_cb(nullptr, 1);
+    // register_logging_cb(pinpoint_log, 1);
+  } else {
+    // register_logging_cb(pinpoint_log, 0);
+    register_logging_cb(nullptr, 0);
+  }
 
   return SUCCESS;
 }
