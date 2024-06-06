@@ -346,3 +346,22 @@ services:
         condition: service_healthy 
       dev-collector:
         condition: service_started        
+
+  phpmyadmin:
+    build:
+      dockerfile: testapps/php_phpmyadmin/Dockerfile
+      context: ../
+    environment:
+      - PMA_ARBITRARY=1   
+      - PMA_HOST='dev-mysql'
+      - PMA_USER='root'
+      - PMA_PASSWORD='password'
+    ports:
+      - "8081:80"     
+    cap_add:
+      - SYS_PTRACE 
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+      dev-collector:
+        condition: service_started           
