@@ -353,9 +353,9 @@ services:
       context: ../
     environment:
       - PMA_ARBITRARY=1   
-      - PMA_HOST='dev-mysql'
-      - PMA_USER='root'
-      - PMA_PASSWORD='password'
+      - PMA_HOST=dev-mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=password
     ports:
       - "8081:80"     
     cap_add:
@@ -364,4 +364,4 @@ services:
       dev-mysql:
         condition: service_healthy 
       dev-collector:
-        condition: service_started           
+        condition: service_started        

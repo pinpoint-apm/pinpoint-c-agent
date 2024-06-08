@@ -1,1 +1,1 @@
-FROM phpmyadmin:fpm
+FROM phpmyadmin:apache
