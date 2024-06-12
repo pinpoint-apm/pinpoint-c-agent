@@ -77,3 +77,4 @@ wheelhouse/
 .clangd
 .vs
 *.dep
+downloads
