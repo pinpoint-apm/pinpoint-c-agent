@@ -1,6 +1,5 @@
 FROM  wordpress:beta-php8.1-apache
 
-
 COPY config.m4 /pinpoint-c-agent/config.m4 
 COPY src/PHP /pinpoint-c-agent/src/PHP
 COPY common /pinpoint-c-agent/common

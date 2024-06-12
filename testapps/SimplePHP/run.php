@@ -68,7 +68,6 @@ function call_mysqli()
     $s_stmt = mysqli_prepare($mysqli, "SELECT * FROM employees WHERE emp_no=?");
     mysqli_stmt_bind_param($s_stmt, "i", $id);
     mysqli_stmt_execute($stmt);
-
 }
 
 function call_mariadb()
@@ -192,13 +191,13 @@ function call_memcached()
 
 function main()
 {
-    // call_mysql();
+    call_mysql();
     call_mysqli();
-    // call_mariadb();
-    // call_mongodb();
-    // call_curl();
-    // call_redis();
-    // call_memcached();
+    call_mariadb();
+    call_mongodb();
+    call_curl();
+    call_redis();
+    call_memcached();
 }
 
 main();

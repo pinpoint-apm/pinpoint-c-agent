@@ -1,0 +1,1 @@
+<Context docBase="${catalina.home}/webapps/javacallapp" path="/javacallapp" reloadable="true"/>
