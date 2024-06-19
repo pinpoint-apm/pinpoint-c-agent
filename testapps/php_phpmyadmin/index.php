@@ -48,7 +48,6 @@ class MyAdminRequestPlugin extends Pinpoint\Plugins\DefaultRequestPlugin
         // do nothing
     }
 }
-define('AOP_CACHE_DIR', __DIR__ . '/Cache');
 define('APPLICATION_NAME', 'cd.dev.test.php'); // your application name
 define('APPLICATION_ID', 'cd.dev.phpmyadmin');  // your application id
 define('PP_REQ_PLUGINS', MyAdminRequestPlugin::class);

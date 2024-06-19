@@ -3,7 +3,7 @@ name: CI
 on: [pull_request, workflow_dispatch, push]
 
 env:
-  MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}.tar.gz
+  MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}
   
 jobs:
   cpp:
@@ -103,11 +103,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Package pinpoint_php
-        run: tar -czf ${{ env.MODULE_PAK }}   common/  src/PHP config.m4 tests LICENSE
+        id: pack
+        run: |
+          tar -czf ${{ env.MODULE_PAK }} common/  src/PHP config.m4 tests LICENSE
+          md5=($(md5sum ${{ env.MODULE_PAK }} ))
+          PACK_NAME=${{ env.MODULE_PAK }}-$(date '+%Y-%m-%d')-${md5}.tar.gz
+          mv ${{ env.MODULE_PAK }} $PACK_NAME
+          echo "PACK=$PACK_NAME" >> $GITHUB_OUTPUT
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.MODULE_PAK }}
-          path: ${{ env.MODULE_PAK }}
+          path: ${{ steps.pack.outputs.PACK }}
 
   Python:
     strategy:

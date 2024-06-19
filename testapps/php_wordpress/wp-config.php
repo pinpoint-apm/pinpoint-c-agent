@@ -101,7 +101,6 @@ class WordPressDefaultRequestPlugin extends Pinpoint\Plugins\DefaultRequestPlugi
         // do nothing
     }
 }
-define('AOP_CACHE_DIR', __DIR__ . '/Cache');
 define('APPLICATION_NAME', 'cd.dev.test.php'); // your application name
 define('APPLICATION_ID', 'cd.dev.wordpress');  // your application id
 define('PP_REQ_PLUGINS', WordPressDefaultRequestPlugin::class);

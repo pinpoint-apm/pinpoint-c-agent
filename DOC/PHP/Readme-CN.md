@@ -60,20 +60,13 @@ collector-agent| [installed ?](../collector-agent/readme.md)
         #################################################
         define('APPLICATION_NAME','APP-2');
         define('APPLICATION_ID','app-2');
-        define('AOP_CACHE_DIR',__DIR__.'./Cache/');
-        define('PLUGINS_DIR',__DIR__.'./Plugins/');
-        define('PINPOINT_USE_CACHE','YES');
         define('PP_REQ_PLUGINS', '\Plugins\PerRequestPlugins');
-        #define('USER_DEFINED_CLASS_MAP_IMPLEMENT',"\Plugins\Framework\app\ClassMapInFile");
         require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
         #################################################
         ```
         1. ```APPLICATION_NAME```: 应用名称.
         2. ```APPLICATION_ID```: Agent ID.
-        3. ```AOP_CACHE_DIR```: 保存```Cache```文件夹的位置.
-        4. ```PLUGINS_DIR```: ```Plugins```文件夹的路径.
-        5. ```PINPOINT_USE_CACHE```: 'YES'-有请求时不会自动更新 ```Cache```; 'No'-有请求时将会自动更新 ```Cache```(您也可以手动更新```Cache```，直接删除```Cache```就可以)。考虑到性能，建议设置为'YES'.如果您修改了Plugins，需要更新```Cache```后才能生效。
-        6. ```PP_REQ_PLUGINS```: ```PerRequestPlugins```的路径(```PerRequestPlugins```是基本的请求拦截器, 不同的PHP框架的拦截器不同，我们已经为您准备了一些框架的```PerRequestPlugins```，[请到这里获取](../../plugins/PHP/Plugins/Framework)，（例如:[swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php)）。欢迎PR其他框架哟~
+        3. ```PP_REQ_PLUGINS```: ```PerRequestPlugins```的路径(```PerRequestPlugins```是基本的请求拦截器, 不同的PHP框架的拦截器不同，我们已经为您准备了一些框架的```PerRequestPlugins```，[请到这里获取](../../plugins/PHP/Plugins/Framework)，（例如:[swoole's PerRequestPlugins](../../plugins/PHP/Plugins/Framework/Swoole/Http/PerReqPlugin.php)）。欢迎PR其他框架哟~
         7. ```require_once __DIR__. path to 'vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';```: 导入pinpoint的auto_pinpointed.php。**请在```require_once __DIR__."/../vendor/autoload.php";```之后添加，这很重要**
 
    3. 拷贝[Plugins](../../plugins/PHP/Plugins)到您的项目根路径下，并在```composer.josn```中自动加载```Plugins```. 

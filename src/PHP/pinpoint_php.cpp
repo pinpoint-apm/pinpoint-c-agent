@@ -1220,7 +1220,7 @@ PHP_RINIT_FUNCTION(pinpoint_php) {
  */
 PHP_RSHUTDOWN_FUNCTION(pinpoint_php) {
   NodeID _parent_id = pinpoint_get_per_thread_id();
-  while (_parent_id != E_INVALID_NODE && _parent_id != E_ROOT_NODE) {
+  while (_parent_id > E_ROOT_NODE) {
     _parent_id = pinpoint_end_trace(_parent_id);
   }
   pinpoint_update_per_thread_id(E_ROOT_NODE);

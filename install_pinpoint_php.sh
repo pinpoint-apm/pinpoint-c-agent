@@ -7,7 +7,9 @@ func_check_command(){
 }
 
 func_download_extension(){
-    mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.1.11/pinpoint_php@feat-join-cut-5-11.tar.gz &&  tar  xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
+    mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.1.11/pinpoint_php@feat-join-cut.tar.gz &&  tar  xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
+
+    # mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/$PINPOINT_PHP_VERSION/pinpoint_php@$PINPOINT_PHP_VERSION.tar.gz &&  tar  xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
     #  && rm /tmp/pinpoint_php* -rf
 }
 

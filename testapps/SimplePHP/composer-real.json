@@ -7,7 +7,7 @@
         }
     },
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "dev-feat-join-cut-api",
+        "pinpoint-apm/pinpoint-php-aop": "dev-feat-use-class-map-script",
         "mongodb/mongodb": "^1.18"
     }
 }

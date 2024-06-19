@@ -9,7 +9,10 @@ services:
       - '3306:3306'
     volumes:
       - ..:/workspace:cached
-
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
     healthcheck:
       test:
         [
@@ -111,7 +114,7 @@ services:
         condition: service_started
     restart: always
     build:
-      dockerfile: testapps/php.dockerfile
+      dockerfile: testapps/SimplePHP/php.dockerfile
       context: ../
     ports:
       - 8185:80
@@ -288,7 +291,7 @@ services:
 
     restart: always
     build:
-      dockerfile: testapps/simplephp.dockerfile
+      dockerfile: testapps/SimplePHP/php.dockerfile
       context: ../
 
   postgres:
@@ -344,7 +347,7 @@ services:
   
   php-wordpress:
     build:
-      dockerfile: testapps/php-wordpress.dockerfile
+      dockerfile: testapps/php_wordpress/php-wordpress.dockerfile
       context: ../
     ports:
       - "8080:80"     
@@ -355,6 +358,10 @@ services:
         condition: service_healthy 
       dev-collector:
         condition: service_started        
+    healthcheck:
+      test: curl -f http://localhost:80
+      interval: 5s
+      timeout: 1s 
 
   phpmyadmin:
     build:
@@ -373,4 +380,31 @@ services:
       dev-mysql:
         condition: service_healthy 
       dev-collector:
-        condition: service_started        
+        condition: service_started 
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    healthcheck:
+      test: curl -f http://localhost:80
+      interval: 5s
+      timeout: 1s          
+
+  cg_phpmyadmin:
+    image: phpmyadmin:apache
+    environment:
+      - PMA_ARBITRARY=1   
+      - PMA_HOST=dev-mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+    ports:
+      - "8082:80"     
+    cap_add:
+      - SYS_PTRACE 
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+    deploy:
+      resources:
+        limits:
+          cpus: "2"       
