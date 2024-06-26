@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include "common.h"
+#include "json/value.h"
 
 using namespace testing;
 std::string ouputMsg;
@@ -179,4 +180,11 @@ TEST(common, pp_trace) {
   pp_trace("한국어 인코딩 테스트 \n");
   pp_trace("日本語エンコーディングをテストする \n");
   pp_trace("%s %s \n", "日本語エンコーディングをテストする ", "combine");
+}
+
+TEST(common, none_utf8) {
+  // using Json = PP::AliasJson;
+  AliasJson::Value value;
+  value["a"] = "ä\xA9ü";
+  pp_trace("%s ", value.toStyledString().c_str());
 }
