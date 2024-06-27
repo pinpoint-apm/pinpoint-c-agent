@@ -91,7 +91,8 @@ _pinpoint_join_cut(
 
 echo "case: curl_init() \n";
 
-$ch = curl_init();
+$my_curl_init = curl_init;
+$ch = my_curl_init();
 curl_setopt($ch, CURLOPT_URL, "http://httpbin.org/anything");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [

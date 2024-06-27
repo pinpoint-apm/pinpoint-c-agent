@@ -36,6 +36,7 @@ collector-agent| [installed ?](../collector-agent/readme.md)
      ;log_errors = On
      ;error_log = /tmp/php_fpm_error.log
      ```
+     
 3. Install pinpoint-php-aop by composer
 
      composer require -w pinpoint-apm/pinpoint-php-aop

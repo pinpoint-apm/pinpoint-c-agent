@@ -408,3 +408,19 @@ services:
       resources:
         limits:
           cpus: "2"       
+
+  flarum:
+    # image: 
+    build:
+      dockerfile: testapps/flarum/flarum.dockerfile
+      context: ../      
+    container_name: flarum
+    env_file:
+      - ./flarum/flarum.env
+    ports:
+      - 8888:8888
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+      dev-collector:
+        condition: service_started    

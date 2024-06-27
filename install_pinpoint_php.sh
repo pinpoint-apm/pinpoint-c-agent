@@ -13,6 +13,12 @@ func_output_w(){
     echo "${RED} $1 ${NC}"
 }
 
+func_output_n(){
+    GREEN='\033[0;32m'
+    NC='\033[0m'
+    echo "${RED} $1 ${NC}"
+}
+
 func_download_extension(){
     mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.1.11/pinpoint_php@feat-join-cut.tar.gz &&  tar xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
 
@@ -53,7 +59,7 @@ EOF
 
 func_show_pinpoint_php(){
     php -r "echo 'TEST: installed pinpoint_php:'. phpversion('pinpoint_php');"
-    echo " \n everything looks done !";
+    func_output_n " \n everything looks done !";
 }
 
 main(){

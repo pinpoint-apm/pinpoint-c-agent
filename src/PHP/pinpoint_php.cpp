@@ -651,21 +651,20 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
           : func->common.function_name;
 #endif
   if (object) {
-    zend_string *scope;
+    zend_string *scope_name;
     if (func->common.scope) {
-      scope = func->common.scope->name;
-#if PHP_MAJOR_VERSION == 7 and                                                 \
-    (PHP_MINOR_VERSION == 4 or PHP_MINOR_VERSION == 3)
-    } else if (object->handlers->get_class_name == zend_std_get_class_name) {
-#elif PHP_MAJOR_VERSION == 7 and PHP_MINOR_VERSION == 1
+      scope_name = func->common.scope->name;
+#if PHP_MAJOR_VERSION == 7 and PHP_MINOR_VERSION == 1
     } else if (object->handlers->get_class_name ==
                std_object_handlers.get_class_name) {
+#else
+    } else if (object->handlers->get_class_name == zend_std_get_class_name) {
 #endif
-      scope = object->ce->name;
+      scope_name = object->ce->name;
     } else {
-      scope = object->handlers->get_class_name(object);
+      scope_name = object->handlers->get_class_name(object);
     }
-    return merge_pp_style_name(scope, function_name);
+    return merge_pp_style_name(scope_name, function_name);
   } else if (func->common.scope) {
     zend_string *scope = func->common.scope->name;
     return merge_pp_style_name(scope, function_name);
