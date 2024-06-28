@@ -6,7 +6,7 @@ mysql-connector-python==8.0.31
 pymongo==4.6.3
 PyMySQL==1.1.1
 redis==5.0.1
-requests==2.31.0
+requests==2.32.2
 SQLAlchemy==2.0.23
 starlette-context==0.3.6
 mysqlclient==2.2.0
