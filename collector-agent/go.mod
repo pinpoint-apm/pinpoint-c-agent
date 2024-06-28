@@ -1,6 +1,6 @@
 module github.com/pinpoint-apm/pinpoint-c-agent/collector-agent
 
-go 1.15
+go 1.18
 
 require (
 	github.com/golang/protobuf v1.5.3

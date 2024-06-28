@@ -26,8 +26,6 @@ from sqlalchemy.engine import Engine
 from urllib.parse import urlparse
 
 from pinpointPy.Common import Trace, PinTrace
-from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
-from pinpointPy.TraceContext import _reqTraceCtx
 
 
 class CreateEnginePlugin(Trace):

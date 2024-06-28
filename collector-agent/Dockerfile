@@ -1,8 +1,9 @@
 FROM golang:1.18-alpine3.17 as builder
 WORKDIR /apps
 USER root
-RUN apk add --no-cache make protobuf-dev
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+RUN apk add --no-cache make protobuf-dev git
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0 
+
 COPY ./ /apps
 RUN make
 

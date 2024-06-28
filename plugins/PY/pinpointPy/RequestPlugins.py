@@ -43,7 +43,7 @@ class RequestPlugin(Common.PinTrace):
         request = args[0]
         ###############################################################
         pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskrequest', trace_id)
+            Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskRequest', trace_id)
         pinpoint.add_trace_header(Defines.PP_REQ_URI, request.path, trace_id)
         pinpoint.add_trace_header(
             Defines.PP_REQ_CLIENT, request.remote_addr, trace_id, trace_id)

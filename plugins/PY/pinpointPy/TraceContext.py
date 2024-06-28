@@ -54,7 +54,8 @@ def set_trace_context(new_trace_context: TraceContext):
 class thread_local_context (TraceContext):
     def get_parent_id(self):
         global _local_id
-        if getattr(_local_id, '_pinpoint_id_', None):
+        # fix bug: -1 break _pinpoint_id_ rule
+        if getattr(_local_id, '_pinpoint_id_', 0) > 0:
             return True, _local_id._pinpoint_id_
         else:
             return False, -1

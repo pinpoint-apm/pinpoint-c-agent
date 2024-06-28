@@ -39,7 +39,7 @@ include_dirs_ = [Path(cwd, './common/include'), Path(cwd, './common/jsoncpp/incl
                  Path(cwd, './common/src')]
 
 setup(name='pinpointPy',
-      version="1.2.1",  # don't forget update __version__ in pinpointPy/__init__.py
+      version="1.3.1",  # don't forget update __version__ in pinpointPy/__init__.py
       author="cd_pinpoint members",
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',
@@ -61,6 +61,8 @@ setup(name='pinpointPy',
 
 """
 # Changed
+## 1.3.1
+- fix bug https://github.com/pinpoint-apm/pinpoint-c-agent/issues/626
 ## 1.3.0
 - support error analysis
 ## 1.2.1

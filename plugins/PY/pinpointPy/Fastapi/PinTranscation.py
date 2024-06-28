@@ -105,8 +105,6 @@ class PinTransaction(AsyncPinTrace):
         if header.ParentTid != '':
             tid = header.ParentTid
             pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, tid, traceId)
-            # nsid = pinpoint.gen_sid()
-            pinpoint.add_trace_header(Defines.PP_NEXT_SPAN_ID, sid, traceId)
         else:
             tid = pinpoint.gen_tid()
 

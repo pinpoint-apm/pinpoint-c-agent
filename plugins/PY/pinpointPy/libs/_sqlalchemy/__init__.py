@@ -40,5 +40,9 @@ def monkey_patch():
 
 __all__ = ['monkey_patch']
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 __author__ = 'liu.mingyi@navercorp.com'
+
+# changes
+# 0.0.4
+# - fix https://github.com/pinpoint-apm/pinpoint-c-agent/issues/626
