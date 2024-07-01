@@ -654,7 +654,7 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
     zend_string *scope_name;
     if (func->common.scope) {
       scope_name = func->common.scope->name;
-#if PHP_MAJOR_VERSION == 7 and PHP_MINOR_VERSION == 1
+#if PHP_MAJOR_VERSION == 7 and PHP_MINOR_VERSION <= 2
     } else if (object->handlers->get_class_name ==
                std_object_handlers.get_class_name) {
 #else
