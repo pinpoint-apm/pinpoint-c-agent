@@ -43,7 +43,7 @@ inline long get_tid() { return GetCurrentThreadId(); }
 #endif
 
 static log_msg_cb log_call_back_;
-static bool enable_trace_ = 0;
+static bool enable_trace_ = false;
 #define LOG_SIZE 40960
 thread_local char buf[LOG_SIZE] = {0};
 

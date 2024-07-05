@@ -6,10 +6,13 @@ services:
       MYSQL_ROOT_PASSWORD: 'password'
       MYSQL_TCP_PORT: 3306
     ports:
-      - '33060:3306'
+      - '3306:3306'
     volumes:
       - ..:/workspace:cached
-
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
     healthcheck:
       test:
         [
@@ -30,19 +33,26 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: test
+      MYSQL_TCP_PORT: 3307
       # MYSQL_USER: root
       # MYSQL_PASSWORD: password
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "33061:3306"
+      - "3307:3307"
     healthcheck:
-      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
       start_period: 1m
-      start_interval: 10s
       interval: 1m
       timeout: 5s
-      retries: 3  
+      retries: 3
 
   dev-mysql-setup:
     image: mysql:5.7
@@ -104,7 +114,7 @@ services:
         condition: service_started
     restart: always
     build:
-      dockerfile: testapps/php.dockerfile
+      dockerfile: testapps/SimplePHP/php.dockerfile
       context: ../
     ports:
       - 8185:80
@@ -210,7 +220,7 @@ services:
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
     ports:
-    - 27017:27017
+      - 27017:27017
 
   python-plugins:
     build:
@@ -252,21 +262,37 @@ services:
       dockerfile: testapps/grpc_py_client.dockerfile
       context: ../
 
+  java-agent:
+    container_name: spring
+    build:
+      dockerfile: testapps/java_call_app/spring.dockerfile
+      context: ../
+    ports:
+      - 8085:8080
+    restart: always
+    volumes:
+      - /etc/hosts:/etc/hosts
+
   simple-php:
     container_name: simple-php
     depends_on:
       dev-mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy   
+        condition: service_healthy
       mongodb:
-        condition: service_healthy   
+        condition: service_healthy
       dev-mariadb:
-        condition: service_healthy 
+        condition: service_healthy
+      memcached:
+        condition: service_healthy
+      dev-collector:
+        condition: service_started
+
     restart: always
     build:
-      dockerfile: testapps/simplephp.dockerfile
-      context: ../      
+      dockerfile: testapps/SimplePHP/php.dockerfile
+      context: ../
 
   postgres:
     image: postgres:14-alpine
@@ -277,7 +303,7 @@ services:
       - POSTGRES_USER=test
       - POSTGRES_DB=test
     volumes:
-        - ./init.sql:/docker-entrypoint-initdb.d/init.sql      
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
@@ -285,3 +311,149 @@ services:
       timeout: 30s
       retries: 5
       start_period: 80s
+
+  php-compatible:
+    build:
+      dockerfile: testapps/php_compatible.dockerfile
+      context: ../
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+    depends_on:
+      dev-mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      dev-mariadb:
+        condition: service_healthy
+
+  memcached:
+    image: memcached:alpine3.20
+    ports:
+      - "11211:11211"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "127.0.0.1", "11211" ]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 80s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 50M
+  
+  php-wordpress:
+    build:
+      dockerfile: testapps/php_wordpress/php-wordpress.dockerfile
+      context: ../
+    ports:
+      - "8080:80"     
+    cap_add:
+      - SYS_PTRACE 
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+      dev-collector:
+        condition: service_started        
+    healthcheck:
+      test: curl -f http://localhost:80
+      interval: 5s
+      timeout: 1s 
+
+  phpmyadmin:
+    build:
+      dockerfile: testapps/php_phpmyadmin/phpmyadmin.dockerfile
+      context: ../
+    environment:
+      - PMA_ARBITRARY=1   
+      - PMA_HOST=dev-mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+    ports:
+      - "8081:80"     
+    cap_add:
+      - SYS_PTRACE 
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+      dev-collector:
+        condition: service_started 
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    healthcheck:
+      test: curl -f http://localhost:80
+      interval: 5s
+      timeout: 1s          
+
+  cg_phpmyadmin:
+    image: phpmyadmin:apache
+    environment:
+      - PMA_ARBITRARY=1   
+      - PMA_HOST=dev-mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+    ports:
+      - "8082:80"     
+    cap_add:
+      - SYS_PTRACE 
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+    deploy:
+      resources:
+        limits:
+          cpus: "2"       
+
+  flarum:
+    # image: 
+    build:
+      dockerfile: testapps/flarum/flarum.dockerfile
+      context: ../      
+    container_name: flarum
+    env_file:
+      - ./flarum/flarum.env
+    ports:
+      - 8888:8888
+    depends_on:
+      dev-mysql:
+        condition: service_healthy 
+      dev-collector:
+        condition: service_started    
+
+  cachet:
+    build:
+      dockerfile: testapps/cachethq/cachethq.dockerfile
+      context: ../    
+    ports:
+      - 8000:8000
+    environment:
+      - DB_DRIVER=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - CACHE_DRIVER=redis
+      - DB_DATABASE=test
+      - DB_USERNAME=test
+      - DB_PASSWORD=pinpoint
+      - DB_PREFIX=chq_
+      - APP_KEY=${APP_KEY:-null}
+      - APP_LOG=errorlog
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=true
+      - REDIS_HOST=redis
+      - REDIS_DATABASE=0
+      - REDIS_PORT=6379
+      - DEBUG=true
+      - APP_KEY=base64:JlA4Fr6ysePTdzUyqGEmPXxknANEIfOF7M2krYh8wgM=
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      dev-collector:
+        condition: service_started           
+    restart: on-failure        

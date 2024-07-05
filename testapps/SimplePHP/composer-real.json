@@ -1,0 +1,13 @@
+{
+    "name": "root/simple-php",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "SimplePHP\\": "src/"
+        }
+    },
+    "require": {
+        "pinpoint-apm/pinpoint-php-aop": "dev-dev",
+        "mongodb/mongodb": "^1.18"
+    }
+}

@@ -1,5 +1,5 @@
 --TEST--
-pinpioint_php internal test case [pinpoint_test_main]
+pinpoint_php internal test case [pinpoint_test_main]
 --SKIPIF--
 <?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
 --INI--
@@ -13,25 +13,25 @@ pinpoint_php.DebugReport=true
 <?php 
 //function shutdown()
 //{
-//    while(pinpoint_end_trace()>0);
+//    while(_pinpoint_end_trace()>0);
 //}
 //register_shutdown_function('shutdown');
 class Foo{
     public  function __construct()
     {
-        pinpoint_start_trace();
-        pinpoint_add_clue("name","Foo");
+        _pinpoint_start_trace();
+        _pinpoint_add_clue("name","Foo");
     }
 
     public function __destruct()
     {
-        pinpoint_end_trace();
+        _pinpoint_end_trace();
     }
 
     public function ouput($a,$b)
     {
-        pinpoint_add_clues("1","$a,$b");
-        pinpoint_add_clues("2","234");
+        _pinpoint_add_clues("1","$a,$b");
+        _pinpoint_add_clues("2","234");
     }
 }
 
@@ -39,7 +39,7 @@ function Test(){
     throw new \Exception("I am testting");
 }
 
-pinpoint_start_trace();
+_pinpoint_start_trace();
 
 try{
     $f = new Foo();
@@ -48,7 +48,7 @@ try{
     throw $e;
 }
 
-pinpoint_start_trace();
+_pinpoint_start_trace();
 --EXPECTF--
 [pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
 [pinpoint] [%d] [%d] [128] pinpoint_start child  [127]

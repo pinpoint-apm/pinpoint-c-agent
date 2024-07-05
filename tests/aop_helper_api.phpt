@@ -1,9 +1,9 @@
 --TEST--
 app info 
 --SKIPIF--
-<?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
+<?php print "skip"; print "deprecated"?>
 --INI--
-
+pinpoint_php.DebugReport=false
 --FILE--
 <?php 
 

@@ -15,7 +15,7 @@
 ```
 $ git clone --recurse-submodules https://github.com/pinpoint-apm/pinpoint-c-agent.git 
 $ cd pinpoint-c-agent && git checkout dev
-$ cd testapps && docker compose up --build
+$ cd testapps && docker compose build --build-arg PHP_VERSION=7.4 && docker compose up
 $ ## testapp-fastapi
 $ curl http://localhost:8186/docs#/
 $ ## testapp-php yii2 framework
