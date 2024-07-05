@@ -7,7 +7,7 @@
         }
     },
     "require": {
-        "pinpoint-apm/pinpoint-php-aop": "dev-feat-use-class-map-script",
+        "pinpoint-apm/pinpoint-php-aop": "dev-dev",
         "mongodb/mongodb": "^1.18"
     }
 }

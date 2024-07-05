@@ -9,7 +9,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 define('APPLICATION_NAME', 'cd.dev.test.php'); // your application name
 define('APPLICATION_ID', 'cd.dev.test.run');  // your application id
-define('PP_REQ_PLUGINS', SimplePHP\RequestPlugin::class);
+define('PP_REQ_PLUGINS', Pinpoint\Plugins\DefaultRequestPlugin::class);
 require_once __DIR__ . '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.php';
 
 $mysql_host = "dev-mysql";

@@ -424,3 +424,36 @@ services:
         condition: service_healthy 
       dev-collector:
         condition: service_started    
+
+  cachet:
+    build:
+      dockerfile: testapps/cachethq/cachethq.dockerfile
+      context: ../    
+    ports:
+      - 8000:8000
+    environment:
+      - DB_DRIVER=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - CACHE_DRIVER=redis
+      - DB_DATABASE=test
+      - DB_USERNAME=test
+      - DB_PASSWORD=pinpoint
+      - DB_PREFIX=chq_
+      - APP_KEY=${APP_KEY:-null}
+      - APP_LOG=errorlog
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=true
+      - REDIS_HOST=redis
+      - REDIS_DATABASE=0
+      - REDIS_PORT=6379
+      - DEBUG=true
+      - APP_KEY=base64:JlA4Fr6ysePTdzUyqGEmPXxknANEIfOF7M2krYh8wgM=
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      dev-collector:
+        condition: service_started           
+    restart: on-failure        

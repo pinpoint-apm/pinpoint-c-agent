@@ -17,5 +17,5 @@ COPY testapps/php_wordpress/wp-config.php /usr/src/wordpress/wp-config.php
 #  install composer
 RUN curl -s https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 USER www-data
-RUN cd /var/www/html/ && composer require -w pinpoint-apm/pinpoint-php-aop:dev-feat-use-class-map-script
+RUN cd /var/www/html/ && composer require -w pinpoint-apm/pinpoint-php-aop:v3.0.1
 USER root

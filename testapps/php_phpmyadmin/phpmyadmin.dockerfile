@@ -19,4 +19,4 @@ RUN curl -sL https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.1.11
 COPY testapps/php_phpmyadmin/index.php /var/www/html/index.php
 ## install composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-RUN cd /var/www/html/ && composer require -w pinpoint-apm/pinpoint-php-aop:dev-feat-use-class-map-script
+RUN cd /var/www/html/ &&  composer require -w pinpoint-apm/pinpoint-php-aop:v3.0.1
