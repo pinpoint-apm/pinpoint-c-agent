@@ -20,7 +20,7 @@ func_output_n(){
 }
 
 func_download_extension(){
-    mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.1.11/pinpoint_php@feat-join-cut.tar.gz &&  tar xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
+    mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.6.0/pinpoint_php@v0.6.0-418bec8f2f0ff1d9213f683214f1b835-2024-07-08.tar.gz &&  tar xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
 
     # mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/$PINPOINT_PHP_VERSION/pinpoint_php@$PINPOINT_PHP_VERSION.tar.gz &&  tar  xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
     #  && rm /tmp/pinpoint_php* -rf
@@ -41,7 +41,7 @@ pinpoint_php.TraceLimit=-1
 # error_reporting = E_ALL
 # log_errors = On
 # should be set false if in production env
-pinpoint_php.DebugReport=true
+pinpoint_php.DebugReport=false
 EOF
     INI_DIR=`php-config --ini-dir`
     if [ -d "$INI_DIR" ]; then

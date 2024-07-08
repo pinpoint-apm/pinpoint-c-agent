@@ -19,13 +19,7 @@ It is an agent written by C++, PHP and Python languages. And we hope to support 
 
 ![How does it work](images/pinpoint_v0.5.x.png)
 
-## Installation guide
-
-### Install Collector-Agent
-
-[How to install Collector-Agent](DOC/collector-agent/readme.md)
-
-### Install Agent
+### Pinpoint Agent
 
 language| tutorial
 ---|---

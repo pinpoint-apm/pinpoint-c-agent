@@ -41,7 +41,7 @@ collector-agent| [installed ?](../collector-agent/readme.md)
 #### Steps
 1. Install `ext-pinpoint_php`
 
-   curl -sL https://github.com/***pinpoint-apm***/pinpoint-c-agent/releases/download/**v0.1.11**/install_pinpoint_php.sh | sh
+   curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.6.0/install_pinpoint_php.sh | sh
 
 2. Check your pinpoint_php.ini is right
          

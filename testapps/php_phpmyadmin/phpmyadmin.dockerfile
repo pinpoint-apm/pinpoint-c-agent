@@ -14,7 +14,7 @@ RUN apt update && apt-get install -y \
 # RUN cd /pinpoint-c-agent/ && phpize && ./configure && make install
 # RUN INI_DIR=`php-config --ini-dir` && cp /pinpoint-c-agent/pinpoint_php.ini $INI_DIR
 
-RUN curl -sL https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.1.11/install_pinpoint_php.sh | sh
+RUN curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.6.0/install_pinpoint_php.sh | sh
 
 COPY testapps/php_phpmyadmin/index.php /var/www/html/index.php
 ## install composer
