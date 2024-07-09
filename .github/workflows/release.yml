@@ -1,0 +1,42 @@
+name: release php package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Package pinpoint_php
+        id: pack
+        run: |
+          tar -czf ${{ env.MODULE_PAK }} common/  src/PHP config.m4 tests LICENSE
+          md5=($(md5sum ${{ env.MODULE_PAK }} ))
+          PACK_NAME=${{ env.MODULE_PAK }}-${md5}-$(date '+%Y-%m-%d').tar.gz
+          mv ${{ env.MODULE_PAK }} $PACK_NAME
+          echo "PACK=$PACK_NAME" >> $GITHUB_OUTPUT        
+      - name: Release php_package
+        id: rel_php_pak
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ steps.pack.outputs.PACK }}
+
+      - name: generate install_pinpoint_php.sh
+        run: |
+          PACK_URL=${{ fromJSON(steps.rel_php_pak.outputs.assets)[0].browser_download_url }}
+          ## replace __PACK_URL__
+          sed -ie "s|__PACK_URL__|${PACK_URL}|g"  install_pinpoint_php.sh
+
+      - name: Release install_pinpoint_php
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: install_pinpoint_php.sh  

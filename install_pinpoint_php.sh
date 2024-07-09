@@ -20,7 +20,7 @@ func_output_n(){
 }
 
 func_download_extension(){
-    mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.6.0/pinpoint_php@v0.6.0-418bec8f2f0ff1d9213f683214f1b835-2024-07-08.tar.gz &&  tar xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
+    mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz __PACK_URL__ &&  tar xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
 
     # mkdir -p /tmp/pinpoint_php &&  cd /tmp/pinpoint_php && curl -L -o pinpoint_php.tar.gz https://github.com/eeliu/pinpoint-c-agent/releases/download/$PINPOINT_PHP_VERSION/pinpoint_php@$PINPOINT_PHP_VERSION.tar.gz &&  tar  xvf pinpoint_php.tar.gz  && phpize && ./configure && make install
     #  && rm /tmp/pinpoint_php* -rf
