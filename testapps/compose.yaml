@@ -291,7 +291,7 @@ services:
 
     restart: always
     build:
-      dockerfile: testapps/SimplePHP/php.dockerfile
+      dockerfile: testapps/SimplePHP/simplephp.dockerfile
       context: ../
 
   postgres:
