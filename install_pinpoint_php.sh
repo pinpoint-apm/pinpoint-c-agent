@@ -63,7 +63,7 @@ func_show_pinpoint_php(){
 }
 
 main(){
-    for cmd in php phpize gcc make php-config curl; do
+    for cmd in php phpize gcc make php-config curl autoconf; do
         func_check_command $cmd
     done 
     func_download_extension 

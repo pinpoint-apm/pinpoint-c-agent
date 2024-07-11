@@ -5,6 +5,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 'password'
       MYSQL_TCP_PORT: 3306
+      MYSQL_USER: 'pinpoint'
+      MYSQL_PASSWORD: 'password'
     ports:
       - '3306:3306'
     volumes:
@@ -457,3 +459,31 @@ services:
       dev-collector:
         condition: service_started           
     restart: on-failure        
+  shopware-php:
+    build:
+      dockerfile: testapps/shopware/shopware.dockerfile
+      context: ../  
+    environment:
+      APP_SECRET: 440dec3766de53010c5ccf6231c182acfc90bd25cff82e771245f736fd276518
+      INSTANCE_ID: 10612e3916e153dd3447850e944a03fabe89440970295447a30a75b151bd844e
+      APP_URL: http://localhost:8200
+      BLUE_GREEN_DEPLOYMENT: 0
+      DATABASE_HOST: dev-mysql
+      DATABASE_URL: mysql://root:password@dev-mysql:3306/shopware
+      CACHE_ADAPTER: redis
+      REDIS_CACHE_HOST: redis
+      REDIS_CACHE_PORT: 6379
+      REDIS_CACHE_DATABASE: 3
+      REDIS_SESSION_HOST: redis
+      REDIS_SESSION_PORT: 6379
+      REDIS_SESSION_DATABASE: 3
+      APP_ENV: dev
+    ports:
+      - 8200:80    
+    depends_on:
+      redis:
+        condition: service_healthy
+      dev-collector:
+        condition: service_started       
+      dev-mysql-setup:
+        condition: service_completed_successfully
