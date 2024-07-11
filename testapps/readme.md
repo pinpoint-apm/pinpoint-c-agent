@@ -25,3 +25,18 @@ $ curl http://localhost:8184/
 $ ## testapp-django
 $ curl http://localhost:8188/admin
 ```
+
+#### Tested List
+
+Agent|Project|
+|---|---|
+PHP|Yii2|
+||cachethq|
+||flarum|
+||phpmyadmin|
+||wordpress|
+||shopware|
+||cli|
+PY|django|
+||fastapi|
+||flask|
