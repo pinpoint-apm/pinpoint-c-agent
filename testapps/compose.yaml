@@ -487,3 +487,22 @@ services:
         condition: service_started       
       dev-mysql-setup:
         condition: service_completed_successfully
+
+
+  thinkphp8:
+    build:
+      dockerfile: testapps/thinkphp-php/thinkphp.dockerfile
+      context: ../  
+    ports:
+      - 8201:8000    
+    depends_on:
+      redis:
+        condition: service_healthy
+      dev-collector:
+        condition: service_started       
+      dev-mysql-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: curl -f http://thinkphp8:8000/test_db
+      interval: 5s
+      timeout: 1s        
