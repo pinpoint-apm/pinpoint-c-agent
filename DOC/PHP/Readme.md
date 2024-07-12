@@ -1,27 +1,6 @@
 ## Supported
 
-<details> <summary>Libraries</summary>
-
-Type|Name|Version
----|---|---
-Built-in | curl| 
-||memcached|`3.2.0`
-||mysqli|
-||pdo|
-||phpredis|`6.0.2`
-|User |guzzlehttp| `8.0.x-dev`
-||predis|`3.0`
-||mongodb|`v1.19.x`
-</details> 
-
-<details> <summary>Frameworks</summary>
- 
-Name|Version|
-|---|---|
-|Yii2||
-|wordpress||
-
-</details>
+[pinpoint-apm/pinpoint-php-aop#supported-librariesframework ](https://github.com/pinpoint-apm/pinpoint-php-aop?tab=readme-ov-file#supported-librariesframework)
 
 ## Get Started
 

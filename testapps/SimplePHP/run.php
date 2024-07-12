@@ -188,6 +188,25 @@ function call_memcached()
     var_dump($Memcached->deleteMulti(["test_add", "a", "b", "c"]));  // int 0 which is Memcached::RES_SUCCESS
 }
 
+function call_apc()
+{
+    $bar = 'BAR';
+    apcu_add('foo', $bar);
+    var_dump(apcu_fetch('foo'));
+    echo "\n";
+    $bar = 'NEVER GETS SET';
+    apcu_add('foo', $bar);
+    var_dump(apcu_fetch('foo'));
+
+
+    apcu_store('cas', 2);
+    apcu_cas("cas", 1, 2);
+    apcu_cas("cas", 2, 1);
+    apcu_inc("cas");
+    var_dump(apcu_fetch("cas"));
+    apcu_clear_cache();
+}
+
 function main()
 {
     call_mysql();
@@ -197,6 +216,7 @@ function main()
     call_curl();
     call_redis();
     call_memcached();
+    call_apc();
 }
 
 main();

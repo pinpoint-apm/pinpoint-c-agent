@@ -16,5 +16,5 @@ COPY testapps/cachethq/index.php /var/www/html/public/index.php
 # COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 RUN /bin/composer.phar self-update
 USER 1001
-RUN cd /var/www/html/ && php -d memory_limit=-1 /bin/composer.phar require  pinpoint-apm/pinpoint-php-aop:v3.0.1
+RUN cd /var/www/html/ && php -d memory_limit=-1 /bin/composer.phar require  pinpoint-apm/pinpoint-php-aop
 # USER root

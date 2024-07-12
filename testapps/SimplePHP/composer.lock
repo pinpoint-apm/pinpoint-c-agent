@@ -141,11 +141,11 @@
         },
         {
             "name": "pinpoint-apm/pinpoint-php-aop",
-            "version": "dev-fix-expose-autoload",
+            "version": "dev-feat-tp8-plugins",
             "dist": {
                 "type": "path",
                 "url": "/home/pinpoint/pinpoint-php-aop",
-                "reference": "f786f0818e9538b33e197e66337513780b2f3615"
+                "reference": "20239d4f8db5b751762686b9a6e0cfc08142fc51"
             },
             "require": {
                 "ext-json": "*",

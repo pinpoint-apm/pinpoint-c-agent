@@ -12,6 +12,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN git clone --recurse-submodules --depth 1 --branch 1.18.1 https://github.com/mongodb/mongo-php-driver.git && cd mongo-php-driver && phpize && ./configure && make -j && make install 
 RUN cd /tmp/ && git clone https://github.com/phpredis/phpredis.git && cd phpredis && phpize && ./configure &&  make install
 RUN cd /tmp/ && git clone https://github.com/php-memcached-dev/php-memcached.git && cd php-memcached && phpize && ./configure &&  make install
+RUN cd /tmp/ && git clone https://github.com/krakjoe/apcu.git && cd apcu && phpize && ./configure &&  make install
 COPY config.m4 /pinpoint-c-agent/config.m4 
 COPY src/PHP /pinpoint-c-agent/src/PHP
 COPY common /pinpoint-c-agent/common
@@ -19,6 +20,6 @@ COPY tests /pinpoint-c-agent/tests
 
 RUN cd /pinpoint-c-agent/ && phpize && ./configure && make && make install
 
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer update
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer require pinpoint-apm/pinpoint-php-aop
 
 CMD [ "php" ,"/workspace/run.php" ]
