@@ -29,6 +29,13 @@ c/cpp|[English](DOC/C-CPP/Readme.md)
 
 > [Try playground](/testapps/readme.md)
 
+### Blogs 
+
+- Intro pinpoint php aop : https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/Intro-pinpoint-php-aop
+- pinpoint php aop 内部原理: https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/pinpoint-php-aop-%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86
+- pinpoint php aop 내부 원리: https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/pinpoint-php-aop-%EB%82%B4%EB%B6%80-%EC%9B%90%EB%A6%AC
+
+
 ## Contact Us
 
 * Submit an [issue](https://github.com/pinpoint-apm/pinpoint-c-agent/issues)
