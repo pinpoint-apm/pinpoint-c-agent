@@ -28,7 +28,7 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   # PINPOINT_COMMON_LIB=PHP_EXT_SRCDIR()/build/lib
   # echo "----------------------------------------"
 
-  EXTRA_PHP_SRCS="src/PHP/pinpoint_php.cpp"
+  EXTRA_PHP_SRCS="pinpoint_php.cpp"
 
   PINPOINT_SRCS="$EXTRA_PHP_SRCS \
     common/src/common.cpp \
