@@ -79,3 +79,5 @@ wheelhouse/
 *.dep
 downloads
 testapps/java_call_app/target
+x64
+x86

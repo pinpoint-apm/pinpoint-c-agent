@@ -16,7 +16,6 @@
 #ifndef PHP_PINPOINT_PHP_H
 #define PHP_PINPOINT_PHP_H
 
-#include "config.h"
 #include "zend_types.h"
 extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
