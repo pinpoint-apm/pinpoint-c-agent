@@ -1,0 +1,6 @@
+output/Release/php_pinpoint_php.dll
+output/Release/php_pinpoint_php.lib
+output/Release/php_pinpoint_php.pdb
+NOTICE
+README.md
+CHANGES-PHP.md
