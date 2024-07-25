@@ -3,7 +3,8 @@ FROM  php:${PHP_VERSION}
 WORKDIR /pinpoint-c-agent/
 RUN apt update && apt install -y valgrind git
 COPY config.m4 /pinpoint-c-agent/config.m4 
-COPY src/PHP /pinpoint-c-agent/src/PHP
+COPY pinpoint_php.cpp /pinpoint-c-agent/pinpoint_php.cpp 
+COPY php_pinpoint_php.h /pinpoint-c-agent/php_pinpoint_php.h
 COPY common /pinpoint-c-agent/common
 COPY tests /pinpoint-c-agent/tests
 ENV NO_INTERACTION=1

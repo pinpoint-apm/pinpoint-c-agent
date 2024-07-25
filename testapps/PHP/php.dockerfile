@@ -3,7 +3,8 @@ FROM yiisoftware/yii2-php:7.4-fpm-nginx
 
 # build ext
 COPY config.m4 /pinpoint-c-agent/config.m4 
-COPY src/PHP /pinpoint-c-agent/src/PHP
+COPY pinpoint_php.cpp /pinpoint-c-agent/pinpoint_php.cpp 
+COPY php_pinpoint_php.h /pinpoint-c-agent/php_pinpoint_php.h
 COPY common /pinpoint-c-agent/common
 COPY tests /pinpoint-c-agent/tests
 

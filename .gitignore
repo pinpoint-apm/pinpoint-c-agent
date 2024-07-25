@@ -66,7 +66,7 @@ test.php
 .libs/
 .libs/
 aclocal.m4
-src/PHP/pinpoint_php.dep
+pinpoint_php.dep
 collector-agent/collector-agent
 .cache
 compile_commands.json

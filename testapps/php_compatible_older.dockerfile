@@ -3,7 +3,8 @@ FROM  php:${PHP_VERSION}
 WORKDIR /pinpoint-c-agent/
 RUN apt update && apt install -y valgrind git
 COPY config.m4 /pinpoint-c-agent/config.m4 
-COPY src/PHP /pinpoint-c-agent/src/PHP
+COPY pinpoint_php.cpp /pinpoint-c-agent/pinpoint_php.cpp 
+COPY php_pinpoint_php.h /pinpoint-c-agent/php_pinpoint_php.h
 COPY common /pinpoint-c-agent/common
 COPY tests /pinpoint-c-agent/tests
 ENV NO_INTERACTION=1
@@ -26,7 +27,8 @@ RUN  wget https://www.php.net/distributions/php-${PHP_VERSION}.tar.gz && tar xvf
 RUN  cd php-${PHP_VERSION} && ./configure --build=x86_64-linux-gnu --with-config-file-path=/usr/local/etc/php --with-config-file-scan-dir=/usr/local/etc/php/conf.d --enable-option-checking=fatal --with-mhash --enable-ftp --enable-mbstring --enable-mysqlnd --with-pdo-sqlite=/usr --with-sqlite3=/usr --with-curl  --with-openssl --with-zlib --with-libdir=lib/x86_64-linux-gnu build_alias=x86_64-linux-gnu && make -j && make install
 
 COPY config.m4 /pinpoint-c-agent/config.m4 
-COPY src/PHP /pinpoint-c-agent/src/PHP
+COPY pinpoint_php.cpp /pinpoint-c-agent/pinpoint_php.cpp 
+COPY php_pinpoint_php.h /pinpoint-c-agent/php_pinpoint_php.h
 COPY common /pinpoint-c-agent/common
 COPY tests /pinpoint-c-agent/tests
 ENV NO_INTERACTION=1

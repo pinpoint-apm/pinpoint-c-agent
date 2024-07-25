@@ -17,7 +17,7 @@ jobs:
       - name: Package pinpoint_php
         id: pack
         run: |
-          tar -czf ${{ env.MODULE_PAK }} common/  src/PHP config.m4 tests LICENSE
+          tar -czf ${{ env.MODULE_PAK }} common/ pinpoint_php.cpp php_pinpoint_php.h config.m4 tests LICENSE
           md5=($(md5sum ${{ env.MODULE_PAK }} ))
           PACK_NAME=${{ env.MODULE_PAK }}-${md5}-$(date '+%Y-%m-%d').tar.gz
           mv ${{ env.MODULE_PAK }} $PACK_NAME

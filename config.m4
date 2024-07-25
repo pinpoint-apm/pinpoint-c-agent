@@ -16,7 +16,6 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/src)
-  PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/src/PHP)
   AC_DEFINE(HAVE_PINPOINT_PHP, 1, [Whether you have pinpoint])
 
   # echo "------Build common libraries------------"
@@ -49,5 +48,4 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   PINPOINT_PHP_SHARED_LIBADD="$PINPOINT_PHP_SHARED_LIBADD -lrt"
   
   PHP_NEW_EXTENSION(pinpoint_php,$PINPOINT_SRCS, $ext_shared)
-  PHP_ADD_BUILD_DIR($ext_builddir/src/PHP)
 fi

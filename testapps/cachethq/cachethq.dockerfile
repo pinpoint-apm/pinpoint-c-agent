@@ -3,7 +3,8 @@ USER root
 RUN apk update && apk add --virtual build-dependencies build-base gcc wget git php7-dev
 ENV DB_DRIVER=pgsql
 COPY config.m4 /pinpoint-c-agent/config.m4 
-COPY src/PHP /pinpoint-c-agent/src/PHP
+COPY pinpoint_php.cpp /pinpoint-c-agent/pinpoint_php.cpp 
+COPY php_pinpoint_php.h /pinpoint-c-agent/php_pinpoint_php.h
 COPY common /pinpoint-c-agent/common
 COPY testapps/php_wordpress/pinpoint_php.ini /pinpoint-c-agent/pinpoint_php.ini
 

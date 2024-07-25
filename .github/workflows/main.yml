@@ -139,6 +139,10 @@ jobs:
             NOTICE
             README.md
             CHANGES-PHP.md
+            LICENSE
+          retention-days: 7
+          overwrite: true
+          if-no-files-found: error
 
   # pack_php_module:
   #   runs-on: ubuntu-latest

@@ -14,7 +14,8 @@ RUN cd /tmp/ && git clone https://github.com/phpredis/phpredis.git && cd phpredi
 RUN cd /tmp/ && git clone https://github.com/php-memcached-dev/php-memcached.git && cd php-memcached && phpize && ./configure &&  make install
 RUN cd /tmp/ && git clone https://github.com/krakjoe/apcu.git && cd apcu && phpize && ./configure &&  make install
 COPY config.m4 /pinpoint-c-agent/config.m4 
-COPY src/PHP /pinpoint-c-agent/src/PHP
+COPY pinpoint_php.cpp /pinpoint-c-agent/pinpoint_php.cpp 
+COPY php_pinpoint_php.h /pinpoint-c-agent/php_pinpoint_php.h
 COPY common /pinpoint-c-agent/common
 COPY tests /pinpoint-c-agent/tests
 

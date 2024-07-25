@@ -4,23 +4,6 @@ ARG_ENABLE("pinpoint_php", "whether to enable redis support", "no");
 
 
 if (PHP_PINPOINT_PHP != "no") {
-	// var sources = "src/PHP/pinpoint_php.cpp common/src/common.cpp common/src/Logging.cpp common/src/NodePool/TraceNode.cpp common/src/NodePool/PoolManager.cpp common/src/ConnectionPool/TransLayer.cpp common/src/Cache/State.cpp common/src/Cache/Chunk.cpp common/jsoncpp/lib_json/json_writer.cpp common/jsoncpp/lib_json/json_value.cpp common/jsoncpp/lib_json/json_reader.cpp";
-
-	// CHECK_HEADER_ADD_INCLUDE("json/assertions.h", "CFLAGS", "common/jsoncpp/include");
-	// // CHECK_HEADER_ADD_INCLUDE("config.h", "CFLAGS", "src/PHP");
-	// CHECK_HEADER_ADD_INCLUDE("common.h", "CFLAGS", "common/include");
-	// CHECK_HEADER_ADD_INCLUDE("Context/ContextType.h", "CFLAGS", "common/src");
-	// // ADD_FLAG("CFLAGS_PINPOINT_PHP", "/EHsc");
-
-	// AC_DEFINE("HAVE_PINPOINT_PHP", 1, "Whether you have pinpoint");
-
-	// EXTENSION("pinpoint_php", sources ,PHP_PINPOINT_PHP_SHARED, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
-
-
-	
-	// CHECK_HEADER_ADD_INCLUDE("json/assertions.h", "CFLAGS", "common/jsoncpp/include");
-	// CHECK_HEADER_ADD_INCLUDE("common.h", "CFLAGS", "common/include");
-	// CHECK_HEADER_ADD_INCLUDE("Context/ContextType.h", "CFLAGS", "common/src");
 
 	EXTENSION("pinpoint_php", "pinpoint_php.cpp", PHP_PINPOINT_PHP_SHARED,'-Icommon/jsoncpp/include -Icommon/include -Icommon/src  /EHsc /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	
