@@ -97,7 +97,7 @@ jobs:
   #       # if: always()
   #       run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down php-compatible
 
-  PHP-Win-2022:
+  PHP-Win-2019:
     runs-on: windows-2019
     strategy:
       matrix:
@@ -125,18 +125,9 @@ jobs:
           ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output
           nmake
           dir
-      # - name: package
-      #   id: pack
-      #   shell: bash
-      #   run: |
-
-      #     PACK_FULL_NAME=${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz
-      #     tar --transform 's:.*/::' -czvf ${PACK_FULL_NAME} -T pinpoint_php_files.txt
-      #     echo "PACK=$PACK_FULL_NAME" >> $GITHUB_OUTPUT
 
       - name: package
-        shell: bash
-        run: mv output/Release/pinpoint_php.* .
+        run: Move-Item -Path output/Release/php_pinpoint_php.* -Destination .
 
       - uses: actions/upload-artifact@v4
         with:
