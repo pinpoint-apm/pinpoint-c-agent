@@ -134,13 +134,17 @@ jobs:
       #     tar --transform 's:.*/::' -czvf ${PACK_FULL_NAME} -T pinpoint_php_files.txt
       #     echo "PACK=$PACK_FULL_NAME" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v3
+      - name: package
+        shell: bash
+        run: mv output/Release/pinpoint_php.* .
+
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}
           path: |
-            output/Release/php_pinpoint_php.dll
-            output/Release/php_pinpoint_php.lib
-            output/Release/php_pinpoint_php.pdb
+            php_pinpoint_php.dll
+            php_pinpoint_php.lib
+            php_pinpoint_php.pdb
             NOTICE
             README.md
             CHANGES-PHP.md
