@@ -125,18 +125,25 @@ jobs:
           ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output
           nmake
           dir
-      - name: package
-        id: pack
-        shell: bash
-        run: |
-          PACK_FULL_NAME=${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz
-          tar --transform 's:.*/::' -czvf ${PACK_FULL_NAME} -T pinpoint_php_files.txt
-          echo "PACK=$PACK_FULL_NAME" >> $GITHUB_OUTPUT
+      # - name: package
+      #   id: pack
+      #   shell: bash
+      #   run: |
+
+      #     PACK_FULL_NAME=${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz
+      #     tar --transform 's:.*/::' -czvf ${PACK_FULL_NAME} -T pinpoint_php_files.txt
+      #     echo "PACK=$PACK_FULL_NAME" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}
-          path: ${{ steps.pack.outputs.PACK }}
+          path: |
+            output/Release/php_pinpoint_php.dll
+            output/Release/php_pinpoint_php.lib
+            output/Release/php_pinpoint_php.pdb
+            NOTICE
+            README.md
+            CHANGES-PHP.md
 
   # pack_php_module:
   #   runs-on: ubuntu-latest
