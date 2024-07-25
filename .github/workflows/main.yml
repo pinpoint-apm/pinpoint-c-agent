@@ -124,6 +124,7 @@ jobs:
           phpize
           ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output
           nmake
+          dir
       - name: package
         id: pack
         shell: bash
