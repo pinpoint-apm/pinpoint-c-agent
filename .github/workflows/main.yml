@@ -102,7 +102,7 @@ jobs:
     strategy:
       matrix:
         php-versions: [ "8.3"]
-        arch: [ "x86" ]
+        arch: [ "x86" ,"x64"]
     steps:
       - uses: actions/checkout@v2
       - id: setup-php-sdk
@@ -116,15 +116,26 @@ jobs:
           arch: ${{ matrix.arch }}
           toolset: ${{steps.setup-php-sdk.outputs.toolset}}
 
-      - name: run unittest
+      - name: nmake
         run: |
-          dir
           php -m
           php -v
+          mkdir output
           phpize
-          configure --enable-pinpoint_php --enable-debug-pack
+          ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output
           nmake
+      - name: package
+        id: pack
+        shell: bash
+        run: |
+          PACK_FULL_NAME=${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}.tar.gz
+          tar --transform 's:.*/::' -czvf ${PACK_FULL_NAME} -T pinpoint_php_files.txt
+          echo "PACK=$PACK_FULL_NAME" >> $GITHUB_OUTPUT
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}
+          path: ${{ steps.pack.outputs.PACK }}
 
   # pack_php_module:
   #   runs-on: ubuntu-latest
@@ -134,7 +145,7 @@ jobs:
   #     - name: Package pinpoint_php
   #       id: pack
   #       run: |
-  #         tar -czf ${{ env.MODULE_PAK }} common/  src/PHP config.m4 tests LICENSE
+  #         tar -czf ${{ env.MODULE_PAK }} common/ config.m4 tests LICENSE pinpoint_php.cpp php_pinpoint_php.h
   #         md5=($(md5sum ${{ env.MODULE_PAK }} ))
   #         PACK_NAME=${{ env.MODULE_PAK }}-${md5}-$(date '+%Y-%m-%d').tar.gz
   #         mv ${{ env.MODULE_PAK }} $PACK_NAME
