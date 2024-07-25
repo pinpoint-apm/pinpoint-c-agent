@@ -81,3 +81,7 @@ downloads
 testapps/java_call_app/target
 x64
 x86
+output
+config.nice.bat
+configure.bat
+configure.js

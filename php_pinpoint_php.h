@@ -17,6 +17,11 @@
 #define PHP_PINPOINT_PHP_H
 
 #include "zend_types.h"
+#ifdef __cplusplus
+
+extern "C" {
+#endif // __cplusplus
+
 extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
@@ -98,4 +103,9 @@ PHP_MSHUTDOWN_FUNCTION(pinpoint_php);
 PHP_RINIT_FUNCTION(pinpoint_php);
 PHP_RSHUTDOWN_FUNCTION(pinpoint_php);
 PHP_MINFO_FUNCTION(pinpoint_php);
+
+#ifdef __cplusplus
+} // extern C
+#endif // __cplusplus
+
 #endif /* PHP_PINPOINT_PHP_H */

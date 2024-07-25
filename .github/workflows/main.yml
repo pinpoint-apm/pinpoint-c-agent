@@ -101,8 +101,12 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        php-versions: [ "8.3"]
+        # php-versions: [ "7.4", "7.3", "7.2","8.0", "8.1", "8.2", "8.3"]
+        php-versions: [ "7.4"]
         arch: [ "x86" ,"x64"]
+        ts: [ "ts", "nts" ]
+    env:
+      SKIP_WINDOWS_ACTION: true
     steps:
       - uses: actions/checkout@v2
       - id: setup-php-sdk
@@ -110,28 +114,29 @@ jobs:
         with:
           version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
-          ts: nts
+          ts: ${{ matrix.ts }}
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
           toolset: ${{steps.setup-php-sdk.outputs.toolset}}
 
-      - name: nmake
+      - name: build/test pinpoint_php on windows
         run: |
           php -m
           php -v
+          where.exe php
           mkdir output
           phpize
-          ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output
+          ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output --with-prefix=${{steps.setup-php-sdk.outputs.prefix}}
           nmake
-          dir
+          nmake test TESTS=tests_win32
 
       - name: package
         run: Move-Item -Path output/Release/php_pinpoint_php.* -Destination .
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.arch }}
+          name: ${{ env.MODULE_PAK }}-php-${{ matrix.php-versions }}-${{ matrix.ts }}-${{ matrix.arch }}
           path: |
             php_pinpoint_php.dll
             php_pinpoint_php.lib
@@ -140,7 +145,7 @@ jobs:
             README.md
             CHANGES-PHP.md
             LICENSE
-          retention-days: 7
+          retention-days: 5
           overwrite: true
           if-no-files-found: error
 
