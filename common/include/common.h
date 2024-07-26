@@ -73,7 +73,7 @@ static const NodeID E_ROOT_NODE = 0;
 static const E_NODE_LOC E_LOC_CURRENT = 0x0;
 static const E_NODE_LOC E_LOC_ROOT = 0x1;
 
-#define PINPOINT_C_AGENT_API_VERSION "0.5.0"
+#define PINPOINT_C_AGENT_API_VERSION "0.5.2"
 
 /**
  * @brief change logs

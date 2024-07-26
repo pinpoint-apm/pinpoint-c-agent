@@ -131,10 +131,11 @@ jobs:
           nmake
           # from https://github.com/php/setup-php-sdk/issues/7
           nmake test TESTS="--show-diff tests_win32"
-          dir /s output
-          dir /s php-bin
+          ls -r
       - name: package
-        run: Move-Item -Path output/Release/php_pinpoint_php.* -Destination .
+        run: |
+          Move-Item -Path output/Release/php_pinpoint_php.* -Destination .  -ErrorAction SilentlyContinue
+          Move-Item -Path output/Release_TS/php_pinpoint_php.* -Destination .  -ErrorAction SilentlyContinue
 
       - uses: actions/upload-artifact@v4
         with:

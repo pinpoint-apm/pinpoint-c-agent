@@ -46,7 +46,7 @@ bool ProcessState::CheckTraceLimit(int64_t timestamp) {
   return false;
 BLOCK:
   pp_trace("This span dropped. max_trace_limit:%ld current_tick:%lld onLine:%d", trace_limit_,
-           tick_, this->IsReady() ? (1) : (0));
+           tick_.load(), this->IsReady() ? (1) : (0));
   return true;
 }
 

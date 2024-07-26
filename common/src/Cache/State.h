@@ -45,7 +45,7 @@ public:
   virtual ~ProcessState() = default;
 
 private:
-  int64_t tick_ = {0};
+  std::atomic<std::int64_t> tick_ = {0};
   std::time_t timestamp_ = {0};
   // default is the unix time in ms
   uint64_t starttime_;
