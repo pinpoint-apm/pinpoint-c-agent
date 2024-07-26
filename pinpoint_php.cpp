@@ -611,7 +611,7 @@ static inline zend_string *merge_pp_style_name(zend_string *scope,
   }
 }
 
-#if PHP_MAJOR_VERSION == 8 and PHP_MINOR_VERSION >= 2
+#if (PHP_MAJOR_VERSION == 8 && PHP_MINOR_VERSION >= 2)
 
 // ref from php-8.2.19/ext/standard/var.c:137
 static zval *zend_array_index(zval *ar, int index) {
@@ -675,7 +675,7 @@ get_pp_style_function_name(zend_execute_data *execute_data) {
     zend_string *scope_name;
     if (func->common.scope) {
       scope_name = func->common.scope->name;
-#if PHP_MAJOR_VERSION == 7 and PHP_MINOR_VERSION <= 2
+#if PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION <= 2
     } else if (object->handlers->get_class_name ==
                std_object_handlers.get_class_name) {
 #else
