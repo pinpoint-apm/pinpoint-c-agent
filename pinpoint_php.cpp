@@ -387,7 +387,9 @@ PHP_FUNCTION(_pinpoint_get_context) {
   }
 }
 
-PHP_FUNCTION(_pinpoint_start_time) { RETURN_LONG(pinpoint_start_time()); }
+PHP_FUNCTION(_pinpoint_start_time) {
+  RETURN_DOUBLE(static_cast<double>(pinpoint_start_time()));
+}
 
 PHP_FUNCTION(_pinpoint_start_trace) {
   NodeID id = E_ROOT_NODE, cur_id = E_ROOT_NODE;
@@ -518,7 +520,9 @@ PHP_FUNCTION(_pinpoint_add_clue) {
   pinpoint_add_clue(Id, key.c_str(), value.c_str(), (E_NODE_LOC)_flag);
 }
 
-PHP_FUNCTION(_pinpoint_unique_id) { RETURN_LONG(generate_unique_id()); }
+PHP_FUNCTION(_pinpoint_unique_id) {
+  RETURN_DOUBLE(static_cast<double>(generate_unique_id()));
+}
 
 PHP_FUNCTION(_pinpoint_mark_as_error) {
   std::string msg;
@@ -606,7 +610,9 @@ static inline zend_string *merge_pp_style_name(zend_string *scope,
     return zend_string_tolower(func);
   }
 }
+
 #if PHP_MAJOR_VERSION == 8 and PHP_MINOR_VERSION >= 2
+
 // ref from php-8.2.19/ext/standard/var.c:137
 static zval *zend_array_index(zval *ar, int index) {
   HashTable *__ht = Z_ARRVAL_P(ar);
@@ -1145,19 +1151,19 @@ PHP_FUNCTION(pinpoint_get_func_ref_args) {
 #endif
 
 PHP_FUNCTION(_pinpoint_trace_limit) {
-
+  // getchar();
+  double timestamp = -1;
 #if PHP_VERSION_ID < 70000
-  long timestamp = -1;
 
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp);
+  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|d", &timestamp);
 #else
-  zend_long timestamp = -1;
-  zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &timestamp);
+  zend_parse_parameters(ZEND_NUM_ARGS(), "|d", &timestamp);
 #endif
 
-  timestamp = (timestamp == -1) ? (time(NULL)) : (timestamp);
+  int64_t timestamp_64 =
+      (timestamp == -1) ? (time(NULL)) : (static_cast<std::int64_t>(timestamp));
 
-  if (check_trace_limit(timestamp) == 1) {
+  if (check_trace_limit(timestamp_64) == 1) {
     RETURN_TRUE;
   } else {
     RETURN_FALSE;

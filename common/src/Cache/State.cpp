@@ -17,6 +17,8 @@
 #include "State.h"
 #include "common.h"
 #include "header.h"
+#include <inttypes.h> /* For PRIu64 */
+
 namespace PP {
 ProcessState::ProcessState(int64_t trace_limit)
     : starttime_(get_unix_time_ms()), trace_limit_(trace_limit) {}
@@ -30,23 +32,24 @@ void ProcessState::SetStartTime(uint64_t start_time) {
 }
 
 bool ProcessState::CheckTraceLimit(int64_t timestamp) {
-  time_t now = (timestamp != -1) ? (timestamp) : (std::time(NULL));
+  std::time_t now = (timestamp != -1) ? (static_cast<std::time_t>(timestamp)) : (std::time(NULL));
   if (trace_limit_ == -1) {
     return false;
   } else if (trace_limit_ == 0) {
-    goto BLOCK;
+    goto LIMITED;
   }
 
   if (timestamp_ != now) {
     timestamp_ = now;
     tick_ = 0;
-  } else if (++tick_ >= trace_limit_) {
-    goto BLOCK;
+  } else if (tick_ >= trace_limit_) {
+    goto LIMITED;
   }
+  tick_++;
   return false;
-BLOCK:
-  pp_trace("This span dropped. max_trace_limit:%ld current_tick:%lld onLine:%d", trace_limit_,
-           tick_.load(), this->IsReady() ? (1) : (0));
+LIMITED:
+  pp_trace("This span dropped. max_trace_limit:%" PRIu64 " current_tick:%" PRIu64 " onLine:%d",
+           trace_limit_, tick_.load(), (this->IsReady() ? (1) : (0)));
   return true;
 }
 

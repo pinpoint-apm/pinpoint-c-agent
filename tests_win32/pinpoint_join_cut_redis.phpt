@@ -4,6 +4,10 @@ pinpoint_php pinpoint_join_cut_redis
 <?php
 if (!extension_loaded("pinpoint_php"))
   print "skip";
+
+if (!extension_loaded("redis"))
+  print "skip";
+
 if (version_compare(phpversion(), '7.1.33', '<='))
    print "skip";
 

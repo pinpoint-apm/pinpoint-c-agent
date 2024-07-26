@@ -57,6 +57,6 @@ Stack trace:
 #1 {main}
   thrown in %s on line 23
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"%s","line":23,"msg":"Uncaught Exception: I am testting in %s:23\nStack trace:\n#0 %s(30): Test()\n#1 {main}\n  thrown"},"calls":[{":E":%d,":S":0,"name":"Foo"}]})
+[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"%s","line":23,"msg":"Uncaught Exception: I am testting in %s:23\nStack trace:\n#0 %s(30): Test()\n#1 {main}\n  thrown"},"calls":[{":E":%d,":S":%d,"name":"Foo"}]})
 [pinpoint] [%d] [%d]agent try to connect:(localhost:10000)
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!

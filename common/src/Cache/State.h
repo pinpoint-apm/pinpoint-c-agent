@@ -45,11 +45,11 @@ public:
   virtual ~ProcessState() = default;
 
 private:
-  std::atomic<std::int64_t> tick_ = {0};
+  std::atomic<int64_t> tick_ = {0};
   std::time_t timestamp_ = {0};
   // default is the unix time in ms
   uint64_t starttime_;
-  int64_t trace_limit_;
+  const int64_t trace_limit_;
   std::atomic<std::int64_t> uuid_ = {0};
   bool ready_ = {false};
 };

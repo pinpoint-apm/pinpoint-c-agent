@@ -251,7 +251,7 @@ public:
                  "root_start_time:%" PRIu64 ",set_exp_:%d \n"
                  "ref_count_:%d \n"
                  "_value:%s \n"
-                 "context_ size:%" PRIu64 ",_endTraceCallback:%" PRIu64 " \n",
+                 "context_ size:%zu,_endTraceCallback:%zu \n ",
                  (int)this->sibling_id_, (int)this->last_child_id_, (int)this->parent_id_,
                  (int)this->root_id_, (int)this->id_, this->start_time, this->fetal_error_time,
                  this->limit, this->cumulative_time, this->root_start_time, this->set_exp_,
@@ -288,6 +288,7 @@ public:
   WrapperTraceNodePtr() = delete;
   WrapperTraceNodePtr(const WrapperTraceNodePtr& other) = delete;
   WrapperTraceNodePtr(WrapperTraceNodePtr& other) = delete;
+
   WrapperTraceNodePtr(WrapperTraceNodePtr&& other) : traceNode_(other.traceNode_) {
     traceNode_.addRef();
   }

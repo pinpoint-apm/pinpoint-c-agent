@@ -101,7 +101,7 @@ jobs:
     runs-on: windows-2019
     strategy:
       matrix:
-        # php-versions: [ "7.4", "7.3", "7.2","8.0", "8.1", "8.2", "8.3"]
+        # php-versions: [ "7.4", "7.3", "7.2","7.1","8.0", "8.1", "8.2", "8.3"]
         php-versions: [ "7.4"]
         arch: [ "x86" ,"x64"]
         ts: [ "ts", "nts" ]
@@ -120,7 +120,7 @@ jobs:
           arch: ${{ matrix.arch }}
           toolset: ${{steps.setup-php-sdk.outputs.toolset}}
 
-      - name: build/test pinpoint_php on windows
+      - name: build pinpoint_php on windows
         run: |
           php -m
           php -v
@@ -129,9 +129,12 @@ jobs:
           phpize
           ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output --with-prefix=${{steps.setup-php-sdk.outputs.prefix}}
           nmake
+
+      - name: test pinpoint_php on windows      
+        run: |
           # from https://github.com/php/setup-php-sdk/issues/7
           nmake test TESTS="--show-diff tests_win32"
-          ls -r
+          
       - name: package
         run: |
           Move-Item -Path output/Release/php_pinpoint_php.* -Destination .  -ErrorAction SilentlyContinue

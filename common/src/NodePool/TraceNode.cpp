@@ -102,8 +102,8 @@ void TraceNode::parseOpt(std::string key, std::string value) {
   if (key == "TraceMinTimeMs") {
     int64_t min = std::stoll(value);
     auto cb = [=]() -> bool {
-      pp_trace("checkOpt:  [%d] TraceMinTimeMs:%ld cumulative_time:%lu", this->id_, min,
-               this->cumulative_time);
+      pp_trace("checkOpt:  [%d] TraceMinTimeMs:%" PRIu64 " cumulative_time:%" PRIu64 "", this->id_,
+               min, this->cumulative_time);
       if ((int64_t)this->cumulative_time >= min)
         return true;
       return false;

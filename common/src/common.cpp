@@ -167,7 +167,8 @@ public:
         } else if (w_trace->limit & E_TRACE_BLOCK) {
           pp_trace("current [%d] span dropped,due to TRACE_BLOCK", w_trace->getId());
         } else {
-          pp_trace("current [%d] span dropped,due to limit=%ld", w_trace->getId(), w_trace->limit);
+          pp_trace("current [%d] span dropped,due to limit=%" PRIu64 "", w_trace->getId(),
+                   w_trace->limit);
         }
       } else {
         w_trace->EndTimer();
