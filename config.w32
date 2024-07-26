@@ -5,7 +5,8 @@ ARG_ENABLE("pinpoint_php", "whether to enable redis support", "no");
 
 if (PHP_PINPOINT_PHP != "no") {
 
-	EXTENSION("pinpoint_php", "pinpoint_php.cpp", PHP_PINPOINT_PHP_SHARED,'-Icommon/jsoncpp/include -Icommon/include -Icommon/src  /EHsc /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	// EXTENSION("pinpoint_php", "pinpoint_php.cpp", PHP_PINPOINT_PHP_SHARED,'-Icommon/jsoncpp/include -Icommon/include -Icommon/src  /EHsc /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+	EXTENSION("pinpoint_php", "pinpoint_php.cpp", PHP_PINPOINT_PHP_SHARED,'-Icommon/jsoncpp/include -Icommon/include -Icommon/src  /EHsc');
 	
 	ADD_SOURCES("common/src/", "\
 			common.cpp \
