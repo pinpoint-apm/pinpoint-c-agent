@@ -10,6 +10,9 @@ if (version_compare(phpversion(), '8.0.0', '>='))
 {    print "skip";
     print "only works in php7";
 }
+if(getenv('SKIP_WINDOWS_ACTION', true)){
+  print "skip";
+}
 ?>
 --INI--
 pinpoint_php.DebugReport=true
@@ -37,7 +40,7 @@ _pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    },
+    }
 );
 
 _pinpoint_join_cut(
@@ -54,7 +57,7 @@ _pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    },
+    }
 );
 
 _pinpoint_join_cut(
@@ -86,7 +89,7 @@ _pinpoint_join_cut(
     function ($e) {
         echo "on_exception \n";
         var_dump($e);
-    },
+    }
 );
 
 

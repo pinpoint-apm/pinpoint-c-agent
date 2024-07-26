@@ -6,9 +6,11 @@ if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (!extension_loaded("curl"))
    print "skip no curl";
-if (version_compare(phpversion(), '8.0.0', '<'))
-{   
+if (version_compare(phpversion(), '8.0.0', '<')){   
     print "skip only works in php8";
+}
+if(getenv('SKIP_WINDOWS_ACTION', true)){
+  print "skip";
 }
 ?>
 --INI--

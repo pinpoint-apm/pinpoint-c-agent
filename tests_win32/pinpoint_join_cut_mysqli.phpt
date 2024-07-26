@@ -1,5 +1,5 @@
 --TEST--
-pinpoint_php pinpoint_join_cut_redis
+pinpoint_php pinpoint_join_cut_mysqli
 --SKIPIF--
 <?php
 if (!extension_loaded("pinpoint_php"))

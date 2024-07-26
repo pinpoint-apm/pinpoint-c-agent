@@ -129,8 +129,10 @@ jobs:
           phpize
           ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output --with-prefix=${{steps.setup-php-sdk.outputs.prefix}}
           nmake
-          nmake test TESTS=tests_win32
-
+          # from https://github.com/php/setup-php-sdk/issues/7
+          nmake test TESTS="--show-diff tests_win32"
+          dir /s output
+          dir /s php-bin
       - name: package
         run: Move-Item -Path output/Release/php_pinpoint_php.* -Destination .
 

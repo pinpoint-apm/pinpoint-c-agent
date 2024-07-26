@@ -31,6 +31,6 @@ $id = _pinpoint_end_trace($id);
 [pinpoint] [%d] [%d] [126] add clue key:name value:Foo2
 [pinpoint] [%d] [%d] [126] pinpoint_end_trace Done!
 [pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({":E":0,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d,"calls":[{":E":%d,":S":%d,"name":"Foo2"}],"clues":["name:Foo1"]}],"clues":["global:global_value"],"global":"global_value","name":"Foo"})
+[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d,"calls":[{":E":%d,":S":%d,"name":"Foo2"}],"clues":["name:Foo1"]}],"clues":["global:global_value"],"global":"global_value","name":"Foo"})
 [pinpoint] [%d] [%d]agent try to connect:(localhost:10000)
 [pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!

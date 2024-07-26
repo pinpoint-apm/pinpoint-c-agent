@@ -6,12 +6,11 @@ if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (version_compare(phpversion(), '7.1.33', '<='))
    print "skip";
-?>
 
 if(getenv('SKIP_WINDOWS_ACTION', true)){
   print "skip";
 }
-
+?>
 --INI--
 pinpoint_php.DebugReport=true
 --EXTENSIONS--

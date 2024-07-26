@@ -1,9 +1,22 @@
 --TEST--
 pinpoint_php test  pinpoint_get_caller_arg
 --SKIPIF--
-<?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
+<?php 
+if (!extension_loaded("pinpoint_php")) 
+{   
+    print "skip"; 
+    print "pinpoint_php"; 
+}
+if (!extension_loaded("curl")) 
+{   
+    print "skip"; 
+    print "curl"; 
+}
+
 --INI--
 pinpoint_php.DebugReport=true
+--EXTENSIONS--
+curl
 --FILE--
 <?php
 

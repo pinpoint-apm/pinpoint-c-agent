@@ -32,27 +32,28 @@
 */
 
 /* $Id$ */
-
+// clang-format off
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include "zend_API.h"
-#include "zend_string.h"
-#include "zend_types.h"
+#include <iostream>
+#include <string>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <stdio.h>
+#include <cinttypes>
 
-// clang-format off
+#include "zend_API.h"
+#include "zend_string.h"
+#include "zend_types.h"
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
 #include "common.h"
 #include "php_pinpoint_php.h"
-#include <string>
+
 // clang-format on
 #ifdef COMPILE_DL_PINPOINT_PHP
 #ifdef ZTS
@@ -318,11 +319,13 @@ PHP_FUNCTION(pinpoint_get_caller_arg) {
 
   if ((zend_ulong)requested_offset >= arg_count) {
     zend_error(E_WARNING,
-               "pinpoint_get_caller_arg():  Argument " ZEND_LONG_FMT
-               " not passed to function",
+               "pinpoint_get_caller_arg():  Argument "
+               "%" PRId64 " not passed to function",
                requested_offset);
     RETURN_FALSE;
   }
+
+  // ZEND_LONG_FMT
 
   first_extra_arg = ex->func->op_array.num_args;
   if ((zend_ulong)requested_offset >= first_extra_arg &&
