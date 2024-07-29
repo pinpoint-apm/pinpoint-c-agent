@@ -3,7 +3,7 @@ name: CI
 on: [pull_request, workflow_dispatch, push]
 
 env:
-  MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}
+  MODULE_PAK: pinpoint_php-${{ github.head_ref || github.ref_name }}
   
 jobs:
   # cpp:
@@ -142,7 +142,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.MODULE_PAK }}-php-${{ matrix.php-versions }}-${{ matrix.ts }}-${{ matrix.arch }}
+          name: ${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.ts }}-${{steps.setup-php-sdk.outputs.vs}}-${{ matrix.arch }}
           path: |
             php_pinpoint_php.dll
             php_pinpoint_php.lib

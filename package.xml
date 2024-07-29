@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+http://pear.php.net/dtd/tasks-1.0.xsd
+http://pear.php.net/dtd/package-2.0
+http://pear.php.net/dtd/package-2.0.xsd">
+ <name>pinpoint_php</name>
+ <channel>pecl.php.net</channel>
+ <summary>PHP extension for pinpoint-apm</summary>
+ <description>
+   This extension provides an API pinpoint-apm and built-in function auto-injection
+ </description>
+ <lead>
+  <name>Jason Mile</name>
+  <user>eeliu</user>
+  <email>liu_ming_yi@outlook.com</email>
+  <active>yes</active>
+ </lead>
+ <date>2024-07-29</date>
+ <version>
+  <release>0.5.2</release>
+  <api>0.5.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+  https://github.com/pinpoint-apm/pinpoint-c-agent
+ </notes>
+ <contents>
+  <dir name="/">
+   <file role='doc' name='LICENSE'/>
+   <file role='doc' name='CHANGES-PHP.md'/>
+   <file role='doc' name='README.md'/>
+   <file role='src' name='pinpoint_php.cpp'/>
+   <file role='src' name='php_pinpoint_php.h'/>
+   <file role='src' name='config.m4'/>
+   <file role='src' name='config.w32'/>
+   <dir name='common'>
+     <file role='doc' name='CHANGES.md'/>
+     <file role='doc' name='readme.md'/>
+    <dir name='include'>
+      <file role='src' name='common.h'/>
+    </dir> 
+    <dir name='jsoncpp'>
+      <dir name='include\json'>
+        <file role='src' name='allocator.h'/>
+        <file role='src' name='assertions.h'/>
+        <file role='src' name='config.h'/>
+        <file role='src' name='forwards.h'/>
+        <file role='src' name='json_features.h'/>
+        <file role='src' name='json.h'/>
+        <file role='src' name='reader.h'/>
+        <file role='src' name='value.h'/>
+        <file role='src' name='version.h'/>
+        <file role='src' name='writer.h'/>
+      </dir> 
+      <dir name='lib_json'>
+        <file role='src' name='json_reader.cpp'/>
+        <file role='src' name='json_tool.h'/>
+        <file role='src' name='json_value.cpp'/>
+         <file role='src' name='json_valueiterator.inl'/>
+          <file role='src' name='json_writer.cpp'/>
+      </dir> 
+    </dir> 
+    <dir name='src'>
+      <file role='src' name='common.cpp'/>
+      <file role='src' name='header.h'/>
+      <file role='src' name='Logging.cpp'/>
+      <dir name='NodePool'>
+        <file role='src' name='PoolManager.cpp'/>
+        <file role='src' name='PoolManager.h'/>
+        <file role='src' name='TraceNode.cpp'/>
+        <file role='src' name='TraceNode.h'/>
+      </dir>
+      <dir name='Context'>
+        <file role='src' name='ContextType.h'/>
+      </dir>
+      <dir name='ConnectionPool'>
+        <file role='src' name='sockets.h'/>
+        <file role='src' name='TransLayer.h'/>
+        <file role='src' name='TransLayer.cpp'/>
+        <file role='src' name='SpanConnectionPool.h'/>
+      </dir>
+      <dir name='Cache'>
+        <file role='src' name='Chunk.h'/>
+        <file role='src' name='Chunk.cpp'/>
+        <file role='src' name='State.h'/>
+        <file role='src' name='State.cpp'/>
+        <file role='src' name='NodeTreeWriter.h'/>
+      </dir>      
+    </dir>
+   </dir> 
+  </dir> 
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>7.1.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>pinpoint_php</providesextension>
+ <extsrcrelease>
+ </extsrcrelease>
+ <changelog>
+ <release>
+   <stability><release>stable</release><api>stable</api></stability>
+   <version><release>0.5.2</release><api>0.5.2</api></version>
+   <date>2024-07-29</date>
+   <notes>
+   https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.6.0
+   </notes>
+ </release>
+
+</changelog>
+</package>
