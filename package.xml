@@ -24,7 +24,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <release>stable</release>
   <api>stable</api>
  </stability>
- <license uri="http://www.php.net/license">PHP</license>
+ <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
  <notes>
   https://github.com/pinpoint-apm/pinpoint-c-agent
  </notes>
@@ -113,7 +113,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <version><release>0.5.2</release><api>0.5.2</api></version>
    <date>2024-07-29</date>
    <notes>
-   https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.6.0
+   ## What's Changed
+   - add pinpoint_get_caller_arg
+
+  **Full Changelog**: https://github.com/pinpoint-apm/pinpoint-c-agent/compare/v0.5.0...v0.6.0
    </notes>
  </release>
 

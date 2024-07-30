@@ -1,0 +1,15 @@
+{
+    "name": "pinpoint_php",
+    "version": "0.5.2",
+    "type": "extension",
+    "license": [
+        "Apache License 2.0"
+    ],
+    "authors": [
+        {
+            "name": "Jason Mile",
+            "email": "liu_ming_yi@outlook.com"
+        }
+    ],
+    "description": "PHP extension for pinpoint-apm"
+}
