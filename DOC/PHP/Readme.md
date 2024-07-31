@@ -9,8 +9,7 @@
 | Dependency          | Version                                     | More                                |
 | ------------------- | ------------------------------------------- | ----------------------------------- |
 | PHP                 | php `7+`                                    |
-| GCC                 | GCC `4.7+`                                  | C++11                               |
-| *inux/windows/macOs |                                             | `windows is on the way`             |
+| *inux/windows/macOs |                                             | windows is released                 |
 | pinpoint            | `2.0+`                                      |
 | composer            |                                             | class can be automatic pinpoint-cut |
 | collector-agent     | [installed ?](../collector-agent/readme.md) |

@@ -2,14 +2,13 @@
 
 ### 요구
 
-디펜던시 | 버전 | 부가
----|----|----
-PHP| php `7+`|
-GCC| GCC `4.7+`| C++11 
-*inux|| `windows is on the way`
-pinpoint| `2.0+`|
-composer| | class can be automatic pinpoint-cut
-collector-agent| [installed ?](../collector-agent/readme.md)
+| 디펜던시            | 버전                                        | 부가                                |
+| ------------------- | ------------------------------------------- | ----------------------------------- |
+| PHP                 | php `7+`                                    |
+| *inux/windows/macOs |                                             | windows is released                 |
+| pinpoint            | `2.0+`                                      |
+| composer            |                                             | class can be automatic pinpoint-cut |
+| collector-agent     | [installed ?](../collector-agent/readme.md) |
 
 ### 설치 스텝
 

@@ -167,35 +167,39 @@ jobs:
 
       - name: package
         run: |
-          Move-Item -Path output/Release/php_pinpoint_php.* -Destination .  -ErrorAction SilentlyContinue
-          Move-Item -Path output/Release_TS/php_pinpoint_php.* -Destination .  -ErrorAction SilentlyContinue
-
+          mkdir _package_
+          cp output/Release/php_pinpoint_php.* _package_  -ErrorAction SilentlyContinue
+          cp output/Release_TS/php_pinpoint_php.* _package_  -ErrorAction SilentlyContinue
+          cp NOTICE _package_
+          cp README.md _package_
+          cp CHANGES-PHP.md _package_
+          cp LICENSE _package_
+          Compress-Archive -Path _package_/*   ${{ env.pinpoint_php_win32_pack_name }}.zip 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.pinpoint_php_win32_pack_name }}
-          path: |
-            php_pinpoint_php.dll
-            php_pinpoint_php.lib
-            php_pinpoint_php.pdb
-            NOTICE
-            README.md
-            CHANGES-PHP.md
-            LICENSE
+          path: ${{ env.pinpoint_php_win32_pack_name }}.zip 
           retention-days: 5
           overwrite: true
           if-no-files-found: error
 
+  PHP-Release-Win32-Package:
+    needs: [ PHP-Win-2019, pack_php_module]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: ${{ env.pinpoint_php_win32_pack_name }}
+          # name: ${{ env.pinpoint_php_win32_pack_name }}
           path: pinpoint-artifact
+          pattern: pinpoint_php-*
+          merge-multiple: true
+      - run: ls -R pinpoint-artifact
 
       - name: Release php_package
         id: rel_php_pak
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: pinpoint-artifact/*
 
@@ -283,6 +287,8 @@ jobs:
 
       - name: Setup protoc
         uses: arduino/setup-protoc@v2.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: run unittest
         run: |
