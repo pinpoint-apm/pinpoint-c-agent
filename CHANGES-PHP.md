@@ -1,3 +1,8 @@
+## 0.5.3 2024-07-31
+- build on win32
+- build on macos
+- support SendSpanTimeOutMs=-1
+
 ## 0.5.2 2024-05-30
 - add pinpoint_get_caller_arg
 

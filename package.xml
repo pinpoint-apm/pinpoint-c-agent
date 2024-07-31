@@ -21,18 +21,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>dl_cd_pinpoint@navercorp.com</email>
     <active>yes</active>
   </lead>
- <date>2024-07-29</date>
+ <date>2024-08-07</date>
  <version>
-  <release>0.5.2</release>
-  <api>0.5.2</api>
+  <release>0.5.3</release>
+  <api>0.5.3</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>alpha</release>
+  <api>alpha</api>
  </stability>
  <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
  <notes>
-  https://github.com/pinpoint-apm/pinpoint-c-agent
+  ## 0.5.3 2024-07-31
+  - build on win32
+  - build on macos
+  - support SendSpanTimeOutMs=-1
  </notes>
  <contents>
   <dir name="/">
@@ -114,6 +117,17 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <extsrcrelease>
  </extsrcrelease>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>alpha</api></stability>
+   <version><release>0.5.2</release><api>0.5.2</api></version>
+   <date>2024-07-29</date>
+   <notes>
+   ## What's Changed
+   - add pinpoint_get_caller_arg
+
+  **Full Changelog**: https://github.com/pinpoint-apm/pinpoint-c-agent/compare/v0.5.0...v0.6.0
+   </notes>
+ </release>
  <release>
    <stability><release>stable</release><api>stable</api></stability>
    <version><release>0.5.2</release><api>0.5.2</api></version>
