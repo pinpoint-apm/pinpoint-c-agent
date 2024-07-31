@@ -1,3 +1,6 @@
+## v0.5.3 2024-07-30
+- support unittest in macos
+
 ## v0.5.2 2024-07-26
 - fix `tick++`
 

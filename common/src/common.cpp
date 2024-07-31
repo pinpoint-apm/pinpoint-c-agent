@@ -78,6 +78,8 @@ private:
     }
     if (span_timeout > 0) {
       trans->SyncSendAll(span_timeout);
+    } else if (span_timeout < 0) {
+      pp_trace("[unittest] current span was dropped");
     } else {
       trans->PoolEventOnce(0);
     }

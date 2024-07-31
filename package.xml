@@ -9,12 +9,18 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <description>
    This extension provides an API pinpoint-apm and built-in function auto-injection
  </description>
- <lead>
-  <name>Jason Mile</name>
-  <user>eeliu</user>
-  <email>liu_ming_yi@outlook.com</email>
-  <active>yes</active>
- </lead>
+  <lead>
+    <name>Jason Mile</name>
+    <user>eeliu</user>
+    <email>liu_ming_yi@outlook.com</email>
+    <active>yes</active>
+  </lead>
+  <lead>
+    <name>dl_cd_pinpoint</name>
+    <user>dl_cd_pinpoint</user>
+    <email>dl_cd_pinpoint@navercorp.com</email>
+    <active>yes</active>
+  </lead>
  <date>2024-07-29</date>
  <version>
   <release>0.5.2</release>
