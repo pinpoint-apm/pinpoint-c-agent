@@ -14,7 +14,12 @@
 
 1. 安装 `ext-pinpoint_php` 模块
 
-   curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.6.0/install_pinpoint_php.sh | sh
+     `pecl install pinpoint_php`
+     or 
+     `curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/latest/install_pinpoint_php.sh | sh`
+
+     > On windows: download .dll from  https://pecl.php.net/package/pinpoint_php  or https://github.com/pinpoint-apm/pinpoint-c-agent/releases/latest
+
 
 2. 检查下你的配置文件 pinpoint_php.ini
          

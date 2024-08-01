@@ -13,7 +13,12 @@
 ### 설치 스텝
 
 1. `ext-pinpoint_php` 모듈 설치 
-    curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.6.0/install_pinpoint_php.sh | sh
+   
+     `pecl install pinpoint_php`
+     or 
+     `curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/latest/install_pinpoint_php.sh | sh`
+
+     > On windows: download .dll from  https://pecl.php.net/package/pinpoint_php  or https://github.com/pinpoint-apm/pinpoint-c-agent/releases/latest
 
 2. pinpoint_php.ini 설정 파일 확인
      ```ini
