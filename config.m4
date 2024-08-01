@@ -41,8 +41,7 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
     PINPOINT_PHP_SHARED_LIBADD="$PINPOINT_PHP_SHARED_LIBADD -lrt"
   fi
   
-  PHP_NEW_EXTENSION(pinpoint_php,$PINPOINT_SRCS, $ext_shared)
-  PHP_ADD_LIBRARY(stdc++, 1, PINPOINT_PHP_SHARED_LIBADD)
+  PHP_NEW_EXTENSION(pinpoint_php,$PINPOINT_SRCS, $ext_shared,,, cxx)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/include)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
