@@ -74,10 +74,12 @@ jobs:
             --log-file=valgrind-out.txt \
             ./bin/TestCommon
       - name: Archive docs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: valgrind-out
           path: common/build/valgrind-out.txt
+          retention-days: 5
+          if-no-files-found: error
 
   PHP:
     runs-on: ubuntu-latest
@@ -153,7 +155,6 @@ jobs:
         run: |
           php -m
           php -v
-          where.exe php
           mkdir output
           phpize
           ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output --with-prefix=${{steps.setup-php-sdk.outputs.prefix}}
@@ -168,8 +169,18 @@ jobs:
       - name: package
         run: |
           mkdir _package_
-          cp output/Release/php_pinpoint_php.* _package_  -ErrorAction SilentlyContinue
-          cp output/Release_TS/php_pinpoint_php.* _package_  -ErrorAction SilentlyContinue
+          if (Test-Path -Path output/Release/ -PathType Container) {
+              cp output/Release/php_pinpoint_php.dll _package_
+              cp output/Release/php_pinpoint_php.pdb _package_
+              cp output/Release/php_pinpoint_php.lib _package_
+          } 
+
+          if (Test-Path -Path output/Release_TS/ -PathType Container) {
+              cp output/Release_TS/php_pinpoint_php.dll _package_
+              cp output/Release_TS/php_pinpoint_php.pdb _package_
+              cp output/Release_TS/php_pinpoint_php.lib _package_
+          } 
+
           cp NOTICE _package_
           cp README.md _package_
           cp CHANGES-PHP.md _package_
@@ -180,7 +191,6 @@ jobs:
           name: ${{ env.pinpoint_php_win32_pack_name }}
           path: ${{ env.pinpoint_php_win32_pack_name }}.zip 
           retention-days: 5
-          overwrite: true
           if-no-files-found: error
 
   PHP-Release-Win32-Package:
@@ -191,9 +201,8 @@ jobs:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          # name: ${{ env.pinpoint_php_win32_pack_name }}
           path: pinpoint-artifact
-          pattern: pinpoint_php-*
+          pattern: pinpoint_php*
           merge-multiple: true
       - run: ls -R pinpoint-artifact
 
@@ -225,10 +234,12 @@ jobs:
       #     mv ${{ env.MODULE_PAK }} $pinpoint_php_win32_pack_name
       #     echo "PACK=$pinpoint_php_win32_pack_name" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.MODULE_PAK }}
+          name: pinpoint_php.tgz
           path: pinpoint_php*.tgz
+          retention-days: 5
+          if-no-files-found: error
 
   Python:
     strategy:
