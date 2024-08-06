@@ -1,4 +1,5 @@
-﻿# Tutorial for pinpoint-py agent
+﻿[English](Readme.md) | [中文](Readme-CN.md) | [한국어](Readme-KR.md)
+
 
 ## Getting Started
 
@@ -15,7 +16,7 @@
 $ pip install pinpointPy
 ```
 
-### How to Use
+### Choose your framework
 
 
 #### 1.1 Flask

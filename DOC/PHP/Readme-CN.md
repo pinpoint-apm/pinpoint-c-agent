@@ -1,3 +1,5 @@
+[English](Readme.md) | [中文](Readme-CN.md) | [한국어](Readme-KR.md)
+
 ## 安装参照
 
 ### 依赖组件
