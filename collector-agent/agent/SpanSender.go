@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
@@ -24,37 +23,33 @@ type ApiIdMap map[string]interface{}
 var unique_id_count = int32(1)
 
 type SpanSender struct {
-	sequenceId    int32
-	idMap         ApiIdMap
-	Md            metadata.MD
-	exitCh        chan bool
-	spanMessageCh chan *v1.PSpanMessage
-	spanRespCh    chan int32
-	wg            sync.WaitGroup
+	sequenceId          int32
+	idMap               ApiIdMap
+	Md                  metadata.MD
+	exitCh              chan bool
+	spanMessageBufferCh chan *v1.PSpanMessage
+	sendStreamRespCh    chan int32
+	wg                  *sync.WaitGroup
+	log                 *log.Entry
 }
 
-func createSpanSender(base metadata.MD, exitCh chan bool) *SpanSender {
+func createSpanSender(base metadata.MD, exitCh chan bool, agent_wg *sync.WaitGroup, log *log.Entry) *SpanSender {
 	sender := &SpanSender{
-		Md: base, exitCh: exitCh,
-		idMap: make(ApiIdMap),
+		Md:     base,
+		exitCh: exitCh,
+		idMap:  make(ApiIdMap),
+		wg:     agent_wg,
+		log:    log,
 	}
 	sender.Init()
 	return sender
 }
 
-func (spanSender *SpanSender) Stop() {
-	log.Warn("Try to close spanSend goroutine")
-	close(spanSender.spanMessageCh)
-	close(spanSender.spanRespCh)
-	spanSender.wg.Wait()
-	log.Warn("Span sender goroutine exit")
-}
-
-func (spanSender *SpanSender) senderMain() {
+func (spanSender *SpanSender) sendSpan() {
 	config := common.GetConfig()
 	conn, err := common.CreateGrpcConnection(config.SpanAddress)
 	if err != nil {
-		log.Warnf("connect:%s failed. %s", config.SpanAddress, err)
+		spanSender.log.Warnf("connect:%s failed. %s", config.SpanAddress, err)
 		return
 	}
 	defer conn.Close()
@@ -64,35 +59,52 @@ func (spanSender *SpanSender) senderMain() {
 
 	stream, err := client.SendSpan(ctx)
 	if err != nil {
-		log.Warnf("create stream failed. %s", err)
+		spanSender.log.Warnf("create stream failed. %s", err)
 		return
 	}
 	defer stream.CloseSend()
 
-	for span := range spanSender.spanMessageCh {
-		log.Debugf("send %v", span)
+	// for span := range spanSender.spanMessageBufferCh {
+	// 	spanSender.log.Debugf("send %v", span)
 
-		if err := stream.Send(span); err != nil {
-			log.Warnf("send span failed with:%s", err)
-			// response the stream is not available
-			spanSender.spanRespCh <- 500
+	// 	if err := stream.Send(span); err != nil {
+	// 		spanSender.log.Warnf("send span failed with:%s", err)
+	// 		// response the stream is not available
+	// 		spanSender.sendStreamRespCh <- 500
+	// 		return
+	// 	}
+	// }
+	// watch exitCh
+	for {
+		select {
+		case span := <-spanSender.spanMessageBufferCh:
+			spanSender.log.Debugf("send %v", span)
+
+			if err := stream.Send(span); err != nil {
+				spanSender.log.Warnf("send span failed with:%s", err)
+				// response the stream is not available
+				spanSender.sendStreamRespCh <- 500
+				return
+			}
+		case <-spanSender.exitCh:
+			spanSender.log.Warn("sendSpan failed with agent exiting")
 			return
 		}
 	}
+
 }
 
 func (spanSender *SpanSender) sendThread() {
 	defer spanSender.wg.Done()
 
-	spanSender.wg.Add(1)
 	for {
-		spanSender.senderMain()
+		spanSender.sendSpan()
 		config := common.GetConfig()
-		if common.WaitChannelEvent(spanSender.exitCh, config.SpanTimeWaitSec) == common.E_AGENT_STOPPING {
+		if common.WaitChannelEvent(spanSender.exitCh, config.SpanTimeWait) == common.E_AGENT_STOPPING {
 			break
 		}
 	}
-	log.Info("sendThread exit")
+	spanSender.log.Info("sendThread exit")
 }
 
 func (spanSender *SpanSender) Init() {
@@ -100,17 +112,18 @@ func (spanSender *SpanSender) Init() {
 	// spanSender.apiMeta = MetaData{MetaDataType: common.META_API, IDMap: make(PARAMS_TYPE), Sender: spanSender}
 	// spanSender.stringMeta = MetaData{MetaDataType: common.META_STRING, IDMap: make(PARAMS_TYPE), Sender: spanSender}
 
-	spanSender.spanMessageCh = make(chan *v1.PSpanMessage, common.GetConfig().AgentChannelSize)
-	spanSender.spanRespCh = make(chan int32, 1)
-	log.Debug("SpanSender::Init span spanSender thread start")
+	spanSender.spanMessageBufferCh = make(chan *v1.PSpanMessage, common.GetConfig().AgentChannelSize)
+	spanSender.sendStreamRespCh = make(chan int32, 1)
+	spanSender.log.Debug("SpanSender::Init span spanSender thread start")
 	for i := int32(0); i < common.GetConfig().SpanStreamParallelismSize; i++ {
+		spanSender.wg.Add(1)
 		go spanSender.sendThread()
 	}
-	log.Debug("SpanSender::Init done")
+	spanSender.log.Debug("SpanSender::Init done")
 }
 
 func (spanSender *SpanSender) cleanAllMetaData() {
-	log.Info("Clean all metaData")
+	spanSender.log.Info("Clean all metaData")
 	spanSender.idMap = make(ApiIdMap)
 }
 
@@ -365,24 +378,23 @@ func (spanSender *SpanSender) makeSpan(span *TSpan) (*v1.PSpan, error) {
 }
 
 func (spanSender *SpanSender) Interceptor(span *TSpan) bool {
-	log.Debug("span spanSender interceptor")
+	spanSender.log.Debug("span spanSender interceptor")
 	if pbSpan, err := spanSender.makeSpan(span); err == nil {
-		// send channel
-		spanSender.spanMessageCh <- &v1.PSpanMessage{
+		// recv the channel status
+		select {
+		case spanSender.spanMessageBufferCh <- &v1.PSpanMessage{
 			Field: &v1.PSpanMessage_Span{
 				Span: pbSpan,
 			},
-		}
-		// recv the channel status
-		select {
-		case statusCode := <-spanSender.spanRespCh:
-			log.Warnf("span send stream is offline statusCode:%d, clear all string/sql/api meta data", statusCode)
+		}:
+		case statusCode := <-spanSender.sendStreamRespCh:
+			spanSender.log.Warnf("span send stream is offline statusCode:%d, clear all string/sql/api meta data", statusCode)
 			spanSender.cleanAllMetaData()
-		case <-time.After(0 * time.Second):
-			// do nothing, just go on
+		default:
+			spanSender.log.Warn("current span dropped, due to spanStream slow or disconnected and spanMessageBufferCh is full")
 		}
 	} else {
-		log.Warnf("SpanSender::Interceptor return err:%s", err)
+		spanSender.log.Warnf("SpanSender::Interceptor return err:%s", err)
 	}
 	return true
 }
@@ -391,14 +403,14 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 	config := common.GetConfig()
 	conn, err := common.CreateGrpcConnection(config.AgentAddress)
 	if err != nil {
-		log.Warnf("connect:%s failed. %s", config.AgentAddress, err)
+		spanSender.log.Warnf("connect:%s failed. %s", config.AgentAddress, err)
 		return errors.New("SenderGrpcMetaData: connect failed")
 	}
 
 	defer conn.Close()
 	client := v1.NewMetadataClient(conn)
 
-	ctx, cancel := common.BuildPinpointCtx(config.MetaDataTimeWaitSec, spanSender.Md)
+	ctx, cancel := common.BuildPinpointCtx(config.MetaDataTimeWait, spanSender.Md)
 	defer cancel()
 
 	switch metaType {
@@ -408,7 +420,7 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: common.API_DEFAULT}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
-				log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.log.Warnf("agentOnline api meta failed %s", err)
 				return errors.New("SenderGrpcMetaData: PApiMetaData failed")
 			}
 		}
@@ -419,7 +431,7 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: common.API_WEB_REQUEST}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
-				log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.log.Warnf("agentOnline api meta failed %s", err)
 				return errors.New("SenderGrpcMetaData: PApiMetaData failed")
 			}
 		}
@@ -432,7 +444,7 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 			}
 
 			if _, err = client.RequestStringMetaData(ctx, &metaMeta); err != nil {
-				log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.log.Warnf("agentOnline api meta failed %s", err)
 				return errors.New("SenderGrpcMetaData: RequestStringMetaData failed")
 			}
 		}
@@ -445,14 +457,14 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 				Sql:    name,
 			}
 			if _, err = client.RequestSqlUidMetaData(ctx, &sqlUidMeta); err != nil {
-				log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.log.Warnf("agentOnline api meta failed %s", err)
 				return errors.New("SenderGrpcMetaData: RequestSqlUidMetaData failed")
 			}
 		}
 	default:
-		log.Warnf("SenderGrpcMetaData: No such Type:%d", metaType)
+		spanSender.log.Warnf("SenderGrpcMetaData: No such Type:%d", metaType)
 	}
 
-	log.Debugf("send metaData %s", name)
+	spanSender.log.Debugf("send metaData %s", name)
 	return nil
 }

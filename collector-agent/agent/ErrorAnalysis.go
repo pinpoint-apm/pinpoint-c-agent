@@ -32,7 +32,7 @@ func (e *ErrorAnalysisFilter) sendExpMetaData(meta *v1.PExceptionMetaData) {
 	defer conn.Close()
 	client := v1.NewMetadataClient(conn)
 
-	ctx, cancel := common.BuildPinpointCtx(config.MetaDataTimeWaitSec, e.md)
+	ctx, cancel := common.BuildPinpointCtx(config.MetaDataTimeWait, e.md)
 	defer cancel()
 	result, err := client.RequestExceptionMetaData(ctx, meta)
 	if err != nil {

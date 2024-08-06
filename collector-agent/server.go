@@ -1,7 +1,9 @@
 package main
 
 import (
-	// _ "net/http/pprof"
+	"net/http"
+	_ "net/http/pprof"
+	"runtime"
 
 	"flag"
 
@@ -11,11 +13,11 @@ import (
 )
 
 var (
-	server_recv_buf=flag.Int("RecvBufSize", server.RECV_BUF_SIZE_DEF, "Set recv buf; eg: -RecvBufSize=409600")
+	server_recv_buf = flag.Int("RecvBufSize", server.RECV_BUF_SIZE_DEF, "Set recv buf; eg: -RecvBufSize=409600")
 )
 
-func initServerSetting(){
-	if *server_recv_buf > server.RECV_BUF_SIZE_DEF{
+func initServerSetting() {
+	if *server_recv_buf > server.RECV_BUF_SIZE_DEF {
 		server.Setting.RecvBufSize = *server_recv_buf
 	}
 }
@@ -24,14 +26,14 @@ func main() {
 	flag.Parse()
 
 	initServerSetting()
-	
+
 	server.InitServerConfig()
 	spanServer := server.SpanServer{}
 	// disable performance profile
-	// go func() {
-	// 	log.Println(http.ListenAndServe("0.0.0.0:8081", nil))
-	// 	runtime.SetBlockProfileRate(1)
-	// }()
+	go func() {
+		log.Println(http.ListenAndServe("0.0.0.0:8081", nil))
+		runtime.SetBlockProfileRate(1)
+	}()
 
 	if _, err := spanServer.Run(); err != nil {
 		log.Warn("SpanServer is exit ....")

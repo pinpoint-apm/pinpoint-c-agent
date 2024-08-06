@@ -189,9 +189,10 @@ func (manager *AgentRouter) Clean() {
 			manager.rwMutex.RUnlock()
 			manager.rwMutex.Lock()
 			delete(manager.AgentMap, id)
-			agent.Stop()
 			manager.rwMutex.Unlock()
 			manager.rwMutex.RLock()
+			//shrink rwMutex scope
+			agent.Stop()
 		}
 	}
 	manager.rwMutex.RUnlock()

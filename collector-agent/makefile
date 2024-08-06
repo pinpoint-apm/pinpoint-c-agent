@@ -15,5 +15,8 @@ clean:
 	rm -rf pinpoint-grpc-idl/proto/v1/*.go
 	rm -rf collector-agent
 
+test: server
+	go test ./... -v	
+
 docker:
 	docker build  -f Dockerfile -t collector-agent:${TAG}  . 

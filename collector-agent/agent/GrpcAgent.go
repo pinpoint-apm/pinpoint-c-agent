@@ -31,7 +31,7 @@ type GrpcAgent struct {
 	requestCounter      RequestProfiler
 	utReport            *UrlTemplateReport
 	tasksGroup          sync.WaitGroup
-	tSpanCh             chan *TSpan
+	tSpanBufCh          chan *TSpan
 	ExitCh              chan bool
 	log                 *log.Entry
 	errorAnalysisFilter *ErrorAnalysisFilter
@@ -52,7 +52,7 @@ func (agent *GrpcAgent) SendSpan(span *TSpan) {
 			log.Warnf("sendSpan met:%s", r)
 		}
 	}()
-	agent.tSpanCh <- span
+	agent.tSpanBufCh <- span
 }
 
 func (agent *GrpcAgent) GetLastBusyTime() int64 {
@@ -61,7 +61,6 @@ func (agent *GrpcAgent) GetLastBusyTime() int64 {
 
 func (agent *GrpcAgent) Stop() {
 	agent.log.Warn("I'm exiting")
-	close(agent.tSpanCh)
 	close(agent.ExitCh)
 	agent.tasksGroup.Wait()
 	agent.log.Warn("I'm exit")
@@ -85,7 +84,7 @@ func (agent *GrpcAgent) String() string {
 	return fmt.Sprintf("id:%s name:%s type:%d startTime:%s", agent.AgentId, agent.agentName, agent.agentType, agent.StartTime)
 }
 
-func (agent *GrpcAgent) agentOnline() error {
+func (agent *GrpcAgent) handleRegisterAgent() error {
 
 	commandTask := sync.WaitGroup{}
 	defer commandTask.Wait()
@@ -107,7 +106,7 @@ func (agent *GrpcAgent) agentOnline() error {
 	}()
 
 	client := v1.NewAgentClient(conn)
-	ctx, cancel := common.BuildPinpointCtx(config.GrpcConTextTimeOutSec, agent.BaseMD)
+	ctx, cancel := common.BuildPinpointCtx(config.GrpcConTextTimeOut, agent.BaseMD)
 	defer cancel()
 	pbAgentInfo := common.GetPBAgentInfo(agent.agentType)
 	agent.log.Debugf("RequestAgentInfo pbAgentInfo:%v", pbAgentInfo)
@@ -136,6 +135,7 @@ func (agent *GrpcAgent) agentOnline() error {
 	// handle command
 	go agent.handleCommand(conn, &commandTask)
 
+	agent.log.Info("agent online ")
 	agent.AgentOnLine = true
 
 	defer func() { agent.AgentOnLine = false }()
@@ -161,20 +161,18 @@ func (agent *GrpcAgent) agentOnline() error {
 }
 
 func (agent *GrpcAgent) keepAgentOnline() {
-	agent.tasksGroup.Add(1)
 	defer agent.tasksGroup.Done()
 
 	for {
-		if err := agent.agentOnline(); err != nil {
+		if err := agent.handleRegisterAgent(); err != nil {
 			agent.log.Infof("agent online exit:%s ", err)
 		}
 
 		config := common.GetConfig()
-		if common.WaitChannelEvent(agent.ExitCh, config.PingInterval) == common.E_AGENT_STOPPING {
+		if common.WaitChannelEvent(agent.ExitCh, config.AgentReTryTimeout) == common.E_AGENT_STOPPING {
 			break
 		}
 	}
-	agent.spanSender.Stop()
 }
 
 func (agent *GrpcAgent) registerFilter() {
@@ -235,7 +233,7 @@ func (agent *GrpcAgent) sendStat() {
 		for {
 			msg := CollectPStateMessage(agent.requestCounter.GetMaxAvg, agent.requestCounter.GetReqTimeProfiler)
 
-			agent.log.Debugf("%v", msg)
+			agent.log.Debugf("PStatMessage: %v", msg)
 			if err := stream.Send(msg); err != nil {
 				agent.log.Warn(err)
 				break
@@ -270,7 +268,7 @@ func (agent *GrpcAgent) sendStat() {
 }
 
 func (agent *GrpcAgent) uploadStatInfo() {
-	agent.tasksGroup.Add(1)
+
 	defer agent.tasksGroup.Done()
 
 	for {
@@ -309,22 +307,25 @@ func (agent *GrpcAgent) Init(id, _name string, _type int32, StartTime string) {
 
 	config := common.GetConfig()
 
-	agent.tSpanCh = make(chan *TSpan, config.AgentChannelSize)
+	agent.tSpanBufCh = make(chan *TSpan, config.AgentChannelSize)
 	agent.ExitCh = make(chan bool)
-	agent.spanSender = createSpanSender(agent.BaseMD, agent.ExitCh)
+	agent.spanSender = createSpanSender(agent.BaseMD, agent.ExitCh, &agent.tasksGroup, agent.log)
 	agent.requestCounter.CTime = time.Now().Unix()
 
 	agent.errorAnalysisFilter = createErrorAnalysisFilter(agent.BaseMD)
 
 	agent.registerFilter()
+	agent.tasksGroup.Add(1)
 	// start agentOnline
 	go agent.keepAgentOnline()
 	// send stat
+	agent.tasksGroup.Add(1)
 	go agent.uploadStatInfo()
 
 }
 
 func (agent *GrpcAgent) Start() {
+	agent.tasksGroup.Add(1)
 	go agent.consumeJsonSpan()
 }
 
@@ -463,18 +464,17 @@ func (agent *GrpcAgent) handleCommand(conn *grpc.ClientConn, wg *sync.WaitGroup)
 
 func (agent *GrpcAgent) consumeJsonSpan() {
 	defer agent.tasksGroup.Done()
-	agent.tasksGroup.Add(1)
-
-	for span := range agent.tSpanCh {
-		if span == nil {
-			agent.log.Infof("agent:%v get EOF", agent)
-			return
-		}
-
-		for _, filter := range agent.spanFilters {
-			if !filter.Interceptor(span) {
-				break
+	for {
+		select {
+		case span := <-agent.tSpanBufCh:
+			for _, filter := range agent.spanFilters {
+				if !filter.Interceptor(span) {
+					break
+				}
 			}
+		case <-agent.spanSender.exitCh:
+			agent.log.Warn("consumeJsonSpan task done, as agent exit")
+			return
 		}
 	}
 }

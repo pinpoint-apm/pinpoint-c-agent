@@ -65,7 +65,7 @@ func BuildPinpointCtx(sec time.Duration, md metadata.MD) (ctx context.Context, c
 }
 
 func CreateGrpcConnection(address string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*config.GrpcConTextTimeOutSec)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*config.GrpcConTextTimeOut)
 	defer cancel()
 	conn, err := grpc.DialContext(ctx, address, GetDialOption()...)
 	if err != nil {

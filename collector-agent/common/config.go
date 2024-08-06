@@ -24,12 +24,12 @@ type Config struct {
 	AgentChannelSize          uint64
 	SpanStreamParallelismSize int32
 
-	AgentReTryTimeout     time.Duration
-	PingInterval          time.Duration
-	StatInterval          time.Duration
-	SpanTimeWaitSec       time.Duration
-	MetaDataTimeWaitSec   time.Duration
-	GrpcConTextTimeOutSec time.Duration
+	AgentReTryTimeout  time.Duration
+	PingInterval       time.Duration
+	StatInterval       time.Duration
+	SpanTimeWait       time.Duration
+	MetaDataTimeWait   time.Duration
+	GrpcConTextTimeOut time.Duration
 	// agent auto offline after xxxx
 	AgentFreeOnlineSurvivalTimeSec time.Duration
 	// agentInfo
@@ -48,9 +48,9 @@ var config = &Config{
 	AgentReTryTimeout:              10,
 	PingInterval:                   300,
 	StatInterval:                   5,
-	SpanTimeWaitSec:                10,
-	MetaDataTimeWaitSec:            10,
-	GrpcConTextTimeOutSec:          5,
+	SpanTimeWait:                   10,
+	MetaDataTimeWait:               10,
+	GrpcConTextTimeOut:             5,
 	AgentFreeOnlineSurvivalTimeSec: 1 * 60 * 60, // 1 hour
 	ServerType:                     1700,        // PHP
 	LoggerLevel:                    "DEBUG",
@@ -129,5 +129,5 @@ func GetPBAgentInfo(serverType int32) *v1.PAgentInfo {
 }
 
 func (self *Config) String() string {
-	return fmt.Sprintf("SocketType:%s Address:%s  StatAddress:%s SpanAddress:%s AgentAddress%s WebPorts:%d  LoggerLevel:%s LoggerDir:%s AgentChannelSize:%d SpanStreamParallelismSize:%d AgentReTryTimeout:%s PingInterval:%d StatInterval:%d SpanTimeWaitSec:%d MetaDataTimeWaitSec:%d Pid:%d StartTime:%d ServerType:%d Container:%t", self.SocketType, self.Address, self.StatAddress, self.SpanAddress, self.AgentAddress, self.WebPorts, self.LoggerLevel, self.LoggerDir, self.AgentChannelSize, self.SpanStreamParallelismSize, self.AgentReTryTimeout, self.PingInterval, self.StatInterval, self.SpanTimeWaitSec, self.MetaDataTimeWaitSec, self.Pid, self.StartTime, self.ServerType, self.Container)
+	return fmt.Sprintf("SocketType:%s Address:%s  StatAddress:%s SpanAddress:%s AgentAddress%s WebPorts:%d  LoggerLevel:%s LoggerDir:%s AgentChannelSize:%d SpanStreamParallelismSize:%d AgentReTryTimeout:%s PingInterval:%d StatInterval:%d SpanTimeWaitSec:%d MetaDataTimeWaitSec:%d Pid:%d StartTime:%d ServerType:%d Container:%t", self.SocketType, self.Address, self.StatAddress, self.SpanAddress, self.AgentAddress, self.WebPorts, self.LoggerLevel, self.LoggerDir, self.AgentChannelSize, self.SpanStreamParallelismSize, self.AgentReTryTimeout, self.PingInterval, self.StatInterval, self.SpanTimeWait, self.MetaDataTimeWait, self.Pid, self.StartTime, self.ServerType, self.Container)
 }

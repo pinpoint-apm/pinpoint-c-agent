@@ -31,9 +31,9 @@ func launchJsonServer() *SpanServer {
 	config.AgentReTryTimeout = 10
 	config.PingInterval = 5
 	config.StatInterval = 5
-	config.SpanTimeWaitSec = 10
-	config.MetaDataTimeWaitSec = 10
-	config.GrpcConTextTimeOutSec = 5
+	config.SpanTimeWait = 10
+	config.MetaDataTimeWait = 10
+	config.GrpcConTextTimeOut = 5
 	config.HostName = "dev-pinpoint"
 	config.HostIp = "10.34.135.214"
 	config.Pid = 5689
