@@ -10,7 +10,7 @@ COPY tests /pinpoint-c-agent/tests
 ENV NO_INTERACTION=1
 RUN cd /pinpoint-c-agent/ && phpize && ./configure && make && make install
 ## install redis
-RUN cd /tmp/ && git clone https://github.com/phpredis/phpredis.git && cd phpredis && phpize && ./configure &&  make install
+RUN cd /tmp/ && git clone https://github.com/phpredis/phpredis.git && cd phpredis && git checkout 6.0.2 && phpize && ./configure &&  make install
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
 
 COPY testapps/shell.sh shell.sh
