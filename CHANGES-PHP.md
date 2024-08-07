@@ -1,3 +1,5 @@
+> end of maintain: use  `https://pecl.php.net/package-changelog.php?package=pinpoint_php`
+
 ## 0.5.3 2024-07-31
 - build on win32
 - build on macos

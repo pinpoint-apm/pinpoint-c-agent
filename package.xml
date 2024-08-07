@@ -22,15 +22,13 @@
     <api>0.5.3</api>
   </version>
   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
+    <release>stable</release>
+    <api>stable</api>
   </stability>
   <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
   <notes>
-    ## 0.5.3 2024-07-31
-    - build on win32
-    - build on macos
-    - support SendSpanTimeOutMs=-1
+    ## 0.5.4 2024-08-07
+    - release stable version
   </notes>
   <contents>
     <dir name="/">
@@ -112,6 +110,23 @@
   <extsrcrelease>
   </extsrcrelease>
   <changelog>
+    <release>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <version>
+        <release>0.5.4</release>
+        <api>0.5.4</api>
+      </version>
+      <date>2024-08-07</date>
+      <notes>
+        ## What's Changed
+        ## 0.5.4 2024-08-07
+        - release stable
+      </notes>
+    </release>
+
     <release>
       <stability>
         <release>alpha</release>

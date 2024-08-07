@@ -25,7 +25,7 @@ extern "C" {
 extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
-#define PHP_PINPOINT_PHP_VERSION "0.5.3"
+#define PHP_PINPOINT_PHP_VERSION "0.5.4"
 
 #ifdef PHP_WIN32
 #define PHP_PINPOINT_PHP_API __declspec(dllexport)
