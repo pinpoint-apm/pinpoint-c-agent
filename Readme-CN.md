@@ -16,19 +16,19 @@
 
 # Pinpoint `C` Agent
 
-> What's `C`
+> 为啥取名为 `c-agent`
 
-1. Use `C/Cpp` common API
-2. `C`ross-platform: windows/*nux/macOS 
-3. `C`llector-agent: a bridge to pinpoint-collector
+1. 使用了 `C/Cpp` common 库的接口
+2. `C`ross-platform: 支持 windows/*nux/macOS 平台
+3. `C`llector-agent: 添加了一个桥接模块支持pinpoint-collector
 
-Pinpoint C Agent helps your monitor your PHP/PYTHON applications into [pinpoint-apm](https://github.com/pinpoint-apm/pinpoint).\
-Our advantage:
-1. Continuous maintenance and optimization. (Since Jul 31,2018)
-2. Auto-injection, that means less aggression against your code.
-    - python: leverage [PEP 318 Decorator](https://peps.python.org/pep-0318/) 
-    - php: leverage `CG(*_table)` in php kernel and AST parser([nikic/PHP-Parser](https://github.com/nikic/PHP-Parser))
-3. Cross-platform: windows/*nux/macOS. It helps address the problems even when you developing.
+Pinpoint-c-agent 帮助您接入 [pinpoint-apm](https://github.com/pinpoint-apm/pinpoint) 监控平台.\
+我们的特点:
+1. 一直在维护和迭代. (第一个版本 @2018-7-31)
+2. 支持自动切入代码，对您的项目更友好。
+    - python: 使用了 [PEP 318 Decorator](https://peps.python.org/pep-0318/) 
+    - php: 使用  PHP内核提供的`CG(*_table)` 和AST 解析工具 ([nikic/PHP-Parser](https://github.com/nikic/PHP-Parser))
+3. 支持多种平台: windows/*nux/macOS. 方便你在开发的时候就接入项目，提前发现问题。
 
 ## Python Agent
 
@@ -36,34 +36,34 @@ Our advantage:
 
 `pip install pinpointPy`
 
-[Full guide for python](DOC/PY/Readme.md) 
+[更详细的接入文档](DOC/PY/Readme.md) 
 
 ## PHP Agent
 
 > php 7.1+
 
-1. Install extension
+1. 安装 pinpoint_php 扩展 (pinpoint_php.so/pinpoint_php.dll)
 
 ` pecl install pinpoint_php `
 
-2. Import pinpoint aspect plugin
+2. 导入切面插件
 
 `composer require pinpoint-apm/pinpoint-php-aop`
 
-[Full guide for PHP](DOC/PHP/Readme.md) 
+[更详细的接入文档](DOC/PHP/Readme.md) 
 
 ## C/CPP built in API
 
-[Full guide for C](DOC/C-CPP/Readme.md)
+[更详细的接入文档](DOC/C-CPP/Readme.md)
 
 
-## Our agent playground
+## 提供的测试项目
 
 `cd testapps && docker compose build --build-arg PHP_VERSION=7.4 && docker compose up`
 
-[Tested project](/testapps/readme.md)
+[测试项目说明](/testapps/readme.md)
 
-### Blogs 
+### 博客 
 
 - [Intro pinpoint php aop](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/Intro-pinpoint-php-aop)
 - [pinpoint php aop 内部原理](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/pinpoint-php-aop-%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86)
