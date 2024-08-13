@@ -10,6 +10,7 @@ permissions:
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
+  TAG_NAME: ${{ github.head_ref || github.ref_name }} 
 
 jobs:
   collector-agent:
@@ -122,7 +123,7 @@ jobs:
       matrix:
         # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
         goos: [linux, windows]
-        goarch: [amd64, arm64]
+        goarch: [amd64]
     steps:
     - name: Show environment
       run: export
@@ -137,3 +138,4 @@ jobs:
         project_path: "collector-agent"
         binary_name: "collector-agent"
         extra_files: LICENSE collector-agent/CHANGES.md 
+        ldflags: -X "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server.Version=${{ env.TAG_NAME }}"
