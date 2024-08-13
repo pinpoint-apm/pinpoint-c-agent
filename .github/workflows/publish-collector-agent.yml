@@ -1,7 +1,12 @@
 name: publish-collector-agent
 
 on:
-  workflow_dispatch:
+  release:
+    types: [created]
+
+permissions:
+    contents: write
+    packages: write
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
@@ -110,3 +115,25 @@ jobs:
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+
+  Release-Collector-agent:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
+        goos: [linux, windows]
+        goarch: [amd64, arm64]
+    steps:
+    - name: Show environment
+      run: export
+    - uses: actions/checkout@v2
+    - uses: wangyoucao577/go-release-action@v1
+      id: release-ca
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goversion: "https://dl.google.com/go/go1.18.10.linux-amd64.tar.gz"
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        project_path: "collector-agent"
+        binary_name: "collector-agent"
+        extra_files: LICENSE collector-agent/CHANGES.md 

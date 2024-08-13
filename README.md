@@ -20,7 +20,7 @@
 
 1. Use `C/Cpp` common API
 2. `C`ross-platform: windows/*nux/macOS 
-3. `C`ollector-agent: a bridge to pinpoint-collector
+3. [`C`ollector-agent](DOC/collector-agent/readme.md): a bridge to pinpoint-collector
 
 Pinpoint C Agent helps your monitor your PHP/PYTHON applications into [pinpoint-apm](https://github.com/pinpoint-apm/pinpoint).\
 Our advantage:
@@ -66,8 +66,6 @@ Our advantage:
 ### Blogs 
 
 - [Intro pinpoint php aop](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/Intro-pinpoint-php-aop)
-- [pinpoint php aop 内部原理](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/pinpoint-php-aop-%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86)
-- [pinpoint php aop 내부 원리](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/pinpoint-php-aop-%EB%82%B4%EB%B6%80-%EC%9B%90%EB%A6%AC)
 - [pinpoint php on phpmyadmin](https://github.com/pinpoint-apm/pinpoint-c-agent/wiki/phpmyadmin_en)
 
 

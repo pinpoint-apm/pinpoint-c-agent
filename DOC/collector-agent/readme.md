@@ -2,14 +2,11 @@
 
 A bridger to pinpoint-collector. 
 
-![collector-agent](../images/pinpoint_v0.5.x.png)
+![collector-agent](/images/pinpoint_v0.5.x.png)
 
-## Install Collector Agent
+## Collector Agent Guide
 `Collector-Agent` formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`.
 
-### 1. Build
-- Install: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@dev`
-  - ❗❗❗Note: collector-agent: located into `/usr/local/bin/`
 - Add environment variables:
     ```
     export PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
@@ -28,13 +25,21 @@ A bridger to pinpoint-collector.
     3. `PP_LOG_DIR`: Set the path of collector-agent's log file.
     4. `PP_Log_Level`: Set the log level.
     5. `PP_ADDRESS`: Set the address of `collector-agent`, then `PHP/Python-Agent` will connect collector-agent through this address.
-- Run `collector-agent` by executing command `./collector-agent`
-   
+
+### 1. Download from github.release
+
+  https://github.com/pinpoint-apm/pinpoint-c-agent/releases/latest
+
 ### 2. Use docker images
 
+> Release page:  https://github.com/pinpoint-apm/pinpoint-c-agent/pkgs/container/pinpoint-c-agent%2Fcollector-agent
+
+#### Example:
+
 ```sh
-docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:v0.6.4
+docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:latest
 ```
+
 ### 3. K8s side car
 
 server.yaml sample
@@ -65,3 +70,11 @@ server.yaml sample
           - name: "PP_COLLECTOR_AGENT_ISDOCKER"
             value: "true"
 ```
+
+### 4. Compiling from source [require `go.1.18`]
+
+- Install: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@dev`
+  - ❗❗❗Note: collector-agent: located into `/usr/local/bin/`
+  
+`./collector-agent`
+   
