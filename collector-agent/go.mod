@@ -3,7 +3,7 @@ module github.com/pinpoint-apm/pinpoint-c-agent/collector-agent
 go 1.18
 
 require (
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/shirou/gopsutil v3.21.2+incompatible
 	github.com/shirou/gopsutil/v3 v3.21.2
 	github.com/sirupsen/logrus v1.8.1
