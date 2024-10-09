@@ -1,4 +1,4 @@
-Django==4.1.13
+Django==4.2.16
 mysqlclient
 requests
 psycopg2-binary
