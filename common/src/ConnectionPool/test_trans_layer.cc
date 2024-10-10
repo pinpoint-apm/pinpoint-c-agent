@@ -72,7 +72,7 @@ void fake_server() {
   close_socket(cfd);
 }
 
-void handle_agent_info(int type, const char* buf, size_t len) {
+int handle_agent_info(int type, const char* buf, size_t len) {
   printf("recv: %s", buf);
   EXPECT_EQ(type, RESPONSE_AGENT_INFO);
   Json::Value root;
@@ -82,6 +82,7 @@ void handle_agent_info(int type, const char* buf, size_t len) {
   EXPECT_STREQ(root["id"].asCString(), "test-app");
   EXPECT_STREQ(root["name"].asCString(), "test-name");
   run = false;
+  return 0;
 }
 
 TEST(translayer, connect_remote) {

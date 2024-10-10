@@ -1,8 +1,10 @@
 package agent
 
 import (
+	"context"
 	"testing"
 
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -11,7 +13,8 @@ func TestErrorAnalysisFilter_Interceptor(t *testing.T) {
 		"test":  "2",
 		"test2": "string",
 	})
-	ea := createErrorAnalysisFilter(md)
+	config := common.CreateTestConfig()
+	ea := createErrorAnalysisFilter(context.Background(), md, config, config.LogEntry)
 
 	cases := []*TSpan{
 		{
@@ -23,7 +26,7 @@ func TestErrorAnalysisFilter_Interceptor(t *testing.T) {
 		{
 			ErrorMarked:   1,
 			ExceptionInfo: "abc",
-			Calls: []*TSpanEvent{
+			Follows: []*TSpanEvent{
 				{
 					ExceptionInfo: "abc",
 				},
@@ -35,7 +38,7 @@ func TestErrorAnalysisFilter_Interceptor(t *testing.T) {
 		{
 			ErrorMarked:   0,
 			ExceptionInfo: "abc",
-			Calls: []*TSpanEvent{
+			Follows: []*TSpanEvent{
 				{
 					ExceptionInfo: "abc",
 				},

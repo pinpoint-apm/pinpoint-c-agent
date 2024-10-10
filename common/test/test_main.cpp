@@ -2,7 +2,7 @@
 // #include <iostream>
 #include <string>
 
-int main(int argc, char const* argv[]) {
+int main(int, char const*[]) {
   pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 7000);
   register_logging_cb(nullptr, 1);
   NodeID root = pinpoint_start_trace(E_ROOT_NODE);

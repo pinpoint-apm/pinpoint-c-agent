@@ -3,47 +3,30 @@ package server
 import (
 	"encoding/binary"
 	"net"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
-
-	log "github.com/sirupsen/logrus"
 )
 
-func launchJsonServer() *SpanServer {
-	config := common.GetConfig()
+func launchJsonServer() *Server {
+	config := common.CreateTestConfig()
 
-	config.SocketType = "tcp"
-	config.Address = "127.0.0.1:8789"
-	config.AgentAddress = "dev-pinpoint-01:9991"
-	config.StatAddress = "dev-pinpoint-01:9992"
-	config.SpanAddress = "dev-pinpoint-01:9993"
-	config.WebPorts = 80
-	config.LoggerLevel = "DEBUG"
-	config.LoggerDir = "/tmp/"
+	config.User.BindAddress = "127.0.0.1:8789"
+	config.User.AgentAddress = "dev-pinpoint-01:9991"
+	config.User.StatAddress = "dev-pinpoint-01:9992"
+	config.User.SpanAddress = "dev-pinpoint-01:9993"
 
-	config.AgentChannelSize = 1000
-	config.SpanStreamParallelismSize = 1
-	config.AgentReTryTimeout = 10
-	config.PingInterval = 5
-	config.StatInterval = 5
-	config.SpanTimeWait = 10
-	config.MetaDataTimeWait = 10
-	config.GrpcConTextTimeOut = 5
 	config.HostName = "dev-pinpoint"
-	config.HostIp = "10.34.135.214"
+	config.HostIp = "10.10.10.10"
 	config.Pid = 5689
 	config.StartTime = 13558755446548
-	config.ServerType = 1700
-	config.Container = false
 
-	js := SpanServer{}
+	js := CreateServer(config)
 
-	return &js
+	return js
 }
 
 func generateValidPacket(msg string) (buf []byte) {
@@ -54,10 +37,10 @@ func generateValidPacket(msg string) (buf []byte) {
 	return buf
 }
 
-func generateUnvaalidPacket01() (buf []byte) {
-	buf = make([]byte, 8)
-	return buf
-}
+// func generateInvalidPacket01() (buf []byte) {
+// 	buf = make([]byte, 8)
+// 	return buf
+// }
 
 func genUniqueIdBody() []byte {
 	msg := make([]byte, 8)
@@ -81,7 +64,6 @@ func generateInvalidPacket03() (buf []byte) {
 }
 
 func handleWrite(t *testing.T, conn net.Conn) {
-	defer conn.Close()
 	conn.Write(genUniqueIdBody())
 	readId(t, conn)
 	for i := 0; i < 5; i++ {
@@ -92,7 +74,7 @@ func handleWrite(t *testing.T, conn net.Conn) {
 		buffer := generateValidPacket(msg)
 		_, e := conn.Write(buffer)
 		if e != nil {
-			t.Error("Error to send message because of ", e.Error())
+			t.Errorf("Error to send message because of %v", e)
 			break
 		}
 		time.Sleep(100 * time.Millisecond)
@@ -108,10 +90,7 @@ func readHello(t *testing.T, conn net.Conn) {
 	time.Sleep(5 * time.Second)
 	buf := make([]byte, 1280)
 	conn.Read(buf)
-	// if err != nil {
-	// 	t.Error("Error to read message because of ", err)
-	// 	return
-	// }
+
 	hello := string(buf[8:])
 	if !strings.HasPrefix(hello, "{\"appid\":\"") {
 		t.Error(hello)
@@ -126,38 +105,28 @@ func readId(t *testing.T, conn net.Conn) {
 	if !strings.HasPrefix(id, "{\"uid\"") {
 		t.Error(id)
 	}
+	t.Log("read hello")
 }
 
 func TestJsonServer(t *testing.T) {
 	js := launchJsonServer()
-	go js.Run()
+	go js.startListen()
 	time.Sleep(2 * time.Second)
 	conn, err := net.Dial("tcp", "127.0.0.1:8789")
 	if err != nil {
 		t.Error(err)
 	}
+	defer conn.Close()
+
 	readHello(t, conn)
 	handleWrite(t, conn)
+
 }
 
-func TestMain(m *testing.M) {
-	log.SetLevel(log.DebugLevel)
-	log.SetOutput(os.Stdout)
-	code := m.Run()
+// func TestMain(m *testing.M) {
+// 	log.SetLevel(log.DebugLevel)
+// 	log.SetOutput(os.Stdout)
+// 	code := m.Run()
 
-	os.Exit(code)
-}
-
-func TestLoadConfig(t *testing.T) {
-	os.Setenv("PP_COLLECTOR_AGENT_SPAN_IP", "dev-pinpoint")
-	os.Setenv("PP_COLLECTOR_AGENT_SPAN_PORT", "9993")
-	os.Setenv("PP_COLLECTOR_AGENT_AGENT_IP", "dev-pinpoint")
-	os.Setenv("PP_COLLECTOR_AGENT_AGENT_PORT", "9991")
-	os.Setenv("PP_COLLECTOR_AGENT_STAT_IP", "dev-pinpoint")
-	os.Setenv("PP_COLLECTOR_AGENT_STAT_PORT", "9992")
-	os.Setenv("PP_COLLECTOR_AGENT_ISDOCKER", "true")
-	os.Setenv("PP_LOG_DIR", "/tmp/")
-	os.Setenv("PP_Log_Level", "ERROR")
-	os.Setenv("PP_ADDRESS", "0.0.0.0@9999")
-	InitServerConfig()
-}
+// 	os.Exit(code)
+// }

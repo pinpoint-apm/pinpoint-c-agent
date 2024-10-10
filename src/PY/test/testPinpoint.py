@@ -30,10 +30,13 @@ class TestAgent(TestCase):
 
     def test_trace_life(self):
         self.assertFalse(_pinpointPy.trace_has_root())
+        self.assertFalse(_pinpointPy.is_root_trace())
         _pinpointPy.start_trace()
         self.assertTrue(_pinpointPy.trace_has_root())
+        self.assertTrue(_pinpointPy.is_root_trace())
         _pinpointPy.start_trace()
         self.assertTrue(_pinpointPy.trace_has_root())
+        self.assertFalse(_pinpointPy.is_root_trace())
         _pinpointPy.start_trace()
         _pinpointPy.start_trace()
 
@@ -52,6 +55,7 @@ class TestAgent(TestCase):
         _pinpointPy.end_trace()
         _pinpointPy.force_flush_trace(10)
         self.assertFalse(_pinpointPy.trace_has_root())
+        self.assertFalse(_pinpointPy.is_root_trace())
 
     def test_set_collector_host(self):
         self.assertTrue(_pinpointPy.set_agent(

@@ -54,8 +54,8 @@ string(3) "123"
  update foo members 
 int(1234)
 string(14) "hello pinpoint"
-[pinpoint] [%d] [%d]pinpoint_get_this: not support, no this
+[pinpoint] [%d:%d]pinpoint_get_this: not support, no this
 bool(false)
 test static method 
-[pinpoint] [%d] [%d]pinpoint_get_this: not support, no this
+[pinpoint] [%d:%d]pinpoint_get_this: not support, no this
 bool(false)

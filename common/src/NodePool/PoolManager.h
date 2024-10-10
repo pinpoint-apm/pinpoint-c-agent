@@ -32,90 +32,44 @@ class PoolManager {
 private:
   TraceNode& getUsedNode(NodeID id);
 
-  TraceNode& getReadyNode(void) noexcept;
+  TraceNode& getReadyNode(void);
 
-  TraceNode& _take(NodeID id);
-
-  bool _restore(NodeID id, NodeID& child_id, NodeID& next_id, bool force);
-
-  Json::Value& getRootNodeValue(WrapperTraceNodePtr& node);
-
-  // void gatherChildrenValues(WrapperTraceNodePtr& parent, NodeID child_header);
+protected:
+  virtual bool returnNode(NodeID id, NodeID& next, bool force);
 
 public:
-  /**
-   * @brief take is not safe, you should avoid use under MT
-   * note: try PoolManager::getInstance().GetWrapperNode
-   * @param id
-   * @return TraceNode&
-   */
-  DEPRECATED("") inline TraceNode& Take(NodeID id = E_ROOT_NODE) {
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    return this->_take(id);
-  }
+  const Json::Value& EncodeTraceToJsonSpan(WrapperTraceNodePtr& node);
 
-  inline TraceNode& NewNode() {
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    return this->getReadyNode();
-  }
+  virtual TraceNode& GetNode() { return this->getReadyNode(); }
 
-  inline WrapperTraceNodePtr ReferNode(NodeID id) {
-    std::lock_guard<std::mutex> _safe(this->_lock);
+  virtual WrapperTraceNodePtr ReferNode(NodeID id) {
     TraceNode& e = this->getUsedNode(id);
     return WrapperTraceNodePtr(e);
   }
 
-  DEPRECATED("") inline WrapperTraceNodePtr GetWrapperNode(NodeID id = E_ROOT_NODE) {
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    TraceNode& e = this->_take(id);
-    return WrapperTraceNodePtr(e);
-  }
-  /**
-   * @brief restore id->traceNode to pool
-   *
-   * @param id
-   * @param child_id child id of `id`, if exist
-   * @param next_id next id of `id`, if exist
-   * @return true
-   * @return false
-   */
-  bool ReturnNode(NodeID id, NodeID& child_id, NodeID& next_id);
+  void AppendToRootTrace(WrapperTraceNodePtr& root, TraceNode& newNode);
 
-  inline bool ReturnNode(const TraceNode& node) {
-    NodeID node1, node2;
-    return this->ReturnNode(node.getId(), node1, node2);
+  NodeID ReturnNode(NodeID id);
+
+  virtual uint32_t totalNodesCount() { return (uint32_t)nodeIndexVec.size() * CELL_SIZE; }
+
+  virtual uint32_t freeNodesCount() { return (uint32_t)this->_freeNodeList.size(); }
+
+  bool NoNodesLeak() {
+    if (freeNodesCount() == totalNodesCount()) {
+      return true;
+    } else {
+      pp_trace("pool status: free:%u total:%u", freeNodesCount(), totalNodesCount());
+      return false;
+    }
   }
 
-  uint32_t totalNodesCount() {
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    return (uint32_t)nodeIndexVec.size() * CELL_SIZE;
-  }
-
-  uint32_t freeNodesCount() {
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    return (uint32_t)this->_freeNodeList.size();
-  }
-
-  void foreachAliveNode(std::function<void(TraceNode& node)> func) {
-    std::lock_guard<std::mutex> _safe(this->_lock);
+  virtual void foreachAliveNode(std::function<void(TraceNode& node)> func) {
     for (int32_t index = 0; index < this->maxId; index++) {
       if (this->indexInUsedVec(index)) {
         func(this->getUsedNode((NodeID)(index + 1)));
       }
     }
-  }
-
-  Json::Value& ExpandTraceTreeNodes(NodeID id) {
-    WrapperTraceNodePtr root = ReferNode(id);
-    return ExpandTraceTreeNodes(root);
-  }
-
-  Json::Value& ExpandTraceTreeNodes(WrapperTraceNodePtr& w_root) {
-    return getRootNodeValue(w_root);
-  }
-  Json::Value& ExpandTraceTreeNodes(TraceNode& root) {
-    WrapperTraceNodePtr w_root(root);
-    return getRootNodeValue(w_root);
   }
 
   void FreeNodeTree(NodeID nodeId);
@@ -135,10 +89,7 @@ public:
   }
 
 #ifdef COMMON_DEBUG
-  inline bool NoNodeLeak() {
-    std::lock_guard<std::mutex> _safe(this->_lock);
-    return this->_freeNodeList.size() == nodeIndexVec.size() * CELL_SIZE;
-  }
+  inline bool NoNodeLeak() { return this->_freeNodeList.size() == nodeIndexVec.size() * CELL_SIZE; }
 #endif
   virtual ~PoolManager() {}
 
@@ -162,15 +113,52 @@ private:
   void expandOnce();
 
 private:
-  std::mutex _lock;
-  // std::set<NodeID> _aliveNodeSet;
+  // std::mutex _lock;
   std::vector<bool> usedNodeSet_;
   std::vector<bool> readyNodeSet_;
   int32_t maxId;
   std::stack<int32_t> _freeNodeList;
   static const int CELL_SIZE = 128;
+  static const int POOL_MAX_NODES_LIMIT = CELL_SIZE * 100;
   std::vector<std::unique_ptr<TraceNode[]>> nodeIndexVec;
 };
+
+class ThreadSafePoolManager : public PoolManager {
+public:
+  void foreachAliveNode(std::function<void(TraceNode& node)> func) override {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    PoolManager::foreachAliveNode(func);
+  }
+  uint32_t freeNodesCount() override {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return PoolManager::freeNodesCount();
+  }
+
+  uint32_t totalNodesCount() override {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return PoolManager::totalNodesCount();
+  }
+
+  WrapperTraceNodePtr ReferNode(NodeID id) override {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return PoolManager::ReferNode(id);
+  }
+
+  TraceNode& GetNode() override {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return PoolManager::GetNode();
+  }
+
+  // private:
+  bool returnNode(NodeID id, NodeID& next, bool force) override {
+    std::lock_guard<std::mutex> _safe(this->_lock);
+    return PoolManager::returnNode(id, next, force);
+  }
+
+private:
+  std::mutex _lock;
+};
+
 } // namespace NodePool
 } // namespace PP
 #endif /* COMMON_SRC_NODEPOOL_POOLMANAGER_H_ */

@@ -7,24 +7,27 @@ import (
 )
 
 func TestUrlTemplateReport(t *testing.T) {
+
+	uri := "/hello"
+	uri_1 := "/hello_exp"
 	spans := []TSpan{
 		{
-			UT:          "/hello",
+			UT:          uri,
 			Uri:         "/hello",
 			ElapsedTime: 32,
 		},
 		{
-			UT:          "/hello",
+			UT:          uri,
 			Uri:         "/hello",
 			ElapsedTime: 320,
 		},
 		{
-			UT:          "/hello",
+			UT:          uri,
 			Uri:         "/hello",
 			ElapsedTime: 3200,
 		},
 		{
-			UT:            "/hello_exp",
+			UT:            uri_1,
 			Uri:           "/hello",
 			ElapsedTime:   32000,
 			ExceptionInfo: "exp",

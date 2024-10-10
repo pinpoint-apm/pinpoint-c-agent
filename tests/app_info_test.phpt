@@ -12,5 +12,5 @@ pinpoint_php.DebugReport=true
 var_dump(_pinpoint_start_time());
 var_dump("APP".'^'.strval(_pinpoint_start_time()).'^'.strval(_pinpoint_unique_id()));
 --EXPECTF--
-int(%d)
+float(%d)
 string(%d) "APP^%d^%d"

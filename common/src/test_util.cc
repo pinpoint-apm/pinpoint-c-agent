@@ -74,17 +74,14 @@ TEST(util, variadic_func_str) {
 
 TEST(util, mergeTraceNodeTree) {
   PoolManager node_pool;
-  TraceNode& n1 = node_pool.Take();
-  TraceNode& n2 = node_pool.Take();
-  TraceNode& n3 = node_pool.Take();
-  TraceNode& n4 = node_pool.Take();
+  TraceNode& n1 = node_pool.GetNode();
+  TraceNode& n2 = node_pool.GetNode();
+  TraceNode& n3 = node_pool.GetNode();
+  TraceNode& n4 = node_pool.GetNode();
 
   n2.parent_id_ = n1.id_;
-  n1.last_child_id_ = n2.id_;
   n3.parent_id_ = n2.id_;
   n4.parent_id_ = n2.id_;
-  n3.sibling_id_ = n4.id_;
-  n2.last_child_id_ = n3.id_;
 
   // Json::Value var = node_pool.ExpandTraceTreeNodes(n1);
   // std::cout << var.toStyledString();
@@ -115,7 +112,7 @@ TEST(util, mergeTraceNodeTree_1) {
   EXPECT_TRUE(span.find("id1") != span.npos);
   EXPECT_TRUE(span.find("id2") != span.npos);
   EXPECT_TRUE(span.find("id3") != span.npos);
-  EXPECT_TRUE(span.find("calls") != span.npos);
+  EXPECT_TRUE(span.find("event") != span.npos);
 }
 
 TEST(util, logger) {

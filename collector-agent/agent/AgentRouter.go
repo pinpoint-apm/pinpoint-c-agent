@@ -11,7 +11,7 @@ import (
 
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type RawPacket struct {
@@ -27,13 +27,25 @@ type I_PacketRouter interface {
 type AgentRouter struct {
 	AgentMap map[string]*GrpcAgent
 	PingId   int32
-	Quit     chan bool
-	WG       *sync.WaitGroup
 	rwMutex  sync.RWMutex
+	Config   *common.Config
+	Log      *logrus.Logger
+}
+
+func CreateAgentRouter(config *common.Config) *AgentRouter {
+	router := &AgentRouter{
+		PingId:   1,
+		AgentMap: make(map[string]*GrpcAgent),
+		Config:   config,
+		Log:      config.Log,
+	}
+	return router
 }
 
 type TSpanEvent struct {
 	Name            string          `json:"name"`
+	Sequence        int32           `json:":seq"`
+	Depth           int32           `json:":depth"`
 	ExceptionInfo   string          `json:"EXP,omitempty"`
 	ExceptionInfoV2 *TExceptionInfo `json:"EXP_V2,omitempty"`
 	DestinationId   string          `json:"dst,omitempty"`
@@ -44,9 +56,9 @@ type TSpanEvent struct {
 	StartElapsedV2  int32           `json:":S"`
 	EndElapsedV2    int32           `json:":E"`
 	ServiceType     int32           `json:"stp,string"`
-	Clues           []string        `json:"clues,omitempty"`
-	Calls           []*TSpanEvent   `json:"calls,omitempty"`
-	SqlMeta         string          `json:"SQL,omitempty"`
+	Annotations     []string        `json:"anno,omitempty"`
+	SqlMeta         *string         `json:"SQL,omitempty"`
+	AsyId           int32           `json:"asyId,string,omitempty"`
 }
 
 func (spanEv *TSpanEvent) GetEndElapsed() int32 {
@@ -77,6 +89,11 @@ type TExceptionInfo struct {
 	StartTime int64  `json:":S"`
 }
 
+type TAsyncId struct {
+	AsyncId  int32 `json:"id"`
+	Sequence int32 `json:"seq"`
+}
+
 type TSpan struct {
 	AppServerType         int32           `json:"FT"`
 	AppServerTypeV2       int32           `json:":FT"`
@@ -91,8 +108,8 @@ type TSpan struct {
 	AppIdV2               string          `json:":appid"`
 	AppName               string          `json:"appname"`
 	AppNameV2             string          `json:":appname"`
-	Calls                 []*TSpanEvent   `json:"calls"`
-	Clues                 []string        `json:"clues,omitempty"`
+	Follows               []*TSpanEvent   `json:"event"`
+	Annotations           []string        `json:"anno,omitempty"`
 	SpanName              string          `json:"name"`
 	SpanId                int64           `json:"sid,string"`
 	ServerType            int32           `json:"stp,string"`
@@ -108,6 +125,7 @@ type TSpan struct {
 	ErrorMarked           int32           `json:"EA,omitempty"`
 	NginxHeader           string          `json:"NP,omitempty"`
 	ApacheHeader          string          `json:"AP,omitempty"`
+	LocalAsyncId          *TAsyncId       `json:"asy,omitempty"`
 }
 
 func (span *TSpan) IsFailed() bool {
@@ -117,7 +135,7 @@ func (span *TSpan) IsFailed() bool {
 	return false
 }
 
-//note
+// note
 // FindHistogramLevel must come with histogramSize
 func (span *TSpan) FindHistogramLevel() int {
 	if span.GetElapsedTime() <= 100 {
@@ -180,12 +198,11 @@ func (span *TSpan) GetAppName() string {
 }
 
 func (manager *AgentRouter) Clean() {
-	config := common.GetConfig()
 	ctime := time.Now().Unix()
 	manager.rwMutex.RLock()
 	for id, agent := range manager.AgentMap {
-		if agent.GetLastBusyTime()+int64(config.AgentFreeOnlineSurvivalTimeSec) < ctime {
-			log.Warnf("agent:%s expired after:%d sec. busyTime:%d", agent, config.AgentFreeOnlineSurvivalTimeSec, agent.GetLastBusyTime())
+		if agent.GetLastBusyTime()+int64(manager.Config.AgentReTryTimeout) < ctime {
+			manager.Log.Warnf("agent:%s expired after:%d sec. busyTime:%d", agent, manager.Config.AgentReTryTimeout, agent.GetLastBusyTime())
 			manager.rwMutex.RUnlock()
 			manager.rwMutex.Lock()
 			delete(manager.AgentMap, id)
@@ -198,13 +215,13 @@ func (manager *AgentRouter) Clean() {
 	manager.rwMutex.RUnlock()
 }
 
-func GetAgentInfo(span *TSpan) (appid, name string, appServerType int32, startTime string, err error) {
+func (manager *AgentRouter) GetAgentInfo(span *TSpan) (appid, name string, appServerType int32, startTime string, err error) {
 
 	// new feat: get current startTime
-	startTime = strconv.FormatInt(common.GetConfig().StartTime, 10) + "000"
+	startTime = strconv.FormatInt(manager.Config.StartTime, 10) + "000"
 	holder := strings.Split(span.TransactionId, "^")
 	if len(holder) < 3 {
-		log.Warn("tid in wrong format")
+		manager.Log.Warn("tid in wrong format")
 	} else if len(holder[1]) <= 10 { // seconds format
 		startTime = holder[1] + "000"
 	} else { // milliseconds format
@@ -240,33 +257,34 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 	}
 
 	if err := json.Unmarshal(packet.RawData, span); err != nil {
-		log.Warnf("json.Unmarshal err:%v", err)
+		manager.Log.Warnf("json.Unmarshal err:%v", err)
 		goto PACKET_INVALID
 	}
 
-	if appid, appName, serverType, startTime, err := GetAgentInfo(span); err == nil {
+	if appid, appName, serverType, startTime, err := manager.GetAgentInfo(span); err == nil {
 		manager.rwMutex.RLock()
-		log.Debug("Read-lock is holding")
+		manager.Log.Debug("Read-lock is holding")
 		agent, OK := manager.AgentMap[appid]
 		if !OK {
 			// create a new agent
 			manager.rwMutex.RUnlock()
-			log.Infof("agent:%s not find, create a new agent.", appid)
-			log.Debug("Try to get write-lock")
+			manager.Log.Infof("agent:%s not find, create a new agent.", appid)
+			manager.Log.Debug("Try to get write-lock")
 			manager.rwMutex.Lock()
-			log.Debug("Write-lock is holding")
+			manager.Log.Debug("Write-lock is holding")
 			if _t, OK := manager.AgentMap[appid]; OK {
 				agent = _t
 			} else {
-				agent = createGrpcAgent(appid, appName, serverType, manager.PingId, startTime)
+				agent = CreateGrpcAgent(appid, appName, serverType, manager.PingId, startTime, manager.Config)
+				agent.StartServe()
 				manager.PingId += 1
 			}
 			manager.AgentMap[appid] = agent
 			manager.rwMutex.Unlock()
-			log.Debug("Write-lock is release")
+			manager.Log.Debug("Write-lock is release")
 		} else {
 			manager.rwMutex.RUnlock()
-			log.Debug("Read-lock is release")
+			manager.Log.Debug("Read-lock is release")
 		}
 
 		agent.CheckValid(span)
@@ -274,7 +292,7 @@ func (manager *AgentRouter) DispatchPacket(packet *RawPacket) error {
 		return nil
 
 	} else {
-		log.Warn(err)
+		manager.Log.Warn(err)
 		return err
 	}
 

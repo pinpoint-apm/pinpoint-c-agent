@@ -1,0 +1,42 @@
+spanChunk 
+{ 
+version: 1 
+transactionId { agentStartTime: 1603785846801 sequence: 4 } 
+spanId: -2310501016293025621 
+endPoint: "localhost:38080" 
+spanEvent { depth: 1 endElapsed: 193 serviceType: 100 apiId: 1 } 
+spanEvent { sequence: 1 depth: 2 endElapsed: 193 serviceType: 9054 apiId: 1269 } 
+spanEvent { sequence: 2 depth: 3 endElapsed: 193 serviceType: 9054 apiId: 1266 } 
+spanEvent { sequence: 3 depth: 4 startElapsed: 7 endElapsed: 46 serviceType: 9053 apiId: 577 } 
+spanEvent { sequence: 4 depth: 5 startElapsed: 25 endElapsed: 9 serviceType: 9053 annotation { key: 48 value { stringValue: "naver.com:80" } } apiId: 1270 } s
+panEvent { sequence: 5 startElapsed: 11 endElapsed: 8 serviceType: 9052 annotation { key: 40 value { stringValue: "/" } } annotation { key: 46 value { intValue: 301 } } annotation { key: 49 value { intBooleanIntBooleanValue { intValue2: 6 } } } apiId: 581 nextEvent { messageEvent { nextSpanId: -598520380655700791 destinationId: "naver.com" } } } 
+spanEvent { sequence: 6 depth: 4 startElapsed: 14 endElapsed: 14 serviceType: 9053 apiId: 577 } 
+spanEvent { sequence: 7 depth: 5 endElapsed: 9 serviceType: 9053 annotation { key: 48 value { stringValue: "www.naver.com:80" } } apiId: 1270 } 
+spanEvent { sequence: 8 startElapsed: 9 endElapsed: 5 serviceType: 9052 annotation { key: 40 value { stringValue: "/" } } annotation { key: 46 value { intValue: 302 } } annotation { key: 49 value { intBooleanIntBooleanValue { intValue2: 5 } } } apiId: 581 nextEvent { messageEvent { nextSpanId: 3587956703181255046 destinationId: "www.naver.com" } } } 
+spanEvent { sequence: 9 depth: 4 startElapsed: 6 endElapsed: 120 serviceType: 9053 apiId: 577 } 
+spanEvent { sequence: 10 depth: 5 endElapsed: 94 serviceType: 9053 annotation { key: 48 value { stringValue: "www.naver.com:443" } } apiId: 1270 } 
+spanEvent { sequence: 11 startElapsed: 94 endElapsed: 23 serviceType: 9052 annotation { key: 40 value { stringValue: "/" } } annotation { key: 46 value { intValue: 200 } } annotation { key: 49 value { intBooleanIntBooleanValue { intValue2: 23 } } } apiId: 581 nextEvent { messageEvent { nextSpanId: 395410527152755259 destinationId: "www.naver.com" } } } 
+applicationServiceType: 1010 
+keyTime: 1603785892805 
+localAsyncId { asyncId: 1 sequence: 1 } 
+}
+
+span
+{ 
+version: 1 
+transactionId { agentStartTime: 1603785846801 sequence: 4 } 
+spanId: -2310501016293025621 
+parentSpanId: -1 
+startTime: 1603785892765 
+elapsed: 257 
+apiId: 4 
+serviceType: 1010 
+acceptEvent { rpc: "/google/httpclient/apachehttp/executeAsync.pinpoint" endPoint: "localhost:38080" remoteAddr: "0:0:0:0:0:0:0:1" } 
+annotation { key: 46 value { intValue: 200 } } 
+spanEvent { depth: 1 startElapsed: 1 endElapsed: 256 serviceType: 1011 apiId: 3 } 
+spanEvent { sequence: 1 depth: 2 endElapsed: 256 serviceType: 5051 apiId: 5 } 
+spanEvent { sequence: 2 depth: 3 startElapsed: 2 endElapsed: 236 serviceType: 5071 apiId: 1006 } 
+spanEvent { sequence: 3 depth: 4 startElapsed: 30 endElapsed: 6 serviceType: 9054 apiId: 1267 asyncEvent: 1 } 
+applicationServiceType: 1010 
+}
+

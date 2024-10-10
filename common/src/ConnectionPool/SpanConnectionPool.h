@@ -68,7 +68,6 @@ public:
 private:
   TransLayerPtr createConnection(const RouteMapValueVec& value_vec) {
     TransLayerPtr _connect(new TransLayer(this->co_host));
-    using namespace std::placeholders;
 
     for (auto& value : value_vec) {
       _connect->RegPeerMsgCallback(value.first, value.second);

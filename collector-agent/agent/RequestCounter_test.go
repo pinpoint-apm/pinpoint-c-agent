@@ -8,8 +8,8 @@ import (
 )
 
 func TestRequestProfiler_Interceptor(t *testing.T) {
-	profiler := RequestProfiler{}
-	config := common.GetConfig()
+	config := common.CreateTestConfig()
+	profiler := createRequestCounter(config)
 	config.StatInterval = 30
 	spans := []TSpan{
 		{ElapsedTime: 10},
@@ -42,7 +42,7 @@ func BenchmarkRequestProfiler_Interceptor(b *testing.B) {
 	spanMap := TSpan{
 		ElapsedTime: 234,
 	}
-	req := RequestProfiler{}
+	req := RequestCounter{}
 	for i := 0; i < b.N; i++ {
 		req.Interceptor(&spanMap)
 	}

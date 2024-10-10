@@ -196,10 +196,26 @@ static PyObject *py_generate_unique_id(PyObject *self,
   return Py_BuildValue("l", ret);
 }
 
+static PyObject *py_is_root_trace(PyObject *self, PyObject *args) {
+  int id = -1;
+  if (!PyArg_ParseTuple(args, "|i", &id)) {
+    return Py_BuildValue("O", Py_False);
+  }
+  if (id == E_INVALID_NODE) {
+    id = pinpoint_get_per_thread_id();
+  }
+  int ret = pinpoint_trace_is_root(id);
+  if (ret == 1) {
+    return Py_BuildValue("O", Py_True);
+  } else {
+    return Py_BuildValue("O", Py_False);
+  }
+}
+
 static PyObject *py_trace_has_root(PyObject *self, PyObject *args) {
   int id = -1;
   if (!PyArg_ParseTuple(args, "|i", &id)) {
-    return NULL;
+    return Py_BuildValue("O", Py_False);
   }
   if (id == E_INVALID_NODE) {
     id = pinpoint_get_per_thread_id();
@@ -324,7 +340,12 @@ static PyMethodDef PinpointMethods[] = {
      "def end_trace(int id=-1):# end currently matched trace"},
     {"unique_id", py_generate_unique_id, METH_NOARGS, "def unique_id()-> long"},
     {"trace_has_root", py_trace_has_root, METH_VARARGS,
-     "def trace_has_root(int id=-1)-> long # check current whether have a "
+     "warning use `is_root_trace` "
+     "def trace_has_root(int id=-1)-> bool # check current whether have a "
+     "root. \n True: \nFalse: "
+     "\n Note: If the id is invalid, return false"},
+    {"is_root_trace", py_is_root_trace, METH_VARARGS,
+     "def is_root_trace(int id=-1)-> bool # check current whether have a "
      "root. \n True: \nFalse: "
      "\n Note: If the id is invalid, return false"},
     {"drop_trace", py_pinpoint_drop_trace, METH_VARARGS,

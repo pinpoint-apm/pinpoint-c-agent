@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(pinpoint VERSION 0.5.3 DESCRIPTION  "pinpoint common library")
+project(pinpoint VERSION 0.6.0 DESCRIPTION  "pinpoint common library")
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -8,10 +8,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 option(AGENT_WITH_PKGCONFIG_SUPPORT "Generate and install .pc files" OFF)
 
 
-# set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}   -g3 -O0 -DCOMMON_DEBUG")   
-# set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DNDEBUG  -O2")
-# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  -g3 -O0 -DCOMMON_DEBUG")
-# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG  -O2")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -39,7 +35,7 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 add_subdirectory(jsoncpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include)                
-
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/common.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/common.h @ONLY)
 if (WITH_TEST_CASE)
     include (CTest)
     enable_testing()

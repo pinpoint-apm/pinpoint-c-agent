@@ -32,7 +32,7 @@ class Foo{
 }
 
 function Test(){
-    throw new \Exception("I am testting");
+    throw new \Exception("I am testing");
 }
 
 _pinpoint_start_trace();
@@ -46,17 +46,17 @@ try{
 
 _pinpoint_start_trace();
 --EXPECTF--
-[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
-[pinpoint] [%d] [%d] [128] pinpoint_start child  [127]
-[pinpoint] [%d] [%d] [127] add clue key:name value:Foo
-[pinpoint] [%d] [%d]apm_error_cb called
+[pinpoint] [%d:%d] [0] pinpoint_start child [128]
+[pinpoint] [%d:%d] [128] pinpoint_start child [127]
+[pinpoint] [%d:%d] [127] add anno_v1 key:name value:Foo
+[pinpoint] [%d:%d]apm_error_cb called
 
-Fatal error: Uncaught Exception: I am testting in %s:23
+Fatal error: Uncaught Exception: I am testing in %s:23
 Stack trace:
 #0 %s(30): Test()
 #1 {main}
   thrown in %s on line 23
-[pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"%s","line":23,"msg":"Uncaught Exception: I am testting in %s:23\nStack trace:\n#0 %s(30): Test()\n#1 {main}\n  thrown"},"calls":[{":E":%d,":S":%d,"name":"Foo"}]})
-[pinpoint] [%d] [%d][unittest] current span was dropped
-[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
+[pinpoint] [%d:%d] [127] pinpoint_end_trace Done!
+[pinpoint] [%d:%d]this span:({":E":%d,":FT":1500,":S":%d,"ERR":{"file":"%s","line":23,"msg":"Uncaught Exception: I am testing in %s:23\nStack trace:\n#0 %s(30): Test()\n#1 {main}\n  thrown"},"event":[{":E":%d,":S":%d,":depth":1,":seq":0,"name":"Foo"}]})
+[pinpoint] [%d:%d][unittest] current span was dropped
+[pinpoint] [%d:%d] [128] pinpoint_end_trace Done!

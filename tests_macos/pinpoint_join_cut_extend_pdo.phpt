@@ -10,11 +10,11 @@ if (version_compare(phpversion(), '8.2.0', '>=')){
   print "skip";
   print phpversion() . ">= 8.2.0";
 }
-
+  
 if(getenv('SKIP_WINDOWS_ACTION', true)){
   print "skip";
 }
-
+   
 ?>
 --INI--
 pinpoint_php.DebugReport=true
@@ -99,17 +99,17 @@ $ret = $pdo->exec($sql);
 
 
 --EXPECTF--
-[pinpoint] [%d] [%d]try to interceptor module(class)/function=pdo:__construct
-[pinpoint] [%d] [%d]added interceptor on `module`: pdo::__construct success
-[pinpoint] [%d] [%d]try to interceptor module(class)/function=pdo:exec
-[pinpoint] [%d] [%d]added interceptor on `module`: pdo::exec success
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:pdo::__construct
+[pinpoint] [%d:%d]try to interceptor module(class)/function=pdo:__construct
+[pinpoint] [%d:%d]added interceptor on `module`: pdo::__construct success
+[pinpoint] [%d:%d]try to interceptor module(class)/function=pdo:exec
+[pinpoint] [%d:%d]added interceptor on `module`: pdo::exec success
+[pinpoint] [%d:%d]pinpoint_interceptor_handler_entry: handle func/method:pdo::__construct
 on_before: mysql:host=dev-mysql;dbname=employees 
 attached dsn 
-[pinpoint] [%d] [%d] call_interceptor_before:pdo::__construct return type(1) zval
-[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d:%d] call_interceptor_before:pdo::__construct return type(1) zval
+[pinpoint] [%d:%d]replace_ex_caller_parameters return value must be `an array`
 on_end 
-[pinpoint] [%d] [%d]call_interceptor_end: pdo::__construct 
+[pinpoint] [%d:%d]call_interceptor_end: pdo::__construct 
 int(4)
 object(PDOStatement)#8 (1) {
   ["queryString"]=>
@@ -152,5 +152,5 @@ array(2) {
 }
 string(3) "123"
 string(37) "mysql:host=dev-mysql;dbname=employees"
-[pinpoint] [%d] [%d]start free interceptor: pdo::__construct
-[pinpoint] [%d] [%d]start free interceptor: pdo::exec
+[pinpoint] [%d:%d]start free interceptor: pdo::__construct
+[pinpoint] [%d:%d]start free interceptor: pdo::exec

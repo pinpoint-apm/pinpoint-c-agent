@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -11,9 +10,9 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
+	"github.com/sirupsen/logrus"
 	"github.com/spaolacci/murmur3"
 
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -23,103 +22,89 @@ type ApiIdMap map[string]interface{}
 var unique_id_count = int32(1)
 
 type SpanSender struct {
-	sequenceId          int32
-	idMap               ApiIdMap
-	Md                  metadata.MD
-	exitCh              chan bool
+	sequenceId int32
+	idMap      ApiIdMap
+	Md         metadata.MD
+	// exitCh              chan bool
+	ctx                 context.Context
 	spanMessageBufferCh chan *v1.PSpanMessage
 	sendStreamRespCh    chan int32
 	wg                  *sync.WaitGroup
-	log                 *log.Entry
+	log                 *logrus.Entry
+	config              *common.Config
 }
 
-func createSpanSender(base metadata.MD, exitCh chan bool, agent_wg *sync.WaitGroup, log *log.Entry) *SpanSender {
+func createSpanSender(base metadata.MD, ctx context.Context, agent_wg *sync.WaitGroup, config *common.Config, entry *logrus.Entry) *SpanSender {
 	sender := &SpanSender{
-		Md:     base,
-		exitCh: exitCh,
-		idMap:  make(ApiIdMap),
-		wg:     agent_wg,
-		log:    log,
+		Md:                  base,
+		ctx:                 ctx,
+		idMap:               make(ApiIdMap),
+		wg:                  agent_wg,
+		log:                 entry,
+		config:              config,
+		spanMessageBufferCh: make(chan *v1.PSpanMessage, config.AgentChannelSize),
+		sendStreamRespCh:    make(chan int32, 1),
 	}
-	sender.Init()
+	sender.StartServe()
 	return sender
 }
 
-func (spanSender *SpanSender) sendSpan() {
-	config := common.GetConfig()
-	conn, err := common.CreateGrpcConnection(config.SpanAddress)
+func (s *SpanSender) Stop() {}
+
+func (s *SpanSender) sendSpan() {
+	conn, err := s.config.CreateGrpcConnection(s.ctx, s.config.User.SpanAddress)
 	if err != nil {
-		spanSender.log.Warnf("connect:%s failed. %s", config.SpanAddress, err)
+		s.log.Warnf("connect:%s failed. %s", s.config.User.SpanAddress, err)
 		return
 	}
 	defer conn.Close()
 	client := v1.NewSpanClient(conn)
 
-	ctx := metadata.NewOutgoingContext(context.Background(), spanSender.Md)
-
+	ctx := metadata.NewOutgoingContext(s.ctx, s.Md)
 	stream, err := client.SendSpan(ctx)
 	if err != nil {
-		spanSender.log.Warnf("create stream failed. %s", err)
+		s.log.Warnf("create stream failed. %s", err)
 		return
 	}
 	defer stream.CloseSend()
-
-	// for span := range spanSender.spanMessageBufferCh {
-	// 	spanSender.log.Debugf("send %v", span)
-
-	// 	if err := stream.Send(span); err != nil {
-	// 		spanSender.log.Warnf("send span failed with:%s", err)
-	// 		// response the stream is not available
-	// 		spanSender.sendStreamRespCh <- 500
-	// 		return
-	// 	}
-	// }
-	// watch exitCh
 	for {
 		select {
-		case span := <-spanSender.spanMessageBufferCh:
-			spanSender.log.Debugf("send %v", span)
+		case span := <-s.spanMessageBufferCh:
+			s.log.Debugf("send %v", span)
 
 			if err := stream.Send(span); err != nil {
-				spanSender.log.Warnf("send span failed with:%s", err)
+				s.log.Warnf("send span failed with:%s", err)
 				// response the stream is not available
-				spanSender.sendStreamRespCh <- 500
+				s.sendStreamRespCh <- 500
 				return
 			}
-		case <-spanSender.exitCh:
-			spanSender.log.Warn("sendSpan failed with agent exiting")
+		case <-s.ctx.Done():
+			s.log.Warn("sendSpan failed with agent exiting")
 			return
 		}
 	}
 
 }
 
-func (spanSender *SpanSender) sendThread() {
+func (spanSender *SpanSender) sendTask() {
 	defer spanSender.wg.Done()
 
 	for {
 		spanSender.sendSpan()
-		config := common.GetConfig()
-		if common.WaitChannelEvent(spanSender.exitCh, config.SpanTimeWait) == common.E_AGENT_STOPPING {
+		if common.WaitEventsWithTime(spanSender.ctx, spanSender.config.SpanTimeWait) == common.E_AGENT_STOPPING {
 			break
 		}
 	}
 	spanSender.log.Info("sendThread exit")
 }
 
-func (spanSender *SpanSender) Init() {
-	// spanSender.sqlMeta = MetaData{MetaDataType: common.META_SQL_UID, IDMap: make(PARAMS_TYPE), Sender: spanSender}
-	// spanSender.apiMeta = MetaData{MetaDataType: common.META_API, IDMap: make(PARAMS_TYPE), Sender: spanSender}
-	// spanSender.stringMeta = MetaData{MetaDataType: common.META_STRING, IDMap: make(PARAMS_TYPE), Sender: spanSender}
-
-	spanSender.spanMessageBufferCh = make(chan *v1.PSpanMessage, common.GetConfig().AgentChannelSize)
-	spanSender.sendStreamRespCh = make(chan int32, 1)
-	spanSender.log.Debug("SpanSender::Init span spanSender thread start")
-	for i := int32(0); i < common.GetConfig().SpanStreamParallelismSize; i++ {
+func (spanSender *SpanSender) StartServe() {
+	spanSender.log.Debug("SpanSender::StartServe span spanSender thread start")
+	for i := int32(0); i < spanSender.config.SpanStreamParallelismSize; i++ {
 		spanSender.wg.Add(1)
-		go spanSender.sendThread()
+		go spanSender.sendTask()
 	}
-	spanSender.log.Debug("SpanSender::Init done")
+	spanSender.log.Debug("SpanSender::StartServe done")
 }
 
 func (spanSender *SpanSender) cleanAllMetaData() {
@@ -127,22 +112,11 @@ func (spanSender *SpanSender) cleanAllMetaData() {
 	spanSender.idMap = make(ApiIdMap)
 }
 
-func (spanSender *SpanSender) makePinpointSpanEv(genSpan *v1.PSpan, spanEv *TSpanEvent, depth int32) error {
-	if pbSpanEv, err := spanSender.createPinpointSpanEv(spanEv); err == nil {
-		pbSpanEv.Sequence = spanSender.sequenceId
-		spanSender.sequenceId += 1
-		pbSpanEv.Depth = depth
-		genSpan.SpanEvent = append(genSpan.SpanEvent, pbSpanEv)
-		for _, call := range spanEv.Calls {
-			spanSender.makePinpointSpanEv(genSpan, call, depth+1)
-		}
-		return nil
-	} else {
-		return err
-	}
+func (spanSender *SpanSender) makeSpanEvent(spanEv *TSpanEvent) *v1.PSpanEvent {
+	return spanSender.createPinpointSpanEv(spanEv)
 }
 
-func (spanSender *SpanSender) getMetaApiId(name string, metaType int32) int32 {
+func (spanSender *SpanSender) getMetaApiId(name string, metaType common.Meta_Type) int32 {
 	id, ok := spanSender.idMap[name]
 	if ok {
 		return id.(int32)
@@ -168,10 +142,24 @@ func (spanSender *SpanSender) getSqlUidMetaApiId(name string) []byte {
 	}
 }
 
-func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) (*v1.PSpanEvent, error) {
-	pbSpanEv := &v1.PSpanEvent{}
+func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) *v1.PSpanEvent {
+	pbSpanEv := &v1.PSpanEvent{
+		StartElapsed: spanEv.GetStartElapsed(),
+		EndElapsed:   spanEv.GetEndElapsed(),
+		ServiceType:  spanEv.ServiceType,
+		Depth:        spanEv.Depth,
+		Sequence:     spanEv.Sequence,
+		AsyncEvent:   spanEv.AsyId,
+	}
 
-	pbSpanEv.ApiId = spanSender.getMetaApiId(spanEv.Name, common.META_Default_api)
+	// TODO check serverType is 100 ,100 should be META_INVOCATION_API
+	// from https://github.com/pinpoint-apm/pinpoint/blob/91af11b99d94c7ce5076a8bf468bf02480eb129d/agent-module/profiler/src/main/java/com/navercorp/pinpoint/profiler/context/method/AsyncMethodDescriptor.java#L26
+	const API_INVOCATION_SERVICE_TYPE = 100
+	if spanEv.ServiceType == API_INVOCATION_SERVICE_TYPE {
+		pbSpanEv.ApiId = spanSender.getMetaApiId(spanEv.Name, common.META_INVOCATION_API)
+	} else {
+		pbSpanEv.ApiId = spanSender.getMetaApiId(spanEv.Name, common.META_Default_api)
+	}
 
 	if len(spanEv.ExceptionInfo) > 0 {
 		id := spanSender.getMetaApiId("___EXP___", common.META_String_api)
@@ -181,7 +169,7 @@ func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) (*v1.PSpa
 		pbSpanEv.ExceptionInfo.StringValue = &stringValue
 	}
 
-	nextEv := v1.PMessageEvent{
+	nextEv := &v1.PMessageEvent{
 		DestinationId: spanEv.DestinationId,
 		NextSpanId:    spanEv.NextSpanId,
 		EndPoint:      spanEv.EndPoint,
@@ -189,15 +177,11 @@ func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) (*v1.PSpa
 
 	pbSpanEv.NextEvent = &v1.PNextEvent{
 		Field: &v1.PNextEvent_MessageEvent{
-			MessageEvent: &nextEv},
+			MessageEvent: nextEv,
+		},
 	}
 
-	pbSpanEv.StartElapsed = spanEv.GetStartElapsed()
-
-	pbSpanEv.EndElapsed = spanEv.GetEndElapsed()
-
-	pbSpanEv.ServiceType = spanEv.ServiceType
-	for _, ann := range spanEv.Clues {
+	for _, ann := range spanEv.Annotations {
 		iColon := strings.Index(ann, ":")
 		if value, err := strconv.ParseInt(ann[0:iColon], 10, 32); err == nil {
 			stringValue := v1.PAnnotationValue_StringValue{StringValue: ann[iColon+1:]}
@@ -213,12 +197,12 @@ func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) (*v1.PSpa
 		}
 	}
 
-	if len(spanEv.SqlMeta) > 0 {
-		id := spanSender.getSqlUidMetaApiId(spanEv.SqlMeta)
+	if spanEv.SqlMeta != nil {
+		id := spanSender.getSqlUidMetaApiId(*spanEv.SqlMeta)
 		sqlByteSv := &v1.PBytesStringStringValue{
 			BytesValue: id,
 			StringValue1: &wrappers.StringValue{
-				Value: spanEv.SqlMeta,
+				Value: *spanEv.SqlMeta,
 			},
 		}
 		pbSpanEv.Annotation = append(pbSpanEv.Annotation, &v1.PAnnotation{
@@ -231,28 +215,41 @@ func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) (*v1.PSpa
 		})
 	}
 
-	return pbSpanEv, nil
+	return pbSpanEv
+}
+
+func (spanSender *SpanSender) makeSpanChunk(span *TSpan) (*v1.PSpanChunk, error) {
+	chunk := &v1.PSpanChunk{Version: 1,
+		TransactionId:          common.TypeV1_String_TransactionId(span.TransactionId),
+		SpanId:                 span.SpanId,
+		KeyTime:                span.GetStartTime(),
+		ApplicationServiceType: span.AppServerType,
+		EndPoint:               span.EndPoint,
+		LocalAsyncId: &v1.PLocalAsyncId{
+			AsyncId:  span.LocalAsyncId.AsyncId,
+			Sequence: span.LocalAsyncId.Sequence,
+		},
+	}
+	return chunk, nil
 }
 
 func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 	spanSender.sequenceId = 0
-	pbSpan := &v1.PSpan{}
-	pbSpan.Version = 1
-	pbSpan.ApiId = spanSender.getMetaApiId(span.GetAppid(), common.META_Web_request_api)
+	pbSpan := &v1.PSpan{
+		ParentSpanId:           -1,
+		Version:                1,
+		ServiceType:            span.ServerType,
+		ApplicationServiceType: span.GetAppServerType(),
+		SpanId:                 span.SpanId,
+		StartTime:              span.GetStartTime(),
+		Elapsed:                span.GetElapsedTime(),
+		TransactionId:          common.TypeV1_String_TransactionId(span.TransactionId),
+		ApiId:                  spanSender.getMetaApiId(span.SpanName, common.META_Web_request_api),
+	}
 
-	pbSpan.ServiceType = span.ServerType
-
-	pbSpan.ApplicationServiceType = span.GetAppServerType()
-
-	pbSpan.ParentSpanId = span.ParentSpanId
-
-	pbSpan.TransactionId = common.TypeV1_String_TransactionId(span.TransactionId)
-
-	pbSpan.SpanId = span.SpanId
-
-	pbSpan.StartTime = span.GetStartTime()
-
-	pbSpan.Elapsed = span.GetElapsedTime()
+	if span.ParentSpanId > 0 {
+		pbSpan.ParentSpanId = span.ParentSpanId
+	}
 
 	parentInfo := v1.PParentInfo{
 		ParentApplicationName: span.ParentApplicationName,
@@ -260,7 +257,12 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 		AcceptorHost:          span.AcceptorHost,
 	}
 
-	acceptEv := v1.PAcceptEvent{Rpc: span.Uri, EndPoint: span.EndPoint, RemoteAddr: span.RemoteAddr, ParentInfo: &parentInfo}
+	acceptEv := v1.PAcceptEvent{
+		Rpc:        span.Uri,
+		EndPoint:   span.EndPoint,
+		RemoteAddr: span.RemoteAddr,
+		ParentInfo: &parentInfo,
+	}
 
 	pbSpan.AcceptEvent = &acceptEv
 	// changes: ERRs's priority bigger EXP, so ERR will replace EXP
@@ -282,7 +284,7 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 		}
 	}
 
-	for _, annotation := range span.Clues {
+	for _, annotation := range span.Annotations {
 		iColon := strings.Index(annotation, ":")
 		if iColon > 0 {
 			if value, err := strconv.ParseInt(annotation[0:iColon], 10, 32); err == nil {
@@ -301,26 +303,26 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 
 	// collector data from nginx-header
 	if len(span.NginxHeader) > 0 {
-		pvalue := v1.PAnnotationValue_LongIntIntByteByteStringValue{
+		ann := v1.PAnnotationValue_LongIntIntByteByteStringValue{
 			LongIntIntByteByteStringValue: &v1.PLongIntIntByteByteStringValue{},
 		}
-		pvalue.LongIntIntByteByteStringValue.IntValue1 = 2
+		ann.LongIntIntByteByteStringValue.IntValue1 = 2
 		ngFormat := common.ParseStringField(span.NginxHeader)
 		if value, OK := ngFormat["D"]; OK {
 			if value, err := common.ParseDotFormatToTime(value); err == nil {
-				pvalue.LongIntIntByteByteStringValue.IntValue2 = int32(value)
+				ann.LongIntIntByteByteStringValue.IntValue2 = int32(value)
 			}
 		}
 		if value, OK := ngFormat["t"]; OK {
 			if value, err := common.ParseDotFormatToTime(value); err == nil {
-				pvalue.LongIntIntByteByteStringValue.LongValue = value
+				ann.LongIntIntByteByteStringValue.LongValue = value
 			}
 		}
 
 		annotation := v1.PAnnotation{
 			Key: 300,
 			Value: &v1.PAnnotationValue{
-				Field: &pvalue,
+				Field: &ann,
 			},
 		}
 		pbSpan.Annotation = append(pbSpan.Annotation, &annotation)
@@ -366,27 +368,40 @@ func (spanSender *SpanSender) makePinpointSpan(span *TSpan) (*v1.PSpan, error) {
 	return pbSpan, nil
 }
 
-func (spanSender *SpanSender) makeSpan(span *TSpan) (*v1.PSpan, error) {
-	if pSpan, err := spanSender.makePinpointSpan(span); err == nil {
-		for _, call := range span.Calls {
-			spanSender.makePinpointSpanEv(pSpan, call, 1)
-		}
-		return pSpan, nil
+func (spanSender *SpanSender) makeSpanOrSpanChunk(span *TSpan) (*v1.PSpan, *v1.PSpanChunk, error) {
+
+	var spanEv []*v1.PSpanEvent
+	for _, call := range span.Follows {
+		spanEv = append(spanEv, spanSender.makeSpanEvent(call))
+	}
+
+	if span.LocalAsyncId == nil {
+		pSpan, _ := spanSender.makePinpointSpan(span)
+		pSpan.SpanEvent = spanEv
+		return pSpan, nil, nil
 	} else {
-		return nil, err
+		chunk, _ := spanSender.makeSpanChunk(span)
+		chunk.SpanEvent = spanEv
+		return nil, chunk, nil
 	}
 }
 
 func (spanSender *SpanSender) Interceptor(span *TSpan) bool {
 	spanSender.log.Debug("span spanSender interceptor")
-	if pbSpan, err := spanSender.makeSpan(span); err == nil {
-		// recv the channel status
-		select {
-		case spanSender.spanMessageBufferCh <- &v1.PSpanMessage{
-			Field: &v1.PSpanMessage_Span{
+	if pbSpan, pbChunk, err := spanSender.makeSpanOrSpanChunk(span); err == nil {
+		spanMessage := &v1.PSpanMessage{}
+		if pbSpan != nil {
+			spanMessage.Field = &v1.PSpanMessage_Span{
 				Span: pbSpan,
-			},
-		}:
+			}
+		} else {
+			spanMessage.Field = &v1.PSpanMessage_SpanChunk{
+				SpanChunk: pbChunk,
+			}
+		}
+
+		select {
+		case spanSender.spanMessageBufferCh <- spanMessage:
 		case statusCode := <-spanSender.sendStreamRespCh:
 			spanSender.log.Warnf("span send stream is offline statusCode:%d, clear all string/sql/api meta data", statusCode)
 			spanSender.cleanAllMetaData()
@@ -399,40 +414,42 @@ func (spanSender *SpanSender) Interceptor(span *TSpan) bool {
 	return true
 }
 
-func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) error {
-	config := common.GetConfig()
-	conn, err := common.CreateGrpcConnection(config.AgentAddress)
+func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Meta_Type) {
+	conn, err := spanSender.config.CreateGrpcConnection(spanSender.ctx, spanSender.config.User.AgentAddress)
 	if err != nil {
-		spanSender.log.Warnf("connect:%s failed. %s", config.AgentAddress, err)
-		return errors.New("SenderGrpcMetaData: connect failed")
+		spanSender.log.Warnf("connect:%s failed. %s", spanSender.config.User.AgentAddress, err)
+		return
 	}
 
 	defer conn.Close()
 	client := v1.NewMetadataClient(conn)
 
-	ctx, cancel := common.BuildPinpointCtx(config.MetaDataTimeWait, spanSender.Md)
+	ctx, cancel := context.WithTimeout(spanSender.ctx, spanSender.config.MetaDataTimeWait)
+
+	ctx = metadata.NewOutgoingContext(ctx, spanSender.Md)
+
 	defer cancel()
 
 	switch metaType {
 	case common.META_Default_api:
 		{
 			id := spanSender.idMap[name].(int32)
-			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: common.API_DEFAULT}
+			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_DEFAULT)}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				return errors.New("SenderGrpcMetaData: PApiMetaData failed")
+				delete(spanSender.idMap, name)
 			}
 		}
 
 	case common.META_Web_request_api:
 		{
 			id := spanSender.idMap[name].(int32)
-			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: common.API_WEB_REQUEST}
+			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_WEB_REQUEST)}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				return errors.New("SenderGrpcMetaData: PApiMetaData failed")
+				delete(spanSender.idMap, name)
 			}
 		}
 	case common.META_String_api:
@@ -445,7 +462,7 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 
 			if _, err = client.RequestStringMetaData(ctx, &metaMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				return errors.New("SenderGrpcMetaData: RequestStringMetaData failed")
+				delete(spanSender.idMap, name)
 			}
 		}
 
@@ -458,13 +475,21 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType int32) er
 			}
 			if _, err = client.RequestSqlUidMetaData(ctx, &sqlUidMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				return errors.New("SenderGrpcMetaData: RequestSqlUidMetaData failed")
+				delete(spanSender.idMap, name)
+			}
+		}
+	case common.META_INVOCATION_API:
+		{
+			id := spanSender.idMap[name].(int32)
+			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_INVOCATION)}
+			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
+				spanSender.log.Warnf("agentOnline api meta failed %s", err)
+				delete(spanSender.idMap, name)
 			}
 		}
 	default:
 		spanSender.log.Warnf("SenderGrpcMetaData: No such Type:%d", metaType)
 	}
 
-	spanSender.log.Debugf("send metaData %s", name)
-	return nil
+	spanSender.log.Debugf("send metaData name:%s type:%d ", name, metaType)
 }

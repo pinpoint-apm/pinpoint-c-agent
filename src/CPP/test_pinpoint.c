@@ -26,7 +26,7 @@
 #elif defined(__linux__) || defined(__APPLE__)
 #include <unistd.h>
 #endif
-int32_t id = 0;
+int32_t local_node_id = 0;
 const char* app_id = "c_test_app";
 const char* app_name = "c_test_name";
 
@@ -48,64 +48,70 @@ void random_sleep() {
 }
 
 void test_httpclient() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "httpclient", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_DESTINATION, "www.pinpoint-wonderful.com", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD, E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "httpclient", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_DESTINATION, "www.pinpoint-wonderful.com", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD, E_LOC_CURRENT);
   char* sid = get_sid();
-  pinpoint_add_clue(id, PP_NEXT_SPAN_ID, sid, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_NEXT_SPAN_ID, sid, E_LOC_CURRENT);
   free(sid);
-  pinpoint_add_clues(id, PP_HTTP_URL, "/support/c-cpp-php-python", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_ADD_EXCEPTION, "test this exception", E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_HTTP_URL, "/support/c-cpp-php-python", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_ADD_EXCEPTION, "test this exception", E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
 
   random_sleep();
 
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_end_trace(local_node_id);
+}
+
+static void test_async() {
+  // todo ...
+  // goto test_pinpoint.cpp test_async
 }
 
 void test_mysql() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "mysql::excute", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_MYSQL, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SQL_FORMAT, "select 1*3;", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_DESTINATION, "localhost:3307", E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "mysql::excute", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_MYSQL, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SQL_FORMAT, "select 1*3;", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_DESTINATION, "localhost:3307", E_LOC_CURRENT);
   random_sleep();
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_end_trace(local_node_id);
 }
 
 void test_func() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "test_func", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_METHOD, E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_PHP_ARGS, "I'm the parameters", E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "test_func", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP_METHOD, E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_ARGS, "I'm the parameters", E_LOC_CURRENT);
   random_sleep();
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_end_trace(local_node_id);
 }
 
 void test_req() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_REQ_URI, "test_url", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_REQ_CLIENT, "127.0.0.1", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_REQ_SERVER, "HTTP_HOST", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "C_CPP Request", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_APP_NAME, app_name, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_APP_ID, app_id, E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_REQ_URI, "test_url", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_REQ_CLIENT, "127.0.0.1", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_REQ_SERVER, "HTTP_HOST", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "C_CPP Request", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_APP_NAME, app_name, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_APP_ID, app_id, E_LOC_CURRENT);
   char ut[64] = {0};
   snprintf(ut, 64, "/user/?/add/%d", rand() % 10);
-  pinpoint_add_clue(id, PP_UT, ut, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_UT, ut, E_LOC_CURRENT);
   random_sleep();
 
   test_func();
   test_mysql();
   test_httpclient();
+  test_async();
   char* tid = get_tid();
   char* sid = get_sid();
-  pinpoint_add_clue(id, PP_TRANSCATION_ID, tid, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SPAN_ID, sid, E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "200", E_LOC_CURRENT);
-  id = pinpoint_end_trace(id);
+  pinpoint_add_clue(local_node_id, PP_TRANSCATION_ID, tid, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SPAN_ID, sid, E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_HTTP_STATUS_CODE, "200", E_LOC_CURRENT);
+  local_node_id = pinpoint_end_trace(local_node_id);
   check_tracelimit(-1);
   free(tid);
   free(sid);

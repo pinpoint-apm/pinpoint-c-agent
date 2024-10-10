@@ -1,44 +1,55 @@
 package agent
 
 import (
+	"context"
+	"sync"
+
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/metadata"
 )
 
 type ErrorAnalysisFilter struct {
-	md metadata.MD
-	// only one gocoroutine working on chn, so no needs to lock it
-	id int64
+	md     metadata.MD
+	id     int64
+	config *common.Config
+	log    *logrus.Entry
+	wg     sync.WaitGroup
+	ctx    context.Context
 }
 
-func createErrorAnalysisFilter(base metadata.MD) *ErrorAnalysisFilter {
-	eaf := &ErrorAnalysisFilter{
-		md: base,
-		id: 0,
+func createErrorAnalysisFilter(ctx context.Context, base metadata.MD, config *common.Config, entry *logrus.Entry) *ErrorAnalysisFilter {
+	return &ErrorAnalysisFilter{
+		md:     base,
+		id:     0,
+		config: config,
+		log:    entry,
+		ctx:    ctx,
 	}
-	return eaf
 }
+
+func (e *ErrorAnalysisFilter) Stop() {}
 
 func (e *ErrorAnalysisFilter) sendExpMetaData(meta *v1.PExceptionMetaData) {
-	config := common.GetConfig()
-	conn, err := common.CreateGrpcConnection(config.AgentAddress)
+	defer e.wg.Done()
+
+	conn, err := e.config.CreateGrpcConnection(e.ctx, e.config.User.AgentAddress)
 	if err != nil {
-		log.Warnf("connect:%s failed. %s", config.AgentAddress, err)
+		e.log.Warnf("connect:%s failed. %s", e.config.User.AgentAddress, err)
 		return
 	}
 
 	defer conn.Close()
 	client := v1.NewMetadataClient(conn)
 
-	ctx, cancel := common.BuildPinpointCtx(config.MetaDataTimeWait, e.md)
+	ctx, cancel := common.BuildMdContextWithTimeout(e.config.MetaDataTimeWait, e.md)
 	defer cancel()
 	result, err := client.RequestExceptionMetaData(ctx, meta)
 	if err != nil {
-		log.Warnf("RequestExceptionMetaData failed. reason: %v", err)
+		e.log.Warnf("RequestExceptionMetaData failed. reason: %v", err)
 	}
-	log.Debugf("RequestExceptionMetaData %v %v", meta, result)
+	e.log.Debugf("RequestExceptionMetaData %v %v", meta, result)
 }
 
 func (e *ErrorAnalysisFilter) parseException(spanEv []*TSpanEvent, exceptions *[]*v1.PException,
@@ -59,13 +70,15 @@ func (e *ErrorAnalysisFilter) parseException(spanEv []*TSpanEvent, exceptions *[
 
 			exp.ExceptionDepth = depth + 1
 			*exceptions = append(*exceptions, exp)
-			if len(ev.Calls) > 0 {
-				e.parseException(ev.Calls, exceptions, exp.ExceptionId, exp.ExceptionDepth, ev.ExceptionInfoV2, startTime)
-			}
+			// TODO
+			// if len(ev.Calls) > 0 {
+			// 	e.parseException(ev.Calls, exceptions, exp.ExceptionId, exp.ExceptionDepth, ev.ExceptionInfoV2, startTime)
+			// }
 		} else {
-			if len(ev.Calls) > 0 {
-				e.parseException(ev.Calls, exceptions, parentErrorId, depth, parentExp, startTime)
-			}
+			// TODO
+			// if len(ev.Calls) > 0 {
+			// 	e.parseException(ev.Calls, exceptions, parentErrorId, depth, parentExp, startTime)
+			// }
 		}
 	}
 	return nil
@@ -94,9 +107,9 @@ func (e *ErrorAnalysisFilter) scanTSpanTree(span *TSpan) *v1.PExceptionMetaData 
 			StartTime:          span.ExceptionInfoV2.StartTime + startTime,
 		}
 		spanExp = append(spanExp, exp)
-		e.parseException(span.Calls, &spanExp, exp.ExceptionId, depth, span.ExceptionInfoV2, startTime)
+		e.parseException(span.Follows, &spanExp, exp.ExceptionId, depth, span.ExceptionInfoV2, startTime)
 	} else {
-		e.parseException(span.Calls, &spanExp, 0, depth, nil, startTime)
+		e.parseException(span.Follows, &spanExp, 0, depth, nil, startTime)
 	}
 
 	e_md.Exceptions = spanExp
@@ -106,12 +119,11 @@ func (e *ErrorAnalysisFilter) scanTSpanTree(span *TSpan) *v1.PExceptionMetaData 
 
 func (e *ErrorAnalysisFilter) Interceptor(span *TSpan) bool {
 	if span.ErrorMarked == 1 {
-		// parse the error
 		meta := e.scanTSpanTree(span)
-		// plan one: send once
+		e.wg.Add(1)
 		go e.sendExpMetaData(meta)
 	} else {
-		log.Debugf("ErrorAnalysisFilter Interceptor, not exception mark")
+		e.log.Debugf("ErrorAnalysisFilter Interceptor, not exception mark")
 	}
 	return true
 }

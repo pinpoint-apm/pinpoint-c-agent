@@ -17,13 +17,17 @@
 #include "common.h"
 #include "pinpoint_define.h"
 #include <chrono>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <stdlib.h>
 #include <string>
 #include <thread>
 #include <time.h>
 
-thread_local NodeID id = E_ROOT_NODE;
+thread_local NodeID local_node_id = E_ROOT_NODE;
 const char *app_id = "cd.dev.test.cpp";
 const char *app_name = "cd.dev.test.cpp";
 
@@ -35,65 +39,126 @@ std::string get_tid() {
          std::to_string(generate_unique_id());
 }
 
+std::string span_id_ = get_sid();
+std::string transcation_id_ = get_tid();
+
 void random_sleep() {
   int32_t delay = rand() % 100;
   std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 }
 
 void test_httpclient() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "httpclient", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_DESTINATION, "www.pinpoint-wonderful.com",
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "httpclient",
                     E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_NEXT_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_HTTP_URL, "/support/c-cpp-php-python",
+  pinpoint_add_clue(local_node_id, PP_DESTINATION, "www.pinpoint-wonderful.com",
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD,
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_NEXT_SPAN_ID, get_sid().c_str(),
+                    E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_HTTP_URL, "/support/c-cpp-php-python",
                      E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_ADD_EXCEPTION, "test this exception", E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_ADD_EXCEPTION, "test this exception",
+                    E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_HTTP_STATUS_CODE, "300", E_LOC_CURRENT);
 
   random_sleep();
 
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_end_trace(local_node_id);
 }
 
 void test_mysql() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "mysql::excute", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_MYSQL, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SQL_FORMAT, "select 1*3;", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_DESTINATION, "localhost:3307", E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "mysql::excute",
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_MYSQL, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SQL_FORMAT, "select 1*3;", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_DESTINATION, "localhost:3307",
+                    E_LOC_CURRENT);
   random_sleep();
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_end_trace(local_node_id);
 }
 
 void test_func() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "test_func", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP_METHOD, E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_PHP_ARGS, "I'm the parameters", E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "test_func",
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP_METHOD,
+                    E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, PP_ARGS, "I'm the parameters",
+                     E_LOC_CURRENT);
   random_sleep();
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_end_trace(local_node_id);
 }
 
 void test_kafka() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, "name", "kafka", E_LOC_CURRENT);
-  pinpoint_add_clue(id, "stp", PP_KAFKA, E_LOC_CURRENT);
-  pinpoint_add_clues(id, "140", "xxxxx", E_LOC_CURRENT);
-  pinpoint_add_clue(id, "dst", "xxxx", E_LOC_CURRENT);
-  id = pinpoint_end_trace(id);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, "name", "kafka", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, "stp", PP_KAFKA, E_LOC_CURRENT);
+  pinpoint_add_clues(local_node_id, "140", "xxxxx", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, "dst", "xxxx", E_LOC_CURRENT);
+  local_node_id = pinpoint_end_trace(local_node_id);
+}
+
+static void test_async() {
+  local_node_id = pinpoint_start_trace(local_node_id);
+
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "test_async",
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_INVOCATION_CALL_TYPE,
+                    E_LOC_CURRENT);
+
+  // generate async_id
+  char async_id_str[32] = {0};
+  int32_t async_id = random() % 99999;
+  sprintf(async_id_str, "%d", async_id);
+  pinpoint_add_clue(local_node_id, PP_ASYNC_CALL_ID, async_id_str,
+                    E_LOC_CURRENT);
+  // get sequence
+  int32_t sequence_id = pinpoint_get_sequence_id(local_node_id);
+
+  auto pinpoint_invocation_wrap_func =
+      [=](std::function<void(void)> user_func) {
+        local_node_id = pinpoint_start_trace(local_node_id);
+        pinpoint_add_clue(local_node_id, PP_APP_NAME, "cpp_app", E_LOC_CURRENT);
+        pinpoint_add_clue(local_node_id, PP_APP_ID, "CPP_APP", E_LOC_CURRENT);
+        pinpoint_add_clue(local_node_id, PP_TRANSCATION_ID,
+                          transcation_id_.c_str(), E_LOC_CURRENT);
+        pinpoint_add_clue(local_node_id, PP_SPAN_ID, span_id_.c_str(),
+                          E_LOC_CURRENT);
+
+        pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP_METHOD,
+                          E_LOC_CURRENT);
+        pinpoint_set_async_ctx(local_node_id, async_id, sequence_id);
+
+        user_func();
+
+        local_node_id = pinpoint_end_trace(local_node_id);
+      };
+  // test_func is the target function
+  // while, you can use std::bind magic supporting any kind of function
+  // eg: std::bind(func,"a",3,4) ;
+  // std::bind(&MyClass::print, &obj, "bbc");
+  // more question: https://en.cppreference.com/w/cpp/utility/functional/bind
+  // or `dl_cd_pinpoint@navercorp.com`
+  std::thread async_call(pinpoint_invocation_wrap_func, test_func);
+
+  local_node_id = pinpoint_end_trace(local_node_id);
+  // joins async_call thread after local_node_id stopped
+  async_call.join();
 }
 
 void test_req() {
-  id = pinpoint_start_trace(id);
-  pinpoint_add_clue(id, PP_REQ_URI, "test_url", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_REQ_CLIENT, "127.0.0.1", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_REQ_SERVER, "HTTP_HOST", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SERVER_TYPE, PP_C_CPP, E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_INTERCEPTOR_NAME, "C_CPP Request", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_APP_NAME, "cpp_app", E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_APP_ID, "CPP_APP", E_LOC_CURRENT);
+  local_node_id = pinpoint_start_trace(local_node_id);
+  pinpoint_add_clue(local_node_id, PP_REQ_URI, "test_url", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_REQ_CLIENT, "127.0.0.1", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_REQ_SERVER, "HTTP_HOST", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP, E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_INTERCEPTOR_NAME, "C_CPP Request",
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_APP_NAME, "cpp_app", E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_APP_ID, "CPP_APP", E_LOC_CURRENT);
 
   random_sleep();
 
@@ -101,15 +166,20 @@ void test_req() {
   test_mysql();
   test_httpclient();
   test_kafka();
-  pinpoint_add_clue(id, PP_TRANSCATION_ID, get_tid().c_str(), E_LOC_CURRENT);
-  pinpoint_add_clue(id, PP_SPAN_ID, get_sid().c_str(), E_LOC_CURRENT);
-  pinpoint_add_clues(id, PP_HTTP_STATUS_CODE, "200", E_LOC_CURRENT);
-  catch_error(id, "msg", __FILE__, 100);
-  id = pinpoint_end_trace(id);
+  // make a asynchronous (by thread) call
+  test_async();
+
+  pinpoint_add_clue(local_node_id, PP_TRANSCATION_ID, transcation_id_.c_str(),
+                    E_LOC_CURRENT);
+  pinpoint_add_clue(local_node_id, PP_SPAN_ID, span_id_.c_str(), E_LOC_CURRENT);
+
+  pinpoint_add_clues(local_node_id, PP_HTTP_STATUS_CODE, "200", E_LOC_CURRENT);
+  catch_error(local_node_id, "msg", __FILE__, 100);
+  local_node_id = pinpoint_end_trace(local_node_id);
 }
 
 int main(int argc, char const *argv[]) {
-  pinpoint_set_agent("tcp:127.0.0.1:9999", 0, -1, 1300);
+  pinpoint_set_agent("tcp:127.0.0.1:10000", 10, -1, 1300);
   register_logging_cb(nullptr, 1);
   srand(time(nullptr));
   int i = 0;

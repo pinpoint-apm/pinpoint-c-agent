@@ -15,9 +15,9 @@ _pinpoint_add_clue("args",'a,$b');
 _pinpoint_add_clue("ret",'a,$b');
 _pinpoint_end_trace();
 --EXPECTF--
-[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
-[pinpoint] [%d] [%d]change current [128] status, before:2,now:4
-[pinpoint] [%d] [%d] [128] add clue key:args value:a,$b
-[pinpoint] [%d] [%d] [128] add clue key:ret value:a,$b
-[pinpoint] [%d] [%d]current [128] span dropped,due to TRACE_BLOCK
-[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
+[pinpoint] [%d:%d] [0] pinpoint_start child [128]
+[pinpoint] [%d:%d]change current [128] status, before:2,now:4
+[pinpoint] [%d:%d] [128] add anno_v1 key:args value:a,$b
+[pinpoint] [%d:%d] [128] add anno_v1 key:ret value:a,$b
+[pinpoint] [%d:%d]current [128] span dropped,due to TRACE_BLOCK
+[pinpoint] [%d:%d] [128] pinpoint_end_trace Done!

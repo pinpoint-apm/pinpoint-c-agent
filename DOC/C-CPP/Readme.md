@@ -7,20 +7,11 @@ While, check examples `src/CPP/test_pinpoint.cpp` and `src/CPP/test_pinpoint.c`.
 
 | Dependency | Version    |
 | ---------- | ---------- |
-| cmake      | 3.2+       |
-| GCC        | GCC `4.7+` |
+| cmake      | 3.15+      |
+| GCC        | GCC `4.9`  |
+| CPP | with `std=c++11` |
 
-#### Build
 
->@obsoleted
-Use CMake `add_subdirectory`;
-[CMakeLists.txt example](../../src/CPP/CMakeLists.txt)
-
-```
-$ mkdir build
-$ cd build
-$ cmake .. && make 
-```
 #### Integrate in your own project 
 
 > Use cmake FetchContent
