@@ -10,58 +10,88 @@ import (
 
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type GrpcAgent struct {
-	AgentId             string
-	agentName           string
-	agentType           int32
-	StartTime           string
-	BaseMD              metadata.MD
-	pingMd              metadata.MD
-	PingId              int32
-	spanFilters         []Filter
-	spanSender          *SpanSender
-	AgentOnLine         bool
-	requestCounter      RequestProfiler
-	utReport            *UrlTemplateReport
-	tasksGroup          sync.WaitGroup
-	tSpanBufCh          chan *TSpan
-	ExitCh              chan bool
-	log                 *log.Entry
-	errorAnalysisFilter *ErrorAnalysisFilter
+	config      *common.Config
+	AgentId     string
+	agentName   string
+	agentType   int32
+	StartTime   string
+	metadata    metadata.MD
+	pingMd      metadata.MD
+	PingId      int32
+	spanFilters []Filter
+	AgentOnLine bool
+	reqCounter  *RequestCounter
+	utReport    *UrlTemplateReport
+	tasksGroup  sync.WaitGroup
+	tSpanBufCh  chan *TSpan
+	ctx         context.Context
+	cancel_ctx  context.CancelFunc
+	log         *logrus.Entry
 }
 
-func createGrpcAgent(id, name string, agentType, pingId int32, startTime string) *GrpcAgent {
-	agent := &GrpcAgent{PingId: pingId, AgentOnLine: false}
-	agent.Init(id, name, agentType, startTime)
-	agent.Start()
+func CreateGrpcAgent(id, name string, agentType, pingId int32, startTime string, config *common.Config) *GrpcAgent {
+	agent := &GrpcAgent{
+		PingId:      pingId,
+		AgentOnLine: false,
+		config:      config,
+		log:         config.Log.WithField("app-id", id),
+		AgentId:     id,
+		agentName:   name,
+		agentType:   agentType,
+		StartTime:   startTime,
+		metadata: metadata.New(map[string]string{
+			"starttime":       startTime,
+			"agentid":         id,
+			"applicationname": name,
+		}),
+		pingMd: metadata.New(map[string]string{
+			"starttime":       startTime,
+			"agentid":         id,
+			"applicationname": name,
+			"socketid":        strconv.FormatInt(int64(pingId), 10),
+		}),
+		utReport:   CreateUrlTemplateReport(),
+		tSpanBufCh: make(chan *TSpan, config.AgentChannelSize),
+	}
 
-	log.Infof("agent:%v is launched", agent)
+	agent.ctx, agent.cancel_ctx = context.WithCancel(context.Background())
+	agent.reqCounter = createRequestCounter(config)
+	agent.runBackgroundTasks()
+	config.Log.Infof("agent:%v is launched", agent)
+
 	return agent
 }
 
 func (agent *GrpcAgent) SendSpan(span *TSpan) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Warnf("sendSpan met:%s", r)
+			agent.log.Warnf("sendSpan met:%s", r)
 		}
 	}()
 	agent.tSpanBufCh <- span
 }
 
 func (agent *GrpcAgent) GetLastBusyTime() int64 {
-	return agent.requestCounter.CTime
+	return agent.reqCounter.CTime
 }
 
 func (agent *GrpcAgent) Stop() {
-	agent.log.Warn("I'm exiting")
-	close(agent.ExitCh)
+	agent.log.Infof("I'm exiting")
+	agent.cancel_ctx()
+	for _, filter := range agent.spanFilters {
+		filter.Stop()
+	}
+
 	agent.tasksGroup.Wait()
 	agent.log.Warn("I'm exit")
 }
@@ -70,94 +100,98 @@ func (agent *GrpcAgent) AddFilter(filter Filter) {
 	agent.spanFilters = append(agent.spanFilters, filter)
 }
 
-func (agent *GrpcAgent) Interceptor(_ *TSpan) bool {
-	if !agent.AgentOnLine {
-		agent.log.Debugf("span dropped,as agent offline")
-	}
+// func (agent *GrpcAgent) Interceptor(_ *TSpan) bool {
+// 	if !agent.AgentOnLine {
+// 		agent.log.Debugf("agent offline")
+// 	}
 
-	//note log url templated
-
-	return agent.AgentOnLine
-}
+// 	return true
+// }
 
 func (agent *GrpcAgent) String() string {
 	return fmt.Sprintf("id:%s name:%s type:%d startTime:%s", agent.AgentId, agent.agentName, agent.agentType, agent.StartTime)
 }
 
-func (agent *GrpcAgent) handleRegisterAgent() error {
+func (a *GrpcAgent) createMdCtxWithTime(dur time.Duration, md metadata.MD) (ctx context.Context, cancel context.CancelFunc) {
+	ctx, cancel = context.WithTimeout(a.ctx, dur)
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	return ctx, cancel
+}
 
-	commandTask := sync.WaitGroup{}
-	defer commandTask.Wait()
+func (a *GrpcAgent) createMdCtx(md metadata.MD) (ctx context.Context, cancel context.CancelFunc) {
+	ctx, cancel = context.WithCancel(a.ctx)
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	return ctx, cancel
+}
 
-	config := common.GetConfig()
-	agent.log.Debugf("connect AgentChannel:%s for agentOnline", config.AgentAddress)
-
-	conn, err := common.CreateGrpcConnection(config.AgentAddress)
-	if err != nil {
-		agent.log.Warnf("connect %s timeout", config.AgentAddress)
-		return errors.New("connect pinpoint-collector timeout")
-	}
-
-	defer func() {
-		agent.log.Info("client activity close grpc connection")
-		if err := conn.Close(); err != nil {
-			agent.log.Warnf("close connection:%s", err)
-		}
-	}()
-
+func (a *GrpcAgent) keepPing(conn *grpc.ClientConn, wg *sync.WaitGroup) {
+	defer wg.Done()
 	client := v1.NewAgentClient(conn)
-	ctx, cancel := common.BuildPinpointCtx(config.GrpcConTextTimeOut, agent.BaseMD)
-	defer cancel()
-	pbAgentInfo := common.GetPBAgentInfo(agent.agentType)
-	agent.log.Debugf("RequestAgentInfo pbAgentInfo:%v", pbAgentInfo)
-	if res, err := client.RequestAgentInfo(ctx, pbAgentInfo); err != nil {
-		errorMsg := fmt.Sprintf("RequestAgentInfo failed. %s", err)
-		agent.log.Warn(errorMsg)
-		return errors.New(errorMsg)
-	} else {
-		agent.log.Debugf("RequestAgentInfo response:%s", res)
+
+	ctx, cancelRequestAgent := a.createMdCtxWithTime(a.config.GrpcConTextTimeOut, a.metadata)
+	defer cancelRequestAgent()
+
+	agent_info := common.GetPBAgentInfo(a.agentType, a.config)
+	a.log.Debugf("request agentInfo:%v", agent_info)
+	if _, err := client.RequestAgentInfo(ctx, agent_info); err != nil {
+		a.log.Warnf("create RequestAgentInfo failed with %v", err)
+		return
 	}
 
 	// send ping
-	pingCtx := metadata.NewOutgoingContext(context.Background(), agent.pingMd)
-
-	stream, err := client.PingSession(pingCtx)
+	ping_ctx, cancelPingFunc := a.createMdCtx(a.pingMd)
+	defer cancelPingFunc()
+	stream, err := client.PingSession(ping_ctx)
 	if err != nil {
-		return err
+		a.log.Warnf("create PingSession failed with %v", err)
+		return
 	}
 
-	defer func() {
-		if err := stream.CloseSend(); err != nil {
-			agent.log.Warnf("unwanted err when stream.CloseSend:%s", err)
-		}
-	}()
-
-	// handle command
-	go agent.handleCommand(conn, &commandTask)
-
-	agent.log.Info("agent online ")
-	agent.AgentOnLine = true
-
-	defer func() { agent.AgentOnLine = false }()
+	defer stream.CloseSend()
 
 	ping := v1.PPing{}
 	for {
 		// send ping
-		agent.log.Infof("ping  %s %v", agent.AgentId, agent.pingMd)
+		a.log.Infof("ping %s %v", a.AgentId, a.pingMd)
 		if err := stream.Send(&ping); err != nil {
-			agent.log.Warnf("agentOnline Send  ping failed. %s", err)
-			return err
+			a.log.Warnf("agentOnline Send  ping failed. %s", err)
+			break
 		}
 		// recv ping
 		if _, err := stream.Recv(); err != nil {
-			agent.log.Warnf("agentOnline recv ping failed. %s", err)
-			return err
+			a.log.Warnf("agentOnline recv ping failed. %s", err)
+			break
 		}
 
-		if common.WaitChannelEvent(agent.ExitCh, config.PingInterval) == common.E_AGENT_STOPPING {
-			return errors.New("catch exit during ping")
+		if common.WaitEventsWithTime(a.ctx, a.config.PingInterval) == common.E_AGENT_STOPPING {
+			break
 		}
 	}
+	a.AgentOnLine = false
+}
+
+func (a *GrpcAgent) handleRegisterAgent() error {
+
+	a.log.Infof("connect AgentChannel:%s for agentOnline", a.config.User.AgentAddress)
+	conn, err := a.config.CreateGrpcConnection(a.ctx, a.config.User.AgentAddress)
+	if err != nil {
+		a.log.Warnf("connect %s timeout", a.config.User.AgentAddress)
+		return errors.New("connect pinpoint-collector timeout")
+	}
+	defer conn.Close()
+
+	var cmd_wg sync.WaitGroup
+	defer cmd_wg.Wait()
+
+	cmd_wg.Add(1)
+	go a.handleCommand(conn, &cmd_wg)
+
+	a.AgentOnLine = true
+
+	cmd_wg.Add(1)
+	go a.keepPing(conn, &cmd_wg)
+
+	return nil
 }
 
 func (agent *GrpcAgent) keepAgentOnline() {
@@ -165,11 +199,10 @@ func (agent *GrpcAgent) keepAgentOnline() {
 
 	for {
 		if err := agent.handleRegisterAgent(); err != nil {
-			agent.log.Infof("agent online exit:%s ", err)
+			agent.log.Infof("agent exit. reason: %s ", err)
 		}
 
-		config := common.GetConfig()
-		if common.WaitChannelEvent(agent.ExitCh, config.AgentReTryTimeout) == common.E_AGENT_STOPPING {
+		if common.WaitEventsWithTime(agent.ctx, agent.config.AgentReTryTimeout) == common.E_AGENT_STOPPING {
 			break
 		}
 	}
@@ -177,12 +210,12 @@ func (agent *GrpcAgent) keepAgentOnline() {
 
 func (agent *GrpcAgent) registerFilter() {
 	// online/off
-	agent.log.Debug("register agent filter")
-	agent.AddFilter(agent)
+	// agent.log.Debug("register agent filter")
+	// agent.AddFilter(agent)
 
 	// req count
 	agent.log.Debug("register requestCounter filter")
-	agent.AddFilter(&agent.requestCounter)
+	agent.AddFilter(agent.reqCounter)
 
 	// req UrlTemplateReport
 	agent.log.Debug("register UrlTemplate Report filter")
@@ -190,81 +223,151 @@ func (agent *GrpcAgent) registerFilter() {
 
 	// req  ErrorAnalysis
 	agent.log.Debug("register errorAnalysis Report error")
-	agent.AddFilter(agent.errorAnalysisFilter)
+	errorAnalysisFilter := createErrorAnalysisFilter(agent.ctx, agent.metadata, agent.config, agent.log)
+	agent.AddFilter(errorAnalysisFilter)
 
 	// send span
 	agent.log.Debug("register spanSender filter")
-	agent.AddFilter(agent.spanSender)
+	spanSender := createSpanSender(agent.metadata, agent.ctx, &agent.tasksGroup, agent.config, agent.log)
+	agent.AddFilter(spanSender)
 
+}
+
+func (a *GrpcAgent) CollectPStateMessage() *v1.PStatMessage {
+
+	max, avg := a.reqCounter.GetMaxAvg()
+	responseTime := v1.PResponseTime{
+		Max: int64(max),
+		Avg: int64(avg),
+	}
+
+	v, _ := mem.VirtualMemory()
+
+	jvmGc := v1.PJvmGc{
+		Type:                 v1.PJvmGcType_JVM_GC_TYPE_PARALLEL,
+		JvmMemoryHeapUsed:    int64(v.Used),
+		JvmMemoryHeapMax:     int64(v.Total),
+		JvmMemoryNonHeapUsed: int64(v.Buffers),
+		JvmMemoryNonHeapMax:  int64(v.Cached),
+		JvmGcOldCount:        0,
+		JvmGcOldTime:         0,
+		JvmGcDetailed:        &v1.PJvmGcDetailed{},
+	}
+	// cpu.Percent calculate cpu in config.StatInterval
+	totalPer, err := cpu.PercentWithContext(a.ctx, a.config.StatInterval*time.Second, false)
+	totalCpuUsage := 0.0
+	if err == nil {
+		totalCpuUsage = totalPer[0] / 100
+	}
+
+	cpuload := v1.PCpuLoad{
+		SystemCpuLoad: totalCpuUsage,
+		JvmCpuLoad:    totalCpuUsage,
+	}
+	var activeTraceCount []int32
+	for _, value := range a.reqCounter.GetReqTimeProfiler() {
+		activeTraceCount = append(activeTraceCount, int32(value))
+	}
+
+	agentStat := v1.PAgentStat{
+		ResponseTime:    &responseTime,
+		Gc:              &jvmGc,
+		CollectInterval: int64(a.config.StatInterval),
+		Timestamp:       int64(time.Now().UnixNano() / int64(time.Millisecond)),
+		CpuLoad:         &cpuload,
+		Transaction:     &v1.PTransaction{},
+		ActiveTrace: &v1.PActiveTrace{
+			Histogram: &v1.PActiveTraceHistogram{
+				Version:             1,
+				HistogramSchemaType: 2, //NORMAL SCHEMA
+				ActiveTraceCount:    activeTraceCount,
+			},
+		},
+		DataSourceList: nil,
+		Deadlock:       nil,
+		FileDescriptor: nil,
+		DirectBuffer:   nil,
+		Metadata:       "",
+	}
+
+	pStateAgentStat := v1.PStatMessage_AgentStat{
+		AgentStat: &agentStat,
+	}
+
+	sateMessage := v1.PStatMessage{
+		Field: &pStateAgentStat,
+	}
+
+	return &sateMessage
+}
+
+func (a *GrpcAgent) handleRequestStat(client v1.Stat_SendAgentStatClient, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		msg := a.CollectPStateMessage()
+
+		a.log.Debugf("PStatMessage: %v", msg)
+		if err := client.Send(msg); err != nil {
+			a.log.Warn(err)
+			break
+		}
+
+		if common.WaitEventsWithTime(a.ctx, 0) == common.E_AGENT_STOPPING {
+			break
+		}
+	}
+}
+
+func (agent *GrpcAgent) handleUrlReportStat(client v1.Stat_SendAgentStatClient, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		msg := agent.utReport.MoveUtReport()
+
+		agent.log.Debugf("ut report:%v", msg)
+		if err := client.Send(msg); err != nil {
+			agent.log.Warn(err)
+			break
+		}
+		//config.StatInterval
+		if common.WaitEventsWithTime(agent.ctx, 30*time.Second) == common.E_AGENT_STOPPING {
+			break
+		}
+	}
 }
 
 func (agent *GrpcAgent) sendStat() {
 
-	config := common.GetConfig()
-	agent.log.Debugf("connect StatAddress:%s", config.StatAddress)
+	agent.log.Debugf("connect StatAddress:%s", agent.config.User.StatAddress)
 
-	conn, err := common.CreateGrpcConnection(config.StatAddress)
+	conn, err := agent.config.CreateGrpcConnection(agent.ctx, agent.config.User.StatAddress)
 	if err != nil {
-		errorMsg := fmt.Sprintf("Dial %s failed err:%s", config.StatAddress, err)
+		errorMsg := fmt.Sprintf("Dial %s failed err:%s", agent.config.User.StatAddress, err)
 		agent.log.Warn(errorMsg)
 		return
 	}
 
-	defer func() {
-		if err := conn.Close(); err != nil {
-			agent.log.Warnf("conn close with:%s", err)
-		}
-	}()
+	defer conn.Close()
 
-	ctx, _ := common.BuildPinpointCtx(-1, agent.pingMd)
+	ctx, cancel := agent.createMdCtx(agent.pingMd)
+
+	defer cancel()
 
 	client := v1.NewStatClient(conn)
 
 	stream, err := client.SendAgentStat(ctx)
 	if err != nil {
-		errorMsg := fmt.Sprintf("create stat client failed:%s", config.StatAddress)
-		agent.log.Warn(errorMsg)
+		agent.log.Warnf("create stat client failed:%s", agent.config.User.StatAddress)
 		return
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		for {
-			msg := CollectPStateMessage(agent.requestCounter.GetMaxAvg, agent.requestCounter.GetReqTimeProfiler)
+	defer wg.Wait()
 
-			agent.log.Debugf("PStatMessage: %v", msg)
-			if err := stream.Send(msg); err != nil {
-				agent.log.Warn(err)
-				break
-			}
-			//config.StatInterval
-			if common.WaitChannelEvent(agent.ExitCh, 0) == common.E_AGENT_STOPPING {
-				break
-			}
-		}
-		wg.Done()
-	}()
-	// wg.Add(1)
-	// todo send uri templated
 	wg.Add(1)
-	go func() {
-		for {
-			msg := agent.utReport.MoveUtReport()
+	go agent.handleRequestStat(stream, &wg)
 
-			agent.log.Debugf("%v", msg)
-			if err := stream.Send(msg); err != nil {
-				agent.log.Warn(err)
-				break
-			}
-			//config.StatInterval
-			if common.WaitChannelEvent(agent.ExitCh, 30) == common.E_AGENT_STOPPING {
-				break
-			}
-		}
-		wg.Done()
-	}()
-	wg.Wait()
+	wg.Add(1)
+	go agent.handleUrlReportStat(stream, &wg)
 }
 
 func (agent *GrpcAgent) uploadStatInfo() {
@@ -274,116 +377,83 @@ func (agent *GrpcAgent) uploadStatInfo() {
 	for {
 		agent.sendStat()
 
-		config := common.GetConfig()
-		if common.WaitChannelEvent(agent.ExitCh, config.StatInterval) == common.E_AGENT_STOPPING {
+		if common.WaitEventsWithTime(agent.ctx, agent.config.StatInterval) == common.E_AGENT_STOPPING {
 			return
 		}
 	}
 }
 
-func (agent *GrpcAgent) Init(id, _name string, _type int32, StartTime string) {
-	agent.log = log.WithFields(log.Fields{"appid": id})
-
-	agent.AgentId = id
-	agent.agentName = _name
-	agent.agentType = _type
-	agent.StartTime = StartTime
-	agent.BaseMD = metadata.New(map[string]string{
-		"starttime":       StartTime,
-		"agentid":         id,
-		"applicationname": _name,
-	})
-
-	pingIdStr := strconv.FormatInt(int64(agent.PingId), 10)
-
-	agent.pingMd = metadata.New(map[string]string{
-		"starttime":       agent.StartTime,
-		"agentid":         agent.AgentId,
-		"applicationname": agent.agentName,
-		"socketid":        pingIdStr,
-	})
-
-	agent.utReport = CreateUrlTemplateReport()
-
-	config := common.GetConfig()
-
-	agent.tSpanBufCh = make(chan *TSpan, config.AgentChannelSize)
-	agent.ExitCh = make(chan bool)
-	agent.spanSender = createSpanSender(agent.BaseMD, agent.ExitCh, &agent.tasksGroup, agent.log)
-	agent.requestCounter.CTime = time.Now().Unix()
-
-	agent.errorAnalysisFilter = createErrorAnalysisFilter(agent.BaseMD)
+func (agent *GrpcAgent) runBackgroundTasks() {
 
 	agent.registerFilter()
+
 	agent.tasksGroup.Add(1)
-	// start agentOnline
 	go agent.keepAgentOnline()
-	// send stat
+
 	agent.tasksGroup.Add(1)
 	go agent.uploadStatInfo()
-
 }
 
-func (agent *GrpcAgent) Start() {
+func (agent *GrpcAgent) StartServe() {
 	agent.tasksGroup.Add(1)
-	go agent.consumeJsonSpan()
+	go agent.handleTSpanFromBuf()
 }
 
 func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, responseId int32, interval time.Duration, wg *sync.WaitGroup) {
-	wg.Add(1)
 	defer wg.Done()
 
 	client := v1.NewProfilerCommandServiceClient(conn)
-	ctx, _ := common.BuildPinpointCtx(-1, agent.pingMd)
+	ctx, _ := common.BuildMdContextWithTimeout(agent.config.GrpcConTextTimeOut, agent.pingMd)
 
-	if activeThreadCountClient, err := client.CommandStreamActiveThreadCount(ctx); err == nil {
-		sequenceId := int32(1)
-		for {
-			// agent.log.Debugf("ResponseId %d", responseId)
-			response := v1.PCmdStreamResponse{
-				ResponseId: responseId,
-				SequenceId: sequenceId,
-				Message: &wrapperspb.StringValue{
-					Value: "hello",
-				},
-			}
-			sequenceId += 1
+	stream_client, err := client.CommandStreamActiveThreadCount(ctx)
+	if err != nil {
+		agent.log.Warnf("CommandStreamActiveThreadCount failed:%v", err)
+	}
+	sequenceId := int32(1)
+	for {
+		response := v1.PCmdStreamResponse{
+			ResponseId: responseId,
+			SequenceId: sequenceId,
+			Message: &wrapperspb.StringValue{
+				Value: "hello",
+			},
+		}
+		sequenceId += 1
 
-			res := v1.PCmdActiveThreadCountRes{
-				CommonStreamResponse: &response,
-			}
-
-			for _, value := range agent.requestCounter.GetReqTimeProfiler() {
-				res.ActiveThreadCount = append(res.ActiveThreadCount, int32(value))
-			}
-
-			res.TimeStamp = time.Now().Unix()
-			res.HistogramSchemaType = 2
-
-			// agent.log.Debugf("try to send PCmdActiveThreadCountRes:%v", res)
-
-			if err := activeThreadCountClient.Send(&res); err != nil {
-				agent.log.Warnf("collectorActiveThreadCount:responseId:%d end with:%s", responseId, err)
-				break
-			}
-
-			if common.WaitChannelEvent(agent.ExitCh, interval) == common.E_AGENT_STOPPING {
-				agent.log.Warnf("catch exit during send collectorActiveThreadCount")
-				break
-			}
+		res := v1.PCmdActiveThreadCountRes{
+			CommonStreamResponse: &response,
 		}
 
+		for _, value := range agent.reqCounter.GetReqTimeProfiler() {
+			res.ActiveThreadCount = append(res.ActiveThreadCount, int32(value))
+		}
+
+		res.TimeStamp = time.Now().Unix()
+		res.HistogramSchemaType = 2
+
+		if err := stream_client.Send(&res); err != nil {
+			agent.log.Warnf("collectorActiveThreadCount:responseId:%d end with:%s", responseId, err)
+			break
+		}
+
+		if common.WaitEventsWithTime(agent.ctx, interval) == common.E_AGENT_STOPPING {
+			agent.log.Warnf("catch exit during send collectorActiveThreadCount")
+			break
+		}
 	}
 }
 
 func (agent *GrpcAgent) genCmdHandshake() *v1.PCmdMessage {
 	handshake := v1.PCmdServiceHandshake{}
-	handshake.SupportCommandServiceKey = append(handshake.SupportCommandServiceKey, int32(v1.PCommandType_PING))
-	handshake.SupportCommandServiceKey = append(handshake.SupportCommandServiceKey, int32(v1.PCommandType_PONG))
-	handshake.SupportCommandServiceKey = append(handshake.SupportCommandServiceKey, int32(v1.PCommandType_ECHO))
-	handshake.SupportCommandServiceKey = append(handshake.SupportCommandServiceKey, int32(v1.PCommandType_ACTIVE_THREAD_COUNT))
-	handshake.SupportCommandServiceKey = append(handshake.SupportCommandServiceKey, int32(v1.PCommandType_ACTIVE_THREAD_DUMP))
-	handshake.SupportCommandServiceKey = append(handshake.SupportCommandServiceKey, int32(v1.PCommandType_ACTIVE_THREAD_LIGHT_DUMP))
+	handshake.SupportCommandServiceKey = append(
+		handshake.SupportCommandServiceKey,
+		int32(v1.PCommandType_PING),
+		int32(v1.PCommandType_PONG),
+		int32(v1.PCommandType_ECHO),
+		int32(v1.PCommandType_ACTIVE_THREAD_COUNT),
+		int32(v1.PCommandType_ACTIVE_THREAD_DUMP),
+		int32(v1.PCommandType_ACTIVE_THREAD_LIGHT_DUMP),
+	)
 
 	return &v1.PCmdMessage{
 		Message: &v1.PCmdMessage_HandshakeMessage{
@@ -394,16 +464,16 @@ func (agent *GrpcAgent) genCmdHandshake() *v1.PCmdMessage {
 
 func (agent *GrpcAgent) handleCommand(conn *grpc.ClientConn, wg *sync.WaitGroup) {
 	defer wg.Done()
-	wg.Add(1)
 
-	cmdWg := sync.WaitGroup{}
-	defer cmdWg.Wait()
+	var cmd_tasks sync.WaitGroup
+	defer cmd_tasks.Wait()
 
 	client := v1.NewProfilerCommandServiceClient(conn)
 	//config.AgentReTryTimeout
-	ctx, _ := common.BuildPinpointCtx(-1, agent.pingMd)
+	ctx, cancel_func := agent.createMdCtx(agent.pingMd)
+	defer cancel_func()
 
-	//todo update HandleCommand to HandleCommandV2
+	//TODO update HandleCommand to HandleCommandV2
 	commandClient, err := client.HandleCommand(ctx)
 
 	if err != nil {
@@ -411,58 +481,56 @@ func (agent *GrpcAgent) handleCommand(conn *grpc.ClientConn, wg *sync.WaitGroup)
 		return
 	}
 
-	// send handleshake
+	// send handle shake
 	if err := commandClient.Send(agent.genCmdHandshake()); err != nil {
 		agent.log.Warnf("handleCommand Send got err:%s", err)
 		return
 	}
+
 	agent.log.Debugf("send command handshake %s", agent.genCmdHandshake())
 	for {
-		if cmd, err := commandClient.Recv(); err != nil {
-			agent.log.Warnf("handleCommand.Recv got err:%s", err)
+		cmd, err := commandClient.Recv()
+		if err != nil {
+			agent.log.Infof("handleCommand.Recv got err:%s", err)
 			return
-		} else {
-			agent.log.Infof("appid:%s handleCommand: get cmd %s", agent.AgentId, cmd)
-			switch cmd.Command.(type) {
-			case *v1.PCmdRequest_CommandEcho:
-				{
-					agent.log.Debug("PCmdRequest_CommandEcho")
-				}
-			case *v1.PCmdRequest_CommandActiveThreadCount:
-				// create a new coro to send active thread
-				go agent.collectorActiveThreadCount(conn, cmd.RequestId, 1, &cmdWg)
-			case *v1.PCmdRequest_CommandActiveThreadDump:
-				agent.log.Debug("PCmdRequest_CommandActiveThreadDump")
-			case *v1.PCmdRequest_CommandActiveThreadLightDump:
-				response := v1.PCmdResponse{
-					ResponseId: cmd.RequestId,
-				}
+		}
 
-				dumpRes := v1.PCmdActiveThreadLightDumpRes{
-					Type:           "java",
-					SubType:        "oracle",
-					Version:        "1.8.105",
-					CommonResponse: &response,
-				}
-
-				go func(in *v1.PCmdActiveThreadLightDumpRes) {
-					defer cmdWg.Done()
-					cmdWg.Add(1)
-
-					if _, err := client.CommandActiveThreadLightDump(ctx, in); err != nil {
-						agent.log.Warnf("CommandActiveThreadLightDump failed! err:%s", err)
-					}
-				}(&dumpRes)
-
-			default:
-				agent.log.Warnf("unknown command type %v", cmd)
+		agent.log.Infof("appid:%s handleCommand: get cmd %s", agent.AgentId, cmd)
+		switch cmd.Command.(type) {
+		case *v1.PCmdRequest_CommandEcho:
+			agent.log.Debug("PCmdRequest_CommandEcho")
+		case *v1.PCmdRequest_CommandActiveThreadCount:
+			// create a new coro to send active thread
+			agent.log.Debug("PCmdRequest_CommandActiveThreadCount")
+			cmd_tasks.Add(1)
+			go agent.collectorActiveThreadCount(conn, cmd.RequestId, 1, &cmd_tasks)
+		case *v1.PCmdRequest_CommandActiveThreadDump:
+			agent.log.Debug("PCmdRequest_CommandActiveThreadDump")
+		case *v1.PCmdRequest_CommandActiveThreadLightDump:
+			agent.log.Debug("PCmdRequest_CommandActiveThreadLightDump")
+			response := v1.PCmdResponse{
+				ResponseId: cmd.RequestId,
 			}
+
+			dumpRes := v1.PCmdActiveThreadLightDumpRes{
+				Type:           "java",
+				SubType:        "oracle",
+				Version:        "1.8.105",
+				CommonResponse: &response,
+			}
+
+			if _, err := client.CommandActiveThreadLightDump(ctx, &dumpRes); err != nil {
+				agent.log.Warnf("CommandActiveThreadLightDump failed! err:%s", err)
+			}
+
+		default:
+			agent.log.Warnf("unknown command type %v", cmd)
 		}
 	}
 
 }
 
-func (agent *GrpcAgent) consumeJsonSpan() {
+func (agent *GrpcAgent) handleTSpanFromBuf() {
 	defer agent.tasksGroup.Done()
 	for {
 		select {
@@ -472,7 +540,7 @@ func (agent *GrpcAgent) consumeJsonSpan() {
 					break
 				}
 			}
-		case <-agent.spanSender.exitCh:
+		case <-agent.ctx.Done():
 			agent.log.Warn("consumeJsonSpan task done, as agent exit")
 			return
 		}

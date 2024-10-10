@@ -15,6 +15,7 @@
 
 **Visit [our official website](http://pinpoint-apm.github.io/pinpoint/) for more information and [the Latest updates on Pinpoint](https://pinpoint-apm.github.io/pinpoint/news.html)**  
 
+> [v0.7](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/v0.7) async api version 
 
 # Pinpoint `C` Agent
 

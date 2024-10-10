@@ -19,8 +19,10 @@ class TestUnderThreadMode(TestCase):
 
         while self.thread_running:
             self.assertFalse(_pinpointPy.trace_has_root())
+            self.assertFalse(_pinpointPy.is_root_trace())
             _pinpointPy.start_trace()
             self.assertTrue(_pinpointPy.trace_has_root())
+            self.assertTrue(_pinpointPy.is_root_trace())
             _pinpointPy.set_context_key('sid', '12345678')
             _pinpointPy.add_clue("key", "value3")
             _pinpointPy.add_clues("key", "value3")
@@ -33,6 +35,7 @@ class TestUnderThreadMode(TestCase):
             value = _pinpointPy.get_context_key('sid')
             self.assertFalse(value)
             self.assertFalse(_pinpointPy.trace_has_root())
+            self.assertFalse(_pinpointPy.is_root_trace())
 
     def test_thread_safe(self):
         thread1 = Thread(target=self._test_api_flow)

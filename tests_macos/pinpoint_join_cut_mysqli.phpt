@@ -1,5 +1,5 @@
 --TEST--
-pinpoint_php pinpoint_join_cut_mysqli
+pinpoint_php pinpoint_join_cut_redis
 --SKIPIF--
 <?php
 if (!extension_loaded("pinpoint_php"))
@@ -71,20 +71,20 @@ mysqli_stmt_execute($stmt);
 
 
 --EXPECTF--
-[pinpoint] [%d] [%d]try to interceptor function=mysqli_query
-[pinpoint] [%d] [%d]added interceptor on `function`: mysqli_query success
-[pinpoint] [%d] [%d]try to interceptor module(class)/function=mysqli:query
-[pinpoint] [%d] [%d]added interceptor on `module`: mysqli::query success
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:mysqli::query
+[pinpoint] [%d:%d]try to interceptor function=mysqli_query
+[pinpoint] [%d:%d]added interceptor on `function`: mysqli_query success
+[pinpoint] [%d:%d]try to interceptor module(class)/function=mysqli:query
+[pinpoint] [%d:%d]added interceptor on `module`: mysqli::query success
+[pinpoint] [%d:%d]pinpoint_interceptor_handler_entry: handle func/method:mysqli::query
 dev-mysql via TCP/IP 
-[pinpoint] [%d] [%d] call_interceptor_before:mysqli::query return type(1) zval
-[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
-[pinpoint] [%d] [%d]call_interceptor_end: mysqli::query 
+[pinpoint] [%d:%d] call_interceptor_before:mysqli::query return type(1) zval
+[pinpoint] [%d:%d]replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d:%d]call_interceptor_end: mysqli::query 
 Select returned 1000 rows.
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:mysqli_query
+[pinpoint] [%d:%d]pinpoint_interceptor_handler_entry: handle func/method:mysqli_query
 dev-mysql via TCP/IP 
-[pinpoint] [%d] [%d] call_interceptor_before:mysqli_query return type(1) zval
-[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
-[pinpoint] [%d] [%d]call_interceptor_end: mysqli_query 
-[pinpoint] [%d] [%d]start free interceptor: mysqli_query
-[pinpoint] [%d] [%d]start free interceptor: mysqli::query
+[pinpoint] [%d:%d] call_interceptor_before:mysqli_query return type(1) zval
+[pinpoint] [%d:%d]replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d:%d]call_interceptor_end: mysqli_query 
+[pinpoint] [%d:%d]start free interceptor: mysqli_query
+[pinpoint] [%d:%d]start free interceptor: mysqli::query

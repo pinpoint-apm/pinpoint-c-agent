@@ -19,5 +19,5 @@ if(_pinpoint_trace_limit() || _pinpoint_trace_limit() ||_pinpoint_trace_limit() 
     echo "_pinpoint_trace_limit failed";
 }
 --EXPECTF--
-[pinpoint] [%d] [%d]This span dropped. max_trace_limit:2 current_tick:2 onLine:0
+[pinpoint] [%d:%d]This span dropped. max_trace_limit:2 current_tick:2 onLine:0
 pass

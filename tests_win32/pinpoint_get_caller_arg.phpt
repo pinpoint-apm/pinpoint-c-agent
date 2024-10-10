@@ -51,13 +51,13 @@ echo "error: $error\n";
 curl_close($ch);
 
 --EXPECTF--
-[pinpoint] [%d] [%d]try to interceptor function=curl_exec
-[pinpoint] [%d] [%d]added interceptor on `function`: curl_exec success
+[pinpoint] [%d:%d]try to interceptor function=curl_exec
+[pinpoint] [%d:%d]added interceptor on `function`: curl_exec success
 case: curl_init() 
-[pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
-[pinpoint] [%d] [%d] call_interceptor_before:curl_exec return type(1) zval
-[pinpoint] [%d] [%d]replace_ex_caller_parameters return value must be `an array`
+[pinpoint] [%d:%d]pinpoint_interceptor_handler_entry: handle func/method:curl_exec
+[pinpoint] [%d:%d] call_interceptor_before:curl_exec return type(1) zval
+[pinpoint] [%d:%d]replace_ex_caller_parameters return value must be `an array`
 status_code 200 
-[pinpoint] [%d] [%d]call_interceptor_end: curl_exec 
+[pinpoint] [%d:%d]call_interceptor_end: curl_exec 
 error: 
-[pinpoint] [%d] [%d]start free interceptor: curl_exec
+[pinpoint] [%d:%d]start free interceptor: curl_exec

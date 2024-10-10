@@ -16,19 +16,31 @@ services:
         limits:
           cpus: "1"
     healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "-uroot",
-          "-ppassword",
-          "ping",
-          "-h",
-          "localhost"
-        ]
+      test: [ "CMD", "mysqladmin", "-uroot", "-ppassword", "ping", "-h", "localhost" ]
       interval: 15s
       timeout: 10s
       retries: 10
+
+  dev-kafka:
+    image: apache/kafka:3.8.0
+    container_name: broker
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://dev-kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # KAFKA_NUM_PARTITIONS: 3
+      KAFKA_CREATE_TOPICS: "test-topic:1:1"
+    ports:
+      - 9092:9092
+      - 9093:9093
 
   dev-mariadb:
     image: mariadb
@@ -43,14 +55,7 @@ services:
     ports:
       - "3307:3307"
     healthcheck:
-      test:
-        [
-          "CMD",
-          "healthcheck.sh",
-          "--su-mysql",
-          "--connect",
-          "--innodb_initialized"
-        ]
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
       start_period: 1m
       interval: 1m
       timeout: 5s
@@ -64,12 +69,7 @@ services:
     volumes:
       - ..:/workspace:cached
     # todo load all data 
-    entrypoint:
-      [
-        "bash",
-        "-c",
-        "cd /workspace/testapps/ && sh load_sample_db.sh"
-      ]
+    entrypoint: [ "bash", "-c", "cd /workspace/testapps/ && sh load_sample_db.sh" ]
 
   redis:
     image: redis:alpine
@@ -290,6 +290,8 @@ services:
         condition: service_healthy
       dev-collector:
         condition: service_started
+      dev-kafka:
+        condition: service_started
 
     restart: always
     build:
@@ -488,7 +490,6 @@ services:
       dev-mysql-setup:
         condition: service_completed_successfully
 
-
   thinkphp8:
     build:
       dockerfile: testapps/thinkphp-php/thinkphp.dockerfile
@@ -524,3 +525,17 @@ services:
       test: curl -f http://localhost:8000/
       interval: 5s
       timeout: 1s
+
+  cpp-httplib:
+    build:
+      dockerfile: testapps/cpp/cpp.dockerfile
+      context: ../
+    ports:
+      - 8203:8080
+    healthcheck:
+      test: curl -f http://localhost:8080/create_async_task
+      interval: 30s
+      timeout: 10s
+    depends_on:
+      dev-collector:
+        condition: service_started

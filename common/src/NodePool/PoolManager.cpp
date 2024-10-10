@@ -23,72 +23,91 @@
 #include "PoolManager.h"
 
 #include "common.h"
+#include "json/value.h"
 #include <cassert>
+#include <stdexcept>
 #include <thread>
-#ifndef UINT32_MAX
-#define UINT32_MAX (0xfffffff)
-#endif
+#include <utility>
+
 namespace PP {
 namespace NodePool {
-void PoolManager::FreeNodeTree(NodeID nodeId) {
-  if (nodeId == E_INVALID_NODE || nodeId == E_ROOT_NODE) {
+void PoolManager::FreeNodeTree(NodeID root) {
+  if (root == E_INVALID_NODE || root == E_ROOT_NODE) {
+    return;
+  }
+  for (NodeID next_id = ReturnNode(root); next_id != E_INVALID_NODE;) {
+    next_id = ReturnNode(next_id);
+  }
+}
+
+void PoolManager::AppendToRootTrace(WrapperTraceNodePtr& root, TraceNode& newNode) {
+  std::lock_guard<std::mutex> _safe(root->GetRootLock());
+
+  if (newNode.root_id_ != E_INVALID_NODE) {
     return;
   }
 
-  NodeID child_id, next_id;
+  newNode.root_id_ = root->id_;
 
-  if (ReturnNode(nodeId, child_id, next_id)) {
-    if (next_id != E_INVALID_NODE) {
-      FreeNodeTree(next_id);
-    }
+  NodeID last = root->GetLastNode();
+  if (last != E_INVALID_NODE) {
+    WrapperTraceNodePtr lastNode = ReferNode(last);
+    lastNode->next_ = newNode.id_;
+    newNode.pre_trace_time_ = lastNode->trace_start_time_;
+  } else {
+    newNode.pre_trace_time_ = root->trace_start_time_;
+  }
 
-    if (child_id != E_INVALID_NODE) {
-      FreeNodeTree(child_id);
-    }
+  root->SetLastNode(newNode.id_);
+
+  newNode.sequence_ = root->CreateNewSequence();
+
+  if (root->next_ == E_INVALID_NODE) {
+    root->next_ = newNode.id_;
   }
 }
-bool PoolManager::ReturnNode(NodeID id, NodeID& child_id, NodeID& next_id) {
+
+NodeID PoolManager::ReturnNode(NodeID id) {
+  NodeID next = E_INVALID_NODE;
   for (int i = 0; i < 1000; i++) {
     // this node was in using: ref is not zero
-    if (this->_restore(id, child_id, next_id, false)) {
-      return true;
+    if (this->returnNode(id, next, false)) {
+      return next;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
   pp_trace("[🐛]Restore node failed:  [%d]; node restore forcefully", id);
-  return this->_restore(id, child_id, next_id, true);
+  this->returnNode(id, next, true);
+  return next;
 }
 
-// avoiding `locking and waiting`
-bool PoolManager::_restore(NodeID id, NodeID& child_id, NodeID& next_id, bool force) {
-  std::lock_guard<std::mutex> _safe(this->_lock);
+bool PoolManager::returnNode(NodeID id, NodeID& next, bool force) {
 
   int32_t index = (int32_t)id - 1;
 
   if (this->indexInUsedVec(index) == false) {
     pp_trace("%d not alive !!!", id);
-    child_id = E_INVALID_NODE;
-    next_id = E_INVALID_NODE;
     return true;
   }
 
   // check refcount
   TraceNode& node = this->getUsedNode(id);
 
-  if (node.checkZeroRef() == false && force == false) {
-    // DO NOT TOUCH THis Node
+  if (node.IsNotReference() == false && force == false) {
+    // DO NOT TOUCH this node
     return false;
   } else {
     this->usedNodeSet_[index] = false;
-    child_id = node.last_child_id_;
-    next_id = node.sibling_id_;
     this->_freeNodeList.push(index);
+    next = node.next_;
+    // xxx disable for CI
+    // pp_trace("returnNode node:%d next:%d", id, next);
     return true;
   }
 }
 
 TraceNode& PoolManager::getUsedNode(NodeID id) {
-  // assert(id != E_INVALID_NODE);
+
   if (id == E_ROOT_NODE) {
     throw std::out_of_range("id should not be 0");
   }
@@ -104,23 +123,19 @@ TraceNode& PoolManager::getUsedNode(NodeID id) {
   return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE];
 }
 
-TraceNode& PoolManager::getReadyNode() noexcept { // create a new node
+TraceNode& PoolManager::getReadyNode() { // create a new node
+
   if (this->_freeNodeList.empty()) {
+    if (maxId > POOL_MAX_NODES_LIMIT) {
+      throw std::out_of_range("node poll size limitation reached");
+    }
     this->expandOnce();
   }
   // as it holds a _lock, so no more _freeNodeList is empty
   int32_t index = this->_freeNodeList.top();
   this->_freeNodeList.pop();
   this->usedNodeSet_[index] = true;
-  return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE].reset(NodeID(index + 1));
-}
-
-TraceNode& PoolManager::_take(NodeID id) {
-  if (id != E_ROOT_NODE) {
-    return this->getUsedNode(id);
-  } else {
-    return this->getReadyNode();
-  }
+  return this->nodeIndexVec[index / CELL_SIZE][index % CELL_SIZE].Reset(NodeID(index + 1));
 }
 
 void PoolManager::expandOnce() {
@@ -138,29 +153,36 @@ void PoolManager::expandOnce() {
   // pp_trace("Node pool expanding is done! news size:%ld", this->nodeIndexVec.size() * CELL_SIZE);
   assert(this->nodeIndexVec.size() * CELL_SIZE == this->usedNodeSet_.size());
 }
-Json::Value empty(Json::nullValue);
-Json::Value& PoolManager::getRootNodeValue(WrapperTraceNodePtr& node) {
 
-  if (node->sibling_id_ != E_INVALID_NODE) {
-    WrapperTraceNodePtr sibling = ReferNode(node->sibling_id_);
-    getRootNodeValue(sibling);
+const Json::Value& PoolManager::EncodeTraceToJsonSpan(WrapperTraceNodePtr& root_node) {
+
+  if (!root_node->IsRootNode()) {
+    pp_trace("current node:%d is not root", root_node->id_);
+    return root_node->GetConstValue();
   }
 
-  if (node->last_child_id_ != E_INVALID_NODE) {
-    WrapperTraceNodePtr child = ReferNode(node->last_child_id_);
-    getRootNodeValue(child);
+  for (NodeID next = root_node->next_; next != E_INVALID_NODE;) {
+    auto next_node = ReferNode(next);
+    next = next_node->next_;
+
+    // XXX: if not end, force end
+    if (next_node->expired_time_ == -1) {
+      next_node->EndTrace();
+    }
+
+    // [ ] add skipped
+    // auto parent_node = ReferNode(next_node->parent_id_);
+    // if (next_node->ShouldSkip() || parent_node->ShouldSkip()) {
+    //   next_node->SkipByParent();
+    //   continue;
+    // }
+
+    root_node->AppendAnnotation("event", next_node->moveToSpan());
   }
 
-  if (node->checkOpt() == false) {
-    return empty;
-  }
+  root_node->runUserOptionFunc();
 
-  if (node->parent_id_ > E_ROOT_NODE) {
-    WrapperTraceNodePtr parent = ReferNode(node->parent_id_);
-    parent->appendNodeValue("calls", node->EncodeProtocol());
-  }
-
-  return node->EncodeProtocol();
+  return root_node->GetConstValue();
 }
 
 } // namespace NodePool

@@ -198,13 +198,45 @@ function call_apc()
     apcu_add('foo', $bar);
     var_dump(apcu_fetch('foo'));
 
-
     apcu_store('cas', 2);
     apcu_cas("cas", 1, 2);
     apcu_cas("cas", 2, 1);
     apcu_inc("cas");
     var_dump(apcu_fetch("cas"));
     apcu_clear_cache();
+}
+
+function produce_msg_kafka()
+{
+    $conf = new RdKafka\Conf();
+    // $conf->set('log_level', (string) LOG_DEBUG);
+    // $conf->set('debug', 'all');
+    $conf->set('metadata.broker.list', 'dev-kafka:9092');
+    $producer = new RdKafka\Producer($conf);
+    $producer->addBrokers("dev-kafka:9092");
+
+    $topic = $producer->newTopic("test");
+    $headers = [
+        "a" => 1,
+        "b" => "xxxx"
+    ];
+
+    for ($i = 0; $i < 2; $i++) {
+        $topic->produce(RD_KAFKA_PARTITION_UA, 0, "I'm Message $i", "key");
+        $topic->producev(RD_KAFKA_PARTITION_UA, 0, "I'm Message $i", "key", $headers);
+        $producer->poll(0);
+    }
+
+    for ($flushRetries = 0; $flushRetries < 10; $flushRetries++) {
+        $result = $producer->flush(10000);
+        if (RD_KAFKA_RESP_ERR_NO_ERROR === $result) {
+            break;
+        }
+    }
+
+    if (RD_KAFKA_RESP_ERR_NO_ERROR !== $result) {
+        throw new \RuntimeException('Was unable to flush, messages might be lost!');
+    }
 }
 
 function main()
@@ -217,6 +249,7 @@ function main()
     call_redis();
     call_memcached();
     call_apc();
+    produce_msg_kafka();
 }
 
 main();

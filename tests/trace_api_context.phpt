@@ -43,28 +43,28 @@ _pinpoint_end_trace($id);
 pinpoint_status();
 ?>
 --EXPECTF--
-[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
+[pinpoint] [%d:%d] [0] pinpoint_start child [128]
 string(1) "a"
 string(1) "b"
 string(1) "c"
-[pinpoint] [%d] [%d] pinpoint_get_context_key [128] failed with map::at, parameters:not exist
+[pinpoint] [%d:%d] pinpoint_get_context_key [128] failed with map::at, parameters:not exist
 bool(false)
-[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d})
-[pinpoint] [%d] [%d]agent try to connect:(:/unexist_file.sock)
-[pinpoint] [%d] [%d]connect:(:/unexist_file.sock) failed error_code: 2
-[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
-[pinpoint] [%d] [%d] [128] pinpoint_start child  [127]
+[pinpoint] [%d:%d]this span:({":E":%d,":FT":1500,":S":%d})
+[pinpoint] [%d:%d]agent try to connect:(:/unexist_file.sock)
+[pinpoint] [%d:%d]connect:(:/unexist_file.sock) failed error_code: 2
+[pinpoint] [%d:%d] [128] pinpoint_end_trace Done!
+[pinpoint] [%d:%d] [0] pinpoint_start child [128]
+[pinpoint] [%d:%d] [128] pinpoint_start child [127]
 string(1) "c"
 string(1) "b"
 string(1) "a"
-[pinpoint] [%d] [%d] pinpoint_get_context_key [127] failed with map::at, parameters:not exist
+[pinpoint] [%d:%d] pinpoint_get_context_key [127] failed with map::at, parameters:not exist
 bool(false)
-[pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d}]})
-[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
+[pinpoint] [%d:%d] [127] pinpoint_end_trace Done!
+[pinpoint] [%d:%d]this span:({":E":%d,":FT":1500,":S":%d,"event":[{":E":%d,":S":%d,":depth":1,":seq":0}]})
+[pinpoint] [%d:%d] [128] pinpoint_end_trace Done!
 {
-	"common_library_version" : "0.5.0",
+	"common_library_version" : "0.6.0",
 	"pool_free_node" : 128,
 	"pool_total_node" : 128
 }

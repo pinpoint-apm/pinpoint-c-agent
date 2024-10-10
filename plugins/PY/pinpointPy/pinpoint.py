@@ -21,6 +21,8 @@ from tempfile import mkstemp
 import random
 import logging
 import _pinpointPy
+import warnings
+
 __app_id = 'app_id_str'
 __app_name = 'app_name_str'
 
@@ -104,7 +106,13 @@ def gen_sid() -> str:
 
 
 def trace_has_root(trace_id=-1):
+    warnings.warn(
+        "deprecated try to use `is_root_trace`", DeprecationWarning)
     return _pinpointPy.trace_has_root(trace_id)
+
+
+def is_root_trace(trace_id=-1):
+    return _pinpointPy.is_root_trace(trace_id)
 
 
 def mark_as_error(message: str, filename: str = '', line: int = 0, trace_id: int = -1):

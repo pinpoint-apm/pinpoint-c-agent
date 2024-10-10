@@ -4,7 +4,7 @@ Test pinpoint_unique_id
 <?php if (!extension_loaded("pinpoint_php")) print "skip"; ?>
 --INI--
 pinpoint_php.CollectorHost=tcp:localhost:10000
-pinpoint_php.SendSpanTimeOutMs=0
+pinpoint_php.SendSpanTimeOutMs=-1
 pinpoint_php.UnitTest=true
 pinpoint_php.DebugReport=true
 --FILE--
@@ -21,16 +21,16 @@ $id = _pinpoint_end_trace($id);
 $id = _pinpoint_end_trace($id);
 $id = _pinpoint_end_trace($id);
 --EXPECTF--
-[pinpoint] [%d] [%d] [0] pinpoint_start child  [128]
-[pinpoint] [%d] [%d] [128] add clue key:name value:Foo
-[pinpoint] [%d] [%d] [128] pinpoint_start child  [127]
-[pinpoint] [%d] [%d] [127] add clues:global:global_value
-[pinpoint] [%d] [%d] [127] add clue key:global value:global_value
-[pinpoint] [%d] [%d] [127] add clues:name:Foo1
-[pinpoint] [%d] [%d] [127] pinpoint_start child  [126]
-[pinpoint] [%d] [%d] [126] add clue key:name value:Foo2
-[pinpoint] [%d] [%d] [126] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d] [127] pinpoint_end_trace Done!
-[pinpoint] [%d] [%d]this span:({":E":%d,":FT":1500,":S":%d,"calls":[{":E":%d,":S":%d,"calls":[{":E":%d,":S":%d,"name":"Foo2"}],"clues":["name:Foo1"]}],"clues":["global:global_value"],"global":"global_value","name":"Foo"})
-[pinpoint] [%d] [%d]agent try to connect:(localhost:10000)
-[pinpoint] [%d] [%d] [128] pinpoint_end_trace Done!
+[pinpoint] [%d:%d] [0] pinpoint_start child [128]
+[pinpoint] [%d:%d] [128] add anno_v1 key:name value:Foo
+[pinpoint] [%d:%d] [128] pinpoint_start child [127]
+[pinpoint] [%d:%d] [127] add anno_v2 global:global_value
+[pinpoint] [%d:%d] [127] add anno_v1 key:global value:global_value
+[pinpoint] [%d:%d] [127] add anno_v2 name:Foo1
+[pinpoint] [%d:%d] [127] pinpoint_start child [126]
+[pinpoint] [%d:%d] [126] add anno_v1 key:name value:Foo2
+[pinpoint] [%d:%d] [126] pinpoint_end_trace Done!
+[pinpoint] [%d:%d] [127] pinpoint_end_trace Done!
+[pinpoint] [%d:%d]this span:({":E":%d,":FT":1500,":S":%d,"anno":["global:global_value"],"event":[{":E":%d,":S":%d,":depth":1,":seq":0,"anno":["name:Foo1"]},{":E":%d,":S":%d,":depth":2,":seq":1,"name":"Foo2"}],"global":"global_value","name":"Foo"})
+[pinpoint] [%d:%d][unittest] current span was dropped
+[pinpoint] [%d:%d] [128] pinpoint_end_trace Done!

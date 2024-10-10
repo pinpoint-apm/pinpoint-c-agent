@@ -1,20 +1,15 @@
 package agent
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 	"google.golang.org/grpc/metadata"
 )
 
 func TestGetAgentInfo(t *testing.T) {
-	// spanMap := map[string]interface{}{
-	// 	"appid":   "sfdaefe",
-	// 	"appname": "sfdaefe",
-	// 	"FT":      float64(23412),
-	// 	"tid":     "234123424^41234^2333",
-	// }
-
 	spanMap := &TSpan{
 		AppId:           "sfdaefe",
 		AppName:         "sfdaefe",
@@ -23,7 +18,9 @@ func TestGetAgentInfo(t *testing.T) {
 		TransactionId: "234123424^41234^2333",
 	}
 
-	id, name, ft, startTime, err := GetAgentInfo(spanMap)
+	router := CreateAgentRouter(common.CreateTestConfig())
+
+	id, name, ft, startTime, err := router.GetAgentInfo(spanMap)
 
 	if id != "sfdaefe" && name != "sfdaefe" && ft != 23412 && startTime != "234123424" && err != nil {
 		t.Error(spanMap)
@@ -48,7 +45,8 @@ func Test_EASpan(t *testing.T) {
 		"test":  "2",
 		"test2": "string",
 	})
-	ea := createErrorAnalysisFilter(md)
+	config := common.CreateTestConfig()
+	ea := createErrorAnalysisFilter(context.Background(), md, config, config.LogEntry)
 
 	meta := ea.scanTSpanTree(&tSpan)
 	if len(meta.Exceptions) == 0 {
@@ -57,8 +55,7 @@ func Test_EASpan(t *testing.T) {
 }
 
 func TestTspan(t *testing.T) {
-	msg := `{"E":1,"FT":1500,":FT":1500,"ptype":"1500","pname":"abc_d","psid":"23563","NP":"t=1617083759.535 D=0.000","S":1617083759798,"appid":"app-2",":appid":"app-2",
-	":appname":"APP-2","appname":"APP-2","calls":[{"E":1,"calls":[{"E":1,"S":0,"clues":["-1:input parameters","14:return value"],"name":"abc"}],"S":0,"clues":["-1:input parameters","14:return value"],"name":"app\\AppDate::abc","SQL":"select* from abc"}],"client":"10.34.135.145","clues":["46:200"],"name":"PHP Request: fpm-fcgi","server":"10.34.130.152:8000","sid":"726125302","stp":"1500","tid":"app-2^1617083747^5506","uri":"/index.php?type=get_date","Ah":"123.35.36.3/host","EXP":"exp","ERR":{"msg":"error_msg","file":"file.cc","line":123}}`
+	msg := `{":E":1,":FT":1500,":S":1728466073494,"appid":"cd.dev.test.run","appname":"cd.dev.test.php","client":"localhost","event":[{":E":0,":S":1,":depth":1,":seq":0,"name":"SimplePHP\\MessageHandler::handle_message_in_kafka","stp":"1501"}],"name":"RdKafka\\KafkaConsumer::consume","server":"localhost","sid":"2057154795","stp":"1500","tid":"cd.dev.test.run^1728466064272^0","uri":"abc","EXP":"xxxxx","ERR":{"msg":"asbc","file":"files","line":233}} `
 	var tspan TSpan
 
 	err := json.Unmarshal([]byte(msg), &tspan)
@@ -66,16 +63,16 @@ func TestTspan(t *testing.T) {
 		t.Error(err)
 	}
 
-	if tspan.GetStartTime() != 1617083759798 {
+	if tspan.GetStartTime() != 1728466073494 {
 		t.Error(tspan.GetStartTime())
 	}
 
-	if tspan.GetAppName() != "APP-2" {
+	if tspan.GetAppName() != "cd.dev.test.php" {
 		t.Error(tspan.GetAppName())
 
 	}
 
-	if tspan.SpanId != 726125302 {
+	if tspan.SpanId != 2057154795 {
 		t.Error(tspan.SpanId)
 	}
 
@@ -83,7 +80,7 @@ func TestTspan(t *testing.T) {
 		t.Error(tspan.ServerType)
 	}
 
-	if tspan.ExceptionInfo != "exp" {
+	if tspan.ExceptionInfo != "xxxxx" {
 		t.Error(tspan.ExceptionInfo)
 	}
 
@@ -91,19 +88,19 @@ func TestTspan(t *testing.T) {
 		t.Error("no error info")
 	}
 
-	if len(tspan.Calls) == 0 {
+	if len(tspan.Follows) == 0 {
 		t.Error("no calls")
 	}
 
-	for _, ev := range tspan.Calls {
-		evCalls := ev.Calls
-		if len(evCalls) == 0 {
-			t.Error("no calls")
-		}
-		if evCalls[0].Name == "app\\AppDate::abc" {
-			t.Error("calls no name")
-		}
+	// for _, ev := range tspan.Calls {
+	// evCalls := ev.Calls
+	// if len(evCalls) == 0 {
+	// 	t.Error("no calls")
+	// }
+	// if evCalls[0].Name == "app\\AppDate::abc" {
+	// 	t.Error("calls no name")
+	// }
 
-	}
+	// }
 
 }

@@ -40,7 +40,7 @@ using Cache::Chunks;
 const uint32_t _chunk_max_size = 10 * 1024 * 1024; // 10M
 const uint32_t _chunk_hold_size = 40 * 1024;       // 40k
 
-using MsgHandleFunc = std::function<void(int type, const char* buf, size_t len)>;
+using MsgHandleFunc = std::function<int(int type, const char* buf, size_t len)>;
 using RouterMsgMap = std::map<int, MsgHandleFunc>;
 using RouteMapValueType = RouterMsgMap::value_type;
 
@@ -53,6 +53,7 @@ public:
         c_fd(-1) {}
 
   void RegPeerMsgCallback(int type, MsgHandleFunc call_back) { msgRouteMap_[type] = call_back; }
+
   void RegStatusChangedCallBack(std::function<void(int)> call_back) {
     statusChangedCallback_ = call_back;
   }
@@ -149,7 +150,9 @@ private:
       if (ret > 0) {
         int total = ret + next_size;
         int msg_offset = HandleMsgStream(in_buf, total);
-        if (msg_offset < total) {
+        if (msg_offset < 0) { // found fetal error
+          return -1;
+        } else if (msg_offset < total) {
           next_size = total - msg_offset;
           memcpy(in_buf, in_buf + msg_offset, next_size);
         } else {
@@ -185,7 +188,10 @@ private:
       uint32_t type = ntohl(header->type);
       auto has = msgRouteMap_.find(type);
       if (has != msgRouteMap_.end()) {
-        msgRouteMap_[type](type, buf + 8, len - 8);
+        int ret = has->second(type, buf + 8, len - 8);
+        if (ret == -1) {
+          return -1;
+        }
       } else {
         pp_trace("unsupported message type:%d from server", type);
       }

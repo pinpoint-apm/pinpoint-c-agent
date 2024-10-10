@@ -284,7 +284,7 @@ jobs:
   Collector-agent:
     strategy:
       matrix:
-        go-version: [1.18.x]
+        go-version: [1.19.x]
         os: [ubuntu-latest,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:

@@ -53,6 +53,8 @@ type UrlTemplateReport struct {
 	mu            sync.Mutex
 }
 
+func (utr *UrlTemplateReport) Stop() {}
+
 func (utr *UrlTemplateReport) Interceptor(span *TSpan) bool {
 	if len(span.UT) > 0 {
 		// found uri templated

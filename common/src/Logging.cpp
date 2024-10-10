@@ -22,8 +22,8 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-inline int get_os_pid() { return syscall(SYS_gettid); }
-inline long get_tid() { return getpid(); }
+inline int get_os_pid() { return getpid(); }
+inline long get_tid() { return syscall(SYS_gettid); }
 #endif
 
 #if defined(__APPLE__)
@@ -48,7 +48,7 @@ static bool enable_trace_ = false;
 thread_local char buf[LOG_SIZE] = {0};
 
 static void log_format_out(const char* format, va_list* args) {
-  int n = snprintf(buf, LOG_SIZE, "[pinpoint] [%d] [%ld]", get_os_pid(), get_tid());
+  int n = snprintf(buf, LOG_SIZE, "[pinpoint] [%d:%ld]", get_os_pid(), get_tid());
   vsnprintf(buf + n, LOG_SIZE - n - 1, format, *args);
 
   if (log_call_back_) {

@@ -2,14 +2,12 @@ package common
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -38,40 +36,30 @@ func ParseDotFormatToTime(v string) (int64, error) {
 			return sec*1000 + ms, nil
 		}
 	}
-	return 0, errors.New(fmt.Sprintf("input:%s is invalid", v))
+	return 0, fmt.Errorf("input:%s is invalid", v)
 }
 
-func WaitChannelEvent(doneCh chan bool, sec time.Duration) E_AGENT_STATUS {
+func WaitEventsWithTime(ctx context.Context, dur time.Duration) E_AGENT_STATUS {
 	select {
-	case <-doneCh:
+	case <-ctx.Done():
 		return E_AGENT_STOPPING
-	case <-time.After(sec * time.Second):
+	case <-time.After(dur):
 		return E_AGENT_GOON
 	}
 }
 
-func BuildPinpointCtx(sec time.Duration, md metadata.MD) (ctx context.Context, cancel context.CancelFunc) {
-	if sec == -1 {
+func BuildMdContextWithTimeout(dur time.Duration, md metadata.MD) (ctx context.Context, cancel context.CancelFunc) {
+	if dur == -1 {
 		ctx = context.Background()
 		//cancel = nil
 		ctx = metadata.NewOutgoingContext(ctx, md)
 		return ctx, nil
 	} else {
-		ctx, cancel = context.WithTimeout(context.Background(), sec*time.Second)
+		ctx, cancel = context.WithTimeout(context.Background(), dur)
 		ctx = metadata.NewOutgoingContext(ctx, md)
 		return ctx, cancel
 	}
 
-}
-
-func CreateGrpcConnection(address string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*config.GrpcConTextTimeOut)
-	defer cancel()
-	conn, err := grpc.DialContext(ctx, address, GetDialOption()...)
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
 }
 
 func TypeV1_String_TransactionId(tid_s string) *v1.PTransactionId {

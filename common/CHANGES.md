@@ -1,3 +1,9 @@
+## v0.6.0 
+- refactor span json protocol
+- add async api
+- data structure change: multiple map to list
+- add `pinpoint_get_depth`
+
 ## v0.5.3 2024-07-30
 - support unittest in macos
 

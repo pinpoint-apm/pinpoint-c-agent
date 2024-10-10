@@ -93,10 +93,11 @@ PHP_FUNCTION(_pinpoint_start_time);
 PHP_FUNCTION(_pinpoint_set_context);
 PHP_FUNCTION(_pinpoint_get_context);
 PHP_FUNCTION(_pinpoint_mark_as_error);
-// DEPRECATED("pinpoint_get_func_ref_args only used for compatiblity")
-// PHP_FUNCTION(pinpoint_get_func_ref_args);
 PHP_FUNCTION(pinpoint_status);
+PHP_FUNCTION(_pinpoint_get_sequence_id);
+PHP_FUNCTION(_pinpoint_set_async_ctx);
 PHP_FUNCTION(_pinpoint_join_cut);
+PHP_FUNCTION(_pinpoint_get_trace_depth);
 
 PHP_MINIT_FUNCTION(pinpoint_php);
 PHP_MSHUTDOWN_FUNCTION(pinpoint_php);

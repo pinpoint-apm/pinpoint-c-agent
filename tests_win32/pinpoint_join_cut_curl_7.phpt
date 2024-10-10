@@ -160,7 +160,7 @@ int(10002)
 test CURLOPT_URL 
 [pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:2
-[pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `size` does not matched
+[pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `size` does not match
 on_end 
 [pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
@@ -168,7 +168,7 @@ int(19913)
 test CURLOPT_RETURNTRANSFER 
 [pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
-[pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not matched expected:3 give:4
+[pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not match expected:3 give:4
 on_end 
 [pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt
@@ -208,7 +208,7 @@ int(19913)
 test CURLOPT_RETURNTRANSFER 
 [pinpoint] [%d] [%d] call_interceptor_before:curl_setopt return type(7) zval
 [pinpoint] [%d] [%d]argv size:3
-[pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not matched expected:3 give:4
+[pinpoint] [%d] [%d]error: replace_ex_caller_parameters return `type` does not match expected:3 give:4
 on_end 
 [pinpoint] [%d] [%d]call_interceptor_end: curl_setopt 
 [pinpoint] [%d] [%d]pinpoint_interceptor_handler_entry: handle func/method:curl_setopt

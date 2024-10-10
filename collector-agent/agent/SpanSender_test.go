@@ -1,17 +1,17 @@
 package agent
 
 import (
+	"context"
 	"sync"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 )
 
 func TestSqlUidFormat(t *testing.T) {
-	// test  chan
-	exitCh := make(chan bool) // chan bool
 	var wg sync.WaitGroup
-	sender := createSpanSender(nil, exitCh, &wg, log.WithField("test", nil))
+	config := common.CreateTestConfig()
+	sender := createSpanSender(nil, context.Background(), &wg, config, config.LogEntry)
 
 	id := sender.getSqlUidMetaApiId("INSERT INTO chengji_m VALUES (%s, %s, %s)")
 	t.Logf("%v", string(id))
