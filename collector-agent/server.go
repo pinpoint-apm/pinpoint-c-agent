@@ -25,6 +25,7 @@ var (
 	log_level       = flag.String("LogLevel", "debug", "Set logging output level(debug/info/warn/error); eg: -LogLevel=info")
 	server_recv_buf = flag.Int("RecvBufSize", 4096*100, "Set recv buf; eg: -RecvBufSize=409600")
 	enable_profile  = flag.Bool("EnableProfile", false, "enable net/http/pprof")
+	show_version    = flag.Bool("v", false, "show current version and exit")
 )
 
 func parseConfig() *common.Config {
@@ -38,7 +39,6 @@ func parseConfig() *common.Config {
 		LoggerLevel:  *log_level,
 		LogStdout:    *log_stdout,
 		LoggerDir:    *log_dir,
-		Profile:      *enable_profile,
 	}
 	if ip, ok := os.LookupEnv("PP_COLLECTOR_AGENT_SPAN_IP"); ok {
 		if port, ok := os.LookupEnv("PP_COLLECTOR_AGENT_SPAN_PORT"); ok {
@@ -87,7 +87,12 @@ func main() {
 
 	config := parseConfig()
 
-	if config.User.Profile {
+	if *show_version {
+		fmt.Fprintf(os.Stderr, "collector-agent:%s \r\n", server.Version)
+		return
+	}
+
+	if *enable_profile {
 		go func() {
 			log.Println(http.ListenAndServe("0.0.0.0:8081", nil))
 			runtime.SetBlockProfileRate(1)

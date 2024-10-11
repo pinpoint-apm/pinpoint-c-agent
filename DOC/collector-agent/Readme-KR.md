@@ -39,7 +39,7 @@ pinpoint-collector의 브리지 모듈
 #### 예시:
 
 ```sh
-docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:latest
+docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.7
 ```
 
 ### 3. K8S에서 sidecar 모드로 실행
@@ -47,7 +47,7 @@ docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoin
 server.yaml sample
 
 ``` yml
-- image: ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:v0.6.4
+- image: ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.7
         name: collector-agent
         args: ["-RecvBufSize=1048576"]
         securityContext:
@@ -75,7 +75,7 @@ server.yaml sample
 
 ### 4. 수동 컴파일 [require `go.1.18`]
 
-- 실행: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@dev`
+- 실행: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@0.7`
   - ❗❗❗Note: collector-agent: located into `/usr/local/bin/`
 
 `./collector-agent`

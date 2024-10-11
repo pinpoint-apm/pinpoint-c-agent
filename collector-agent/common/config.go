@@ -28,7 +28,6 @@ type UserSetting struct {
 	LoggerLevel  string
 	LoggerDir    string
 	LogStdout    bool
-	Profile      bool
 }
 
 func (u *UserSetting) String() string {

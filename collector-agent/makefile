@@ -1,5 +1,5 @@
 
-TAG ?=v0.6.4
+TAG ?=v0.7
 
 .PHONY: default
 default: server ;

@@ -3,6 +3,7 @@ name: publish-collector-agent
 on:
   release:
     types: [created]
+  workflow_dispatch:
 
 permissions:
     contents: write
@@ -10,7 +11,7 @@ permissions:
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
-  TAG_NAME: ${{ github.head_ref || github.ref_name }} 
+  TAG_NAME: 0.7
 
 jobs:
   collector-agent:
@@ -58,9 +59,6 @@ jobs:
         with:
           context: collector-agent
           platforms: ${{ matrix.platform }}
-          # tags: |
-          #   ghcr.io/${{ github.repository }}/collector-agent:${{ inputs.tag }}
-          #   ghcr.io/${{ github.repository }}/collector-agent:latest
           github-token: ${{ secrets.GITHUB_TOKEN }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
@@ -115,10 +113,11 @@ jobs:
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.TAG_NAME }}
 
   Release-Collector-agent:
     runs-on: ubuntu-latest
+    if: github.event_name == 'release'
     strategy:
       matrix:
         # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
@@ -132,7 +131,7 @@ jobs:
       id: release-ca
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        goversion: "https://dl.google.com/go/go1.18.10.linux-amd64.tar.gz"
+        goversion: 1.19
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: "collector-agent"

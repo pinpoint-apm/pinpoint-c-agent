@@ -20,7 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Version = "v0.6.4"
+var Version = "0.7"
 
 type Server struct {
 	listener        net.Listener

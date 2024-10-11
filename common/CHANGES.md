@@ -1,4 +1,4 @@
-## v0.6.0 
+## v0.6.0 2024-10-10
 - refactor span json protocol
 - add async api
 - data structure change: multiple map to list

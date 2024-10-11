@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 
+// per-thread context id
 static thread_local NodeID local_node_id = E_ROOT_NODE;
 
 namespace pinpoint {
@@ -60,7 +61,7 @@ async(F &&f, Args &&... args) {
                     E_LOC_CURRENT);
   pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_INVOCATION_CALL_TYPE,
                     E_LOC_CURRENT);
-
+  // a random number for avoiding ID collision
   int32_t async_id = random() % 99999;
   std::string async_id_str = std::to_string(async_id);
   pinpoint_add_clue(local_node_id, PP_ASYNC_CALL_ID, async_id_str.c_str(),
@@ -79,12 +80,12 @@ async(F &&f, Args &&... args) {
 
   size = pinpoint_get_context_key(local_node_id, PP_SPAN_ID, buf, 128);
   std::string sid(buf, size);
-
+  // get the root trace tid and span id
   size = pinpoint_get_context_key(local_node_id, PP_APP_NAME, buf, 128);
   std::string app_name(buf, size);
   size = pinpoint_get_context_key(local_node_id, PP_APP_ID, buf, 128);
   std::string app_id(buf, size);
-
+  // wrapper user function (F) with  pinpoint_wrapper_func
   auto pinpoint_wrapper_func = [=]() -> return_type {
     local_node_id = pinpoint_start_trace(local_node_id);
     pinpoint_add_clue(local_node_id, PP_APP_NAME, app_name.c_str(),
@@ -97,6 +98,7 @@ async(F &&f, Args &&... args) {
 
     pinpoint_add_clue(local_node_id, PP_SERVER_TYPE, PP_C_CPP_METHOD,
                       E_LOC_CURRENT);
+    // mark current span as a asynchronous span
     pinpoint_set_async_ctx(local_node_id, async_id, sequence_id);
     (*task)();
     local_node_id = pinpoint_end_trace(local_node_id);
@@ -104,6 +106,7 @@ async(F &&f, Args &&... args) {
   };
 
   auto async_res = std::async(std::launch::async, pinpoint_wrapper_func);
+  // end current trace
   local_node_id = pinpoint_end_trace(local_node_id);
   return async_res;
 }
