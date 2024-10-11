@@ -8,7 +8,8 @@ include(FetchContent)
 
 FetchContent_Declare(
   pinpoint 
-  URL https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.2.33/pinpoint-common.tar.gz
+  # URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7/pinpoint-common.tar.gz
+  URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7.0/pinpoint-common.tar.gz
 )
 
 FetchContent_Declare(
