@@ -16,12 +16,11 @@
 #ifndef Py_PINPOINT_PY_H
 #define Py_PINPOINT_PY_H
 
-#include "common.h"
+#include "pinpoint/common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 #ifdef __cplusplus
 }

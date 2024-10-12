@@ -14,7 +14,7 @@
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "common.h"
+#include "pinpoint/common.h"
 
 #include <stdio.h>
 #include <stdarg.h>

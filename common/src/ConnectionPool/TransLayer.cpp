@@ -15,7 +15,7 @@
  ******************************************************************************/
 #include "TransLayer.h"
 #include "ConnectionPool/sockets.h"
-#include "common.h"
+#include "pinpoint/common.h"
 #include <cctype>
 #include <ctime>
 namespace ConnectionPool {

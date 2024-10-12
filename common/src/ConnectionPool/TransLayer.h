@@ -26,7 +26,7 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include "common.h"
+#include "pinpoint/common.h"
 #include "Cache/Chunk.h"
 #include "sockets.h"
 

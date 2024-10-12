@@ -22,7 +22,7 @@
 
 #ifndef COMMON_SRC_TRACENODE_H_
 #define COMMON_SRC_TRACENODE_H_
-#include "common.h"
+#include "pinpoint/common.h"
 #include "Context/ContextType.h"
 #include "json/json.h"
 #include "json/value.h"

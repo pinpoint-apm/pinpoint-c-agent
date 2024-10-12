@@ -17,7 +17,7 @@
 // Created by eeliu on 1/3/2020.
 //
 
-#include "common.h"
+#include "pinpoint/common.h"
 #include "json/value.h"
 #include <cstddef>
 #include <cstdint>

@@ -1,9 +1,9 @@
-#include "common.h"
 #include "httplib.h"
 #include "pinpoint_define.h"
 #include "pinpoint_helper.h"
 #include <functional>
 #include <future>
+#include <pinpoint/common.h>
 #include <string>
 
 const char *app_id = "cd.dev.test.cpp";

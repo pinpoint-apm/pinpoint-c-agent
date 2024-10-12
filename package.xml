@@ -16,19 +16,19 @@
     <email>liu_ming_yi@outlook.com</email>
     <active>yes</active>
   </lead>
-  <date>2024-08-07</date>
+  <date>2024-10-20</date>
   <version>
-    <release>0.5.4</release>
-    <api>0.5.4</api>
+    <release>0.6.0</release>
+    <api>0.6.0</api>
   </version>
   <stability>
-    <release>stable</release>
-    <api>stable</api>
+    <release>alpha</release>
+    <api>alpha</api>
   </stability>
   <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
   <notes>
-    ## 0.5.4 2024-08-07
-    - release stable version
+    ## 0.6.0 2024-10-20
+    - release asynchronous version 
   </notes>
   <contents>
     <dir name="/">
@@ -42,7 +42,7 @@
       <dir name='common'>
         <file role='doc' name='CHANGES.md' />
         <file role='doc' name='readme.md' />
-        <dir name='include'>
+        <dir name='include\pinpoint'>
           <file role='src' name='common.h' />
         </dir>
         <dir name='jsoncpp'>
@@ -110,6 +110,22 @@
   <extsrcrelease>
   </extsrcrelease>
   <changelog>
+    <release>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <version>
+        <release>0.6.0</release>
+        <api>2024-10-20</api>
+      </version>
+      <date> 2024-10-20</date>
+      <notes>
+        ## 0.6.0 2024-10-20
+        - release asynchronous version 
+      </notes>
+    </release>
+
     <release>
       <stability>
         <release>stable</release>

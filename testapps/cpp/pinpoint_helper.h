@@ -16,8 +16,8 @@
 // the License.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "common.h"
 #include "pinpoint_define.h"
+#include <pinpoint/common.h>
 
 #include <functional>
 #include <future>

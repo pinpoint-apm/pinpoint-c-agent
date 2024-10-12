@@ -1,4 +1,4 @@
-#include "common.h"
+#include "pinpoint/common.h"
 // #include <iostream>
 #include <string>
 

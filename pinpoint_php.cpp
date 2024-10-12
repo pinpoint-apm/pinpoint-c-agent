@@ -51,7 +51,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#include "common.h"
+#include "pinpoint/common.h"
 #include "php_pinpoint_php.h"
 
 // clang-format on

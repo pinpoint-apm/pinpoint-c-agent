@@ -14,7 +14,7 @@
  * the License.
  ******************************************************************************/
 #pragma once
-#include "common.h"
+#include "pinpoint/common.h"
 
 #ifdef __linux__
 #define likely(x) __builtin_expect(!!(x), 1)

@@ -21,7 +21,7 @@
  */
 
 #include "TraceNode.h"
-#include "common.h"
+#include "pinpoint/common.h"
 #include "header.h"
 #include "json/value.h"
 #include <cstdint>

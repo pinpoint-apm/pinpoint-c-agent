@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "State.h"
-#include "common.h"
+#include "pinpoint/common.h"
 #include "header.h"
 #include <inttypes.h> /* For PRIu64 */
 

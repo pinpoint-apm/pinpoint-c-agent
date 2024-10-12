@@ -16,6 +16,10 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+/**@file common.h.in
+  common.h is deprecated in 0.6, please use <pinpoint/common.h>
+ */
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -279,3 +283,5 @@ void show_status(void);
 }
 #endif
 #endif /* COMMON_H_ */
+
+// @author eeliu

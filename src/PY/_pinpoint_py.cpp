@@ -14,7 +14,6 @@
  * the License.
  ******************************************************************************/
 #include "_pinpoint_py.h"
-#include "common.h"
 #include <Python.h>
 #include <string.h>
 

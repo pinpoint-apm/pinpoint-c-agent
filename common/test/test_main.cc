@@ -1,5 +1,5 @@
 ﻿#include <gtest/gtest.h>
-#include "common.h"
+#include "pinpoint/common.h"
 #include "ConnectionPool/sockets.h"
 #include "header.h"
 void log_msg_cb_(char* msg) { printf("%s", msg); }

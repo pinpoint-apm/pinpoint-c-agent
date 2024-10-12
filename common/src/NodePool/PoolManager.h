@@ -21,7 +21,7 @@
 #ifndef COMMON_SRC_NODEPOOL_POOLMANAGER_H_
 #define COMMON_SRC_NODEPOOL_POOLMANAGER_H_
 
-#include "common.h"
+#include "pinpoint/common.h"
 #include "TraceNode.h"
 #include "json/value.h"
 #include <vector>

@@ -14,18 +14,18 @@ target_include_directories(pinpoint_common_static PUBLIC
 add_library(pinpoint_common_shared SHARED ${SRC_FILES}) 
 target_link_libraries(pinpoint_common_shared jsoncpp_static)
 
-install(DIRECTORY include/ DESTINATION include/pinpoint_common
-        FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/ DESTINATION include/pinpoint
+        FILES_MATCHING PATTERN "pinppoint/*.h")
 
 set_target_properties(pinpoint_common_shared pinpoint_common_static PROPERTIES 
         VERSION ${PROJECT_VERSION} 
         SOVERSION 1
-        PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/../include/common.h")      
+        PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/../include/pinpoint/common.h")      
 
 install(TARGETS pinpoint_common_shared pinpoint_common_static ${INSTALL_EXPORT}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     OBJECTS DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pinpoint_common
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pinpoint
 )

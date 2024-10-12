@@ -1,4 +1,4 @@
-#include "common.h"
+#include "pinpoint/common.h"
 #include "json/value.h"
 #include <gtest/gtest.h>
 #include "header.h"

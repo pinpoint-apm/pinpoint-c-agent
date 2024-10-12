@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(pinpoint VERSION 0.6.0 DESCRIPTION  "pinpoint common library")
+project(pinpoint VERSION 0.6.1 DESCRIPTION  "pinpoint common library")
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -35,7 +35,8 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 add_subdirectory(jsoncpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include)                
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/common.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/common.h @ONLY)
+# configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/common.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/common.h @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/common.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/pinpoint/common.h @ONLY)
 if (WITH_TEST_CASE)
     include (CTest)
     enable_testing()

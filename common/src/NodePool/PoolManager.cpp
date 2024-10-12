@@ -22,7 +22,7 @@
 
 #include "PoolManager.h"
 
-#include "common.h"
+#include "pinpoint/common.h"
 #include "json/value.h"
 #include <cassert>
 #include <stdexcept>
