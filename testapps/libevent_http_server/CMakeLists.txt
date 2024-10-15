@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(libevent_c_http)
+
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD 11)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -10,6 +12,7 @@ set(EVENT__DISABLE_MBEDTLS ON CACHE INTERNAL "")
 set(EVENT__DISABLE_TESTS ON CACHE INTERNAL "")
 set(EVENT__DISABLE_SAMPLES ON CACHE INTERNAL "")
 set(EVENT__DISABLE_BENCHMARK ON CACHE INTERNAL "")
+# set(EVENT__ENABLE_VERBOSE_DEBUG ON CACHE INTERNAL "")
 
 FetchContent_Declare(
   pinpoint 
@@ -27,4 +30,5 @@ FetchContent_MakeAvailable(libevent pinpoint)
 
 add_executable(server server.c pp_ev_http.c)
 
+target_compile_options(server PRIVATE -fsanitize=leak)
 target_link_libraries(server PRIVATE event event_core  pinpoint_common_static  pthread rt)

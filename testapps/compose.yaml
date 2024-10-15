@@ -539,3 +539,17 @@ services:
     depends_on:
       dev-collector:
         condition: service_started
+
+  c-libevent:
+    build:
+      dockerfile: testapps/libevent_http_server/libevent.dockerfile
+      context: ../
+    ports:
+      - 8204:8080
+    healthcheck:
+      test: curl -f http://localhost:8080/http-client
+      interval: 30s
+      timeout: 10s
+    depends_on:
+      dev-collector:
+        condition: service_started

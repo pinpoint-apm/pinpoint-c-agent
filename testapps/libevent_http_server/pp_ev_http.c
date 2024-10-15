@@ -1,9 +1,15 @@
 #include "pp_ev_http.h"
+#include "event2/http.h"
 #include <malloc.h>
 #include <pinpoint/common.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
+
+#include <threads.h>
+
+#define thread_local _Thread_local
 
 typedef struct {
   pp_http_client_t *client_;
@@ -12,7 +18,37 @@ typedef struct {
   void *parent_arg_;
 } sub_request_callback_t;
 
-static void pp_sub_request_done(struct evhttp_request *req, void *ctx) {
+static char _app_id_[25] = {"cd.dev.test.libevent"};
+static char _app_name_[25] = {"cd.dev.test.cxx"};
+
+const char *pp_get_app_id() { return _app_id_; }
+const char *pp_get_app_name() { return _app_name_; }
+
+static inline int args_is_ctx(const void *args) {
+  const pp_request_context_t *ctx = args;
+  return ctx->magic_num_ == CTX_MATIC_NUM ? (1) : (0);
+}
+
+void pp_request_complete(struct evhttp_request *req, void *args) {
+  if (args_is_ctx(args)) {
+    pp_request_context_t *ctx = args;
+    NodeID root = ctx->current_id_;
+    int status = evhttp_request_get_response_code(req);
+    char status_str[16] = {0};
+    sprintf(status_str, "%d", status);
+    pinpoint_add_clues(root, PP_HTTP_STATUS_CODE, status_str, E_LOC_CURRENT);
+    // call origin completed cb
+    if (ctx->on_complete_cb_origin_) {
+      ctx->on_complete_cb_origin_(req, ctx->on_complete_cb_arg_origin_);
+    }
+
+    pinpoint_end_trace(root);
+
+    free(ctx);
+  }
+}
+
+static void sub_request_done(struct evhttp_request *req, void *ctx) {
   sub_request_callback_t *callback = ctx;
 
   pp_http_client_t *client = callback->client_;
@@ -50,13 +86,100 @@ static void pp_sub_request_done(struct evhttp_request *req, void *ctx) {
   }
 
 ERROR:
-
   if (callback->parent_req_continue_cb_) {
     callback->parent_req_continue_cb_(client, callback->parent_req_,
                                       callback->parent_arg_);
   }
 
   free(callback);
+}
+
+static void pp_sub_request_done(struct evhttp_request *req, void *ctx) {
+  pp_request_context_t *req_ctx = ctx;
+  NodeID node = req_ctx->current_id_;
+  int status = evhttp_request_get_response_code(req);
+  char status_str[16] = {0};
+  sprintf(status_str, "%d", status);
+  pinpoint_add_clues(node, PP_HTTP_STATUS_CODE, status_str, E_LOC_CURRENT);
+  NodeID parent = pinpoint_end_trace(node);
+  req_ctx->current_id_ = parent;
+
+  if (req_ctx->http_client_request_cb_) {
+    req_ctx->http_client_request_cb_(req,
+                                     req_ctx->http_client_request_done_cb_arg_);
+  }
+}
+
+void pinpoint_set_agent_helper(const char *app_name, const char *app_id,
+                               const char *collector_agent_address,
+                               long timeout_ms, long trace_limit) {
+  strncpy(_app_name_, app_name, sizeof(_app_name_));
+  strncpy(_app_id_, app_id, sizeof(_app_id_));
+
+  pinpoint_set_agent(collector_agent_address, timeout_ms, trace_limit, 1300);
+}
+
+const char *gen_span_id() {
+  static thread_local char span_id[16] = {0};
+  sprintf(span_id, "%ld", rand() % 100000000l);
+  return span_id;
+}
+
+const char *gen_tid() {
+  static thread_local char transaction_tid[128] = {0};
+  sprintf(transaction_tid, "%s^%ld^%ld", _app_id_, pinpoint_start_time(),
+          generate_unique_id());
+  return transaction_tid;
+}
+
+static int pp_evhttp_make_request(struct evhttp_connection *evcon,
+                                  struct evhttp_request *req,
+                                  enum evhttp_cmd_type type, const char *uri) {
+  // get context from req
+  sub_request_callback_t *sub_req = req->cb_arg;
+
+  pp_request_context_t *ctx = sub_req->parent_arg_;
+  if (args_is_ctx(ctx)) {
+    NodeID parent = ctx->current_id_;
+    NodeID node = pinpoint_start_trace(parent);
+    pinpoint_add_clue(node, PP_INTERCEPTOR_NAME, "libevent_make_request",
+                      E_LOC_CURRENT);
+    pinpoint_add_clue(node, PP_DESTINATION, sub_req->client_->host_,
+                      E_LOC_CURRENT);
+    pinpoint_add_clue(node, PP_SERVER_TYPE, PP_C_CPP_REMOTE_METHOD,
+                      E_LOC_CURRENT);
+    const char *next_span_id = gen_span_id();
+    pinpoint_add_clue(node, PP_NEXT_SPAN_ID, next_span_id, E_LOC_CURRENT);
+    pinpoint_add_clues(node, PP_HTTP_URL, uri, E_LOC_CURRENT);
+    ctx->current_id_ = node;
+
+    ctx->http_client_request_cb_ = req->cb;
+    ctx->http_client_request_done_cb_arg_ = req->cb_arg;
+    req->cb = pp_sub_request_done;
+    req->cb_arg = ctx;
+
+    // todo add pinpoint-header
+
+    struct evkeyvalq *output_headers;
+    output_headers = evhttp_request_get_output_headers(req);
+
+    evhttp_add_header(output_headers, PP_HEADER_SAMPLED, "s1");
+    evhttp_add_header(output_headers, PP_HEADER_PINPOINT_HOST,
+                      sub_req->client_->host_);
+    evhttp_add_header(output_headers, PP_HEADER_PAPPTYPE, "1300");
+    evhttp_add_header(output_headers, PP_HEADER_PAPPNAME, pp_get_app_name());
+    char t_buf[128] = {0};
+
+    pinpoint_get_context_key(node, PP_TRANSCATION_ID, t_buf, sizeof(t_buf));
+    evhttp_add_header(output_headers, PP_HEADER_TRACEID, t_buf);
+
+    pinpoint_get_context_key(node, PP_SPAN_ID, t_buf, sizeof(t_buf));
+    evhttp_add_header(output_headers, PP_HEADER_PSPANID, t_buf);
+
+    evhttp_add_header(output_headers, PP_HEADER_SPANID, next_span_id);
+  }
+
+  return evhttp_make_request(evcon, req, type, uri);
 }
 
 int pp_http_get(const char *url, struct event_base *base,
@@ -119,6 +242,7 @@ int pp_http_get(const char *url, struct event_base *base,
   } else {
     snprintf(uri, sizeof(uri) - 1, "%s?%s", path, query);
   }
+
   uri[sizeof(uri) - 1] = '\0';
 
   bev = bufferevent_socket_new(base, -1, BEV_OPT_CLOSE_ON_FREE);
@@ -128,6 +252,12 @@ int pp_http_get(const char *url, struct event_base *base,
                                                  client->port_);
 
   evhttp_connection_set_family(evcon, AF_INET);
+  evhttp_connection_set_timeout(evcon, 3);
+
+  struct timeval tv;
+  tv.tv_sec = 3;
+  tv.tv_usec = 0;
+  evhttp_connection_set_connect_timeout_tv(evcon, &tv);
 
   sub_request_callback_t *sub_request_ctx =
       malloc(sizeof(sub_request_callback_t));
@@ -137,16 +267,14 @@ int pp_http_get(const char *url, struct event_base *base,
   sub_request_ctx->parent_req_ = parent_req;
   sub_request_ctx->parent_arg_ = parent_arg;
 
-  req = evhttp_request_new(pp_sub_request_done, sub_request_ctx);
+  req = evhttp_request_new(sub_request_done, sub_request_ctx);
 
   output_headers = evhttp_request_get_output_headers(req);
 
   evhttp_add_header(output_headers, "Host", host);
   evhttp_add_header(output_headers, "Connection", "close");
 
-  // todo add pinpoint header
-
-  r = evhttp_make_request(evcon, req, EVHTTP_REQ_GET, uri);
+  r = pp_evhttp_make_request(evcon, req, EVHTTP_REQ_GET, uri);
 
   if (r != 0) {
     goto ERROR;

@@ -9,8 +9,8 @@
 /* Compatibility for possible missing IPv6 declarations */
 // #include "../util-internal.h"
 
-#include "pinpoint/common.h"
 #include "pp_ev_http.h"
+#include <pinpoint/common.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -131,12 +131,6 @@ static const char *guess_content_type(const char *path) {
 
 not_found:
   return "application/misc";
-}
-
-int request_error_cb(struct evhttp_request *req, struct evbuffer *ev_buf,
-                     int error, const char *error_msg, void *args) {
-  pp_trace(" request_error_cb ");
-  return 0;
 }
 
 /* Callback used for the /dump URI, and for every non-GET request:
@@ -485,23 +479,28 @@ static int display_listen_sock(struct evhttp_bound_socket *handle) {
 static void http_client_request_continue_cb(pp_http_client_t *client,
                                             struct evhttp_request *req,
                                             void *arg) {
-  pp_trace(">>> request %d \n %s", client->status_, client->resp_body_);
+  pp_trace(">>> request %d  \n >>> %s \r\n", client->status_,
+           client->resp_body_);
   pp_free_http_client(client);
   evhttp_send_reply(req, 200, NULL, NULL);
 }
 
-static void http_client_request_cb(struct evhttp_request *req, void *arg) {
+static void http_client_request_cb(struct evhttp_request *req, void *ctx) {
   pp_trace("handle /http-client");
-  struct event_base *base = arg;
+  struct evhttp_connection *evcon = evhttp_request_get_connection(req);
+  struct event_base *base = evhttp_connection_get_base(evcon);
 
-  int ret = pp_http_get("http://example.com/say_hi", base,
-                        http_client_request_continue_cb, req, arg);
+  int ret = pp_http_get("http://httpbin.org/anything", base,
+                        http_client_request_continue_cb, req, ctx);
   if (ret < 0) {
     // end current req
     evhttp_send_reply(req, 503, "server unavailable", NULL);
   }
+
   pp_trace("pp_http_get ret:%d", ret);
 }
+
+MAKE_PP_ENTRY(http_client_request_cb);
 
 int main(int argc, char **argv) {
 
@@ -566,8 +565,9 @@ int main(int argc, char **argv) {
 
   /* The /dump URI will dump all requests to stdout and say 200 ok. */
   evhttp_set_cb(http, "/dump", dump_request_cb, NULL);
-  evhttp_set_errorcb(http, request_error_cb, base);
-  evhttp_set_cb(http, "/http-client", http_client_request_cb, base);
+
+  // create by MAKE_PP_ENTRY(http_client_request_cb);
+  evhttp_set_cb(http, "/http-client", pp_http_client_request_cb, base);
 
   /* We want to accept arbitrary requests, so we need to set a "generic"
    * cb.  We can also add callbacks for specific paths. */
