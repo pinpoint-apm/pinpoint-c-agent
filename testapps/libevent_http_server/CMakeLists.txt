@@ -17,7 +17,8 @@ set(EVENT__DISABLE_BENCHMARK ON CACHE INTERNAL "")
 FetchContent_Declare(
   pinpoint 
   # URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7.0/pinpoint-common.tar.gz
-  URL https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.7.1/pinpoint-common.tar.gz
+  # URL https://github.com/eeliu/pinpoint-c-agent/releases/download/v0.7.1/pinpoint-common.tar.gz
+  URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7.1/pinpoint-common.tar.gz
 )
 
 FetchContent_Declare(

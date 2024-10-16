@@ -8,7 +8,6 @@ While, check examples `src/CPP/test_pinpoint.cpp` and `src/CPP/test_pinpoint.c`.
 | Dependency | Version    |
 | ---------- | ---------- |
 | cmake      | 3.15+      |
-| GCC        | GCC `4.9`  |
 | CPP | with `std=c++11` |
 
 
@@ -23,7 +22,7 @@ include(FetchContent)
 
 FetchContent_Declare(
   pinpoint 
-  URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7/pinpoint-common.tar.gz
+  URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7.1/pinpoint-common.tar.gz
 )
 FetchContent_MakeAvailable(pinpoint)
 
@@ -47,6 +46,7 @@ $ ./test_pinpoint.cpp
 
 
 
+### Test apps example 
 
-
-
+- [yhirose/cpp-httplib example](../../testapps/cpp-httplib/readme.md)
+- [libevent/libevent example](../../testapps/libevent_http_server/readme.md)
