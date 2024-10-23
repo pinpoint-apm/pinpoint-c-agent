@@ -20,4 +20,4 @@ RUN curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/latest/do
 COPY testapps/php_phpmyadmin/index.php /var/www/html/index.php
 ## install composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-RUN cd /var/www/html/ &&  composer require -w pinpoint-apm/pinpoint-php-aop:v3.0.1
+RUN cd /var/www/html/ &&  composer require -w pinpoint-apm/pinpoint-php-aop

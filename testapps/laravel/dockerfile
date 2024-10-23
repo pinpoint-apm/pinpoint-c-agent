@@ -13,7 +13,9 @@ COPY testapps/laravel/example-app /app
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN cd /app && composer update && composer require -w pinpoint-apm/pinpoint-php-aop:v4.x-dev
+RUN php --re extension | head -1
+
+RUN cd /app && composer update && composer require -w pinpoint-apm/pinpoint-php-aop
 WORKDIR /app
 EXPOSE 8000
 CMD [ "php" ,"artisan", "serve","--host=0.0.0.0"]

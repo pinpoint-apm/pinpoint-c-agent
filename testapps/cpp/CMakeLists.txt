@@ -6,19 +6,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 
-# FetchContent_Declare(
-#   pinpoint 
-#   # URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7/pinpoint-common.tar.gz
-#   URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7.0/pinpoint-common.tar.gz
-# )
+FetchContent_Declare(
+  pinpoint 
+  # URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7/pinpoint-common.tar.gz
+  URL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/download/v0.7.1/pinpoint-common.tar.gz
+)
 
-FetchContent_Declare(pinpoint SOURCE_DIR ${PROJECT_SOURCE_DIR}/../../)
+# FetchContent_Declare(pinpoint SOURCE_DIR ${PROJECT_SOURCE_DIR}/../../)
 
-FetchContent_GetProperties(pinpoint)
-if (NOT pinpoint_POPULATED)
-    FetchContent_Populate(pinpoint)
-    add_subdirectory(${pinpoint_SOURCE_DIR}/common ${pinpoint_BINARY_DIR})
-endif ()
+# FetchContent_GetProperties(pinpoint)
+# if (NOT pinpoint_POPULATED)
+#     FetchContent_Populate(pinpoint)
+#     add_subdirectory(${pinpoint_SOURCE_DIR}/common ${pinpoint_BINARY_DIR})
+# endif ()
 
 FetchContent_Declare(
   httplib

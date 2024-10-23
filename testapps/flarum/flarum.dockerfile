@@ -14,4 +14,4 @@ RUN apk update && apk add php8-dev build-base
 RUN curl -sL https://github.com/pinpoint-apm/pinpoint-c-agent/releases/latest/download/install_pinpoint_php.sh | sh
 
 COPY testapps/flarum/site.php /flarum/app/site.php
-RUN cd /flarum/app/ && composer require -w pinpoint-apm/pinpoint-php-aop:v3.0.1
+RUN cd /flarum/app/ && composer require -w pinpoint-apm/pinpoint-php-aop

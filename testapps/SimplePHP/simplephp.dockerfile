@@ -21,6 +21,6 @@ COPY tests /pinpoint-c-agent/tests
 RUN cd /pinpoint-c-agent/ && phpize && ./configure && make && make install
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer require pinpoint-apm/pinpoint-php-aop:dev-feat-async-rdkafka
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer require pinpoint-apm/pinpoint-php-aop:v4.0.1
 
 CMD [ "sh" ,"/workspace/run_all.sh" ]
