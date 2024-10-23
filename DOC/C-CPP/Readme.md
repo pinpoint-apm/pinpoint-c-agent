@@ -50,3 +50,8 @@ $ ./test_pinpoint.cpp
 
 - [yhirose/cpp-httplib example](../../testapps/cpp-httplib/readme.md)
 - [libevent/libevent example](../../testapps/libevent_http_server/readme.md)
+
+
+### Blogs
+-  [pinpoint-c-agen directly monitor C/C++ applications？](https://github.com/pinpoint-apm/pinpoint-c-agent/issues/690#issuecomment-2421787446)
+- [Introduction for pinpoint on asynchronous framework](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/0.7/testapps/libevent_http_server#introduction-for-pinpoint-on-asynchronous-framework)

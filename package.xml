@@ -16,19 +16,19 @@
     <email>liu_ming_yi@outlook.com</email>
     <active>yes</active>
   </lead>
-  <date>2024-10-20</date>
+  <date>2024-10-23</date>
   <version>
-    <release>0.6.0</release>
-    <api>0.6.0</api>
+    <release>0.6.1</release>
+    <api>0.6.1</api>
   </version>
   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
+    <release>stable</release>
+    <api>stable</api>
   </stability>
   <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
   <notes>
-    ## 0.6.0 2024-10-20
-    - release asynchronous version 
+    ## 0.6.1 2024-10-23
+    - release asynchronous version https://github.com/pinpoint-apm/pinpoint-c-agent/pull/692
   </notes>
   <contents>
     <dir name="/">
@@ -112,16 +112,32 @@
   <changelog>
     <release>
       <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <version>
+        <release>0.6.1</release>
+        <api>2024-10-23</api>
+      </version>
+      <date> 2024-10-23</date>
+      <notes>
+        ## 0.6.0 2024-10-23 [stable]
+        - release asynchronous version https://github.com/pinpoint-apm/pinpoint-c-agent/pull/692
+      </notes>
+    </release>
+
+    <release>
+      <stability>
         <release>alpha</release>
         <api>alpha</api>
       </stability>
       <version>
         <release>0.6.0</release>
-        <api>2024-10-20</api>
+        <api>2024-10-21</api>
       </version>
-      <date> 2024-10-20</date>
+      <date> 2024-10-21</date>
       <notes>
-        ## 0.6.0 2024-10-20
+        ## 0.6.0 2024-10-21
         - release asynchronous version 
       </notes>
     </release>

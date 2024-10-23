@@ -15,7 +15,7 @@ COPY testapps/thinkphp-php/index.php /app/public/index.php
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN cd /app && composer update && composer require pinpoint-apm/pinpoint-php-aop:^3.0.2
+RUN cd /app && composer update && composer require pinpoint-apm/pinpoint-php-aop
 WORKDIR /app
 EXPOSE 8000
 CMD [ "php" ,"think", "run" ]
