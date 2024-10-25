@@ -7,7 +7,7 @@ with open("README", "r") as fh:
 
 name = platform.system().lower()
 agent_libraries = []
-extra_compile_args_ = []
+extra_compile_args_ = ["-DPINPOINT_MT"]
 if name == 'windows':
     pass
 elif name == 'darwin':
@@ -37,8 +37,8 @@ include_dirs_ = [Path(cwd, './common/include'), Path(cwd, './common/jsoncpp/incl
                  Path(cwd, './common/src')]
 
 setup(name='pinpointPy',
-      version="1.3.6",  # don't forget update __version__ in pinpointPy/__init__.py
-      author="cd_pinpoint members",
+      version="1.4.0",  # don't forget update __version__ in pinpointPy/__init__.py
+      author="pinpoint members",
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',
       url="https://github.com/pinpoint-apm/pinpoint-c-agent",

@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: photonix-postgres
+    image: postgres:11.1-alpine
+    environment:
+      POSTGRES_DB: photonix
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+
+  redis:
+    container_name: photonix-redis
+    image: redis:6.2.2
+
+  photonix:
+    container_name: photonix
+    # image: photonixapp/photonix:latest
+    build:
+      dockerfile: testapps/py-photonix/pin-photonix.dockerfile
+      context:  ../../
+    ports:
+      - '8888:80'
+    environment:
+      ENV: prd
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: photonix
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      REDIS_HOST: redis
+      ALLOWED_HOSTS: '*'
+      # More configuration options here: https://photonix.org/docs/configuration/
+    volumes:
+      - ./data/photos:/data/photos
+      - ./data/raw-photos-processed:/data/raw-photos-processed
+      - ./data/cache:/data/cache
+      - ./data/models:/data/models
+    links:
+      - postgres
+      - redis
+      - dev-collector
+
+  dev-collector:
+    restart: always
+    image: ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:v0.7.0
+
+    environment:
+      - PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
+      - PP_COLLECTOR_AGENT_SPAN_PORT=9993
+      - PP_COLLECTOR_AGENT_AGENT_IP=dev-pinpoint
+      - PP_COLLECTOR_AGENT_AGENT_PORT=9991
+      - PP_COLLECTOR_AGENT_STAT_IP=dev-pinpoint
+      - PP_COLLECTOR_AGENT_STAT_PORT=9992
+      - PP_COLLECTOR_AGENT_ISDOCKER=true
+      - PP_Log_Level=DEBUG
+      - PP_ADDRESS=0.0.0.0@10000
+      # ports:
+      # - 8989:10000
+    volumes:
+      - /etc/hosts:/etc/hosts
