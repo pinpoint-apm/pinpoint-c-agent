@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.13
 
 COPY setup.py /pinpoint-c-agent/setup.py
 COPY common/ /pinpoint-c-agent/common
