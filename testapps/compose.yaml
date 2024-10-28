@@ -224,9 +224,41 @@ services:
     ports:
       - 27017:27017
 
-  python-plugins:
+  py3.9-plugins:
     build:
-      dockerfile: testapps/python-plugins.dockerfile
+      dockerfile: testapps/python-plugins/py3.9-plugins.dockerfile
+      context: ../
+    profiles:
+      - testing
+    depends_on:
+      redis:
+        condition: service_healthy
+      httpbin:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  py3.11-plugins:
+    build:
+      dockerfile: testapps/python-plugins/py3.11-plugins.dockerfile
+      context: ../
+    profiles:
+      - testing
+    depends_on:
+      redis:
+        condition: service_healthy
+      httpbin:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  py-plugins:
+    build:
+      dockerfile: testapps/python-plugins/py-plugins.dockerfile
       context: ../
     profiles:
       - testing
