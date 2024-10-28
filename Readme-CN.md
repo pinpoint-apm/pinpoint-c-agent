@@ -32,7 +32,7 @@ Pinpoint-c-agent 帮助您接入 [pinpoint-apm](https://github.com/pinpoint-apm/
 
 ## Python Agent
 
-> py 3.8+
+> py 3.9+
 
 `pip install pinpointPy`
 

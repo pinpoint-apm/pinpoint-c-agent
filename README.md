@@ -39,7 +39,7 @@ Our advantage:
 
 ## Python Agent
 
-> py 3.8+
+> py 3.9+
 
 `pip install pinpointPy`
 
