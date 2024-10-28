@@ -1,4 +1,4 @@
-FROM python:3.13
+FROM python:3.9
 
 COPY setup.py /pinpoint-c-agent/setup.py
 COPY common/ /pinpoint-c-agent/common
@@ -11,5 +11,5 @@ RUN pip install -r /pinpoint-c-agent/plugins/PY/requirements.txt
 RUN cd /pinpoint-c-agent && pip install -e .
 CMD ["python","-m","unittest","discover","-s","/pinpoint-c-agent/plugins/PY/pinpointPy/"]
 # CMD [ "python","-m","unittest","pinpointPy.libs._MysqlConnector.test_case.Test_Case" ]
-# CMD [ "bash" ]
+# CMD [ "sleep","infinity" ]
 # python -m unittest discover -s /pinpoint-c-agent/plugins/PY/pinpointPy/
