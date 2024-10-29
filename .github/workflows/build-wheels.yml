@@ -57,8 +57,10 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pypi_test
+          name: pypi_test-${{ matrix.os }}
           path: ./wheelhouse/*
+          retention-days: 1
+          if-no-files-found: error
 
   publish-pypitest:
     needs: build_wheels_pypitest
@@ -66,21 +68,25 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: pypi_test
+          pattern: pypi_test-*
+          merge-multiple: true
           path: ./wheelhouse/
 
       - name: show all artifact
         run: |
-          ls -R ./wheelhouse/
+          ls -alR ./wheelhouse/
 
       - name: Publish package to pypitest
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.EELIUTEST }}
-          packages_dir: ./wheelhouse/
-          repository_url: https://test.pypi.org/legacy/
-
+          packages-dir: ./wheelhouse/
+          repository-url: https://test.pypi.org/legacy/
+          skip_existing: true
+          verbose: true
+          print_hash: true
+          attestations: true
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -115,11 +121,14 @@ jobs:
           CIBW_ARCHS_LINUX: auto aarch64
           CIBW_ARCHS_WINDOWS: ARM64 AMD64 x86
           CIBW_ARCHS_MACOS: auto x86_64 arm64
+          CIBW_SKIP: cp37-* cp38-* cp36-* pp*
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pypi
+          name: pypi-${{ matrix.os }}
           path: ./wheelhouse/*
+          retention-days: 1
+          if-no-files-found: error
 
   publish:
     needs: build_wheels
@@ -127,12 +136,13 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4.1.7
         with:
-          name: pypi
+          pattern: pypi-*
+          merge-multiple: true
           path: ./wheelhouse/
 
       - name: show all artifact
         run: |
-          ls -R ./wheelhouse/
+          ls -alR ./wheelhouse/
 
       - name: Publish package to pypitest
         uses: pypa/gh-action-pypi-publish@release/v1
