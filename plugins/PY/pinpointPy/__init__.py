@@ -21,7 +21,7 @@
 from pinpointPy.libs import monkey_patch_for_pinpoint
 from pinpointPy.pinpoint import set_agent, app_id, app_name, gen_tid, get_logger
 from pinpointPy.TraceContext import set_trace_context, thread_local_context
-from pinpointPy.Common import PinTransaction, GenPinHeader, PinHeader
+from pinpointPy.Common import PinTransaction, GenPinHeader, PinHeader, enable_experiment_plugins
 
 
 def use_thread_local_context():
@@ -30,6 +30,6 @@ def use_thread_local_context():
 
 
 __all__ = ['monkey_patch_for_pinpoint', 'use_thread_local_context'
-           'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader']
+           'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader', 'enable_experiment_plugins']
 __version__ = "1.4.0"
 __author__ = 'liu.mingyi@navercorp.com'

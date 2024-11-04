@@ -123,6 +123,14 @@ def drop_trace(trace_id: int):
     _pinpointPy.drop_trace(trace_id)
 
 
+def get_sequence_id(trace_id: int):
+    return _pinpointPy.get_sequence_id(trace_id)
+
+
+def set_async_context(trace_id: int, async_id: int, seq_id: int):
+    _pinpointPy.set_async_ctx(trace_id, async_id, seq_id)
+
+
 def check_trace_limit(time: int = -1) -> bool:
     return _pinpointPy.check_tracelimit(time)
 
