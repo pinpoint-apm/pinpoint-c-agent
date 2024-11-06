@@ -2,6 +2,7 @@ import unittest
 import logging
 import json
 from pinpointPy import GenPinHeader, PinHeader, use_thread_local_context, set_agent
+from pinpointPy.TraceContext import get_trace_context
 
 
 class GenTestHeader(GenPinHeader):
@@ -24,6 +25,12 @@ class TestCase(unittest.TestCase):
         use_thread_local_context()
         set_agent("cd.dev.test.py", "cd.dev.test.py",
                   'tcp:localhost:9999', -1, log_level=logging.DEBUG)
+
+    def assert_in_pinpoint_context(self):
+        # get_trace_context().get_parent_id()
+        ret, _ = get_trace_context().get_parent_id()
+        self.assertTrue(
+            ret, "get pinpoint parent id failed, must not in pinpoint trace context")
 
 
 class AsyncTestCase(unittest.TestCase):

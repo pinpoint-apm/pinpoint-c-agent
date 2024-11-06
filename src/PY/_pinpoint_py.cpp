@@ -111,6 +111,26 @@ static PyObject *py_pinpoint_get_key(PyObject *self, PyObject *args) {
   }
 }
 
+static PyObject *py_pinpoint_get_sequence_id(PyObject *self, PyObject *args) {
+  int id = -1;
+  if (PyArg_ParseTuple(args, "|i", &id)) {
+    if (id == -1) {
+      id = pinpoint_get_per_thread_id();
+    }
+    return Py_BuildValue("i", pinpoint_get_sequence_id(id));
+  } else {
+    return Py_BuildValue("O", Py_False);
+  }
+}
+
+static PyObject *py_pinpoint_set_async_ctx(PyObject *self, PyObject *args) {
+  int id = -1, async_id = -1, node_sequence = -1;
+  if (PyArg_ParseTuple(args, "iii", &id, &async_id, &node_sequence)) {
+    pinpoint_set_async_ctx(id, async_id, node_sequence);
+  }
+  return Py_BuildValue("O", Py_True);
+}
+
 /**
  * bool check_tracelimit(int64_t timestamp);
  */
@@ -361,6 +381,10 @@ static PyMethodDef PinpointMethods[] = {
      "on current trace chain"},
     {"get_context_key", py_pinpoint_get_key, METH_VARARGS,
      "def get_context_key(string key,int id=-1)->string "},
+    {"get_sequence_id", py_pinpoint_get_sequence_id, METH_VARARGS,
+     "def get_sequence_id(int id)->int"},
+    {"set_async_ctx", py_pinpoint_set_async_ctx, METH_VARARGS,
+     "def set_async_ctx(int id,int async id,int node_sequence_id)"},
     {"check_tracelimit", py_check_trace_limit, METH_VARARGS,
      "def check_tracelimit(long timestamp=-1): #check trace whether is "
      "limit"},

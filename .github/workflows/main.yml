@@ -141,11 +141,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: setup-php-sdk
-        uses: php/setup-php-sdk@v0.8
+        uses: php/setup-php-sdk@v0.10
         with:
           version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
           ts: ${{ matrix.ts }}
+          cache: true
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}

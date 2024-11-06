@@ -23,6 +23,20 @@ from pinpointPy import Defines, pinpoint, get_logger
 from pinpointPy.TraceContext import get_trace_context
 from functools import wraps
 
+import warnings
+import functools
+
+
+def deprecated(reason: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def deprecated_func(*args, **kwargs):
+            warnings.warn(f"{func.__name__} is deprecated. Reason: {reason}",
+                          category=DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return deprecated_func
+    return decorator
+
 
 class Trace:
     def __init__(self, name):
@@ -57,6 +71,9 @@ class PinTrace:
 
     def __init__(self, name):
         self.name = name
+
+    def setCurrentTraceNodeId(self, traceId):
+        get_trace_context().set_parent_id(traceId)
 
     def onBefore(self, parentId: int, *args, **kwargs):
         traceId = pinpoint.with_trace(parentId)
@@ -109,6 +126,32 @@ class PinTrace:
 
     def getUniqueName(self):
         return self.name
+
+
+class AsyncPinTrace(PinTrace):
+
+    def __call__(self, func):
+        self.func_name = func.__name__
+
+        @wraps(func)
+        async def pinpointTrace(*args, **kwargs):
+            ret = None
+            # avoiding variable missing
+            # use and return
+            sampled, parentId, nArgs, nKwargs = self._isSample(*args, **kwargs)
+            if not sampled:
+                return await func(*nArgs, **nKwargs)
+            traceId, nArgs, nKwargs = self.onBefore(
+                parentId, *nArgs, **nKwargs)
+            try:
+                ret = await func(*nArgs, **nKwargs)
+                return ret
+            except Exception as e:
+                self.onException(traceId, e)
+                raise e
+            finally:
+                self.onEnd(traceId, ret)
+        return pinpointTrace
 
 
 class TraceIdObject:
@@ -179,7 +222,7 @@ class PinTransaction(PinTrace):
     def __init__(self, name: str, userGenHeaderCb: GenPinHeader):
         """pinpointPy user entry point
 
-        Example: 
+        Example:
 
             ```
             from pinpointPy.Common import GenPinHeader, PinHeader, PinTransaction
@@ -195,7 +238,7 @@ class PinTransaction(PinTrace):
             ```
         Args:
             name (str): entry points name(showing pinpoint)
-            userGenHeaderCb (GenPinHeader): This helps getting header from current function 
+            userGenHeaderCb (GenPinHeader): This helps getting header from current function
         """
         super().__init__(name)
         self.name: str = name
@@ -215,11 +258,15 @@ class PinTransaction(PinTrace):
 
         pinpoint.add_trace_header(
             Defines.PP_INTERCEPTOR_NAME, self.name, traceId)
+
         pinpoint.add_trace_header(
             Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
         pinpoint.add_context(
             Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+
         pinpoint.add_trace_header(
+            Defines.PP_APP_ID, pinpoint.app_id(), traceId)
+        pinpoint.add_context(
             Defines.PP_APP_ID, pinpoint.app_id(), traceId)
 
         pinpoint.add_trace_header(Defines.PP_REQ_URI, header.Url, traceId)
@@ -264,3 +311,13 @@ class PinTransaction(PinTrace):
     def onException(self, traceId, e):
         pinpoint.mark_as_error(str(e), "", 0, traceId)
         raise e
+
+
+def enable_experiment_plugins(async_plugins: bool = True):
+    if async_plugins:
+        from pinpointPy.libs._threading import monkey_patch as thread_patch
+        thread_patch()
+        from pinpointPy.libs._process import monkey_patch as process_patch
+        process_patch()
+        from pinpointPy.libs._asyncio import monkey_patch as asyncio_patch
+        asyncio_patch()

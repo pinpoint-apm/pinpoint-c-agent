@@ -21,6 +21,7 @@
 
 from pinpointPy.pinpoint import get_logger
 import threading
+from contextvars import ContextVar
 
 _local_id = threading.local()
 
@@ -63,3 +64,20 @@ class thread_local_context (TraceContext):
     def set_parent_id(self, id: int):
         global _local_id
         _local_id._pinpoint_id_ = id
+
+
+class asyncio_local_context(TraceContext):
+
+    def __init__(self):
+        self.request_id = ContextVar(
+            '_pinpoint_id_', default=0)
+
+    def get_parent_id(self):
+        id = self.request_id.get()
+        if id > 0:
+            return True, id
+        else:
+            return False, -1
+
+    def set_parent_id(self, id: int):
+        self.request_id.set(id)

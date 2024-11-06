@@ -34,6 +34,7 @@ class AsyRequestPlugin(AsyncPinTrace):
         pinpoint.add_trace_header(
             Defines.PP_APP_ID, pinpoint.app_id(), traceId)
         pinpoint.add_context(Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+        pinpoint.add_context(Defines.PP_APP_ID, pinpoint.app_id(), traceId)
         ###############################################################
         request = args[0]
 

@@ -15,20 +15,18 @@ class TestUnderProcessMode(TestCase):
     def _test_api_flow(self):
         self.assertTrue(_pinpointPy.set_agent(
             collector_host='tcp:127.0.0.1:9999'))
-        # self.assertTrue(_pinpointPy.enable_debug(None))
 
         while True:
-            id = str(random.randint(1, 10000000))
-            _pinpointPy.start_trace()
-            _pinpointPy.set_context_key('sid', id)
-            _pinpointPy.add_clue("key", "value3")
-            _pinpointPy.add_clues("key", "value3")
-            value = _pinpointPy.get_context_key('sid')
-            self.assertEqual(value, id)
-            _pinpointPy.mark_as_error("fghjk", "fghjkl", 234234)
-            _pinpointPy.end_trace()
-            _pinpointPy.force_flush_trace()
-            _pinpointPy.drop_trace()
+            id = _pinpointPy.start_trace(0)
+            _pinpointPy.set_context_key('sid', f'{id}', id)
+            _pinpointPy.add_clue("key", "value3", id)
+            _pinpointPy.add_clues("key", "value3", id)
+            value = _pinpointPy.get_context_key('sid', id)
+            self.assertEqual(value, f'{id}')
+            _pinpointPy.mark_as_error("fghjk", "fghjkl", 234234, id)
+            id = _pinpointPy.end_trace(id)
+            _pinpointPy.force_flush_trace(id)
+            _pinpointPy.drop_trace(id)
 
     @unittest.skipIf(platform.system() == "Darwin", "skip Darwin")
     @unittest.skipIf(platform.system() == "Windows", "skip Windows")

@@ -16,26 +16,26 @@ class TestUnderThreadMode(TestCase):
     def _test_api_flow(self):
         self.assertTrue(_pinpointPy.set_agent(
             collector_host='tcp:127.0.0.1:9999'))
-
+        id = 0
         while self.thread_running:
-            self.assertFalse(_pinpointPy.trace_has_root())
-            self.assertFalse(_pinpointPy.is_root_trace())
-            _pinpointPy.start_trace()
-            self.assertTrue(_pinpointPy.trace_has_root())
-            self.assertTrue(_pinpointPy.is_root_trace())
-            _pinpointPy.set_context_key('sid', '12345678')
-            _pinpointPy.add_clue("key", "value3")
-            _pinpointPy.add_clues("key", "value3")
-            value = _pinpointPy.get_context_key('sid')
+            self.assertFalse(_pinpointPy.trace_has_root(id))
+            self.assertFalse(_pinpointPy.is_root_trace(id))
+            id = _pinpointPy.start_trace(id)
+            self.assertTrue(_pinpointPy.trace_has_root(id))
+            self.assertTrue(_pinpointPy.is_root_trace(id))
+            _pinpointPy.set_context_key('sid', '12345678', id)
+            _pinpointPy.add_clue("key", "value3", id)
+            _pinpointPy.add_clues("key", "value3", id)
+            value = _pinpointPy.get_context_key('sid', id)
             self.assertEqual(value, '12345678')
-            _pinpointPy.mark_as_error("fghjk", "fghjkl", 234234)
-            _pinpointPy.end_trace()
-            _pinpointPy.force_flush_trace()
-            _pinpointPy.drop_trace()
-            value = _pinpointPy.get_context_key('sid')
+            _pinpointPy.mark_as_error("fghjk", "fghjkl", 234234, id)
+            id = _pinpointPy.end_trace(id)
+            _pinpointPy.force_flush_trace(id)
+            _pinpointPy.drop_trace(id)
+            value = _pinpointPy.get_context_key('sid', id)
             self.assertFalse(value)
-            self.assertFalse(_pinpointPy.trace_has_root())
-            self.assertFalse(_pinpointPy.is_root_trace())
+            self.assertFalse(_pinpointPy.trace_has_root(id))
+            self.assertFalse(_pinpointPy.is_root_trace(id))
 
     def test_thread_safe(self):
         thread1 = Thread(target=self._test_api_flow)
