@@ -15,11 +15,17 @@
 # ------------------------------------------------------------------------------
 
 from pinpointPy import Common, Defines, pinpoint
+import mysql
+import warnings
+
+#
 
 
 class CMysqlPlugin(Common.PinTrace):
 
     def __init__(self, name):
+        warnings.warn(
+            "CMysqlPlugin is deprecated, please use MysqlPlugin instead", DeprecationWarning)
         super().__init__(name)
 
     # -> tuple[Any, tuple[Any, ...], dict[str, Any]]:
@@ -48,4 +54,5 @@ class CMysqlPlugin(Common.PinTrace):
         pinpoint.add_exception(f'{e}', traceId)
 
     def get_cursor_host(self, cursor):
-        return f'{cursor._cnx.server_host}:{cursor._cnx.server_port}'
+        # https://github.com/mysql/mysql-connector-python/blob/4fbf521f1c6c71621f882f89c0c4946c10ee13ac/mysql-connector-python/lib/mysql/connector/abstracts.py#L692
+        return f'{cursor._connection._host}:{cursor._connection._host}'

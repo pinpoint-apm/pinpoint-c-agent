@@ -248,7 +248,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11","3.12","3.13"]
     runs-on: ${{ matrix.os }}
     needs: [cpp, cpp-windows]
     steps:
@@ -277,10 +277,13 @@ jobs:
         # run: docker-compose  -f "testapps/compose.yaml" build python-plugins
       # - name: build python-plugins
       - name: start test environment
-        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up python-plugins --exit-code-from python-plugins
+        run: |
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py3.9-plugins --exit-code-from py3.9-plugins
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py-plugins --exit-code-from py-plugins
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py3.11-plugins --exit-code-from py3.11-plugins
       - name: Stop containers
         # if: always()
-        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down python-plugins
+        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down py3.11-plugins py-plugins py3.9-plugins 
 
   Collector-agent:
     strategy:

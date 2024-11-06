@@ -55,5 +55,9 @@ def monkey_patch():
 
 
 __all__ = ['monkey_patch']
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 __author__ = 'liu.mingyi@navercorp.com'
+
+# Changes
+# ## 0.0.6
+# - remove `CMySQLCursor` and `CMySQLCursorPrepared`

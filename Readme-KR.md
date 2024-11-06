@@ -31,7 +31,7 @@ Pinpoint-c-agent는 [pinpoint-apm](https://github.com/pinpoint-apm/pinpoint) 모
 
 ## Python Agent
 
-> py 3.8+
+> py 3.9+
 
 `pip install pinpointPy`
 
