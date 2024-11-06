@@ -24,6 +24,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         id = _pinpointPy.start_trace(id)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, 0)
         async_id = random.randint(1, 100000)
         a_id = _pinpointPy.start_trace(0)
         _pinpointPy.set_async_ctx(a_id, async_id, seq_id)
@@ -40,6 +41,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         async_id = random.randint(1, 100000)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, 0)
 
         def thread_main():
             a_id = _pinpointPy.start_trace(0)
@@ -60,6 +62,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         async_id = random.randint(1, 100000)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, 0)
 
         def thread_main():
             a_id = _pinpointPy.start_trace(0)
@@ -80,6 +83,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         async_id = random.randint(1, 100000)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, 0)
 
         def thread_main():
             a_id = _pinpointPy.start_trace(0)
@@ -100,6 +104,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         async_id = random.randint(1, 100000)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, 0)
 
         async def thread_main():
             a_id = _pinpointPy.start_trace(0)
@@ -120,6 +125,7 @@ class TestAsync(TestCase):
             id = _pinpointPy.start_trace(id)
             async_id = random.randint(1, 100000)
             seq_id = _pinpointPy.get_sequence_id(id)
+            self.assertGreaterEqual(seq_id, 0)
 
             async def task_func():
                 a_id = _pinpointPy.start_trace(0)
@@ -143,6 +149,7 @@ class TestAsync(TestCase):
             id = _pinpointPy.start_trace(id)
             async_id = random.randint(1, 100000)
             seq_id = _pinpointPy.get_sequence_id(id)
+            self.assertGreaterEqual(seq_id, 0)
 
             async def task_func():
                 a_id = _pinpointPy.start_trace(0)
@@ -164,6 +171,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         async_id = random.randint(1, 100000)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, 0)
 
         def thread_main():
             a_id = _pinpointPy.start_trace(0)
@@ -188,6 +196,7 @@ class TestAsync(TestCase):
         id = _pinpointPy.start_trace(id)
         async_id = random.randint(1, 100000)
         seq_id = _pinpointPy.get_sequence_id(id)
+        self.assertGreaterEqual(seq_id, -1)
 
         def thread_main():
             a_id = _pinpointPy.start_trace(0)

@@ -17,10 +17,10 @@
 #  limitations under the License.                                              -
 # ------------------------------------------------------------------------------
 
-# Created by eeliu at 11/8/23
+# Created by eeliu at 24/11/04
 
 from pinpointPy.Interceptor import intercept_once, Interceptor
-from pinpointPy.Common import HookTargetPlugins
+from pinpointPy.CommonPlugin import HookTargetPlugins
 from pinpointPy import get_logger
 
 

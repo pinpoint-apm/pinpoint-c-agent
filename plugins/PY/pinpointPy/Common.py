@@ -22,7 +22,20 @@
 from pinpointPy import Defines, pinpoint, get_logger
 from pinpointPy.TraceContext import get_trace_context
 from functools import wraps
-import random
+
+import warnings
+import functools
+
+
+def deprecated(reason: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def deprecated_func(*args, **kwargs):
+            warnings.warn(f"{func.__name__} is deprecated. Reason: {reason}",
+                          category=DeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+        return deprecated_func
+    return decorator
 
 
 class Trace:
@@ -115,6 +128,32 @@ class PinTrace:
         return self.name
 
 
+class AsyncPinTrace(PinTrace):
+
+    def __call__(self, func):
+        self.func_name = func.__name__
+
+        @wraps(func)
+        async def pinpointTrace(*args, **kwargs):
+            ret = None
+            # avoiding variable missing
+            # use and return
+            sampled, parentId, nArgs, nKwargs = self._isSample(*args, **kwargs)
+            if not sampled:
+                return await func(*nArgs, **nKwargs)
+            traceId, nArgs, nKwargs = self.onBefore(
+                parentId, *nArgs, **nKwargs)
+            try:
+                ret = await func(*nArgs, **nKwargs)
+                return ret
+            except Exception as e:
+                self.onException(traceId, e)
+                raise e
+            finally:
+                self.onEnd(traceId, ret)
+        return pinpointTrace
+
+
 class TraceIdObject:
     def __init__(self, id: int) -> None:
         self.traceId = id
@@ -183,7 +222,7 @@ class PinTransaction(PinTrace):
     def __init__(self, name: str, userGenHeaderCb: GenPinHeader):
         """pinpointPy user entry point
 
-        Example: 
+        Example:
 
             ```
             from pinpointPy.Common import GenPinHeader, PinHeader, PinTransaction
@@ -199,7 +238,7 @@ class PinTransaction(PinTrace):
             ```
         Args:
             name (str): entry points name(showing pinpoint)
-            userGenHeaderCb (GenPinHeader): This helps getting header from current function 
+            userGenHeaderCb (GenPinHeader): This helps getting header from current function
         """
         super().__init__(name)
         self.name: str = name
@@ -280,56 +319,5 @@ def enable_experiment_plugins(async_plugins: bool = True):
         thread_patch()
         from pinpointPy.libs._process import monkey_patch as process_patch
         process_patch()
-
-
-class HookTargetPlugins(PinTrace):
-    def onBefore(self, parentId: int,  *args, **kwargs):
-
-        traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
-        pinpoint.add_trace_header(
-            Defines.PP_INTERCEPTOR_NAME, self.getUniqueName(), traceId)
-        pinpoint.add_trace_header(
-            Defines.PP_SERVER_TYPE, Defines.P_INVOCATION_CALL_TYPE, traceId)
-
-        async_id = random.randint(0, 9999)
-        pinpoint.add_trace_header(
-            Defines.PP_ASYNC_CALL_ID, f'{async_id}', traceId)
-
-        sequence_id = pinpoint.get_sequence_id(traceId)
-
-        tid = pinpoint.get_context(Defines.PP_TRANSCATION_ID, traceId)
-        seq_id = pinpoint.get_context(Defines.PP_SPAN_ID, traceId)
-        app_name = pinpoint.get_context(Defines.PP_APP_NAME, traceId)
-        app_id = pinpoint.get_context(Defines.PP_APP_ID, traceId)
-
-        origin_target = kwargs['target']
-
-        def pp_new_entry_func(*args, **kwargs):
-            # start trace
-            thread_trace_id = pinpoint.with_trace(0)
-            self.setCurrentTraceNodeId(thread_trace_id)
-            pinpoint.add_trace_header(
-                Defines.PP_APP_NAME, app_name, thread_trace_id)
-            pinpoint.add_trace_header(
-                Defines.PP_APP_ID, app_id, thread_trace_id)
-
-            pinpoint.add_trace_header(
-                Defines.PP_SPAN_ID, seq_id, thread_trace_id)
-            pinpoint.add_trace_header(
-                Defines.PP_TRANSCATION_ID, tid, thread_trace_id)
-            pinpoint.add_trace_header(
-                Defines.PP_SERVER_TYPE, Defines.PYTHON, thread_trace_id)
-            pinpoint.set_async_context(
-                thread_trace_id, async_id, sequence_id)
-
-            if callable(origin_target):
-                origin_target(*args, **kwargs)
-
-            pinpoint.end_trace(thread_trace_id)
-
-        kwargs['target'] = pp_new_entry_func
-        return traceId, args, kwargs
-
-    def onEnd(self, traceId, ret):
-        super().onEnd(traceId, ret)
-        return ret
+        from pinpointPy.libs._asyncio import monkey_patch as asyncio_patch
+        asyncio_patch()

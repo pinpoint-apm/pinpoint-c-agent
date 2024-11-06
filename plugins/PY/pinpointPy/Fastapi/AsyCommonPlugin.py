@@ -17,8 +17,10 @@
 
 from pinpointPy.Fastapi.AsyCommon import AsyncPinTrace
 from pinpointPy import Defines, pinpoint
+from pinpointPy.Common import deprecated
 
 
+@deprecated("please use AsyncCommonPlugin in pinpointPy.CommonPlugin eg: `from pinpointPy.CommonPlugin import AsyncCommonPlugin`")
 class CommonPlugin(AsyncPinTrace):
 
     # -> tuple[int, Any, dict[str, Any]]:

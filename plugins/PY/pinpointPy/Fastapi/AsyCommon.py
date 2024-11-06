@@ -20,20 +20,24 @@ from starlette_context import context
 from pinpointPy.TraceContext import TraceContext
 from pinpointPy.Common import PinTrace
 
+
 class AsyncTraceContext (TraceContext):
     def get_parent_id(self):
-        id = context.get('_pinpoint_id_', 0)
-        if id == 0:
+        try:
+            id = context.get('_pinpoint_id_', 0)
+            if id == 0:
+                return False, -1
+            else:
+                return True, id
+        except Exception:
             return False, -1
-        else:
-            return True, id
 
     def set_parent_id(self, id: int):
         context['_pinpoint_id_'] = id
 
 
 class AsyncPinTrace(PinTrace):
-    
+
     def __call__(self, func):
         self.func_name = func.__name__
 

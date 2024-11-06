@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
-from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context
+from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context, enable_experiment_plugins
 from datetime import timedelta
 import os
 from pathlib import Path
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 ]
 
 use_thread_local_context()
+enable_experiment_plugins()
 monkey_patch_for_pinpoint()
 set_agent("cd.dev.test.photonix", "cd.dev.test.py",
           'tcp:dev-collector:10000', -1, 0, logging.DEBUG)

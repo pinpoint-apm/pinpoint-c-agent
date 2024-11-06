@@ -154,8 +154,7 @@ int pinpoint_trace_is_root(NodeID);
  * @return int 0 : means oK
  *             -1: exception found, check the log
  */
-DEPRECATED(
-    "use pinpoint_end_trace. if you need no span missing, set pinpoint_set_agent with `timeout_ms`")
+DEPRECATED("use pinpoint_end_trace. if you need all span, set pinpoint_set_agent with `timeout_ms`")
 int pinpoint_force_end_trace(NodeID, int32_t timeout);
 
 /**
