@@ -9,7 +9,6 @@ import threading
 from multiprocessing import Process
 
 
-# use_thread_local_context()
 use_asyncio_local_context()
 enable_experiment_plugins()
 set_agent("cd.dev.test.py", "cd.dev.test.py",
