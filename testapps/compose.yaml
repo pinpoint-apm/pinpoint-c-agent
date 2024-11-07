@@ -585,3 +585,13 @@ services:
     depends_on:
       dev-collector:
         condition: service_started
+
+  py-standalone:
+    build:
+      dockerfile: testapps/standalone-py/Dockerfile
+      context: ../
+    restart: always
+    depends_on:
+      dev-collector:
+        condition: service_started     
+
