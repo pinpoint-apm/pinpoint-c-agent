@@ -11,7 +11,7 @@ import logging
 use_thread_local_context()
 monkey_patch_for_pinpoint()
 set_agent("cd.dev.test.celery", "cd.dev.test.py",
-          'tcp:127.0.0.1:10000', -1, 0, logging.DEBUG)
+          'tcp:dev-collector:10000', -1, 0, logging.DEBUG)
 
 app = Flask(__name__)
 app.wsgi_app = PinPointMiddleWare(app, app.wsgi_app)
@@ -148,4 +148,4 @@ def test_delay():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True)

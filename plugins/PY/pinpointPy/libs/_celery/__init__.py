@@ -36,53 +36,95 @@ class CeleryWorkerPlugin(PinTrace):
         return True, 0, args, kwargs
 
     def onBefore(self, parentId, *args, **kwargs):
-        print(args)
-        print(kwargs)
         traceId, args, kwargs = super().onBefore(parentId, *args, **kwargs)
 
         if _PP_TID not in kwargs:
-            # todo call common transaction id
-            print("--------------------------------------------")
+            sid = pinpoint.gen_sid()
+            pinpoint.add_trace_header(Defines.PP_SPAN_ID, sid, traceId)
+            pinpoint.add_context(Defines.PP_SPAN_ID, sid, traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_INTERCEPTOR_NAME, "celery[worker]", traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+            pinpoint.add_context(
+                Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_APP_ID, pinpoint.app_id(), traceId)
+            pinpoint.add_context(
+                Defines.PP_APP_ID, pinpoint.app_id(), traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_REQ_URI, self.getUniqueName(), traceId)
+            pinpoint.add_trace_header(
+                Defines.PP_REQ_SERVER, "localhost", traceId)
+            pinpoint.add_trace_header(
+                Defines.PP_REQ_CLIENT, "localhost", traceId)
+            pinpoint.add_trace_header(
+                Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
+            pinpoint.add_context(Defines.PP_SERVER_TYPE,
+                                 Defines.PYTHON, traceId)
+
+            pinpoint.add_context(
+                Defines.PP_HEADER_PINPOINT_SAMPLED, "s1", traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_TYPE, Defines.PYTHON, traceId)
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_NAME, pinpoint.app_name(), traceId)
+            pinpoint.add_trace_header(
+                Defines.PP_PARENT_HOST, "localhost", traceId)
+
+            tid = pinpoint.gen_tid()
+
+            pinpoint.add_trace_header(Defines.PP_TRANSACTION_ID, tid, traceId)
+            pinpoint.add_context(Defines.PP_TRANSACTION_ID, tid, traceId)
+
+            return traceId, args, kwargs
+        else:
+            tid = kwargs[_PP_TID]
+            span_id = kwargs[_PP_SPAN_ID]
+            pp_name = kwargs[_PP_NAME]
+            pp_id = kwargs[_PP_ID]
+            pp_seq_id = kwargs[_PP_SEQ_ID]
+            pp_async_id = kwargs[_PP_ASYNC_ID]
+
+            pinpoint.add_trace_header(
+                Defines.PP_APP_NAME, pp_name, traceId)
+            pinpoint.add_context(
+                Defines.PP_APP_NAME, pp_name, traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_APP_ID, pp_id, traceId)
+            pinpoint.add_context(
+                Defines.PP_APP_ID, pp_id, traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_SPAN_ID, span_id, traceId)
+            pinpoint.add_context(
+                Defines.PP_SPAN_ID, span_id, traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_TRANSACTION_ID, tid, traceId)
+
+            pinpoint.add_context(
+                Defines.PP_TRANSACTION_ID, tid, traceId)
+
+            pinpoint.add_trace_header(
+                Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
+
+            pinpoint.set_async_context(
+                traceId, pp_async_id, pp_seq_id)
+
+            for id in _pinpoint_id_set:
+                del kwargs[id]
+
             return traceId, args, kwargs
 
-        tid = kwargs[_PP_TID]
-        span_id = kwargs[_PP_SPAN_ID]
-        pp_name = kwargs[_PP_NAME]
-        pp_id = kwargs[_PP_ID]
-        pp_seq_id = kwargs[_PP_SEQ_ID]
-        pp_async_id = kwargs[_PP_ASYNC_ID]
-
-        pinpoint.add_trace_header(
-            Defines.PP_APP_NAME, pp_name, traceId)
-        pinpoint.add_context(
-            Defines.PP_APP_NAME, pp_name, traceId)
-
-        pinpoint.add_trace_header(
-            Defines.PP_APP_ID, pp_id, traceId)
-        pinpoint.add_context(
-            Defines.PP_APP_ID, pp_id, traceId)
-
-        pinpoint.add_trace_header(
-            Defines.PP_SPAN_ID, span_id, traceId)
-        pinpoint.add_context(
-            Defines.PP_SPAN_ID, span_id, traceId)
-
-        pinpoint.add_trace_header(
-            Defines.PP_TRANSCATION_ID, tid, traceId)
-
-        pinpoint.add_context(
-            Defines.PP_TRANSCATION_ID, tid, traceId)
-
-        pinpoint.add_trace_header(
-            Defines.PP_SERVER_TYPE, Defines.PYTHON, traceId)
-
-        pinpoint.set_async_context(
-            traceId, pp_async_id, pp_seq_id)
-
-        for id in _pinpoint_id_set:
-            del kwargs[id]
-
-        return traceId, args, kwargs
+    def getUniqueName(self):
+        return "celery[worker]."+super().getUniqueName()
 
 
 class CeleryParasInjection_async_Plugin(PinpointCommonPlugin):
@@ -90,7 +132,7 @@ class CeleryParasInjection_async_Plugin(PinpointCommonPlugin):
         sequence_id = pinpoint.get_sequence_id(traceId)
         kwargs = {}
         kwargs[_PP_TID] = pinpoint.get_context(
-            Defines.PP_TRANSCATION_ID, traceId)
+            Defines.PP_TRANSACTION_ID, traceId)
         kwargs[_PP_SPAN_ID] = pinpoint.get_context(
             Defines.PP_SPAN_ID, traceId)
         kwargs[_PP_NAME] = pinpoint.get_context(
@@ -109,8 +151,6 @@ class CeleryParasInjection_async_Plugin(PinpointCommonPlugin):
         pinpoint.add_trace_header(
             Defines.PP_ASYNC_CALL_ID, f'{async_id}', traceId)
         pin_kwargs = self.genPinpointId(traceId, async_id)
-        print(args)
-        print(kwargs)
         if 'kwargs' in kwargs:
             origin_kwargs = kwargs['kwargs']
             origin_kwargs.update(pin_kwargs)
@@ -121,52 +161,13 @@ class CeleryParasInjection_async_Plugin(PinpointCommonPlugin):
         else:
             if len(args) >= 2:
                 args[1].update(pin_kwargs)
-                print(args)
                 return traceId, args, kwargs
             elif len(args) == 1:
                 arg_1 = pin_kwargs
-                # return traceId, args+(arg_1,), kwargs
-                print(args+({},))
                 return traceId, args+({},), kwargs
             else:
                 arg_1 = pin_kwargs
-                print(([], arg_1))
                 return traceId, ([], arg_1), kwargs
-
-            # print(args)
-            # args[1]['tesyt'] = 23434
-            # print(kwargs)
-            # return traceId, args, kwargs
-
-            # if len(args) >= 2:
-            #     args[1].update(pin_kwargs)
-            #     print(args)
-            #     return traceId, args, kwargs
-            # elif len(args) == 1:
-            #     arg_1 = pin_kwargs
-            #     # return traceId, args+(arg_1,), kwargs
-            #     print(args+({},))
-            #     return traceId, args+({},), kwargs
-            # else:
-            #     arg_1 = pin_kwargs
-            #     print(([], arg_1))
-            #     return traceId, ([], arg_1), kwargs
-
-            # def updateKwargs(self, origin_kwargs, pin_kwargs):
-            #     if origin_kwargs:
-            #         origin_kwargs.update(pin_kwargs)
-            #         return origin_kwargs
-            #     else:
-            #         return pin_kwargs
-
-            # class CeleryParasInjection_delay_Plugin(CeleryParasInjection_async_Plugin):
-            #     def updateKwargs(self, kwargs, pin_kwargs):
-            #         if kwargs:
-            #             for k, v in pin_kwargs.items():
-            #                 kwargs[k] = v
-            #             return kwargs
-            #         else:
-            #             return pin_kwargs
 
 
 class CeleryCallerPlugin:
@@ -174,12 +175,8 @@ class CeleryCallerPlugin:
         self.func_name = func.__name__
         if func.apply_async:
             apply_async = CeleryParasInjection_async_Plugin(
-                f"{self.func_name}.apply_async")(func.apply_async)
-        # if func.delay:
-        #     delay = CeleryParasInjection_delay_Plugin(
-        #         f"{self.func_name}.delay")(func.delay)
+                f"celery.caller.{self.func_name}.apply_async")(func.apply_async)
         func.apply_async = apply_async
-        # func.delay = delay
 
         return func
 

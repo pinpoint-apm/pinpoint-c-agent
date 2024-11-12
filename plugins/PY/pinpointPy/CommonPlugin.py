@@ -72,7 +72,7 @@ class HookTargetPlugins(Common.PinTrace):
 
         sequence_id = pinpoint.get_sequence_id(traceId)
 
-        tid = pinpoint.get_context(Defines.PP_TRANSCATION_ID, traceId)
+        tid = pinpoint.get_context(Defines.PP_TRANSACTION_ID, traceId)
         seq_id = pinpoint.get_context(Defines.PP_SPAN_ID, traceId)
         app_name = pinpoint.get_context(Defines.PP_APP_NAME, traceId)
         app_id = pinpoint.get_context(Defines.PP_APP_ID, traceId)
@@ -100,9 +100,9 @@ class HookTargetPlugins(Common.PinTrace):
                     Defines.PP_SPAN_ID, seq_id, thread_trace_id)
 
                 pinpoint.add_trace_header(
-                    Defines.PP_TRANSCATION_ID, tid, thread_trace_id)
+                    Defines.PP_TRANSACTION_ID, tid, thread_trace_id)
                 pinpoint.add_context(
-                    Defines.PP_TRANSCATION_ID, tid, thread_trace_id)
+                    Defines.PP_TRANSACTION_ID, tid, thread_trace_id)
 
                 pinpoint.add_trace_header(
                     Defines.PP_SERVER_TYPE, Defines.PYTHON, thread_trace_id)

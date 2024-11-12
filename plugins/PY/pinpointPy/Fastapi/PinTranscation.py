@@ -108,8 +108,8 @@ class PinTransaction(AsyncPinTrace):
         else:
             tid = pinpoint.gen_tid()
 
-        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid, traceId)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, traceId)
+        pinpoint.add_trace_header(Defines.PP_TRANSACTION_ID, tid, traceId)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, tid, traceId)
 
         if header.Error:
             pinpoint.mark_as_error(header.Error, header.Error, 0, traceId)

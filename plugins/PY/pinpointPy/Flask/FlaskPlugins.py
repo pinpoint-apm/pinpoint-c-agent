@@ -128,8 +128,8 @@ class BaseFlaskPlugins(Common.PinTrace):
             pinpoint.add_context(
                 Defines.PP_HEADER_PINPOINT_SAMPLED, "s0", traceId)
 
-        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, self.tid, traceId)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, traceId)
+        pinpoint.add_trace_header(Defines.PP_TRANSACTION_ID, self.tid, traceId)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, self.tid, traceId)
         pinpoint.add_trace_header(Defines.PP_SPAN_ID, self.sid, traceId)
         pinpoint.add_context(Defines.PP_SPAN_ID, self.sid, traceId)
         pinpoint.add_trace_header_v2(

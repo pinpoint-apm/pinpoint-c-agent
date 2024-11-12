@@ -34,7 +34,7 @@ def generatePinpointHeader(host, headers, traceId=-1):
     headers['Pinpoint-Flags'] = "0"
     headers[Defines.PP_HEADER_PINPOINT_HOST] = host
     headers[Defines.PP_HEADER_PINPOINT_TRACEID] = pinpoint.get_context(
-        Defines.PP_TRANSCATION_ID, traceId)
+        Defines.PP_TRANSACTION_ID, traceId)
     headers[Defines.PP_HEADER_PINPOINT_PSPANID] = pinpoint.get_context(
         Defines.PP_SPAN_ID, traceId)
     nextSeqId = pinpoint.gen_sid()
@@ -128,8 +128,8 @@ def startPinpointByEnviron(environ, trace_id: int):
         pinpoint.add_context(
             Defines.PP_HEADER_PINPOINT_SAMPLED, "s0", trace_id)
 
-    pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid, trace_id)
-    pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, trace_id)
+    pinpoint.add_trace_header(Defines.PP_TRANSACTION_ID, tid, trace_id)
+    pinpoint.add_context(Defines.PP_TRANSACTION_ID, tid, trace_id)
 
     pinpoint.add_trace_header(Defines.PP_SPAN_ID, sid, trace_id)
     pinpoint.add_context(Defines.PP_SPAN_ID, sid, trace_id)
