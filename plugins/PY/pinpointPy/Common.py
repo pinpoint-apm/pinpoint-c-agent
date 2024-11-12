@@ -19,7 +19,8 @@
 
 # Created by eeliu at 3/5/20
 
-from pinpointPy import Defines, pinpoint, get_logger
+from pinpointPy import Defines, pinpoint
+from pinpointPy.pinpoint import get_logger
 from pinpointPy.TraceContext import get_trace_context
 from functools import wraps
 
@@ -69,7 +70,7 @@ class Trace:
 
 class PinTrace:
 
-    def __init__(self, name):
+    def __init__(self, name=''):
         self.name = name
 
     def setCurrentTraceNodeId(self, traceId):
@@ -125,7 +126,10 @@ class PinTrace:
         return pinpointTrace
 
     def getUniqueName(self):
-        return self.name
+        if self.name:
+            return self.name
+        else:
+            return self.func_name
 
 
 class AsyncPinTrace(PinTrace):

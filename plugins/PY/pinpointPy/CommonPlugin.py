@@ -110,7 +110,6 @@ class HookTargetPlugins(Common.PinTrace):
                     thread_trace_id, async_id, sequence_id)
 
                 if callable(origin_target):
-                    # todo add
                     @PinpointCommonPlugin(origin_target.__name__)
                     def call_origin_target(*args, **kwargs):
                         origin_target(*args, **kwargs)

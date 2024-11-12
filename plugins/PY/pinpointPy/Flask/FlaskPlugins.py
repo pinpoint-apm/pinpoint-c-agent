@@ -38,8 +38,11 @@ class BaseFlaskPlugins(Common.PinTrace):
         pinpoint.add_trace_header(
             Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
         pinpoint.add_context(Defines.PP_APP_NAME, pinpoint.app_name(), traceId)
+
         pinpoint.add_trace_header(
             Defines.PP_APP_ID, pinpoint.app_id(), traceId)
+        pinpoint.add_context(Defines.PP_APP_ID, pinpoint.app_id(), traceId)
+
         ###############################################################
         pinpoint.add_trace_header(
             Defines.PP_INTERCEPTOR_NAME, 'BaseFlaskrequest', traceId)
@@ -138,6 +141,6 @@ class BaseFlaskPlugins(Common.PinTrace):
         super().onEnd(traceId, ret)
         return ret
 
-    def onException(self, e):
-        pinpoint.mark_as_error(str(e), "", 0)
+    def onException(self, traceId, e):
+        pinpoint.mark_as_error(str(e), "", 0, traceId)
         raise e

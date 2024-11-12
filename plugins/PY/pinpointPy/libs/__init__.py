@@ -15,6 +15,7 @@
 # ------------------------------------------------------------------------------
 import importlib
 from pinpointPy.pinpoint import get_logger
+from pinpointPy.libs._celery import CeleryWorkerPlugin, CeleryCallerPlugin
 
 
 def __monkey_patch(*args, **kwargs):
@@ -42,6 +43,7 @@ def monkey_patch_for_pinpoint(pymongo=True,
                    _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector, _psycopg2=pyscopg2)
 
 
-__all__ = ['monkey_patch_for_pinpoint']
+__all__ = ['monkey_patch_for_pinpoint',
+           'CeleryWorkerPlugin', 'CeleryCallerPlugin']
 __version__ = '0.0.4'
 __author__ = 'liu.mingyi@navercorp.com'
