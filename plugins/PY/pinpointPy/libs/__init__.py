@@ -38,12 +38,18 @@ def monkey_patch_for_pinpoint(pymongo=True,
                               sqlalchemy=True,
                               MySQLdb=True,
                               MysqlConnector=True,
-                              pyscopg2=True):
+                              pyscopg2=True,
+                              rabbitmq=True,
+                              kombu=True):
     __monkey_patch(_pymongo=pymongo, _MySQLdb=MySQLdb, _PyMysql=PyMysql, _pyRedis=pyRedis, _requests=requests,
-                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector, _psycopg2=pyscopg2)
+                   _urllib=urllib, _sqlalchemy=sqlalchemy,   _MysqlConnector=MysqlConnector, _psycopg2=pyscopg2,
+                   _rabbitmq=rabbitmq, _kombu=kombu)
 
 
 __all__ = ['monkey_patch_for_pinpoint',
            'CeleryWorkerPlugin', 'CeleryCallerPlugin']
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 __author__ = 'liu.mingyi@navercorp.com'
+
+# 0.0.5
+# add rabbitmq
