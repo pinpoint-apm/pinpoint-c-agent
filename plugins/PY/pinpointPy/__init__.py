@@ -36,9 +36,12 @@ def use_asyncio_local_context():
 
 __all__ = ['monkey_patch_for_pinpoint', 'use_thread_local_context', 'use_asyncio_local_context',
            'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader', 'enable_experiment_plugins']
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 __author__ = 'liu.mingyi@navercorp.com'
 
-# 1.4.0
+
 # Changes
+# 1.4.1 11-19-2024
+# - add celery plugins and testcase
+# 1.4.0
 # - use_asyncio_local_context
