@@ -14,3 +14,5 @@ grpcio
 grpc-interceptor
 psycopg2
 pinpointPy
+kombu
+amqp

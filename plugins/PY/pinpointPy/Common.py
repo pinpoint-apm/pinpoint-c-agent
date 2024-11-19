@@ -19,7 +19,8 @@
 
 # Created by eeliu at 3/5/20
 
-from pinpointPy import Defines, pinpoint, get_logger
+from pinpointPy import Defines, pinpoint
+from pinpointPy.pinpoint import get_logger
 from pinpointPy.TraceContext import get_trace_context
 from functools import wraps
 
@@ -69,7 +70,7 @@ class Trace:
 
 class PinTrace:
 
-    def __init__(self, name):
+    def __init__(self, name=''):
         self.name = name
 
     def setCurrentTraceNodeId(self, traceId):
@@ -125,7 +126,10 @@ class PinTrace:
         return pinpointTrace
 
     def getUniqueName(self):
-        return self.name
+        if self.name:
+            return self.name
+        else:
+            return self.func_name
 
 
 class AsyncPinTrace(PinTrace):
@@ -189,8 +193,10 @@ class PinHeader:
         self.ParentName = ''
         # REMOTE_ADDRESS field (the same as RemoteAddr)
         self.ParentHost = ''
-        # create a new one, or use an exist parents Tid, this Tid used to generate call-tree
+        # create a new one, or use an exist parents Tid, this Tid is used to generate call-tree
         self.ParentTid = ''
+        # create a new one, or use an exist parent sequence id
+        self.ParentSid = ''
         # if find a error, just fill here. it could rise an error(read mark) in pinpoint-web
         self.Error = ''
 
@@ -292,13 +298,13 @@ class PinTransaction(PinTrace):
         tid = ''
         if header.ParentTid != '':
             tid = header.ParentTid
-            pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, tid, traceId)
+            # pinpoint.add_trace_header(Defines.PP_PARENT_SPAN_ID, tid, traceId)
         else:
             tid = pinpoint.gen_tid()
 
-        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid, traceId)
+        pinpoint.add_trace_header(Defines.PP_TRANSACTION_ID, tid, traceId)
 
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, traceId)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, tid, traceId)
 
         if header.Error:
             pinpoint.mark_as_error(header.Error, header.Error, 0, traceId)

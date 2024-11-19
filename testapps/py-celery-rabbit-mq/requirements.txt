@@ -1,0 +1,4 @@
+celery<4.4.7
+flask<3.0.3
+importlib-metadata<5.0
+

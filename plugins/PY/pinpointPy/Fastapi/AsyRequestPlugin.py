@@ -108,8 +108,8 @@ class AsyRequestPlugin(AsyncPinTrace):
             pinpoint.drop_trace(traceId)
             pinpoint.add_context("Pinpoint-Sampled", "s0", traceId)
 
-        pinpoint.add_trace_header(Defines.PP_TRANSCATION_ID, tid, traceId)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, tid, traceId)
+        pinpoint.add_trace_header(Defines.PP_TRANSACTION_ID, tid, traceId)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, tid, traceId)
         pinpoint.add_trace_header(Defines.PP_SPAN_ID, sid, traceId)
         pinpoint.add_context(Defines.PP_SPAN_ID, sid, traceId)
         return traceId, args, kwargs

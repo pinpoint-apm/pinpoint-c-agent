@@ -239,6 +239,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      rabbit-mq:
+        condition: service_healthy           
 
   py3.11-plugins:
     build:
@@ -255,6 +257,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      rabbit-mq:
+        condition: service_healthy           
 
   py-plugins:
     build:
@@ -271,6 +275,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+      rabbit-mq:
+        condition: service_healthy        
 
   grpc-py:
     container_name: grpc-py
@@ -585,3 +591,57 @@ services:
     depends_on:
       dev-collector:
         condition: service_started
+
+  py-standalone:
+    build:
+      dockerfile: testapps/standalone-py/Dockerfile
+      context: ../
+    restart: always
+    depends_on:
+      dev-collector:
+        condition: service_started
+
+  py-celery:
+    build:
+      dockerfile: testapps/py-celery/Dockerfile
+      context: ../
+    restart: always
+    depends_on:
+      dev-collector:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f http://localhost:5000/test_delay &&  curl -f http://localhost:5000/test_apply_async
+      interval: 30s
+      timeout: 10s
+
+  py-celery-mq:
+    build:
+      dockerfile: testapps/py-celery-rabbit-mq/Dockerfile
+      context: ../
+    restart: always
+    depends_on:
+      dev-collector:
+        condition: service_started
+      rabbit-mq:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f http://localhost:5000/test_delay &&  curl -f http://localhost:5000/test_apply_async
+      interval: 30s
+      timeout: 10s
+
+  rabbit-mq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - 5672:5672
+      - 8080:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: 'user'
+      RABBITMQ_DEFAULT_PASS: 'password'
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3

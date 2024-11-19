@@ -12,7 +12,7 @@ from multiprocessing import Process
 use_asyncio_local_context()
 enable_experiment_plugins()
 set_agent("cd.dev.test.py", "cd.dev.test.py",
-          'tcp:localhost:10000', -1, log_level=logging.DEBUG)
+          'tcp:dev-collector:10000', -1, log_level=logging.DEBUG)
 
 
 class FakeHeader(GenPinHeader):

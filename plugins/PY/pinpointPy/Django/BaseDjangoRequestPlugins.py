@@ -75,7 +75,7 @@ class BaseDjangoRequestPlugins(Common.PinTraceV1):
             self.tid = headers[Defines.PP_HEADER_PINPOINT_TRACEID]
         else:
             self.tid = pinpoint.gen_tid()
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, trace_id)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, self.tid, trace_id)
 
         if Defines.PP_HTTP_PINPOINT_PAPPNAME in headers:
             self.pname = headers[Defines.PP_HTTP_PINPOINT_PAPPNAME]
@@ -133,9 +133,9 @@ class BaseDjangoRequestPlugins(Common.PinTraceV1):
                 Defines.PP_HEADER_PINPOINT_SAMPLED, "s0", trace_id)
 
         pinpoint.add_trace_header(
-            Defines.PP_TRANSCATION_ID, self.tid, trace_id)
+            Defines.PP_TRANSACTION_ID, self.tid, trace_id)
         pinpoint.add_trace_header(Defines.PP_SPAN_ID, self.sid, trace_id)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, trace_id)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, self.tid, trace_id)
         pinpoint.add_context(Defines.PP_SPAN_ID, self.sid, trace_id)
         pinpoint.add_trace_header_v2(
             Defines.PP_HTTP_METHOD, headers["REQUEST_METHOD"], trace_id)

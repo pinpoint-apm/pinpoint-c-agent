@@ -72,7 +72,7 @@ class RequestPlugin(Common.PinTrace):
             self.tid = request.headers[Defines.PP_HEADER_PINPOINT_TRACEID]
         else:
             self.tid = pinpoint.gen_tid()
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, trace_id)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, self.tid, trace_id)
 
         if Defines.PP_HTTP_PINPOINT_PAPPNAME in request.headers:
             self.pname = request.headers[Defines.PP_HTTP_PINPOINT_PAPPNAME]
@@ -131,9 +131,9 @@ class RequestPlugin(Common.PinTrace):
                 Defines.PP_HEADER_PINPOINT_SAMPLED, "s0", trace_id)
 
         pinpoint.add_trace_header(
-            Defines.PP_TRANSCATION_ID, self.tid, trace_id)
+            Defines.PP_TRANSACTION_ID, self.tid, trace_id)
         pinpoint.add_trace_header(Defines.PP_SPAN_ID, self.sid, trace_id)
-        pinpoint.add_context(Defines.PP_TRANSCATION_ID, self.tid, trace_id)
+        pinpoint.add_context(Defines.PP_TRANSACTION_ID, self.tid, trace_id)
         pinpoint.add_context(Defines.PP_SPAN_ID, self.sid, trace_id)
         return trace_id, args, kwargs
 
