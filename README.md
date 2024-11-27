@@ -69,7 +69,7 @@ Our advantage:
 ### Blogs 
 
 - [Intro pinpoint php aop](https://github.com/pinpoint-apm/pinpoint-php-aop/wiki/Intro-pinpoint-php-aop)
-- [pinpoint php on phpmyadmin](https://github.com/pinpoint-apm/pinpoint-c-agent/wiki/phpmyadmin_en)
+- [pinpoint php on phpmyadmin](https://github.com/pinpoint-apm/pinpoint-c-agent/wiki/pinpoint-in-phpmyadmin)
 
 
 ## Contact Us
