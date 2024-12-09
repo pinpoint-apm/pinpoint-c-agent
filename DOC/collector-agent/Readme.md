@@ -30,7 +30,7 @@ A bridger to pinpoint-collector.
 
 ### 1. Download from github.release
 
-  https://github.com/pinpoint-apm/pinpoint-c-agent/releases/latest
+  https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.7.5
 
 ### 2. Use docker images
 
@@ -39,7 +39,7 @@ A bridger to pinpoint-collector.
 #### Example:
 
 ```sh
-docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.7
+docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.7.1
 ```
 
 ### 3. K8s side car
@@ -47,7 +47,7 @@ docker run -itd -p 9999:9999  --env-file ./env.list ghcr.io/pinpoint-apm/pinpoin
 server.yaml sample
 
 ``` yml
-- image: ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.7
+- image: ghcr.io/pinpoint-apm/pinpoint-c-agent/collector-agent:0.7.1
         name: collector-agent
         args: ["-RecvBufSize=1048576"]
         securityContext:
@@ -75,7 +75,7 @@ server.yaml sample
 
 ### 4. Compiling from source [require `go.1.18`]
 
-- Install: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@v0.7`
+- Install: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@v0.7.5`
   - ❗❗❗Note: collector-agent: located into `/usr/local/bin/`
   
 `./collector-agent`
