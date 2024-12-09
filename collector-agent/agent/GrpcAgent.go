@@ -403,7 +403,7 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 	defer wg.Done()
 
 	client := v1.NewProfilerCommandServiceClient(conn)
-	ctx, _ := common.BuildMdContextWithTimeout(agent.config.GrpcConTextTimeOut, agent.pingMd)
+	ctx, _ := common.BuildMdContextWithTimeout(-1, agent.pingMd)
 
 	stream_client, err := client.CommandStreamActiveThreadCount(ctx)
 	if err != nil {
