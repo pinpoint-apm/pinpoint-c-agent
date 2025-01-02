@@ -46,7 +46,7 @@ class NextSpanPlugin(Common.PinTrace):
 
     def onBefore(self, parentId, *args, **kwargs):
         traceId, _args, _kwargs = super().onBefore(parentId, *args, **kwargs)
-        url = _args[1]
+        url = kwargs.get('url') or args[1]
         target = urlparse(url).netloc
         ###############################################################
         pinpoint.add_trace_header(

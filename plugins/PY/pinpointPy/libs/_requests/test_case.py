@@ -65,6 +65,16 @@ class Test_Case(TestCase):
         httpbin = create_http_bin_response(body.text)
         self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
 
+    @PinTransaction("testcase", GenTestHeader())
+    def test_request_kwargs(self):
+        import requests
+        parameters = {
+            'method': "POST", "url": 'http://httpbin/anything', "data": 'abc'
+        }
+        body = requests.request(**parameters)
+        httpbin = create_http_bin_response(body.text)
+        self.assertIn(Defines.PP_HEADER_PINPOINT_SPANID, httpbin.headers)
+
     def test_request_no_transaction(self):
         import requests
         from threading import Thread
