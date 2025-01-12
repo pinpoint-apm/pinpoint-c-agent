@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.8.3
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	google.golang.org/grpc v1.56.3
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/protobuf v1.36.2
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
