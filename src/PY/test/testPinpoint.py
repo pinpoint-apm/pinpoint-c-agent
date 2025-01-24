@@ -23,6 +23,7 @@ class TestAgent(TestCase):
 
     def test_encode(self):
         _pinpointPy.start_trace()
+        _pinpointPy.add_clue("key", bytes("value3", 'utf-8'))
         _pinpointPy.add_clues("CN", "测试中文编码")
         _pinpointPy.add_clues("KR", "한국어 인코딩 테스트 ")
         _pinpointPy.add_clues("JP", "日本語エンコーディングをテストする ")
@@ -39,6 +40,11 @@ class TestAgent(TestCase):
 
         _pinpointPy.add_clue("key", "value")
         _pinpointPy.add_clue("key", "value3")
+        _pinpointPy.add_clue('end', b'3434')
+        _pinpointPy.add_clue('end', ('3434', '23'))
+        _pinpointPy.add_clue('end', ['3434', '23'])
+        _pinpointPy.add_clue('end', {'3434': 23, '23': 23})
+        _pinpointPy.add_clue('end', 1314)
         _pinpointPy.set_context_key('sid', '12345')
         value = _pinpointPy.get_context_key('sid')
         self.assertEqual(value, '12345')

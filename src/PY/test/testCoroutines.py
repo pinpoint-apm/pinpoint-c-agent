@@ -30,7 +30,7 @@ class TestInCoroutines(TestCase):
                 self.assertEqual(value, '12345')
 
                 ret = await func(*args, **kwargs)
-                _pinpointPy.add_clue('end', '3434', id)
+                _pinpointPy.add_clue('end', b'3434', id)
                 id = _pinpointPy.end_trace(id)
             return pinpoint_trace
 

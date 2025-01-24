@@ -63,15 +63,24 @@ static PyObject *py_pinpoint_add_clues(PyObject *self, PyObject *args) {
  */
 static PyObject *py_pinpoint_add_clue(PyObject *self, PyObject *args) {
   char *key = NULL;
-  char *value = NULL;
+  // char *value = NULL;
+  PyObject *value = NULL;
   int id = -1;
   int loc = 0;
-  if (PyArg_ParseTuple(args, "ss|ii", &key, &value, &id, &loc)) {
+  if (PyArg_ParseTuple(args, "sO|ii", &key, &value, &id, &loc)) {
     if (id == -1) {
       id = pinpoint_get_per_thread_id();
     }
-
-    pinpoint_add_clue(id, key, value, loc);
+    PyObject *str_obj = PyObject_Str(value);
+    if (str_obj) {
+      // patch for https://github.com/pinpoint-apm/pinpoint-c-agent/issues/716
+      // it likes str(value)
+      const char *c_str = PyUnicode_AsUTF8(str_obj);
+      if (c_str) {
+        pinpoint_add_clue(id, key, c_str, loc);
+      }
+      Py_DECREF(str_obj);
+    }
   }
   return Py_BuildValue("O", Py_True);
 }
@@ -265,7 +274,7 @@ static PyObject *py_pinpoint_enable_debug(PyObject *, PyObject *) {
 static PyObject *py_set_agent(PyObject *self, PyObject *args,
                               PyObject *keywds) {
   // PyObject* setting;
-  bool ret = false;
+  // bool ret = false;
   char default_host[] = "collector_host";
   char default_tracelimit[] = "trace_limit";
   char default_timeout[] = "time_out_ms";

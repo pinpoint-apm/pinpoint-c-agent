@@ -22,6 +22,12 @@ class TestUnderProcessMode(TestCase):
             _pinpointPy.start_trace()
             _pinpointPy.set_context_key('sid', id)
             _pinpointPy.add_clue("key", "value3")
+            _pinpointPy.add_clue("key", bytes("value3", 'utf-8'))
+            _pinpointPy.add_clue('end', b'3434')
+            _pinpointPy.add_clue('end', ('3434', '23'))
+            _pinpointPy.add_clue('end', ['3434', '23'])
+            _pinpointPy.add_clue('end', {'3434': 23, '23': 23})
+            _pinpointPy.add_clue('end', 1314)
             _pinpointPy.add_clues("key", "value3")
             value = _pinpointPy.get_context_key('sid')
             self.assertEqual(value, id)
@@ -30,8 +36,8 @@ class TestUnderProcessMode(TestCase):
             _pinpointPy.force_flush_trace()
             _pinpointPy.drop_trace()
 
-    @unittest.skipIf(platform.system() == "Darwin", "skip Darwin")
-    @unittest.skipIf(platform.system() == "Windows", "skip Windows")
+    @ unittest.skipIf(platform.system() == "Darwin", "skip Darwin")
+    @ unittest.skipIf(platform.system() == "Windows", "skip Windows")
     def test_process(self):
         p1 = Process(target=self._test_api_flow)
         p1.start()
