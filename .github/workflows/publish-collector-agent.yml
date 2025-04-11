@@ -11,7 +11,7 @@ permissions:
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
-  TAG_NAME: 0.7.1
+  TAG_NAME: v0.7.7
 
 jobs:
   collector-agent: # reference from https://docs.docker.com/build/ci/github-actions/multi-platform/

@@ -119,10 +119,10 @@ private:
 
     if (root["version"] || root["version"].isString()) {
       std::string version = root["version"].asString();
-      std::string lowest_version = "v0.6.0";
+      std::string lowest_version = "v0.7.0";
       pp_trace("collector information: version:%s", version.c_str());
       if (version < lowest_version) {
-        pp_trace("collector-agent should be >=v0.5.0, please upgrade it");
+        pp_trace("collector-agent should be >=v0.7.0, please upgrade it");
         return -1;
       }
     }
