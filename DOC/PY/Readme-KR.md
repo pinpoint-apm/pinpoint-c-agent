@@ -63,7 +63,7 @@ Settings in app/main.py:
 from starlette_context.middleware import ContextMiddleware
 from starlette_context import context, plugins
 
-from pinpointPy import set_agent
+from pinpointPy import set_agent, monkey_patch_for_pinpoint, use_thread_local_context, use_asyncio_local_context
 from pinpointPy.Fastapi import asyn_monkey_patch_for_pinpoint
 from starlette.middleware import Middleware
 from pinpointPy.Fastapi import PinPointMiddleWare
@@ -73,11 +73,12 @@ middleware = [
     Middleware(PinPointMiddleWare)
 ]
 set_agent("cd.dev.test.py", "cd.dev.test.py",0, 'tcp:dev-collector:10000')
-use_starlette_context()
+use_thread_local_context()
+use_asyncio_local_context()
 ## patch for synchronous libraries, such as requests,myql-connector-python ...
 # support lists https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/plugins/PY/pinpointPy/libs
 monkey_patch_for_pinpoint()
-async_monkey_patch_for_pinpoint()
+asyn_monkey_patch_for_pinpoint()
 ```
 
 #### 1.4 pyramid
