@@ -15,6 +15,7 @@ var (
 )
 
 func initServerSetting() {
+	log.Infof("collector-agent version: %s", server.Version)
 	if *server_recv_buf > server.RECV_BUF_SIZE_DEF {
 		server.Setting.RecvBufSize = *server_recv_buf
 	}

@@ -9,7 +9,11 @@ on:
 
 env:
   MODULE_PAK: pinpoint_php-${{ github.head_ref || github.ref_name }}
-  
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   cpp:
     strategy:
@@ -308,8 +312,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: run unittest
+        shell: bash
         run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-          # export PATH="$PATH:$(go env GOPATH)/bin"
-          cd collector-agent && go mod tidy && go test ./... -v
+          export PATH="$PATH:$(go env GOPATH)/bin"
+          cd collector-agent && make test

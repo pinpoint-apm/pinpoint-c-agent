@@ -4,7 +4,12 @@ USER root
 RUN apk add --no-cache make protobuf-dev git
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest 
 
-COPY ./ /apps
+COPY go.mod go.sum makefile server.go ./
+COPY agent/ ./agent/
+COPY common/ ./common/
+COPY server/ ./server/
+COPY pinpoint-grpc-idl/ ./pinpoint-grpc-idl/
+
 RUN make
 
 FROM alpine:3.20

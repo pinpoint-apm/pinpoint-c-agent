@@ -1,3 +1,6 @@
+## v0.7.8 
+- fix `version_id` bug and upgrade to go.1.25
+
 ## v0.6.4
 - fix: panic: send on closed channel #658
 

@@ -6,3 +6,4 @@
 CollectorAgent
 collector-agent
 pinpoint-grpc-idl
+pinpoint-grpc-idl-go/proto
