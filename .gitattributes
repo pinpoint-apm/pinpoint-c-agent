@@ -1,3 +1,2 @@
 .devcontainer/*.gz filter=lfs diff=lfs merge=lfs -text
-.devcontainer/go1.18.10.linux-amd64.tar.gz filter=lfs diff=lfs merge=lfs -text
 .devcontainer/php-7.4.33.tar.gz filter=lfs diff=lfs merge=lfs -text

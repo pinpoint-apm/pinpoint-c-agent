@@ -73,7 +73,7 @@ server.yaml sample
             value: "true"
 ```
 
-### 4. 手动编译 [require `go.1.18`]
+### 4. 手动编译 [require `go.1.25`]
 
 - 执行: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@dev`
   - ❗❗❗Note: collector-agent: located into `/usr/local/bin/`

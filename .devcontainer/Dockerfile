@@ -69,13 +69,13 @@ ENV PATH="$PATH:${PHP_HOME}/php/bin/:${PHP_HOME}/php/sbin/"
 # RUN cd ~ && wget https://www.php.net/distributions/${PHP_VESION}.tar.gz && tar xvf ${PHP_VESION}.tar.gz && cd ${PHP_VESION} && ./configure --prefix=/opt/${PHP_VESION} --enable-fpm   --enable-opcache   --enable-debug && make -j && make install
 
 
-# install golang 1.18
+# install golang 1.25
 USER root
-RUN wget https://go.dev/dl/go1.18.10.linux-amd64.tar.gz -O /home/pinpoint/go1.18.10.linux-amd64.tar.gz
-RUN rm -rf /usr/local/go && cd /home/pinpoint/ && tar -C /usr/local -xzf go1.18.10.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz -O /home/pinpoint/go1.25.0.linux-amd64.tar.gz
+RUN rm -rf /usr/local/go && cd /home/pinpoint/ && tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin
 ENV PATH=$PATH:/home/pinpoint/go/bin
 ENV GO111MODULE="on" 
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
 
 SHELL ["/bin/bash", "-c"]

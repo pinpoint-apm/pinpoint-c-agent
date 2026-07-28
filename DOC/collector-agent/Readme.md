@@ -73,7 +73,7 @@ server.yaml sample
             value: "true"
 ```
 
-### 4. Compiling from source [require `go.1.18`]
+### 4. Compiling from source [require `go.1.25`]
 
 - Install: `GOBIN=/usr/local/bin/ go install github.com/pinpoint-apm/pinpoint-c-agent/collector-agent@dev`
   - ❗❗❗Note: collector-agent: located into `/usr/local/bin/`

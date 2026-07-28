@@ -45,7 +45,7 @@ jobs:
       - name: Build agent
         run: |
           cd common
-          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 17 2022" -T host=x86 -A win32
+          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 18 2026" -T host=x86 -A win32
           cmake --build build --target ALL_BUILD --config debug --
           ./build/bin/Debug/TestCommon.exe
 
@@ -288,7 +288,7 @@ jobs:
   Collector-agent:
     strategy:
       matrix:
-        go-version: [1.18.x]
+        go-version: [1.25.x]
         os: [ubuntu-latest,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -309,7 +309,7 @@ jobs:
 
       - name: run unittest
         run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
           # export PATH="$PATH:$(go env GOPATH)/bin"
           cd collector-agent && go mod tidy && go test ./... -v
