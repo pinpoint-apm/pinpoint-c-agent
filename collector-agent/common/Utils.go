@@ -2,7 +2,6 @@ package common
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -38,7 +37,7 @@ func ParseDotFormatToTime(v string) (int64, error) {
 			return sec*1000 + ms, nil
 		}
 	}
-	return 0, errors.New(fmt.Sprintf("input:%s is invalid", v))
+	return 0, fmt.Errorf("input:%s is invalid", v)
 }
 
 func WaitChannelEvent(doneCh chan bool, sec time.Duration) E_AGENT_STATUS {

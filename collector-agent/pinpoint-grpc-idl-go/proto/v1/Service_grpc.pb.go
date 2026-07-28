@@ -20,14 +20,18 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Span_SendSpan_FullMethodName = "/v1.Span/SendSpan"
+	Span_SendSpan_FullMethodName      = "/v1.Span/SendSpan"
+	Span_SendSpanBatch_FullMethodName = "/v1.Span/SendSpanBatch"
 )
 
 // SpanClient is the client API for Span service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SpanClient interface {
+	// Deprecated: Do not use.
 	SendSpan(ctx context.Context, opts ...grpc.CallOption) (Span_SendSpanClient, error)
+	// Supported since 3.1.0
+	SendSpanBatch(ctx context.Context, in *PSpanMessageBatch, opts ...grpc.CallOption) (*PSpanResultBatch, error)
 }
 
 type spanClient struct {
@@ -38,6 +42,7 @@ func NewSpanClient(cc grpc.ClientConnInterface) SpanClient {
 	return &spanClient{cc}
 }
 
+// Deprecated: Do not use.
 func (c *spanClient) SendSpan(ctx context.Context, opts ...grpc.CallOption) (Span_SendSpanClient, error) {
 	stream, err := c.cc.NewStream(ctx, &Span_ServiceDesc.Streams[0], Span_SendSpan_FullMethodName, opts...)
 	if err != nil {
@@ -72,11 +77,23 @@ func (x *spanSendSpanClient) CloseAndRecv() (*empty.Empty, error) {
 	return m, nil
 }
 
+func (c *spanClient) SendSpanBatch(ctx context.Context, in *PSpanMessageBatch, opts ...grpc.CallOption) (*PSpanResultBatch, error) {
+	out := new(PSpanResultBatch)
+	err := c.cc.Invoke(ctx, Span_SendSpanBatch_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SpanServer is the server API for Span service.
 // All implementations must embed UnimplementedSpanServer
 // for forward compatibility
 type SpanServer interface {
+	// Deprecated: Do not use.
 	SendSpan(Span_SendSpanServer) error
+	// Supported since 3.1.0
+	SendSpanBatch(context.Context, *PSpanMessageBatch) (*PSpanResultBatch, error)
 	mustEmbedUnimplementedSpanServer()
 }
 
@@ -86,6 +103,9 @@ type UnimplementedSpanServer struct {
 
 func (UnimplementedSpanServer) SendSpan(Span_SendSpanServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendSpan not implemented")
+}
+func (UnimplementedSpanServer) SendSpanBatch(context.Context, *PSpanMessageBatch) (*PSpanResultBatch, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendSpanBatch not implemented")
 }
 func (UnimplementedSpanServer) mustEmbedUnimplementedSpanServer() {}
 
@@ -126,13 +146,36 @@ func (x *spanSendSpanServer) Recv() (*PSpanMessage, error) {
 	return m, nil
 }
 
+func _Span_SendSpanBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PSpanMessageBatch)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SpanServer).SendSpanBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Span_SendSpanBatch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SpanServer).SendSpanBatch(ctx, req.(*PSpanMessageBatch))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Span_ServiceDesc is the grpc.ServiceDesc for Span service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Span_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "v1.Span",
 	HandlerType: (*SpanServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SendSpanBatch",
+			Handler:    _Span_SendSpanBatch_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "SendSpan",

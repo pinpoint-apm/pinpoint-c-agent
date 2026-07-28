@@ -18,7 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-type ApiIdMap map[string]interface{}
+type ApiIdMap map[string]any
 
 var unique_id_count = int32(1)
 

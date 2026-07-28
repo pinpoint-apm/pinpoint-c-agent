@@ -38,10 +38,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v7
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           context: collector-agent
-          tags: ${{ env.REGISTRY_IMAGE }}:${{ env.TAG_NAME }}
+          tags: ${{ env.REGISTRY_IMAGE }}:v0.7.8
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   Release-Collector-agent:
@@ -59,7 +59,7 @@ jobs:
       id: release-ca
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        goversion: "https://dl.google.com/go/go1.18.10.linux-amd64.tar.gz"
+        goversion: "https://dl.google.com/go/go1.25.12.linux-amd64.tar.gz"
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: "collector-agent"

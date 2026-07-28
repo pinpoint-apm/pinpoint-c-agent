@@ -1,4 +1,6 @@
+# syntax=docker/dockerfile:1
 FROM ubuntu:20.04
+SHELL ["/bin/bash", "-c"]
 USER root 
 ## install developmental env
 ENV TZ=Asia/Shanghai
@@ -75,3 +77,5 @@ ENV PATH=$PATH:/usr/local/go/bin
 ENV PATH=$PATH:/home/pinpoint/go/bin
 ENV GO111MODULE="on" 
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28 && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+
+SHELL ["/bin/bash", "-c"]

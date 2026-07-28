@@ -85,3 +85,5 @@ output
 config.nice.bat
 configure.bat
 configure.js
+.venv
+collector-agent/env.list

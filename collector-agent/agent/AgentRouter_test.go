@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetAgentInfo(t *testing.T) {
-	// spanMap := map[string]interface{}{
+	// spanMap := map[string]any{
 	// 	"appid":   "sfdaefe",
 	// 	"appname": "sfdaefe",
 	// 	"FT":      float64(23412),
