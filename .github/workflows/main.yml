@@ -77,14 +77,14 @@ jobs:
       needs.changes.outputs.cpp == 'true'
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13]
+        os: [ubuntu-latest, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: actions-setup-cmake
-        uses: jwlawson/actions-setup-cmake@v1.6
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.16.x"
+          cmake-version: "3.25.x"
       - name: Build agent
         run: |
           cd common
@@ -103,7 +103,7 @@ jobs:
       needs.changes.outputs.cpp == 'true'
     runs-on: [windows-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: powershell allow...
         shell: cmd
@@ -123,11 +123,11 @@ jobs:
       needs.changes.outputs.cpp == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: actions-setup-cmake
-        uses: jwlawson/actions-setup-cmake@v1.6
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.16.x"
+          cmake-version: "3.25.x"
       - name: Build agent
         run: |
           sudo apt update || echo "update failed,but try to overlook it"
@@ -160,9 +160,11 @@ jobs:
       needs.changes.outputs.php == 'true'
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        # PHP 7.x removed: Docker images are based on Debian Buster (EOL),
+        # apt repos return 404. Only support PHP 8.0+.
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: update docker compose
@@ -187,18 +189,19 @@ jobs:
       needs.changes.outputs.php == 'true'
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        # PHP 7.x removed: no longer supported (Debian Buster EOL on Linux side).
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
         ts: ["ts","nts"]
     env:
       SKIP_MACOS_ACTION: true        
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php-version }}
         env:
           phpts: ${{ matrix.ts }}
       - name: build pinpoint_php
@@ -206,24 +209,19 @@ jobs:
       - name: make test      
         run: make test TESTS="--show-diff tests_macos"
 
-  PHP-Win-2019:
-    runs-on: windows-2019
-    needs: [changes, cpp-windows]
-    if: >-
-      github.event_name != 'pull_request' ||
-      needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.php == 'true'
-    env:
-      SKIP_WINDOWS_ACTION: true
+  PHP-Win-2022:
+    runs-on: windows-2022
+    needs: cpp-windows
     strategy:
       matrix:
-        php-versions: [ "7.4", "7.3", "7.2","7.1","8.0", "8.1", "8.2", "8.3"]
+        # PHP 7.x removed: no longer supported.
+        php-versions: [ "8.0", "8.1", "8.2", "8.3"]
         arch: [ "x64"]
         ts: [ "ts", "nts" ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - id: setup-php-sdk
-        uses: php/setup-php-sdk@v0.10
+        uses: php/setup-php-sdk@v0.12
         with:
           version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
@@ -277,7 +275,7 @@ jobs:
           if-no-files-found: error
 
   PHP-Release-Win32-Package:
-    needs: [ PHP-Win-2019, pack_php_module]
+    needs: [ PHP-Win-2022, pack_php_module]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -303,7 +301,7 @@ jobs:
       needs.changes.outputs.cpp == 'true' ||
       needs.changes.outputs.php == 'true'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup PHP without composer
         uses: shivammathur/setup-php@v2
         with:
@@ -338,12 +336,12 @@ jobs:
       needs.changes.outputs.python == 'true'
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13]
+        os: [ubuntu-latest, macos-15]
         python-version: ["3.9", "3.10", "3.11","3.12","3.13"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: run unittest
@@ -360,7 +358,7 @@ jobs:
       needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: update docker compose
@@ -391,12 +389,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
           
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: "true"
 

@@ -21,7 +21,7 @@ jobs:
     if: ${{ inputs.release-testpypi }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
         run: |
           cp setup_pypi_test.py setup.py
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
 
       - name: Set up QEMU
         if: runner.os == 'Linux'
@@ -93,12 +93,12 @@ jobs:
     if: ${{ inputs.release }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
 
       - name: Set up QEMU
         if: runner.os == 'Linux'

@@ -5,6 +5,27 @@ from pinpointPy.tests import GenTestHeader, create_http_bin_response
 from pinpointPy.libs._requests import monkey_patch
 
 
+def _process_function():
+    """Module-level function so multiprocessing.Process can pickle it.
+
+    Local (nested) functions cannot be pickled, which causes
+    ``_pickle.PicklingError`` on Python 3.14+ when using the
+    forkserver or spawn start methods.
+    """
+    import requests
+    from pinpointPy.TraceContext import get_trace_context
+
+    sample, traceId = get_trace_context().get_parent_id()
+    print(f'process_function:{sample},{traceId}')
+    body = requests.request(
+        "POST", 'http://httpbin/anything/threaded_function', data='abc')
+    httpbin = create_http_bin_response(body.text)
+
+    sample, traceId = get_trace_context().get_parent_id()
+    print(f'process_function:{sample},{traceId}')
+    print(httpbin.headers)
+
+
 class TestHeader(GenPinHeader):
     def GetHeader(self, *args, **kwargs) -> PinHeader:
         _header = PinHeader()
@@ -90,23 +111,6 @@ class Test_Case(TestCase):
             httpbin = create_http_bin_response(body.text)
             print(httpbin.headers)
 
-        def process_function():
-            sample, traceId = get_trace_context().get_parent_id()
-            # self.assertFalse(sample)
-            print(f'process_function:{sample},{traceId}')
-            body = requests.request(
-                "POST", 'http://httpbin/anything/threaded_function', data='abc')
-            httpbin = create_http_bin_response(body.text)
-
-            # body = requests.request(
-            #     "POST", 'xxx', data='abc')
-            # httpbin = create_http_bin_response(body.text)
-
-            sample, traceId = get_trace_context().get_parent_id()
-            # self.assertFalse(sample)
-            print(f'process_function:{sample},{traceId}')
-            print(httpbin.headers)
-
         @PinTransaction("testcase", TestHeader())
         def test_body():
 
@@ -123,7 +127,7 @@ class Test_Case(TestCase):
             thread.join()
             sample, _ = get_trace_context().get_parent_id()
             self.assertTrue(sample)
-            p = Process(target=process_function)
+            p = Process(target=_process_function)
             p.start()
             p.join()
 
