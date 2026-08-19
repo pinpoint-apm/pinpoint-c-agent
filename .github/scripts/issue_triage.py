@@ -294,18 +294,12 @@ def main() -> int:
     number = env("ISSUE_NUMBER")
     title = env("ISSUE_TITLE")
     body = env("ISSUE_BODY")[:MAX_BODY_CHARS]
-    action = env("ISSUE_ACTION")
     api_key = env("GEMINI_API_KEY")
     model = env("GEMINI_MODEL", "gemini-2.5-flash")
 
     if not (token and repo and number):
         print("missing GITHUB_TOKEN / REPO / ISSUE_NUMBER", file=sys.stderr)
         return 1
-
-    # Idempotency: on edits, skip if the bot already triaged this issue.
-    if action == "edited" and bot_already_commented(repo, number, token):
-        print("bot already commented; skipping (edited event)")
-        return 0
 
     result: dict | None = None
     ai_powered = False
