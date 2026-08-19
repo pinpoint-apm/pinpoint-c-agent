@@ -4,8 +4,7 @@
 Classifies an issue with an LLM, applies labels, and posts a single triage
 comment. Backend chain:
   1. GitHub Models (free, uses the workflow's GITHUB_TOKEN, zero config)
-  2. Gemini (optional fallback, only if GEMINI_API_KEY is set)
-  3. Keyword-based labeling (no AI available / quota exhausted)
+  2. Keyword-based labeling (no AI available / quota exhausted)
 
 Security model (public repo):
   - Issue title/body are untrusted input: passed via env vars, embedded in the
@@ -27,7 +26,6 @@ import urllib.request
 
 GITHUB_API = "https://api.github.com"
 GH_MODELS_API = "https://models.github.ai/inference/chat/completions"
-GEMINI_API = "https://generativelanguage.googleapis.com/v1beta/models"
 
 BOT_MARKER = "<!-- pinpoint-triage-bot -->"
 
@@ -165,45 +163,6 @@ def call_github_models(token: str, model: str, prompt: str) -> dict | None:
     return parse_model_json(text)
 
 
-def call_gemini(api_key: str, model: str, prompt: str) -> dict | None:
-    url = f"{GEMINI_API}/{model}:generateContent"
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "temperature": 0.2,
-            "maxOutputTokens": 1024,
-            "responseMimeType": "application/json",
-        },
-    }
-    req = urllib.request.Request(url, data=json.dumps(payload).encode(), method="POST")
-    req.add_header("x-goog-api-key", api_key)
-    req.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            data = json.loads(resp.read().decode())
-    except urllib.error.HTTPError as e:
-        body = e.read().decode(errors="replace")
-        print(f"[gemini] HTTP {e.code}: {body[:500]}", file=sys.stderr)
-        return None
-    except Exception as e:  # noqa: BLE001
-        print(f"[gemini] error: {e}", file=sys.stderr)
-        return None
-
-    try:
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError, TypeError):
-        print(f"[gemini] unexpected response: {json.dumps(data)[:500]}", file=sys.stderr)
-        return None
-
-    # Tolerate accidental markdown fences around the JSON.
-    text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip(), flags=re.MULTILINE)
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        print(f"[gemini] non-JSON output: {text[:500]}", file=sys.stderr)
-        return None
-
-
 # ---------------------------------------------------------------------------
 # Keyword fallback (no AI / quota exhausted)
 # ---------------------------------------------------------------------------
@@ -272,9 +231,9 @@ def render_comment(result: dict, ai_powered: bool) -> str:
     lines.append("---")
     if ai_powered:
         lines.append(
-            "🤖 *This is an automated AI triage (Gemini). The analysis above may be "
-            "incorrect — a maintainer will review it. If the labels look wrong, feel "
-            "free to adjust them.*"
+            "🤖 *This is an automated AI triage (GitHub Models). The analysis above "
+            "may be incorrect — a maintainer will review it. If the labels look "
+            "wrong, feel free to adjust them.*"
         )
     else:
         lines.append(
@@ -294,8 +253,7 @@ def main() -> int:
     number = env("ISSUE_NUMBER")
     title = env("ISSUE_TITLE")
     body = env("ISSUE_BODY")[:MAX_BODY_CHARS]
-    api_key = env("GEMINI_API_KEY")
-    model = env("GEMINI_MODEL", "gemini-2.5-flash")
+    model = env("GH_MODEL", "openai/gpt-4o-mini")
 
     if not (token and repo and number):
         print("missing GITHUB_TOKEN / REPO / ISSUE_NUMBER", file=sys.stderr)
@@ -303,12 +261,9 @@ def main() -> int:
 
     result: dict | None = None
     ai_powered = False
-    if api_key:
-        prompt = PROMPT_TEMPLATE.format(title=title, body=body or "(no description)")
-        result = call_gemini(api_key, model, prompt)
-        ai_powered = result is not None
-    else:
-        print("GEMINI_API_KEY not set; using keyword fallback", file=sys.stderr)
+    prompt = PROMPT_TEMPLATE.format(title=title, body=body or "(no description)")
+    result = call_github_models(token, model, prompt)
+    ai_powered = result is not None
 
     if result is None:
         result = keyword_fallback(title, body)

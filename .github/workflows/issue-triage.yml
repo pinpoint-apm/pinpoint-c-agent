@@ -4,10 +4,8 @@ name: Issue Triage Bot
 #
 # Setup: none required. The workflow uses the built-in GITHUB_TOKEN with the
 # `models: read` permission to call GitHub Models (https://github.com/marketplace/models).
-# Optional overrides (repo Variables):
-#   - GH_MODEL:        GitHub Models model id (default: openai/gpt-4o-mini)
-#   - GEMINI_API_KEY:  (repo Secret) optional Gemini fallback backend
-#   - GEMINI_MODEL:    (repo Variable) Gemini model, default gemini-2.5-flash
+# Optional override (repo Variable):
+#   - GH_MODEL:  GitHub Models model id (default: openai/gpt-4o-mini)
 #
 # Security notes (public repo):
 #   - Issue title/body are UNTRUSTED input. They are passed via env vars (never
@@ -48,8 +46,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_MODEL: ${{ vars.GH_MODEL || 'openai/gpt-4o-mini' }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
           REPO: ${{ github.repository }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
