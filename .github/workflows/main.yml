@@ -23,9 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: actions-setup-cmake
-        uses: jwlawson/actions-setup-cmake@v1.6
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.16.x"
+          cmake-version: "3.25.x"
       - name: Build agent
         run: |
           cd common
@@ -59,9 +59,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: actions-setup-cmake
-        uses: jwlawson/actions-setup-cmake@v1.6
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.16.x"
+          cmake-version: "3.25.x"
       - name: Build agent
         run: |
           sudo apt update || echo "update failed,but try to overlook it"
@@ -145,7 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: setup-php-sdk
-        uses: php/setup-php-sdk@v0.10
+        uses: php/setup-php-sdk@v0.12
         with:
           version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
