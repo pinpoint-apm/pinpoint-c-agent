@@ -131,7 +131,7 @@ jobs:
       - name: Build agent
         run: |
           sudo apt update || echo "update failed,but try to overlook it"
-          sudo apt install -y valgrind -y valgrind
+          sudo apt install -y valgrind
           cd common
           mkdir -p build
           cd build
@@ -140,7 +140,6 @@ jobs:
           valgrind --leak-check=full \
             --show-leak-kinds=all \
             --track-origins=yes \
-            --verbose \
             --log-file=valgrind-out.txt \
             ./bin/TestCommon
       - name: Archive docs
@@ -188,6 +187,7 @@ jobs:
       needs.changes.outputs.cpp == 'true' ||
       needs.changes.outputs.php == 'true'
     strategy:
+      fail-fast: false
       matrix:
         # PHP 7.x removed: no longer supported (Debian Buster EOL on Linux side).
         php-version: ["8.0", "8.1", "8.2", "8.3"]
@@ -213,6 +213,7 @@ jobs:
     runs-on: windows-2022
     needs: cpp-windows
     strategy:
+      fail-fast: false
       matrix:
         # PHP 7.x removed: no longer supported.
         php-versions: [ "8.0", "8.1", "8.2", "8.3"]
