@@ -1,3 +1,6 @@
+## v0.8.0 2026-08-19
+- support `sqlUid` https://github.com/pinpoint-apm/pinpoint-c-agent/pull/735
+
 ## v0.7.8 
 - fix `version_id` bug and upgrade to go.1.25
 

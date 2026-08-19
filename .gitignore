@@ -87,3 +87,5 @@ configure.bat
 configure.js
 .venv
 collector-agent/env.list
+.env
+AGENTS.md

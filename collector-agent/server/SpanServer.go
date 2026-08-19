@@ -20,7 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var Version = "v0.7.8"
+var Version = "v0.8.0"
 
 type SpanServer struct {
 	listener    net.Listener
