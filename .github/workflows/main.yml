@@ -90,7 +90,9 @@ jobs:
     needs: cpp
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        # PHP 7.x removed: Docker images are based on Debian Buster (EOL),
+        # apt repos return 404. Only support PHP 8.0+.
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -113,7 +115,8 @@ jobs:
     needs: cpp
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        # PHP 7.x removed: no longer supported (Debian Buster EOL on Linux side).
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
         ts: ["ts","nts"]
     env:
       SKIP_MACOS_ACTION: true        
@@ -124,7 +127,7 @@ jobs:
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: ${{ matrix.php-version }}
         env:
           phpts: ${{ matrix.ts }}
       - name: build pinpoint_php
@@ -137,7 +140,8 @@ jobs:
     needs: cpp-windows
     strategy:
       matrix:
-        php-versions: [ "7.4", "7.3", "7.2","7.1","8.0", "8.1", "8.2", "8.3"]
+        # PHP 7.x removed: no longer supported.
+        php-versions: [ "8.0", "8.1", "8.2", "8.3"]
         arch: [ "x64"]
         ts: [ "ts", "nts" ]
     env:
