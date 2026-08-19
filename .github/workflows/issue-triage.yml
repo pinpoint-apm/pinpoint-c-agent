@@ -1,0 +1,57 @@
+name: Issue Triage Bot
+
+# Auto-triage new/edited issues with GitHub Models (free, zero config).
+#
+# Setup: none required. The workflow uses the built-in GITHUB_TOKEN with the
+# `models: read` permission to call GitHub Models (https://github.com/marketplace/models).
+# Optional overrides (repo Variables):
+#   - GH_MODEL:        GitHub Models model id (default: openai/gpt-4o-mini)
+#   - GEMINI_API_KEY:  (repo Secret) optional Gemini fallback backend
+#   - GEMINI_MODEL:    (repo Variable) Gemini model, default gemini-2.5-flash
+#
+# Security notes (public repo):
+#   - Issue title/body are UNTRUSTED input. They are passed via env vars (never
+#     interpolated into shell), and the prompt treats them as data only.
+#   - permissions are minimal: issues:write + models:read. No checkout of
+#     untrusted content, no pull_request_target; secrets are not exposed to
+#     fork-triggered runs.
+#   - The bot comments at most once per issue to avoid spam loops.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+  models: read
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Skip issues opened by bots (e.g. dependabot) to save quota.
+    if: github.event.issue.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Triage issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_MODEL: ${{ vars.GH_MODEL || 'openai/gpt-4o-mini' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          ISSUE_ACTION: ${{ github.event.action }}
+        run: python .github/scripts/issue_triage.py
