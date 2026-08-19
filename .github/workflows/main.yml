@@ -2,6 +2,10 @@ name: CI
 
 on: 
   pull_request:
+    # Changes under testapps/ are local integration-test helpers and do not
+    # trigger CI. Only source changes should run the pipeline.
+    paths-ignore:
+      - 'testapps/**'
   workflow_dispatch:
   push:
     tags:
@@ -28,9 +32,6 @@ jobs:
       php: ${{ steps.filter.outputs.php }}
       python: ${{ steps.filter.outputs.python }}
       collector: ${{ steps.filter.outputs.collector }}
-      testapps: ${{ steps.filter.outputs.testapps }}
-      testapps-php: ${{ steps.filter.outputs['testapps-php'] }}
-      testapps-python: ${{ steps.filter.outputs['testapps-python'] }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -68,55 +69,12 @@ jobs:
               - 'plugins/PY/**'
             collector:
               - 'collector-agent/**'
-            # PHP integration test apps
-            testapps-php:
-              - 'testapps/PHP/**'
-              - 'testapps/SimplePHP/**'
-              - 'testapps/laravel/**'
-              - 'testapps/flarum/**'
-              - 'testapps/shopware/**'
-              - 'testapps/php_phpmyadmin/**'
-              - 'testapps/php_wordpress/**'
-              - 'testapps/thinkphp-php/**'
-              - 'testapps/cachethq/**'
-              - 'testapps/php_compatible.dockerfile'
-              - 'testapps/php_compatible_older.dockerfile'
-            # Python integration test apps
-            testapps-python:
-              - 'testapps/PY/**'
-              - 'testapps/django/**'
-              - 'testapps/fastapi/**'
-              - 'testapps/flask/**'
-              - 'testapps/grpc-py/**'
-              - 'testapps/python-plugins/**'
-              - 'testapps/django.dockerfile'
-              - 'testapps/flask.dockerfile'
-              - 'testapps/fastapi.dockerfile'
-              - 'testapps/grpc_py.dockerfile'
-              - 'testapps/grpc_py_client.dockerfile'
-            # Shared test infra / anything not matched above
-            testapps:
-              - 'testapps/compose.yaml'
-              - 'testapps/compose.override.local.yml'
-              - 'testapps/backend/**'
-              - 'testapps/test_db/**'
-              - 'testapps/db.sql'
-              - 'testapps/init.sql'
-              - 'testapps/load_sample_db.sh'
-              - 'testapps/java_call_app/**'
-              - 'testapps/httpbin.dockerfile'
-              - 'testapps/backend.dockerfile'
-              - 'testapps/Dockerfile.collector.local'
-              - 'testapps/Dockerfile.flask.local'
-              - 'testapps/.dockerignore'
-              - 'testapps/.env'
 
   cpp:
     needs: changes
     if: >-
       github.event_name != 'pull_request' ||
-      needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.cpp == 'true'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13]
@@ -142,8 +100,7 @@ jobs:
     needs: changes
     if: >-
       github.event_name != 'pull_request' ||
-      needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.cpp == 'true'
     runs-on: [windows-latest]
     steps:
       - uses: actions/checkout@v2
@@ -163,8 +120,7 @@ jobs:
     needs: [changes, cpp, cpp-windows]
     if: >-
       github.event_name != 'pull_request' ||
-      needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.cpp == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -201,9 +157,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request' ||
       needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.php == 'true' ||
-      needs.changes.outputs['testapps-php'] == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.php == 'true'
     strategy:
       matrix:
         php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
@@ -230,9 +184,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request' ||
       needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.php == 'true' ||
-      needs.changes.outputs['testapps-php'] == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.php == 'true'
     strategy:
       matrix:
         php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
@@ -260,9 +212,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request' ||
       needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.php == 'true' ||
-      needs.changes.outputs['testapps-php'] == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.php == 'true'
     env:
       SKIP_WINDOWS_ACTION: true
     strategy:
@@ -351,9 +301,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request' ||
       needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.php == 'true' ||
-      needs.changes.outputs['testapps-php'] == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.php == 'true'
     steps:
       - uses: actions/checkout@v2
       - name: Setup PHP without composer
@@ -387,9 +335,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request' ||
       needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.python == 'true' ||
-      needs.changes.outputs['testapps-python'] == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.python == 'true'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13]
@@ -411,9 +357,7 @@ jobs:
     if: >-
       github.event_name != 'pull_request' ||
       needs.changes.outputs.cpp == 'true' ||
-      needs.changes.outputs.python == 'true' ||
-      needs.changes.outputs['testapps-python'] == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -439,8 +383,7 @@ jobs:
     needs: changes
     if: >-
       github.event_name != 'pull_request' ||
-      needs.changes.outputs.collector == 'true' ||
-      needs.changes.outputs.testapps == 'true'
+      needs.changes.outputs.collector == 'true'
     strategy:
       matrix:
         go-version: [1.25.x]
