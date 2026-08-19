@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -159,9 +158,9 @@ func (spanSender *SpanSender) getSqlUidMetaApiId(name string) []byte {
 	if ok {
 		return id.([]byte)
 	} else {
-		h1, h2 := murmur3.Sum128([]byte(name))
-		// use %x to format hash
-		id := []byte(fmt.Sprintf("%x%x", h1, h2))
+		hash := murmur3.New128()
+		_, _ = hash.Write([]byte(name))
+		id := hash.Sum(nil)
 		spanSender.idMap[name] = id
 		spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
 		return id
