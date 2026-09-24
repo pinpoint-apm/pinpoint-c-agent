@@ -315,5 +315,7 @@ jobs:
           export PATH="$PATH:$(go env GOPATH)/bin"
           cd collector-agent
           # Regenerate the protobuf Go code (not committed to the repo) before testing.
+          # The output dir is absent in a fresh checkout, so create it first.
+          mkdir -p pinpoint-grpc-idl-go/proto/v1
           protoc --go_out=pinpoint-grpc-idl-go/proto/ --go-grpc_out=pinpoint-grpc-idl-go/proto --proto_path=pinpoint-grpc-idl/proto/ --go-grpc_opt=paths=source_relative v1/Annotation.proto v1/Cmd.proto v1/CustomMetric.proto v1/Service.proto v1/Span.proto v1/Stat.proto v1/ThreadDump.proto
           go mod tidy && go test ./... -v
