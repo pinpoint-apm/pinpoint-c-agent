@@ -8,9 +8,7 @@ on:
       - "v*.*.*"
 
 env:
-  # Sanitize the branch name (replace '/' with '-') so the artifact/package name
-  # stays a valid single path segment even for branches like fix/foo.
-  MODULE_PAK: pinpoint_php-${{ replace(github.head_ref || github.ref_name, '/', '-') }}
+  MODULE_PAK: pinpoint_php-${{ github.head_ref || github.ref_name }}
   
 jobs:
   cpp:
@@ -167,7 +165,10 @@ jobs:
         run: |
           # from https://github.com/php/setup-php-sdk/issues/7
           nmake test TESTS="--show-diff tests_win32"
-          echo "pinpoint_php_win32_pack_name=${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.ts }}-${{steps.setup-php-sdk.outputs.vs}}-${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_ENV -Append 
+          # Sanitize the branch name (replace '/' with '-') so the artifact name
+          # stays a single valid path segment even for branches like fix/foo.
+          $pak = "${{ env.MODULE_PAK }}" -replace '/', '-'
+          echo "pinpoint_php_win32_pack_name=$pak-${{ matrix.php-versions }}-${{ matrix.ts }}-${{steps.setup-php-sdk.outputs.vs}}-${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_ENV -Append 
 
       - name: package
         run: |
