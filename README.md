@@ -19,6 +19,11 @@
 
 # Pinpoint `C` Agent
 
+> ⚠️ **SECURITY NOTICE**: collector-agent **v0.7.8 (and earlier)** contains a
+> remote denial-of-service vulnerability — an unauthenticated attacker can crash
+> the collector-agent with a single TCP packet, affecting all traced
+> applications. **Please upgrade the collector-agent to [v0.7.9](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.7.9) as soon as possible.**
+
 > What's `C`
 
 1. Use `C/Cpp` common API

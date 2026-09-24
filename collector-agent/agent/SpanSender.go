@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,6 +17,13 @@ import (
 )
 
 type ApiIdMap map[string]interface{}
+
+// sqlUidKeyPrefix namespaces SQL-UID cache entries in the shared idMap so they
+// can never collide with API/string metadata keys (which store int32). Without
+// this, an attacker-controlled name string equal to a SQL string would make the
+// shared map hold one type while the other accessor asserts the other, panicking
+// with an interface-conversion error.
+const sqlUidKeyPrefix = "\x00sqluid:"
 
 var unique_id_count = int32(1)
 
@@ -129,14 +135,15 @@ func (spanSender *SpanSender) getMetaApiId(name string, metaType common.Meta_Typ
 }
 
 func (spanSender *SpanSender) getSqlUidMetaApiId(name string) []byte {
-	id, ok := spanSender.idMap[name]
+	key := sqlUidKeyPrefix + name
+	id, ok := spanSender.idMap[key]
 	if ok {
 		return id.([]byte)
 	} else {
-		h1, h2 := murmur3.Sum128([]byte(name))
-		// use %x to format hash
-		id := []byte(fmt.Sprintf("%x%x", h1, h2))
-		spanSender.idMap[name] = id
+		hash := murmur3.New128()
+		_, _ = hash.Write([]byte(name))
+		id := hash.Sum(nil)
+		spanSender.idMap[key] = id
 		spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
 		return id
 	}
@@ -183,17 +190,19 @@ func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) *v1.PSpan
 
 	for _, ann := range spanEv.Annotations {
 		iColon := strings.Index(ann, ":")
-		if value, err := strconv.ParseInt(ann[0:iColon], 10, 32); err == nil {
-			stringValue := v1.PAnnotationValue_StringValue{StringValue: ann[iColon+1:]}
+		if iColon > 0 {
+			if value, err := strconv.ParseInt(ann[0:iColon], 10, 32); err == nil {
+				stringValue := v1.PAnnotationValue_StringValue{StringValue: ann[iColon+1:]}
 
-			v := v1.PAnnotationValue{
-				Field: &stringValue,
+				v := v1.PAnnotationValue{
+					Field: &stringValue,
+				}
+				ann := v1.PAnnotation{
+					Key:   int32(value),
+					Value: &v,
+				}
+				pbSpanEv.Annotation = append(pbSpanEv.Annotation, &ann)
 			}
-			ann := v1.PAnnotation{
-				Key:   int32(value),
-				Value: &v,
-			}
-			pbSpanEv.Annotation = append(pbSpanEv.Annotation, &ann)
 		}
 	}
 
@@ -372,6 +381,9 @@ func (spanSender *SpanSender) makeSpanOrSpanChunk(span *TSpan) (*v1.PSpan, *v1.P
 
 	var spanEv []*v1.PSpanEvent
 	for _, call := range span.Follows {
+		if call == nil {
+			continue
+		}
 		spanEv = append(spanEv, spanSender.makeSpanEvent(call))
 	}
 
@@ -468,14 +480,14 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Me
 
 	case common.META_Sql_uid_api:
 		{
-			id := spanSender.idMap[name].([]byte)
+			id := spanSender.idMap[sqlUidKeyPrefix+name].([]byte)
 			sqlUidMeta := v1.PSqlUidMetaData{
 				SqlUid: id,
 				Sql:    name,
 			}
 			if _, err = client.RequestSqlUidMetaData(ctx, &sqlUidMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				delete(spanSender.idMap, name)
+				delete(spanSender.idMap, sqlUidKeyPrefix+name)
 			}
 		}
 	case common.META_INVOCATION_API:
