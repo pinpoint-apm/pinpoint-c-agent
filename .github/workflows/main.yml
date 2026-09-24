@@ -128,8 +128,8 @@ jobs:
       - name: make test      
         run: make test TESTS="--show-diff tests_macos"
 
-  PHP-Win-2019:
-    runs-on: windows-2019
+  PHP-Win-2022:
+    runs-on: windows-2022
     needs: cpp-windows
     strategy:
       matrix:
@@ -141,7 +141,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: setup-php-sdk
-        uses: php/setup-php-sdk@v0.10
+        uses: php/setup-php-sdk@v0.12
         with:
           version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
@@ -195,7 +195,7 @@ jobs:
           if-no-files-found: error
 
   PHP-Release-Win32-Package:
-    needs: [ PHP-Win-2019, pack_php_module]
+    needs: [ PHP-Win-2022, pack_php_module]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
