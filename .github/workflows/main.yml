@@ -86,7 +86,7 @@ jobs:
     needs: cpp
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -109,7 +109,7 @@ jobs:
     needs: cpp
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        php-version: ["8.0", "8.1", "8.2", "8.3"]
         ts: ["ts","nts"]
     env:
       SKIP_MACOS_ACTION: true        
@@ -133,7 +133,7 @@ jobs:
     needs: cpp-windows
     strategy:
       matrix:
-        php-versions: [ "7.4", "7.3", "7.2","7.1","8.0", "8.1", "8.2", "8.3"]
+        php-versions: [ "8.0", "8.1", "8.2", "8.3"]
         arch: [ "x64"]
         ts: [ "ts", "nts" ]
     env:
