@@ -8,7 +8,9 @@ on:
       - "v*.*.*"
 
 env:
-  MODULE_PAK: pinpoint_php-${{ github.head_ref || github.ref_name }}
+  # Sanitize the branch name (replace '/' with '-') so the artifact/package name
+  # stays a valid single path segment even for branches like fix/foo.
+  MODULE_PAK: pinpoint_php-${{ replace(github.head_ref || github.ref_name, '/', '-') }}
   
 jobs:
   cpp:
