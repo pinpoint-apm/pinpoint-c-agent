@@ -6,3 +6,5 @@
 CollectorAgent
 collector-agent
 pinpoint-grpc-idl
+# Generated protobuf Go code (regenerated at build time via `make protoc`)
+pinpoint-grpc-idl-go/proto/v1/*.pb.go
