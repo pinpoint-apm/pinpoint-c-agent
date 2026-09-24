@@ -45,7 +45,7 @@ jobs:
       - name: Build agent
         run: |
           cd common
-          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 17 2022" -T host=x86 -A win32
+          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 18 2026" -T host=x86 -A win32
           cmake --build build --target ALL_BUILD --config debug --
           ./build/bin/Debug/TestCommon.exe
 
