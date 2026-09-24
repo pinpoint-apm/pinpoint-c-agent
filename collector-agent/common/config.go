@@ -63,7 +63,9 @@ func (c *Config) ParseServerAddress() (socket_type string, address string) {
 		// /tmp/pinpoint.sock
 		// a very loose checking
 		// assume a file
-		return "unix", address
+		// strip the "sock" prefix to get the real unix socket file path,
+		// e.g. "sock/tmp/pinpoint.sock" -> "/tmp/pinpoint.sock"
+		return "unix", strings.TrimPrefix(raw_address, "sock")
 	} else {
 		// like 0.0.0.0:5689
 		return "tcp", strings.Replace(raw_address, "@", ":", 1)
@@ -100,7 +102,7 @@ func CreateDefaultConfig() *Config {
 		GrpcConTextTimeOut:        5 * time.Second,
 		AgentRetireTime:           1 * time.Hour,
 		StartTime:                 time.Now().Unix(),
-		Pid:                       int32(os.Getgid()),
+		Pid:                       int32(os.Getpid()),
 		HostName:                  getHostName(),
 		HostIp:                    lookupIpFromName(),
 		Log:                       logrus.New(),

@@ -266,7 +266,7 @@ func (a *GrpcAgent) CollectPStateMessage() *v1.PStatMessage {
 	}
 	var activeTraceCount []int32
 	for _, value := range a.reqCounter.GetReqTimeProfiler() {
-		activeTraceCount = append(activeTraceCount, int32(value))
+		activeTraceCount = append(activeTraceCount, value)
 	}
 
 	agentStat := v1.PAgentStat{
@@ -425,7 +425,7 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 		}
 
 		for _, value := range agent.reqCounter.GetReqTimeProfiler() {
-			res.ActiveThreadCount = append(res.ActiveThreadCount, int32(value))
+			res.ActiveThreadCount = append(res.ActiveThreadCount, value)
 		}
 
 		res.TimeStamp = time.Now().Unix()

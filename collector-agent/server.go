@@ -21,7 +21,7 @@ var (
 	bind_address    = flag.String("host", "", "server bind host and port information; eg: -host=0.0.0.0@10000")
 	in_container    = flag.Bool("container", false, "collector-agent run in a pod or PM; eg: -container=true")
 	log_dir         = flag.String("LogDir", os.TempDir(), "Set logging output directory; eg: -LogDir=/tmp")
-	log_stdout      = flag.Bool("LogStdout", true, "enable net/http/pprof")
+	log_stdout      = flag.Bool("LogStdout", true, "enable logging to stdout")
 	log_level       = flag.String("LogLevel", "debug", "Set logging output level(debug/info/warn/error); eg: -LogLevel=info")
 	server_recv_buf = flag.Int("RecvBufSize", 4096*100, "Set recv buf; eg: -RecvBufSize=409600")
 	enable_profile  = flag.Bool("EnableProfile", false, "enable net/http/pprof")
@@ -93,9 +93,9 @@ func main() {
 	}
 
 	if *enable_profile {
+		runtime.SetBlockProfileRate(1)
 		go func() {
 			log.Println(http.ListenAndServe("0.0.0.0:8081", nil))
-			runtime.SetBlockProfileRate(1)
 		}()
 	}
 
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	config.Log.Infof("Config:{%v}", config)
-	server := server.CreateServer(parseConfig())
+	server := server.CreateServer(config)
 
 	if _, err := server.Run(); err != nil {
 		config.Log.Warn("SpanServer is exit")

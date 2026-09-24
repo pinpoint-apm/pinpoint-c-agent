@@ -8,7 +8,7 @@ import (
 )
 
 type RequestCounter struct {
-	counter                                    [4]uint16
+	counter                                    [4]int32
 	reqProfileLastTime, reqTop1LastTime, CTime int64
 	max, total, times                          uint32
 	config                                     *common.Config
@@ -74,12 +74,12 @@ func (reqProf *RequestCounter) GetMaxAvg() (max, avg uint32) {
 	}
 }
 
-func (reqProf *RequestCounter) GetReqTimeProfiler() [4]uint16 {
+func (reqProf *RequestCounter) GetReqTimeProfiler() [4]int32 {
 	now := time.Now().Unix()
 	if now < reqProf.reqProfileLastTime+2 {
 		return reqProf.counter
 	} else {
-		return [4]uint16{0, 0, 0, 0}
+		return [4]int32{0, 0, 0, 0}
 	}
 }
 

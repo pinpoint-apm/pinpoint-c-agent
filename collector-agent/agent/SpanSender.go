@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
@@ -25,11 +26,15 @@ type ApiIdMap map[string]interface{}
 // with an interface-conversion error.
 const sqlUidKeyPrefix = "\x00sqluid:"
 
+// unique_id_count is a process-wide counter shared by all SpanSender instances.
+// It must be atomic because multiple agents (each with its own SpanSender and
+// its own idMapMutex) increment it concurrently from different goroutines.
 var unique_id_count = int32(1)
 
 type SpanSender struct {
 	sequenceId int32
 	idMap      ApiIdMap
+	idMapMutex sync.Mutex
 	Md         metadata.MD
 	// exitCh              chan bool
 	ctx                 context.Context
@@ -49,7 +54,7 @@ func createSpanSender(base metadata.MD, ctx context.Context, agent_wg *sync.Wait
 		log:                 entry,
 		config:              config,
 		spanMessageBufferCh: make(chan *v1.PSpanMessage, config.AgentChannelSize),
-		sendStreamRespCh:    make(chan int32, 1),
+		sendStreamRespCh:    make(chan int32, config.SpanStreamParallelismSize),
 	}
 	sender.StartServe()
 	return sender
@@ -80,8 +85,13 @@ func (s *SpanSender) sendSpan() {
 
 			if err := stream.Send(span); err != nil {
 				s.log.Warnf("send span failed with:%s", err)
-				// response the stream is not available
-				s.sendStreamRespCh <- 500
+				// response the stream is not available; use a non-blocking send
+				// so a full resp channel never blocks this goroutine (which
+				// would otherwise hang Stop() via tasksGroup.Wait()).
+				select {
+				case s.sendStreamRespCh <- 500:
+				default:
+				}
 				return
 			}
 		case <-s.ctx.Done():
@@ -115,7 +125,9 @@ func (spanSender *SpanSender) StartServe() {
 
 func (spanSender *SpanSender) cleanAllMetaData() {
 	spanSender.log.Info("Clean all metaData")
+	spanSender.idMapMutex.Lock()
 	spanSender.idMap = make(ApiIdMap)
+	spanSender.idMapMutex.Unlock()
 }
 
 func (spanSender *SpanSender) makeSpanEvent(spanEv *TSpanEvent) *v1.PSpanEvent {
@@ -123,30 +135,34 @@ func (spanSender *SpanSender) makeSpanEvent(spanEv *TSpanEvent) *v1.PSpanEvent {
 }
 
 func (spanSender *SpanSender) getMetaApiId(name string, metaType common.Meta_Type) int32 {
+	spanSender.idMapMutex.Lock()
 	id, ok := spanSender.idMap[name]
 	if ok {
+		spanSender.idMapMutex.Unlock()
 		return id.(int32)
-	} else {
-		unique_id_count += 1
-		spanSender.idMap[name] = unique_id_count
-		spanSender.SenderGrpcMetaData(name, metaType)
-		return unique_id_count
 	}
+	newId := atomic.AddInt32(&unique_id_count, 1)
+	spanSender.idMap[name] = newId
+	spanSender.idMapMutex.Unlock()
+	spanSender.SenderGrpcMetaData(name, metaType)
+	return newId
 }
 
 func (spanSender *SpanSender) getSqlUidMetaApiId(name string) []byte {
 	key := sqlUidKeyPrefix + name
+	spanSender.idMapMutex.Lock()
 	id, ok := spanSender.idMap[key]
 	if ok {
+		spanSender.idMapMutex.Unlock()
 		return id.([]byte)
-	} else {
-		hash := murmur3.New128()
-		_, _ = hash.Write([]byte(name))
-		id := hash.Sum(nil)
-		spanSender.idMap[key] = id
-		spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
-		return id
 	}
+	hash := murmur3.New128()
+	_, _ = hash.Write([]byte(name))
+	sqlUid := hash.Sum(nil)
+	spanSender.idMap[key] = sqlUid
+	spanSender.idMapMutex.Unlock()
+	spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
+	return sqlUid
 }
 
 func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) *v1.PSpanEvent {
@@ -445,28 +461,38 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Me
 	switch metaType {
 	case common.META_Default_api:
 		{
+			spanSender.idMapMutex.Lock()
 			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Unlock()
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_DEFAULT)}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.idMapMutex.Lock()
 				delete(spanSender.idMap, name)
+				spanSender.idMapMutex.Unlock()
 			}
 		}
 
 	case common.META_Web_request_api:
 		{
+			spanSender.idMapMutex.Lock()
 			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Unlock()
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_WEB_REQUEST)}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.idMapMutex.Lock()
 				delete(spanSender.idMap, name)
+				spanSender.idMapMutex.Unlock()
 			}
 		}
 	case common.META_String_api:
 		{
+			spanSender.idMapMutex.Lock()
 			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Unlock()
 			metaMeta := v1.PStringMetaData{
 				StringId:    id,
 				StringValue: name,
@@ -474,29 +500,39 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Me
 
 			if _, err = client.RequestStringMetaData(ctx, &metaMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.idMapMutex.Lock()
 				delete(spanSender.idMap, name)
+				spanSender.idMapMutex.Unlock()
 			}
 		}
 
 	case common.META_Sql_uid_api:
 		{
+			spanSender.idMapMutex.Lock()
 			id := spanSender.idMap[sqlUidKeyPrefix+name].([]byte)
+			spanSender.idMapMutex.Unlock()
 			sqlUidMeta := v1.PSqlUidMetaData{
 				SqlUid: id,
 				Sql:    name,
 			}
 			if _, err = client.RequestSqlUidMetaData(ctx, &sqlUidMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.idMapMutex.Lock()
 				delete(spanSender.idMap, sqlUidKeyPrefix+name)
+				spanSender.idMapMutex.Unlock()
 			}
 		}
 	case common.META_INVOCATION_API:
 		{
+			spanSender.idMapMutex.Lock()
 			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Unlock()
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_INVOCATION)}
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
+				spanSender.idMapMutex.Lock()
 				delete(spanSender.idMap, name)
+				spanSender.idMapMutex.Unlock()
 			}
 		}
 	default:

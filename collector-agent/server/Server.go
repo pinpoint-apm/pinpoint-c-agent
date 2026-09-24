@@ -33,7 +33,7 @@ type Server struct {
 	agentRouter     agent.I_PacketRouter
 	createTime      int64
 	uniqueIDCounter int64
-	lastTime        int64
+	lastTime        atomic.Int64
 	config          *common.Config
 	log             *logrus.Logger
 }
@@ -100,7 +100,11 @@ func (server *Server) genUniqueId() *ServerUniqueId {
 }
 
 func (s *Server) parsePacket(con net.Conn, size, packetType uint32, body []byte) (err error) {
-	s.log.Debugf("size:%d  packetType:%d body:%s ", size, packetType, string(body[:]))
+	if len(body) > 256 {
+		s.log.Tracef("size:%d  packetType:%d body:%s ...", size, packetType, string(body[:256]))
+	} else {
+		s.log.Tracef("size:%d  packetType:%d body:%s ", size, packetType, string(body))
+	}
 
 	//todo parse packetType
 	// data := make([]byte, size)
@@ -115,7 +119,8 @@ func (s *Server) parsePacket(con net.Conn, size, packetType uint32, body []byte)
 			return err
 		}
 	case 2: //REQ_UNIQUE_ID
-		uniqueBody, err := json.Marshal(s.genUniqueId())
+		var uniqueBody []byte
+		uniqueBody, err = json.Marshal(s.genUniqueId())
 		if err == nil {
 			err = s.respToClient(con, 2, uniqueBody)
 		}
@@ -201,6 +206,9 @@ func (s *Server) respToClient(con net.Conn, msgType uint32, msgBody []byte) erro
 		if err != nil {
 			return fmt.Errorf("client:%s channel error:%s", con.RemoteAddr(), err)
 		}
+		if size == 0 {
+			return fmt.Errorf("client:%s channel error: zero-byte write", con.RemoteAddr())
+		}
 		offset += size
 	}
 
@@ -215,12 +223,12 @@ func (server *Server) genHello() *ServerInfo {
 	}
 	for {
 		now_in_ms := time.Now().UnixMilli()
-		if now_in_ms == server.lastTime {
+		if now_in_ms == server.lastTime.Load() {
 			// force sleep 1ms,avoiding conflict
 			time.Sleep(1 * time.Microsecond)
 			continue
 		}
-		server.lastTime = now_in_ms
+		server.lastTime.Store(now_in_ms)
 		info.StartTime = strconv.FormatInt(now_in_ms, 10)
 		break
 	}
@@ -273,7 +281,7 @@ func (s *Server) handleClient(con net.Conn) {
 		token, needs := s.matchFullPacket(clientInBuf, int32(packetOffset), int32(inOffset-packetOffset), &packetLen, &packetType, &body)
 		if token == 0 {
 			if needs == 0 {
-				s.log.Error("needs cannot be 0")
+				s.log.Errorf("oversized packet rejected: bodyLen exceeds RecvBufSize(%d). client:%s", s.config.User.RecvBufSize, con.RemoteAddr())
 				break
 			}
 

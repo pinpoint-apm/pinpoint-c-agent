@@ -199,20 +199,24 @@ func (span *TSpan) GetAppName() string {
 
 func (manager *AgentRouter) Clean() {
 	ctime := time.Now().Unix()
-	manager.rwMutex.RLock()
+
+	// Collect expired agents under the lock, then Stop() them outside the lock.
+	// Stop() blocks on tasksGroup.Wait(), so it must not hold the RWMutex —
+	// otherwise it would block all concurrent DispatchPacket readers/writers.
+	var expired []*GrpcAgent
+	manager.rwMutex.Lock()
 	for id, agent := range manager.AgentMap {
 		if agent.GetLastBusyTime()+int64(manager.Config.AgentReTryTimeout) < ctime {
 			manager.Log.Warnf("agent:%s expired after:%d sec. busyTime:%d", agent, manager.Config.AgentReTryTimeout, agent.GetLastBusyTime())
-			manager.rwMutex.RUnlock()
-			manager.rwMutex.Lock()
 			delete(manager.AgentMap, id)
-			manager.rwMutex.Unlock()
-			manager.rwMutex.RLock()
-			//shrink rwMutex scope
-			agent.Stop()
+			expired = append(expired, agent)
 		}
 	}
-	manager.rwMutex.RUnlock()
+	manager.rwMutex.Unlock()
+
+	for _, agent := range expired {
+		agent.Stop()
+	}
 }
 
 func (manager *AgentRouter) GetAgentInfo(span *TSpan) (appid, name string, appServerType int32, startTime string, err error) {
