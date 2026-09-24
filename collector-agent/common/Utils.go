@@ -31,6 +31,9 @@ func ParseStringField(v string) map[string]string {
 
 func ParseDotFormatToTime(v string) (int64, error) {
 	ar := strings.Split(v, ".")
+	if len(ar) < 2 {
+		return 0, fmt.Errorf("input:%s is invalid", v)
+	}
 	if sec, err := strconv.ParseInt(ar[0], 10, 32); err == nil {
 		if ms, err := strconv.ParseInt(ar[1], 10, 32); err == nil {
 			return sec*1000 + ms, nil

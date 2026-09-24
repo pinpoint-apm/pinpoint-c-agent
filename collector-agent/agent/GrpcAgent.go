@@ -256,7 +256,7 @@ func (a *GrpcAgent) CollectPStateMessage() *v1.PStatMessage {
 	// cpu.Percent calculate cpu in config.StatInterval
 	totalPer, err := cpu.PercentWithContext(a.ctx, a.config.StatInterval*time.Second, false)
 	totalCpuUsage := 0.0
-	if err == nil {
+	if err == nil && len(totalPer) > 0 {
 		totalCpuUsage = totalPer[0] / 100
 	}
 
@@ -535,11 +535,20 @@ func (agent *GrpcAgent) handleTSpanFromBuf() {
 	for {
 		select {
 		case span := <-agent.tSpanBufCh:
-			for _, filter := range agent.spanFilters {
-				if !filter.Interceptor(span) {
-					break
+			func() {
+				// Recover from a panic in any filter so a single malformed span
+				// (e.g. attacker-controlled input) cannot crash the whole process.
+				defer func() {
+					if r := recover(); r != nil {
+						agent.log.Warnf("handleTSpanFromBuf recovered from panic:%v", r)
+					}
+				}()
+				for _, filter := range agent.spanFilters {
+					if !filter.Interceptor(span) {
+						break
+					}
 				}
-			}
+			}()
 		case <-agent.ctx.Done():
 			agent.log.Warn("consumeJsonSpan task done, as agent exit")
 			return
