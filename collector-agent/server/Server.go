@@ -36,6 +36,20 @@ type Server struct {
 	lastTime        atomic.Int64
 	config          *common.Config
 	log             *logrus.Logger
+
+	// wg tracks client handler goroutines so shutdown can wait for them.
+	wg sync.WaitGroup
+	// connMu guards conns during shutdown.
+	connMu sync.Mutex
+	// conns holds the currently served client connections so they can be
+	// closed on shutdown (unblocking their reads).
+	conns map[net.Conn]struct{}
+	// listenerMu guards listener, which is written by startListen and read by
+	// shutdown.
+	listenerMu sync.Mutex
+	// shuttingDown is set once a termination signal is received; the accept
+	// loop then stops admitting new connections.
+	shuttingDown atomic.Bool
 }
 
 func CreateServer(config *common.Config) *Server {
@@ -45,6 +59,7 @@ func CreateServer(config *common.Config) *Server {
 		agentRouter:     agent.CreateAgentRouter(config),
 		createTime:      time.Now().Unix(),
 		uniqueIDCounter: 0,
+		conns:           make(map[net.Conn]struct{}),
 	}
 }
 
@@ -63,12 +78,9 @@ const CLIENT_HEADER_SIZE = 8
 
 func (s *Server) Run() (code int, err error) {
 
-	var wg sync.WaitGroup
-	defer wg.Wait()
-	wg.Add(1)
-
+	s.wg.Add(1)
 	go func() {
-		defer wg.Done()
+		defer s.wg.Done()
 		s.startListen()
 	}()
 
@@ -84,13 +96,49 @@ func (s *Server) Run() (code int, err error) {
 		select {
 		case sig := <-sig:
 			s.log.Warnf("catch signal %s", sig)
-			s.log.Warn("Stopping listener ...")
-			s.listener.Close()
+			s.shutdown()
 			return 0, fmt.Errorf("SpanServer exit with signal %s", sig)
 		case <-time.After(s.config.AgentRetireTime):
 			s.agentRouter.Clean()
 		}
 	}
+}
+
+// shutdown performs an orderly stop: it stops admitting new connections,
+// closes the listener and all in-flight client connections (unblocking their
+// reads), waits a bounded time for handlers to drain, then stops the router
+// agents so their queues and goroutines are released.
+func (s *Server) shutdown() {
+	s.log.Warn("Stopping listener ...")
+
+	// 1. Stop accepting new connections and close the listener.
+	s.shuttingDown.Store(true)
+	s.closeListener()
+
+	// 2. Close all in-flight client connections so blocked reads return.
+	s.connMu.Lock()
+	for conn := range s.conns {
+		conn.Close()
+	}
+	s.connMu.Unlock()
+
+	// 3. Wait (bounded) for client handlers to finish.
+	done := make(chan struct{})
+	go func() {
+		s.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		s.log.Warn("all client connections drained")
+	case <-time.After(s.config.SpanTimeWait):
+		s.log.Warnf("shutdown timed out after %v waiting for client connections", s.config.SpanTimeWait)
+	}
+
+	// 4. Stop all router agents so their queues/goroutines are released.
+	s.agentRouter.Stop()
+	s.log.Warn("collector-agent shutdown complete")
 }
 
 func (server *Server) genUniqueId() *ServerUniqueId {
@@ -134,8 +182,6 @@ func (s *Server) parsePacket(con net.Conn, size, packetType uint32, body []byte)
 }
 
 func (s *Server) startListen() {
-	var wg sync.WaitGroup
-
 	socket_type, address := s.config.ParseServerAddress()
 	s.log.Debugf("bind server on %v:%s", socket_type, address)
 	listener, err := net.Listen(socket_type, address)
@@ -144,21 +190,90 @@ func (s *Server) startListen() {
 		panic(err)
 	}
 
-	s.listener = listener
+	s.setListener(listener)
+
+	// connSem caps the number of concurrently served connections. Each
+	// connection holds a RecvBufSize buffer plus a goroutine, so without a
+	// limit an unbounded accept loop can exhaust memory/FDs. A slot is taken
+	// after accept and released when handleClient returns; when full, the new
+	// connection is rejected immediately instead of blocking the accept loop
+	// (which would also stall shutdown).
+	maxConns := s.config.User.MaxConnections
+	if maxConns <= 0 {
+		maxConns = common.DefaultMaxConnections
+	}
+	connSem := make(chan struct{}, maxConns)
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			s.log.Errorf("accepter failed with %s", err.Error())
+			if s.shuttingDown.Load() {
+				s.log.Warn("listener closed, stop accepting")
+			} else {
+				s.log.Errorf("accepter failed with %s", err.Error())
+			}
 			break
 		}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			s.handleClient(conn)
-		}()
+
+		// Reject new connections once shutdown has started.
+		if s.shuttingDown.Load() {
+			conn.Close()
+			continue
+		}
+
+		select {
+		case connSem <- struct{}{}:
+			s.trackConn(conn)
+			s.wg.Add(1)
+			go func() {
+				defer s.wg.Done()
+				defer func() { <-connSem }()
+				defer s.untrackConn(conn)
+				s.handleClient(conn)
+			}()
+		default:
+			s.log.Warnf("connection limit reached(%d), rejecting client:%s", maxConns, conn.RemoteAddr())
+			conn.Close()
+		}
 	}
 
+}
+
+// setListener stores the listener under lock.
+func (s *Server) setListener(l net.Listener) {
+	s.listenerMu.Lock()
+	s.listener = l
+	s.listenerMu.Unlock()
+}
+
+// closeListener closes the listener (if any) under lock.
+func (s *Server) closeListener() {
+	s.listenerMu.Lock()
+	if s.listener != nil {
+		s.listener.Close()
+	}
+	s.listenerMu.Unlock()
+}
+
+// getListener returns the current listener under lock.
+func (s *Server) getListener() net.Listener {
+	s.listenerMu.Lock()
+	defer s.listenerMu.Unlock()
+	return s.listener
+}
+
+// trackConn registers a client connection so shutdown can close it.
+func (s *Server) trackConn(conn net.Conn) {
+	s.connMu.Lock()
+	s.conns[conn] = struct{}{}
+	s.connMu.Unlock()
+}
+
+// untrackConn removes a client connection from the tracking set.
+func (s *Server) untrackConn(conn net.Conn) {
+	s.connMu.Lock()
+	delete(s.conns, conn)
+	s.connMu.Unlock()
 }
 
 func ParseHeader(buffer []byte) (packetLen, packetType uint32) {

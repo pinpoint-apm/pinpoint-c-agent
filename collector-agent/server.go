@@ -24,21 +24,23 @@ var (
 	log_stdout      = flag.Bool("LogStdout", true, "enable logging to stdout")
 	log_level       = flag.String("LogLevel", "debug", "Set logging output level(debug/info/warn/error); eg: -LogLevel=info")
 	server_recv_buf = flag.Int("RecvBufSize", 4096*100, "Set recv buf; eg: -RecvBufSize=409600")
+	max_connections = flag.Int("MaxConnections", common.DefaultMaxConnections, "max concurrent client connections; eg: -MaxConnections=1000")
 	enable_profile  = flag.Bool("EnableProfile", false, "enable net/http/pprof")
 	show_version    = flag.Bool("v", false, "show current version and exit")
 )
 
 func parseConfig() *common.Config {
 	setting := &common.UserSetting{
-		RecvBufSize:  *server_recv_buf,
-		BindAddress:  *bind_address,
-		SpanAddress:  *span_address,
-		AgentAddress: *agent_address,
-		StatAddress:  *stat_address,
-		Container:    *in_container,
-		LoggerLevel:  *log_level,
-		LogStdout:    *log_stdout,
-		LoggerDir:    *log_dir,
+		RecvBufSize:    *server_recv_buf,
+		BindAddress:    *bind_address,
+		SpanAddress:    *span_address,
+		AgentAddress:   *agent_address,
+		StatAddress:    *stat_address,
+		Container:      *in_container,
+		LoggerLevel:    *log_level,
+		LogStdout:      *log_stdout,
+		LoggerDir:      *log_dir,
+		MaxConnections: *max_connections,
 	}
 	if ip, ok := os.LookupEnv("PP_COLLECTOR_AGENT_SPAN_IP"); ok {
 		if port, ok := os.LookupEnv("PP_COLLECTOR_AGENT_SPAN_PORT"); ok {
@@ -74,6 +76,12 @@ func parseConfig() *common.Config {
 
 	if v, ok := os.LookupEnv("PP_ADDRESS"); ok {
 		setting.BindAddress = v
+	}
+
+	if v, ok := os.LookupEnv("PP_MAX_CONNECTIONS"); ok {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			setting.MaxConnections = n
+		}
 	}
 
 	config := common.CreateDefaultConfig()

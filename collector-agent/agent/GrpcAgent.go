@@ -82,7 +82,7 @@ func (agent *GrpcAgent) SendSpan(span *TSpan) {
 }
 
 func (agent *GrpcAgent) GetLastBusyTime() int64 {
-	return agent.reqCounter.CTime
+	return agent.reqCounter.GetLastBusyTime()
 }
 
 func (agent *GrpcAgent) Stop() {
@@ -253,8 +253,10 @@ func (a *GrpcAgent) CollectPStateMessage() *v1.PStatMessage {
 		JvmGcOldTime:         0,
 		JvmGcDetailed:        &v1.PJvmGcDetailed{},
 	}
-	// cpu.Percent calculate cpu in config.StatInterval
-	totalPer, err := cpu.PercentWithContext(a.ctx, a.config.StatInterval*time.Second, false)
+	// cpu.Percent samples over config.StatInterval, which is already a
+	// time.Duration. Multiplying by time.Second again would make the interval
+	// ~158 years and block this call forever, stopping regular AgentStat.
+	totalPer, err := cpu.PercentWithContext(a.ctx, a.config.StatInterval, false)
 	totalCpuUsage := 0.0
 	if err == nil && len(totalPer) > 0 {
 		totalCpuUsage = totalPer[0] / 100
@@ -301,36 +303,40 @@ func (a *GrpcAgent) CollectPStateMessage() *v1.PStatMessage {
 	return &sateMessage
 }
 
-func (a *GrpcAgent) handleRequestStat(client v1.Stat_SendAgentStatClient, wg *sync.WaitGroup) {
+func (a *GrpcAgent) handleRequestStat(ctx context.Context, statCh chan<- *v1.PStatMessage, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		msg := a.CollectPStateMessage()
 
 		a.log.Debugf("PStatMessage: %v", msg)
-		if err := client.Send(msg); err != nil {
-			a.log.Warn(err)
-			break
+		// Hand the message to the single sender goroutine. Never call
+		// stream.Send here: gRPC forbids concurrent SendMsg on one stream.
+		select {
+		case statCh <- msg:
+		case <-ctx.Done():
+			return
 		}
 
-		if common.WaitEventsWithTime(a.ctx, 0) == common.E_AGENT_STOPPING {
-			break
+		if common.WaitEventsWithTime(ctx, 0) == common.E_AGENT_STOPPING {
+			return
 		}
 	}
 }
 
-func (agent *GrpcAgent) handleUrlReportStat(client v1.Stat_SendAgentStatClient, wg *sync.WaitGroup) {
+func (agent *GrpcAgent) handleUrlReportStat(ctx context.Context, statCh chan<- *v1.PStatMessage, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		msg := agent.utReport.MoveUtReport()
 
 		agent.log.Debugf("ut report:%v", msg)
-		if err := client.Send(msg); err != nil {
-			agent.log.Warn(err)
-			break
+		select {
+		case statCh <- msg:
+		case <-ctx.Done():
+			return
 		}
 		//config.StatInterval
-		if common.WaitEventsWithTime(agent.ctx, 30*time.Second) == common.E_AGENT_STOPPING {
-			break
+		if common.WaitEventsWithTime(ctx, 30*time.Second) == common.E_AGENT_STOPPING {
+			return
 		}
 	}
 }
@@ -360,14 +366,41 @@ func (agent *GrpcAgent) sendStat() {
 		return
 	}
 
+	// gRPC forbids concurrent SendMsg on the same stream. Both stat producers
+	// (request stat and url report stat) funnel their messages through this
+	// channel, and a single goroutine performs all sends.
+	statCh := make(chan *v1.PStatMessage, agent.config.SpanStreamParallelismSize)
+
+	// sendCtx is cancelled when the sender goroutine exits (send error or agent
+	// shutdown), so producers never block forever on a full channel.
+	sendCtx, sendCancel := context.WithCancel(agent.ctx)
+	defer sendCancel()
+
 	var wg sync.WaitGroup
 	defer wg.Wait()
 
 	wg.Add(1)
-	go agent.handleRequestStat(stream, &wg)
+	go func() {
+		defer wg.Done()
+		defer sendCancel()
+		for {
+			select {
+			case msg := <-statCh:
+				if err := stream.Send(msg); err != nil {
+					agent.log.Warnf("send stat failed:%s", err)
+					return
+				}
+			case <-sendCtx.Done():
+				return
+			}
+		}
+	}()
 
 	wg.Add(1)
-	go agent.handleUrlReportStat(stream, &wg)
+	go agent.handleRequestStat(sendCtx, statCh, &wg)
+
+	wg.Add(1)
+	go agent.handleUrlReportStat(sendCtx, statCh, &wg)
 }
 
 func (agent *GrpcAgent) uploadStatInfo() {
@@ -403,11 +436,19 @@ func (agent *GrpcAgent) collectorActiveThreadCount(conn *grpc.ClientConn, respon
 	defer wg.Done()
 
 	client := v1.NewProfilerCommandServiceClient(conn)
-	ctx, _ := common.BuildMdContextWithTimeout(-1, agent.pingMd)
+	// Derive the stream context from the agent context so that agent shutdown
+	// cancels this subscription. A Background context would leave a blocked
+	// Send unable to observe agent cancellation.
+	ctx, cancel := context.WithCancel(agent.ctx)
+	defer cancel()
+	ctx = metadata.NewOutgoingContext(ctx, agent.pingMd)
 
 	stream_client, err := client.CommandStreamActiveThreadCount(ctx)
 	if err != nil {
+		// The returned stream is nil on error; using it below would panic.
+		// This goroutine has no recover, so bail out immediately.
 		agent.log.Warnf("CommandStreamActiveThreadCount failed:%v", err)
+		return
 	}
 	sequenceId := int32(1)
 	for {
@@ -503,7 +544,10 @@ func (agent *GrpcAgent) handleCommand(conn *grpc.ClientConn, wg *sync.WaitGroup)
 			// create a new coro to send active thread
 			agent.log.Debug("PCmdRequest_CommandActiveThreadCount")
 			cmd_tasks.Add(1)
-			go agent.collectorActiveThreadCount(conn, cmd.RequestId, 1, &cmd_tasks)
+			// The interval is a time.Duration; the literal 1 would mean 1ns and
+			// make the loop effectively unthrottled (~hundreds of thousands of
+			// messages per second). Use 1 second, matching the Pinpoint agent.
+			go agent.collectorActiveThreadCount(conn, cmd.RequestId, 1*time.Second, &cmd_tasks)
 		case *v1.PCmdRequest_CommandActiveThreadDump:
 			agent.log.Debug("PCmdRequest_CommandActiveThreadDump")
 		case *v1.PCmdRequest_CommandActiveThreadLightDump:

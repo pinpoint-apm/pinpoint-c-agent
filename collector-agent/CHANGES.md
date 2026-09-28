@@ -1,7 +1,7 @@
 ## v0.7.9
 
 > ⚠️ **SECURITY**: v0.7.8 (and earlier) contains a remote denial-of-service
-> vulnerability. **Upgrade to v0.7.9 as soon as possible.** See the notice below.
+> vulnerability. **Upgrade to v0.7.9 as soon as possible.**
 
 ### Security
 - **Fix remote DoS (CVE-pending)**: an unauthenticated remote attacker could
@@ -19,21 +19,23 @@
     - `makeSpanOrSpanChunk`: nil element in `span.Follows` (`"event":[null]`)
       caused a nil-pointer dereference (skip nil elements).
     - `idMap` type-confusion: an API-name string equal to a SQL string could
-      collide in the shared cache and panic on a type assertion (namespaced SQL
-      keys with a `sqlUidKeyPrefix`).
+      collide in the shared cache and panic on a type assertion. The cache key
+      is now a `metaKey{metaType, name}` struct, so entries of different
+      metadata types (API/string/web/SQL-uid/invocation) can never collide —
+      this also closes the NUL-prefix bypass (`"\u0000sqluid:..."`) that the
+      earlier string-prefix scheme did not prevent.
     - `CollectPStateMessage`: `totalPer[0]` could panic on an empty slice.
 
-### Build
-- Stop committing generated protobuf Go code (`pinpoint-grpc-idl-go/proto/v1/*.pb.go`).
-  Regenerated at build time via `make protoc` (also in CI).
-
-### CI
-- `cpp-windows`: use Visual Studio 18 2026 (runner no longer ships VS 2022).
-- `PHP-Win-2019` → `PHP-Win-2022` (windows-2022, `php/setup-php-sdk@v0.12`).
-- Drop PHP 7.x from CI matrix (EOL).
-- Regenerate protobuf code in the `Collector-agent` job before testing.
-- Sanitize branch name in the PHP-Win artifact name (branches with `/` broke
-  `Compress-Archive`).
+### Reliability
+- **Fix data race in request statistics (R6)**: `RequestCounter` fields were
+  written by the span consumer goroutine and read concurrently by the
+  stat/command/cleanup goroutines with no synchronization. A mutex now guards
+  all statistics and snapshots (reproduced with `go test -race`).
+- **Fix metadata registration not retried after a connection failure (R8)**:
+  `getMetaApiId`/`getSqlUidMetaApiId` cached the assigned ID before registering
+  it, so a failed dial left an unregistered ID cached forever. Entries are now
+  marked *pending* until registration is confirmed and retried on next access
+  (the ID stays stable).
 
 ## v0.6.4
 - fix: panic: send on closed channel #658
