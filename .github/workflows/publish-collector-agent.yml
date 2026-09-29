@@ -66,6 +66,26 @@ jobs:
     - name: Show environment
       run: export
     - uses: actions/checkout@v2
+      with:
+        submodules: "true"
+    # The generated protobuf Go code under pinpoint-grpc-idl-go/proto/v1 is NOT
+    # committed (see collector-agent/.gitignore); regenerate it here so the
+    # release build has the v1 package available.
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "1.27.1"
+    - name: Install protoc and plugins
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+        protoc --version
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+        echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+    - name: Generate protobuf Go code
+      working-directory: collector-agent
+      run: make protoc
     # The version is defined once in code (collector-agent/server/Server.go).
     # Do NOT override server.Version via -ldflags; the binary must report the
     # version that is actually compiled into the source.
@@ -82,7 +102,7 @@ jobs:
       id: release-ca
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        goversion: 1.19
+        goversion: 1.27.1
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: "collector-agent"
