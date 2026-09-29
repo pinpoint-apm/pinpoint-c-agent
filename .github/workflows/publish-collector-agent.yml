@@ -45,6 +45,20 @@ jobs:
           echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
           echo "Resolved version: $VERSION"
 
+      # On a release event, the published tag must match the version compiled
+      # into the source, otherwise the container would be tagged with a stale
+      # version and drift from the release. Manual dispatch has no tag, so skip.
+      - name: Verify version matches release tag
+        if: github.event_name == 'release'
+        run: |
+          RELEASE_TAG="${GITHUB_REF_NAME#v}"
+          SOURCE_VERSION="${TAG_NAME#v}"
+          if [ "$RELEASE_TAG" != "$SOURCE_VERSION" ]; then
+            echo "::error::Release tag '$GITHUB_REF_NAME' does not match server.Version '$TAG_NAME'. Bump collector-agent/server/Server.go before publishing."
+            exit 1
+          fi
+          echo "Release tag '$GITHUB_REF_NAME' matches server.Version '$TAG_NAME'"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -98,6 +112,19 @@ jobs:
         fi
         echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
         echo "Resolved version: $VERSION"
+    # On a release event, the published tag must match the version compiled
+    # into the source, otherwise the binary would report a stale version and
+    # drift from the release. Manual dispatch has no tag, so skip.
+    - name: Verify version matches release tag
+      if: github.event_name == 'release'
+      run: |
+        RELEASE_TAG="${GITHUB_REF_NAME#v}"
+        SOURCE_VERSION="${TAG_NAME#v}"
+        if [ "$RELEASE_TAG" != "$SOURCE_VERSION" ]; then
+          echo "::error::Release tag '$GITHUB_REF_NAME' does not match server.Version '$TAG_NAME'. Bump collector-agent/server/Server.go before publishing."
+          exit 1
+        fi
+        echo "Release tag '$GITHUB_REF_NAME' matches server.Version '$TAG_NAME'"
     - uses: wangyoucao577/go-release-action@v1
       id: release-ca
       with:
