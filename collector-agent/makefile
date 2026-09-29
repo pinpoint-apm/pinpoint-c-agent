@@ -1,5 +1,7 @@
 
-TAG ?=0.7.1
+# The version is defined once in code (server/Server.go). Derive the docker tag
+# from there so it can never drift from the compiled-in version.
+TAG ?= $(shell grep -oP 'var Version = "\K[^"]+' server/Server.go)
 
 .PHONY: default
 default: server ;
