@@ -1,0 +1,50 @@
+name: CI-python
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Python:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-13]
+        python-version: ["3.9","3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: run unittest
+        run: |
+          # ref https://github.com/pypa/setuptools/issues/3198
+          pip install -e .
+          python -m unittest discover -s src/PY/test
+
+  python-plugins:
+    needs: Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+      - name: update docker compose
+        run: |
+          wget "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+          chmod +x docker-compose-linux-x86_64
+          ./docker-compose-linux-x86_64 version
+        # run: docker-compose  -f "testapps/compose.yaml" build python-plugins
+      # - name: build python-plugins
+      - name: start test environment
+        run: |
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py3.9-plugins --exit-code-from py3.9-plugins
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py-plugins --exit-code-from py-plugins
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py3.11-plugins --exit-code-from py3.11-plugins
+      - name: Stop containers
+        # if: always()
+        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down py3.11-plugins py-plugins py3.9-plugins 

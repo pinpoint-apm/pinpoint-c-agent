@@ -1,6 +1,6 @@
 {
     "name": "pinpoint_php",
-    "version": "0.5.2",
+    "version": "0.6.1",
     "type": "extension",
     "license": [
         "Apache License 2.0"

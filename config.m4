@@ -47,6 +47,16 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/jsoncpp/include)
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/src)
   AC_DEFINE(HAVE_PINPOINT_PHP, 1, [Whether you have pinpoint])
+
+  dnl Inject the PHP agent version from the single source of truth
+  dnl (repo-root versions.json) so it can never drift from the other products.
+  PINPOINT_PHP_VERSION=`grep -oP '"php": *"\K[^"]+' PHP_EXT_SRCDIR()/../versions.json 2>/dev/null`
+  if test -z "$PINPOINT_PHP_VERSION"; then
+    PINPOINT_PHP_VERSION="0.6.1"
+  fi
+  PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_SUBST(PINPOINT_PHP_VERSION)
+  AC_DEFINE_UNQUOTED([PHP_PINPOINT_PHP_VERSION], ["$PINPOINT_PHP_VERSION"], [Pinpoint PHP agent version from versions.json])
   PHP_ADD_BUILD_DIR(common/src/)
   PHP_ADD_BUILD_DIR(common/src/NodePool/)
   PHP_ADD_BUILD_DIR(common/src/ConnectionPool/)

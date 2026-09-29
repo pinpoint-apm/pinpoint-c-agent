@@ -1,8 +1,6 @@
 name: publish-collector-agent
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -33,31 +31,17 @@ jobs:
         with:
           submodules: "true"          
       
-      # The version is defined once in code (collector-agent/server/Server.go).
-      # Read it from there instead of hardcoding it here.
+      # The version is defined once in repo-root versions.json (the single
+      # source of truth for all products). Read it from there.
       - name: Resolve version from source
         run: |
-          VERSION=$(grep -oP 'var Version = "\K[^"]+' collector-agent/server/Server.go)
+          VERSION=$(grep -oP '"collector-agent": *"\K[^"]+' versions.json)
           if [ -z "$VERSION" ]; then
-            echo "::error::Could not resolve server.Version from collector-agent/server/Server.go"
+            echo "::error::Could not resolve collector-agent version from versions.json"
             exit 1
           fi
           echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
           echo "Resolved version: $VERSION"
-
-      # On a release event, the published tag must match the version compiled
-      # into the source, otherwise the container would be tagged with a stale
-      # version and drift from the release. Manual dispatch has no tag, so skip.
-      - name: Verify version matches release tag
-        if: github.event_name == 'release'
-        run: |
-          RELEASE_TAG="${GITHUB_REF_NAME#v}"
-          SOURCE_VERSION="${TAG_NAME#v}"
-          if [ "$RELEASE_TAG" != "$SOURCE_VERSION" ]; then
-            echo "::error::Release tag '$GITHUB_REF_NAME' does not match server.Version '$TAG_NAME'. Bump collector-agent/server/Server.go before publishing."
-            exit 1
-          fi
-          echo "Release tag '$GITHUB_REF_NAME' matches server.Version '$TAG_NAME'"
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -70,7 +54,6 @@ jobs:
 
   Release-Collector-agent:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
     strategy:
       matrix:
         # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
@@ -100,31 +83,19 @@ jobs:
     - name: Generate protobuf Go code
       working-directory: collector-agent
       run: make protoc
-    # The version is defined once in code (collector-agent/server/Server.go).
-    # Do NOT override server.Version via -ldflags; the binary must report the
-    # version that is actually compiled into the source.
+    # The version is defined once in repo-root versions.json (the single source
+    # of truth). Do NOT override server.Version via -ldflags; the binary must
+    # report the version that is actually compiled into the source.
     - name: Resolve version from source
       run: |
-        VERSION=$(grep -oP 'var Version = "\K[^"]+' collector-agent/server/Server.go)
+        VERSION=$(grep -oP '"collector-agent": *"\K[^"]+' versions.json)
         if [ -z "$VERSION" ]; then
-          echo "::error::Could not resolve server.Version from collector-agent/server/Server.go"
+          echo "::error::Could not resolve collector-agent version from versions.json"
           exit 1
         fi
         echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
+        echo "RELEASE_TAG=collector-agent/v$VERSION" >> "$GITHUB_ENV"
         echo "Resolved version: $VERSION"
-    # On a release event, the published tag must match the version compiled
-    # into the source, otherwise the binary would report a stale version and
-    # drift from the release. Manual dispatch has no tag, so skip.
-    - name: Verify version matches release tag
-      if: github.event_name == 'release'
-      run: |
-        RELEASE_TAG="${GITHUB_REF_NAME#v}"
-        SOURCE_VERSION="${TAG_NAME#v}"
-        if [ "$RELEASE_TAG" != "$SOURCE_VERSION" ]; then
-          echo "::error::Release tag '$GITHUB_REF_NAME' does not match server.Version '$TAG_NAME'. Bump collector-agent/server/Server.go before publishing."
-          exit 1
-        fi
-        echo "Release tag '$GITHUB_REF_NAME' matches server.Version '$TAG_NAME'"
     - uses: wangyoucao577/go-release-action@v1
       id: release-ca
       with:
@@ -134,4 +105,5 @@ jobs:
         goarch: ${{ matrix.goarch }}
         project_path: "collector-agent"
         binary_name: "collector-agent"
+        release_tag: ${{ env.RELEASE_TAG }}
         extra_files: LICENSE collector-agent/CHANGES.md 

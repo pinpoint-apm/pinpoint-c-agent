@@ -1,0 +1,157 @@
+name: CI-php
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  MODULE_PAK: pinpoint_php-${{ github.head_ref || github.ref_name }}
+
+jobs:
+  PHP:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ["8.0","8.3"]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+      - name: update docker compose
+        run: |
+          wget "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+          chmod +x docker-compose-linux-x86_64
+          ./docker-compose-linux-x86_64 version
+      - name: start test environment
+        run: |
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" build php-compatible  --build-arg PHP_VERSION=${{ matrix.php-version }}
+          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up php-compatible
+      - name: Stop containers
+        # if: always()
+        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down php-compatible
+
+  PHP-MacOS:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        php-version: ["8.0","8.3"]
+        ts: ["ts","nts"]
+    env:
+      SKIP_MACOS_ACTION: true        
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+        env:
+          phpts: ${{ matrix.ts }}
+      - name: build pinpoint_php
+        run:  phpize && ./configure && make 
+      - name: make test      
+        run: make test TESTS="--show-diff tests_macos"
+
+  PHP-Win-2022:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        php-versions: [ "8.0", "8.3"]
+        arch: [ "x64"]
+        ts: [ "ts", "nts" ]
+    env:
+      SKIP_WINDOWS_ACTION: true
+    steps:
+      - uses: actions/checkout@v2
+      - id: setup-php-sdk
+        uses: php/setup-php-sdk@v0.12
+        with:
+          version: ${{ matrix.php-versions }}
+          arch: ${{ matrix.arch }}
+          ts: ${{ matrix.ts }}
+          cache: true
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+          toolset: ${{steps.setup-php-sdk.outputs.toolset}}
+
+      - name: build pinpoint_php on windows
+        run: |
+          php -m
+          php -v
+          mkdir output
+          phpize
+          ./configure.bat --enable-pinpoint_php --enable-debug-pack --enable-object-out-dir=output --with-prefix=${{steps.setup-php-sdk.outputs.prefix}}
+          nmake
+
+      - name: test pinpoint_php on windows      
+        run: |
+          # from https://github.com/php/setup-php-sdk/issues/7
+          nmake test TESTS="--show-diff tests_win32"
+          # Sanitize the branch name (replace '/' with '-') so the artifact name
+          # stays a single valid path segment even for branches like fix/foo.
+          $pak = "${{ env.MODULE_PAK }}" -replace '/', '-'
+          echo "pinpoint_php_win32_pack_name=$pak-${{ matrix.php-versions }}-${{ matrix.ts }}-${{steps.setup-php-sdk.outputs.vs}}-${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_ENV -Append 
+
+      - name: package
+        run: |
+          mkdir _package_
+          if (Test-Path -Path output/Release/ -PathType Container) {
+              cp output/Release/php_pinpoint_php.dll _package_
+              cp output/Release/php_pinpoint_php.pdb _package_
+              cp output/Release/php_pinpoint_php.lib _package_
+          } 
+
+          if (Test-Path -Path output/Release_TS/ -PathType Container) {
+              cp output/Release_TS/php_pinpoint_php.dll _package_
+              cp output/Release_TS/php_pinpoint_php.pdb _package_
+              cp output/Release_TS/php_pinpoint_php.lib _package_
+          } 
+
+          cp NOTICE _package_
+          cp README.md _package_
+          cp CHANGES-PHP.md _package_
+          cp LICENSE _package_
+          Compress-Archive -Path _package_/*   ${{ env.pinpoint_php_win32_pack_name }}.zip 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.pinpoint_php_win32_pack_name }}
+          path: ${{ env.pinpoint_php_win32_pack_name }}.zip 
+          retention-days: 5
+          if-no-files-found: error
+
+  pack_php_module:
+    runs-on: ubuntu-latest
+    needs: PHP
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup PHP without composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: pecl package
+        run: |
+          pecl package
+          pecl build
+
+      # - name: Package pinpoint_php
+      #   id: pack
+      #   run: |
+      #     tar -czf ${{ env.MODULE_PAK }} common/ config.m4 tests LICENSE pinpoint_php.cpp php_pinpoint_php.h
+      #     md5=($(md5sum ${{ env.MODULE_PAK }} ))
+      #     pinpoint_php_win32_pack_name=${{ env.MODULE_PAK }}-${md5}-$(date '+%Y-%m-%d').tar.gz
+      #     mv ${{ env.MODULE_PAK }} $pinpoint_php_win32_pack_name
+      #     echo "PACK=$pinpoint_php_win32_pack_name" >> $GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinpoint_php.tgz
+          path: pinpoint_php*.tgz
+          retention-days: 5
+          if-no-files-found: error

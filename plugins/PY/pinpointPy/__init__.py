@@ -36,7 +36,32 @@ def use_asyncio_local_context():
 
 __all__ = ['monkey_patch_for_pinpoint', 'use_thread_local_context', 'use_asyncio_local_context',
            'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader', 'enable_experiment_plugins']
-__version__ = "1.4.1"
+
+# Single source of truth for the Python agent version is repo-root versions.json.
+# When running from an installed package (site-packages) versions.json is not
+# present, so fall back to the installed distribution metadata; if that also
+# fails, keep the last-known hardcoded value below.
+def _resolve_version():
+    try:
+        import json
+        import os
+        # Walk up from this file to find the repo-root versions.json.
+        here = os.path.dirname(os.path.abspath(__file__))
+        for _ in range(5):
+            candidate = os.path.join(here, "versions.json")
+            if os.path.exists(candidate):
+                with open(candidate, "r") as f:
+                    return json.load(f)["python"]
+            here = os.path.dirname(here)
+    except Exception:
+        pass
+    try:
+        from importlib.metadata import version as _dist_version
+        return _dist_version("pinpointPy")
+    except Exception:
+        return "1.4.1"
+
+__version__ = _resolve_version()
 __author__ = 'liu.mingyi@navercorp.com'
 
 

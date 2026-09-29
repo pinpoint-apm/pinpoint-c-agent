@@ -1,9 +1,16 @@
 from setuptools import setup, Extension, find_namespace_packages
 import platform
+import json
 from pathlib import Path
 
 with open("README", "r") as fh:
     long_description = fh.read()
+
+# Single source of truth for the Python agent version lives in repo-root
+# versions.json. Keep __version__ in plugins/PY/pinpointPy/__init__.py in sync
+# with this value (the CI version-consistency check enforces it).
+with open("versions.json", "r") as f:
+    VERSION = json.load(f)["python"]
 
 name = platform.system().lower()
 agent_libraries = []
@@ -39,7 +46,7 @@ include_dirs_ = [Path(cwd, './common/include'), Path(cwd, './common/jsoncpp/incl
                  Path(cwd, './common/src')]
 
 setup(name='pinpointPy',
-      version="1.4.1",  # don't forget update __version__ in pinpointPy/__init__.py
+      version=VERSION,  # from versions.json
       author="pinpoint members",
       author_email='dl_cd_pinpoint@navercorp.com',
       license='Apache License 2.0',

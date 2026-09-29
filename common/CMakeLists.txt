@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.13)
-project(pinpoint VERSION 0.6.1 DESCRIPTION  "pinpoint common library")
+
+# Read the single source of truth for all product versions (repo root
+# versions.json). The "common" version drives both the CMake project version
+# and the PINPOINT_C_AGENT_API_VERSION macro injected into common.h.
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../versions.json" _pp_versions_json)
+string(REGEX MATCH "\"common\": *\"([0-9.]+)\"" _ "${_pp_versions_json}")
+set(PINPOINT_C_AGENT_API_VERSION "${CMAKE_MATCH_1}")
+if(NOT PINPOINT_C_AGENT_API_VERSION)
+  message(FATAL_ERROR "Could not resolve 'common' version from versions.json")
+endif()
+
+project(pinpoint VERSION ${PINPOINT_C_AGENT_API_VERSION} DESCRIPTION  "pinpoint common library")
 
 set(CMAKE_CXX_STANDARD 11)
 

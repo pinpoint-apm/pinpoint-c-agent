@@ -39,6 +39,63 @@ The project follows a tiered architecture:
 - **Documentation**: Extensive documentation is available in the [DOC/](DOC/) directory for each component. Refer to them before making architectural changes.
 - **Environment Variables**: The Collector Agent is configured primarily via environment variables (see [collector-agent/env.list](collector-agent/env.list)).
 
+## Branch Creation Rules
+
+When creating a new branch, follow these conventions (observed from the repo's
+existing branches):
+
+- **Prefix by type** (kebab-case, lowercase):
+  - `fix/...` — bug fixes (e.g. `fix/collector-agent-security-panics`)
+  - `feat/...` — new features (e.g. `feat/issue-triage-bot`)
+  - `ci/...` — CI/workflow changes (e.g. `ci/path-filtering`)
+  - `chore/...` — maintenance, docs, build tooling
+  - `refactor/...` — code restructuring without behavior change
+- **Scope by product** when the change is product-specific: include the product
+  name in the branch (e.g. `fix/collector-agent-...`, `fix/python-...`,
+  `fix/php-...`, `fix/common-...`).
+- **Never branch directly from a version branch** (`main`, `dev`, `0.7`, etc.)
+  for feature work — always create a short-lived topic branch from `dev` (the
+  default branch) unless told otherwise.
+- **Keep names short and descriptive**, separated by `-`; no spaces, no
+  uppercase, no underscores.
+- **Do not reuse existing branch names**; if a branch already exists for the
+  same topic, check with the user before creating a duplicate.
+- **Version bumps are their own concern**: a version change is made by editing
+  `versions.json` (the single source of truth), not by creating a
+  version-named branch. See the "Version Management" section.
+
+## Version Management
+
+- **Single source of truth**: all product versions live in [versions.json](versions.json)
+  at the repo root. Never hardcode a version in source files — read it from
+  `versions.json` at build time.
+- **Products and their keys**: `collector-agent`, `php`, `python`, `common`.
+  Each product versions independently (they are NOT kept in sync).
+- **How each product consumes the version**:
+  - `common` — `common/CMakeLists.txt` reads `versions.json` and injects
+    `PINPOINT_C_AGENT_API_VERSION` via `configure_file` from
+    `common/include/common.h.in`.
+  - `collector-agent` — `make version` generates `server/version_gen.go`
+    (gitignored) from `versions.json`; keep the `v` prefix (the client compares
+    it lexicographically against `lowest_version="v0.7.0"`).
+  - `python` — `setup.py` / `setup_pypi_test.py` read `versions.json`;
+    `plugins/PY/pinpointPy/__init__.py` resolves it at runtime with a fallback.
+  - `php` — `config.m4` injects `PHP_PINPOINT_PHP_VERSION` via `AC_DEFINE`;
+    `php_pinpoint_php.h` keeps a fallback default.
+- **Release tags are product-prefixed** (strategy 1): `collector-agent/v*.*.*`,
+  `php/v*.*.*`, `python/v*.*.*`, `common/v*.*.*`.
+- **Publishing is fully manual** (`workflow_dispatch` only — no `release` or
+  `push: tags` triggers). Each product has its own manual release workflow:
+  - `collector-agent` → `publish-collector-agent.yml`
+  - `php` → `release.yml`
+  - `python` → `build-wheels.yml`
+  The release tag/version is derived from `versions.json` at dispatch time.
+- **CI is split per product**: `ci-common.yml`, `ci-php.yml`, `ci-python.yml`,
+  `ci-collector-agent.yml` (no more monolithic `main.yml`). CI triggers on
+  `pull_request` + `workflow_dispatch` only.
+- **Guard**: `check-version-consistency.yml` fails CI if any product's version
+  is hardcoded somewhere that disagrees with `versions.json`.
+
 ## Key Directories
 
 - [common/](common/): The "heart" of the C-agent logic.

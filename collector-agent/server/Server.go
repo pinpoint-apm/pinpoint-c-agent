@@ -20,14 +20,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Version is hardcoded here. Do NOT override it via -ldflags at build time;
-// the makefile no longer injects it dynamically.
-// NOTE: must keep the "v" prefix — the client (pinpointPy C++ core
-// HandleHelloMsg) compares this string against lowest_version="v0.7.0"
+// Version is generated into server/version_gen.go (via `make version`) from
+// the single source of truth at repo-root versions.json. Do NOT override it
+// via -ldflags at build time; the makefile no longer injects it dynamically.
+// NOTE: the generated value keeps the "v" prefix — the client (pinpointPy C++
+// core HandleHelloMsg) compares this string against lowest_version="v0.7.0"
 // lexicographically; without the "v" prefix ("0.7.9" < "v0.7.0") the client
 // rejects the handshake and drops the connection.
-var Version = "v0.7.9"
-
 type Server struct {
 	listener        net.Listener
 	agentRouter     agent.I_PacketRouter
