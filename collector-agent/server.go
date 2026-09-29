@@ -21,24 +21,26 @@ var (
 	bind_address    = flag.String("host", "", "server bind host and port information; eg: -host=0.0.0.0@10000")
 	in_container    = flag.Bool("container", false, "collector-agent run in a pod or PM; eg: -container=true")
 	log_dir         = flag.String("LogDir", os.TempDir(), "Set logging output directory; eg: -LogDir=/tmp")
-	log_stdout      = flag.Bool("LogStdout", true, "enable net/http/pprof")
+	log_stdout      = flag.Bool("LogStdout", true, "enable logging to stdout")
 	log_level       = flag.String("LogLevel", "debug", "Set logging output level(debug/info/warn/error); eg: -LogLevel=info")
 	server_recv_buf = flag.Int("RecvBufSize", 4096*100, "Set recv buf; eg: -RecvBufSize=409600")
+	max_connections = flag.Int("MaxConnections", common.DefaultMaxConnections, "max concurrent client connections; eg: -MaxConnections=1000")
 	enable_profile  = flag.Bool("EnableProfile", false, "enable net/http/pprof")
 	show_version    = flag.Bool("v", false, "show current version and exit")
 )
 
 func parseConfig() *common.Config {
 	setting := &common.UserSetting{
-		RecvBufSize:  *server_recv_buf,
-		BindAddress:  *bind_address,
-		SpanAddress:  *span_address,
-		AgentAddress: *agent_address,
-		StatAddress:  *stat_address,
-		Container:    *in_container,
-		LoggerLevel:  *log_level,
-		LogStdout:    *log_stdout,
-		LoggerDir:    *log_dir,
+		RecvBufSize:    *server_recv_buf,
+		BindAddress:    *bind_address,
+		SpanAddress:    *span_address,
+		AgentAddress:   *agent_address,
+		StatAddress:    *stat_address,
+		Container:      *in_container,
+		LoggerLevel:    *log_level,
+		LogStdout:      *log_stdout,
+		LoggerDir:      *log_dir,
+		MaxConnections: *max_connections,
 	}
 	if ip, ok := os.LookupEnv("PP_COLLECTOR_AGENT_SPAN_IP"); ok {
 		if port, ok := os.LookupEnv("PP_COLLECTOR_AGENT_SPAN_PORT"); ok {
@@ -76,6 +78,12 @@ func parseConfig() *common.Config {
 		setting.BindAddress = v
 	}
 
+	if v, ok := os.LookupEnv("PP_MAX_CONNECTIONS"); ok {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			setting.MaxConnections = n
+		}
+	}
+
 	config := common.CreateDefaultConfig()
 	config.User = setting
 	config.InitLogger()
@@ -93,9 +101,9 @@ func main() {
 	}
 
 	if *enable_profile {
+		runtime.SetBlockProfileRate(1)
 		go func() {
 			log.Println(http.ListenAndServe("0.0.0.0:8081", nil))
-			runtime.SetBlockProfileRate(1)
 		}()
 	}
 
@@ -105,7 +113,7 @@ func main() {
 	}
 
 	config.Log.Infof("Config:{%v}", config)
-	server := server.CreateServer(parseConfig())
+	server := server.CreateServer(config)
 
 	if _, err := server.Run(); err != nil {
 		config.Log.Warn("SpanServer is exit")

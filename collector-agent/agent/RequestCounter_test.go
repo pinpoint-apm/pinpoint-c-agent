@@ -10,7 +10,9 @@ import (
 func TestRequestProfiler_Interceptor(t *testing.T) {
 	config := common.CreateTestConfig()
 	profiler := createRequestCounter(config)
-	config.StatInterval = 30
+	// StatInterval is a time.Duration; use a real duration so the statistics
+	// window is 30 seconds (a bare 30 would mean 30 nanoseconds).
+	config.StatInterval = 30 * time.Second
 	spans := []TSpan{
 		{ElapsedTime: 10},
 		{ElapsedTime: 2568},

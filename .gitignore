@@ -86,3 +86,5 @@ config.nice.bat
 configure.bat
 configure.js
 *.cap
+.venv
+.env

@@ -7,6 +7,10 @@ on:
     tags:
       - "v*.*.*"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   MODULE_PAK: pinpoint_php-${{ github.head_ref || github.ref_name }}
   
@@ -45,7 +49,7 @@ jobs:
       - name: Build agent
         run: |
           cd common
-          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 17 2022" -T host=x86 -A win32
+          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 18 2026" -T host=x86 -A win32
           cmake --build build --target ALL_BUILD --config debug --
           ./build/bin/Debug/TestCommon.exe
 
@@ -86,7 +90,7 @@ jobs:
     needs: cpp
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        php-version: ["8.0","8.3"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -109,7 +113,7 @@ jobs:
     needs: cpp
     strategy:
       matrix:
-        php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+        php-version: ["8.0","8.3"]
         ts: ["ts","nts"]
     env:
       SKIP_MACOS_ACTION: true        
@@ -128,12 +132,12 @@ jobs:
       - name: make test      
         run: make test TESTS="--show-diff tests_macos"
 
-  PHP-Win-2019:
-    runs-on: windows-2019
+  PHP-Win-2022:
+    runs-on: windows-2022
     needs: cpp-windows
     strategy:
       matrix:
-        php-versions: [ "7.4", "7.3", "7.2","7.1","8.0", "8.1", "8.2", "8.3"]
+        php-versions: [ "8.0", "8.3"]
         arch: [ "x64"]
         ts: [ "ts", "nts" ]
     env:
@@ -141,7 +145,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - id: setup-php-sdk
-        uses: php/setup-php-sdk@v0.10
+        uses: php/setup-php-sdk@v0.12
         with:
           version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
@@ -165,7 +169,10 @@ jobs:
         run: |
           # from https://github.com/php/setup-php-sdk/issues/7
           nmake test TESTS="--show-diff tests_win32"
-          echo "pinpoint_php_win32_pack_name=${{ env.MODULE_PAK }}-${{ matrix.php-versions }}-${{ matrix.ts }}-${{steps.setup-php-sdk.outputs.vs}}-${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_ENV -Append 
+          # Sanitize the branch name (replace '/' with '-') so the artifact name
+          # stays a single valid path segment even for branches like fix/foo.
+          $pak = "${{ env.MODULE_PAK }}" -replace '/', '-'
+          echo "pinpoint_php_win32_pack_name=$pak-${{ matrix.php-versions }}-${{ matrix.ts }}-${{steps.setup-php-sdk.outputs.vs}}-${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_ENV -Append 
 
       - name: package
         run: |
@@ -195,7 +202,7 @@ jobs:
           if-no-files-found: error
 
   PHP-Release-Win32-Package:
-    needs: [ PHP-Win-2019, pack_php_module]
+    needs: [ PHP-Win-2022, pack_php_module]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -248,7 +255,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-13]
-        python-version: ["3.9", "3.10", "3.11","3.12","3.13"]
+        python-version: ["3.9","3.13"]
     runs-on: ${{ matrix.os }}
     needs: [cpp, cpp-windows]
     steps:
@@ -308,8 +315,14 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: run unittest
+        shell: bash
         run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
-          # export PATH="$PATH:$(go env GOPATH)/bin"
-          cd collector-agent && go mod tidy && go test ./... -v
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+          export PATH="$PATH:$(go env GOPATH)/bin"
+          cd collector-agent
+          # Regenerate the protobuf Go code (not committed to the repo) before testing.
+          # The output dir is absent in a fresh checkout, so create it first.
+          mkdir -p pinpoint-grpc-idl-go/proto/v1
+          protoc --go_out=pinpoint-grpc-idl-go/proto/ --go-grpc_out=pinpoint-grpc-idl-go/proto --proto_path=pinpoint-grpc-idl/proto/ --go-grpc_opt=paths=source_relative v1/Annotation.proto v1/Cmd.proto v1/CustomMetric.proto v1/Service.proto v1/Span.proto v1/Stat.proto v1/ThreadDump.proto
+          go mod tidy && go test ./... -v
