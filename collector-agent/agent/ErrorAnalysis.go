@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
 	v1 "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/pinpoint-grpc-idl-go/proto/v1"
@@ -85,8 +86,7 @@ func (e *ErrorAnalysisFilter) parseException(spanEv []*TSpanEvent, exceptions *[
 }
 
 func (e *ErrorAnalysisFilter) getNewExceptionId() int64 {
-	e.id += 1
-	return e.id
+	return atomic.AddInt64(&e.id, 1)
 }
 
 func (e *ErrorAnalysisFilter) scanTSpanTree(span *TSpan) *v1.PExceptionMetaData {

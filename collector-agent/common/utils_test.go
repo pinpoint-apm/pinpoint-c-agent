@@ -32,3 +32,14 @@ func Test_ParseDotFormatToTime(t *testing.T) {
 	}
 
 }
+
+// Regression test for the security fix: input without a "." must return an
+// error instead of panicking with an index-out-of-range (previously crashed
+// the whole collector-agent process via the unauthenticated span path).
+func Test_ParseDotFormatToTime_NoDot(t *testing.T) {
+	for _, input := range []string{"123", "", "abc"} {
+		if _, err := ParseDotFormatToTime(input); err == nil {
+			t.Errorf("ParseDotFormatToTime(%q) expected error, got nil", input)
+		}
+	}
+}

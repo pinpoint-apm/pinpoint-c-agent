@@ -1,5 +1,16 @@
 # Security Policy
 
+## ⚠️ Known Vulnerability (Fixed in v0.7.9)
+
+collector-agent **v0.7.8 (and earlier)** contains a remote denial-of-service
+vulnerability: an unauthenticated remote attacker can crash the collector-agent
+with a single TCP packet (type=1 `REQ_UPDATE_SPAN`), causing a denial of service
+for all traced applications.
+
+**Action required**: upgrade the collector-agent to
+**[v0.7.9](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.7.9)**
+as soon as possible.
+
 ## [pinpointPy@pypi](https://pypi.org/project/pinpointPy/) 
 
 ### Supported Versions

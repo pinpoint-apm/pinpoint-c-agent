@@ -11,7 +11,6 @@ permissions:
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
-  TAG_NAME: v0.7.7
 
 jobs:
   collector-agent: # reference from https://docs.docker.com/build/ci/github-actions/multi-platform/
@@ -34,6 +33,32 @@ jobs:
         with:
           submodules: "true"          
       
+      # The version is defined once in code (collector-agent/server/Server.go).
+      # Read it from there instead of hardcoding it here.
+      - name: Resolve version from source
+        run: |
+          VERSION=$(grep -oP 'var Version = "\K[^"]+' collector-agent/server/Server.go)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not resolve server.Version from collector-agent/server/Server.go"
+            exit 1
+          fi
+          echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
+          echo "Resolved version: $VERSION"
+
+      # On a release event, the published tag must match the version compiled
+      # into the source, otherwise the container would be tagged with a stale
+      # version and drift from the release. Manual dispatch has no tag, so skip.
+      - name: Verify version matches release tag
+        if: github.event_name == 'release'
+        run: |
+          RELEASE_TAG="${GITHUB_REF_NAME#v}"
+          SOURCE_VERSION="${TAG_NAME#v}"
+          if [ "$RELEASE_TAG" != "$SOURCE_VERSION" ]; then
+            echo "::error::Release tag '$GITHUB_REF_NAME' does not match server.Version '$TAG_NAME'. Bump collector-agent/server/Server.go before publishing."
+            exit 1
+          fi
+          echo "Release tag '$GITHUB_REF_NAME' matches server.Version '$TAG_NAME'"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -55,14 +80,58 @@ jobs:
     - name: Show environment
       run: export
     - uses: actions/checkout@v2
+      with:
+        submodules: "true"
+    # The generated protobuf Go code under pinpoint-grpc-idl-go/proto/v1 is NOT
+    # committed (see collector-agent/.gitignore); regenerate it here so the
+    # release build has the v1 package available.
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "1.27.1"
+    - name: Install protoc and plugins
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+        protoc --version
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+        echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+    - name: Generate protobuf Go code
+      working-directory: collector-agent
+      run: make protoc
+    # The version is defined once in code (collector-agent/server/Server.go).
+    # Do NOT override server.Version via -ldflags; the binary must report the
+    # version that is actually compiled into the source.
+    - name: Resolve version from source
+      run: |
+        VERSION=$(grep -oP 'var Version = "\K[^"]+' collector-agent/server/Server.go)
+        if [ -z "$VERSION" ]; then
+          echo "::error::Could not resolve server.Version from collector-agent/server/Server.go"
+          exit 1
+        fi
+        echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
+        echo "Resolved version: $VERSION"
+    # On a release event, the published tag must match the version compiled
+    # into the source, otherwise the binary would report a stale version and
+    # drift from the release. Manual dispatch has no tag, so skip.
+    - name: Verify version matches release tag
+      if: github.event_name == 'release'
+      run: |
+        RELEASE_TAG="${GITHUB_REF_NAME#v}"
+        SOURCE_VERSION="${TAG_NAME#v}"
+        if [ "$RELEASE_TAG" != "$SOURCE_VERSION" ]; then
+          echo "::error::Release tag '$GITHUB_REF_NAME' does not match server.Version '$TAG_NAME'. Bump collector-agent/server/Server.go before publishing."
+          exit 1
+        fi
+        echo "Release tag '$GITHUB_REF_NAME' matches server.Version '$TAG_NAME'"
     - uses: wangyoucao577/go-release-action@v1
       id: release-ca
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        goversion: 1.19
+        goversion: 1.27.1
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
         project_path: "collector-agent"
         binary_name: "collector-agent"
         extra_files: LICENSE collector-agent/CHANGES.md 
-        ldflags: -X "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server.Version=${{ env.TAG_NAME }}"

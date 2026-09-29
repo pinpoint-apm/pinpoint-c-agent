@@ -1,5 +1,24 @@
 ﻿# Changes
 
+## v0.7.9
+
+> ⚠️ **SECURITY**: v0.7.8 (and earlier) contains a remote denial-of-service
+> vulnerability in the collector-agent. **Upgrade to v0.7.9 as soon as possible.**
+
+### Security (collector-agent)
+- **Fix remote DoS**: an unauthenticated remote attacker could crash the
+  collector-agent with a single TCP packet, causing a denial of service for all
+  traced applications. Root cause: `ParseDotFormatToTime` accessed `ar[1]` out
+  of bounds on attacker-controlled input, and the filter-chain goroutine had no
+  `recover()`. Also hardened several related panic-prone paths (annotation
+  parsing, nil `span.Follows` elements, `idMap` type-confusion, empty-slice
+  index). See `collector-agent/CHANGES.md` for details.
+
+### Build & CI
+- Stop committing generated protobuf Go code (regenerated at build time).
+- `cpp-windows`: use Visual Studio 18 2026.
+- `PHP-Win-2019` → `PHP-Win-2022`; drop PHP 7.x from CI matrix (EOL).
+
 ## v0.4.1
 
 ### Fix

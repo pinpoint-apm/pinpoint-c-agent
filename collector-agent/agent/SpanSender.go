@@ -2,10 +2,10 @@ package agent
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/common"
@@ -17,14 +17,33 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-type ApiIdMap map[string]interface{}
+// metaKey identifies a cached metadata entry. It includes the metadata type so
+// that the same string used for different metadata kinds (API, string, web,
+// SQL uid, invocation) is cached under distinct keys. This prevents both the
+// int32/[]byte type confusion (an attacker-controlled API name equal to a SQL
+// string) and cross-type ID collisions.
+type metaKey struct {
+	metaType common.Meta_Type
+	name     string
+}
 
+type ApiIdMap map[metaKey]interface{}
+
+// unique_id_count is a process-wide counter shared by all SpanSender instances.
+// It must be atomic because multiple agents (each with its own SpanSender and
+// its own idMapMutex) increment it concurrently from different goroutines.
 var unique_id_count = int32(1)
 
 type SpanSender struct {
 	sequenceId int32
 	idMap      ApiIdMap
-	Md         metadata.MD
+	// pendingMeta marks entries whose ID has been assigned but whose metadata
+	// registration has not yet been confirmed by the backend. Such entries are
+	// retried on the next access instead of being treated as permanently
+	// registered (R8).
+	pendingMeta map[metaKey]bool
+	idMapMutex  sync.Mutex
+	Md          metadata.MD
 	// exitCh              chan bool
 	ctx                 context.Context
 	spanMessageBufferCh chan *v1.PSpanMessage
@@ -39,11 +58,12 @@ func createSpanSender(base metadata.MD, ctx context.Context, agent_wg *sync.Wait
 		Md:                  base,
 		ctx:                 ctx,
 		idMap:               make(ApiIdMap),
+		pendingMeta:         make(map[metaKey]bool),
 		wg:                  agent_wg,
 		log:                 entry,
 		config:              config,
 		spanMessageBufferCh: make(chan *v1.PSpanMessage, config.AgentChannelSize),
-		sendStreamRespCh:    make(chan int32, 1),
+		sendStreamRespCh:    make(chan int32, config.SpanStreamParallelismSize),
 	}
 	sender.StartServe()
 	return sender
@@ -74,8 +94,13 @@ func (s *SpanSender) sendSpan() {
 
 			if err := stream.Send(span); err != nil {
 				s.log.Warnf("send span failed with:%s", err)
-				// response the stream is not available
-				s.sendStreamRespCh <- 500
+				// response the stream is not available; use a non-blocking send
+				// so a full resp channel never blocks this goroutine (which
+				// would otherwise hang Stop() via tasksGroup.Wait()).
+				select {
+				case s.sendStreamRespCh <- 500:
+				default:
+				}
 				return
 			}
 		case <-s.ctx.Done():
@@ -109,7 +134,10 @@ func (spanSender *SpanSender) StartServe() {
 
 func (spanSender *SpanSender) cleanAllMetaData() {
 	spanSender.log.Info("Clean all metaData")
+	spanSender.idMapMutex.Lock()
 	spanSender.idMap = make(ApiIdMap)
+	spanSender.pendingMeta = make(map[metaKey]bool)
+	spanSender.idMapMutex.Unlock()
 }
 
 func (spanSender *SpanSender) makeSpanEvent(spanEv *TSpanEvent) *v1.PSpanEvent {
@@ -117,29 +145,47 @@ func (spanSender *SpanSender) makeSpanEvent(spanEv *TSpanEvent) *v1.PSpanEvent {
 }
 
 func (spanSender *SpanSender) getMetaApiId(name string, metaType common.Meta_Type) int32 {
-	id, ok := spanSender.idMap[name]
-	if ok {
-		return id.(int32)
-	} else {
-		unique_id_count += 1
-		spanSender.idMap[name] = unique_id_count
+	key := metaKey{metaType: metaType, name: name}
+	spanSender.idMapMutex.Lock()
+	if id, ok := spanSender.idMap[key]; ok {
+		// Already registered and confirmed -> return the cached ID.
+		if !spanSender.pendingMeta[key] {
+			spanSender.idMapMutex.Unlock()
+			return id.(int32)
+		}
+		// Assigned but registration not confirmed yet -> retry below.
+		spanSender.idMapMutex.Unlock()
 		spanSender.SenderGrpcMetaData(name, metaType)
-		return unique_id_count
+		return id.(int32)
 	}
+	newId := atomic.AddInt32(&unique_id_count, 1)
+	spanSender.idMap[key] = newId
+	spanSender.pendingMeta[key] = true
+	spanSender.idMapMutex.Unlock()
+	spanSender.SenderGrpcMetaData(name, metaType)
+	return newId
 }
 
 func (spanSender *SpanSender) getSqlUidMetaApiId(name string) []byte {
-	id, ok := spanSender.idMap[name]
-	if ok {
-		return id.([]byte)
-	} else {
-		h1, h2 := murmur3.Sum128([]byte(name))
-		// use %x to format hash
-		id := []byte(fmt.Sprintf("%x%x", h1, h2))
-		spanSender.idMap[name] = id
+	key := metaKey{metaType: common.META_Sql_uid_api, name: name}
+	spanSender.idMapMutex.Lock()
+	if id, ok := spanSender.idMap[key]; ok {
+		if !spanSender.pendingMeta[key] {
+			spanSender.idMapMutex.Unlock()
+			return id.([]byte)
+		}
+		spanSender.idMapMutex.Unlock()
 		spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
-		return id
+		return id.([]byte)
 	}
+	hash := murmur3.New128()
+	_, _ = hash.Write([]byte(name))
+	sqlUid := hash.Sum(nil)
+	spanSender.idMap[key] = sqlUid
+	spanSender.pendingMeta[key] = true
+	spanSender.idMapMutex.Unlock()
+	spanSender.SenderGrpcMetaData(name, common.META_Sql_uid_api)
+	return sqlUid
 }
 
 func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) *v1.PSpanEvent {
@@ -183,17 +229,19 @@ func (spanSender *SpanSender) createPinpointSpanEv(spanEv *TSpanEvent) *v1.PSpan
 
 	for _, ann := range spanEv.Annotations {
 		iColon := strings.Index(ann, ":")
-		if value, err := strconv.ParseInt(ann[0:iColon], 10, 32); err == nil {
-			stringValue := v1.PAnnotationValue_StringValue{StringValue: ann[iColon+1:]}
+		if iColon > 0 {
+			if value, err := strconv.ParseInt(ann[0:iColon], 10, 32); err == nil {
+				stringValue := v1.PAnnotationValue_StringValue{StringValue: ann[iColon+1:]}
 
-			v := v1.PAnnotationValue{
-				Field: &stringValue,
+				v := v1.PAnnotationValue{
+					Field: &stringValue,
+				}
+				ann := v1.PAnnotation{
+					Key:   int32(value),
+					Value: &v,
+				}
+				pbSpanEv.Annotation = append(pbSpanEv.Annotation, &ann)
 			}
-			ann := v1.PAnnotation{
-				Key:   int32(value),
-				Value: &v,
-			}
-			pbSpanEv.Annotation = append(pbSpanEv.Annotation, &ann)
 		}
 	}
 
@@ -372,6 +420,9 @@ func (spanSender *SpanSender) makeSpanOrSpanChunk(span *TSpan) (*v1.PSpan, *v1.P
 
 	var spanEv []*v1.PSpanEvent
 	for _, call := range span.Follows {
+		if call == nil {
+			continue
+		}
 		spanEv = append(spanEv, spanSender.makeSpanEvent(call))
 	}
 
@@ -415,8 +466,12 @@ func (spanSender *SpanSender) Interceptor(span *TSpan) bool {
 }
 
 func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Meta_Type) {
+	key := metaKey{metaType: metaType, name: name}
+
 	conn, err := spanSender.config.CreateGrpcConnection(spanSender.ctx, spanSender.config.User.AgentAddress)
 	if err != nil {
+		// Keep the entry pending so a later access retries registration once the
+		// backend is reachable again (R8).
 		spanSender.log.Warnf("connect:%s failed. %s", spanSender.config.User.AgentAddress, err)
 		return
 	}
@@ -430,31 +485,47 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Me
 
 	defer cancel()
 
+	// markConfirmed clears the pending flag for this key on successful
+	// registration so subsequent accesses use the cache without retrying.
+	markConfirmed := func() {
+		spanSender.idMapMutex.Lock()
+		delete(spanSender.pendingMeta, key)
+		spanSender.idMapMutex.Unlock()
+	}
+
 	switch metaType {
 	case common.META_Default_api:
 		{
-			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Lock()
+			id := spanSender.idMap[key].(int32)
+			spanSender.idMapMutex.Unlock()
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_DEFAULT)}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				delete(spanSender.idMap, name)
+			} else {
+				markConfirmed()
 			}
 		}
 
 	case common.META_Web_request_api:
 		{
-			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Lock()
+			id := spanSender.idMap[key].(int32)
+			spanSender.idMapMutex.Unlock()
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_WEB_REQUEST)}
 
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				delete(spanSender.idMap, name)
+			} else {
+				markConfirmed()
 			}
 		}
 	case common.META_String_api:
 		{
-			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Lock()
+			id := spanSender.idMap[key].(int32)
+			spanSender.idMapMutex.Unlock()
 			metaMeta := v1.PStringMetaData{
 				StringId:    id,
 				StringValue: name,
@@ -462,29 +533,36 @@ func (spanSender *SpanSender) SenderGrpcMetaData(name string, metaType common.Me
 
 			if _, err = client.RequestStringMetaData(ctx, &metaMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				delete(spanSender.idMap, name)
+			} else {
+				markConfirmed()
 			}
 		}
 
 	case common.META_Sql_uid_api:
 		{
-			id := spanSender.idMap[name].([]byte)
+			spanSender.idMapMutex.Lock()
+			id := spanSender.idMap[key].([]byte)
+			spanSender.idMapMutex.Unlock()
 			sqlUidMeta := v1.PSqlUidMetaData{
 				SqlUid: id,
 				Sql:    name,
 			}
 			if _, err = client.RequestSqlUidMetaData(ctx, &sqlUidMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				delete(spanSender.idMap, name)
+			} else {
+				markConfirmed()
 			}
 		}
 	case common.META_INVOCATION_API:
 		{
-			id := spanSender.idMap[name].(int32)
+			spanSender.idMapMutex.Lock()
+			id := spanSender.idMap[key].(int32)
+			spanSender.idMapMutex.Unlock()
 			apiMeta := v1.PApiMetaData{ApiId: id, ApiInfo: name, Type: int32(common.API_INVOCATION)}
 			if _, err = client.RequestApiMetaData(ctx, &apiMeta); err != nil {
 				spanSender.log.Warnf("agentOnline api meta failed %s", err)
-				delete(spanSender.idMap, name)
+			} else {
+				markConfirmed()
 			}
 		}
 	default:

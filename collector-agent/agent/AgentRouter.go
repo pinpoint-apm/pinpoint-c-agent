@@ -22,6 +22,7 @@ type RawPacket struct {
 type I_PacketRouter interface {
 	DispatchPacket(*RawPacket) error
 	Clean()
+	Stop()
 }
 
 type AgentRouter struct {
@@ -199,20 +200,46 @@ func (span *TSpan) GetAppName() string {
 
 func (manager *AgentRouter) Clean() {
 	ctime := time.Now().Unix()
-	manager.rwMutex.RLock()
+
+	// Collect expired agents under the lock, then Stop() them outside the lock.
+	// Stop() blocks on tasksGroup.Wait(), so it must not hold the RWMutex —
+	// otherwise it would block all concurrent DispatchPacket readers/writers.
+	var expired []*GrpcAgent
+	// idle threshold in seconds: AgentRetireTime is a time.Duration, so convert
+	// it to seconds to compare against GetLastBusyTime() (a Unix timestamp in
+	// seconds). Using int64(AgentRetireTime) directly would compare nanoseconds
+	// against seconds, making the threshold ~317 years and never retiring agents.
+	retireSec := int64(manager.Config.AgentRetireTime / time.Second)
+	manager.rwMutex.Lock()
 	for id, agent := range manager.AgentMap {
-		if agent.GetLastBusyTime()+int64(manager.Config.AgentReTryTimeout) < ctime {
-			manager.Log.Warnf("agent:%s expired after:%d sec. busyTime:%d", agent, manager.Config.AgentReTryTimeout, agent.GetLastBusyTime())
-			manager.rwMutex.RUnlock()
-			manager.rwMutex.Lock()
+		if agent.GetLastBusyTime()+retireSec < ctime {
+			manager.Log.Warnf("agent:%s expired after:%d sec. busyTime:%d", agent, retireSec, agent.GetLastBusyTime())
 			delete(manager.AgentMap, id)
-			manager.rwMutex.Unlock()
-			manager.rwMutex.RLock()
-			//shrink rwMutex scope
-			agent.Stop()
+			expired = append(expired, agent)
 		}
 	}
-	manager.rwMutex.RUnlock()
+	manager.rwMutex.Unlock()
+
+	for _, agent := range expired {
+		agent.Stop()
+	}
+}
+
+// Stop stops every managed agent and clears the map. Used during shutdown so
+// that agent goroutines and queues are released instead of dying with the
+// process.
+func (manager *AgentRouter) Stop() {
+	manager.rwMutex.Lock()
+	agents := make([]*GrpcAgent, 0, len(manager.AgentMap))
+	for id, agent := range manager.AgentMap {
+		agents = append(agents, agent)
+		delete(manager.AgentMap, id)
+	}
+	manager.rwMutex.Unlock()
+
+	for _, agent := range agents {
+		agent.Stop()
+	}
 }
 
 func (manager *AgentRouter) GetAgentInfo(span *TSpan) (appid, name string, appServerType int32, startTime string, err error) {

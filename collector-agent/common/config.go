@@ -19,19 +19,25 @@ import (
 )
 
 type UserSetting struct {
-	RecvBufSize  int // default is 4k
-	BindAddress  string
-	SpanAddress  string
-	AgentAddress string
-	StatAddress  string
-	Container    bool
-	LoggerLevel  string
-	LoggerDir    string
-	LogStdout    bool
+	RecvBufSize    int // default is 4k
+	BindAddress    string
+	SpanAddress    string
+	AgentAddress   string
+	StatAddress    string
+	Container      bool
+	LoggerLevel    string
+	LoggerDir      string
+	LogStdout      bool
+	MaxConnections int // max concurrent client connections; default 1000
 }
 
+// DefaultMaxConnections caps the number of concurrently served client
+// connections. Each connection holds a RecvBufSize buffer plus a goroutine, so
+// an unbounded accept loop can exhaust memory/FDs under idle or hostile load.
+const DefaultMaxConnections = 1000
+
 func (u *UserSetting) String() string {
-	return fmt.Sprintf("{RecvBufSize:%v BindAddress:%v SpanAddress:%v AgentAddress:%v StatAddress:%v}", u.RecvBufSize, u.BindAddress, u.SpanAddress, u.AgentAddress, u.StatAddress)
+	return fmt.Sprintf("{RecvBufSize:%v BindAddress:%v SpanAddress:%v AgentAddress:%v StatAddress:%v MaxConnections:%v}", u.RecvBufSize, u.BindAddress, u.SpanAddress, u.AgentAddress, u.StatAddress, u.MaxConnections)
 }
 
 type Config struct {
@@ -63,7 +69,9 @@ func (c *Config) ParseServerAddress() (socket_type string, address string) {
 		// /tmp/pinpoint.sock
 		// a very loose checking
 		// assume a file
-		return "unix", address
+		// strip the "sock" prefix to get the real unix socket file path,
+		// e.g. "sock/tmp/pinpoint.sock" -> "/tmp/pinpoint.sock"
+		return "unix", strings.TrimPrefix(raw_address, "sock")
 	} else {
 		// like 0.0.0.0:5689
 		return "tcp", strings.Replace(raw_address, "@", ":", 1)
@@ -100,7 +108,7 @@ func CreateDefaultConfig() *Config {
 		GrpcConTextTimeOut:        5 * time.Second,
 		AgentRetireTime:           1 * time.Hour,
 		StartTime:                 time.Now().Unix(),
-		Pid:                       int32(os.Getgid()),
+		Pid:                       int32(os.Getpid()),
 		HostName:                  getHostName(),
 		HostIp:                    lookupIpFromName(),
 		Log:                       logrus.New(),
@@ -115,12 +123,13 @@ func CreateDefaultConfig() *Config {
 func CreateTestConfig() *Config {
 	config := CreateDefaultConfig()
 	user := &UserSetting{
-		AgentAddress: "dev-pinpoint:9991",
-		SpanAddress:  "dev-pinpoint:9993",
-		StatAddress:  "dev-pinpoint:9992",
-		LoggerLevel:  "debug",
-		LogStdout:    true,
-		RecvBufSize:  4 * 1024,
+		AgentAddress:   "dev-pinpoint:9992",
+		SpanAddress:    "dev-pinpoint:9992",
+		StatAddress:    "dev-pinpoint:9992",
+		LoggerLevel:    "debug",
+		LogStdout:      true,
+		RecvBufSize:    4 * 1024,
+		MaxConnections: DefaultMaxConnections,
 	}
 	config.User = user
 	config.InitLogger()
