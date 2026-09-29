@@ -11,7 +11,6 @@ permissions:
 
 env:
   REGISTRY_IMAGE: ghcr.io/${{ github.repository }}/collector-agent
-  TAG_NAME: v0.7.9
 
 jobs:
   collector-agent: # reference from https://docs.docker.com/build/ci/github-actions/multi-platform/
@@ -34,6 +33,18 @@ jobs:
         with:
           submodules: "true"          
       
+      # The version is defined once in code (collector-agent/server/Server.go).
+      # Read it from there instead of hardcoding it here.
+      - name: Resolve version from source
+        run: |
+          VERSION=$(grep -oP 'var Version = "\K[^"]+' collector-agent/server/Server.go)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not resolve server.Version from collector-agent/server/Server.go"
+            exit 1
+          fi
+          echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
+          echo "Resolved version: $VERSION"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -55,6 +66,18 @@ jobs:
     - name: Show environment
       run: export
     - uses: actions/checkout@v2
+    # The version is defined once in code (collector-agent/server/Server.go).
+    # Do NOT override server.Version via -ldflags; the binary must report the
+    # version that is actually compiled into the source.
+    - name: Resolve version from source
+      run: |
+        VERSION=$(grep -oP 'var Version = "\K[^"]+' collector-agent/server/Server.go)
+        if [ -z "$VERSION" ]; then
+          echo "::error::Could not resolve server.Version from collector-agent/server/Server.go"
+          exit 1
+        fi
+        echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
+        echo "Resolved version: $VERSION"
     - uses: wangyoucao577/go-release-action@v1
       id: release-ca
       with:
@@ -65,4 +88,3 @@ jobs:
         project_path: "collector-agent"
         binary_name: "collector-agent"
         extra_files: LICENSE collector-agent/CHANGES.md 
-        ldflags: -X "github.com/pinpoint-apm/pinpoint-c-agent/collector-agent/server.Version=${{ env.TAG_NAME }}"
