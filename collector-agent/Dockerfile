@@ -1,4 +1,4 @@
-FROM golang:1.27.1-alpine3.17 as builder
+FROM golang:1.27.1-alpine3.23 AS builder
 WORKDIR /apps
 USER root
 RUN apk add --no-cache make protobuf-dev git
