@@ -35,6 +35,7 @@ jobs:
         run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down php-compatible
 
   PHP-MacOS:
+    if: false # skip: macOS PHP build is currently flaky/unsupported
     runs-on: macos-latest
     strategy:
       matrix:
