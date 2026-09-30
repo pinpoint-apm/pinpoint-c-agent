@@ -1,0 +1,80 @@
+name: CI-common
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cpp:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-13]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.6
+        with:
+          cmake-version: "3.16.x"
+      - name: Build agent
+        run: |
+          cd common
+          mkdir -p build
+          cd build
+          cmake -DWITH_TEST_CASE=1 -DWITH_CODECOVERAGE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
+          make
+          ./bin/TestCommon
+      - name: Codecovage
+        uses: codecov/codecov-action@v4
+
+  cpp-windows:
+    runs-on: [windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: powershell allow...
+        shell: cmd
+        run: powershell -Command "Set-ExecutionPolicy RemoteSigned -Scope CurrentUser"
+
+      - name: Build agent
+        run: |
+          cd common
+          cmake --no-warn-unused-cli -DWITH_TEST_CASE=1 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -S. -B./build -G "Visual Studio 18 2026" -T host=x86 -A win32
+          cmake --build build --target ALL_BUILD --config debug --
+          ./build/bin/Debug/TestCommon.exe
+
+  memory-leak:
+    needs: [cpp, cpp-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.6
+        with:
+          cmake-version: "3.16.x"
+      - name: Build agent
+        run: |
+          sudo apt update || echo "update failed,but try to overlook it"
+          sudo apt install -y valgrind -y valgrind
+          cd common
+          mkdir -p build
+          cd build
+          cmake -DWITH_TEST_CASE=1 -DCMAKE_BUILD_TYPE=Debug  .. 
+          make
+          valgrind --leak-check=full \
+            --show-leak-kinds=all \
+            --track-origins=yes \
+            --verbose \
+            --log-file=valgrind-out.txt \
+            ./bin/TestCommon
+      - name: Archive docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: valgrind-out
+          path: common/build/valgrind-out.txt
+          retention-days: 5
+          if-no-files-found: error

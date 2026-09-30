@@ -8,3 +8,5 @@ collector-agent
 pinpoint-grpc-idl
 # Generated protobuf Go code (regenerated at build time via `make protoc`)
 pinpoint-grpc-idl-go/proto/v1/*.pb.go
+# Generated version file (regenerated at build time via `make version`)
+server/version_gen.go

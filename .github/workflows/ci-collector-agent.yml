@@ -1,0 +1,48 @@
+name: CI-collector-agent
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Collector-agent:
+    strategy:
+      matrix:
+        go-version: [1.27.x]
+        os: [ubuntu-latest,windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+          
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: "true"
+
+      - name: Setup protoc
+        uses: arduino/setup-protoc@v2.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: run unittest
+        shell: bash
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+          export PATH="$PATH:$(go env GOPATH)/bin"
+          cd collector-agent
+          # Regenerate the protobuf Go code (not committed to the repo) before testing.
+          # The output dir is absent in a fresh checkout, so create it first.
+          mkdir -p pinpoint-grpc-idl-go/proto/v1
+          protoc --go_out=pinpoint-grpc-idl-go/proto/ --go-grpc_out=pinpoint-grpc-idl-go/proto --proto_path=pinpoint-grpc-idl/proto/ --go-grpc_opt=paths=source_relative v1/Annotation.proto v1/Cmd.proto v1/CustomMetric.proto v1/Service.proto v1/Span.proto v1/Stat.proto v1/ThreadDump.proto
+          # Generate server/version_gen.go from versions.json (not committed to the repo).
+          # Without this, server/Server.go references an undefined Version and fails to build.
+          make version
+          go mod tidy && go test ./... -v

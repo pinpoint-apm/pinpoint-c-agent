@@ -1,0 +1,6 @@
+{
+    "collector-agent": "0.7.9",
+    "php": "0.6.1",
+    "python": "1.4.1",
+    "common": "0.6.0"
+}
