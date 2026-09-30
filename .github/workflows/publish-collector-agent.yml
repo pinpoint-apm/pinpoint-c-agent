@@ -83,6 +83,12 @@ jobs:
     - name: Generate protobuf Go code
       working-directory: collector-agent
       run: make protoc
+    # Generate server/version_gen.go from versions.json (not committed to the
+    # repo). Without it, server/Server.go references an undefined Version and
+    # the release build fails.
+    - name: Generate version file
+      working-directory: collector-agent
+      run: make version
     # The version is defined once in repo-root versions.json (the single source
     # of truth). Do NOT override server.Version via -ldflags; the binary must
     # report the version that is actually compiled into the source.
