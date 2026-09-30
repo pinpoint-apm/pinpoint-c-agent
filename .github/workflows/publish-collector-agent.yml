@@ -32,7 +32,9 @@ jobs:
           submodules: "true"          
       
       # The version is defined once in repo-root versions.json (the single
-      # source of truth for all products). Read it from there.
+      # source of truth for all products). It already carries the "v" prefix
+      # (e.g. v0.7.9), matching the version compiled into the binary
+      # (server.Version = "v0.7.9").
       - name: Resolve version from source
         run: |
           VERSION=$(grep -oP '"collector-agent": *"\K[^"]+' versions.json)
