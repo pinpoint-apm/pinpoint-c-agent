@@ -50,7 +50,8 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
 
   dnl Inject the PHP agent version from the single source of truth
   dnl (repo-root versions.json) so it can never drift from the other products.
-  PINPOINT_PHP_VERSION=`grep -oP '"php": *"\K[^"]+' PHP_EXT_SRCDIR()/../versions.json 2>/dev/null`
+  dnl NOTE: use sed (not `grep -oP`) so this works with BSD grep on macOS.
+  PINPOINT_PHP_VERSION=`sed -n 's/.*"php": *"\([^"]*\)".*/\1/p' PHP_EXT_SRCDIR()/../versions.json 2>/dev/null`
   if test -z "$PINPOINT_PHP_VERSION"; then
     PINPOINT_PHP_VERSION="0.6.1"
   fi

@@ -1,5 +1,9 @@
-ARG PHP_VERSION=7.4
-FROM  php:${PHP_VERSION}
+ARG PHP_VERSION=8.2
+# Pin to the bookworm variant so the base image uses the current Debian stable
+# release. The default php:<version> tag for older PHP (e.g. 8.0) is based on
+# Debian bullseye, whose security packages have been removed from
+# deb.debian.org (404), breaking `apt install`.
+FROM  php:${PHP_VERSION}-bookworm
 WORKDIR /pinpoint-c-agent/
 RUN apt update && apt install -y valgrind git
 COPY config.m4 /pinpoint-c-agent/config.m4 
