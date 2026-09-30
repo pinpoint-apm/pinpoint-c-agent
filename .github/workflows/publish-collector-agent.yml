@@ -48,77 +48,7 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
-          context: collector-agent
+          context: .
+          file: collector-agent/Dockerfile
           tags: ${{ env.REGISTRY_IMAGE }}:${{ env.TAG_NAME }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  Release-Collector-agent:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # build and publish in parallel (64-bit only)
-        include:
-          - goos: linux
-            goarch: amd64
-          - goos: linux
-            goarch: arm64
-          - goos: windows
-            goarch: amd64
-          - goos: darwin
-            goarch: amd64
-          - goos: darwin
-            goarch: arm64
-    steps:
-    - name: Show environment
-      run: export
-    - uses: actions/checkout@v2
-      with:
-        submodules: "true"
-    # The generated protobuf Go code under pinpoint-grpc-idl-go/proto/v1 is NOT
-    # committed (see collector-agent/.gitignore); regenerate it here so the
-    # release build has the v1 package available.
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: "1.27.1"
-    - name: Install protoc and plugins
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y protobuf-compiler
-        protoc --version
-        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
-        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
-        echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-    - name: Generate protobuf Go code
-      working-directory: collector-agent
-      run: make protoc
-    # Generate server/version_gen.go from versions.json (not committed to the
-    # repo). Without it, server/Server.go references an undefined Version and
-    # the release build fails.
-    - name: Generate version file
-      working-directory: collector-agent
-      run: make version
-    # The version is defined once in repo-root versions.json (the single source
-    # of truth). Do NOT override server.Version via -ldflags; the binary must
-    # report the version that is actually compiled into the source.
-    - name: Resolve version from source
-      run: |
-        VERSION=$(grep -oP '"collector-agent": *"\K[^"]+' versions.json)
-        if [ -z "$VERSION" ]; then
-          echo "::error::Could not resolve collector-agent version from versions.json"
-          exit 1
-        fi
-        echo "TAG_NAME=$VERSION" >> "$GITHUB_ENV"
-        echo "RELEASE_TAG=collector-agent/v$VERSION" >> "$GITHUB_ENV"
-        echo "Resolved version: $VERSION"
-    - uses: wangyoucao577/go-release-action@v1
-      id: release-ca
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goversion: 1.27.1
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        project_path: "collector-agent"
-        binary_name: "collector-agent"
-        release_tag: ${{ env.RELEASE_TAG }}
-        extra_files: LICENSE collector-agent/CHANGES.md 
