@@ -1,9 +1,11 @@
 ＞　End of maintain: goto [DOC/collector-agent](../DOC/collector-agent/Readme.md)
 
-> ⚠️ **SECURITY NOTICE**: collector-agent **v0.7.8 (and earlier)** contains a
-> remote denial-of-service vulnerability — an unauthenticated attacker can crash
+> ⚠️ **SECURITY NOTICE**: collector-agent **v0.7.9 (and earlier)** ships
+> vulnerable dependencies (including **CVE-2023-44487**, HTTP/2 "Rapid Reset").
+> Earlier releases (v0.7.8 and earlier) also contain a remote
+> denial-of-service vulnerability — an unauthenticated attacker can crash
 > the collector-agent with a single TCP packet, affecting all traced
-> applications. **Please upgrade to [v0.7.9](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.7.9) as soon as possible.**
+> applications. **Please upgrade to [v0.7.10](https://github.com/pinpoint-apm/pinpoint-c-agent/releases/tag/v0.7.10) as soon as possible.**
 
 ## Install Collector-Agent
 `Collector-Agent`, who formats the span from PHP/Python/C/CPP-Agent and send to `Pinpoint-Collector`, is an agent written by [golang](https://golang.google.cn/).Please install golang before the following steps.[Install GO](https://golang.google.cn/doc/install)

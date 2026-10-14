@@ -24,9 +24,9 @@ version:
 # .proto files in the pinpoint-grpc-idl submodule. The generated *.pb.go files
 # are NOT committed to the repo (see .gitignore) and are produced at build time.
 #
-# Required tool versions (must match the project's go 1.19 / grpc v1.56.3):
-#   protoc-gen-go      v1.33.0   (newer versions emit unsafe.StringData, needs go1.20+)
-#   protoc-gen-go-grpc v1.3.0    (newer versions emit generic streaming API, needs grpc v1.64+)
+# Required tool versions (project is go 1.26.0 / grpc v1.83.1):
+#   protoc-gen-go      v1.33.0   (pinned; newer versions emit unsafe.StringData)
+#   protoc-gen-go-grpc v1.3.0    (pinned; newer versions emit the generic streaming API)
 # Install with:
 #   go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
 #   go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
