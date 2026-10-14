@@ -1,3 +1,22 @@
+## v0.7.10
+
+> ⚠️ **SECURITY**: v0.7.9 (and earlier) ships vulnerable dependencies.
+> **Upgrade to v0.7.10 as soon as possible.**
+
+### Security
+- **Upgrade vulnerable Go dependencies** (found by `govulncheck`/image scanners):
+  - `golang.org/x/net` v0.9.0 → **v0.60.0** — fixes **CVE-2023-44487**
+    (HTTP/2 "Rapid Reset" DoS, GO-2023-2102) plus GO-2025-3503 and
+    GO-2026-6603/6611/6612/6617.
+  - `google.golang.org/grpc` v1.56.3 → **v1.83.1** — fixes GO-2026-6061 and
+    GO-2026-6348.
+  - `google.golang.org/protobuf` v1.34.1 → **v1.36.11**.
+  - The module's Go language version is raised `go 1.19` → `go 1.26.0`.
+  - After the upgrade `govulncheck ./...` reports **0 reachable vulnerabilities**
+    (was 7 from 2 modules). The generated gRPC code
+    (`SupportPackageIsVersion7`) remains compatible — no proto regeneration
+    required.
+
 ## v0.7.9
 
 > ⚠️ **SECURITY**: v0.7.8 (and earlier) contains a remote denial-of-service
