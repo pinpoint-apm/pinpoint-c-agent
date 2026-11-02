@@ -53,6 +53,8 @@ static PyObject *py_pinpoint_add_clues(PyObject *self, PyObject *args) {
     }
 
     pinpoint_add_clues(id, key, value, loc);
+  } else {
+    return NULL;
   }
   return Py_BuildValue("O", Py_True);
 }
@@ -71,6 +73,8 @@ static PyObject *py_pinpoint_add_clue(PyObject *self, PyObject *args) {
     }
 
     pinpoint_add_clue(id, key, value, loc);
+  } else {
+    return NULL;
   }
   return Py_BuildValue("O", Py_True);
 }
@@ -87,6 +91,8 @@ static PyObject *py_pinpoint_context_key(PyObject *self, PyObject *args) {
       id = pinpoint_get_per_thread_id();
 
     pinpoint_set_context_key(id, key, value);
+  } else {
+    return NULL;
   }
   return Py_BuildValue("O", Py_True);
 }
@@ -107,7 +113,7 @@ static PyObject *py_pinpoint_get_key(PyObject *self, PyObject *args) {
       return Py_BuildValue("O", Py_False);
     }
   } else {
-    return Py_BuildValue("O", Py_False);
+    return NULL;
   }
 }
 
@@ -119,7 +125,7 @@ static PyObject *py_pinpoint_get_sequence_id(PyObject *self, PyObject *args) {
     }
     return Py_BuildValue("i", pinpoint_get_sequence_id(id));
   } else {
-    return Py_BuildValue("O", Py_False);
+    return NULL;
   }
 }
 
@@ -127,6 +133,8 @@ static PyObject *py_pinpoint_set_async_ctx(PyObject *self, PyObject *args) {
   int id = -1, async_id = -1, node_sequence = -1;
   if (PyArg_ParseTuple(args, "iii", &id, &async_id, &node_sequence)) {
     pinpoint_set_async_ctx(id, async_id, node_sequence);
+  } else {
+    return NULL;
   }
   return Py_BuildValue("O", Py_True);
 }
@@ -159,8 +167,14 @@ static PyObject *py_force_flush_span(PyObject *self, PyObject *args) {
     id = pinpoint_get_per_thread_id();
   }
 
-  pinpoint_force_end_trace(id, timeout);
-
+  if (pinpoint_force_end_trace(id, timeout) != E_ROOT_NODE) {
+    Py_RETURN_FALSE;
+  }
+  // Explicit IDs may also close the tree containing the thread-local node.
+  NodeID current_id = pinpoint_get_per_thread_id();
+  if (current_id != E_ROOT_NODE && pinpoint_trace_is_root(current_id) == -1) {
+    pinpoint_update_per_thread_id(E_ROOT_NODE);
+  }
   return Py_BuildValue("O", Py_True);
 }
 
@@ -218,7 +232,7 @@ static PyObject *py_generate_unique_id(PyObject *self,
 static PyObject *py_is_root_trace(PyObject *self, PyObject *args) {
   int id = -1;
   if (!PyArg_ParseTuple(args, "|i", &id)) {
-    return Py_BuildValue("O", Py_False);
+    return NULL;
   }
   if (id == E_INVALID_NODE) {
     id = pinpoint_get_per_thread_id();
@@ -234,7 +248,7 @@ static PyObject *py_is_root_trace(PyObject *self, PyObject *args) {
 static PyObject *py_trace_has_root(PyObject *self, PyObject *args) {
   int id = -1;
   if (!PyArg_ParseTuple(args, "|i", &id)) {
-    return Py_BuildValue("O", Py_False);
+    return NULL;
   }
   if (id == E_INVALID_NODE) {
     id = pinpoint_get_per_thread_id();
@@ -331,6 +345,8 @@ static PyObject *py_pinpoint_mark_an_error(PyObject *self, PyObject *args) {
     }
 
     catch_error(id, msg, file_name, line_no);
+  } else {
+    return NULL;
   }
 
   return Py_BuildValue("O", Py_True);
@@ -344,6 +360,8 @@ static PyObject *py_pinpoint_add_exception(PyObject *self, PyObject *args) {
       id = pinpoint_get_per_thread_id();
     }
     pinpoint_add_exception(id, msg);
+  } else {
+    return NULL;
   }
 
   return Py_BuildValue("O", Py_True);
