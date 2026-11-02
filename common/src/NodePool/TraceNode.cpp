@@ -45,6 +45,7 @@ TraceNode& TraceNode::Reset(NodeID id) {
   }
 
   this->value_.clear();
+  this->context_map_.clear();
   set_exp_ = false;
 
   return *this;

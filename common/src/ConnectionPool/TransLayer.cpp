@@ -192,6 +192,14 @@ size_t TransLayer::PoolEventOnce(uint32_t timeout) {
   }
 
   SOCKET fd = c_fd;
+#ifndef _WIN32
+  // POSIX fd_set is indexed by descriptor number; Windows stores socket values.
+  if (fd < 0 || fd >= FD_SETSIZE) {
+    pp_trace("socket descriptor %d exceeds select capacity", fd);
+    _reset_remote();
+    return -1;
+  }
+#endif
   fd_set wfds, efds, rfds;
   FD_ZERO(&efds);
 
