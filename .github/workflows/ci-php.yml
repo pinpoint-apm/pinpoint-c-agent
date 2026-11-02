@@ -76,6 +76,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           arch: ${{ matrix.arch }}
           ts: ${{ matrix.ts }}
+          args: --enable-pinpoint_php
           run-tests: true
           test-runner: run-tests.php
           test-runner-args: --show-diff tests_win32
