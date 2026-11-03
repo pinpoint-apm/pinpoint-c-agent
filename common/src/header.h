@@ -36,4 +36,5 @@
 
 void debug_nodeid(NodeID id);
 uint64_t get_unix_time_ms();
+int compare_version(const char* lhs, const char* rhs);
 void pinpoint_stop_agent();

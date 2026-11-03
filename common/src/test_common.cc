@@ -9,6 +9,7 @@
 #include "pinpoint/common.h"
 #include "json/value.h"
 #include "json/reader.h"
+#include "header.h"
 
 using namespace testing;
 std::string ouputMsg;
@@ -177,6 +178,18 @@ TEST(common, force_end_trace) {
 }
 
 TEST(common, version) { EXPECT_STREQ(pinpoint_agent_version(), AGENT_VERSION); }
+
+// collector-agent versions seen in hello messages, against lowest_version "v0.7.0"
+TEST(common, compare_version) {
+  EXPECT_EQ(compare_version("v0.7.0", "v0.7.0"), 0);
+  EXPECT_EQ(compare_version("v0.7", "v0.7.0"), 0);
+  EXPECT_GT(compare_version("0.7.1", "v0.7.0"), 0);
+  EXPECT_GT(compare_version("v0.7.10", "v0.7.0"), 0);
+  EXPECT_GT(compare_version("v0.10.0", "v0.7.0"), 0);
+  EXPECT_LT(compare_version("v0.6.9", "v0.7.0"), 0);
+  EXPECT_LT(compare_version("0.6.4", "v0.7.0"), 0);
+  EXPECT_LT(compare_version("", "v0.7.0"), 0);
+}
 
 TEST(common, invalid_host) {
   pinpoint_set_agent("tcp:0.0.0.0.0:9999", 7000, -1, 7000);

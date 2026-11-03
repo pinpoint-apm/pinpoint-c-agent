@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <memory>
@@ -119,9 +120,9 @@ private:
 
     if (root["version"] || root["version"].isString()) {
       std::string version = root["version"].asString();
-      std::string lowest_version = "v0.7.0";
+      const char* lowest_version = "v0.7.0";
       pp_trace("collector information: version:%s", version.c_str());
-      if (version < lowest_version) {
+      if (compare_version(version.c_str(), lowest_version) < 0) {
         pp_trace("collector-agent should be >=v0.7.0, please upgrade it");
         return -1;
       }
@@ -637,6 +638,30 @@ const char* pinpoint_agent_version() {
   static const char* _version_ = PINPOINT_C_AGENT_API_VERSION;
 #endif
   return _version_;
+}
+
+static unsigned long next_version_part(const char*& version) {
+  char* end = nullptr;
+  unsigned long part = std::strtoul(version, &end, 10);
+  const char* dot = std::strchr(end, '.');
+  version = dot ? dot + 1 : end + std::strlen(end);
+  return part;
+}
+
+// Compares dotted versions part by part as numbers, so "v0.10.0" > "v0.7.0" and
+// "v0.7" == "0.7.0". The leading 'v' is optional; missing parts count as 0.
+int compare_version(const char* lhs, const char* rhs) {
+  if (*lhs == 'v' || *lhs == 'V')
+    lhs++;
+  if (*rhs == 'v' || *rhs == 'V')
+    rhs++;
+  while (*lhs || *rhs) {
+    unsigned long l = next_version_part(lhs);
+    unsigned long r = next_version_part(rhs);
+    if (l != r)
+      return l < r ? -1 : 1;
+  }
+  return 0;
 }
 
 uint64_t get_unix_time_ms() {
