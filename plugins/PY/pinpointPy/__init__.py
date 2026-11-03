@@ -59,7 +59,7 @@ def _resolve_version():
         from importlib.metadata import version as _dist_version
         return _dist_version("pinpointPy")
     except Exception:
-        return "1.4.1"
+        return "1.4.2"
 
 __version__ = _resolve_version()
 __author__ = 'liu.mingyi@navercorp.com'
