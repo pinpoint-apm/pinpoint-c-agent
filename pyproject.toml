@@ -36,6 +36,14 @@ Documentation = "https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/DOC/P
 
 [project.scripts]
 
+[tool.cibuildwheel]
+# The C extension is built against the Python Stable ABI (abi3), so a single
+# cp38-abi3 wheel covers every supported Python (>=3.8) per architecture.
+# Build only the lowest supported version once; cibuildwheel tags the wheel
+# as cp38-abi3 automatically.
+build = "cp38-*"
+skip = "pp*"
+
 [tool.hatch.version]
 
 [tool.hatch.build.targets.sdist]

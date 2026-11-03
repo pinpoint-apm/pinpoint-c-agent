@@ -14,7 +14,10 @@ with open("versions.json", "r") as f:
 
 name = platform.system().lower()
 agent_libraries = []
-extra_compile_args_ = ["-DPINPOINT_MT"]
+# Build against the Python Stable ABI (abi3) so a single wheel covers all
+# supported Python versions (>=3.8) per architecture, instead of one wheel
+# per Python version. The extension only uses stable-ABI CPython APIs.
+extra_compile_args_ = ["-DPINPOINT_MT", "-DPy_LIMITED_API=0x03080000"]
 if name == 'windows':
     pass
 elif name == 'darwin':
@@ -58,7 +61,8 @@ setup(name='pinpointPy',
                     extFiles,
                     include_dirs=include_dirs_,
                     libraries=agent_libraries,
-                    extra_compile_args=extra_compile_args_
+                    extra_compile_args=extra_compile_args_,
+                    py_limited_api=True
                     )
       ],
       package_dir={'': 'plugins/PY'},
