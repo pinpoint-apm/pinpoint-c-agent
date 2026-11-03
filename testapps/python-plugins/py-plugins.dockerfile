@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.14
 
 COPY setup.py /pinpoint-c-agent/setup.py
 COPY versions.json /pinpoint-c-agent/versions.json
