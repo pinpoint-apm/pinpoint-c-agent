@@ -50,10 +50,10 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ARCHS_LINUX: auto aarch64
-          CIBW_ARCHS_WINDOWS: ARM64 AMD64 x86
-          CIBW_ARCHS_MACOS: auto x86_64 arm64
-          CIBW_SKIP: cp37-* cp38-* cp36-* pp*
+          CIBW_ARCHS_LINUX: x86_64 aarch64
+          CIBW_ARCHS_WINDOWS: AMD64 ARM64
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_SKIP: cp36-* cp37-* pp*
 
       - uses: actions/upload-artifact@v4
         with:
@@ -118,10 +118,10 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ARCHS_LINUX: auto aarch64
-          CIBW_ARCHS_WINDOWS: ARM64 AMD64 x86
-          CIBW_ARCHS_MACOS: auto x86_64 arm64
-          CIBW_SKIP: cp37-* cp38-* cp36-* pp*
+          CIBW_ARCHS_LINUX: x86_64 aarch64
+          CIBW_ARCHS_WINDOWS: AMD64 ARM64
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_SKIP: cp36-* cp37-* pp*
 
       - uses: actions/upload-artifact@v4
         with:

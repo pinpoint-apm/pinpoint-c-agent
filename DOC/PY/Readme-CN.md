@@ -8,8 +8,8 @@
 
 依赖| 版本
 ---|----
-python |python 3.5+
-python async|python 3.7.1+
+python |python 3.8+
+python async|python 3.8+
 GO | | 
 gcc|gcc 4.7+
 cmake| 3.0+

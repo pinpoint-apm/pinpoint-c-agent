@@ -7,7 +7,7 @@
 
 | Dependency      | Version                                     | More                |
 | --------------- | ------------------------------------------- | ------------------- |
-| python          | 3+                                          | (async must 3.7.1+) |
+| python          | 3.8+                                        | (async must 3.8+) |
 | collector-agent | [installed ?](../collector-agent/Readme.md) |
 
 ### Installation
