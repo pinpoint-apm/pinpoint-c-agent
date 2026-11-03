@@ -99,7 +99,8 @@ private:
   }
 
   void _reset_remote() {
-    if (c_fd > 0) {
+    in_buf_size_ = 0;
+    if (c_fd != INVALID_SOCKET) {
       pp_trace("reset peer:%d", c_fd);
       close_socket(c_fd);
       c_fd = -1;
@@ -144,19 +145,18 @@ private:
   }
 
   int recvByteStream() {
-    int next_size = 0;
-    while (next_size < IN_MSG_BUF_SIZE) {
-      int ret = recv(c_fd, in_buf + next_size, IN_MSG_BUF_SIZE - next_size, 0);
+    while (in_buf_size_ < IN_MSG_BUF_SIZE) {
+      int ret = recv(c_fd, in_buf + in_buf_size_, IN_MSG_BUF_SIZE - in_buf_size_, 0);
       if (ret > 0) {
-        int total = ret + next_size;
+        int total = ret + in_buf_size_;
         int msg_offset = HandleMsgStream(in_buf, total);
-        if (msg_offset < 0) { // found fetal error
+        if (msg_offset < 0) { // found fatal error
           return -1;
         } else if (msg_offset < total) {
-          next_size = total - msg_offset;
-          memcpy(in_buf, in_buf + msg_offset, next_size);
+          in_buf_size_ = total - msg_offset;
+          memmove(in_buf, in_buf + msg_offset, in_buf_size_);
         } else {
-          next_size = 0;
+          in_buf_size_ = 0;
         }
       } else if (ret == 0) {
         pp_trace("server closed. error:%d", err_code());
@@ -170,32 +170,37 @@ private:
         }
       }
     }
-    pp_trace("recv buf full,maybe a bug");
-    return 0;
+    pp_trace("receive buffer full with an incomplete message");
+    return -1;
   }
 
   int HandleMsgStream(const char* buf, int len) {
     int offset = 0;
-    while (offset + 8 <= len) {
-      Header* header = (Header*)buf;
-
-      int body_len = (int)ntohl(header->length);
-
-      if (8 + body_len > len) {
+    const int header_size = sizeof(Header);
+    while (len - offset >= header_size) {
+      Header header;
+      memcpy(&header, buf + offset, sizeof(header));
+      uint32_t body_len = ntohl(header.length);
+      // Reject oversized lengths before converting to signed buffer offsets.
+      if (body_len > IN_MSG_BUF_SIZE - sizeof(Header)) {
+        return -1;
+      }
+      int frame_size = header_size + static_cast<int>(body_len);
+      if (frame_size > len - offset) {
         return offset;
       }
 
-      uint32_t type = ntohl(header->type);
+      uint32_t type = ntohl(header.type);
       auto has = msgRouteMap_.find(type);
       if (has != msgRouteMap_.end()) {
-        int ret = has->second(type, buf + 8, len - 8);
+        int ret = has->second(type, buf + offset + header_size, body_len);
         if (ret == -1) {
           return -1;
         }
       } else {
         pp_trace("unsupported message type:%d from server", type);
       }
-      offset += (8 + body_len);
+      offset += frame_size;
     }
     return offset;
   }
@@ -211,6 +216,7 @@ private:
   Chunks chunks;
   int32_t _state;
   char in_buf[IN_MSG_BUF_SIZE] = {0};
+  int in_buf_size_ = 0;
   std::function<void(int)> statusChangedCallback_;
   RouterMsgMap msgRouteMap_;
   const static char* UNIX_SOCKET;

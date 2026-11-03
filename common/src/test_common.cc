@@ -4,6 +4,8 @@
 
 #include <thread>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include "pinpoint/common.h"
 #include "json/value.h"
 #include "json/reader.h"

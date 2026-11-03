@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <stdexcept>
 
 using PP::NodePool::PoolManager;
 using PP::NodePool::ThreadSafePoolManager;
@@ -24,6 +25,26 @@ static void test_opt(TraceNode& node, const char* opt, ...) {
   va_start(args, opt);
   node.setNodeUserOption(opt, &args);
   va_end(args);
+}
+
+TEST(NodePool, reused_node_clears_context) {
+  PoolManager pool;
+  TraceNode& first = pool.GetNode();
+  NodeID first_id = first.id_;
+  first.UpgradeToRootNode(1700);
+  first.setContext("request-private", "previous-request");
+  pool.FreeNodeTree(first_id);
+
+  TraceNode& second = pool.GetNode();
+  ASSERT_EQ(first_id, second.id_);
+  second.UpgradeToRootNode(1700);
+  std::string value;
+  EXPECT_THROW(second.getContext("request-private", value), std::out_of_range);
+  second.setContext("request-private", "current-request");
+  second.getContext("request-private", value);
+  EXPECT_EQ("current-request", value);
+  pool.FreeNodeTree(second.id_);
+  EXPECT_TRUE(pool.NoNodesLeak());
 }
 
 TEST(NodePool, opt) {

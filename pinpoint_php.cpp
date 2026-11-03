@@ -47,6 +47,7 @@
 #include "zend_API.h"
 #include "zend_string.h"
 #include "zend_types.h"
+#include "zend_exceptions.h"
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -331,8 +332,11 @@ PHP_FUNCTION(pinpoint_get_caller_arg) {
 
   // changes
   // ex = EX(prev_execute_data)
-  ex = EX(prev_execute_data)->prev_execute_data;
-  if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+  ex = EX(prev_execute_data);
+  if (ex) {
+    ex = ex->prev_execute_data;
+  }
+  if (!ex || (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
     zend_error(E_WARNING, "pinpoint_get_caller_arg():  Called from the global "
                           "scope - no function context");
     RETURN_FALSE;
@@ -470,16 +474,10 @@ void apm_error_cb(int type, const char *error_filename,
 
 #endif
 
-  if (!(EG(error_reporting) & type)) {
-#if PHP_VERSION_ID < 80000
-    efree(msg);
-#endif
-    return;
+  if (EG(error_reporting) & type) {
+    catch_error(pinpoint_get_per_thread_id(), msg, error_filename, error_lineno);
+    pp_trace("apm_error_cb called");
   }
-
-  catch_error(pinpoint_get_per_thread_id(), msg, error_filename, error_lineno);
-
-  pp_trace("apm_error_cb called");
 
 #if PHP_VERSION_ID < 80000
 
@@ -628,12 +626,11 @@ PHP_FUNCTION(_pinpoint_add_clues) {
 
 static inline zend_string *merge_pp_style_name(zend_string *scope,
                                                zend_string *func) {
-#define MAX_CLASS_METHOD_SIZE 128
-  char buf[MAX_CLASS_METHOD_SIZE] = {0};
   if (scope) {
-    int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s::%s", ZSTR_VAL(scope),
-                        ZSTR_VAL(func));
-    zend_string *name = zend_string_init(buf, size, 0);
+    std::string full_name(ZSTR_VAL(scope), ZSTR_LEN(scope));
+    full_name += "::";
+    full_name.append(ZSTR_VAL(func), ZSTR_LEN(func));
+    zend_string *name = zend_string_init(full_name.data(), full_name.size(), 0);
     zend_string *lower_name = zend_string_tolower(name);
     zend_string_release(name);
     return lower_name;
@@ -678,9 +675,24 @@ static zval *zend_array_index(zval *ar, int index) {
 }
 #endif
 
-static inline pp_interceptor_v_t *find_interceptor(zend_string *func_name) {
-  return (pp_interceptor_v_t *)zend_hash_str_find_ptr(
+static inline pp_interceptor_v_t *find_interceptor(zend_string *func_name,
+                                                 zend_function *func) {
+  pp_interceptor_v_t *named = (pp_interceptor_v_t *)zend_hash_str_find_ptr(
       PPG(interceptors), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+  if (named && named->origin_func == func) {
+    return named;
+  }
+  // An inherited internal method can be a separate zend_function with its
+  // parent's scope. Prefer its own registration over the parent's named hook.
+  void *value;
+  ZEND_HASH_FOREACH_PTR(PPG(interceptors), value) {
+    pp_interceptor_v_t *interceptor = (pp_interceptor_v_t *)value;
+    if (interceptor->origin_func == func) {
+      return interceptor;
+    }
+  } ZEND_HASH_FOREACH_END();
+  // Classes created after their parent was hooked can inherit its handler.
+  return named;
 }
 
 static zend_string *
@@ -730,30 +742,24 @@ static void call_callback_function(zval *callback, zval *params,
                                    zval *needs_retval = nullptr) {
   // ref SAPI.c:139
   int error;
-  zend_fcall_info fcall_info;
+  zend_fcall_info fcall_info = {};
   char *callback_error = NULL;
   zval default_retval;
   zval *retval = &default_retval;
   if (needs_retval) {
     retval = needs_retval;
   }
-  zend_fcall_info_cache fcall_cache;
+  ZVAL_UNDEF(retval);
+  zend_fcall_info_cache fcall_cache = {};
   if (zend_fcall_info_init(callback, 0, &fcall_info, &fcall_cache, NULL,
                            &callback_error) == SUCCESS) {
     fcall_info.retval = retval;
     fcall_info.param_count = params_count;
     fcall_info.params = params;
-    fcall_info.object = NULL;
 
 #if PHP_MAJOR_VERSION == 7
     fcall_info.no_separation = 0;
 #endif
-
-    // fcall_cache.initialized = 1;
-    // fcall_cache.function_handler = EG(autoload_func);
-
-    fcall_cache.called_scope = NULL;
-    fcall_cache.object = NULL;
 
     error = zend_call_function(&fcall_info, &fcall_cache);
     if (error == FAILURE) {
@@ -774,7 +780,11 @@ static void call_callback_function(zval *callback, zval *params,
   }
 
   if (free_params) {
-    zend_fcall_info_args_clear(&fcall_info, 1);
+    // The caller owns these copies even if callable resolution failed.
+    for (uint32_t i = 0; i < params_count; ++i) {
+      zval_ptr_dtor(&params[i]);
+    }
+    efree(params);
   }
 }
 
@@ -853,7 +863,9 @@ static void call_interceptor_before(pp_interceptor_v_t *interceptor) {
   pp_trace(" call_interceptor_before:%s return type(%d) zval",
            ZSTR_VAL(interceptor->name), zval_get_type(&retval));
 
-  replace_ex_caller_parameters(&retval);
+  if (!EG(exception)) {
+    replace_ex_caller_parameters(&retval);
+  }
 
   zval_ptr_dtor(&retval);
 }
@@ -868,7 +880,25 @@ static void call_interceptor_end(pp_interceptor_v_t *interceptor,
 }
 static void call_interceptor_exception(pp_interceptor_v_t *interceptor) {
   zend_object *exception = EG(exception);
-  pp_trace(" exception: %p ", exception);
+  // Engine control-flow exceptions (such as exit on newer PHP) must unwind
+  // without being exposed to user callbacks as ordinary Throwables.
+  if (!instanceof_function(exception->ce, zend_ce_throwable)) {
+    return;
+  }
+  // PHP callbacks cannot run with a pending exception. Keep ownership of the
+  // original exception until notification finishes, then propagate it unchanged.
+  EG(exception) = NULL;
+  zval *params = (zval *)safe_emalloc(1, sizeof(zval), 0);
+  ZVAL_OBJ_COPY(params, exception);
+  call_callback_function(&interceptor->exception, params, 1, 1);
+  if (EG(exception)) {
+    if (!instanceof_function(EG(exception)->ce, zend_ce_throwable)) {
+      OBJ_RELEASE(exception);
+      return;
+    }
+    zend_exception_set_previous(exception, EG(exception));
+  }
+  EG(exception) = exception;
 }
 
 ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
@@ -877,7 +907,7 @@ ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
   zend_string *function_name = get_pp_style_function_name(execute_data);
   pp_trace("pinpoint_interceptor_handler_entry: handle func/method:%s",
            ZSTR_VAL(function_name));
-  pp_interceptor_v_t *interceptor = find_interceptor(function_name);
+  pp_interceptor_v_t *interceptor = find_interceptor(function_name, execute_data->func);
   zend_string_release(function_name);
   if (interceptor == nullptr) {
     pp_trace(" MUST be a bug 🐞🐞🐞 !!! please send us "
@@ -885,21 +915,19 @@ ZEND_NAMED_FUNCTION(pinpoint_interceptor_handler_entry) {
     return;
   }
 
-  // 2. call before
-  // 3. call origin
-  // 4. call end
-  // 5. call exception if catch
-
-  zend_try {
-    call_interceptor_before(interceptor);
-    interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-    call_interceptor_end(interceptor, return_value);
-  }
-  zend_catch {
+  // Ordinary PHP exceptions live in EG(exception). Fatal Zend bailouts must
+  // propagate to the engine rather than executing more callbacks here.
+  call_interceptor_before(interceptor);
+  if (EG(exception)) {
     call_interceptor_exception(interceptor);
-    call_interceptor_end(interceptor, return_value);
+    return;
   }
-  zend_end_try();
+  interceptor->origin(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+  if (EG(exception)) {
+    call_interceptor_exception(interceptor);
+    return;
+  }
+  call_interceptor_end(interceptor, return_value);
 }
 
 static pp_interceptor_v_t *make_interceptor(zend_string *name, zval *before,
@@ -940,6 +968,10 @@ static void add_function_interceptor(zend_string *name, zval *before, zval *end,
                                      zval *exception) {
   zend_function *func = (zend_function *)zend_hash_str_find_ptr(
       CG(function_table), ZSTR_VAL(name), ZSTR_LEN(name));
+  if (func && func->type != ZEND_INTERNAL_FUNCTION) {
+    php_error_docref(NULL, E_WARNING, "only internal functions can be intercepted");
+    return;
+  }
   if (func != NULL &&
       func->internal_function.handler == pinpoint_interceptor_handler_entry) {
     pp_trace("function `%s` interceptor already added", ZSTR_VAL(name));
@@ -972,13 +1004,15 @@ static void add_class_method_interceptor(zend_string *cls_name,
         &module->function_table, ZSTR_VAL(method), ZSTR_LEN(method));
 
     if (original != NULL) {
-      // overwrite with plugins eg: pinpoint_pdo_exec
-#define MAX_CLASS_METHOD_SIZE 128
-      char buf[MAX_CLASS_METHOD_SIZE] = {0};
-      int size = snprintf(buf, MAX_CLASS_METHOD_SIZE, "%s::%s",
-                          ZSTR_VAL(cls_name), ZSTR_VAL(method));
-
-      zend_string *name = zend_string_init(buf, size, 0);
+      if (original->type != ZEND_INTERNAL_FUNCTION) {
+        php_error_docref(NULL, E_WARNING, "only internal methods can be intercepted");
+        return;
+      }
+      if (original->internal_function.handler == pinpoint_interceptor_handler_entry) {
+        pp_trace("method interceptor already added");
+        return;
+      }
+      zend_string *name = merge_pp_style_name(cls_name, original->common.function_name);
 
       pp_interceptor_v_t *interceptor =
           make_interceptor(name, before, end, exception, original);
@@ -1023,8 +1057,22 @@ static void add_interceptor(zval *joinable, zval *before, zval *end,
   switch (join_type) {
   case 2: {
     zval *v = zend_array_index(joinable, 1);
+    if (Z_TYPE_P(v) != IS_STRING) {
+      php_error_docref(NULL, E_WARNING,
+                       "joinable[1] (module/class name) must be a string, "
+                       "got %s",
+                       zend_zval_type_name(v));
+      return;
+    }
     zend_string *module = zend_string_tolower(Z_STR_P(v));
     v = zend_array_index(joinable, 2);
+    if (Z_TYPE_P(v) != IS_STRING) {
+      php_error_docref(NULL, E_WARNING,
+                       "joinable[2] (method name) must be a string, got %s",
+                       zend_zval_type_name(v));
+      zend_string_release(module);
+      return;
+    }
     zend_string *method = zend_string_tolower(Z_STR_P(v));
     pp_trace("try to interceptor module(class)/function=%s:%s",
              ZSTR_VAL(module), ZSTR_VAL(method));
@@ -1035,6 +1083,12 @@ static void add_interceptor(zval *joinable, zval *before, zval *end,
   }
   case 1: {
     zval *v = zend_array_index(joinable, 1);
+    if (Z_TYPE_P(v) != IS_STRING) {
+      php_error_docref(NULL, E_WARNING,
+                       "joinable[1] (function name) must be a string, got %s",
+                       zend_zval_type_name(v));
+      return;
+    }
     zend_string *function = zend_string_tolower(Z_STR_P(v));
     pp_trace("try to interceptor function=%s", ZSTR_VAL(function));
     add_function_interceptor(function, before, end, exception);
