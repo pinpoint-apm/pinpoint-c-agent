@@ -1,3 +1,11 @@
+## v0.6.1 2026-11-03
+- harden stream framing: reject oversized frame lengths, use `memmove` for
+  buffer shifts, and handle incomplete messages gracefully
+- validate socket descriptors against `FD_SETSIZE` on POSIX before `select`
+- clear `context_map_` on `TraceNode::Reset` to avoid stale node reuse state
+- compare collector-agent hello version numerically (optional `v` prefix,
+  dotted parts as numbers) so `0.7.1`, `v0.7`, `v0.10.x` sort correctly (#758)
+
 ## v0.6.0 2024-10-10
 - refactor span json protocol
 - add async api

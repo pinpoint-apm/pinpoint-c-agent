@@ -1,5 +1,22 @@
 ﻿# Changes
 
+## 2026-11-03
+
+### PHP (v0.6.2)
+- preserve interceptor exception and bailout semantics (#764)
+- fix inherited internal method interceptor resolution
+
+### Python (v1.4.2)
+- preserve native API errors and trace state (#763)
+
+### Common (v0.6.1)
+- harden stream framing: reject oversized frame lengths, use `memmove` for
+  buffer shifts, and handle incomplete messages gracefully
+- validate socket descriptors against `FD_SETSIZE` on POSIX before `select`
+- clear `context_map_` on `TraceNode::Reset` to avoid stale node reuse state
+- compare collector-agent hello version numerically (optional `v` prefix,
+  dotted parts as numbers) so `0.7.1`, `v0.7`, `v0.10.x` sort correctly (#758)
+
 ## v0.7.9
 
 > ⚠️ **SECURITY**: v0.7.8 (and earlier) contains a remote denial-of-service

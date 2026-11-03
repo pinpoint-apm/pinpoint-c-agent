@@ -1,5 +1,9 @@
 > end of maintain: use  `https://pecl.php.net/package-changelog.php?package=pinpoint_php`
 
+## 0.6.2 2026-11-03
+- preserve interceptor exception and bailout semantics (#764)
+- fix inherited internal method interceptor resolution
+
 ## 0.5.3 2024-07-31
 - build on win32
 - build on macos

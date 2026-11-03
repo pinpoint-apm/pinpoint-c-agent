@@ -96,6 +96,52 @@ existing branches):
 - **Guard**: `check-version-consistency.yml` fails CI if any product's version
   is hardcoded somewhere that disagrees with `versions.json`.
 
+## Changelog Update Workflow
+
+When a version is bumped in `versions.json` (or new code lands on the release
+branch), update the changelogs by following this exact method:
+
+### Which changelog file to update (per product)
+
+| Product | Changelog file | Format |
+|---------|----------------|--------|
+| `common` | `common/CHANGES.md` | `## v<ver> <YYYY-MM-DD>` + `- bullet` |
+| `php` | `CHANGES-PHP.md` | `## <ver> <YYYY-MM-DD>` + `- bullet` (no `v` prefix) |
+| `python` | no dedicated file — use top-level `Changes.md` | see below |
+| `collector-agent` | `collector-agent/CHANGES.md` | `## v<ver>` + `### Section` |
+
+### Top-level `Changes.md`
+- The top-level `Changes.md` is the **release summary** — add a `## <YYYY-MM-DD>`
+  entry at the very top with `### PHP (vX.Y.Z)` / `### Python (vX.Y.Z)` /
+  `### Common (vX.Y.Z)` subsections summarizing each product's changes.
+- It also carries collector-agent release notes (e.g. `## v0.7.9` with security
+  notices). When a collector-agent release has a security fix, mirror the
+  `⚠️ SECURITY` notice here and in `collector-agent/CHANGES.md`.
+
+### Steps to follow
+1. **Read `versions.json`** to see which products were bumped and their new
+   versions.
+2. **Inspect the git history** for the changes that belong to each bump:
+   `git log --oneline -15` and `git show <sha>` to read the commit message and
+   diff. Derive the changelog bullets from the actual commit content (not from
+   assumptions).
+3. **Match the existing format** of each file (see table above) — keep the
+   version heading style and bullet style consistent with prior entries.
+4. **Use the current date** (`date`) for the entry, e.g. `2026-11-03`.
+5. **Add the new entry at the TOP** of the file, above the previous release.
+
+### Pitfalls
+- `versions.json` is the single source of truth — the changelog version heading
+  must match it exactly (e.g. `common` uses `v0.6.1`, `php` uses `0.6.2` without
+  `v`).
+- A `git pull` can **reset an uncommitted `versions.json` bump** back to the
+  committed value. After pulling, re-check `versions.json` before writing the
+  changelog so the heading matches the actual current version.
+- `common` changes affect **both** PHP and Python agents — mention the shared
+  impact if relevant, but only log the change under the product(s) whose version
+  actually bumped.
+- Do not invent changelog entries for products whose version did not change.
+
 ## Key Directories
 
 - [common/](common/): The "heart" of the C-agent logic.
