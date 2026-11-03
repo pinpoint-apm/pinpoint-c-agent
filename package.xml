@@ -16,10 +16,10 @@
     <email>liu_ming_yi@outlook.com</email>
     <active>yes</active>
   </lead>
-  <date>2024-10-23</date>
+  <date>2026-11-03</date>
   <version>
-    <release>0.6.1</release>
-    <api>0.6.1</api>
+    <release>0.6.2</release>
+    <api>0.6.2</api>
   </version>
   <stability>
     <release>stable</release>
@@ -27,8 +27,9 @@
   </stability>
   <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
   <notes>
-    ## 0.6.1 2024-10-23
-    - release asynchronous version https://github.com/pinpoint-apm/pinpoint-c-agent/pull/692
+    ## 0.6.2 2026-11-03
+    - preserve interceptor exception and bailout semantics (#764)
+    - fix inherited internal method interceptor resolution
   </notes>
   <contents>
     <dir name="/">
