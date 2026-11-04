@@ -50,10 +50,13 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
+          # abi3 (Py_LIMITED_API) is enabled in setup.py, so each architecture
+          # only needs ONE cp38-abi3 wheel covering all supported Pythons (>=3.8).
+          CIBW_BUILD: cp38-*
           CIBW_ARCHS_LINUX: x86_64 aarch64
-          CIBW_ARCHS_WINDOWS: AMD64 ARM64
+          CIBW_ARCHS_WINDOWS: AMD64
           CIBW_ARCHS_MACOS: x86_64 arm64
-          CIBW_SKIP: cp36-* cp37-* pp*
+          CIBW_SKIP: pp*
 
       - uses: actions/upload-artifact@v4
         with:
@@ -118,10 +121,13 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
+          # abi3 (Py_LIMITED_API) is enabled in setup.py, so each architecture
+          # only needs ONE cp38-abi3 wheel covering all supported Pythons (>=3.8).
+          CIBW_BUILD: cp38-*
           CIBW_ARCHS_LINUX: x86_64 aarch64
-          CIBW_ARCHS_WINDOWS: AMD64 ARM64
+          CIBW_ARCHS_WINDOWS: AMD64
           CIBW_ARCHS_MACOS: x86_64 arm64
-          CIBW_SKIP: cp36-* cp37-* pp*
+          CIBW_SKIP: pp*
 
       - uses: actions/upload-artifact@v4
         with:
