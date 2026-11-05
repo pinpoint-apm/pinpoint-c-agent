@@ -19,3 +19,5 @@ jobs:
         run: make -C collector-agent version
       - name: Check synchronized versions
         run: python3 scripts/sync_versions.py --check
+      - name: Check generated product histories
+        run: python3 scripts/sync_changes.py --check

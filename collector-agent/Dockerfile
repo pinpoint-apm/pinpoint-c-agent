@@ -10,6 +10,8 @@ RUN make
 
 FROM alpine:3.23
 COPY --from=builder /apps/collector-agent /usr/local/bin/CollectorAgent
+RUN mkdir -p /usr/share/doc/collector-agent
+COPY collector-agent/CHANGES.md /usr/share/doc/collector-agent/CHANGES.md
 LABEL org.opencontainers.image.source=https://github.com/pinpoint-apm/pinpoint-c-agent.git
 LABEL org.opencontainers.image.description="collector agent for pinpoint-collector"
 LABEL org.opencontainers.image.licenses="Apache-2.0"

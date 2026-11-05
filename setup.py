@@ -5,6 +5,9 @@ from pathlib import Path
 with open("README", "r") as fh:
     long_description = fh.read()
 
+with open("CHANGES-PY.md", "r") as fh:
+    long_description += "\n\n" + fh.read()
+
 # DO NOT edit by hand. Managed by CI (sync-component-versions).
 VERSION = "1.4.2"
 
