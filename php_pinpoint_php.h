@@ -26,9 +26,7 @@ extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
 #ifndef PHP_PINPOINT_PHP_VERSION
-/* Default fallback. The authoritative version is injected at configure time by
- * config.m4 (from repo-root versions.json) via -DPHP_PINPOINT_PHP_VERSION=...
- * If building without running config.m4, this fallback is used. */
+/* DO NOT Change it by hand, it managed by CI(sync-component-versions) */
 #define PHP_PINPOINT_PHP_VERSION "0.6.2"
 #endif
 

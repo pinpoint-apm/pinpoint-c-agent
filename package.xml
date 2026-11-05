@@ -17,6 +17,7 @@
     <active>yes</active>
   </lead>
   <date>2026-11-03</date>
+  <!-- DO NOT Change it by hand, it managed by CI(sync-component-versions) -->
   <version>
     <release>0.6.2</release>
     <api>0.6.2</api>
