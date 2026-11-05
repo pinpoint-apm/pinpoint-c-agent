@@ -1,4 +1,4 @@
-FROM golang:1.27.1-alpine3.23 AS builder
+FROM golang:1.27.3-alpine3.23 AS builder
 WORKDIR /apps
 USER root
 RUN apk add --no-cache make protobuf-dev git
@@ -12,7 +12,7 @@ COPY collector-agent/ /apps
 COPY versions.json /versions.json
 RUN make
 
-FROM alpine:3.17
+FROM alpine:3.23
 COPY --from=builder /apps/collector-agent /usr/local/bin/CollectorAgent
 LABEL org.opencontainers.image.source=https://github.com/pinpoint-apm/pinpoint-c-agent.git
 LABEL org.opencontainers.image.description="collector agent for pinpoint-collector"
