@@ -64,7 +64,7 @@ bool(false)
 [pinpoint] [%d:%d][unittest] current span was dropped
 [pinpoint] [%d:%d] [128] pinpoint_end_trace Done!
 {
-	"common_library_version" : "%d.%d.%d",
+	"common_library_version" : "%s",
 	"pool_free_node" : 128,
 	"pool_total_node" : 128
 }
