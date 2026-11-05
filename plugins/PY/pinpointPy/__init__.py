@@ -37,7 +37,7 @@ def use_asyncio_local_context():
 __all__ = ['monkey_patch_for_pinpoint', 'use_thread_local_context', 'use_asyncio_local_context',
            'set_agent', 'app_id', 'app_name', 'gen_tid', 'get_logger', 'PinTransaction', 'GenPinHeader', 'PinHeader', 'enable_experiment_plugins']
 
-# DO NOT Change it by hand, it managed by CI(sync-component-versions)
+# DO NOT edit by hand. Managed by CI (sync-component-versions).
 def _resolve_version():
     try:
         from importlib.metadata import version as _dist_version

@@ -26,7 +26,7 @@ extern zend_module_entry pinpoint_php_module_entry;
 #define phpext_pinpoint_php_ptr &pinpoint_php_module_entry
 
 #ifndef PHP_PINPOINT_PHP_VERSION
-/* DO NOT Change it by hand, it managed by CI(sync-component-versions) */
+/* DO NOT edit by hand. Managed by CI (sync-component-versions). */
 #define PHP_PINPOINT_PHP_VERSION "0.6.2"
 #endif
 

@@ -5,7 +5,7 @@ from pathlib import Path
 with open("README", "r") as fh:
     long_description = fh.read()
 
-# DO NOT Change it by hand, it managed by CI(sync-component-versions)
+# DO NOT edit by hand. Managed by CI (sync-component-versions).
 VERSION = "1.4.2"
 
 name = platform.system().lower()

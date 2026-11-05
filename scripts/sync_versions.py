@@ -69,7 +69,7 @@ def sync_versions(check_only=False):
     )
     for relative_path in managed_fields:
         content = (ROOT / relative_path).read_text(encoding="utf-8")
-        if "DO NOT Change it by hand, it managed by CI(sync-component-versions)" not in content:
+        if "DO NOT edit by hand. Managed by CI (sync-component-versions)." not in content:
             print(f"Missing managed-version comment: {relative_path}")
             out_of_sync = True
     for path, pattern, version in fields:

@@ -48,7 +48,7 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   PHP_ADD_INCLUDE(PHP_EXT_SRCDIR()/common/src)
   AC_DEFINE(HAVE_PINPOINT_PHP, 1, [Whether you have pinpoint])
 
-  dnl DO NOT Change it by hand, it managed by CI(sync-component-versions)
+  dnl DO NOT edit by hand. Managed by CI (sync-component-versions).
   PINPOINT_PHP_VERSION="0.6.2"
   PHP_ADD_MAKEFILE_FRAGMENT
   PHP_SUBST(PINPOINT_PHP_VERSION)

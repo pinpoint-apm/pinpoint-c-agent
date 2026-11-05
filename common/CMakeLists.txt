@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-# DO NOT Change it by hand, it managed by CI(sync-component-versions)
+# DO NOT edit by hand. Managed by CI (sync-component-versions).
 set(PINPOINT_C_AGENT_API_VERSION "0.6.1")
 
 project(pinpoint VERSION ${PINPOINT_C_AGENT_API_VERSION} DESCRIPTION  "pinpoint common library")

@@ -70,7 +70,7 @@ static const NodeID E_ROOT_NODE = 0;
 static const E_NODE_LOC E_LOC_CURRENT = 0x0;
 static const E_NODE_LOC E_LOC_ROOT = 0x1;
 
-/* DO NOT Change it by hand, it managed by CI(sync-component-versions) */
+/* DO NOT edit by hand. Managed by CI (sync-component-versions). */
 #define PINPOINT_C_AGENT_API_VERSION "0.6.1"
 
 /**
