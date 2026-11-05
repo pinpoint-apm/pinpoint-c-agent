@@ -1,12 +1,22 @@
 from setuptools import setup, Extension, find_namespace_packages
 import platform
+import warnings
 from pathlib import Path
 
 with open("README", "r") as fh:
     long_description = fh.read()
 
-with open("CHANGES-PY.md", "r") as fh:
-    long_description += "\n\n" + fh.read()
+changelog_path = Path("CHANGES-PY.md")
+if changelog_path.is_file():
+    with changelog_path.open("r", encoding="utf-8") as fh:
+        long_description += "\n\n" + fh.read()
+else:
+    warnings.warn(
+        "CHANGES-PY.md is missing. Copy it to the project root "
+        "to include the Python change history.",
+        UserWarning,
+        stacklevel=1,
+    )
 
 # DO NOT edit by hand. Managed by CI (sync-component-versions).
 VERSION = "1.4.2"

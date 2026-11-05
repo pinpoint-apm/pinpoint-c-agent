@@ -4,7 +4,6 @@ WORKDIR /app/
 COPY testapps/PY/ /app/
 
 COPY setup.py /pinpoint-c-agent/setup.py
-COPY CHANGES-PY.md /pinpoint-c-agent/CHANGES-PY.md
 COPY common/ /pinpoint-c-agent/common
 COPY README /pinpoint-c-agent/README
 COPY plugins/PY /pinpoint-c-agent/plugins/PY

@@ -8,7 +8,6 @@ COPY testapps/py-celery/run_all.sh /app/run_all.sh
 # RUN pip install -i https://test.pypi.org/simple/ pinpointPy==1.4.1
 
 COPY setup.py /pinpoint-c-agent/setup.py
-COPY CHANGES-PY.md /pinpoint-c-agent/CHANGES-PY.md
 COPY common/ /pinpoint-c-agent/common
 COPY README /pinpoint-c-agent/README
 COPY plugins/PY /pinpoint-c-agent/plugins/PY
