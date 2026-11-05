@@ -1,7 +1,6 @@
 FROM python:3.9
 
 COPY setup.py /pinpoint-c-agent/setup.py
-COPY versions.json /pinpoint-c-agent/versions.json
 COPY common/ /pinpoint-c-agent/common
 COPY README /pinpoint-c-agent/README
 COPY plugins/PY /pinpoint-c-agent/plugins/PY

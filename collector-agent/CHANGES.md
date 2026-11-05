@@ -1,9 +1,11 @@
-## v0.7.10
+# Collector-agent Change History
+
+## 0.7.10 2026-11-03
 
 > ⚠️ **SECURITY**: v0.7.9 (and earlier) ships vulnerable dependencies.
 > **Upgrade to v0.7.10 as soon as possible.**
 
-### Security
+#### Security
 - **Upgrade vulnerable Go dependencies** (found by `govulncheck`/image scanners):
   - `golang.org/x/net` v0.9.0 → **v0.60.0** — fixes **CVE-2023-44487**
     (HTTP/2 "Rapid Reset" DoS, GO-2023-2102) plus GO-2025-3503 and
@@ -17,12 +19,12 @@
     (`SupportPackageIsVersion7`) remains compatible — no proto regeneration
     required.
 
-## v0.7.9
+## 0.7.9 2026-11-03
 
 > ⚠️ **SECURITY**: v0.7.8 (and earlier) contains a remote denial-of-service
 > vulnerability. **Upgrade to v0.7.9 as soon as possible.**
 
-### Security
+#### Security
 - **Fix remote DoS (CVE-pending)**: an unauthenticated remote attacker could
   crash the collector-agent with a single TCP packet (type=1 `REQ_UPDATE_SPAN`),
   causing a denial of service for all traced applications.
@@ -45,7 +47,7 @@
       earlier string-prefix scheme did not prevent.
     - `CollectPStateMessage`: `totalPer[0]` could panic on an empty slice.
 
-### Reliability
+#### Reliability
 - **Fix data race in request statistics (R6)**: `RequestCounter` fields were
   written by the span consumer goroutine and read concurrently by the
   stat/command/cleanup goroutines with no synchronization. A mutex now guards
@@ -56,11 +58,16 @@
   marked *pending* until registration is confirmed and retried on next access
   (the ID stays stable).
 
-## v0.6.4
+## 0.6.4 2026-11-03
+
 - fix: panic: send on closed channel #658
 
-## v0.5.3 2024.05.31
+## 0.5.3 2026-11-03
+
 - support go install
 
-## [v0.5.0] start time in ms
+## 0.5.0
+
 - return current time in ms
+
+</details>

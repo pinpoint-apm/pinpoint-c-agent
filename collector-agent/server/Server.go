@@ -21,7 +21,7 @@ import (
 )
 
 // Version is generated into server/version_gen.go (via `make version`) from
-// the single source of truth at repo-root versions.json. Do NOT override it
+// the synchronized TAG value in collector-agent/makefile. Do NOT override it
 // via -ldflags at build time; the makefile no longer injects it dynamically.
 // NOTE: the generated value keeps the "v" prefix — the client (pinpointPy C++
 // core HandleHelloMsg) compares this string against lowest_version="v0.7.0"

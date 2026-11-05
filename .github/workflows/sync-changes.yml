@@ -1,0 +1,55 @@
+name: sync-product-changes
+
+on:
+  push:
+    branches: ["0.7"]
+    paths:
+      - Changes.md
+  pull_request:
+    branches: ["0.7"]
+    paths:
+      - Changes.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sync-product-changes-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Generate product changelogs
+        run: python3 scripts/sync_changes.py
+
+      - name: Verify generated changelogs
+        run: python3 scripts/sync_changes.py --check
+
+      - name: Commit generated histories
+        run: |
+          if git diff --quiet; then
+            echo "Product changelogs are already synchronized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Changes.md CHANGES-PHP.md CHANGES-PY.md common/CHANGES.md \
+            collector-agent/CHANGES.md package.xml
+          git commit -m "docs: synchronize product change histories"
+          TARGET_BRANCH="${{ github.event.pull_request.head.ref || github.ref_name }}"
+          git push origin "HEAD:${TARGET_BRANCH}"
+          gh workflow run check-version-consistency.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-common.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-php.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-python.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-collector-agent.yml --ref "$TARGET_BRANCH"
+        env:
+          GH_TOKEN: ${{ github.token }}
