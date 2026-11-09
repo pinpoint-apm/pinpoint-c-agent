@@ -4,13 +4,18 @@ Interceptor reports PHP exceptions and does not execute the original after befor
 <?php if (!extension_loaded('pinpoint_php')) echo 'skip'; ?>
 --FILE--
 <?php
+$notifiedId = null;
 _pinpoint_join_cut(['intdiv'], function (...$args) {},
     function ($value) { echo "unexpected end\n"; },
-    function ($error) { echo 'notified:', get_class($error), "\n"; });
+    function ($error) use (&$notifiedId) {
+        $notifiedId = spl_object_hash($error);
+        echo 'notified:', get_class($error), "\n";
+    });
 try {
     intdiv(1, 0);
 } catch (Throwable $error) {
     echo 'caught:', get_class($error), "\n";
+    var_dump(spl_object_hash($error) === $notifiedId);
 }
 $original = new RuntimeException('before failed');
 $path = __DIR__ . '/pinpoint-before-side-effect.txt';
@@ -18,7 +23,8 @@ $path = __DIR__ . '/pinpoint-before-side-effect.txt';
 _pinpoint_join_cut(['file_put_contents'],
     function (...$args) use ($original) { throw $original; },
     function ($value) { echo "unexpected end\n"; },
-    function ($error) {
+    function ($error) use ($original) {
+        var_dump($error === $original);
         echo 'notified:', get_class($error), "\n";
         throw new LogicException('notification failed');
     });
@@ -35,6 +41,8 @@ echo 'file exists:', file_exists($path) ? 'yes' : 'no', "\n";
 --EXPECT--
 notified:DivisionByZeroError
 caught:DivisionByZeroError
+bool(true)
+bool(true)
 notified:RuntimeException
 bool(true)
 notification error:LogicException

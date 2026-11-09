@@ -1,9 +1,9 @@
 {
-    "name": "pinpoint_php",
+    "name": "pinpoint-apm/pinpoint-php",
     "version": "0.6.2",
-    "type": "extension",
+    "type": "php-ext",
     "license": [
-        "Apache License 2.0"
+        "Apache-2.0"
     ],
     "authors": [
         {
@@ -11,5 +11,18 @@
             "email": "liu_ming_yi@outlook.com"
         }
     ],
-    "description": "PHP extension for pinpoint-apm"
+    "description": "PHP extension for pinpoint-apm",
+    "require": {
+        "php": ">=7.1.0"
+    },
+    "php-ext": {
+        "extension-name": "pinpoint_php",
+        "configure-options": [
+            {
+                "name": "enable-pinpoint_php",
+                "description": "Enable Pinpoint PHP extension",
+                "needs-value": false
+            }
+        ]
+    }
 }

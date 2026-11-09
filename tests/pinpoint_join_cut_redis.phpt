@@ -2,6 +2,10 @@
 pinpoint_php pinpoint_join_cut_redis
 --SKIPIF--
 <?php
+// Older PHP test runners do not load dependencies from --EXTENSIONS--.
+if (!extension_loaded("redis")) {
+    die("skip redis extension required");
+}
 if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (version_compare(phpversion(), '7.1.33', '<='))

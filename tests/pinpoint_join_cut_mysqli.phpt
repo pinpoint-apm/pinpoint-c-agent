@@ -2,6 +2,10 @@
 pinpoint_php pinpoint_join_cut_redis
 --SKIPIF--
 <?php
+// Older PHP test runners do not load dependencies from --EXTENSIONS--.
+if (!extension_loaded("mysqli")) {
+    die("skip mysqli extension required");
+}
 if (!extension_loaded("pinpoint_php"))
   print "skip";
 ?>

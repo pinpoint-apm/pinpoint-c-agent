@@ -3,9 +3,8 @@ name: release php package
 on:
   workflow_dispatch:
 
-env:
-  # Name the source archive after the ref selected for this manual release.
-  MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -13,28 +12,55 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Resolve synchronized PHP version
         run: |
           VERSION=$(grep -oP '#define PHP_PINPOINT_PHP_VERSION "\K[^"]+' php_pinpoint_php.h)
-          if [ -z "$VERSION" ]; then
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Could not resolve synchronized PHP version"
             exit 1
           fi
           echo "RELEASE_TAG=php/v$VERSION" >> "$GITHUB_ENV"
+          echo "MODULE_PAK=pinpoint_php-$VERSION.tar.gz" >> "$GITHUB_ENV"
           echo "Resolved release tag: php/v$VERSION"
+      - name: Validate release packages before publishing
+        run: |
+          docker run --rm -v "$PWD:/source:ro" php:7.1-cli sh /source/scripts/check_php_packages.sh
+          docker run --rm -v "$PWD:/source:ro" php:8.3-cli sh /source/scripts/check_php_packages.sh
       - name: Package pinpoint_php
         id: pack
         run: |
-          tar -czf ${{ env.MODULE_PAK }} common/ pinpoint_php.cpp php_pinpoint_php.h config.m4 tests LICENSE CHANGES-PHP.md
-          md5=($(md5sum ${{ env.MODULE_PAK }} ))
-          PACK_NAME=${{ env.MODULE_PAK }}-${md5}-$(date '+%Y-%m-%d').tar.gz
-          mv ${{ env.MODULE_PAK }} $PACK_NAME
+          sh scripts/package_php.sh "$MODULE_PAK"
+          md5=$(md5sum "$MODULE_PAK" | cut -d ' ' -f1)
+          PACK_NAME="${MODULE_PAK%.tar.gz}-${md5}-$(date '+%Y-%m-%d').tar.gz"
+          mv "$MODULE_PAK" "$PACK_NAME"
           echo "PACK=$PACK_NAME" >> $GITHUB_OUTPUT
+      - name: Create Composer-compatible PHP tag
+        env:
+          PHP_COMMIT: ${{ github.sha }}
+        run: |
+          VERSION=${RELEASE_TAG#php/v}
+          # Both names must describe this exact source revision. Never move tags.
+          for TAG in "$RELEASE_TAG" "$VERSION"; do
+            if git rev-parse --verify "refs/tags/$TAG" >/dev/null 2>&1; then
+              TAG_COMMIT=$(git rev-parse "refs/tags/$TAG^{commit}")
+              if [ "$TAG_COMMIT" != "$PHP_COMMIT" ]; then
+                echo "::error::Tag $TAG already points to another commit; bump the PHP version."
+                exit 1
+              fi
+            fi
+          done
+          if ! git rev-parse --verify "refs/tags/$VERSION" >/dev/null 2>&1; then
+            git tag "$VERSION" "$PHP_COMMIT"
+            git push origin "refs/tags/$VERSION"
+          fi
       - name: Release php_package
         id: rel_php_pak
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.sha }}
           files: ${{ steps.pack.outputs.PACK }}
 
       - name: generate install_pinpoint_php.sh

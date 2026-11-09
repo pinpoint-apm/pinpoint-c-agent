@@ -50,6 +50,9 @@ Our advantage:
 
 > php 7.1+
 
+For PHP 7.1–8.2, support is limited to security fixes and critical bug fixes.
+New features are not supported on these PHP versions.
+
 1. Install extension
 
 ` pecl install pinpoint_php `
@@ -58,7 +61,7 @@ Our advantage:
 
 `composer require pinpoint-apm/pinpoint-php-aop`
 
-[Full guide for PHP](DOC/PHP/Readme.md) 
+[Full guide for PHP](DOC/PHP/Readme.md) · [Package validation and PIE release checklist](DOC/PHP/packaging.md)
 
 ## C/CPP built in API
 
