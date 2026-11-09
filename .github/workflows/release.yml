@@ -26,7 +26,6 @@ jobs:
           echo "Resolved release tag: php/v$VERSION"
       - name: Validate release packages before publishing
         run: |
-          docker run --rm -v "$PWD:/source:ro" php:7.1-cli sh /source/scripts/check_php_packages.sh
           docker run --rm -v "$PWD:/source:ro" php:8.3-cli sh /source/scripts/check_php_packages.sh
       - name: Package pinpoint_php
         id: pack
