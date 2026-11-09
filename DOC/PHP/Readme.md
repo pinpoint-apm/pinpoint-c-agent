@@ -61,6 +61,10 @@ require_once __DIR__ . '/vendor/pinpoint-apm/pinpoint-php-aop/auto_pinpointed.ph
 >We have prepared some examples for you, try [playground](https://github.com/pinpoint-apm/pinpoint-c-agent/tree/dev/testapps#playground).
 
 
+## Windows package publishing
+
+See [Windows PHP extension packages](windows-packages.md) for the release workflow, supported build matrix and manual retries.
+
 ## Feedback & Question
 
 ### 1. How to regenerate all AOP files?

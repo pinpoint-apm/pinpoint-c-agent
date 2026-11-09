@@ -6,15 +6,19 @@ on:
 permissions:
   contents: write
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      release-tag: ${{ steps.php-version.outputs.release-tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Resolve synchronized PHP version
+        id: php-version
         run: |
           VERSION=$(grep -oP '#define PHP_PINPOINT_PHP_VERSION "\K[^"]+' php_pinpoint_php.h)
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -23,6 +27,7 @@ jobs:
           fi
           echo "RELEASE_TAG=php/v$VERSION" >> "$GITHUB_ENV"
           echo "MODULE_PAK=pinpoint_php-$VERSION.tar.gz" >> "$GITHUB_ENV"
+          echo "release-tag=php/v$VERSION" >> "$GITHUB_OUTPUT"
           echo "Resolved release tag: php/v$VERSION"
       - name: Validate release packages before publishing
         run: |
@@ -83,3 +88,11 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: pinpoint-common.tar.gz
+
+  windows:
+    needs: build
+    uses: ./.github/workflows/php-windows-release.yml
+    with:
+      source-ref: ${{ github.sha }}
+      release-tag: ${{ needs.build.outputs.release-tag }}
+      publish: true
