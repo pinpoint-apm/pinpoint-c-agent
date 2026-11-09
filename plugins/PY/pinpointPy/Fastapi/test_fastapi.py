@@ -25,7 +25,7 @@ class Test_UT(unittest.TestCase):
         app = FastAPI(title='pinpointpy test', middleware=middlewares)
 
         set_agent("cd.dev.test.py", "cd.dev.test.py",
-                  'tcp:dev-collector:9999', -1)
+                  'tcp:dev-collector:10000', -1)
 
         @app.get("/cluster/{name}")
         async def read_main(name, request: Request):

@@ -231,6 +231,8 @@ services:
     profiles:
       - testing
     depends_on:
+      dev-collector:
+        condition: service_started
       redis:
         condition: service_healthy
       httpbin:
@@ -249,6 +251,8 @@ services:
     profiles:
       - testing
     depends_on:
+      dev-collector:
+        condition: service_started
       redis:
         condition: service_healthy
       httpbin:
@@ -267,6 +271,8 @@ services:
     profiles:
       - testing
     depends_on:
+      dev-collector:
+        condition: service_started
       redis:
         condition: service_healthy
       httpbin:
