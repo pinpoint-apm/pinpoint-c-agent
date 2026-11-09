@@ -197,8 +197,8 @@ services:
   dev-collector:
     restart: always
     build:
-      dockerfile: Dockerfile
-      context: ../collector-agent/
+      dockerfile: collector-agent/Dockerfile
+      context: ../
 
     environment:
       - PP_COLLECTOR_AGENT_SPAN_IP=dev-pinpoint
