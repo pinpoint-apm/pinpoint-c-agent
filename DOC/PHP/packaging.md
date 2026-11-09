@@ -42,12 +42,12 @@ temporary local VCS repository. It does not register or publish to Packagist.
    tag at the same commit for Composer. Composer ignores `php/vX.Y.Z` tags.
    Existing tags pointing to another commit cause the workflow to fail;
    publish a new PHP version instead of moving an old tag.
-4. Register `pinpoint-apm/pinpoint-php` on Packagist with this repository and
+4. Register `pinpoint-apm/ext-php` on Packagist with this repository and
    configure its update hook. Verify the new PHP version is indexed before
    announcing the following installation command:
 
    ```sh
-   pie install pinpoint-apm/pinpoint-php
+   pie install pinpoint-apm/ext-php
    ```
 
 The explicit Composer version is synchronized from `versions.json`. It also

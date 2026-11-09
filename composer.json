@@ -1,5 +1,5 @@
 {
-    "name": "pinpoint-apm/pinpoint-php",
+    "name": "pinpoint-apm/ext-php",
     "version": "0.6.2",
     "type": "php-ext",
     "license": [

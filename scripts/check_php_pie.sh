@@ -40,7 +40,7 @@ php -r '
     file_put_contents($argv[2], json_encode($config));
 ' "$validation_root/repository" "$validation_root/consumer/composer.json"
 php "$composer_phar" show --working-dir="$validation_root/consumer" \
-    --all pinpoint-apm/pinpoint-php "$expected_version" --format=json \
+    --all pinpoint-apm/ext-php "$expected_version" --format=json \
     > "$validation_root/discovered.json"
 php -r '
     $package = json_decode(file_get_contents($argv[1]), true);
@@ -51,7 +51,7 @@ php -r '
 ' "$validation_root/discovered.json" "$expected_version"
 
 php "$pie_phar" repository:add vcs "$validation_root/repository"
-php "$pie_phar" install "pinpoint-apm/pinpoint-php:$expected_version" \
+php "$pie_phar" install "pinpoint-apm/ext-php:$expected_version" \
     --skip-enable-extension --no-interaction --make-parallel-jobs=2
 php -n -d extension=pinpoint_php.so -r '
     if (phpversion("pinpoint_php") !== $argv[1]) {
