@@ -3,6 +3,9 @@ name: release php package
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 env:
   # Name the source archive after the ref selected for this manual release.
   MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}
@@ -10,10 +13,13 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      release-tag: ${{ steps.php-version.outputs.release-tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Resolve synchronized PHP version
+        id: php-version
         run: |
           VERSION=$(grep -oP '#define PHP_PINPOINT_PHP_VERSION "\K[^"]+' php_pinpoint_php.h)
           if [ -z "$VERSION" ]; then
@@ -21,6 +27,7 @@ jobs:
             exit 1
           fi
           echo "RELEASE_TAG=php/v$VERSION" >> "$GITHUB_ENV"
+          echo "release-tag=php/v$VERSION" >> "$GITHUB_OUTPUT"
           echo "Resolved release tag: php/v$VERSION"
       - name: Package pinpoint_php
         id: pack
@@ -58,3 +65,11 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           files: pinpoint-common.tar.gz
+
+  windows:
+    needs: build
+    uses: ./.github/workflows/php-windows-release.yml
+    with:
+      source-ref: ${{ github.sha }}
+      release-tag: ${{ needs.build.outputs.release-tag }}
+      publish: true
