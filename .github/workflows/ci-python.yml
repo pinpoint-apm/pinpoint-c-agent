@@ -12,7 +12,9 @@ jobs:
   Python:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # Python 3.8/3.9 are not published for the rolling ubuntu-latest
+        # image after it migrated to Ubuntu 26.04.
+        os: [ubuntu-22.04, macos-latest]
         python-version: ["3.8", "3.9", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
