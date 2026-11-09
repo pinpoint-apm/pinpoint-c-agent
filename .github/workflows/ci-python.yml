@@ -12,8 +12,8 @@ jobs:
   Python:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.11", "3.12", "3.13"]
+        os: [ubuntu-22.04, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,9 +42,8 @@ jobs:
       # - name: build python-plugins
       - name: start test environment
         run: |
-          ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py3.9-plugins --exit-code-from py3.9-plugins
           ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py-plugins --exit-code-from py-plugins
           ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" up py3.11-plugins --exit-code-from py3.11-plugins
       - name: Stop containers
         # if: always()
-        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down py3.11-plugins py-plugins py3.9-plugins 
+        run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down py3.11-plugins py-plugins

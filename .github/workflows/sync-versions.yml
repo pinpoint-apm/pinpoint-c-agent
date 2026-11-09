@@ -1,0 +1,82 @@
+name: sync-component-versions
+
+on:
+  push:
+    branches: ["0.7"]
+    paths:
+      - versions.json
+  pull_request:
+    branches: ["0.7"]
+    paths:
+      - versions.json
+  workflow_dispatch:
+    inputs:
+      branch_guard:
+        description: Run only against the 0.7 branch
+        required: true
+        default: "0.7"
+        type: choice
+        options: ["0.7"]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sync-component-versions-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify target branch
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            if [ "$HEAD_REPO" != "${GITHUB_REPOSITORY}" ]; then
+              echo "::error::Fork PRs cannot be updated with the repository token. Apply scripts/sync_versions.py locally and push the generated files."
+              exit 1
+            fi
+            echo "PR source branch: $HEAD_REF"
+          elif [ "$HEAD_REF" != "0.7" ]; then
+            echo "::error::This workflow can only run on branch 0.7"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - name: Synchronize component versions
+        run: python3 scripts/sync_versions.py
+
+      - name: Verify synchronized versions
+        run: python3 scripts/sync_versions.py --check
+
+      - name: Commit generated version updates
+        run: |
+          if git diff --quiet; then
+            echo "All component versions are already synchronized."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config.m4 php_pinpoint_php.h composer.json package.xml \
+            plugins/PY/pinpointPy/__init__.py setup.py setup_pypi_test.py \
+            common/CMakeLists.txt common/include/common.h.in \
+            common/include/pinpoint/common.h collector-agent/makefile \
+            collector-agent/server/Server.go
+          git commit -m "chore: sync component versions"
+          TARGET_BRANCH="${{ github.event.pull_request.head.ref || github.ref_name }}"
+          git push origin "HEAD:${TARGET_BRANCH}"
+          gh workflow run check-version-consistency.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-common.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-php.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-python.yml --ref "$TARGET_BRANCH"
+          gh workflow run ci-collector-agent.yml --ref "$TARGET_BRANCH"
+        env:
+          GH_TOKEN: ${{ github.token }}

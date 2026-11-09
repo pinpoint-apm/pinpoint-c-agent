@@ -25,7 +25,7 @@ class TestCase(unittest.TestCase):
     def setUpClass(cls):
         use_thread_local_context()
         set_agent("cd.dev.test.utest", "cd.dev.test.py",
-                  'tcp:localhost:10000', -1, log_level=logging.DEBUG)
+                  'tcp:dev-collector:10000', -1, log_level=logging.DEBUG)
 
     def assert_in_pinpoint_context(self):
         # get_trace_context().get_parent_id()
@@ -40,7 +40,7 @@ class AsyncTestCase(unittest.TestCase):
     def setUpClass(cls):
         # use_thread_local_context()
         set_agent("cd.dev.test.py", "cd.dev.test.py",
-                  'tcp:localhost:9999', -1, log_level=logging.DEBUG)
+                  'tcp:dev-collector:10000', -1, log_level=logging.DEBUG)
 
 
 class HttpBinResponse:

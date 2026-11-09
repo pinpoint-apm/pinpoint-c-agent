@@ -10,7 +10,7 @@ class Test_case(unittest.TestCase):
     def setUpClass(cls):
         use_thread_local_context()
         set_agent("cd.dev.test.py", "cd.dev.test.py",
-                  'tcp:dev-collector:9999', -1, logging.DEBUG)
+                  'tcp:dev-collector:10000', -1, logging.DEBUG)
         app = Flask("abc")
         app.wsgi_app = PinPointMiddleWare(app, app.wsgi_app)
         app.config.update({

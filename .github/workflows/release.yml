@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  # Manual dispatch has no tag; the release tag is derived from versions.json.
+  # Name the source archive after the ref selected for this manual release.
   MODULE_PAK: pinpoint_php@${{ github.head_ref || github.ref_name }}
 
 jobs:
@@ -13,11 +13,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Resolve version from versions.json
+      - name: Resolve synchronized PHP version
         run: |
-          VERSION=$(grep -oP '"php": *"\K[^"]+' versions.json)
+          VERSION=$(grep -oP '#define PHP_PINPOINT_PHP_VERSION "\K[^"]+' php_pinpoint_php.h)
           if [ -z "$VERSION" ]; then
-            echo "::error::Could not resolve php version from versions.json"
+            echo "::error::Could not resolve synchronized PHP version"
             exit 1
           fi
           echo "RELEASE_TAG=php/v$VERSION" >> "$GITHUB_ENV"
@@ -25,7 +25,7 @@ jobs:
       - name: Package pinpoint_php
         id: pack
         run: |
-          tar -czf ${{ env.MODULE_PAK }} common/ pinpoint_php.cpp php_pinpoint_php.h config.m4 tests LICENSE
+          tar -czf ${{ env.MODULE_PAK }} common/ pinpoint_php.cpp php_pinpoint_php.h config.m4 tests LICENSE CHANGES-PHP.md
           md5=($(md5sum ${{ env.MODULE_PAK }} ))
           PACK_NAME=${{ env.MODULE_PAK }}-${md5}-$(date '+%Y-%m-%d').tar.gz
           mv ${{ env.MODULE_PAK }} $PACK_NAME
