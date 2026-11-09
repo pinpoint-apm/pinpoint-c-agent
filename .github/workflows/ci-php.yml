@@ -55,8 +55,10 @@ jobs:
           tools: composer
       - name: Download PIE and Composer
         run: |
-          curl -fsSL https://github.com/php/pie/releases/download/1.5.5/pie.phar -o /tmp/pie.phar
-          curl -fsSL https://getcomposer.org/download/2.11.1/composer.phar -o /tmp/composer.phar
+          curl -fsSL --retry 5 --retry-delay 3 --connect-timeout 20 --max-time 120 \
+            https://github.com/php/pie/releases/download/1.5.5/pie.phar -o /tmp/pie.phar
+          curl -fsSL --retry 5 --retry-delay 3 --connect-timeout 20 --max-time 120 \
+            https://getcomposer.org/download/2.11.1/composer.phar -o /tmp/composer.phar
       - name: Verify Composer discovery and PIE installation
         # PIE installs into the system PHP extension directory. Run as root on
         # this disposable runner so PIE never needs an interactive sudo prompt.
