@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ["8.2","8.3"]
+        php-version: ["8.2", "8.3"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -31,12 +31,45 @@ jobs:
         # if: always()
         run: ./docker-compose-linux-x86_64 -f "testapps/compose.yaml" down php-compatible
 
+  PHP-packages:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.2", "8.3", "8.4", "8.5"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test extracted PECL and GitHub packages
+        run: |
+          docker run --rm -v "$PWD:/source:ro" \
+            "php:${{ matrix.php-version }}-cli" \
+            sh /source/scripts/check_php_packages.sh
+
+  PHP-PIE:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+      - name: Download PIE and Composer
+        run: |
+          curl -fsSL --retry 5 --retry-delay 3 --connect-timeout 20 --max-time 120 \
+            https://github.com/php/pie/releases/download/1.5.5/pie.phar -o /tmp/pie.phar
+          curl -fsSL --retry 5 --retry-delay 3 --connect-timeout 20 --max-time 120 \
+            https://getcomposer.org/download/2.11.1/composer.phar -o /tmp/composer.phar
+      - name: Verify Composer discovery and PIE installation
+        # PIE installs into the system PHP extension directory. Run as root on
+        # this disposable runner so PIE never needs an interactive sudo prompt.
+        run: sudo sh scripts/check_php_pie.sh /tmp/composer.phar /tmp/pie.phar
+
   PHP-MacOS:
     if: false # skip: macOS PHP build is currently flaky/unsupported
     runs-on: macos-latest
     strategy:
       matrix:
-        php-version: ["8.2","8.3"]
+        php-version: ["8.2", "8.3"]
         ts: ["ts","nts"]
     env:
       SKIP_MACOS_ACTION: true        

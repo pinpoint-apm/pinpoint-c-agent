@@ -889,7 +889,9 @@ static void call_interceptor_exception(pp_interceptor_v_t *interceptor) {
   // original exception until notification finishes, then propagate it unchanged.
   EG(exception) = NULL;
   zval *params = (zval *)safe_emalloc(1, sizeof(zval), 0);
-  ZVAL_OBJ_COPY(params, exception);
+  // ZVAL_OBJ_COPY is unavailable on PHP 7. Keep the callback argument owned.
+  ZVAL_OBJ(params, exception);
+  Z_ADDREF_P(params);
   call_callback_function(&interceptor->exception, params, 1, 1);
   if (EG(exception)) {
     if (!instanceof_function(EG(exception)->ce, zend_ce_throwable)) {

@@ -2,6 +2,10 @@
 pinpoint_php pinpoint_join_cut_pdo
 --SKIPIF--
 <?php
+// Older PHP test runners do not load dependencies from --EXTENSIONS--.
+if (!extension_loaded("pdo_mysql")) {
+    die("skip pdo_mysql extension required");
+}
 if (!extension_loaded("pinpoint_php"))
   print "skip";
 if (!extension_loaded("pdo"))

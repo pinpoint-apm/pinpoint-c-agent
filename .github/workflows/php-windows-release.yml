@@ -1,0 +1,151 @@
+name: PHP Windows packages
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        type: string
+        required: true
+      release-tag:
+        type: string
+        required: true
+      publish:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Upload packages to the matching existing PHP release
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - .github/workflows/php-windows-release.yml
+      - .github/workflows/release.yml
+      - scripts/verify_windows_package.ps1
+      - config.w32
+      - pinpoint_php.cpp
+      - php_pinpoint_php.h
+      - common/**
+      - tests_win32/**
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      release-tag: ${{ steps.metadata.outputs.release-tag }}
+      source-sha: ${{ steps.metadata.outputs.source-sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source-ref || github.sha }}
+          fetch-depth: 0
+      - name: Resolve and verify release metadata
+        id: metadata
+        env:
+          REQUESTED_TAG: ${{ inputs.release-tag }}
+          PUBLISH: ${{ inputs.publish || false }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/^#define PHP_PINPOINT_PHP_VERSION "\([^"]*\)"/\1/p' php_pinpoint_php.h)
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Cannot resolve the synchronized PHP extension version"
+            exit 1
+          fi
+          RELEASE_TAG="php/v$VERSION"
+          if [ -n "$REQUESTED_TAG" ] && [ "$REQUESTED_TAG" != "$RELEASE_TAG" ]; then
+            echo "::error::Release tag does not match the extension version"
+            exit 1
+          fi
+          SOURCE_SHA=$(git rev-parse HEAD)
+          if [ "$PUBLISH" = true ]; then
+            gh release view "$RELEASE_TAG" >/dev/null
+            for TAG in "$RELEASE_TAG" "$VERSION"; do
+              if git rev-parse --verify "refs/tags/$TAG" >/dev/null 2>&1; then
+                TAG_SHA=$(git rev-parse "refs/tags/$TAG^{commit}")
+                if [ "$TAG_SHA" != "$SOURCE_SHA" ]; then
+                  echo "::error::Tag $TAG points to a different source commit"
+                  exit 1
+                fi
+              elif [ "$TAG" = "$RELEASE_TAG" ]; then
+                echo "::error::The PHP source release tag is missing"
+                exit 1
+              fi
+            done
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release-tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "source-sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: prepare
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.3', '8.4', '8.5']
+        ts: [ts, nts]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.source-sha }}
+      - name: Build and test the Windows extension
+        uses: php/php-windows-builder/extension@v1
+        with:
+          # Build the checked-out source; use the numeric version for ZIP/DLL names.
+          extension-ref: ${{ needs.prepare.outputs.version }}
+          php-version: ${{ matrix.php-version }}
+          arch: x64
+          ts: ${{ matrix.ts }}
+          args: --enable-pinpoint_php
+          run-tests: true
+          test-runner: run-tests.php
+          test-runner-args: --show-diff tests_win32
+      - name: Verify the packaged DLL loads and reports the release version
+        shell: pwsh
+        env:
+          EXPECTED_VERSION: ${{ needs.prepare.outputs.version }}
+          TARGET_PHP: ${{ matrix.php-version }}
+          TARGET_TS: ${{ matrix.ts }}
+        run: |
+          ./scripts/verify_windows_package.ps1 -Version $env:EXPECTED_VERSION `
+            -PhpVersion $env:TARGET_PHP -ThreadSafety $env:TARGET_TS
+
+  publish:
+    if: ${{ inputs.publish == true }}
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: php_pinpoint_php-*.zip
+          path: windows-packages
+          merge-multiple: true
+      - name: Upload Windows packages to the PHP and PIE releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release-tag }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.source-sha }}
+        run: |
+          shopt -s nullglob
+          PACKAGES=(windows-packages/php_pinpoint_php-*.zip)
+          if [ "${#PACKAGES[@]}" -ne 6 ]; then
+            echo "::error::Expected all six Windows packages before publishing"
+            exit 1
+          fi
+          # PIE looks up a release by its numeric package version, not php/vX.Y.Z.
+          if ! gh release view "$VERSION" >/dev/null 2>&1; then
+            gh release create "$VERSION" --target "$SOURCE_SHA" --latest=false \
+              --title "PHP extension $VERSION" \
+              --notes "Windows packages for PHP source release $RELEASE_TAG."
+          fi
+          gh release upload "$RELEASE_TAG" "${PACKAGES[@]}" --clobber
+          gh release upload "$VERSION" "${PACKAGES[@]}" --clobber
