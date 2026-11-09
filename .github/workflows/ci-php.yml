@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ["8.3"]
+        php-version: ["8.2", "8.3"]
     steps:
       - uses: actions/checkout@v2
         with:
@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["8.3", "8.4", "8.5"]
+        php-version: ["8.2", "8.3", "8.4", "8.5"]
     steps:
       - uses: actions/checkout@v4
       - name: Build and test extracted PECL and GitHub packages
@@ -69,7 +69,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        php-version: ["8.3"]
+        php-version: ["8.2", "8.3"]
         ts: ["ts","nts"]
     env:
       SKIP_MACOS_ACTION: true        
@@ -92,7 +92,7 @@ jobs:
     runs-on: windows-2022
     strategy:
       matrix:
-        php-versions: [ "8.3"]
+        php-versions: [ "8.2", "8.3"]
         arch: [ "x64"]
         ts: [ "ts", "nts" ]
     env:

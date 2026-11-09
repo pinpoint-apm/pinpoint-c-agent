@@ -18,8 +18,8 @@ This generates both the PECL archive and the GitHub release archive, extracts
 each into a temporary directory, builds it without `versions.json`, checks
 `phpversion('pinpoint_php')`, and runs interceptor and runtime smoke tests.
 Database, Redis and HTTP integration tests use the separate service CI job.
-The package CI matrix covers PHP 8.3, 8.4 and 8.5. Historical releases
-(PHP 7.1, 7.4, 8.0 and 8.2) are no longer included in CI.
+The package CI matrix covers PHP 8.2, 8.3, 8.4 and 8.5. Historical releases
+(PHP 7.1, 7.4 and 8.0) are no longer included in CI.
 
 To reproduce PIE installation and Composer version discovery in an isolated
 runner or container with PHP development tools, Git, libtool and unzip:
