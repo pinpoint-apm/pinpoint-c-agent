@@ -58,7 +58,9 @@ jobs:
           curl -fsSL https://github.com/php/pie/releases/download/1.5.5/pie.phar -o /tmp/pie.phar
           curl -fsSL https://getcomposer.org/download/2.11.1/composer.phar -o /tmp/composer.phar
       - name: Verify Composer discovery and PIE installation
-        run: sh scripts/check_php_pie.sh /tmp/composer.phar /tmp/pie.phar
+        # PIE installs into the system PHP extension directory. Run as root on
+        # this disposable runner so PIE never needs an interactive sudo prompt.
+        run: sudo sh scripts/check_php_pie.sh /tmp/composer.phar /tmp/pie.phar
 
   PHP-MacOS:
     if: false # skip: macOS PHP build is currently flaky/unsupported
