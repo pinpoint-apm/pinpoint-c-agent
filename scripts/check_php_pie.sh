@@ -52,7 +52,8 @@ php -r '
 
 php "$pie_phar" repository:add vcs "$validation_root/repository"
 php "$pie_phar" install "pinpoint-apm/ext-php:$expected_version" \
-    --skip-enable-extension --no-interaction --make-parallel-jobs=2
+    --skip-enable-extension --no-interaction --make-parallel-jobs=2 \
+    --suppress-download-url-method=pre-packaged-binary
 php -n -d extension=pinpoint_php.so -r '
     if (phpversion("pinpoint_php") !== $argv[1]) {
         fwrite(STDERR, "PIE installed an incorrect extension version\n");

@@ -16,11 +16,11 @@
     <email>liu_ming_yi@outlook.com</email>
     <active>yes</active>
   </lead>
-  <date>2026-11-03</date>
+  <date>2026-11-16</date>
   <!-- DO NOT edit by hand. Managed by CI (sync-component-versions). -->
   <version>
-    <release>0.6.2</release>
-    <api>0.6.2</api>
+    <release>0.8.0</release>
+    <api>0.8.0</api>
   </version>
   <stability>
     <release>stable</release>
@@ -28,9 +28,13 @@
   </stability>
   <license uri="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</license>
   <notes>
-    ## 0.6.2 2026-11-03
-    - preserve interceptor exception and bailout semantics (#764)
-    - fix inherited internal method interceptor resolution
+    ## 0.8.0 2026-11-16
+    - prefer PIE binaries with source fallback; add PHP 8.2–8.4 Linux glibc/musl and macOS x86_64/arm64 NTS/ZTS packages
+    - extend Windows binary packages to PHP 8.2 and publish numeric PHP releases before binary uploads
+    - publish PHP package metadata as version 0.8.0, independently of other products
+    - restore PHP 7.1-compatible object handling and validate source packages on PHP 8.2–8.5 (#774)
+    - add PIE packaging as `pinpoint-apm/ext-php`, retaining `pinpoint_php` as the extension name
+    - add Windows PHP 8.3–8.5 TS/NTS package builds and release assets (#774)
   </notes>
   <contents>
     <dir name="/">

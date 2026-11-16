@@ -1,6 +1,6 @@
 {
     "collector-agent": "v0.7.10",
-    "php": "0.6.2",
+    "php": "0.8.0",
     "python": "1.4.2",
     "python-test": "1.4.2",
     "common": "0.6.1"

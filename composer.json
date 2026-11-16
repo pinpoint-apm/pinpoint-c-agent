@@ -1,6 +1,6 @@
 {
     "name": "pinpoint-apm/ext-php",
-    "version": "0.6.2",
+    "version": "0.8.0",
     "type": "php-ext",
     "license": [
         "Apache-2.0"
@@ -17,6 +17,10 @@
     },
     "php-ext": {
         "extension-name": "pinpoint_php",
+        "download-url-method": [
+            "pre-packaged-binary",
+            "composer-default"
+        ],
         "configure-options": [
             {
                 "name": "enable-pinpoint_php",

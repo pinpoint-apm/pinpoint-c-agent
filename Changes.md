@@ -5,14 +5,23 @@ Release history by product. Use the table to locate a release, then expand its a
 <!-- BEGIN GENERATED RELEASE SUMMARY -->
 | Agent | Latest version | Security update (upgrade recommended) | Release history |
 | --- | --- | --- | --- |
-| PHP agent | 0.6.2 | — | [View history](#php-agent) |
+| PHP agent | 0.8.0 | — | [View history](#php-agent) |
 | Python agent | 1.4.2 | — | [View history](#python-agent) |
 | Common library | 0.6.1 | — | [View history](#common-library) |
 | Collector-agent | 0.7.10 | ⚠️ Upgrade to v0.7.10 as soon as possible ([details](#collector-agent)) | [View history](#collector-agent) |
 <!-- END GENERATED RELEASE SUMMARY -->
 
 <details>
-<summary id="php-agent">PHP agent — latest 0.6.2</summary>
+<summary id="php-agent">PHP agent — latest 0.8.0</summary>
+
+### PHP (0.8.0, 2026-11-16)
+
+- prefer PIE binaries with source fallback; add PHP 8.2–8.4 Linux glibc/musl and macOS x86_64/arm64 NTS/ZTS packages
+- extend Windows binary packages to PHP 8.2 and publish numeric PHP releases before binary uploads
+- publish PHP package metadata as version 0.8.0, independently of other products
+- restore PHP 7.1-compatible object handling and validate source packages on PHP 8.2–8.5 (#774)
+- add PIE packaging as `pinpoint-apm/ext-php`, retaining `pinpoint_php` as the extension name
+- add Windows PHP 8.3–8.5 TS/NTS package builds and release assets (#774)
 
 ### PHP (0.6.2, 2026-11-03)
 

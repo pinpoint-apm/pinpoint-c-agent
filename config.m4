@@ -49,7 +49,7 @@ if test "$PHP_PINPOINT_PHP" != "no"; then
   AC_DEFINE(HAVE_PINPOINT_PHP, 1, [Whether you have pinpoint])
 
   dnl DO NOT edit by hand. Managed by CI (sync-component-versions).
-  PINPOINT_PHP_VERSION="0.6.2"
+  PINPOINT_PHP_VERSION="0.8.0"
   PHP_ADD_MAKEFILE_FRAGMENT
   PHP_SUBST(PINPOINT_PHP_VERSION)
   AC_DEFINE_UNQUOTED([PHP_PINPOINT_PHP_VERSION], ["$PINPOINT_PHP_VERSION"], [Pinpoint PHP agent version])
