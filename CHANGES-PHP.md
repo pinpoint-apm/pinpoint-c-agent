@@ -2,6 +2,15 @@
 
 PECL package changelog: https://pecl.php.net/package-changelog.php?package=pinpoint_php
 
+## 0.8.0 2026-11-16
+
+- prefer PIE binaries with source fallback; add PHP 8.2–8.4 Linux glibc/musl and macOS x86_64/arm64 NTS/ZTS packages
+- extend Windows binary packages to PHP 8.2 and publish numeric PHP releases before binary uploads
+- publish PHP package metadata as version 0.8.0, independently of other products
+- restore PHP 7.1-compatible object handling and validate source packages on PHP 8.2–8.5 (#774)
+- add PIE packaging as `pinpoint-apm/ext-php`, retaining `pinpoint_php` as the extension name
+- add Windows PHP 8.3–8.5 TS/NTS package builds and release assets (#774)
+
 ## 0.6.2 2026-11-03
 
 - preserve interceptor exception and bailout semantics (#764)

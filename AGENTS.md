@@ -82,17 +82,27 @@ existing branches):
     `PHP_PINPOINT_PHP_VERSION` via `AC_DEFINE`; it also updates
     the fallback in `config.m4`, `php_pinpoint_php.h`, `composer.json`, and
     `package.xml`. PHP release packages do not need `versions.json`.
-- **Release tags**: collector-agent uses `v*.*.*`; PHP uses `php/v*.*.*`.
-  Python publishes to PyPI without creating a Git tag, and common has no
-  separate release workflow.
+- **Release tags**: product versions are independent and have no fixed major
+  version restriction. PHP releases use `php/vX.Y.Z` plus a Composer-compatible
+  `X.Y.Z` tag. Standard numeric tags are reserved for PHP; Python creates a
+  `python/vX.Y.Z` tag after the PyPI publish succeeds.
+  Collector-agent versions remain managed by the container Packages workflow
+  and do not use this PHP/Python tag split. Common has no separate release
+  workflow.
 - **Publishing is fully manual** (`workflow_dispatch` only — no `release` or
   `push: tags` triggers). Each product has its own manual release workflow:
   - `collector-agent` → `publish-collector-agent.yml`
   - `php` → `release.yml`
   - `python` → `build-wheels.yml`
-  PHP and collector-agent release versions/tags are read from synchronized
-  metadata at dispatch time. Python publishes the package version
-  synchronized into its build metadata.
+  PHP, Python and collector-agent release versions are read from synchronized
+  metadata at dispatch time. Python release tags must match the version
+  published to PyPI.
+- **PHP PIE binaries**: `release.yml` creates the source and numeric PHP
+  releases, then calls `php-unix-release.yml` and `php-windows-release.yml`.
+  Unix binaries cover PHP 8.2–8.4 on Linux glibc/musl and macOS, x86_64/arm64,
+  NTS/ZTS. Windows covers PHP 8.2–8.5 x64, NTS/TS. Keep the numeric PHP release
+  because PIE resolves assets by package version. See `DOC/PHP/packaging.md`
+  for runtime baselines and source fallback behavior.
 - **CI is split per product**: `ci-common.yml`, `ci-php.yml`, `ci-python.yml`,
   `ci-collector-agent.yml` (no more monolithic `main.yml`). CI triggers on
   `pull_request` + `workflow_dispatch` only.
