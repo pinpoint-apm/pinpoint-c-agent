@@ -8,7 +8,7 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0 && go instal
 COPY collector-agent/ /apps
 RUN make
 
-FROM alpine:3.23
+FROM ubuntu:24.04
 COPY --from=builder /apps/collector-agent /usr/local/bin/CollectorAgent
 RUN mkdir -p /usr/share/doc/collector-agent
 COPY collector-agent/CHANGES.md /usr/share/doc/collector-agent/CHANGES.md
